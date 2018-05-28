@@ -248,11 +248,11 @@ Module BOrder_to_UsualOrderedTypeFull : UsualOrderedTypeFull.
 
   Parameter B : BOrder.
 
-  Definition t := carrier.
-  Definition eq := @eq carrier.
+  Definition t := @carrier B.
+  Definition eq := @eq (@carrier B).
   Definition eq_equiv : Equivalence eq := eq_equivalence.
   Local Coercion is_true : bool >-> Sortclass.
-  Definition lt x y := leqb x y /\ x <> y.
+  Definition lt x y := @leqb B x y /\ x <> y.
 
   Lemma lt_strorder : StrictOrder lt.
   Proof.
@@ -280,7 +280,7 @@ Module BOrder_to_UsualOrderedTypeFull : UsualOrderedTypeFull.
   Qed.
 
   Definition compare x y :=
-    if leqb x y then (if leqb y x then Eq else Lt) else Gt.
+    if @leqb B x y then (if leqb y x then Eq else Lt) else Gt.
 
  Lemma compare_spec : forall x y, CompareSpec (eq x y) (lt x y) (lt y x) (compare x y).
 (*  Lemma compare_spec : forall x y, CompSpec eq lt x y (compare x y). *)
@@ -314,7 +314,7 @@ Module BOrder_to_UsualOrderedTypeFull : UsualOrderedTypeFull.
     rewrite Heq1 in Heq2 ; inversion Heq2.
   Qed.
 
-  Definition le x y := is_true (leqb x y).
+  Definition le x y := is_true (@leqb B x y).
 
   Lemma le_lteq : forall x y, le x y -> lt x y + eq x y.
   Proof.
