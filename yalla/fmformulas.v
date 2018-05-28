@@ -1,12 +1,15 @@
 (* fmformulas library for yalla *)
-(* v 1.0   Olivier Laurent *)
+
+
+
+(* output in Type *)
 
 
 (** * Order structure and finite multiset structure on formulas *)
 
 Require Import Injective.
 Require Import nattree.
-Require Import fmsetlist.
+Require Import fmsetlist_Type.
 
 Require Export formulas.
 

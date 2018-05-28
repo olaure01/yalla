@@ -7,8 +7,10 @@
 Require Import RelationClasses.
 Require Import List.
 Require Import Omega.
+Require Import Bool.
 
 Require Import Injective.
+Require Import Bool_more.
 
 Require yalla_ax.
 
@@ -221,5 +223,322 @@ intros b l l1 l2 H1 HP ; revert H1 ; induction l ; intro H1.
   + apply IHl...
 Qed.
 *)
+
+
+(** ** Equality in [bool] *)
+
+Fixpoint eqb_form A B :=
+match A, B with
+| var X, var Y => yalla_ax.ateq X Y
+| covar X, covar Y => yalla_ax.ateq X Y
+| one, one => true
+| bot, bot => true
+| tens A1 A2, tens B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
+| parr A1 A2, parr B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
+| top, top => true
+| zero, zero => true
+| awith A1 A2, awith B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
+| aplus A1 A2, aplus B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
+| oc A1, oc B1 => eqb_form A1 B1
+| wn A1, wn B1 => eqb_form A1 B1
+| _, _ => false
+end.
+
+Lemma eqb_eq_form : forall A B, eqb_form A B = true <-> A = B.
+Proof with reflexivity.
+induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
+  try inversion Heqb ; try inversion Heq ; try reflexivity.
+- apply yalla_ax.ateq_eq in H0 ; subst...
+- subst ; simpl.
+  apply yalla_ax.ateq_eq...
+- apply yalla_ax.ateq_eq in H0 ; subst...
+- subst ; simpl.
+  apply yalla_ax.ateq_eq...
+- apply andb_true_iff in H0.
+  destruct H0 as [H1 H2].
+  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
+- subst ; simpl ; apply andb_true_iff.
+  split ; [ apply IHA1 | apply IHA2 ]...
+- apply andb_true_iff in H0.
+  destruct H0 as [H1 H2].
+  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
+- subst ; simpl ; apply andb_true_iff.
+  split ; [ apply IHA1 | apply IHA2 ]...
+- apply andb_true_iff in H0.
+  destruct H0 as [H1 H2].
+  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
+- subst ; simpl ; apply andb_true_iff.
+  split ; [ apply IHA1 | apply IHA2 ]...
+- apply andb_true_iff in H0.
+  destruct H0 as [H1 H2].
+  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
+- subst ; simpl ; apply andb_true_iff.
+  split ; [ apply IHA1 | apply IHA2 ]...
+- apply IHA in H0 ; subst...
+- subst ; simpl ; apply IHA...
+- apply IHA in H0 ; subst...
+- subst ; simpl ; apply IHA...
+Qed.
+
+Fixpoint eqb_formlist l1 l2 :=
+match l1, l2 with
+| nil, nil => true
+| cons A t1, cons B t2 => andb (eqb_form A B) (eqb_formlist t1 t2)
+| _, _ => false
+end.
+
+Lemma eqb_eq_formlist : forall l1 l2, eqb_formlist l1 l2 = true <-> l1 = l2.
+Proof with reflexivity.
+induction l1 ; destruct l2 ; (split ; [ intros Heqb | intros Heq ]) ;
+  try inversion Heqb ; try inversion Heq ; try reflexivity.
+- apply andb_true_iff in H0.
+  destruct H0 as [H1 H2].
+  apply eqb_eq_form in H1 ; apply IHl1 in H2 ; subst...
+- subst ; simpl ; apply andb_true_iff.
+  split ; [ apply eqb_eq_form | apply IHl1 ]...
+Qed.
+
+(** * In with [bool] output for formula list *)
+Fixpoint inb_form A l :=
+match l with
+| nil => false
+| cons hd tl => eqb_form A hd || inb_form A tl
+end.
+
+Lemma inb_in_form : forall A l, inb_form A l = true <-> In A l.
+Proof with assumption.
+induction l ; (split ; [ intros Heqb | intros Heq ]).
+- inversion Heqb.
+- inversion Heq.
+- inversion Heqb ; subst.
+  apply orb_true_iff in H0.
+  destruct H0.
+  + constructor.
+    symmetry ; apply eqb_eq_form...
+  + apply in_cons.
+    apply IHl...
+- inversion Heq ; subst.
+  + simpl ; apply orb_true_iff ; left.
+    apply eqb_eq_form.
+    reflexivity.
+  + simpl ; apply orb_true_iff ; right.
+    apply IHl...
+Qed.
+
+
+(** ** Sub-formulas in [bool] *)
+
+(** First argument is a sub-formula of the second: *)
+Fixpoint subformb A B :=
+eqb_form A B ||
+match B with
+| tens B1 B2 => subformb A B1 || subformb A B2
+| parr B1 B2 => subformb A B1 || subformb A B2
+| awith B1 B2 => subformb A B1 || subformb A B2
+| aplus B1 B2 => subformb A B1 || subformb A B2
+| oc B1 => subformb A B1
+| wn B1 => subformb A B1
+| _ => false
+end.
+
+Lemma subb_sub : forall A B, is_true (subformb A B) <-> subform A B.
+Proof with try assumption.
+intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructor)).
+- destruct A ; simpl in H ; try (now inversion H).
+  rewrite orb_false_r in H.
+  apply yalla_ax.ateq_eq in H ; subst ; constructor.
+- destruct A ; simpl in H ; try (now inversion H).
+  rewrite orb_false_r in H.
+  apply yalla_ax.ateq_eq in H ; subst ; constructor.
+- destruct A ; simpl in H ; try (now inversion H).
+- destruct A ; simpl in H ; try (now inversion H).
+- simpl in H.
+  apply orb_true_elim in H ; destruct H as [ H | H ] ;
+    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
+  + apply eqb_eq_form in H ; subst ; constructor.
+  + apply sub_tens_l.
+    apply IHB1...
+  + apply sub_tens_r.
+    apply IHB2...
+- simpl in H.
+  apply orb_true_elim in H ; destruct H as [ H | H ] ;
+    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
+  + apply eqb_eq_form in H ; subst ; constructor.
+  + apply sub_parr_l.
+    apply IHB1...
+  + apply sub_parr_r.
+    apply IHB2...
+- destruct A ; simpl in H ; try (now inversion H).
+- destruct A ; simpl in H ; try (now inversion H).
+- simpl in H.
+  apply orb_true_elim in H ; destruct H as [ H | H ] ;
+    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
+  + apply eqb_eq_form in H ; subst ; constructor.
+  + apply sub_plus_l.
+    apply IHB1...
+  + apply sub_plus_r.
+    apply IHB2...
+- simpl in H.
+  apply orb_true_elim in H ; destruct H as [ H | H ] ;
+    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
+  + apply eqb_eq_form in H ; subst ; constructor.
+  + apply sub_with_l.
+    apply IHB1...
+  + apply sub_with_r.
+    apply IHB2...
+- simpl in H.
+  apply orb_true_elim in H ; destruct H as [ H | H ].
+  + apply eqb_eq_form in H ; subst ; constructor.
+  + apply sub_oc.
+    apply IHB...
+- simpl in H.
+  apply orb_true_elim in H ; destruct H as [ H | H ].
+  + apply eqb_eq_form in H ; subst ; constructor.
+  + apply sub_wn.
+    apply IHB...
+- inversion H ; subst.
+  simpl ; unfold yalla_ax.ateq ; simpl.
+  rewrite <- beq_nat_refl.
+  constructor.
+- inversion H ; subst.
+  simpl ; unfold yalla_ax.ateq ; simpl.
+  rewrite <- beq_nat_refl.
+  constructor.
+- inversion H ; subst.
+  + unfold subformb.
+    replace (eqb_form (tens B1 B2) (tens B1 B2)) with true.
+    * reflexivity.
+    * symmetry ; apply eqb_eq_form.
+      reflexivity.
+  + apply IHB1 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite orb_true_r.
+    reflexivity.
+  + apply IHB2 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite 2 orb_true_r.
+    reflexivity.
+- inversion H ; subst.
+  + unfold subformb.
+    replace (eqb_form (parr B1 B2) (parr B1 B2)) with true.
+    * reflexivity.
+    * symmetry ; apply eqb_eq_form.
+      reflexivity.
+  + apply IHB1 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite orb_true_r.
+    reflexivity.
+  + apply IHB2 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite 2 orb_true_r.
+    reflexivity.
+- inversion H ; subst.
+  + unfold subformb.
+    replace (eqb_form (aplus B1 B2) (aplus B1 B2)) with true.
+    * reflexivity.
+    * symmetry ; apply eqb_eq_form.
+      reflexivity.
+  + apply IHB1 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite orb_true_r.
+    reflexivity.
+  + apply IHB2 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite 2 orb_true_r.
+    reflexivity.
+- inversion H ; subst.
+  + unfold subformb.
+    replace (eqb_form (awith B1 B2) (awith B1 B2)) with true.
+    * reflexivity.
+    * symmetry ; apply eqb_eq_form.
+      reflexivity.
+  + apply IHB1 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite orb_true_r.
+    reflexivity.
+  + apply IHB2 in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite 2 orb_true_r.
+    reflexivity.
+- inversion H ; subst.
+  + unfold subformb.
+    replace (eqb_form (oc B) (oc B)) with true.
+    * reflexivity.
+    * symmetry ; apply eqb_eq_form.
+      reflexivity.
+  + apply IHB in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite orb_true_r.
+    reflexivity.
+- inversion H ; subst.
+  + unfold subformb.
+    replace (eqb_form (wn B) (wn B)) with true.
+    * reflexivity.
+    * symmetry ; apply eqb_eq_form.
+      reflexivity.
+  + apply IHB in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite orb_true_r.
+    reflexivity.
+Qed.
+
+Lemma subb_trans : forall A B C,
+  is_true (subformb A B) -> is_true (subformb B C) -> is_true (subformb A C).
+Proof.
+intros A B C Hl Hr.
+apply subb_sub in Hl.
+apply subb_sub in Hr.
+apply subb_sub.
+etransitivity ; eassumption.
+Qed.
+
+(** Each element of the first list is a sub-formula of some element of the second. *)
+Definition subformb_list l1 l2 := Forallb (fun A => Existsb (subformb A) l2) l1.
+
+Lemma subb_sub_list : forall l1 l2, is_true (subformb_list l1 l2) <-> subform_list l1 l2.
+Proof with try assumption.
+intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constructor)).
+- unfold subformb_list in H.
+  apply Forallb_Forall in H.
+  inversion H ; subst.
+  apply Existsb_Exists in H2.
+  constructor.
+  + clear - H2 ; induction l2 ; inversion H2 ; subst.
+    * constructor.
+      apply subb_sub...
+    * apply Exists_cons_tl.
+      apply IHl2...
+  + apply IHl1.
+    apply Forallb_Forall...
+- inversion H ; subst.
+  unfold subformb_list ; simpl.
+  apply andb_true_iff ; split.
+  + apply Existsb_Exists.
+    clear - H2 ; induction l2 ; inversion H2 ; subst.
+    * constructor.
+      apply subb_sub...
+    * apply Exists_cons_tl.
+      apply IHl2...
+  + apply IHl1...
+Qed.
+
+Lemma subb_id_list : forall l l0, is_true (subformb_list l (l0 ++ l)).
+Proof.
+intros l l0.
+apply subb_sub_list.
+apply sub_id_list.
+Qed.
+
+Lemma subb_trans_list : forall l1 l2 l3,
+  is_true (subformb_list l1 l2) -> is_true (subformb_list l2 l3) -> is_true (subformb_list l1 l3).
+Proof.
+intros l1 l2 l3 Hl Hr.
+apply subb_sub_list in Hl.
+apply subb_sub_list in Hr.
+apply subb_sub_list.
+etransitivity ; eassumption.
+Qed.
+
+
 
 

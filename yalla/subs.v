@@ -1,13 +1,14 @@
 (* subs library for yalla *)
-(* v 1.1   Olivier Laurent *)
+
+(* output in Type *)
 
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-Require Import Permutation.
+Require Import Permutation_Type.
 
 Require Import List_more.
-Require Import genperm.
+Require Import genperm_Type.
 
 Require Export ll.
 
@@ -66,12 +67,14 @@ induction A ; simpl ; rewrite ?bidual ; simpl ;
 Qed.
 
 (** Substitution in proofs *)
-Lemma subs_ll {P} : forall A x l s,
-  ll P l s -> exists s',
-    ll (axupd_pfrag P (fun l => exists l', pgax P l' /\ l = map (subs A x) l'))
-       (map (subs A x) l) s'.
+
+Lemma subs_ll {P} : forall A x l,
+  ll P l ->
+    ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                            (fun a => map (subs A x) (projT2 (pgax P) a))))
+       (map (subs A x) l).
 Proof with myeeasy.
-intros A x l s pi.
+intros A x l pi.
 assert
   (forall l, map (subs A x) (map wn l)
            = map wn (map (subs A x) l))
@@ -79,16 +82,9 @@ assert
 { clear.
   induction l...
   simpl ; rewrite IHl... }
-induction pi ; list_simpl ;
-  try (destruct IHpi as [s' IHpi]) ;
-  try (destruct IHpi1 as [s1' IHpi1]) ;
-  try (destruct IHpi2 as [s2' IHpi2]) ;
-  first [ now rewrite <- (bidual (repl_at _ _ _)) ;
-              rewrite bidual ;
-              apply ax_exp
-        | eexists ] ;
-  try (now (constructor ; myeeasy)).
-- eapply PCperm_map in H.
+induction pi ; list_simpl ; try (now constructor).
+- eapply ex_r ; [ apply ax_exp | apply PCperm_Type_swap ].
+- eapply PCperm_Type_map in p.
   eapply ex_r...
 - specialize Hmapwn with l.
   rewrite Hmapwn.
@@ -101,43 +97,23 @@ induction pi ; list_simpl ;
   rewrite <- Hmapwn...
 - eapply (cut_r _ (subs A x A0))...
   rewrite <- subs_dual...
-- apply gax_r.
-  eexists ; split...
-Unshelve.
-simpl...
+- assert ({ b | map (subs A x) (projT2 (pgax P) a) = projT2 (existT (fun x => x -> list formula) _
+                                                     (fun a => map (subs A x) (projT2 (pgax P) a))) b}) as [b Hgax]
+    by (now exists a).
+  rewrite Hgax.
+  apply gax_r.
+Unshelve. simpl...
 Qed.
 
-Lemma subs_ll_axfree {P} : (forall l, ~ pgax P l) -> forall A x l s,
-  ll P l s -> exists s', ll P (map (subs A x) l) s'.
+Lemma subs_ll_axfree {P} : (projT1 (pgax P) -> False) -> forall A x l,
+  ll P l -> ll P (map (subs A x) l).
 Proof with myeeasy.
-intros P_axfree A x l s pi.
+intros P_axfree A x l pi.
 apply (subs_ll A x) in pi.
-clear s ; destruct pi as [s pi].
-eexists.
 eapply stronger_pfrag...
 nsplit 5...
-intros f (l' & Hax & _).
-apply P_axfree in Hax...
-Qed.
-
-(** Substitution of axioms *)
-Lemma subs_ll_axioms {P} : forall (gax : _ -> Prop) l s,
-  (forall l, gax l -> exists s0, ll P l s0) ->
-  ll (axupd_pfrag P gax) l s -> exists s', ll P l s'.
-Proof with myeeasy.
-intros gax l s Hgax pi.
-induction pi ;
-  try destruct IHpi as [s' IHpi] ;
-  try destruct IHpi1 as [s1' IHpi1] ;
-  try destruct IHpi2 as [s2' IHpi2] ;
-  try (now (eexists ; constructor ; myeeasy)).
-- eexists.
-  simpl in H.
-  eapply ex_r ; [ apply IHpi | ]...
-- eexists.
-  simpl in f.
-  eapply (@cut_r _ f)...
-- apply Hgax...
+simpl ; intros a.
+contradiction P_axfree.
 Qed.
 
 

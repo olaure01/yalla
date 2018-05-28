@@ -6,8 +6,8 @@
 Require Import Omega.
 Require Import Psatz.
 
-Require Import Permutation_solve.
-Require Import genperm.
+Require Import Permutation_Type_solve.
+Require Import genperm_Type.
 
 (** Generalized version of [split] for [n] components *)
 
@@ -30,9 +30,9 @@ Ltac myeeasy := myeasy_pattern eassumption.
 
 (** An [easy] tactic with automated permutation solving **)
 
-Ltac myeasy_perm :=
+Ltac myeasy_perm_Type :=
   myeeasy ;
-  try PCperm_solve ;
-  try (simpl_hyp_perm_all ; PCperm_solve).
+  try PCperm_Type_solve ;
+  try (simpl_hyp_perm_all_Type ; PCperm_Type_solve).
 
 

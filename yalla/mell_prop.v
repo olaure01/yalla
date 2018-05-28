@@ -1,15 +1,18 @@
-(* mell2 example file for yalla library *)
+(* mell_prop example file for yalla library *)
+
 
 
 (* output in Type *)
 
 
-(** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
+(** * Example of a concrete use of the yalla library: unit-free MELL *)
 
-Require Import CMorphisms.
+Require Import Morphisms.
 
 Require Import Injective.
-Require Import List_Type_more.
+Require Import List_more.
+Require Import Permutation_more.
+Require Import Permutation_solve.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 
@@ -82,7 +85,7 @@ Qed.
 
 Lemma mell2ll_map_wn_inv : forall l1 l2,
   map formulas.wn l1 = map mell2ll l2 ->
-    { l2' | l2 = map wn l2' /\ l1 = map mell2ll l2' }.
+    exists l2', l2 = map wn l2' /\ l1 = map mell2ll l2'.
 Proof with try assumption ; try reflexivity.
 induction l1 ; intros l2 Heq ;
   destruct l2 ; inversion Heq...
@@ -96,12 +99,10 @@ Qed.
 
 (** ** 3. define proofs *)
 
-Inductive mell : list formula -> Type :=
+Inductive mell : list formula -> Prop :=
 | ax_r : forall X, mell (covar X :: var X :: nil)
 | ex_r : forall l1 l2, mell l1 ->
-              Permutation_Type l1 l2 -> mell l2
-| mix_r : forall l1 l2, mell l1 -> mell l2 ->
-              mell (l1 ++ l2)
+              Permutation l1 l2 -> mell l2
 | tens_r : forall A B l1 l2,
               mell (A :: l1) -> mell (B :: l2) ->
               mell (tens A B :: l1 ++ l2)
@@ -121,35 +122,65 @@ Inductive mell : list formula -> Type :=
               mell (wn A :: wn A :: l) ->
               mell (wn A :: l).
 
-Instance mell_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) mell.
+Instance mell_perm : Proper ((@Permutation _) ==> Basics.impl) mell.
 Proof.
 intros l1 l2 HP pi.
 eapply ex_r ; eassumption.
 Qed.
 
+
 (** ** 4. characterize corresponding [ll] fragment *)
 
+(*
+Definition mell_fragment A := exists B, A = mell2ll B.
+
+Lemma mell_is_fragment : ll.fragment mell_fragment.
+Proof.
+intros A HfA B Hsf.
+induction Hsf ; 
+  try (apply IHHsf ;
+       destruct HfA as [B0 HfA] ;
+       destruct B0 ; inversion HfA ; subst ;
+       eexists ; reflexivity).
+assumption.
+Qed.
+*)
+
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll.mk_pfrag false ll_fragments.NoAxioms false true true.
-(*                                   cut   axioms                mix0  mix2 perm  *)
+Definition pfrag_mell := ll.mk_pfrag false ll_fragments.NoAxioms false false true.
+(*                                   cut   axioms                mix0  mix2  perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
-Lemma mell2mellfrag : forall l, mell l -> ll.ll pfrag_mell (map mell2ll l).
+Lemma mell2mellfrag : forall l, mell l ->
+  inhabited (ll.ll pfrag_mell (map mell2ll l)).
 Proof with try eassumption ; try reflexivity. 
 intros l pi.
-induction pi ; try (now constructor) ; try rewrite map_app.
-- eapply ll.ex_r...
-  apply Permutation_Type_map...
-- apply ll.mix2_r...
-- eapply ll.ex_r.
-  + apply (ll.tens_r _ _ _ _ _ IHpi1 IHpi2).
+induction pi ; try (now ((try inversion IHpi) ; constructor ; constructor)) ;
+  try rewrite map_app.
+- apply perm_perm_t in H.
+  induction H.
+  + inversion IHpi ; constructor...
+  + inversion IHpi ; constructor.
+    eapply ll.ex_r...
+    apply Permutation_Type_map...
+    perm_Type_solve.
+  + apply IHPermutation_transp2.
+    * apply perm_perm_t in H.
+      eapply ex_r...
+    * apply IHPermutation_transp1...
+- inversion IHpi1 ; inversion IHpi2 ; constructor.
+  eapply ll.ex_r.
+  + apply (ll.tens_r _ _ _ _ _ X X0).
   + simpl ; perm_Type_solve.
-- simpl ; rewrite mell2ll_map_wn.
+- inversion IHpi ; constructor.
+  simpl ; rewrite mell2ll_map_wn.
   apply ll.oc_r.
   rewrite <- mell2ll_map_wn...
-- simpl ; rewrite <- (app_nil_l (map _ _)).
+- inversion IHpi ; constructor.
+  simpl.
+  rewrite <- (app_nil_l (map _ _)).
   change nil with (map formulas.wn nil).
   apply ll.co_r...
 Qed.
@@ -161,7 +192,7 @@ remember (map mell2ll l) as l0.
 revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   try (destruct l' ; inversion Heql0 ;
        destruct f ; inversion H0 ; fail).
-- decomp_map_Type Heql0 ; subst.
+- decomp_map Heql0 ; subst.
   destruct l1 ; inversion Heql4.
   destruct x ; inversion Heql2.
   destruct x0 ; inversion Heql0.
@@ -171,20 +202,19 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_map_inv in p.
   destruct p as ((l'' & Heq) & HP).
   apply Permutation_Type_sym in HP.
+  simpl in HP.
+  apply Permutation_Type_Permutation in HP.
   eapply ex_r...
   apply IHpi...
 - inversion f.
-- decomp_map_Type Heql0 ; subst.
-  apply mix_r.
-  + apply IHpi2...
-  + apply IHpi1...
-- decomp_map_Type Heql0 ; subst.
+- inversion f.
+- decomp_map Heql0 ; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.
   apply tens_r.
   + apply IHpi1...
   + apply IHpi2...
-  + perm_Type_solve.
+  + perm_solve.
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply parr_r.
@@ -206,7 +236,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply IHpi...
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
-  decomp_map_Type H1.
+  decomp_map H1.
   simpl in H1 ; simpl in H3 ; simpl in H4 ; subst.
   apply co_r.
   apply mell2ll_map_wn_inv in H3.
@@ -218,9 +248,22 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
          ++ formulas.wn (mell2ll f) :: map mell2ll l2)
        with (map mell2ll (wn f :: map wn l'' ++ wn f :: l2))...
     simpl ; rewrite map_app...
-  + perm_Type_solve.
+  + perm_solve.
 - inversion f.
 - destruct a.
+Qed.
+
+Lemma inhmellfrag2mell : forall l,
+  inhabited (ll.ll pfrag_mell (map mell2ll l)) -> mell l.
+Proof.
+intros l.
+assert (inhabited (ll.ll pfrag_mell (map mell2ll l)) -> inhabited (mell l)) as Hi.
+{ apply inhabited_covariant.
+  apply mellfrag2mell. }
+intros H.
+apply Hi in H.
+destruct H.
+assumption.
 Qed.
 
 
@@ -242,15 +285,15 @@ Lemma cut_r : forall A l1 l2,
   mell (A :: l1) -> mell (dual A :: l2) -> mell (l1 ++ l2).
 Proof with try eassumption.
 intros A l1 l2 pi1 pi2.
-apply mellfrag2mell.
+apply mell2mellfrag in pi1.
+apply mell2mellfrag in pi2.
+apply inhmellfrag2mell.
+destruct pi1 as [ pi1 ] ; destruct pi2 as [ pi2 ] ; constructor.
 rewrite map_app.
-eapply ll.cut_r_axfree.
+eapply ll.cut_r_axfree...
 - intros a ; destruct a.
-- apply mell2mellfrag in pi2.
-  simpl in pi2 ; rewrite <- mell2ll_dual in pi2...
-- apply mell2mellfrag in pi1...
+- rewrite mell2ll_dual...
 Qed.
-
 
 
 

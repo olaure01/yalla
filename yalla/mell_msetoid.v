@@ -1,20 +1,23 @@
 (* mell_msetoid example file for yalla library *)
-(* v 1.0   Olivier Laurent *)
+
+
+(* output in Type *)
 
 
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 
-Require Import Morphisms.
+Require Import CMorphisms.
 
 Require Import Injective.
-Require Import fmsetoidlist.
+Require Import fmsetoidlist_Type.
 Require Import List_more.
-Require Import Permutation_more.
+Require Import Permutation_Type_more.
 
 
 (** ** 0. load the [ll] library *)
 
 Require ll.
+Require ll_fragments.
 
 
 (** ** 1. define formulas *)
@@ -156,39 +159,39 @@ Qed.
 *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll.mk_pfrag false (fun _ => False) false false true.
-(*                                   cut   axioms           mix0  mix2  perm  *)
+Definition pfrag_mell := ll.mk_pfrag false ll_fragments.NoAxioms false false true.
+(*                                   cut   axioms                mix0  mix2  perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
 Lemma mell2mellfrag : forall m,
-  mell m -> exists s, ll.ll pfrag_mell (map mell2ll (elts m)) s.
+  mell m -> inhabited (ll.ll pfrag_mell (map mell2ll (elts m))).
 Proof with try eassumption ; try reflexivity.
 intros l pi.
 induction pi ;
-  try destruct IHpi as [s' pi'] ;
-  try destruct IHpi1 as [s1' pi1'] ;
-  try destruct IHpi2 as [s2' pi2'] ;
-  eexists ; simpl ; rewrite ? map_app ;
+  try destruct IHpi as [IHpi] ;
+  try destruct IHpi1 as [IHpi1] ;
+  try destruct IHpi2 as [IHpi2] ;
+  constructor ; simpl ; rewrite ? map_app ;
   try (now (constructor ; eassumption)).
-- apply meq_perm in H.
+- apply meq_perm in X.
   eapply ll.ex_r...
-  apply Permutation_map...
+  apply Permutation_Type_map...
 - eapply ll.ex_r.
   + apply ll.tens_r.
-    * assert (Helt := Permutation_map mell2ll (elts_add A l1)).
-      apply (ll.ex_r _ _ _ _ pi1') in Helt.
+    * assert (Helt := Permutation_Type_map mell2ll (elts_add A l1)).
+      apply (ll.ex_r _ _ _ IHpi1) in Helt.
       simpl in Helt...
-    * assert (Helt := Permutation_map mell2ll (elts_add B l2)).
-      apply (ll.ex_r _ _ _ _ pi2') in Helt.
+    * assert (Helt := Permutation_Type_map mell2ll (elts_add B l2)).
+      apply (ll.ex_r _ _ _ IHpi2) in Helt.
       simpl in Helt...
-  + apply Permutation_cons...
+  + apply Permutation_Type_cons...
     rewrite <- map_app.
-    apply Permutation_map.
+    apply Permutation_Type_map.
     unfold sum ; unfold list2fm.
     simpl ; rewrite fold_id.
-    apply Permutation_app_comm.
+    apply Permutation_Type_app_comm.
 - unfold fmmap.
   unfold list2fm.
   unfold add.
@@ -196,22 +199,22 @@ induction pi ;
   simpl.
   rewrite fold_id.
   rewrite mell2ll_map_wn.
-  unfold elts in pi'.
-  unfold add in pi'.
-  unfold fmmap in pi'.
-  unfold list2fm in pi'.
-  simpl in pi'.
-  rewrite fold_id in pi'.
-  rewrite mell2ll_map_wn in pi'.
+  unfold elts in IHpi.
+  unfold add in IHpi.
+  unfold fmmap in IHpi.
+  unfold list2fm in IHpi.
+  simpl in IHpi.
+  rewrite fold_id in IHpi.
+  rewrite mell2ll_map_wn in IHpi.
   apply ll.oc_r...
 - change (map mell2ll l) with (map formulas.wn nil ++ map mell2ll l).
   apply ll.co_r...
 Qed.
 
-Lemma mellfrag2mell : forall m s,
-  ll.ll pfrag_mell (map mell2ll (elts m)) s -> mell m.
+Lemma mellfrag2mell : forall m,
+  ll.ll pfrag_mell (map mell2ll (elts m)) -> mell m.
 Proof with try eassumption ; try reflexivity.
-intros m s pi.
+intros m pi.
 remember (map mell2ll (elts m)) as l.
 revert m Heql ; induction pi ; intros m Heql ;
   try (now (destruct m ; inversion Heql ;
@@ -224,9 +227,9 @@ revert m Heql ; induction pi ; intros m Heql ;
   destruct m ; inversion H3.
   apply ax_r.
 - subst.
-  simpl in H.
-  apply Permutation_map_inv in H.
-  destruct H as (l' & Heq & HP) ; subst.
+  simpl in p.
+  apply Permutation_Type_map_inv in p.
+  destruct p as ((l' & Heq) & HP) ; subst.
   eapply ex_r.
   + apply IHpi...
   + symmetry...
@@ -242,17 +245,17 @@ revert m Heql ; induction pi ; intros m Heql ;
   destruct f ; inversion H0 ; subst.
   assert (Heq := H1).
   decomp_map H1 ; subst.
-  replace (tens f1 f2 :: l0 ++ l3)
-     with (add (tens f1 f2) (sum l0 l3)).
-  + rewrite sum_comm.
-    apply tens_r.
+  apply (ex_r (add (tens f1 f2) (sum l3 l0))).
+  + apply tens_r.
     * apply IHpi1...
     * apply IHpi2...
   + unfold sum.
     unfold list2fm.
     unfold add.
     simpl.
-    rewrite fold_id...
+    apply Permutation_Type_cons...
+    rewrite fold_id.
+    apply Permutation_Type_app_comm.
 - destruct m ; inversion Heql.
   destruct f ; inversion H0 ; subst.
   apply parr_r.
@@ -291,14 +294,14 @@ revert m Heql ; induction pi ; intros m Heql ;
   apply mell2ll_map_wn_inv in H3.
   destruct H3 as (m' & Heq1 & Heq2) ; subst.
   apply co_r.
-  eapply ex_r ; [ | symmetry ; apply Permutation_cons ;
-                               [reflexivity | apply Permutation_middle ] ].
+  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons ;
+                               [reflexivity | apply Permutation_Type_middle ] ].
   apply IHpi.
   change (formulas.wn (mell2ll f)) with (mell2ll (wn f)).
   rewrite <- mell2ll_map_wn.
   list_simpl.
   reflexivity.
-- inversion H.
+- inversion a.
 Qed.
 
 
@@ -309,13 +312,12 @@ Qed.
 Lemma ax_gen_r : forall A, mell (add (dual A) (add A empty)).
 Proof.
 intro A.
-destruct (@ll.ax_exp pfrag_mell (formulas.dual (mell2ll A)))
-  as [s Hax].
-rewrite formulas.bidual in Hax.
-rewrite mell2ll_dual in Hax.
-eapply mellfrag2mell.
-eapply ll.ex_r ; [ eassumption | reflexivity ].
+apply mellfrag2mell.
+eapply ll.ex_r ; [ apply ll.ax_exp | ].
+rewrite mell2ll_dual.
+apply Permutation_Type_swap.
 Qed.
+
 
 (** *** cut elimination *)
 
@@ -323,20 +325,19 @@ Lemma cut_r : forall A m1 m2,
   mell (add A m1) -> mell (add (dual A) m2) -> mell (sum m1 m2).
 Proof with try eassumption.
 intros A m1 m2 pi1 pi2.
-destruct (mell2mellfrag _ pi1) as [s1 pi1'] ; simpl in pi1'.
-destruct (mell2mellfrag _ pi2) as [s2 pi2'] ; simpl in pi2'.
-rewrite <- mell2ll_dual in pi2'.
-assert (forall l, ~ ll.pgax pfrag_mell l)
-  as Hax by (intros l Hax ; inversion Hax).
-apply (ll.cut_r_axfree Hax _ _ _ _ _ pi2') in pi1'.
-destruct pi1' as [s pi].
-eapply mellfrag2mell.
-apply (ll.ex_r _ _ _ _ pi).
-rewrite <- map_app.
-apply Permutation_map.
-unfold sum ; unfold list2fm ; unfold add ; simpl.
-rewrite fold_id.
-reflexivity.
+apply mell2mellfrag in pi1 ; destruct pi1 as [pi1] ; simpl in pi1.
+apply mell2mellfrag in pi2 ; destruct pi2 as [pi2] ; simpl in pi2.
+apply mellfrag2mell.
+eapply ll.ex_r ; [ | apply Permutation_Type_map ; symmetry ; apply elts_sum ].
+rewrite map_app.
+eapply ll.cut_r_axfree...
+- intros Hax ; inversion Hax.
+- assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
+                           (map mell2ll (dual A :: elts m2)))
+  as Helt2 by (apply Permutation_Type_map ; apply elts_add).
+  simpl in Helt2 ; rewrite <- mell2ll_dual in Helt2.
+  rewrite <- mell2ll_dual in pi2.
+  eapply ll.ex_r ; [ | apply Helt2 ]...
 Qed.
 
 
