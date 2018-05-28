@@ -1,5 +1,4 @@
 (* Bool_more Library *)
-(* Coq 8.6 *)
 (* v0   Olivier Laurent *)
 
 
@@ -64,5 +63,64 @@ assert (forall f, f = eq_refl_bool_ext b1 b2 f1) as Heq.
 rewrite (Heq f2).
 apply Heq.
 Qed.
+
+
+(** * Forall on lists with [bool] output *)
+Require Import List.
+
+Fixpoint Forallb {A} P (l : list A) :=
+match l with
+| nil => true
+| cons h t => andb (P h) (Forallb P t)
+end.
+
+Lemma Forallb_Forall {A} : forall P (l : list A),
+  is_true (Forallb P l) <-> Forall (fun x => is_true (P x)) l.
+Proof.
+induction l ; split ; intros H ; try (now constructor).
+- constructor.
+  + simpl in H ; destruct (P a).
+    * constructor.
+    * inversion H.
+  + apply IHl.
+    simpl in H ; destruct (Forallb P l).
+    * constructor.
+    * rewrite andb_false_r in H.
+      inversion H.
+- inversion H ; subst.
+  apply IHl in H3.
+  simpl.
+  destruct (P a) ; destruct (Forallb P l) ; now inversion H2.
+Qed.
+
+
+(** * Exists on lists with [bool] output *)
+Fixpoint Existsb {A} P (l : list A) :=
+match l with
+| nil => false
+| cons h t => orb (P h) (Existsb P t)
+end.
+
+Lemma Existsb_Exists {A} : forall P (l : list A),
+  is_true (Existsb P l) <-> Exists (fun x => is_true (P x)) l.
+Proof with try assumption.
+induction l ; split ; intros H ; try (now inversion H).
+- inversion H.
+  apply orb_true_iff in H1.
+  destruct H1 as [H1 | H1].
+  + constructor...
+  + apply Exists_cons_tl.
+    apply IHl...
+- inversion H ; subst.
+  + simpl ; rewrite H1.
+    reflexivity.
+  + apply IHl in H1.
+    simpl ; rewrite H1.
+    rewrite orb_true_r.
+    reflexivity.
+Qed.
+
+
+
 
 

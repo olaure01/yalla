@@ -1,9 +1,10 @@
 (* llpol example file for yalla library *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 
 (** * Example of a concrete use of the yalla library: polarized linear logic LLpol *)
+
+Require Import Morphisms.
 
 Require Import Injective.
 Require Import List_more.
@@ -69,7 +70,7 @@ apply polform_ind ; intros ; simpl ;
   try rewrite H ; try rewrite H0 ; try reflexivity.
 Qed.
 
-Function dual A :=
+Definition dual A :=
 match A with
 | pos P => neg (pdual P)
 | neg N => pos (ndual N)
@@ -97,7 +98,7 @@ match N with
 | wn P => formulas.wn (pllpol2ll P)
 end.
 
-Function llpol2ll A :=
+Definition llpol2ll A :=
 match A with
 | pos P => pllpol2ll P
 | neg N => nllpol2ll N
@@ -210,6 +211,12 @@ Inductive llpol : list formula -> Prop :=
               llpol (neg (wn P) :: neg (wn P) :: l) ->
               llpol (neg (wn P) :: l).
 
+Instance llpol_perm : Proper ((@Permutation _) ==> Basics.impl) llpol.
+Proof.
+intros l1 l2 HP pi.
+eapply ex_r ; eassumption.
+Qed.
+
 
 (** ** 4. characterize corresponding [ll] fragment *)
 
@@ -240,7 +247,7 @@ Definition pfrag_mell := ll.mk_pfrag false (fun _ => False) false false true.
 
 Lemma llpol2llpolfrag : forall l, llpol l ->
   exists s, ll.ll pfrag_mell (map llpol2ll l) s.
-Proof with try reflexivity ; try eassumption.
+Proof with try eassumption ; try reflexivity.
 intros l pi.
 induction pi ;
   try destruct IHpi as [s' pi'] ;
@@ -490,8 +497,7 @@ Qed.
 Lemma polsequent_neg_add : forall N l,
   polsequent l -> polsequent (neg N :: l).
 Proof.
-intros N l Hpol.
-destruct Hpol as [ (l0 & Heq) | (l0 & P & HP) ] ; subst.
+intros N l [ (l0 & Heq) | (l0 & P & HP) ] ; subst.
 - left ; exists (N :: l0) ; reflexivity.
 - assert (HP' := HP).
   apply Permutation_vs_cons_inv in HP'.
@@ -1181,6 +1187,12 @@ Inductive llpolt : list formula -> Prop :=
 | co_rt : forall P l,
                llpolt (neg (wn P) :: neg (wn P) :: l) ->
                llpolt (neg (wn P) :: l).
+
+Instance llpolt_perm : Proper ((@Permutation _) ==> Basics.impl) llpolt.
+Proof.
+intros l1 l2 HP pi.
+eapply ex_rt ; eassumption.
+Qed.
 
 (** For polarized sequents [llpol] corresponds to [top] rule with at most one positive formula. *)
 Theorem llpol_llpolt : forall l, (polsequent l /\ llpol l) <-> llpolt l.

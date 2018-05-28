@@ -1,0 +1,973 @@
+(* nnfoc file for yalla library *)
+(* v 1.2   Olivier Laurent *)
+
+
+(** * Focusing by Polarized Translation *)
+
+Require Import Morphisms.
+
+Require Import Injective.
+Require Import List_more.
+Require Import Permutation_more.
+Require Import Permutation_solve.
+Require Import genperm.
+
+Require Import basic_tactics.
+Require Import ll_fragments.
+Require Import ill.
+Require Import llfoc.
+Require Import tl.
+Require Import nn.
+
+
+(** ** Polarized Translation *)
+
+Definition a2t := yalla_ax.a2t.
+Definition a2t_inj := yalla_ax.a2t_inj.
+Definition a2i_a2i := yalla_ax.a2i_a2i.
+
+Fixpoint ptrans C :=
+match C with
+| var x => tvar (a2t x)
+| one => tone
+| tens A B => ttens (ptrans A) (ptrans B)
+| zero => tzero
+| aplus A B => tplus (ptrans A) (ptrans B)
+| oc A => toc (tneg (ntrans A))
+| covar x => tneg (tvar (a2t x))
+| bot => tneg tone
+| parr A B => tneg (ttens (ntrans B) (ntrans A))
+| top => tneg (tzero)
+| awith A B => tneg (tplus (ntrans A) (ntrans B))
+| wn A => tneg (toc (tneg (ptrans A)))
+end
+with ntrans C :=
+match C with
+| var x => tneg (tvar (a2t x))
+| one => tneg tone
+| tens A B => tneg (ttens (ptrans A) (ptrans B))
+| zero => tneg tzero
+| aplus A B => tneg (tplus (ptrans A) (ptrans B))
+| oc A => tneg (toc (tneg (ntrans A)))
+| covar x => tvar (a2t x)
+| bot => tone
+| parr A B => ttens (ntrans B) (ntrans A)
+| top => tzero
+| awith A B => tplus (ntrans A) (ntrans B)
+| wn A => toc (tneg (ptrans A))
+end.
+
+Lemma pntrans_neg : forall A,
+   (aformula A -> ptrans A = tneg (ntrans A))
+/\ (sformula A -> ntrans A = tneg (ptrans A)).
+Proof.
+induction A ;
+  (split ; intros Hpol ; inversion Hpol) ;
+  reflexivity.
+Qed.
+
+Lemma pntrans_dual : forall A,
+  ptrans (dual A) = ntrans A /\ ntrans (dual A) = ptrans A.
+Proof.
+induction A ; simpl ;
+  try (destruct IHA as [IHAl IHAr]) ;
+  try (destruct IHA1 as [IHA1l IHA1r]) ;
+  try (destruct IHA2 as [IHA2l IHA2r]) ;
+  try rewrite IHAl ;
+  try rewrite IHAr ;
+  try rewrite IHA1l ;
+  try rewrite IHA1r ;
+  try rewrite IHA2l ;
+  try rewrite IHA2r ;
+  split ; reflexivity.
+Qed.
+
+Lemma ntrans_map_toc : forall l,
+  map ntrans (map wn l) = map toc (map tneg (map ptrans l)).
+Proof with try reflexivity.
+induction l...
+simpl ; rewrite IHl...
+Qed.
+
+Lemma ntrans_map_toc_inv : forall l1 l2,
+  map toc l1 = map ntrans l2 ->
+    exists l2', l2 = map wn l2' /\ l1 = map tneg (map ptrans l2').
+Proof with try assumption ; try reflexivity.
+induction l1 ; intros l2 Heq ;
+  destruct l2 ; inversion Heq...
+- exists nil ; split...
+- apply IHl1 in H1.
+  destruct f ; inversion H0.
+  destruct H1 as (l2' & Heq1 & H1) ; subst.
+  exists (f :: l2') ; split...
+Qed.
+
+Lemma pntrans_to_trans : forall A s,
+  ill_ll (tl2ill (ntrans A) :: nil) (trans N A) s -> exists s',
+  ill_ll (negR N (trans N A) :: tl2ill (tneg (ptrans A)) :: nil) N s'.
+Proof with myeeasy.
+destruct (@ax_exp_ill ipfrag_ill N) as [sN HaxN].
+intros A s pi.
+destruct (polarity A) ; eexists.
+- apply negR_ilr...
+  rewrite <- (proj2 (pntrans_neg _) s0)...
+- rewrite (proj1 (pntrans_neg _) a)...
+  cons2app.
+  apply neg_ilr...
+  apply neg_irr.
+  eapply ex_ir ; [ | apply perm_swap ].
+  apply negR_ilr...
+Qed.
+
+Lemma ntrans_to_trans : forall A, exists s,
+  ill_ll (tl2ill (ntrans A) :: nil) (trans N A) s.
+Proof with myeeasy.
+assert (forall l C, ~ ipgax ipfrag_ill l C) as Hgax.
+{ intros l C Hax.
+  inversion Hax. }
+destruct (@ax_exp_ill ipfrag_ill N) as [sN HaxN].
+induction A ;
+  try (destruct IHA as [sA IHA]) ;
+  try (destruct IHA1 as [sA1 IHA1]) ;
+  try (destruct IHA2 as [sA2 IHA2]) ;
+  simpl.
+- eexists.
+  apply negR_irr.
+  cons2app.
+  apply neg_ilr...
+  rewrite a2i_a2i.
+  apply ax_ir.
+- eexists.
+  rewrite a2i_a2i.
+  apply ax_ir.
+- eexists.
+  apply negR_irr.
+  cons2app.
+  apply neg_ilr...
+  rewrite <- (app_nil_l _).
+  apply one_ilr.
+  apply one_irr.
+- eexists.
+  rewrite <- (app_nil_l _).
+  apply one_ilr.
+  apply one_irr.
+- apply pntrans_to_trans in IHA1.
+  clear sA1 ; destruct IHA1 as [sA1 IHA1].
+  apply pntrans_to_trans in IHA2.
+  clear sA2 ; destruct IHA2 as [sA2 IHA2].
+  cons2app in IHA1.
+  destruct (@ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))) as [s1 H1].
+  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ _ _ H1) in IHA1...
+  clear sA1 ; destruct IHA1 as [sA1 IHA1].
+  cons2app in IHA2.
+  destruct (@ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))) as [s2 H2].
+  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ _ _ H2) in IHA2...
+  clear sA2 ; destruct IHA2 as [sA2 IHA2].
+  apply (neg_tens_propag _ _ _ _ _ _ _ IHA1) in IHA2.
+  destruct IHA2 as [s IHA2].
+  destruct (@ineg_to_ilmap ipfrag_ill
+             (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))) as [s' H'].
+  cons2app in IHA2.
+  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ _ _ H') in IHA2...
+  clear sA2 ; destruct IHA2 as [sA2 IHA2].
+  eexists.
+  apply negR_irr...
+- eexists.
+  rewrite <- (app_nil_l _).
+  apply tens_ilr.
+  list_simpl.
+  eapply ex_ir ; [ | apply perm_swap ].
+  cons2app.
+  apply tens_irr...
+- eexists.
+  apply negR_irr.
+  rewrite <- (app_nil_l _).
+  apply zero_ilr.
+- eexists.
+  rewrite <- (app_nil_l _).
+  apply zero_ilr.
+- apply pntrans_to_trans in IHA1.
+  clear sA1 ; destruct IHA1 as [sA1 IHA1].
+  apply pntrans_to_trans in IHA2.
+  clear sA2 ; destruct IHA2 as [sA2 IHA2].
+  cons2app in IHA1.
+  destruct (@ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))) as [s1 H1].
+  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ _ _ H1) in IHA1...
+  clear sA1 ; destruct IHA1 as [sA1 IHA1].
+  cons2app in IHA2.
+  destruct (@ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))) as [s2 H2].
+  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ _ _ H2) in IHA2...
+  clear sA2 ; destruct IHA2 as [sA2 IHA2].
+  apply (neg_plus_propag _ _ _ _ _ _ _ IHA1) in IHA2.
+  destruct IHA2 as [s IHA2].
+  destruct (@ineg_to_ilmap ipfrag_ill
+             (iplus (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))) as [s' H'].
+  cons2app in IHA2.
+  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ _ _ H') in IHA2...
+  clear sA2 ; destruct IHA2 as [sA2 IHA2].
+  eexists.
+  apply negR_irr...
+- eexists.
+  rewrite <- (app_nil_l _).
+  apply plus_ilr ; list_simpl.
+  + apply plus_irr1...
+  + apply plus_irr2...
+- eexists.
+  apply negR_irr.
+  cons2app.
+  apply neg_ilr.
+  change (ioc (negR N (trans N A)) :: nil)
+    with (map ioc (negR N (trans N A) :: nil)).
+  apply oc_irr.
+  rewrite <- (app_nil_l _).
+  apply de_ilr.
+  apply neg_irr.
+  eapply ex_ir ; [ | apply perm_swap ].
+  apply negR_ilr...
+- apply pntrans_to_trans in IHA.
+  clear sA ; destruct IHA as [sA IHA].
+  eexists.
+  change (ioc (ineg (tl2ill (ptrans A))) :: nil)
+    with (map ioc (ineg (tl2ill (ptrans A)) :: nil)).
+  apply oc_irr.
+  rewrite <- (app_nil_l _).
+  apply de_ilr.
+  apply negR_irr...
+Unshelve.
+all : try (now apply Hgax).
+all : constructor ; [ constructor | ]...
+all : list_simpl.
+all : constructor ; constructor ; try constructor.
+all : try (apply trans_nz).
+all : try (now (intros HN ; inversion HN)).
+all : try (now constructor).
+all : try (apply tl2ill_nz).
+all : constructor ; apply tl2ill_nz.
+Qed.
+
+Definition tpfrag_tl := mk_tpfrag true (fun _ _ => False) true.
+(*                                cut   axioms            perm  *)
+Definition tl_ll := tl tpfrag_tl.
+
+Proposition ll_to_tl : forall l s, ll_ll l s -> tl_ll (map ntrans l) None.
+Proof with myeeasy.
+intros l s pi.
+apply (ll_ll_to_ill_trans N) in pi.
+clear s ; destruct pi as [s pi].
+assert (forall l1 l2 s , ill_ll (map (trans N) l1 ++ map tl2ill (map ntrans l2)) N s
+          -> exists s', ill_ll (map tl2ill (map ntrans (l1 ++ l2))) N s')
+ as IH.
+{ clear ; induction l1 ; intros l2 s pi.
+  - eexists...
+  - list_simpl in pi.
+    destruct (ntrans_to_trans a) as [sa Ha].
+    eapply ex_ir in pi ; [ | apply Permutation_middle ].
+    eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ _ _ Ha) in pi...
+    clear s ; destruct pi as [s pi].
+    list_simpl in pi.
+    change (tl2ill (ntrans a) :: map tl2ill (map ntrans l2))
+      with (map tl2ill (map ntrans (a :: l2))) in pi.
+    apply IHl1 in pi.
+    clear s ; destruct pi as [s pi].
+    eexists.
+    eapply ex_ir...
+    PEperm_solve.
+  Unshelve.
+  + intros l C Hgax ; inversion Hgax.
+  + simpl.
+    constructor.
+    * constructor.
+    * apply Forall_app.
+      -- apply Forall_forall.
+         intros x Hin.
+         apply in_map_iff in Hin.
+         destruct Hin as (x0 & Heq & _) ; subst.
+         apply trans_nz.
+         ++ intros Hz ; inversion Hz.
+        ++ constructor.
+      -- change (tl2ill (ntrans a) :: map tl2ill (map ntrans l2))
+           with (map tl2ill (map ntrans (a :: l2))).
+         apply Forall_forall.
+         intros x Hin.
+         apply in_map_iff in Hin.
+         destruct Hin as (x0 & Heq & _) ; subst.
+         apply tl2ill_nz. }
+rewrite <- (app_nil_r _) in pi.
+change nil with (map tl2ill (map ntrans nil)) in pi.
+apply IH in pi.
+clear s ; destruct pi as [s pi].
+list_simpl in pi.
+apply (cut_admissible_ill_nzeropos_axfree_by_ll _ i2ac_inj) in pi.
+- clear s ; destruct pi as [s pi].
+  eapply (stronger_tpfrag (cutrm_tpfrag tpfrag_tl)).
+  + nsplit 3...
+    intros f a Hax...
+  + eapply tlfrag2tl_cutfree...
+    rewrite <- cutrm_t2ipfrag.
+    eapply stronger_ipfrag ; [ | apply pi].
+    nsplit 3...
+    intros f a Hax ; inversion Hax.
+- intros l0 C Hax ; inversion Hax.
+- constructor ; [ constructor | ]...
+  apply Forall_forall.
+  intros x Hin.
+  apply in_map_iff in Hin.
+  destruct Hin as (x0 & Heq & _) ; subst.
+  apply tl2ill_nz.
+Qed.
+
+(* ** Proof of Focusing *)
+
+Section Focusing.
+
+Inductive otl : list tformula -> option tformula -> Prop :=
+| ax_otr : forall X, otl (tvar X :: nil) (Some (tvar X))
+| ex_otr : forall l1 l2 A, otl l1 A -> Permutation l1 l2 ->
+                           otl l2 A
+| one_otrr : otl nil (Some tone)
+| one_otlr : forall l1 l2 A, otl (l1 ++ l2) A ->
+                             otl (l1 ++ tone :: l2) A
+| tens_otrr : forall A B l1 l2,
+                    otl l1 (Some A) -> otl l2 (Some B) ->
+                    otl (l1 ++ l2) (Some (ttens A B))
+| tens_otlr : forall A B l1 l2 C,
+                    otl (l1 ++ A :: B :: l2) C ->
+                    otl (l1 ++ ttens A B :: l2) C
+| neg_otrr : forall A l,
+                    otl (A :: l) None ->
+                    otl l (Some (tneg A))
+| neg_otlr : forall A l, otl l (Some A) ->
+                         otl (l ++ tneg A :: nil) None
+| zero_otlr : forall l1 l2 C, otl (l1 ++ tzero :: l2) C
+| plus_otrr1 : forall A B l, otl l (Some A) ->
+                             otl l (Some (tplus A B))
+| plus_otrr2 : forall A B l, otl l (Some A) ->
+                             otl l (Some (tplus B A))
+| plus_otlr : forall A B l1 l2 C,
+                        otl (l1 ++ A :: l2) C ->
+                        otl (l1 ++ B :: l2) C ->
+                        otl (l1 ++ tplus A B :: l2) C
+| oc_otrr : forall A l, otl (A :: map toc l) None ->
+                        otl (map toc l) (Some (toc (tneg A)))
+| de_otlr : forall A l, otl l (Some A) ->
+                        otl (l ++ toc (tneg A) :: nil) None
+| wk_otlr : forall A l1 l2 C,
+                        otl (l1 ++ l2) C ->
+                        otl (l1 ++ toc A :: l2) C
+| co_otlr : forall A lw l1 l2 C,
+                        otl (l1 ++ toc A :: map toc lw
+                                ++ toc A :: l2) C ->
+                        otl (l1 ++ map toc lw ++ toc A :: l2) C.
+
+Instance otl_perm {Pi} : Proper ((@Permutation _) ==> Basics.impl) (fun l => otl l Pi).
+Proof.
+intros l1 l2 HP pi.
+eapply ex_otr ; eassumption.
+Qed.
+
+Lemma neg_rev_ot : forall A l, otl l (Some (tneg A)) ->
+  otl (A :: l) None.
+Proof with myeeasy.
+intros A l pi.
+remember (Some (tneg A)) as Pi.
+revert A HeqPi ; induction pi ; intros A' HeqPi ;
+  try (now (inversion HeqPi)) ; subst ;
+  try (now (rewrite app_comm_cons ;
+            constructor ;
+            rewrite <- app_comm_cons ;
+            apply IHpi ; myeasy)).
+- eapply ex_otr.
+  + apply IHpi...
+  + perm_solve.
+- inversion HeqPi ; subst...
+- rewrite app_comm_cons.
+  apply plus_otlr.
+  + rewrite <- app_comm_cons.
+    apply IHpi1...
+  + rewrite <- app_comm_cons.
+    apply IHpi2...
+Qed.
+
+Lemma tsubform_toc_ntrans : forall A B, tsubform (toc A) (ntrans B) ->
+  exists A', A = tneg A'.
+Proof with myeasy.
+intros A B Hsub.
+apply (@or_introl _ (tsubform (toc A) (ptrans B))) in Hsub.
+revert Hsub ; clear ; induction B ; intros [ Hsub | Hsub ] ;
+  try (now (inversion Hsub ; subst ; inversion H1)) ;
+  try (now (inversion Hsub ; inversion H1 ; subst ;
+              try (apply IHB1 ; right ; assumption) ;
+              try (apply IHB2 ; right ; assumption))) ;
+  try (now (inversion Hsub ; inversion H1 ; subst ;
+              try (apply IHB1 ; left ; assumption) ;
+              try (apply IHB2 ; left ; assumption))).
+- inversion Hsub ; inversion H1 ; subst.
+  + eexists...
+  + inversion H4 ; subst ; apply IHB ; left...
+  + eexists...
+  + inversion H4 ; subst ; apply IHB ; left...
+- inversion Hsub ; subst.
+  + eexists...
+  + inversion H1 ; subst ; apply IHB ; left...
+- inversion Hsub ; subst.
+  + eexists...
+  + inversion H1 ; subst ; apply IHB ; right...
+- inversion Hsub ; inversion H1 ; subst.
+  + eexists...
+  + inversion H4 ; subst ; apply IHB ; right...
+  + eexists...
+  + inversion H4 ; subst ; apply IHB ; right...
+Qed.
+
+(* ** From [tl] to [otl] *)
+
+Ltac Forall_simpl_hyp :=
+  repeat (
+    match goal with
+    | H:Forall _ (_ ++ _) |- _ => apply Forall_app_inv in H ; destruct H
+    | H:Forall _ (_ :: _) |- _ => inversion H ; clear H
+    end).
+Ltac Forall_solve_rec :=
+  match goal with
+  | |- Forall _ (_ ++ _) => apply Forall_app ; Forall_solve_rec
+  | |- Forall _ (_ :: _) => constructor ; [ assumption | Forall_solve_rec ]
+  | |- Forall _ nil => constructor
+  | _ => try assumption
+  end.
+Ltac Forall_solve :=
+  Forall_simpl_hyp ; simpl ; Forall_solve_rec.
+
+Lemma tl_to_otl_neg : forall l C,
+  tl_ll l C ->
+  Forall (fun F => exists x, tsubform F (ntrans x)) l ->
+  (forall D, C = Some D -> exists x, tsubform D (ntrans x)) ->
+  forall l1 l2, Permutation l (l1 ++ map tneg l2) ->
+  otl (l1 ++ map toc (map tneg l2)) C.
+Proof with (try Forall_solve) ; myeeasy.
+intros l C pi.
+apply cut_admissible_tl_axfree in pi...
+induction pi ; intros HF HC l1' l2' HP.
+- apply Permutation_length_1_inv in HP.
+  destruct l1' ; inversion HP.
+  + destruct l2' ; inversion H0.
+  + apply app_eq_nil in H1.
+    destruct H1 ; subst.
+    destruct l2' ; inversion H1.
+    apply ax_otr.
+- apply IHpi...
+  + rewrite H...
+  + simpl in H.
+    etransitivity...
+- apply Permutation_nil in HP.
+  apply app_eq_nil in HP.
+  destruct HP ; subst.
+  destruct l2' ; inversion H0.
+  apply one_otrr.
+- assert (HP' := HP).
+  apply Permutation_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
+  destruct HP' as (l1'' & l2'' & Heq) ; subst.
+  list_simpl.
+  constructor.
+  rewrite app_assoc.
+  apply IHpi...
+  list_simpl.
+  list_simpl in HP.
+  apply Permutation_app_inv in HP...
+- apply Permutation_app_app_inv in HP.
+  destruct HP as (l3' & l3'' & l4' & l4'' & HP1 & HP2 & HP3 & HP4).
+  symmetry in HP4.
+  apply Permutation_map_inv in HP4.
+  destruct HP4 as (l3''' & Heq & HP4).
+  decomp_map Heq ; subst.
+  apply (ex_otr ((l3' ++ map toc (map tneg l0))
+                 ++ l3'' ++ map toc (map tneg l3))) ;
+    [ | rewrite HP3 ; rewrite HP4 ; perm_solve ].
+  constructor.
+  + apply IHpi1 in HP1...
+    destruct (HC _ (eq_refl _)) as [D HD].
+    intros D0 Heq0.
+    inversion Heq0 ; subst.
+    eexists.
+    etransitivity ; [ | apply HD].
+    constructor ; constructor...
+  + apply IHpi2 in HP2...
+    destruct (HC _ (eq_refl _)) as [D HD].
+    intros D0 Heq0.
+    inversion Heq0 ; subst.
+    eexists.
+    etransitivity ; [ | apply HD].
+    constructor ; constructor...
+- assert (HP' := HP).
+  apply Permutation_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
+  destruct HP' as (l1'' & l2'' & Heq) ; subst.
+  list_simpl.
+  constructor.
+  rewrite 2 app_comm_cons.
+  rewrite app_assoc.
+  apply IHpi...
+  + Forall_simpl_hyp ; subst.
+    destruct H3 as (S & Hs).
+    constructor.
+    * exists S.
+      etransitivity ; [ | apply Hs].
+      constructor ; constructor.
+    * constructor...
+      exists S.
+      etransitivity ; [ | apply Hs].
+      constructor ; constructor.
+  + list_simpl.
+    list_simpl in HP.
+    apply Permutation_app_inv in HP.
+    apply Permutation_elt.
+    apply Permutation_elt...
+- constructor.
+  apply (@Permutation_cons _ A _ (eq_refl _)) in HP.
+  rewrite app_comm_cons in HP.
+  apply IHpi in HP...
+  + constructor...
+    destruct (HC _ (eq_refl _)) as [D HD].
+    eexists.
+    etransitivity ; [ | apply HD ].
+    constructor ; constructor...
+  + intros D HD.
+    inversion HD.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_vs_elt_inv in HP'.
+  destruct HP' as (l' & l'' & Heq).
+  dichot_elt_app_exec Heq ; subst.
+  + eapply (ex_otr ((l' ++ l0 ++ map toc (map tneg l2')) ++ tneg A :: nil)) ;
+      [ | perm_solve ].
+    constructor.
+    rewrite app_assoc.
+    apply IHpi...
+    * intros D HD.
+      inversion HD ; subst.
+      destruct H3 as [D' HD'].
+      eexists.
+      etransitivity ; [ | apply HD'].
+      constructor ; constructor...
+    * list_simpl.
+      list_simpl in HP.
+      apply Permutation_app_inv in HP.
+      list_simpl in HP...
+  + decomp_map Heq1 ; subst.
+    inversion Heq1 ; subst.
+    list_simpl.
+    eapply (ex_otr ((l1' ++ map toc (map tneg (l2 ++ l4))) ++ toc (tneg x) :: nil)) ;
+      [ | perm_solve ].
+    constructor.
+    apply IHpi...
+    * intros D HD.
+      inversion HD ; subst.
+      destruct H3 as [D' HD'].
+      eexists.
+      etransitivity ; [ | apply HD'].
+      constructor ; constructor...
+    * list_simpl.
+      list_simpl in HP.
+      rewrite app_assoc in HP.
+      apply Permutation_app_inv in HP.
+      list_simpl in HP...
+- assert (HP' := HP).
+  apply Permutation_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
+  destruct HP' as (l1'' & l2'' & Heq) ; subst.
+  list_simpl.
+  constructor.
+- constructor.
+  apply IHpi...
+  destruct (HC _ (eq_refl _)) as [D HD].
+  intros D0 Heq0.
+  inversion Heq0 ; subst.
+  eexists.
+  etransitivity ; [ | apply HD].
+  constructor ; constructor...
+- apply plus_otrr2.
+  apply IHpi...
+  destruct (HC _ (eq_refl _)) as [D HD].
+  intros D0 Heq0.
+  inversion Heq0 ; subst.
+  eexists.
+  etransitivity ; [ | apply HD].
+  constructor ; constructor...
+- assert (HP' := HP).
+  apply Permutation_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
+  destruct HP' as (l1'' & l2'' & Heq) ; subst.
+  list_simpl.
+  constructor ; rewrite app_comm_cons ; rewrite app_assoc.
+  + apply IHpi1...
+    * constructor...
+      destruct H3 as [D' HD'].
+      eexists.
+      etransitivity ; [ | apply HD'].
+      constructor ; constructor...
+    * list_simpl.
+      list_simpl in HP.
+      apply Permutation_app_inv in HP.
+      apply Permutation_elt...
+  + apply IHpi2...
+    * constructor...
+      destruct H3 as [D' HD'].
+      eexists.
+      etransitivity ; [ | apply HD'].
+      constructor ; constructor...
+    * list_simpl.
+      list_simpl in HP.
+      apply Permutation_app_inv in HP.
+      apply Permutation_elt...
+- symmetry in HP.
+  apply Permutation_map_inv in HP.
+  destruct HP as (l3 & Heq & HP).
+  decomp_map Heq.
+  assert (l2' = nil).
+  { destruct l2'...
+    destruct l2 ; inversion Heq2. }
+  subst.
+  list_simpl.
+  destruct (HC (toc A) (eq_refl _)) as [A' HC'].
+  destruct (tsubform_toc_ntrans _ _ HC') as [A'' HC''] ; subst.
+  apply oc_otrr.
+  destruct l2 ; inversion Heq2.
+  replace (map toc l1) with (map toc l1 ++ map toc (map tneg nil))
+    by (list_simpl ; myeasy).
+  apply neg_rev_ot.
+  apply IHpi...
+  + destruct (HC _ (eq_refl _)) as [D HD].
+    intros D0 Heq0.
+    inversion Heq0 ; subst.
+    eexists.
+    etransitivity ; [ | apply HD].
+    constructor ; constructor...
+  + rewrite HP ; list_simpl...
+- Forall_simpl_hyp ; subst.
+  destruct H3 as [At HAt].
+  destruct (tsubform_toc_ntrans _ _ HAt) as [B HeqB] ; subst.
+  assert (HP' := HP).
+  apply Permutation_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
+  destruct HP' as (l1'' & l2'' & Heq) ; subst.
+  list_simpl.
+  apply (ex_otr ((l1'' ++ l2'') ++ map toc (map tneg (B :: l2')))) ;
+    [ | perm_solve].
+  apply IHpi...
+  + constructor...
+    eexists...
+    etransitivity ; [ | apply HAt ].
+    constructor ; constructor...
+  + list_simpl in HP.
+    apply Permutation_app_inv in HP.
+    apply Permutation_elt.
+    list_simpl...
+- assert (HP' := HP).
+  apply Permutation_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
+  destruct HP' as (l1'' & l2'' & Heq) ; subst.
+  list_simpl.
+  constructor.
+  rewrite app_assoc.
+  apply IHpi...
+  list_simpl.
+  list_simpl in HP.
+  apply Permutation_app_inv in HP...
+- assert (exists l3, Permutation l1' (l3 ++ toc A :: map toc lw))
+    as [l3 HPw].
+  { rewrite <- Permutation_middle in HP.
+    rewrite app_comm_cons in HP.
+    change (toc A :: map toc lw) with (map toc (A :: lw)).
+    change (toc A :: map toc lw) with (map toc (A :: lw)) in HP.
+    remember (A :: lw) as lt.
+    clear - HP.
+    revert l1 l2 l1' l2' HP ; induction lt ; intros l1 l2 l1' l2' HP.
+    + eexists l1' ; list_simpl ; reflexivity.
+    + list_simpl in HP.
+      assert (HP' := HP).
+      apply Permutation_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
+      destruct HP' as (l1'' & l2'' & Heq) ; subst.
+      list_simpl in HP.
+      apply Permutation_app_inv in HP.
+      rewrite (app_assoc l1'' l2'') in HP.
+      apply IHlt in HP.
+      destruct HP as [l3 HP].
+      eexists ; apply Permutation_elt... }
+  apply (ex_otr (l3 ++ map toc lw ++ toc A :: map toc (map tneg l2'))) ;
+    [ | perm_solve ].
+  constructor.
+  rewrite <- (app_nil_l (map toc (map _ _))).
+  rewrite ? app_comm_cons.
+  rewrite ? app_assoc.
+  apply IHpi...
+  rewrite <- HPw.
+  list_simpl.
+  apply Permutation_elt...
+- inversion f.
+- inversion H.
+- intros _ _ HFalse.
+  destruct HFalse.
+Qed.
+
+Proposition tl_to_otl : forall l,
+  tl_ll (map ntrans l) None -> otl (map ntrans l) None.
+Proof with try eassumption.
+intros l pi.
+replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil))
+  by (list_simpl ; reflexivity).
+eapply tl_to_otl_neg...
++ clear ; induction l ; constructor...
+  eexists ; reflexivity.
++ intros D HD.
+  inversion HD.
++ list_simpl ; reflexivity.
+Qed.
+
+(* ** From [tl] to [llfoc] *)
+
+Ltac splitIHpi H s :=
+  let HpiN := fresh "HpiN" in
+  let HpiP := fresh "HpiP" in
+  let HpiS := fresh "HpiS" in
+  let HpiN' := fresh "HpiN" in
+  let HpiP' := fresh "HpiP" in
+  let HpiS' := fresh "HpiS" in
+  try (destruct H as (HpiN & HpiP)) ;
+  try (assert (HpiN' := HpiN (eq_refl _)) ; clear HpiN) ;
+  try (destruct HpiN' as [s HpiN']) ;
+  try (assert (HpiP' := HpiP _ (eq_refl _)) ; clear HpiP) ;
+  try (destruct HpiP' as [s HpiP']).
+
+Ltac polfoccont_simpl := unfold polfoc ; unfold polcont ; simpl.
+
+Theorem otl_to_llfoc : forall l Pi, otl l Pi ->
+  forall l0, l = map ntrans l0 ->
+     (Pi = None -> exists s, llfoc l0 None s)
+  /\ (forall D, Pi = Some (ptrans D) -> exists s, llfoc (polcont l0 D) (polfoc D) s).
+Proof with (try perm_solve) ; myeeasy.
+intros l Pi pi.
+induction pi ;
+  intros l0 Heq ;
+  (nsplit 2 ; [ intros HN ; inversion HN
+              | intros D HD ; inversion HD ]) ;
+  subst ; list_simpl.
+- destruct l0 ; inversion Heq.
+  destruct l0 ; inversion H2.
+  destruct D ; inversion H0.
+  destruct f ; inversion H1 ; subst.
+  apply a2t_inj in H4 ; subst.
+  polfoccont_simpl ; eexists ; apply ax_fr.
+- apply Permutation_map_inv in H.
+  destruct H as (l' & H & HP) ; subst.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr.
+  + eassumption.
+  + symmetry...
+- apply Permutation_map_inv in H.
+  destruct H as (l' & H & HP) ; subst.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr.
+  + eassumption.
+  + polfoccont_simpl ; destruct (polarity D)...
+- destruct l0 ; inversion Heq.
+  destruct D ; inversion H0.
+  eexists ; constructor.
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  rewrite <- map_app in IHpi.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr ; [ apply bot_fr | ].
+  + eassumption.
+  + idtac...
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  rewrite <- map_app in IHpi.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr ; [ apply bot_fr | ].
+  + eassumption.
+  + polfoccont_simpl ; destruct (polarity D)...
+- destruct D ; inversion HD.
+  decomp_map Heq ; subst.
+  assert (IHpi1' := IHpi1 _ (eq_refl _)).
+  assert (IHpi2' := IHpi2 _ (eq_refl _)).
+  splitIHpi IHpi1' s1.
+  splitIHpi IHpi2' s2.
+  eexists ; apply tens_fr...
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  replace (map ntrans l3 ++ ntrans x2 :: ntrans x1 :: map ntrans l5)
+     with (map ntrans (l3 ++ x2 :: x1 :: l5)) in IHpi
+    by (list_simpl ; reflexivity).
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr ; [ apply parr_fr | apply Permutation_middle ].
+  eapply ex_fr.
+  + eassumption.
+  + idtac...
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  replace (map ntrans l3 ++ ntrans x2 :: ntrans x1 :: map ntrans l5)
+     with (map ntrans (l3 ++ x2 :: x1 :: l5)) in IHpi
+    by (list_simpl ; reflexivity).
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr ; [ apply parr_fr | apply Permutation_middle_polcont ].
+  eapply ex_fr.
+  + eassumption.
+  + polfoccont_simpl ; destruct (polarity D)...
+- polfoccont_simpl.
+  destruct (polarity D) as [Hs | Ha].
+  + destruct D ; inversion H0 ; inversion Hs.
+  + apply IHpi...
+    destruct D ; inversion H0...
+- decomp_map Heq ; subst.
+  destruct l4 ; inversion Heq4 ; subst.
+  destruct (polarity x).
+  + rewrite (proj2 (pntrans_neg x) s) in Heq3.
+    inversion Heq3 ; subst.
+    assert (IHpi' := IHpi _ (eq_refl _)).
+    splitIHpi IHpi' s'...
+    rewrite (polfocs _ s) in HpiP0.
+    rewrite (polconts _ _ s) in HpiP0.
+    eexists ; eapply ex_fr ; [ apply foc_fr | ].
+    * eassumption.
+    * idtac...
+  + exfalso.
+    destruct x ; inversion Heq3 ; inversion a.
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  destruct (top_gen_fr (l3 ++ l5) None) as [s pi]...
+  eexists ; eapply ex_fr ; [ | apply Permutation_middle ]...
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  polfoccont_simpl.
+  destruct (polarity D) as [Hs | Ha].
+  + destruct (top_gen_fr (l3 ++ l5) (Some D)) as [s pi]...
+    eexists ; eapply ex_fr ; [ | apply Permutation_middle ]...
+  + destruct (top_gen_fr ((D :: l3) ++ l5) None) as [s pi]...
+    rewrite app_comm_cons.
+    eexists ; eapply ex_fr ; [ | apply Permutation_middle ]...
+- destruct D ; inversion HD ; subst.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s1.
+  eexists ; apply plus_fr1...
+- destruct D ; inversion HD ; subst.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s1.
+  eexists ; apply plus_fr2...
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  replace (map ntrans l3 ++ ntrans x1 :: map ntrans l5)
+     with (map ntrans (l3 ++ x1 :: l5)) in IHpi1
+    by (list_simpl ; reflexivity).
+  replace (map ntrans l3 ++ ntrans x2 :: map ntrans l5)
+     with (map ntrans (l3 ++ x2 :: l5)) in IHpi2
+    by (list_simpl ; reflexivity).
+  assert (IHpi1' := IHpi1 _ (eq_refl _)).
+  splitIHpi IHpi1' s1.
+  assert (IHpi2' := IHpi2 _ (eq_refl _)).
+  splitIHpi IHpi2' s2.
+  eexists ; eapply ex_fr ; [ apply with_fr | apply Permutation_middle ].
+  + eapply ex_fr ; [ apply HpiN0 | ]...
+  + eapply ex_fr ; [ apply HpiN1 | ]...
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  replace (map ntrans l3 ++ ntrans x1 :: map ntrans l5)
+     with (map ntrans (l3 ++ x1 :: l5)) in IHpi1
+    by (list_simpl ; reflexivity).
+  replace (map ntrans l3 ++ ntrans x2 :: map ntrans l5)
+     with (map ntrans (l3 ++ x2 :: l5)) in IHpi2
+    by (list_simpl ; reflexivity).
+  assert (IHpi1' := IHpi1 _ (eq_refl _)).
+  splitIHpi IHpi1' s1.
+  assert (IHpi2' := IHpi2 _ (eq_refl _)).
+  splitIHpi IHpi2' s2.
+  eexists ; eapply ex_fr ; [ apply with_fr | apply Permutation_middle_polcont ].
+  + eapply ex_fr ; [ apply HpiP0 | ].
+    polfoccont_simpl ; destruct (polarity D)...
+  + eapply ex_fr ; [ apply HpiP1 | ].
+    polfoccont_simpl ; destruct (polarity D)...
+- destruct D ; inversion HD ; subst.
+  assert (ntrans D :: map toc l = map ntrans (D :: l0)) as Heq'
+    by (rewrite Heq ; myeasy).
+  assert (IHpi' := IHpi _ Heq').
+  splitIHpi IHpi' s.
+  apply ntrans_map_toc_inv in Heq.
+  destruct Heq as (lw & Heq & HP) ; subst.
+  eexists ; apply oc_fr...
+- decomp_map Heq.
+  destruct x ; inversion Heq3 ; subst.
+  destruct l4 ; inversion Heq4.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s1.
+  eexists ; eapply ex_fr ; [ apply de_fr | apply Permutation_middle ].
+  list_simpl...
+- decomp_map Heq ; subst.
+  destruct x ; inversion Heq3 ; subst.
+  rewrite <- map_app in IHpi.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr ; [ apply wk_fr | ].
+  * eassumption.
+  * idtac...
+- decomp_map Heq ; subst.
+  destruct x ; inversion Heq3 ; subst.
+  rewrite <- map_app in IHpi.
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  eexists ; eapply ex_fr ; [ apply wk_fr | apply Permutation_middle_polcont ]...
+- decomp_map Heq ; subst.
+  rewrite Heq2 in IHpi.
+  rewrite Heq3 in IHpi.
+  replace (map ntrans l3 ++ ntrans x :: map ntrans l5 ++ ntrans x :: map ntrans l7)
+     with (map ntrans (l3 ++ x :: l5 ++ x :: l7)) in IHpi
+    by (list_simpl ; reflexivity).
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  destruct x ; inversion Heq2 ; subst.
+  rewrite app_assoc.
+  eexists ; eapply ex_fr ; [ apply co_fr | apply Permutation_middle ].
+  eapply ex_fr.
+  * eassumption.
+  * idtac...
+- decomp_map Heq ; subst.
+  rewrite Heq2 in IHpi.
+  rewrite Heq3 in IHpi.
+  replace (map ntrans l3 ++ ntrans x :: map ntrans l5 ++ ntrans x :: map ntrans l7)
+     with (map ntrans (l3 ++ x :: l5 ++ x :: l7)) in IHpi
+    by (list_simpl ; reflexivity).
+  assert (IHpi' := IHpi _ (eq_refl _)).
+  splitIHpi IHpi' s.
+  destruct x ; inversion Heq2 ; subst.
+  rewrite app_assoc.
+  eexists ; eapply ex_fr ; [ apply co_fr | apply Permutation_middle_polcont ].
+  eapply ex_fr.
+  * eassumption.
+  * polfoccont_simpl ; destruct (polarity D)...
+Qed.
+
+Theorem tl_to_llfoc : forall l,
+  tl_ll (map ntrans l) None -> exists s, llfoc l None s.
+Proof with myeasy.
+intros l pi.
+apply tl_to_otl in pi...
+eapply otl_to_llfoc in pi...
+apply pi...
+Qed.
+
+End Focusing.
+
+
+Theorem weak_focusing : forall l s, ll_ll l s -> exists s', llfoc l None s'.
+Proof with myeasy.
+intros l s pi.
+apply ll_to_tl in pi.
+apply tl_to_llfoc...
+Qed.
+
+Theorem focusing : forall l s, ll_ll l s -> llFoc l None.
+Proof.
+intros l s pi.
+destruct (weak_focusing _ _ pi) as [s' pi'].
+apply (proj1 (llfoc_to_llFoc _ _) pi').
+Qed.
+
+

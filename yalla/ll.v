@@ -1,10 +1,10 @@
 (* ll library for yalla *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 
 (** * Linear Logic with explicit permutations *)
 
+Require Import RelationClasses.
 Require Import Omega.
 Require Import Wf_nat.
 
@@ -58,6 +58,15 @@ apply Ha2.
 apply Ha1...
 Qed.
 
+Instance le_pfrag_po : PreOrder le_pfrag.
+Proof.
+split.
+- nsplit 5 ; try reflexivity.
+  intros ; assumption.
+- intros P Q R.
+  apply le_pfrag_trans.
+Qed.
+
 (** Same proof fragment as [P] but with value [b] for [pcut]. *)
 Definition cutupd_pfrag P b :=
   mk_pfrag b (pgax P) (pmix0 P) (pmix2 P) (pperm P).
@@ -68,6 +77,14 @@ Definition axupd_pfrag P G :=
 
 (** Same proof fragment as [P] but without the [cut] rule. *)
 Definition cutrm_pfrag P := cutupd_pfrag P false.
+
+Lemma cutrm_cutrm : forall P,
+  cutrm_pfrag (cutrm_pfrag P) = cutrm_pfrag P.
+Proof.
+intros P.
+unfold cutrm_pfrag ; unfold cutupd_pfrag.
+reflexivity.
+Qed.
 
 
 (** ** Rules *)
@@ -264,8 +281,620 @@ Ltac ll_swap_in H :=
   end.
 
 
-(** ** Axiom expansion *)
+(** ** Some reversibility statements *)
 
+Lemma bot_rev_axat {P} : (forall l, pgax P l -> Forall atomic l) ->
+  forall l s, ll P l s -> forall l1 l2, l = l1 ++ bot :: l2 ->
+  exists s', ll P (l1 ++ l2) s' /\ s' <= s.
+Proof with myeeasy.
+intros Hgax l s pi.
+induction pi ; intros l1' l2' Heq ; subst.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+  destruct l1' ; inversion H3.
+- apply PCperm_vs_elt_inv in H.
+  destruct H as (l3 & l4 & HP' & Heq).
+  apply IHpi in Heq...
+  destruct Heq as (s' & IH & Hs).
+  eexists ; split.
+  + eapply ex_r...
+    apply PEperm_PCperm in HP' ; unfold id in HP'.
+    symmetry.
+    etransitivity ; [ apply PCperm_app_comm | ].
+    rewrite HP'.
+    apply PCperm_app_comm.
+  + omega.
+- destruct l1' ; inversion Heq.
+- dichot_elt_app_exec Heq ; subst.
+  + destruct (IHpi2 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite app_assoc ; apply mix2_r...
+    * omega.
+  + destruct (IHpi1 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply mix2_r...
+    * omega.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  + eexists ; split...
+  + destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+    eexists ; split.
+    * list_simpl ; eapply bot_r...
+    * omega.
+- rewrite app_comm_cons in Heq ; dichot_elt_app_exec Heq ; subst.
+  + destruct l1' ; inversion Heq0 ; subst.
+    rewrite app_comm_cons in IHpi2.
+    destruct (IHpi2 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite app_assoc ; apply tens_r...
+    * omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply tens_r...
+    * omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite 2 app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply parr_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  eexists ; split...
+  list_simpl ; apply top_r...
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r1...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r2...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi1.
+  destruct (IHpi1 _ _ eq_refl) as (s1' & IH1 & Hs1).
+  list_simpl in IH1.
+  rewrite app_comm_cons in IHpi2.
+  destruct (IHpi2 _ _ eq_refl) as (s2' & IH2 & Hs2).
+  list_simpl in IH2.
+  eexists ; split.
+  + list_simpl ; eapply with_r...
+  + myeasy.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  symmetry in H1.
+  decomp_map H1.
+  inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply de_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split.
+  + list_simpl ; eapply wk_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  dichot_elt_app_exec H1 ; subst.
+  + exfalso.
+    decomp_map H0.
+    inversion H0.
+  + rewrite 2 app_comm_cons in IHpi.
+    rewrite app_assoc in IHpi.
+    destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+    list_simpl in IH.
+    eexists ; split.
+    * list_simpl ; eapply co_r...
+    * omega.
+- dichot_elt_app_exec Heq ; subst.
+  + rewrite app_comm_cons in IHpi2.
+    destruct (IHpi2 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite app_assoc ; eapply cut_r...
+    * omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; eapply cut_r...
+    * omega.
+- exfalso.
+  apply Hgax in H.
+  destruct (Forall_app_inv _ _ _ H) as [_ Hat].
+  inversion Hat.
+  inversion H2.
+Qed.
+
+Lemma parr_rev_axat {P} : (forall l, pgax P l -> Forall atomic l) ->
+  forall l s, ll P l s -> forall A B l1 l2, l = l1 ++ parr A B :: l2 ->
+  exists s', ll P (l1 ++ A :: B :: l2) s' /\ s' <= s.
+Proof with myeeasy.
+intros Hgax l s pi.
+induction pi ; intros A' B' l1' l2' Heq ; subst.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+  destruct l1' ; inversion H3.
+- apply PCperm_vs_elt_inv in H.
+  destruct H as (l3 & l4 & HP' & Heq).
+  apply IHpi in Heq...
+  destruct Heq as (s' & IH & Hs).
+  eexists ; split.
+  + eapply ex_r...
+    destruct (pperm P) ; simpl in HP' ; simpl.
+    * symmetry.
+      etransitivity ; [ apply Permutation_app_comm | ].
+      list_simpl ; rewrite HP' ; perm_solve.
+    * etransitivity ; [ apply cperm | ].
+      list_simpl ; rewrite <- HP' ; cperm_solve.
+  + omega.
+- destruct l1' ; inversion Heq.
+- dichot_elt_app_exec Heq ; subst.
+  + destruct (IHpi2 _ _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite 2 app_comm_cons ; rewrite app_assoc ; apply mix2_r...
+    * omega.
+  + destruct (IHpi1 _ _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply mix2_r...
+    * omega.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split.
+  + list_simpl ; eapply bot_r...
+  + omega.
+- rewrite app_comm_cons in Heq ; dichot_elt_app_exec Heq ; subst.
+  + destruct l1' ; inversion Heq0 ; subst.
+    rewrite app_comm_cons in IHpi2.
+    destruct (IHpi2 _ _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite 2 app_comm_cons ; rewrite app_assoc ; apply tens_r...
+    * omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply tens_r...
+    * omega.
+- destruct l1' ; inversion Heq ; subst.
+  + eexists ; split...
+  + rewrite 2 app_comm_cons in IHpi.
+    destruct (IHpi _ _ _ _ eq_refl) as (s' & IH & Hs).
+    list_simpl in IH.
+    eexists ; split.
+    * list_simpl ; eapply parr_r...
+    * omega.
+- destruct l1' ; inversion Heq ; subst.
+  eexists ; split...
+  list_simpl ; apply top_r...
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r1...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r2...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi1.
+  destruct (IHpi1 _ _ _ _ eq_refl) as (s1' & IH1 & Hs1).
+  list_simpl in IH1.
+  rewrite app_comm_cons in IHpi2.
+  destruct (IHpi2 _ _ _ _ eq_refl) as (s2' & IH2 & Hs2).
+  list_simpl in IH2.
+  eexists ; split.
+  + list_simpl ; eapply with_r...
+  + myeasy.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  symmetry in H1.
+  decomp_map H1.
+  inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply de_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split.
+  + list_simpl ; eapply wk_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  dichot_elt_app_exec H1 ; subst.
+  + exfalso.
+    decomp_map H0.
+    inversion H0.
+  + rewrite 2 app_comm_cons in IHpi.
+    rewrite app_assoc in IHpi.
+    destruct (IHpi _ _ _ _ eq_refl) as (s' & IH & Hs).
+    list_simpl in IH.
+    eexists ; split.
+    * list_simpl ; eapply co_r...
+    * omega.
+- dichot_elt_app_exec Heq ; subst.
+  + rewrite app_comm_cons in IHpi2.
+    destruct (IHpi2 _ _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite 2 app_comm_cons ; rewrite app_assoc ; eapply cut_r...
+    * omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; eapply cut_r...
+    * omega.
+- exfalso.
+  apply Hgax in H.
+  destruct (Forall_app_inv _ _ _ H) as [_ Hat].
+  inversion Hat.
+  inversion H2.
+Qed.
+
+Lemma one_rev_axat {P} : (forall l, pgax P l -> Forall atomic l) ->
+  forall l0 l s0 s, ll P l0 s0 -> ll P l s -> forall l1 l2, l = l1 ++ one :: l2 ->
+  exists s', ll P (l1 ++ l0 ++ l2) s' /\ s' <= s0 + s.
+Proof with myeeasy.
+intros Hgax l0 l s0 s pi0 pi.
+induction pi ; intros l1' l2' Heq ; subst.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+  destruct l1' ; inversion H3.
+- apply PCperm_vs_elt_inv in H.
+  destruct H as (l3 & l4 & HP' & Heq).
+  apply IHpi in Heq...
+  destruct Heq as (s' & IH & Hs).
+  eexists ; split.
+  + eapply ex_r...
+    destruct (pperm P) ; simpl in HP' ; simpl.
+    * symmetry.
+      etransitivity ; [ apply Permutation_app_comm | ].
+      list_simpl ; rewrite HP' ; perm_solve.
+    * etransitivity ; [ apply cperm | ].
+      list_simpl ; rewrite <- HP' ; cperm_solve.
+  + omega.
+- destruct l1' ; inversion Heq.
+- dichot_elt_app_exec Heq ; subst.
+  + destruct (IHpi2 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite 2 app_assoc ; apply mix2_r...
+      list_simpl...
+    * omega.
+  + destruct (IHpi1 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply mix2_r...
+    * omega.
+- destruct l1' ; inversion Heq ; subst.
+  + eexists ; split ; list_simpl...
+  + destruct l1' ; inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split.
+  + list_simpl ; eapply bot_r...
+  + omega.
+- rewrite app_comm_cons in Heq ; dichot_elt_app_exec Heq ; subst.
+  + destruct l1' ; inversion Heq0 ; subst.
+    rewrite app_comm_cons in IHpi2.
+    destruct (IHpi2 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_comm_cons ; rewrite 2 app_assoc ; apply tens_r...
+      list_simpl...
+    * omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply tens_r...
+    * omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite 2 app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply parr_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  eexists ; split.
+  + list_simpl ; apply top_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r1...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r2...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi1.
+  destruct (IHpi1 _ _ eq_refl) as (s1' & IH1 & Hs1).
+  list_simpl in IH1.
+  rewrite app_comm_cons in IHpi2.
+  destruct (IHpi2 _ _ eq_refl) as (s2' & IH2 & Hs2).
+  list_simpl in IH2.
+  eexists ; split.
+  + list_simpl ; eapply with_r...
+  + myeasy.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  symmetry in H1.
+  decomp_map H1.
+  inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply de_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split.
+  + list_simpl ; eapply wk_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  dichot_elt_app_exec H1 ; subst.
+  + exfalso.
+    decomp_map H0.
+    inversion H0.
+  + rewrite 2 app_comm_cons in IHpi.
+    rewrite app_assoc in IHpi.
+    destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+    list_simpl in IH.
+    eexists ; split.
+    * list_simpl ; eapply co_r...
+    * omega.
+- dichot_elt_app_exec Heq ; subst.
+  + rewrite app_comm_cons in IHpi2.
+    destruct (IHpi2 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite 2 app_assoc ; eapply cut_r...
+      list_simpl...
+    * omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; eapply cut_r...
+    * omega.
+- exfalso.
+  apply Hgax in H.
+  destruct (Forall_app_inv _ _ _ H) as [_ Hat].
+  inversion Hat.
+  inversion H2.
+Qed.
+
+Lemma tens_one_rev_axat {P} : (forall l, pgax P l -> Forall atomic l) ->
+  forall l s, ll P l s -> forall A l1 l2, l = l1 ++ tens one A :: l2 ->
+  exists s', ll P (l1 ++ A :: l2) s' /\ s' <= s.
+Proof with myeeasy.
+intros Hgax l s pi.
+induction pi ; intros A' l1' l2' Heq ; subst.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+  destruct l1' ; inversion H3.
+- apply PCperm_vs_elt_inv in H.
+  destruct H as (l3 & l4 & HP' & Heq).
+  apply IHpi in Heq...
+  destruct Heq as (s' & IH & Hs).
+  eexists ; split.
+  + eapply ex_r...
+    destruct (pperm P) ; simpl in HP' ; simpl.
+    * symmetry.
+      etransitivity ; [ apply Permutation_app_comm | ].
+      list_simpl ; rewrite HP' ; perm_solve.
+    * etransitivity ; [ apply cperm | ].
+      list_simpl ; rewrite <- HP' ; cperm_solve.
+  + omega.
+- destruct l1' ; inversion Heq.
+- dichot_elt_app_exec Heq ; subst.
+  + destruct (IHpi2 _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite app_comm_cons ; rewrite app_assoc ; apply mix2_r...
+    * omega.
+  + destruct (IHpi1 _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply mix2_r...
+    * omega.
+- destruct l1' ; inversion Heq ; subst.
+  destruct l1' ; inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split.
+  + list_simpl ; eapply bot_r...
+  + omega.
+- rewrite app_comm_cons in Heq ; dichot_elt_app_exec Heq ; subst.
+  + destruct l1' ; inversion Heq0 ; subst.
+    * eapply (one_rev_axat Hgax _ _ _ _ pi2) in pi1 ;
+        [ | rewrite app_nil_l ; reflexivity ].
+      destruct pi1 as (s & IH & Hs).
+      eexists ; split...
+    * rewrite app_comm_cons in IHpi2.
+      destruct (IHpi2 _ _ _ eq_refl) as (s & IH & Hs).
+      eexists ; split.
+      -- rewrite <- app_comm_cons.
+         rewrite (app_comm_cons l) ; rewrite app_assoc ; apply tens_r...
+      -- omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; apply tens_r...
+    * omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite 2 app_comm_cons in IHpi.
+  destruct (IHpi _ _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply parr_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  eexists ; split.
+  + list_simpl ; apply top_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r1...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply plus_r2...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi1.
+  destruct (IHpi1 _ _ _ eq_refl) as (s1' & IH1 & Hs1).
+  list_simpl in IH1.
+  rewrite app_comm_cons in IHpi2.
+  destruct (IHpi2 _ _ _ eq_refl) as (s2' & IH2 & Hs2).
+  list_simpl in IH2.
+  eexists ; split.
+  + list_simpl ; eapply with_r...
+  + myeasy.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  symmetry in H1.
+  decomp_map H1.
+  inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  rewrite app_comm_cons in IHpi.
+  destruct (IHpi _ _ _ eq_refl) as (s' & IH & Hs).
+  list_simpl in IH.
+  eexists ; split.
+  + list_simpl ; eapply de_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split.
+  + list_simpl ; eapply wk_r...
+  + omega.
+- destruct l1' ; inversion Heq ; subst.
+  dichot_elt_app_exec H1 ; subst.
+  + exfalso.
+    decomp_map H0.
+    inversion H0.
+  + rewrite 2 app_comm_cons in IHpi.
+    rewrite app_assoc in IHpi.
+    destruct (IHpi _ _ _ eq_refl) as (s' & IH & Hs).
+    list_simpl in IH.
+    eexists ; split.
+    * list_simpl ; eapply co_r...
+    * omega.
+- dichot_elt_app_exec Heq ; subst.
+  + rewrite app_comm_cons in IHpi2.
+    destruct (IHpi2 _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite app_comm_cons ; rewrite app_assoc ; eapply cut_r...
+    * omega.
+  + rewrite app_comm_cons in IHpi1.
+    destruct (IHpi1 _ _ _ eq_refl) as (s & IH & Hs).
+    eexists ; split.
+    * rewrite <- app_assoc ; eapply cut_r...
+    * omega.
+- exfalso.
+  apply Hgax in H.
+  destruct (Forall_app_inv _ _ _ H) as [_ Hat].
+  inversion Hat.
+  inversion H2.
+Qed.
+
+Lemma tens_rev_axat {P} : (forall l, pgax P l -> Forall atomic l) ->
+  pcut P = false ->
+  forall A B s, ll P (tens A B :: nil) s ->
+  exists s1 s2, ll P (A :: nil) s1 /\ ll P (B :: nil) s2
+             /\ s1 < s /\ s2 < s.
+Proof with myeeasy.
+intros Hgax Hcut A B s pi.
+remember (tens A B :: nil) as l ; revert A B Heql ;
+  induction pi ; intros A' B' Heq ; subst ;
+  try (now inversion Heq).
+- symmetry in H.
+  apply PCperm_length_1_inv in H ; subst.
+  destruct (IHpi _ _ eq_refl) as (s1 & s2 & IH1 & IH2 & Hs1 & Hs2).
+  eexists ; eexists ; nsplit 4...
+- destruct l2 ; inversion Heq.
+  + destruct l1 ; inversion Heq ; subst.
+    destruct (IHpi1 _ _ eq_refl) as (s1' & s2' & IH1 & IH2 & Hs1 & Hs2).
+    eexists ; eexists ; nsplit 4...
+  + apply app_eq_nil in H1 ; destruct H1 ; subst.
+    destruct (IHpi2 _ _ eq_refl) as (s1' & s2' & IH1 & IH2 & Hs1 & Hs2).
+    eexists ; eexists ; nsplit 4...
+- inversion Heq.
+  apply app_eq_nil in H2 ; destruct H2 ; subst.
+  eexists ; eexists ; nsplit 4...
+- rewrite Hcut in f ; inversion f.
+- exfalso.
+  apply Hgax in H.
+  inversion H.
+  inversion H2.
+Qed.
+
+Lemma plus_rev_axat {P} : (forall l, pgax P l -> Forall atomic l) ->
+  pcut P = false ->
+  forall A B s, ll P (aplus A B :: nil) s ->
+  exists s', (ll P (A :: nil) s' \/ ll P (B :: nil) s') /\ s' < s.
+Proof with myeeasy.
+intros Hgax Hcut A B s pi.
+remember (aplus A B :: nil) as l ; revert A B Heql ;
+  induction pi ; intros A' B' Heq ; subst ;
+  try (now inversion Heq).
+- symmetry in H.
+  apply PCperm_length_1_inv in H ; subst.
+  destruct (IHpi _ _ eq_refl) as (s' & IH & Hs).
+  eexists ; split ...
+- destruct l2 ; inversion Heq.
+  + destruct l1 ; inversion Heq ; subst.
+    destruct (IHpi1 _ _ eq_refl) as (s' & IH & Hs).
+    eexists ; split...
+  + apply app_eq_nil in H1 ; destruct H1 ; subst.
+    destruct (IHpi2 _ _ eq_refl) as (s' & IH & Hs).
+    eexists ; split...
+- inversion Heq ; subst.
+  eexists ; split ; [ left | ]...
+- inversion Heq ; subst.
+  eexists ; split ; [ right | ]...
+- rewrite Hcut in f ; inversion f.
+- exfalso.
+  apply Hgax in H.
+  inversion H.
+  inversion H2.
+Qed.
+
+
+(** ** Properties on axioms *)
+
+(** Axiom expansion *)
 Lemma ax_exp {P} : forall A, exists s, ll P (A :: dual A :: nil) s.
 Proof with myeeasy.
 induction A ;
@@ -310,41 +939,44 @@ induction A ;
   apply oc_r...
 Qed.
 
+Lemma ax_gen : forall P Q l s, Bool.leb (pperm P) (pperm Q) ->
+  Bool.leb (pmix0 P) (pmix0 Q) ->
+  Bool.leb (pmix2 P) (pmix2 Q) ->
+  Bool.leb (pcut P) (pcut Q) ->
+  (forall lax, pgax P lax -> exists sax, ll Q lax sax) ->
+  ll P l s -> exists s', ll Q l s'.
+Proof with myeeasy.
+intros P Q l s Hperm Hmix0 Hmix2 Hcut Hgax pi.
+induction pi ;
+  try (destruct IHpi as [s' pi']) ;
+  try (destruct IHpi1 as [s1' pi1']) ;
+  try (destruct IHpi2 as [s2' pi2']) ;
+  try (eexists ; constructor ; myeeasy ; fail).
+- eexists ; eapply ex_r...
+  destruct (pperm P) ; destruct (pperm Q) ; inversion Hperm ; simpl ; simpl in H...
+  apply cperm_perm...
+- eexists ; constructor.
+  rewrite f in Hmix0 ; destruct (pmix0 Q) ; inversion Hmix0 ; simpl...
+- eexists ; constructor...
+  rewrite f in Hmix2 ; destruct (pmix2 Q) ; inversion Hmix2 ; simpl...
+- eexists ; eapply cut_r...
+  rewrite f in Hcut ; destruct (pcut Q) ; inversion Hcut ; simpl...
+- apply Hgax...
+Qed.
+
 Lemma ax_exp_frag {P} : forall l s P', ll P' l s ->
   le_pfrag P' (axupd_pfrag P (fun x => pgax P x
                                        \/ exists A, x = A :: dual A :: nil))
     -> exists s', ll P l s'.
-Proof with try eassumption ; try reflexivity.
+Proof with  try eassumption ; try reflexivity.
 intros l s P' pi Hlf.
-induction pi ;
-  try (destruct IHpi as [s' IHpi]) ;
-  try (destruct IHpi1 as [s1' IHpi1]) ;
-  try (destruct IHpi2 as [s2' IHpi2]) ;
-  try (eexists ; constructor ; eassumption ; fail).
-- eexists ; eapply ex_r...
-  destruct Hlf as (_ & _ & _ & _ & Hp) ; simpl in Hp.
-  unfold PCperm in H ; unfold PCperm.
-  destruct (pperm P) ; destruct (pperm P') ;
-    try (inversion Hp ; fail)...
-  apply cperm_perm...
-- destruct Hlf as (_ & _ & Hmix0 & _).
-  rewrite f in Hmix0.
-  simpl in Hmix0.
-  eexists ; apply (@mix0_r _ Hmix0).
-- destruct Hlf as (_ & _ & _ & Hmix2 & _).
-  rewrite f in Hmix2.
-  simpl in Hmix2.
-  eexists ; apply (@mix2_r _ Hmix2)...
-- destruct Hlf as (Hcut & _).
-  rewrite f in Hcut.
-  simpl in Hcut.
-  eexists ; eapply (@cut_r _ Hcut)...
-- destruct Hlf as (_ & Hlfax & _).
-  apply Hlfax in H.
-  destruct H.
+eapply (ax_gen (axupd_pfrag P (fun x => pgax P x
+                                        \/ exists A, x = A :: dual A :: nil)))...
+- simpl ; intros lax [ Hgax | [A Hax]].
   + eexists ; apply gax_r...
-  + destruct H as [A HA] ; subst.
+  + subst.
     apply ax_exp.
+- eapply stronger_pfrag...
 Qed.
 
 
@@ -394,12 +1026,12 @@ Lemma key_case_oc_subst_mix2_cperm {P} : forall A l ls l1 l2 l3 s1 s2,
   ll P l1 s1 -> ll P (l2 ++ l3) s2 ->
   (forall ls,
      CPermutation l1 (flat_map (cons (wn (dual A))) ls) ->
-     exists s' : nat, ll P (flat_map (app (map wn l)) ls) s') ->
+     exists s', ll P (flat_map (app (map wn l)) ls) s') ->
   (forall ls,
      CPermutation (l2 ++ l3) (flat_map (cons (wn (dual A))) ls) ->
-       exists s' : nat, ll P (flat_map (app (map wn l)) ls) s') ->
+       exists s', ll P (flat_map (app (map wn l)) ls) s') ->
      l3 ++ l1 ++ l2 = flat_map (cons (wn (dual A))) ls ->
-     exists s' : nat, ll P (flat_map (app (map wn l)) ls) s'.
+     exists s', ll P (flat_map (app (map wn l)) ls) s'.
 Proof with myeeasy ; try PCperm_solve.
 intros A l ls l1 l2 l3 s1 s2 f0 Hpp H1 H2 IHll1 IHll2 HP.
 apply app_app_vs_flat_map in HP.
@@ -562,12 +1194,12 @@ Lemma key_case_oc_subst_cut_cperm {P} : forall A A0 l ls l1 l2 l3 s1 s2,
   ll P (dual A0 :: l1) s1 -> ll P (A0 :: l2 ++ l3) s2 ->
   (forall ls,
      CPermutation (dual A0 :: l1) (flat_map (cons (wn (dual A))) ls) ->
-     exists s' : nat, ll P (flat_map (app (map wn l)) ls) s') ->
+     exists s', ll P (flat_map (app (map wn l)) ls) s') ->
   (forall ls,
      CPermutation (A0 :: l2 ++ l3) (flat_map (cons (wn (dual A))) ls) ->
-       exists s' : nat, ll P (flat_map (app (map wn l)) ls) s') ->
+       exists s', ll P (flat_map (app (map wn l)) ls) s') ->
      l3 ++ l1 ++ l2 = flat_map (cons (wn (dual A))) ls ->
-     exists s' : nat, ll P (flat_map (app (map wn l)) ls) s'.
+     exists s', ll P (flat_map (app (map wn l)) ls) s'.
 Proof with myeeasy ; try PCperm_solve.
 intros A A0 l ls l1 l2 l3 s1 s2 f Hpp H1 H2 IHll1 IHll2 HP.
 apply app_app_vs_flat_map in HP.
@@ -1555,7 +2187,7 @@ induction H ; intros ls HP.
         rewrite Hls1' in HP2.
         rewrite <- Heq in HP2.
         apply cperm_map_inv in HP2.
-        destruct HP2 as [l1' HP2].
+        destruct HP2 as (l1' & HP2 & _).
         apply (flat_map_wn_subst _ l) in HP2.
         destruct HP2 as [l' HP2].
         rewrite HP2 in Hls2'.
@@ -2591,20 +3223,20 @@ Ltac comm_oc1 rule mkl0 mkl1 mkl2 x B lrule l0 l5 Hl1' Hr1' HP1 IHsize Hpp :=
   | comm_oc1_C rule mkl0 mkl1 mkl2 x B lrule l0 l5 Hl1' Hr1' HP1 IHsize Hpp ].
 (* end hide *)
 
-(** A cut on a [wn] formula cut be commuted up with any rule which does not touch this formula.
+(** A cut on a [wn] formula can be commuted up with any rule which does not touch this formula.
 This contains the fact that a proof of [oc C :: _] (here [oc C] is [dual A]) can be deconstructed 
 until one reaches an [oc_r] rule introducing [oc C] with a [wn] context. *)
 Lemma comm_oc_wn : forall c s1 s A l1 l2 l0 lw l lrule B Brule,
   ll P (dual A :: l1) s1 -> fsize A <= c ->
-  (forall (A1 : formula) (l0 l4 l5 : list formula) (s0 s2 : nat),
+  (forall A1 l0 l4 l5 s0 s2,
      ll P (dual A1 :: l0) s0 -> ll P (l4 ++ A1 :: l5) s2 ->
      s0 + s2 < s1 + S s -> fsize A1 <= c ->
-     exists s' : nat, ll P (l4 ++ l0 ++ l5) s') ->
+     exists s', ll P (l4 ++ l0 ++ l5) s') ->
   l2 ++ A :: l0 = map wn lw -> 
   (forall s' lw', ll P (B :: map wn lw' ++ l) s' ->
                   ll P (Brule :: map wn lw' ++ lrule) (S s')) ->
   ll P (B :: map wn lw ++ l) s -> 
-    exists s' : nat, ll P (Brule :: l2 ++ l1 ++ l0 ++ lrule) s'.
+    exists s', ll P (Brule :: l2 ++ l1 ++ l0 ++ lrule) s'.
 Proof with myeasy_perm.
 intros c s1 s A l1 l2 l0 lw l lrule B Brule Hl Hc IHsize H1 Hrule Hl2.
 decomp_map H1 ; subst.
@@ -3104,7 +3736,7 @@ assert (
   forall A l1 l2 l3 s1 s2,
     ll P (dual A :: l1) s1 ->
     ll P (l2 ++ A :: l3) s2 ->
-    fsize A < c -> exists s' : nat, ll P (l2 ++ l1 ++ l3) s'
+    fsize A < c -> exists s', ll P (l2 ++ l1 ++ l3) s'
   ) as IHcut by (intros ; eapply H ; myeeasy).
 clear H.
 induction s using (well_founded_induction lt_wf).
@@ -3112,7 +3744,7 @@ assert (
   forall A l1 l2 l3 s1 s2,
     ll P (dual A :: l1) s1 ->
     ll P (l2 ++ A :: l3) s2 ->
-    s1 + s2 < s -> fsize A <= c -> exists s' : nat, ll P (l2 ++ l1 ++ l3) s'
+    s1 + s2 < s -> fsize A <= c -> exists s', ll P (l2 ++ l1 ++ l3) s'
   ) as IHsize by (intros ; eapply H ; myeeasy).
 clear H.
 intros A l1 l2 l3 s1 s2 Hl Hr Heqs Hc.
@@ -3442,6 +4074,55 @@ intros P_axfree l s H.
 eapply cut_admissible ;
   try (intros ; exfalso ; eapply P_axfree ; myeeasy ; fail) ;
   eassumption.
+Qed.
+
+(** Some additional reversibility statements *)
+Lemma with_rev1_noax {P} : (forall l, pgax P l -> False) ->
+  forall l s, ll P l s -> forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
+  exists s', ll P (l1 ++ A :: l2) s'.
+Proof with myeeasy.
+intros Hgax l s pi A B l1 l2 Heq ; subst.
+assert (Hax := @ax_exp P (dual A)).
+destruct Hax as [sax Hax] ; rewrite bidual in Hax.
+eapply (ex_r _ _ (awith A B :: l2 ++ l1)) in pi ; [ | PCperm_solve ].
+eapply (cut_r_axfree _ _ (A :: nil)) in pi...
+- destruct pi as [s' pi].
+  eexists.
+  eapply ex_r ; [ apply pi | PCperm_solve ].
+- apply plus_r1...
+Unshelve. assumption.
+Qed.
+
+Lemma with_rev2_noax {P} : (forall l, pgax P l -> False) ->
+  forall l s, ll P l s -> forall A B l1 l2, l = l1 ++ awith B A :: l2 ->
+  exists s', ll P (l1 ++ A :: l2) s'.
+Proof with myeeasy.
+intros Hgax l s pi A B l1 l2 Heq ; subst.
+assert (Hax := @ax_exp P (dual A)).
+destruct Hax as [sax Hax] ; rewrite bidual in Hax.
+eapply (ex_r _ _ (awith B A :: l2 ++ l1)) in pi ; [ | PCperm_solve ].
+eapply (cut_r_axfree _ _ (A :: nil)) in pi...
+- destruct pi as [s' pi].
+  eexists.
+  eapply ex_r ; [ apply pi | PCperm_solve ].
+- apply plus_r2...
+Unshelve. assumption.
+Qed.
+
+Lemma oc_rev_noax {P} : (forall l, pgax P l -> False) ->
+  forall l s, ll P l s -> forall A l1 l2, l = l1 ++ oc A :: l2 ->
+  exists s', ll P (l1 ++ A :: l2) s'.
+Proof with myeeasy.
+intros Hgax l s pi A l1 l2 Heq ; subst.
+assert (Hax := @ax_exp P (dual A)).
+destruct Hax as [sax Hax] ; rewrite bidual in Hax.
+eapply (ex_r _ _ (oc A :: l2 ++ l1)) in pi ; [ | PCperm_solve ].
+eapply (cut_r_axfree _ _ (A :: nil)) in pi...
+- destruct pi as [s' pi].
+  eexists.
+  eapply ex_r ; [ apply pi | PCperm_solve ].
+- apply de_r...
+Unshelve. assumption.
 Qed.
 
 
@@ -3869,81 +4550,117 @@ eapply (ext_wn_param P Q) in pi...
   inversion Q_mix2.
 Qed.
 
-Lemma weaker_hyp {P} : forall G : list formula -> Prop,
-  (forall l, pgax P l -> exists s, ll (axupd_pfrag P G) l s) ->
-    forall l s, ll P l s -> exists s', ll (axupd_pfrag P G) l s'.
-Proof with myeeasy.
-intros G Hhyps l s H.
-induction H ;
-  try (eexists ; constructor ; myeeasy ; fail) ;
-  try (destruct IHll as [s' IHll] ; eexists ; constructor ; myeeasy ; fail) ;
-  try (destruct IHll1 as [s'1 IHll1] ;
-       destruct IHll2 as [s'2 IHll2] ; eexists ; constructor ; myeeasy ; fail).
-- destruct IHll as [s' IHll].
-  eexists.
-  apply (ex_r _ l1)...
-- destruct IHll1 as [s'1 IHll1].
-  destruct IHll2 as [s'2 IHll2].
-  eexists.
-  assert (pcut (axupd_pfrag P G) = true) as G_cut by now simpl.
-  eapply (@cut_r _ G_cut)...
-- apply Hhyps...
-Qed.
-
 (** Deduction lemma for linear logic. *)
-Lemma deduction {P} : pperm P = true -> (forall l, ~ pgax P l) -> pcut P = true ->
-  forall A l, 
-      (exists s, ll (axupd_pfrag P (fun x => x = A :: nil)) l s)
+Lemma deduction_list {P} : pperm P = true -> pcut P = true ->
+  forall lax l, 
+      (exists s, ll (axupd_pfrag P (fun x => pgax P x \/ Exists (fun A => x = A :: nil) lax)) l s)
    <->
-      (exists s, ll (cutrm_pfrag P) (l ++ (wn (dual A) :: nil)) s).
+      (exists s, ll P (l ++ map wn (map dual lax)) s).
 Proof with myeeasy.
-intros P_perm P_axfree P_cut A l ; split ; intros [s H].
-- cut (exists s, ll P (l ++ (wn (dual A) :: nil)) s) ;
-    [ intros [s' Hc] ; eapply cut_admissible_axfree ; myeeasy | ].
-  assert (pperm (axupd_pfrag P (fun x => x = A :: nil)) = true)
-    as fp by now simpl.
-  eapply (@ext_wn _ fp _ (dual A :: nil)) in H.
-  destruct H as [s' H].
-  apply (weaker_hyp (fun _ => False)) in H...
-  + destruct H as [s0 H].
-    eexists.
-    apply (stronger_pfrag _ P) in H...
-    nsplit 5 ; try apply leb_refl ; simpl.
-    intros l0 HF ; destruct HF.
-  + simpl.
-    intros l0 Hl0.
-    destruct Hl0 as (l'0 & Hone & Hl0).
-    inversion Hone ; subst.
-    assert (HaxA := @ax_exp (axupd_pfrag P (fun _ => False)) (dual A)).
-    destruct HaxA as [s0 HaxA].
-    eexists.
-    eapply ex_r.
-    * eapply de_r...
-    * rewrite bidual.
-      apply PCperm_swap.
-- assert
-    (exists s, ll (axupd_pfrag P (fun x => x = A :: nil))
-                  ((oc A :: nil) ++ map wn nil) s)
-    as Hoc.
+intros P_perm P_cut lax.
+induction lax ; split ; intros pi.
+- destruct pi as [s pi].
+  eexists.
+  list_simpl.
+  eapply stronger_pfrag...
+  nsplit 5...
+  intros lax Hgax.
+  inversion Hgax...
+  inversion H.
+- destruct pi as [s pi].
+  eexists.
+  list_simpl in pi.
+  eapply stronger_pfrag...
+  nsplit 5...
+  intros lax Hgax.
+  simpl.
+  left...
+- simpl.
+  cons2app.
+  rewrite app_assoc.
+  apply IHlax.
+  destruct pi as [s pi].
+  eapply (@ext_wn _ _ _ (dual a :: nil)) in pi.
+  destruct pi as [s' pi].
+  eapply ax_gen ; [ | | | | | apply pi ]...
+  intros lax0 Hgax0.
+  simpl in Hgax0.
+  destruct Hgax0 as (l' & Heq1 & Heq2) ; subst.
+  destruct Heq1 as [Heq1 | Heq1].
   + eexists.
+    eapply ex_r ; [ | simpl ; rewrite P_perm ; simpl ; apply Permutation_cons_append ].
+    apply wk_r.
+    apply gax_r.
+    left...
+  + inversion Heq1 ; subst.
+    * destruct (@ax_exp (axupd_pfrag P (fun x => pgax P x \/ Exists (fun A => x = A :: nil) lax)) (dual a)) as [sa Ha].
+      rewrite bidual in Ha.
+      eexists.
+      eapply ex_r ; [ apply de_r ; apply Ha | ].
+      PCperm_solve.
+    * eexists.
+      eapply ex_r ; [ | simpl ; rewrite P_perm ; simpl ; apply Permutation_cons_append ].
+      apply wk_r.
+      apply gax_r.
+      right...
+- list_simpl in pi.
+  cons2app in pi.
+  rewrite app_assoc in pi.
+  apply IHlax in pi.
+  destruct pi as [s pi].
+  eexists.
+  rewrite <- (app_nil_r l).
+  eapply (cut_r _ (wn (dual a)))...
+  + simpl ; rewrite bidual.
+    change nil with (map wn nil).
     apply oc_r.
-    apply gax_r...
-  + destruct Hoc as [s1 Hoc].
-    eexists.
-    replace (oc A) with (dual (wn (dual A))) in Hoc
-      by (simpl ; rewrite bidual ; myeasy).
-    apply (stronger_pfrag _ (axupd_pfrag P (fun x => x = A :: nil))) in H.
-    * rewrite <- (app_nil_r l).
-      assert (pcut (axupd_pfrag P (fun x => x = A :: nil)) = true)
-        as f2 by now simpl.
-      eapply (@cut_r _ f2)...
-      eapply ex_r ; [ apply H | PCperm_solve ].
-    * nsplit 5 ; try apply leb_refl...
-      intros l0 Hax.
-      apply P_axfree in Hax...
+    apply gax_r.
+    right.
+    constructor...
+  + eapply ex_r ; [ | simpl ; rewrite P_perm ; symmetry ; apply Permutation_cons_append ].
+    eapply stronger_pfrag...
+    nsplit 5...
+    intros l1 Hgax1.
+    simpl in Hgax1 ; simpl.
+    destruct Hgax1 as [Hgax1 | Hgax1].
+    * left...
+    * right.
+      apply Exists_cons.
+      right...
+Unshelve. all : assumption.
 Qed.
 
-
-
-
+Lemma deduction {P} : pperm P = true -> (forall l, ~ pgax P l) -> pcut P = true ->
+  forall lax l, 
+      (exists s, ll (axupd_pfrag P (fun x => Exists (fun A => x = A :: nil) lax)) l s)
+   <->
+      (exists s, ll (cutrm_pfrag P) (l ++ (map wn (map dual lax))) s).
+Proof with myeeasy.
+intros P_perm P_axfree P_cut lax l ; split ; intros pi.
+- cut (exists s, ll P (l ++ (map wn (map dual lax))) s) ;
+    [ intros [s' Hc] ; eapply cut_admissible_axfree ; myeeasy | ].
+  apply deduction_list...
+  destruct pi as [s pi].
+  eexists.
+  eapply stronger_pfrag...
+  nsplit 5...
+  intros l0 Hgax0.
+  right...
+- assert (exists s, ll P (l ++ (map wn (map dual lax))) s) as pi'.
+  { destruct pi as [s pi].
+    eexists.
+    eapply stronger_pfrag...
+    nsplit 5...
+    intros l0 Hgax0.
+    apply P_axfree in Hgax0 ; destruct Hgax0. }
+  apply deduction_list in pi'...
+  destruct pi' as [s' pi'].
+  eexists.
+  eapply stronger_pfrag...
+  nsplit 5...
+  intros l0 Hgax0.
+  simpl ; simpl in Hgax0.
+  destruct Hgax0 as [Hgax0 | Hgax0]...
+  apply P_axfree in Hgax0 ; destruct Hgax0.
+Qed.
 

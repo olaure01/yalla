@@ -1,5 +1,4 @@
 (* formulas library for yalla *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 
@@ -11,10 +10,12 @@ Require Import Omega.
 
 Require Import Injective.
 
+Require yalla_ax.
+
 (** ** Definition and main properties of formulas *)
 
 (** A set of atoms for building formulas *)
-Parameter Atom : Set.
+Definition Atom := yalla_ax.Atom.
 
 (** Formulas *)
 Inductive formula : Set :=
@@ -85,12 +86,12 @@ match A with
 | covar X   => 1
 | one       => 1
 | bot       => 1
-| tens A B  => S ((fsize A) + (fsize B))
-| parr A B  => S ((fsize A) + (fsize B))
+| tens A B  => S (fsize A + fsize B)
+| parr A B  => S (fsize A + fsize B)
 | zero      => 1
 | top       => 1
-| aplus A B => S ((fsize A) + (fsize B))
-| awith A B => S ((fsize A) + (fsize B))
+| aplus A B => S (fsize A + fsize B)
+| awith A B => S (fsize A + fsize B)
 | oc A      => S (fsize A)
 | wn A      => S (fsize A)
 end.

@@ -1,5 +1,4 @@
 (* fmformulas library for yalla *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 
@@ -14,9 +13,9 @@ Require Export formulas.
 (** ** Encoding of [formula] into [nat]-labelled trees for ordering *)
 
 (** Embedding of [Atom] into [nat] *)
-Parameter a2n : Atom -> nat.
-Parameter n2a : nat -> Atom.
-Axiom a2a : forall X, n2a (a2n X) = X.
+Definition a2n := yalla_ax.a2n.
+Definition n2a := yalla_ax.n2a.
+Definition a2a_n := yalla_ax.a2a_n.
 
 (** Embedding of [formula] into [nattree] *)
 Fixpoint form2nattree A :=
@@ -57,7 +56,7 @@ Proof.
 induction A ; simpl ;
   try rewrite IHA1 ; try rewrite IHA2 ;
   try rewrite IHA ;
-  try rewrite a2a ; try reflexivity.
+  try rewrite a2a_n ; try reflexivity.
 Qed.
 
 

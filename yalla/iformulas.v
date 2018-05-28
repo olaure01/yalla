@@ -1,6 +1,5 @@
 (* iformulas library for yalla *)
-(* Coq 8.6 *)
-(* v 1.0   Olivier Laurent *)
+(* v 1.1   Olivier Laurent *)
 
 
 (** * Intuitionistic Linear Logic formulas *)
@@ -9,16 +8,14 @@ Require Import RelationClasses.
 Require Import List.
 Require Import Omega.
 
-Require Import Bool_more.
+Require yalla_ax.
 
 (** ** Definition and main properties of formulas *)
 
 (** A set of atoms for building formulas *)
-Parameter IAtom : Set.
-(** Boolean parameter deciding whether [izero] is a formula or not *)
-Parameter ifzer : bool.
-(** Boolean parameter deciding whether [itop] is a formula or not *)
-Parameter iftop : bool.
+Definition IAtom := yalla_ax.IAtom.
+Definition atN := yalla_ax.atN.
+
 
 (** Intuitionistic formulas
 
@@ -27,42 +24,30 @@ Inductive iformula : Set :=
 | ivar  : IAtom -> iformula
 | ione  : iformula
 | itens : iformula -> iformula -> iformula
-| ilmap : iformula -> iformula -> iformula
 | ilpam : iformula -> iformula -> iformula
-| itop {ft : iftop = true} : iformula
+| ilmap : iformula -> iformula -> iformula
+| ineg  : iformula -> iformula
+| itop  : iformula
 | iwith : iformula -> iformula -> iformula
-| izero {fz : ifzer = true} : iformula
+| izero : iformula
 | iplus : iformula -> iformula -> iformula
 | ioc   : iformula -> iformula.
 
-(** Technical lemma : indepence of Boolean proof for validity of [itop]. *)
-Lemma uniq_itop : forall ft1 ft2, @itop ft1 = @itop ft2.
-Proof.
-intros.
-assert (ft1 = ft2) by (apply UIP_bool) ; subst.
-reflexivity.
-Qed.
-
-(** Technical lemma : indepence of Boolean proof for validity of [izero]. *)
-Lemma uniq_izero : forall fz1 fz2, @izero fz1 = @izero fz2.
-Proof.
-intros.
-assert (fz1 = fz2) by (apply UIP_bool) ; subst.
-reflexivity.
-Qed.
+Definition N := ivar atN.
 
 (** Size of a [iformula] as its number of symbols *)
 Fixpoint ifsize A :=
 match A with
 | ivar X     => 1
 | ione       => 1
-| itens A B  => S ((ifsize A) + (ifsize B))
-| ilmap A B  => S ((ifsize A) + (ifsize B))
-| ilpam A B  => S ((ifsize A) + (ifsize B))
+| itens A B  => S (ifsize A + ifsize B)
+| ilpam A B  => S (ifsize A + ifsize B)
+| ilmap A B  => S (ifsize A + ifsize B)
+| ineg A     => S (ifsize A)
 | itop       => 1
-| iwith A B  => S ((ifsize A) + (ifsize B))
+| iwith A B  => S (ifsize A + ifsize B)
 | izero      => 1
-| iplus A B  => S ((ifsize A) + (ifsize B))
+| iplus A B  => S (ifsize A + ifsize B)
 | ioc A      => S (ifsize A)
 end.
 
@@ -86,10 +71,13 @@ Inductive isubform : iformula -> iformula -> Prop :=
 | isub_id : forall A, isubform A A
 | isub_tens_l : forall A B C, isubform A B -> isubform A (itens B C)
 | isub_tens_r : forall A B C, isubform A B -> isubform A (itens C B)
-| isub_lmap_l : forall A B C, isubform A B -> isubform A (ilmap B C)
-| isub_lmap_r : forall A B C, isubform A B -> isubform A (ilmap C B)
 | isub_lpam_l : forall A B C, isubform A B -> isubform A (ilpam B C)
 | isub_lpam_r : forall A B C, isubform A B -> isubform A (ilpam C B)
+| isub_lmap_l : forall A B C, isubform A B -> isubform A (ilmap B C)
+| isub_lmap_r : forall A B C, isubform A B -> isubform A (ilmap C B)
+| isub_neg_l  : forall A B, isubform A B -> isubform A (ineg B)
+| isub_neg_r  : forall A B, isubform A B -> isubform A (ineg B)
+| isub_neg_N  : forall A, isubform N (ineg A)
 | isub_plus_l : forall A B C, isubform A B -> isubform A (iplus B C)
 | isub_plus_r : forall A B C, isubform A B -> isubform A (iplus C B)
 | isub_with_l : forall A B C, isubform A B -> isubform A (iwith B C)
@@ -100,6 +88,8 @@ Lemma isub_trans : forall A B C, isubform A B -> isubform B C -> isubform A C.
 Proof with try assumption.
 intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   try (constructor ; apply IHHr)...
+inversion Hl.
+apply isub_neg_N.
 Qed.
 
 Instance isub_po : PreOrder isubform.

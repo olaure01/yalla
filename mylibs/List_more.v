@@ -1,6 +1,5 @@
 (* List_more Library *)
-(* Coq 8.6 *)
-(* v 0.3  2017/07/18   Olivier Laurent *)
+(* v 0.3  2017/09/03   Olivier Laurent *)
 
 
 (* Release Notes
@@ -8,6 +7,7 @@
              and better implementation
      v0.3: change in cons2app and cons2app_hyp
              dealing with existentials
+           add list_sum
 *)
 
 
@@ -15,7 +15,8 @@
 Usefull properties apparently missing in the List library. *)
 
 Require Export List.
-Require Import Lt Le.
+Require Import Lt Le Plus.
+
 
 
 (** ** Simplification in lists *)
@@ -349,6 +350,40 @@ rewrite IHl...
 Qed.
 
 
+(** ** Set inclusion on list *)
+
+Lemma incl_nil {A} : forall l : list A, incl nil l.
+Proof.
+intros l a Hin.
+inversion Hin.
+Qed.
+
+Lemma incl_app_app {A} : forall l1 l2 m1 m2:list A,
+  incl l1 m1 -> incl l2 m2 -> incl (l1 ++ l2) (m1 ++ m2).
+Proof.
+intros l1 l2 m1 m2 Hi1 Hi2.
+apply incl_app.
+- apply incl_appl.
+  assumption.
+- apply incl_appr.
+  assumption.
+Qed.
+
+Lemma incl_cons_inv {A} : forall (a:A) (l m:list A),
+  incl (a :: l) m -> In a m /\ incl l m.
+Proof.
+intros a l m Hi.
+split.
+- apply Hi.
+  constructor.
+  reflexivity.
+- intros b Hin.
+  apply Hi.
+  apply in_cons.
+  assumption.
+Qed.
+
+
 (** ** [Forall] and [Exists] *)
 
 Lemma Forall_app_inv {A} : forall P (l1 : list A) l2,
@@ -547,5 +582,17 @@ induction l1 ; intros.
     apply lt_S_n...
 Qed.
 
+
+(** ** Sum of elements of a list of [nat] : [list_sum] *)
+
+Definition list_sum l := fold_right plus 0 l.
+
+Lemma list_sum_app : forall l1 l2,
+   list_sum (l1 ++ l2) = list_sum l1 + list_sum l2.
+Proof with try reflexivity.
+induction l1 ; intros l2...
+simpl ; rewrite IHl1.
+rewrite plus_assoc...
+Qed.
 
 

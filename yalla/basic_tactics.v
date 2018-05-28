@@ -1,5 +1,4 @@
 (* basic_tactics library for yalla *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 (** * A few basic tactics used in [yalla] *)

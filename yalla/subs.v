@@ -1,20 +1,20 @@
 (* subs library for yalla *)
-(* Coq 8.6 *)
-(* v 1.0   Olivier Laurent *)
+(* v 1.1   Olivier Laurent *)
 
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-Require Import List.
 Require Import Permutation.
+
+Require Import List_more.
 Require Import genperm.
 
 Require Export ll.
 
 
 (** ** Decidable equality on [Atom], through value into [bool] *)
-Parameter ateq : Atom -> Atom -> bool.
-Axiom ateq_eq : forall x y, ateq x y = true <-> x = y.
+Definition ateq := yalla_ax.ateq.
+Definition ateq_eq := yalla_ax.ateq_eq.
 
 
 (** ** Substitutions *)
@@ -43,18 +43,18 @@ Qed.
 (** Substitution in [formula]: substitutes [x] by [C] in [A] *)
 Fixpoint subs C x A :=
 match A with
-| var y      => repl_at y x C
-| covar y    => dual (repl_at y x C)
-| one        => one
-| bot        => bot
-| tens A B   => tens (subs C x A) (subs C x B)
-| parr A B   => parr (subs C x A) (subs C x B)
-| zero       => zero
-| top        => top
-| aplus A B  => aplus (subs C x A) (subs C x B)
-| awith A B  => awith (subs C x A) (subs C x B)
-| oc A       => oc (subs C x A)
-| wn A       => wn (subs C x A)
+| var y     => repl_at y x C
+| covar y   => dual (repl_at y x C)
+| one       => one
+| bot       => bot
+| tens A B  => tens (subs C x A) (subs C x B)
+| parr A B  => parr (subs C x A) (subs C x B)
+| zero      => zero
+| top       => top
+| aplus A B => aplus (subs C x A) (subs C x B)
+| awith A B => awith (subs C x A) (subs C x B)
+| oc A      => oc (subs C x A)
+| wn A      => wn (subs C x A)
 end.
 
 Lemma subs_dual : forall A C x, subs C x (dual A) = dual (subs C x A).
@@ -79,72 +79,32 @@ assert
 { clear.
   induction l...
   simpl ; rewrite IHl... }
-induction pi ; simpl ;
+induction pi ; list_simpl ;
   try (destruct IHpi as [s' IHpi]) ;
   try (destruct IHpi1 as [s1' IHpi1]) ;
-  try (destruct IHpi2 as [s2' IHpi2]).
-- rewrite <- (bidual (repl_at _ _ _)).
-  rewrite bidual.
-  apply ax_exp.
-- eexists.
-  simpl in H.
-  eapply PCperm_map in H.
+  try (destruct IHpi2 as [s2' IHpi2]) ;
+  first [ now rewrite <- (bidual (repl_at _ _ _)) ;
+              rewrite bidual ;
+              apply ax_exp
+        | eexists ] ;
+  try (now (constructor ; myeeasy)).
+- eapply PCperm_map in H.
   eapply ex_r...
-- eexists.
-  assert (pmix0 (axupd_pfrag P
-     (fun l => exists l', pgax P l' /\ l = map (subs A x) l')) = true)
-    as f' by (simpl ; myeasy).
-  apply (@mix0_r _ f')...
-- eexists.
-  rewrite map_app.
-  assert (pmix2 (axupd_pfrag P
-     (fun l => exists l', pgax P l' /\ l = map (subs A x) l')) = true)
-    as f' by (simpl ; myeasy).
-  apply (@mix2_r _ f')...
-- eexists.
-  apply one_r.
-- eexists.
-  apply bot_r...
-- eexists.
-  rewrite map_app.
-  apply tens_r...
-- eexists.
-  apply parr_r...
-- eexists.
-  apply top_r.
-- eexists.
-  apply plus_r1...
-- eexists.
-  apply plus_r2...
-- eexists.
-  apply with_r...
-- eexists.
-  specialize Hmapwn with l.
+- specialize Hmapwn with l.
   rewrite Hmapwn.
-  apply oc_r...
+  apply oc_r.
   rewrite <- Hmapwn...
-- eexists.
-  apply de_r...
-- eexists.
-  apply wk_r...
-- eexists.
-  rewrite map_app.
-  specialize Hmapwn with lw.
-  simpl in IHpi.
-  rewrite map_app in IHpi.
+- specialize Hmapwn with lw.
+  list_simpl in IHpi.
   rewrite Hmapwn.
-  apply co_r...
+  apply co_r.
   rewrite <- Hmapwn...
-- eexists.
-  rewrite map_app.
-  assert (pcut (axupd_pfrag P
-     (fun l => exists l', pgax P l' /\ l = map (subs A x) l')) = true)
-    as f' by (simpl ; myeasy).
-  eapply (@cut_r _ f' (subs A x A0))...
+- eapply (cut_r _ (subs A x A0))...
   rewrite <- subs_dual...
-- eexists.
-  apply gax_r.
+- apply gax_r.
   eexists ; split...
+Unshelve.
+simpl...
 Qed.
 
 Lemma subs_ll_axfree {P} : (forall l, ~ pgax P l) -> forall A x l s,
@@ -224,13 +184,11 @@ induction A ; simpl in Hle ; simpl ;
   try rewrite IHA ;
   try (rewrite IHA2 ; [ rewrite IHA1 | ]) ;
   simpl...
-- simpl in Hle.
-  rewrite repl_at_neq...
+- rewrite repl_at_neq...
   intro Heq.
   apply a2n_is_n2a in Heq ; subst.
   inversion Hle...
-- simpl in Hle.
-  rewrite repl_at_neq...
+- rewrite repl_at_neq...
   intro Heq.
   apply a2n_is_n2a in Heq ; subst.
   inversion Hle...
@@ -240,7 +198,7 @@ Lemma subs_fresh : forall C A, subs C (fresh_of A) A = A.
 Proof.
 intros.
 apply subs_fresh_le.
-myeasy.
+reflexivity.
 Qed.
 
 Definition nat_fresh_of_list l := fold_right (fun x y => nat_fresh_of x + y) 0 l.
@@ -261,7 +219,7 @@ Lemma subs_fresh_list : forall C l, map (subs C (fresh_of_list l)) l = l.
 Proof.
 intros.
 apply subs_fresh_list_le.
-myeasy.
+reflexivity.
 Qed.
 
 End Fresh.

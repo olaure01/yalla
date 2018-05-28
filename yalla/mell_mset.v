@@ -1,5 +1,4 @@
 (* mell_mset example file for yalla library *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 

@@ -1,5 +1,8 @@
 (* fmsetoidlist Library *)
-(* v0   Olivier Laurent *)
+
+
+(* output in Type *)
+
 
 (** * Finite Multiset over Lists
    We define an axiomatization of finite multiset through their relation with lists.
@@ -7,10 +10,9 @@
    An implementation of the axioms is provided for every type 
    by lists up to permutation. *)
 
-Require Import Relations.
-Require Import Morphisms.
+Require Import CMorphisms.
 Require Import List.
-Require Import Permutation.
+Require Import Permutation_Type.
 
 
 (** * Axiomatization *)
@@ -19,17 +21,17 @@ Require Import Permutation.
     related with [list A] as follows: *)
 Class FinMultisetoid M A :=
 {
-  meq : relation M;
+  meq : crelation M;
   mequiv : Equivalence meq;
   empty : M;
   add : A -> M -> M;
   add_meq : Proper (eq ==> meq ==> meq) add;
   elts : M -> list A;
   elts_empty : elts empty = @nil A;
-  elts_add : forall a m, Permutation (elts (add a m)) (a :: elts m);
-  perm_meq : forall l1 l2, Permutation l1 l2 ->
+  elts_add : forall a m, Permutation_Type (elts (add a m)) (a :: elts m);
+  perm_meq : forall l1 l2, Permutation_Type l1 l2 ->
                meq (fold_right add empty l1) (fold_right add empty l2);
-  meq_perm : forall m1 m2, meq m1 m2 -> Permutation (elts m1) (elts m2);
+  meq_perm : forall m1 m2, meq m1 m2 -> Permutation_Type (elts m1) (elts m2);
   retract_meq : forall m, meq (fold_right add empty (elts m)) m
 }.
 
@@ -50,9 +52,9 @@ Global Instance mequivalence : Equivalence meq := mequiv.
 
 Definition list2fm l := fold_right add empty l.
 
-Global Instance list2fm_perm : Proper (@Permutation A ==> meq) list2fm := perm_meq.
+Global Instance list2fm_perm : Proper (@Permutation_Type A ==> meq) list2fm := perm_meq.
 
-Global Instance elts_perm' : Proper (meq ==> @Permutation A) elts := meq_perm.
+Global Instance elts_perm' : Proper (meq ==> @Permutation_Type A) elts := meq_perm.
 
 Lemma list2fm_retract : forall m, meq (list2fm (elts m)) m.
 Proof.
@@ -72,7 +74,7 @@ change (add a (list2fm (l1 ++ l2)))
   with (list2fm (a :: l1 ++ l2)).
 apply perm_meq.
 symmetry.
-apply Permutation_middle.
+apply Permutation_Type_middle.
 Qed.
 
 Lemma list2fm_cons : forall l a, meq (list2fm (a :: l)) (add a (list2fm l)).
@@ -83,14 +85,14 @@ rewrite list2fm_elt.
 reflexivity.
 Qed.
 
-Lemma elts_perm : forall l, Permutation (elts (list2fm l)) l.
+Lemma elts_perm : forall l, Permutation_Type (elts (list2fm l)) l.
 Proof.
 induction l.
 - simpl ; rewrite elts_empty.
   reflexivity.
-- simpl ; rewrite elts_add.
-  rewrite IHl.
-  reflexivity.
+- etransitivity ; [ apply elts_add | ].
+  apply Permutation_Type_cons ; [ reflexivity | ].
+  apply IHl.
 Qed.
 
 Lemma add_swap : forall m a b, meq (add a (add b m)) (add b (add a m)).
@@ -98,7 +100,7 @@ Proof.
 intros m a b.
 rewrite <- list2fm_retract.
 rewrite ? elts_add.
-rewrite perm_swap.
+rewrite Permutation_Type_swap.
 rewrite <- 2 elts_add.
 rewrite list2fm_retract.
 reflexivity.
@@ -107,7 +109,7 @@ Qed.
 Definition sum m1 m2 := list2fm (elts m1 ++ elts m2).
 
 Lemma elts_sum : forall m1 m2,
-  Permutation (elts (sum m1 m2)) (elts m1 ++ elts m2).
+  Permutation_Type (elts (sum m1 m2)) (elts m1 ++ elts m2).
 Proof.
 intros.
 apply elts_perm.
@@ -134,7 +136,7 @@ Lemma sum_comm : forall m1 m2, meq (sum m1 m2) (sum m2 m1).
 Proof.
 intros m1 m2.
 unfold sum.
-rewrite Permutation_app_comm.
+rewrite Permutation_Type_app_comm.
 reflexivity.
 Qed.
 
@@ -144,10 +146,10 @@ intros m1 m2 m3.
 unfold sum.
 apply perm_meq.
 etransitivity.
-- apply Permutation_app_tail.
+- apply Permutation_Type_app_tail.
   apply elts_perm.
 - rewrite <- app_assoc.
-  apply Permutation_app_head.
+  apply Permutation_Type_app_head.
   symmetry.
   apply elts_perm.
 Qed.
@@ -159,10 +161,10 @@ intros l1 l2.
 unfold sum.
 apply perm_meq.
 etransitivity.
-- apply Permutation_app_tail.
+- apply Permutation_Type_app_tail.
   symmetry.
   apply elts_perm.
-- apply Permutation_app_head.
+- apply Permutation_Type_app_head.
   symmetry.
   apply elts_perm.
 Qed.
@@ -174,7 +176,7 @@ unfold sum.
 apply meq_perm in Heq.
 apply meq_perm in Heq'.
 apply perm_meq.
-apply Permutation_app ; assumption.
+apply Permutation_Type_app ; assumption.
 Qed.
 
 End FMSet2List.
@@ -193,7 +195,7 @@ Global Instance fmmap_meq : Proper (meq ==> meq) fmmap.
 Proof.
 intros l1 l2 Heq.
 apply perm_meq.
-apply Permutation_map.
+apply Permutation_Type_map.
 apply meq_perm.
 assumption.
 Qed.
@@ -202,15 +204,16 @@ Lemma list2fm_map : forall l, meq (list2fm (map f l)) (fmmap (list2fm l)).
 Proof.
 intros l.
 apply perm_meq.
-apply Permutation_map.
+apply Permutation_Type_map.
 symmetry.
 apply elts_perm.
 Qed.
 
-Lemma elts_fmmap : forall m, Permutation (elts (fmmap m)) (map f (elts m)).
+Lemma elts_fmmap : forall m, Permutation_Type (elts (fmmap m)) (map f (elts m)).
 Proof.
 intros m.
-rewrite <- (list2fm_retract m) at 1.
+etransitivity ; [ apply meq_perm ; apply fmmap_meq ;
+                  symmetry ; apply (list2fm_retract m) | ].
 remember (elts m) as l.
 clear m Heql.
 induction l.
@@ -222,7 +225,7 @@ induction l.
   reflexivity.
 - etransitivity.
   + apply elts_perm.
-  + apply Permutation_map.
+  + apply Permutation_Type_map.
     apply elts_perm.
 Qed.
 
@@ -244,10 +247,10 @@ Qed.
 Fact FMoidConstr_list : FMoidConstructor _ list id.
 Proof with try reflexivity.
 intros A.
-split with (@Permutation A) (@nil A) (@cons A) id...
-- apply Permutation_Equivalence.
+split with (@Permutation_Type A) (@nil A) (@cons A) id...
+- apply Permutation_Type_Equivalence.
 - intros a1 a2 Heq l1 l2 HP ; subst.
-  apply Permutation_cons...
+  apply Permutation_Type_cons...
   assumption.
 - intros l1 l2 HP.
   rewrite 2 fold_id.

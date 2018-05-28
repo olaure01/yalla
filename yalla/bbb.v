@@ -1,5 +1,4 @@
 (* bbb library for yalla *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 
@@ -521,7 +520,7 @@ constructor...
 constructor...
 constructor...
 Qed.
-      
+
 Theorem cut_elim_bbb : forall c s A l1 l2 l3 s1 s2, 
   ll_bbb (dual A :: l1) s1 -> ll_bbb (l2 ++ A :: l3) s2 ->
     s = s1 + s2 -> fsize A <= c -> exists s',

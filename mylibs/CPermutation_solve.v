@@ -1,5 +1,4 @@
 (* CPermutation_solve library *)
-(* Coq 8.6 *)
 (* v 0.1  2017/07/18   Olivier Laurent *)
 
 

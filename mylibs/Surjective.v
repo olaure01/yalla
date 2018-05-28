@@ -1,5 +1,4 @@
 (* Surjective Library *)
-(* Coq 8.6 *)
 (* v0   Olivier Laurent *)
 
 

@@ -1,5 +1,8 @@
 (* fmsetlist Library *)
-(* v0   Olivier Laurent *)
+
+
+
+(* Permutation in Type *)
 
 
 (** * Finite Multiset over Lists
@@ -12,9 +15,9 @@ Require Import Le.
 Require Import Compare_dec.
 Require Import Wf_nat.
 Require Import List.
-Require Import Permutation.
-Require Import Morphisms.
-Require Import Orders.
+Require Import Permutation_Type.
+Require Import CMorphisms.
+Require Import COrders.
 
 Require Import Bool_more.
 Require Import Injective.
@@ -29,9 +32,9 @@ Class FinMultiset M A := {
   add : A -> M -> M;
   elts : M -> list A;
   elts_empty : elts empty = @nil A;
-  elts_add : forall a m, Permutation (elts (add a m)) (a :: elts m);
+  elts_add : forall a m, Permutation_Type (elts (add a m)) (a :: elts m);
   retract : forall m, fold_right add empty (elts m) = m;
-  perm_eq : forall l1 l2, Permutation l1 l2 ->
+  perm_eq : forall l1 l2, Permutation_Type l1 l2 ->
                   fold_right add empty l1 = fold_right add empty l2
 }.
 
@@ -49,7 +52,7 @@ Context {fm : FinMultiset M A}.
 
 Definition list2fm l := fold_right add empty l.
 
-Global Instance list2fm_perm : Proper (@Permutation A ==> eq) list2fm
+Global Instance list2fm_perm : Proper (@Permutation_Type A ==> eq) list2fm
   := perm_eq.
 
 Lemma list2fm_retract : forall m, list2fm (elts m) = m.
@@ -70,7 +73,7 @@ change (add a (list2fm (l1 ++ l2)))
   with (list2fm (a :: l1 ++ l2)).
 apply perm_eq.
 symmetry.
-apply Permutation_middle.
+apply Permutation_Type_middle.
 Qed.
 
 Lemma list2fm_cons : forall l a, list2fm (a :: l) = add a (list2fm l).
@@ -81,17 +84,18 @@ rewrite list2fm_elt.
 reflexivity.
 Qed.
 
-Lemma elts_perm : forall l, Permutation (elts (list2fm l)) l.
+Lemma elts_perm : forall l, Permutation_Type (elts (list2fm l)) l.
 Proof.
 induction l ; simpl.
 - rewrite elts_empty.
   reflexivity.
-- rewrite elts_add.
-  rewrite IHl.
-  reflexivity.
+- etransitivity.
+  apply elts_add.
+  apply Permutation_Type_cons ; [ reflexivity | ].
+  assumption.
 Qed.
 
-Global Instance elts_perm' : Proper (eq ==> @Permutation A) elts.
+Global Instance elts_perm' : Proper (eq ==> @Permutation_Type A) elts.
 Proof.
 intros m1 m2 Heq ; subst.
 reflexivity.
@@ -102,15 +106,21 @@ Proof.
 intros m a b.
 rewrite <- list2fm_retract.
 rewrite <- list2fm_retract at 1.
-rewrite 4 elts_add.
-rewrite perm_swap.
-reflexivity.
+apply list2fm_perm.
+etransitivity ; [ apply elts_add | ].
+etransitivity ; [ apply Permutation_Type_cons ;
+                    [ reflexivity | apply elts_add ] | ].
+symmetry.
+etransitivity ; [ apply elts_add | ].
+etransitivity ; [ apply Permutation_Type_cons ;
+                    [ reflexivity | apply elts_add ] | ].
+apply Permutation_Type_swap.
 Qed.
 
 Definition sum m1 m2 := list2fm (elts m1 ++ elts m2).
 
 Lemma elts_sum : forall m1 m2,
-  Permutation (elts (sum m1 m2)) (elts m1 ++ elts m2).
+  Permutation_Type (elts (sum m1 m2)) (elts m1 ++ elts m2).
 Proof.
 intros.
 apply elts_perm.
@@ -137,8 +147,8 @@ Lemma sum_comm : forall m1 m2, sum m1 m2 = sum m2 m1.
 Proof.
 intros m1 m2.
 unfold sum.
-rewrite Permutation_app_comm.
-reflexivity.
+apply list2fm_perm.
+apply Permutation_Type_app_comm.
 Qed.
 
 Lemma sum_ass : forall m1 m2 m3, sum (sum m1 m2) m3 = sum m1 (sum m2 m3).
@@ -147,10 +157,10 @@ intros m1 m2 m3.
 unfold sum.
 apply perm_eq.
 etransitivity.
-- apply Permutation_app_tail.
+- apply Permutation_Type_app_tail.
   apply elts_perm.
 - rewrite <- app_assoc.
-  apply Permutation_app_head.
+  apply Permutation_Type_app_head.
   symmetry.
   apply elts_perm.
 Qed.
@@ -162,10 +172,10 @@ intros l1 l2.
 unfold sum.
 apply perm_eq.
 etransitivity.
-- apply Permutation_app_tail.
+- apply Permutation_Type_app_tail.
   symmetry.
   apply elts_perm.
-- apply Permutation_app_head.
+- apply Permutation_Type_app_head.
   symmetry.
   apply elts_perm.
 Qed.
@@ -186,12 +196,12 @@ Lemma list2fm_map : forall l, list2fm (map f l) = fmmap (list2fm l).
 Proof.
 intros l.
 apply perm_eq.
-apply Permutation_map.
+apply Permutation_Type_map.
 symmetry.
 apply elts_perm.
 Qed.
 
-Lemma elts_fmmap : forall m, Permutation (elts (fmmap m)) (map f (elts m)).
+Lemma elts_fmmap : forall m, Permutation_Type (elts (fmmap m)) (map f (elts m)).
 Proof.
 intros m.
 rewrite <- (retract m).
@@ -262,16 +272,18 @@ Module BOrder_to_UsualOrderedTypeFull : UsualOrderedTypeFull.
       * rewrite Heqbb in Hleq2 ; inversion Hleq2.
   Qed.
 
-  Lemma lt_compat : Proper (eq==>eq==>iff) lt.
+  Lemma lt_compat : Proper (eq==>eq==>Basics.arrow) lt.
   Proof.
   intros a b H1 c d H2 ; unfold eq in H1 ; unfold eq in H2 ;
-    subst ; reflexivity.
+    subst.
+  intros H ; assumption.
   Qed.
 
   Definition compare x y :=
     if leqb x y then (if leqb y x then Eq else Lt) else Gt.
 
-  Lemma compare_spec : forall x y, CompSpec eq lt x y (compare x y).
+ Lemma compare_spec : forall x y, CompareSpec (eq x y) (lt x y) (lt y x) (compare x y).
+(*  Lemma compare_spec : forall x y, CompSpec eq lt x y (compare x y). *)
   Proof.
   intros.
   unfold compare.
@@ -288,7 +300,7 @@ Module BOrder_to_UsualOrderedTypeFull : UsualOrderedTypeFull.
     rewrite Ht in H ; inversion H.
   Qed.
 
-  Lemma eq_dec : forall x y, { eq x y } + { ~ eq x y }.
+  Lemma eq_dec : forall x y, (eq x y) + (eq x y -> False).
   Proof.
   intros.
   case_eq (leqb x y) ; case_eq (leqb y x) ; intros Heq1 Heq2.
@@ -304,21 +316,24 @@ Module BOrder_to_UsualOrderedTypeFull : UsualOrderedTypeFull.
 
   Definition le x y := is_true (leqb x y).
 
-  Lemma le_lteq : forall x y, le x y <-> lt x y \/ eq x y.
+  Lemma le_lteq : forall x y, le x y -> lt x y + eq x y.
   Proof.
-  intros ; split.
-  - intros Hle.
-    destruct (eq_dec x y).
-    + right ; assumption.
-    + left ; split ; assumption.
-  - intros [[Hle Heq] | Heq] ; try assumption.
-    rewrite Heq.
-    case_eq (leqb y y) ; intros Heq2.
-    + unfold le.
-      rewrite Heq2 ; reflexivity.
-    + exfalso.
-      assert (Heq3 := total _ _ Heq2).
-      rewrite Heq2 in Heq3 ; inversion Heq3.
+  intros x y Hle.
+  destruct (eq_dec x y).
+  - right ; assumption.
+  - left ; split ; assumption.
+  Qed.
+
+  Lemma lteq_le : forall x y, lt x y + eq x y -> le x y.
+  Proof.
+  intros x y [[Hle Heq] | Heq] ; try assumption.
+  rewrite Heq.
+  case_eq (leqb y y) ; intros Heq2.
+  - unfold le.
+    rewrite Heq2 ; reflexivity.
+  - exfalso.
+    assert (Heq3 := total _ _ Heq2).
+    rewrite Heq2 in Heq3 ; inversion Heq3.
   Qed.
 
 End BOrder_to_UsualOrderedTypeFull.
@@ -331,58 +346,74 @@ Module UsualOrderedTypeFull_to_BOrder (T : UsualOrderedTypeFull).
   | _  => true
   end.
 
-  Lemma leb_le : forall x y, leb x y = true <-> T.le x y.
+  Lemma leb_le : forall x y, leb x y = true -> T.le x y.
   Proof.
-  intros.
   unfold leb.
-  rewrite T.le_lteq.
+  intros.
+  apply T.lteq_le.
   destruct (T.compare_spec x y) as [ Heq | Hlt | Hgt] ;
-    split ; intros ; try reflexivity.
+    try reflexivity.
   - right ; assumption.
   - left ; assumption.
   - discriminate.
-  - destruct (StrictOrder_Irreflexive x).
-    destruct H as [ Hlt | Heq ].
-    + transitivity y ; assumption.
-    + rewrite <- Heq in Hgt ; assumption.
   Qed.
 
-  Lemma nleb_lt : forall x y, leb x y = false <-> T.lt y x.
+  Lemma le_leb : forall x y, T.le x y -> leb x y = true.
   Proof.
-  intros.
+  intros x y H.
   unfold leb.
   destruct (T.compare_spec x y) as [ Heq | Hlt | Hgt] ;
-    split ; intros ; try reflexivity ; try discriminate ; subst.
+    intros ; try reflexivity.
+  destruct (StrictOrder_Irreflexive x).
+  apply T.le_lteq in H.
+  destruct H as [ Hlt | Heq ].
+  - transitivity y ; assumption.
+  - rewrite <- Heq in Hgt ; assumption.
+  Qed.
+
+  Lemma nleb_lt : forall x y, leb x y = false -> T.lt y x.
+  Proof.
+  unfold leb.
+  intros.
+  destruct (T.compare_spec x y) as [ Heq | Hlt | Hgt] ;
+    try reflexivity ; try discriminate ; try assumption.
+  Qed.
+
+  Lemma lt_nleb : forall x y, T.lt y x -> leb x y = false.
+  Proof.
+  intros x y H.
+  unfold leb.
+  destruct (T.compare_spec x y) as [ Heq | Hlt | Hgt] ;
+    intros ; try reflexivity ; subst.
   - apply StrictOrder_Irreflexive in H.
     destruct H.
   - apply (StrictOrder_Transitive _ _ _ H) in Hlt.
     apply StrictOrder_Irreflexive in Hlt.
     destruct Hlt.
-  - assumption.
   Qed.
 
   Lemma to_BOrder : BOrder.
   Proof.
   split with T.t leb.
   - intros a b Hf.
-    rewrite nleb_lt in Hf.
-    rewrite leb_le.
-    apply T.le_lteq.
+    apply nleb_lt in Hf.
+    apply le_leb.
+    apply T.lteq_le.
     left ; assumption.
   - intros a b H1 H2.
-    rewrite leb_le in H1.
-    rewrite leb_le in H2.
+    apply leb_le in H1.
+    apply leb_le in H2.
     apply T.le_lteq in H1.
     apply T.le_lteq in H2.
     destruct H1 ; destruct H2 ;
       try subst ; try reflexivity ; try assumption.
-    apply (StrictOrder_Transitive _ _ _ H0) in H.
-    apply StrictOrder_Irreflexive in H.
-    destruct H.
+    apply (StrictOrder_Transitive _ _ _ l0) in l.
+    apply StrictOrder_Irreflexive in l.
+    destruct l.
   - intros a b c H1 H2.
-    rewrite leb_le ; apply T.le_lteq.
-    rewrite leb_le in H1.
-    rewrite leb_le in H2.
+    apply le_leb ; apply T.lteq_le.
+    apply leb_le in H1.
+    apply leb_le in H2.
     apply T.le_lteq in H1.
     apply T.le_lteq in H2.
     destruct H1 ; destruct H2 ; subst.
@@ -571,7 +602,7 @@ split with (@fmslist_empty A) (@fmslist_add A) (fun m => proj1_sig m) ; intros.
   revert Hsort ; induction l ; intros Hsort ; simpl...
   destruct (leqb a a0)...
   change (a :: a0 :: l) with ((a :: nil) ++ a0 :: l).
-  apply Permutation_cons_app.
+  apply Permutation_Type_cons_app.
   apply is_sorted_tail in Hsort.
   apply (IHl Hsort).
 - destruct m as [l Hsort].
@@ -586,11 +617,11 @@ split with (@fmslist_empty A) (@fmslist_add A) (fun m => proj1_sig m) ; intros.
     rewrite H'.
     simpl.
     destruct (leqb a c) ; [ reflexivity | discriminate Ha ].
-- induction H ; simpl...
-  + rewrite IHPermutation...
+- induction X ; simpl...
+  + rewrite IHX...
   + apply sortedlist_equality.
     apply insert_insert.
-  + rewrite IHPermutation1 ; assumption.
+  + rewrite IHX1 ; assumption.
 Defined.
 
 

@@ -1,5 +1,4 @@
 (* Permutation_solve library *)
-(* Coq 8.6 *)
 (* v 0.1  2017/07/18   Olivier Laurent *)
 
 
@@ -20,7 +19,7 @@ Require Import Permutation_more.
 Ltac pre_simpl_hyp_perm H :=
   try apply Permutation_cons_inv in H ;
   try apply Permutation_app_inv in H ;
-  try apply Permutation_elt_inv in H ;
+  try apply Permutation_app_inv in H ;
   try apply Permutation_app_middle_inv in H ;
   try apply Permutation_cons_app_inv in H ;
   try (rewrite app_assoc in H ;

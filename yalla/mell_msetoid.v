@@ -1,5 +1,4 @@
 (* mell_msetoid example file for yalla library *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 
@@ -165,7 +164,7 @@ Definition pfrag_mell := ll.mk_pfrag false (fun _ => False) false false true.
 
 Lemma mell2mellfrag : forall m,
   mell m -> exists s, ll.ll pfrag_mell (map mell2ll (elts m)) s.
-Proof with try reflexivity ; try eassumption.
+Proof with try eassumption ; try reflexivity.
 intros l pi.
 induction pi ;
   try destruct IHpi as [s' pi'] ;
@@ -187,14 +186,9 @@ induction pi ;
   + apply Permutation_cons...
     rewrite <- map_app.
     apply Permutation_map.
-    unfold sum.
-    rewrite list2fm_app.
-    rewrite sum_comm.
-    unfold sum.
-    unfold list2fm.
-    simpl.
-    rewrite ? fold_id.
-    reflexivity.
+    unfold sum ; unfold list2fm.
+    simpl ; rewrite fold_id.
+    apply Permutation_app_comm.
 - unfold fmmap.
   unfold list2fm.
   unfold add.
@@ -332,7 +326,7 @@ intros A m1 m2 pi1 pi2.
 destruct (mell2mellfrag _ pi1) as [s1 pi1'] ; simpl in pi1'.
 destruct (mell2mellfrag _ pi2) as [s2 pi2'] ; simpl in pi2'.
 rewrite <- mell2ll_dual in pi2'.
-assert (forall l : list formulas.formula, ~ ll.pgax pfrag_mell l)
+assert (forall l, ~ ll.pgax pfrag_mell l)
   as Hax by (intros l Hax ; inversion Hax).
 apply (ll.cut_r_axfree Hax _ _ _ _ _ pi2') in pi1'.
 destruct pi1' as [s pi].

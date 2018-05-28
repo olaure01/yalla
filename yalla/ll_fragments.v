@@ -1,6 +1,5 @@
 (* ll_fragments library for yalla *)
-(* Coq 8.6 *)
-(* v 1.0   Olivier Laurent *)
+(* v 1.1   Olivier Laurent *)
 
 
 (** * Definitions of various Linear Logic fragments *)
@@ -31,6 +30,24 @@ eapply cut_elim ; try (intros ; inversion H ; fail)...
 rewrite bidual...
 Qed.
 
+Lemma cut_ll_admissible :
+  forall l s, ll (cutupd_pfrag pfrag_ll true) l s -> exists s', ll_ll l s'.
+Proof with myeeasy.
+intros l s pi.
+induction pi ;
+  try (eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi as [s' IHpi] ; eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi1 as [s'1 IHpi1] ;
+       destruct IHpi2 as [s'2 IHpi2] ; eexists ; constructor ; myeeasy ; fail).
+- destruct IHpi as [s' IHpi].
+  eexists.
+  apply (ex_r _ l1)...
+- destruct IHpi1 as [s'1 IHpi1].
+  destruct IHpi2 as [s'2 IHpi2].
+  eapply cut_ll_r...
+Qed.
+
+
 
 (** ** Linear logic with mix0: [ll_mix0] (no mix2, no axiom) *)
 
@@ -48,6 +65,23 @@ intros A l1 l2 s1 s2 pi1 pi2.
 rewrite <- (app_nil_l (_ ++ _)).
 eapply cut_elim ; try (intros ; inversion H ; fail)... 
 rewrite bidual...
+Qed.
+
+Lemma cut_mix0_admissible :
+  forall l s, ll (cutupd_pfrag pfrag_mix0 true) l s -> exists s', ll_mix0 l s'.
+Proof with myeeasy.
+intros l s pi.
+induction pi ;
+  try (eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi as [s' IHpi] ; eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi1 as [s'1 IHpi1] ;
+       destruct IHpi2 as [s'2 IHpi2] ; eexists ; constructor ; myeeasy ; fail).
+- destruct IHpi as [s' IHpi].
+  eexists.
+  apply (ex_r _ l1)...
+- destruct IHpi1 as [s'1 IHpi1].
+  destruct IHpi2 as [s'2 IHpi2].
+  eapply cut_mix0_r...
 Qed.
 
 (** Provability in [ll_mix0] is equivalent to adding [wn one] in [ll] *)
@@ -98,13 +132,34 @@ eapply stronger_pfrag in pi.
   + destruct pmix0...
 Qed.
 
+Lemma mix0_wn_one : forall l,
+  (exists s, ll_mix0 l s) <-> (exists s, ll_mix0 (wn one :: l) s).
+Proof with myeeasy.
+intros l ; split ; intros [s pi].
+- eexists.
+  apply wk_r...
+- (* an alternative proof is by introducing a cut with (oc bot) *)
+  assert (pfrag_mix0 = mk_pfrag pfrag_mix0.(pcut) pfrag_mix0.(pgax)
+                                true pfrag_mix0.(pmix2) true)
+    as Heqfrag by reflexivity.
+  unfold ll_mix0 in pi.
+  rewrite Heqfrag in pi.
+  apply mix0_to_ll in pi...
+  clear s ; destruct pi as [s pi].
+  apply co_std_r in pi.
+  apply ll_to_mix0 in pi.
+  clear s ; destruct pi as [s pi].
+  eapply cut_mix0_admissible...
+Qed.
+
+
 (** Provability in [ll_mix0] is equivalent to provability of [ll]
 extended with the provability of [bot :: bot :: nil] *)
 
 Lemma mix0_to_ll_bot {P} : pcut P = true -> pperm P = true -> forall bc b0 bp l s,
   ll (mk_pfrag bc P.(pgax) b0 P.(pmix2) bp) l s -> exists s',
     ll (axupd_pfrag P (fun l => P.(pgax) l \/ l = bot :: bot :: nil)) l s'.
-Proof with myeeasy ; try (unfold PCperm ; rewrite fp ; PCperm_solve).
+Proof with myeeasy ; try (unfold PCperm ; PCperm_solve).
 remember (axupd_pfrag P (fun l => pgax P l \/ l = bot :: bot :: nil)) as P'.
 intros fc fp bc b0 bp l s pi.
 eapply stronger_pfrag in pi.
@@ -188,6 +243,23 @@ eapply cut_elim ; try (intros ; inversion H ; fail)...
 rewrite bidual...
 Qed.
 
+Lemma cut_mix2_admissible :
+  forall l s, ll (cutupd_pfrag pfrag_mix2 true) l s -> exists s', ll_mix2 l s'.
+Proof with myeeasy.
+intros l s pi.
+induction pi ;
+  try (eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi as [s' IHpi] ; eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi1 as [s'1 IHpi1] ;
+       destruct IHpi2 as [s'2 IHpi2] ; eexists ; constructor ; myeeasy ; fail).
+- destruct IHpi as [s' IHpi].
+  eexists.
+  apply (ex_r _ l1)...
+- destruct IHpi1 as [s'1 IHpi1].
+  destruct IHpi2 as [s'2 IHpi2].
+  eapply cut_mix2_r...
+Qed.
+
 (** Provability in [ll_mix2] is equivalent to adding [wn (tens bot bot)] in [ll] *)
 
 Lemma mix2_to_ll {P} : pperm P = true -> forall b2 bp l s,
@@ -251,7 +323,7 @@ extended with the provability of [one :: one :: nil] *)
 Lemma mix2_to_ll_one_one {P} : pcut P = true -> pperm P = true -> forall bc b2 bp l s,
   ll (mk_pfrag bc P.(pgax) P.(pmix0) b2 bp) l s -> exists s',
     ll (axupd_pfrag P (fun l => P.(pgax) l \/ l = one :: one :: nil)) l s'.
-Proof with myeeasy ; try (unfold PCperm ; rewrite fp ; PCperm_solve).
+Proof with myeeasy ; try (unfold PCperm ; PCperm_solve).
 remember (axupd_pfrag P (fun l => pgax P l \/ l = one :: one :: nil)) as P'.
 intros fc fp bc b0 bp l s pi.
 eapply stronger_pfrag in pi.
@@ -337,6 +409,169 @@ eapply cut_elim ; try (intros ; inversion H ; fail)...
 rewrite bidual...
 Qed.
 
+Lemma cut_mix02_admissible :
+  forall l s, ll (cutupd_pfrag pfrag_mix02 true) l s -> exists s', ll_mix02 l s'.
+Proof with myeeasy.
+intros l s pi.
+induction pi ;
+  try (eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi as [s' IHpi] ; eexists ; constructor ; myeeasy ; fail) ;
+  try (destruct IHpi1 as [s'1 IHpi1] ;
+       destruct IHpi2 as [s'2 IHpi2] ; eexists ; constructor ; myeeasy ; fail).
+- destruct IHpi as [s' IHpi].
+  eexists.
+  apply (ex_r _ l1)...
+- destruct IHpi1 as [s'1 IHpi1].
+  destruct IHpi2 as [s'2 IHpi2].
+  eapply cut_mix02_r...
+Qed.
+
+(** Provability in [ll_mix02] is equivalent to adding [wn (tens (wn one) (wn one))] in [ll] *)
+
+Lemma mix02_to_ll {P} : pperm P = true -> forall b1 b2 bp l s,
+  ll (mk_pfrag P.(pcut) P.(pgax) b1 b2 bp) l s -> exists s',
+    ll P (wn (tens (wn one) (wn one)) :: l) s'.
+Proof with myeeasy ; try PCperm_solve.
+intros fp b1 b2 bp l s pi.
+eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
+- clear s ; destruct pi as [s pi].
+  eexists.
+  eapply ex_r...
+- intros Hcut...
+- intros l' Hgax.
+  simpl in Hgax.
+  apply gax_r in Hgax.
+  apply (wk_list_r (tens (wn one) (wn one) :: nil)) in Hgax.
+  destruct Hgax as [s0 pi']. 
+  eexists.
+  eapply ex_r...
+- intros Hpmix0 Hpmix0'.
+  eexists.
+  apply de_r...
+  rewrite <- (app_nil_l nil).
+  apply tens_r ; apply de_r ; apply one_r.
+- intros _ _ l1 l2 s1 s2 pi1 pi2.
+  eexists.
+  apply (ex_r _ (wn (tens (wn one) (wn one)) :: l2 ++ l1))...
+  apply co_std_r.
+  apply co_std_r.
+  apply de_r.
+  eapply ex_r.
+  + apply tens_r ; apply wk_r ; [ apply pi1 | apply pi2 ].
+  + rewrite fp...
+Qed.
+
+Lemma ll_to_mix02 {P} : forall l s,
+  ll P (wn (tens (wn one) (wn one)) :: l) s -> exists s',
+    ll (mk_pfrag true P.(pgax) true true P.(pperm)) l s'.
+Proof with myeasy.
+intros l s pi.
+eapply stronger_pfrag in pi.
+- eexists.
+  rewrite <- (app_nil_r l).
+  eapply cut_r ; [ | | apply pi]...
+  change nil with (map wn nil).
+  apply oc_r.
+  apply parr_r.
+  change (oc bot :: oc bot :: map wn nil) with ((oc bot :: map wn nil)
+                                              ++ oc bot :: map wn nil).
+  eapply mix2_r...
+  + apply oc_r.
+    apply bot_r.
+    apply mix0_r...
+  + apply oc_r.
+    apply bot_r.
+    apply mix0_r...
+- nsplit 5...
+  + destruct pcut...
+  + intros f Hax...
+  + destruct pmix0...
+  + destruct pmix2...
+Qed.
+
+(** Provability in [ll_mix02] is equivalent to provability of [ll]
+extended with the provability of both [bot :: bot :: nil] and [one :: one :: nil] *)
+
+Lemma mix02_to_ll_one_eq_bot {P} : pcut P = true -> pperm P = true -> forall bc b0 b2 bp l s,
+  ll (mk_pfrag bc P.(pgax) b0 b2 bp) l s -> exists s',
+    ll (axupd_pfrag P
+         (fun l => P.(pgax) l \/ l = one :: one :: nil \/ l = bot :: bot :: nil)) l s'.
+Proof with myeeasy ; try (unfold PCperm ; PCperm_solve).
+remember (axupd_pfrag P
+           (fun l => pgax P l \/ l = one :: one :: nil \/ l = bot :: bot :: nil)) as P'.
+intros fc fp bc b0 b2 bp l s pi.
+eapply stronger_pfrag in pi.
+- eapply mix02_to_ll in pi...
+  assert (pcut P' = true) as fc' by (rewrite HeqP' ; simpl ; assumption).
+  clear s ; destruct pi as [s pi].
+  apply (stronger_pfrag _ P') in pi.
+  + assert (exists s', ll P' (oc (parr (oc bot) (oc bot)) :: map wn nil) s') as pi'.
+    { eexists.
+      apply oc_r.
+      apply parr_r.
+      change (oc bot :: oc bot :: map wn nil)
+        with ((oc bot :: nil) ++ oc bot :: map wn nil).
+      eapply (@cut_r _ fc' one).
+      - apply bot_r.
+        apply oc_r.
+        change (bot :: map wn nil) with ((bot :: nil) ++ nil).
+        eapply (@cut_r _ fc' bot).
+        + apply one_r.
+        + apply gax_r.
+          rewrite HeqP'.
+          right ; right...
+      - change (one :: oc bot :: nil)
+          with ((one :: nil) ++ oc bot :: map wn nil).
+        eapply (@cut_r _ fc' one).
+        + apply bot_r.
+          apply oc_r.
+          change (bot :: map wn nil) with ((bot :: nil) ++ nil).
+          eapply (@cut_r _ fc' bot).
+          * apply one_r.
+          * apply gax_r.
+            rewrite HeqP'.
+            right ; right...
+        + apply gax_r.
+          rewrite HeqP'.
+          right ; left... }
+    destruct pi' as [s' pi'].
+    eexists.
+    rewrite <- (app_nil_l l).
+    eapply (@cut_r _ fc' (oc (parr (oc bot) (oc bot)))) ; [ simpl ; apply pi | apply pi' ].
+  + nsplit 5 ; rewrite HeqP'...
+    intros l0 Hpgax ; left...
+- nsplit 5 ; intros ; simpl...
+  rewrite fc.
+  destruct bc...
+Qed.
+
+Lemma ll_one_eq_bot_to_mix02 {P} : forall l s,
+  ll (axupd_pfrag P
+     (fun l => P.(pgax) l \/ l = one :: one :: nil \/ l = bot :: bot :: nil)) l s
+    -> exists s', ll (mk_pfrag P.(pcut) P.(pgax) true true P.(pperm)) l s'.
+Proof with myeeasy.
+intros l s pi.
+remember (mk_pfrag P.(pcut) P.(pgax) true true P.(pperm)) as P'.
+apply (stronger_pfrag _
+  (axupd_pfrag P' (fun l => P.(pgax) l \/ l = one :: one :: nil \/ l = bot :: bot :: nil)))
+  in pi.
+- eapply subs_ll_axioms...
+  clear - HeqP' ; intros l Hgax.
+  destruct Hgax as [Hgax | [Hgax | Hgax]] ; subst ; eexists.
+  + apply gax_r...
+  + change (one :: one :: nil) with ((one :: nil) ++ one :: nil).
+    apply mix2_r...
+    * apply one_r.
+    * apply one_r.
+  + change (bot :: bot :: nil) with ((bot :: nil) ++ bot :: nil).
+    apply bot_r...
+    apply bot_r...
+    apply mix0_r...
+- rewrite HeqP' ; nsplit 5 ; intros ; simpl...
+  + destruct (pmix0 P)...
+  + destruct (pmix2 P)...
+Qed.
+
 
 (* llR *)
 
@@ -412,5 +647,105 @@ intros f (l' & Hax & Heq) ; subst.
 destruct Hax ; [ left | right ] ; subst ;
   simpl ; try rewrite subs_dual...
 Qed.
+
+Lemma llR_to_ll : forall R l s,
+  llR R l s -> exists s', ll_ll (l ++ wn R :: wn (tens (dual R) bot) :: nil) s'.
+Proof with myeasy.
+intros R l s pi.
+destruct (@ax_exp pfrag_ll (dual R)) as [sR HaxR].
+rewrite bidual in HaxR.
+cut (exists s', ll (cutupd_pfrag pfrag_ll true) (l ++ wn R :: wn (tens (dual R) bot) :: nil) s').
+{ intros [s' pi'].
+  apply cut_ll_admissible in pi'... }
+replace (wn R :: wn (tens (dual R) bot) :: nil) with (map wn (map dual (dual R :: parr one R :: nil)))
+  by (simpl ; rewrite bidual ; reflexivity).
+apply deduction_list...
+eapply ax_gen ; [ | | | | | apply pi ]...
+intros lax Hgax.
+simpl in Hgax.
+destruct Hgax ; eexists ; subst ; simpl.
+- apply gax_r.
+  right.
+  constructor...
+- rewrite <- (app_nil_r nil).
+  rewrite_all app_comm_cons.
+  eapply cut_r...
+  + apply gax_r.
+    right.
+    right.
+    constructor.
+    rewrite <- (bidual (parr _ _)).
+    reflexivity.
+  + apply (ex_r _ (tens (dual R) bot :: (one :: nil) ++ R :: nil)) ; [ | PCperm_solve ].
+    apply tens_r.
+    * eapply stronger_pfrag ; [ | apply HaxR ].
+      nsplit 5...
+      intros lax Hgax ; destruct Hgax.
+    * apply bot_r.
+      apply one_r.
+Qed.
+
+Lemma llwnR_to_ll : forall R l s,
+  llR (wn R) l s -> exists s', ll_ll (l ++ wn R :: nil) s'.
+Proof with myeasy.
+intros R l s pi.
+apply llR_to_ll in pi.
+destruct pi as [s' pi].
+eapply (ex_r _ _ (wn (tens (dual (wn R)) bot) :: l ++ wn (wn R) :: nil)) in pi ;
+  [ | PCperm_solve ].
+eapply (cut_ll_r _ nil) in pi.
+- destruct pi as [s'' pi].
+  destruct (@ax_exp pfrag_ll (dual (wn R))) as [sR HaxR].
+  rewrite bidual in HaxR.
+  eapply (cut_ll_r (wn (wn R))).
+  + simpl.
+    change (wn R :: nil) with (map wn (R :: nil)).
+    apply oc_r.
+    apply HaxR.
+  + eapply ex_r ; [ apply pi | PCperm_solve ].
+- simpl ; rewrite bidual.
+  change nil with (map wn nil).
+  apply oc_r.
+  apply parr_r.
+  eapply ex_r ; [ apply wk_r ; apply one_r | PCperm_solve ].
+Qed.
+
+Lemma ll_wn_wn_to_llR : forall R l s,
+  ll_ll (l ++ wn R :: wn (tens (dual R) bot) :: nil) s -> exists s', llR R l s'.
+Proof with myeasy.
+intros R l s pi.
+apply (ll_to_llR R) in pi.
+clear s ; destruct pi as [s pi].
+eexists.
+rewrite <- (app_nil_l l).
+eapply (cut_r _ (oc (dual R))).
+- rewrite <- (app_nil_l (dual _ :: l)).
+  eapply (cut_r _ (oc (parr one R))).
+  + simpl ; rewrite bidual ; eapply ex_r ; [apply pi | PCperm_solve ].
+  + change nil with (map wn nil).
+    apply oc_r.
+    apply parr_r.
+    eapply ex_r ; [ apply gax_r ; right ; reflexivity | PCperm_solve ].
+- change nil with (map wn nil).
+  apply oc_r.
+  apply gax_r.
+  left...
+Unshelve. all : reflexivity.
+Qed.
+
+Lemma ll_wn_to_llwnR : forall R l s,
+  ll_ll (l ++ wn R :: nil) s -> exists s', llR (wn R) l s'.
+Proof with myeasy.
+intros R l s pi.
+eapply ll_wn_wn_to_llR.
+eapply (ex_r _ (wn (tens (dual (wn R)) bot) :: wn (wn R) :: l)) ;
+  [ | PCperm_solve ].
+apply wk_r.
+apply de_r.
+eapply ex_r ; [ apply pi | PCperm_solve ].
+Qed.
+
+
+
 
 

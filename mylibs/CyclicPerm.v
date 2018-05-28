@@ -1,6 +1,10 @@
 (* CyclicPerm library *)
-(* Coq 8.6 *)
-(* v0.1  2017/02/17   Olivier Laurent *)
+(* v 0.2  2017/07/24   Olivier Laurent *)
+
+
+(* Release Notes
+     v0.2: strengthening of cperm_map_inv
+*)
 
 
 (** * Cyclic Permutations
@@ -276,15 +280,25 @@ inversion HC ; subst ; rewrite ? map_app.
 apply cperm.
 Qed.
 
-Lemma cperm_map_inv {A B} : forall (f : A -> B) l1 l2,
-  CPermutation l1 (map f l2) -> exists l3, l1 = map f l3.
-Proof.
-intros f l1 l2 HC.
-inversion HC ; subst.
-decomp_map H1 ; subst.
-exists (l4 ++ l1).
-rewrite map_app.
-reflexivity.
+Lemma cperm_map_inv {A B} : forall(f : A -> B) l1 l2,
+  CPermutation l1 (map f l2) -> exists l3, l1 = map f l3 /\ CPermutation l2 l3.
+Proof with try reflexivity ; try assumption.
+induction l1 ; intros l2 HP.
+- exists nil ; split...
+  destruct l2...
+  apply cperm_nil in HP.
+  inversion HP.
+- symmetry in HP.
+  assert (Heq := HP).
+  apply cperm_vs_cons_inv in Heq.
+  destruct Heq as (l3 & l4 & Heq1 & Heq2).
+  symmetry in Heq2.
+  decomp_map Heq2 ; subst.
+  exists (x :: l6 ++ l0).
+  split.
+  + list_simpl...
+  + rewrite app_comm_cons.
+    apply cperm.
 Qed.
 
 Instance cperm_Forall {A} (P : A -> Prop) :
@@ -303,10 +317,20 @@ eapply Permutation_Exists...
 apply cperm_perm...
 Qed.
 
-Lemma cperm_image {A B} :
-  forall (f : A -> B) a l l',
-    CPermutation (a :: l) (map f l') -> exists a', a = f a'
-.
+Lemma cperm_Forall2 {A B} (P : A -> B -> Prop) :
+  forall l1 l1' l2, CPermutation l1 l1' -> Forall2 P l1 l2 -> exists l2',
+    CPermutation l2 l2' /\ Forall2 P l1' l2'.
+Proof.
+intros l1 l1' l2 HC.
+revert l2 ; induction HC ; intros l2' HF.
+apply Forall2_app_inv_l in HF as (l2a & l2b & HF2a & HF2b & Heq) ; subst.
+exists (l2b ++ l2a) ; split.
+- constructor.
+- apply Forall2_app ; assumption.
+Qed.
+
+Lemma cperm_image {A B} : forall (f : A -> B) a l l',
+  CPermutation (a :: l) (map f l') -> exists a', a = f a'.
 Proof.
 intros f a l l' HP.
 eapply Permutation_image.

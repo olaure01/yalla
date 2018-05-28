@@ -1,5 +1,4 @@
 (* flat_map_lemmas library for yalla *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 

@@ -1,9 +1,10 @@
 (* mell2 example file for yalla library *)
-(* Coq 8.6 *)
 (* v 1.0   Olivier Laurent *)
 
 
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
+
+Require Import Morphisms.
 
 Require Import Injective.
 Require Import List_more.
@@ -117,6 +118,12 @@ Inductive mell : list formula -> Prop :=
               mell (wn A :: wn A :: l) ->
               mell (wn A :: l).
 
+Instance mell_perm : Proper ((@Permutation _) ==> Basics.impl) mell.
+Proof.
+intros l1 l2 HP pi.
+eapply ex_r ; eassumption.
+Qed.
+
 
 (** ** 4. characterize corresponding [ll] fragment *)
 
@@ -144,7 +151,7 @@ Definition pfrag_mell := ll.mk_pfrag false (fun _ => False) false true true.
 
 Lemma mell2mellfrag : forall l, mell l ->
     exists s, ll.ll pfrag_mell (map mell2ll l) s.
-Proof with try reflexivity ; try eassumption.
+Proof with try eassumption ; try reflexivity. 
 intros l pi.
 induction pi ;
   try destruct IHpi as [s' pi'] ;

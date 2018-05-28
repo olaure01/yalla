@@ -1,5 +1,4 @@
 (* natree Library *)
-(* Coq v8.6 *)
 (* v0   Olivier Laurent *)
 
 

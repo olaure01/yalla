@@ -1,6 +1,5 @@
 (* lambek example file for yalla library *)
-(* Coq 8.6 *)
-(* v 1.0   Olivier Laurent *)
+(* v 1.1   Olivier Laurent *)
 
 
 (** * Example of a concrete use of the yalla library: a variant of the Lambek calculus
@@ -21,25 +20,20 @@ Inductive lform  : Set :=
 | lvar  : iformulas.IAtom -> lform
 | ltop  : lform
 | lwith : lform -> lform -> lform
-| lmap  : lform -> lform -> lform.
+| lpam  : lform -> lform -> lform.
 
 
 (** ** 2. define embedding into [iformulas.iformula] *)
 
-(** allow the use of the formula [top] in [ill] but not [zero] *)
-Axiom ft : iformulas.iftop = true.
-Axiom fz : iformulas.ifzer = false.
-
-Definition Itop := @iformulas.itop ft.
-
 Fixpoint l2ill A :=
 match A with
 | lvar x    => iformulas.ivar x
-| ltop      => Itop
+| ltop      => iformulas.itop
 | lwith A B => iformulas.iwith (l2ill A) (l2ill B)
-| lmap A B  => iformulas.ilmap (l2ill A) (l2ill B)
+| lpam A B  => iformulas.ilpam (l2ill A) (l2ill B)
 end.
 
+(*
 Lemma l2ill_inj : injective l2ill.
 Proof with try reflexivity.
 intros A.
@@ -48,6 +42,7 @@ induction A ; intros B Heq ;
   try apply IHA1 in H0 ;
   try apply IHA2 in H1 ; subst...
 Qed.
+*)
 
 
 (** ** 3. define proofs *)
@@ -60,10 +55,10 @@ Inductive lprove : list lform -> lform -> Prop :=
                                   lprove (l1 ++ lwith A B :: l2) C
 | with_llr2 : forall A B C l1 l2, lprove (l1 ++ A :: l2) C ->
                                   lprove (l1 ++ lwith B A :: l2) C
-| lmap_lrr  : forall A B l, lprove (l ++ A :: nil) B -> lprove l (lmap A B)
-| lmap_llr : forall A B C l1 l2 l3,
+| lpam_lrr  : forall A B l, lprove (l ++ A :: nil) B -> lprove l (lpam A B)
+| lpam_llr : forall A B C l1 l2 l3,
                   lprove l2 A -> lprove (l1 ++ B :: l3) C ->
-                  lprove (l1 ++ lmap A B :: l2 ++ l3) C.
+                  lprove (l1 ++ lpam A B :: l2 ++ l3) C.
 
 
 (** ** 4. characterize corresponding [ill] fragment *)
@@ -112,12 +107,12 @@ revert l A Heql0 HeqA0 ; induction pi ;
   apply ax_lr.
 - apply IHpi...
 - destruct A' ; inversion HeqA0 ; subst.
-  apply lmap_lrr.
+  apply lpam_lrr.
   apply IHpi...
   rewrite map_last...
 - decomp_map Heql0 ; subst.
   destruct x ; inversion Heql0 ; subst.
-  apply lmap_llr.
+  apply lpam_llr.
   + apply IHpi1...
   + apply IHpi2...
     list_simpl...
@@ -144,15 +139,15 @@ Qed.
 
 (** ** 6. import properties *)
 
-Parameter i2a : iformulas.IAtom -> formulas.Atom.
-Axiom i2a_inj : injective i2a.
+Definition i2ac := yalla_ax.i2ac.
+Definition i2ac_inj := yalla_ax.i2ac_inj.
 
 (** *** axiom expansion *)
 
 Lemma ax_gen_r : forall A, lprove (A :: nil) A.
 Proof.
 intro A.
-destruct (@ill.ax_exp_ill fz i2a i2a_inj ipfrag_lambek (l2ill A))
+destruct (@ill.ax_exp_ill ipfrag_lambek (l2ill A))
   as [s Hax].
 eapply illfrag2l.
 eassumption.
@@ -166,11 +161,24 @@ Proof with try eassumption.
 intros A l0 l1 l2 C pi1 pi2.
 destruct (l2illfrag _ _ pi1) as [s1 pi1'].
 destruct (l2illfrag _ _ pi2) as [s2 pi2'] ; list_simpl in pi2'.
-eapply (@ill.cut_ir_axfree fz i2a i2a_inj) in pi1'...
+eapply (@ill.cut_ir_nzeropos_axfree_by_ll _ i2ac_inj) in pi1'...
 - destruct pi1' as [s pi].
   rewrite <- ? map_app in pi.
   eapply illfrag2l...
 - intros l B Hax ; inversion Hax.
+- apply Forall_forall.
+  intros x Hin.
+  replace (l2ill C :: map l2ill l1 ++ map l2ill l0 ++ map l2ill l2)
+    with (map l2ill (C :: l1 ++ l0 ++ l2)) in Hin
+    by (list_simpl ; reflexivity).
+  remember (C :: l1 ++ l0 ++ l2) as l.
+  apply In_split in Hin.
+  destruct Hin as (ll & lr & Heq).
+  symmetry in Heq.
+  decomp_map Heq ; subst.
+  clear ; induction x0 ; try (now constructor).
+  constructor...
+  clear ; induction x0_2 ; intros Hz ; try (now inversion Hz).
 Qed.
 
 

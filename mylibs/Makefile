@@ -19,10 +19,13 @@ doc: $(VFILES:.v=.glob)
 
 clean :
 	rm -f $(VFILES:.v=.vo)
+	rm -f .*.aux
+	rm -f *.crashcoqide
 	rm -f *.glob
 	rm -f *.html
 	rm -f coqdoc.css
 	rm -f lia.cache
+	rm -f .lia.cache
 
 .PHONY: clean
 .PRECIOUS: %.vo %.glob
