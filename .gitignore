@@ -6,7 +6,9 @@
 *.cmx
 *.cmxa
 *.cmxs
+*.css
 *.glob
+*.html
 *.ml.d
 *.ml4.d
 *.mli.d
