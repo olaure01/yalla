@@ -818,8 +818,16 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF.
 - inversion HF ; subst.
   inversion H1 ; subst.
   constructor.
+- inversion HF ; subst.
+  inversion H1 ; subst.
+  constructor ; apply IHpi ; constructor...
+- inversion HF ; subst.
+  inversion H1 ; subst.
+  now (constructor ; apply IHpi ; constructor ; assumption).
+- inversion HF ; subst.
+  inversion H1 ; subst.
+  constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
 - 
-
 
 
 (* TODO *)
