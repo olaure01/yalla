@@ -784,8 +784,7 @@ apply (stronger_pfrag _ (mk_pfrag true (fun _ => False) false false true))
 Qed.
 
 
-(** *** Sufficient condition on [R] for embedding [llR] into [ill_ll]
-
+(* ** Sufficient condition on [R] for embedding [llR] into [ill_ll]
 extension of [ll_to_ill_trans] *)
 
 (** Elementary intuitionistic formulas *)
@@ -1144,42 +1143,6 @@ eapply ll_to_ill_trans ; myeeasy ; myeeasy.
     apply one_ilr.
     apply one_ilr.
     apply one_irr.
-Qed.
-
-
-(** ** Study of the case [R = zero] *)
-
-(** Given a sequent, the following 2 statements are equivalent:
- - the translation of the sequent is provable in [ill] for parameter [izero];
- - the sequent is provable in [llR zero].
-*)
-
-Lemma ill_trans_to_llR_zero : forall l s,
-  ill_ll (map (trans izero) l) izero s -> exists s', llR zero l s'.
-Proof.
-apply ill_trans_to_llR.
-Qed.
-
-Lemma llR_zero_to_ill_trans : forall l s,
-  llR zero l s -> exists s', ill_ll (map (trans izero) l) izero s'.
-Proof with myeeasy.
-intros l s pi.
-eapply llR_ie_to_ill_trans...
-constructor.
-Qed.
-
-(** Moreover in these systems, the general weakening rule is admissible. *)
-Lemma aff_to_ill_trans : forall l s,
-  ill_ll (map (trans izero) l) izero s -> forall A, exists s',
-  ill_ll (map (trans izero) (A :: l)) izero s'.
-Proof with myeeasy.
-intros l s Hll A.
-eexists.
-simpl.
-cons2app.
-rewrite <- (app_nil_r (map _ _)).
-eapply cut_ir...
-apply zero_ilr.
 Qed.
 
 

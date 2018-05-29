@@ -22,7 +22,7 @@ Require Import List_more.
 
 Lemma Permutation_morph_transp {A} : forall P : list A -> Prop,
   (forall a b l1 l2, P (l1 ++ a :: b :: l2) -> P (l1 ++ b :: a :: l2)) ->
-    Proper ((@Permutation A) ==> Basics.impl) P.
+    Proper ((@Permutation A) ==> iff) P.
 Proof with try eassumption.
 assert (forall P : list A -> Prop,
          (forall a b l1 l2, P (l1 ++ a :: b :: l2) ->
@@ -40,10 +40,15 @@ assert (forall P : list A -> Prop,
   - apply HP...
   - apply IHPermutation2.
     apply IHPermutation1... }
-intros P HP l1 l2 H H'.
-rewrite <- (app_nil_l l2).
-rewrite <- (app_nil_l l1) in H'.
-eapply Himp...
+intros P HP l1 l2 H.
+split ; intro H'.
+- rewrite <- (app_nil_l l2).
+  rewrite <- (app_nil_l l1) in H'.
+  eapply Himp...
+- symmetry in H.
+  rewrite <- (app_nil_l l1).
+  rewrite <- (app_nil_l l2) in H'.
+  eapply Himp...
 Qed.
 
 Lemma Permutation_elt {A} : forall (a : A) l1 l2 l1' l2',
@@ -243,27 +248,6 @@ induction H ; intro H1...
   apply IHPermutation1...
 Qed.
 
-Lemma Permutation_Forall2 {A B} (P : A -> B -> Prop) :
-  forall l1 l1' l2, Permutation l1 l1' -> Forall2 P l1 l2 -> exists l2',
-    Permutation l2 l2' /\ Forall2 P l1' l2'.
-Proof.
-intros l1 l1' l2 HP.
-revert l2 ; induction HP ; intros l2 HF ; inversion HF ; subst.
-- exists nil ; auto.
-- apply IHHP in H3 as (l2' & HP2 & HF2).
-  exists (y :: l2') ; auto.
-- inversion H3 ; subst.
-  exists (y1 :: y0 :: l'0) ; split ; auto.
-  constructor.
-- apply Permutation_nil in HP1 ; subst.
-  apply Permutation_nil in HP2 ; subst.
-  exists nil ; auto.
-- apply IHHP1 in HF as (l2' & HP2' & HF2').
-  apply IHHP2 in HF2' as (l2'' & HP2'' & HF2'').
-  exists l2'' ; split ; auto.
-  transitivity l2' ; assumption.
-Qed.
-
 Lemma Permutation_map_inv {A B} : forall(f : A -> B) l1 l2,
   Permutation l1 (map f l2) -> exists l3, l1 = map f l3 /\ Permutation l2 l3.
 Proof with try reflexivity ; try assumption.
@@ -362,76 +346,6 @@ intros l1 ; induction l1 ; intros l2 HP.
   simpl.
   rewrite 2 (plus_comm a).
   rewrite plus_assoc...
-Qed.
-
-
-(** ** Permutation definition based on transpositions for induction with fixed length *)
-Inductive Permutation_transp {A} : list A -> list A -> Prop :=
-| perm_t_refl : forall l, Permutation_transp l l
-| perm_t_swap : forall x y l1 l2, Permutation_transp (l1 ++ y :: x :: l2) (l1 ++ x :: y :: l2)
-| perm_t_trans l l' l'' :
-    Permutation_transp l l' -> Permutation_transp l' l'' -> Permutation_transp l l''.
-
-Instance Permutation_transp_sym {A} : Symmetric (@Permutation_transp A).
-Proof.
-intros l1 l2 HC.
-induction HC ; subst ; try (now constructor).
-eapply perm_t_trans ; eassumption.
-Qed.
-
-Instance Permutation_transp_equiv A : Equivalence (@Permutation_transp A).
-Proof.
-split.
-- intros l ; apply perm_t_refl.
-- apply Permutation_transp_sym.
-- intros l1 l2 l3 ; apply perm_t_trans.
-Qed.
-
-Lemma Permutation_transp_cons {A} : forall (x : A) l1 l2,
-  Permutation_transp l1 l2 -> Permutation_transp (x :: l1) (x :: l2).
-Proof.
-intros x l1 l2 HP.
-induction HP ; try reflexivity.
-- rewrite 2 app_comm_cons.
-  apply perm_t_swap.
-- etransitivity ; eassumption.
-Qed.
-
-Lemma perm_perm_t {A} : forall l1 l2 : list A,
-  Permutation l1 l2 <-> Permutation_transp l1 l2.
-Proof with try eassumption.
-intros l1 l2 ; split ; intros HP.
-- induction HP.
-  + constructor.
-  + apply Permutation_transp_cons...
-  + rewrite <- (app_nil_l (y :: _)).
-    rewrite <- (app_nil_l (x :: y :: _)).
-    apply perm_t_swap.
-  + etransitivity...
-- induction HP.
-  + reflexivity.
-  + apply Permutation_app_head.
-    apply perm_swap.
-  + etransitivity...
-Qed.
-
-Lemma Permutation_ind_transp {A} : forall P : list A -> list A -> Prop,
-  (forall l, P l l) ->
-  (forall x y l1 l2, P (l1 ++ y :: x :: l2) (l1 ++ x :: y :: l2)) ->
-  (forall l l' l'',
-     Permutation l l' -> P l l' -> Permutation l' l'' -> P l' l'' -> P l l'') ->
-  forall l1 l2, Permutation l1 l2 -> P l1 l2.
-Proof with try assumption.
-intros P Hr Ht Htr l1 l2 HP ; revert Hr Ht Htr.
-apply perm_perm_t in HP.
-induction HP ; intros Hr Ht Htr.
-- apply Hr.
-- apply Ht.
-- apply (Htr _ l').
-  + apply perm_perm_t...
-  + apply IHHP1...
-  + apply perm_perm_t...
-  + apply IHHP2...
 Qed.
 
 

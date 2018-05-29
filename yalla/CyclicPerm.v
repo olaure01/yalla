@@ -317,20 +317,10 @@ eapply Permutation_Exists...
 apply cperm_perm...
 Qed.
 
-Lemma cperm_Forall2 {A B} (P : A -> B -> Prop) :
-  forall l1 l1' l2, CPermutation l1 l1' -> Forall2 P l1 l2 -> exists l2',
-    CPermutation l2 l2' /\ Forall2 P l1' l2'.
-Proof.
-intros l1 l1' l2 HC.
-revert l2 ; induction HC ; intros l2' HF.
-apply Forall2_app_inv_l in HF as (l2a & l2b & HF2a & HF2b & Heq) ; subst.
-exists (l2b ++ l2a) ; split.
-- constructor.
-- apply Forall2_app ; assumption.
-Qed.
-
-Lemma cperm_image {A B} : forall (f : A -> B) a l l',
-  CPermutation (a :: l) (map f l') -> exists a', a = f a'.
+Lemma cperm_image {A B} :
+  forall (f : A -> B) a l l',
+    CPermutation (a :: l) (map f l') -> exists a', a = f a'
+.
 Proof.
 intros f a l l' HP.
 eapply Permutation_image.

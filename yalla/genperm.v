@@ -225,13 +225,6 @@ destruct b ; intros l1 l2 HP HE.
 - eapply cperm_Exists...
 Qed.
 
-Lemma PCperm_Forall2 {A B} b (P : A -> B -> Prop) :
-  forall l1 l1' l2, PCperm b l1 l1' -> Forall2 P l1 l2 -> exists l2',
-    PCperm b l2 l2' /\ Forall2 P l1' l2'.
-Proof.
-destruct b ; [ apply Permutation_Forall2 | apply cperm_Forall2 ].
-Qed.
-
 Lemma PCperm_image {A B} b : forall (f : A -> B) a l l',
   PCperm b (a :: l) (map f l') -> exists a', a = f a'.
 Proof with try eassumption.
@@ -416,15 +409,6 @@ destruct b ; simpl ; intros l1 l2 HP HF.
 - subst...
 Qed.
 
-Lemma PEperm_Forall2 {A B} b (P : A -> B -> Prop) :
-  forall l1 l1' l2, PEperm b l1 l1' -> Forall2 P l1 l2 -> exists l2',
-    PCperm b l2 l2' /\ Forall2 P l1' l2'.
-Proof.
-destruct b ; [ apply Permutation_Forall2 | ].
-intros l1 l1' l2 HE HF ; simpl in HE ; subst.
-exists l2 ; split ; [ reflexivity | assumption ].
-Qed.
-
 Instance PEperm_map {A B} (f : A -> B) b :
   Proper (PEperm b ==> PEperm b) (map f).
 Proof.
@@ -485,7 +469,7 @@ rewrite HP.
 reflexivity.
 Qed.
 
-Instance PEperm_PCperm_app {A} b :
+Lemma PEperm_PCperm_app {A} b :
   Proper (PEperm b ==> PEperm b ==> PCperm b) (@app A).
 Proof.
 intros l1 l1' HPhd l2 l2' HPtl.
