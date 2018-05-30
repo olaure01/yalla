@@ -533,6 +533,15 @@ induction l ; intros HP ; inversion HP ; subst ;
   apply IHl...
 Qed.
 
+Lemma Exists_impl {A} : forall (P Q : A -> Prop), (forall a, P a -> Q a) ->
+  forall l, Exists P l -> Exists Q l.
+Proof.
+intros P Q Hi.
+induction l ; intros He ; inversion He ; subst.
+- apply Hi in H0 ; now constructor.
+- apply IHl in H0 ; now constructor.
+Qed.
+
 
 (** ** Map for functions with two arguments : [map2] *)
 
