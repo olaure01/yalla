@@ -30,7 +30,7 @@ Section Exists_Forall.
       Exists_Type (x::l) -> P x + Exists_Type l.
     Proof. inversion 1; auto. Qed.
 
-    Lemma Exists_dec l:
+    Lemma Exists_Type_dec l:
       (forall x:A, P x + (P x -> False)) ->
       Exists_Type l + (Exists_Type l -> False).
     Proof.
@@ -56,7 +56,7 @@ Section Exists_Forall.
 
   End One_predicate.
 
-  Lemma Forall_impl : forall (P Q : A -> Type), (forall a, P a -> Q a) ->
+  Lemma Forall_Type_arrow : forall (P Q : A -> Type), (forall a, P a -> Q a) ->
     forall l, Forall_Type P l -> Forall_Type Q l.
   Proof.
     induction l ; intros H ; inversion H ; constructor ; auto.
@@ -130,3 +130,4 @@ Section Forall2.
 End Forall2.
 
 Hint Constructors Forall2.
+
