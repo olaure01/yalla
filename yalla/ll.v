@@ -770,10 +770,30 @@ Inductive munit_smp : formula -> formula -> Type :=
 | musmp_to : forall A B, munit_smp A B -> munit_smp (tens one A) B
 | musmp_pb : forall A B, munit_smp A B -> munit_smp (parr A bot) B.
 
+Lemma munit_smp_id : forall A, munit_smp A A.
+Proof.
+induction A ; constructor ; assumption.
+Qed.
+
+Lemma munit_smp_map_wn : forall l1 l2, Forall2_Type munit_smp (map wn l1) l2 ->
+  { l : _ & l2 = map wn l & Forall2_Type munit_smp l1 l }.
+Proof.
+induction l1 ; intros l2 HF ; inversion HF ; subst.
+- exists nil ; constructor.
+- inversion H1 ; subst.
+  apply IHl1 in H3.
+  destruct H3 as [ l'' Heq HF' ] ; subst.
+  exists (B :: l'') ; constructor ; assumption.
+Qed.
+
 Lemma munit_elim {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
   forall l1, ll P l1 -> forall l2, Forall2_Type munit_smp l1 l2 -> ll P l2.
 Proof with try eassumption.
-intros Hgax l1 pi ; induction pi ; intros l2' HF.
+intros Hgax l1 pi ; induction pi ; intros l2' HF ;
+  try now (inversion HF ; subst ;
+           inversion H1 ; subst ;
+           constructor ; apply IHpi ; try eassumption ;
+           constructor ; eassumption).
 - inversion HF as [ | C D lc ld Hc' HF'] ; subst.
   inversion HF' as [ | C' D' lc' ld' Hc'' HF''] ; subst.
   inversion HF'' ; subst.
@@ -783,7 +803,8 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF.
 - symmetry in p.
   eapply PCperm_Type_Forall2 in p as [la HP] ; [ | eassumption ].
   symmetry in HP.
-  eapply (ex_r _ _ _ _ HP).
+  eapply ex_r ; [ | apply HP ].
+  apply IHpi ; assumption.
 - inversion HF ; subst.
   constructor...
 - apply Forall2_Type_app_inv_l in HF as ([ l' HF2 HF1 ] & Heq) ;
@@ -793,9 +814,6 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF.
   inversion H1 ; inversion H3 ; subst.
   constructor.
 - inversion HF ; subst.
-  inversion H1 ; subst.
-  constructor ; apply IHpi...
-- inversion HF ; subst.
   apply Forall2_Type_app_inv_l in H3 as ([ (l2' & l1') HF2 HF1 ] & Heq) ;
     simpl in Heq ; subst ; simpl in HF1 ; simpl in HF2.
   inversion H1 ; subst.
@@ -804,7 +822,7 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF.
     apply IHpi1 in HF1.
     apply (Forall2_Type_cons B y) in HF2...
     apply IHpi2 in HF2.
-    eapply (one_rev_axat _ _ (one :: l1') HF2) in HF1...
+    eapply (one_rev_axat Hgax _ (one :: l1') HF2) in HF1...
     * rewrite app_nil_l in HF1 ; exact HF1.
     * reflexivity.
 - inversion HF ; subst.
@@ -817,21 +835,37 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF.
     eapply bot_rev_axat ; [ | | reflexivity ]...
 - inversion HF ; subst.
   inversion H1 ; subst.
-  constructor.
+  constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
 - inversion HF ; subst.
   inversion H1 ; subst.
+  assert (HF' := H3).
+  apply munit_smp_map_wn in H3 as [ l'' Heq HF'' ] ; subst.
   constructor ; apply IHpi ; constructor...
 - inversion HF ; subst.
   inversion H1 ; subst.
-  now (constructor ; apply IHpi ; constructor ; assumption).
-- inversion HF ; subst.
-  inversion H1 ; subst.
-  constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
-- 
-
-
-(* TODO *)
-Admitted.
+  apply Forall2_Type_app_inv_l in H3 as ([ l'' HF2 HF1 ] & Heq) ;
+    simpl in Heq ; subst.
+  assert (HF3 := HF2).
+  apply munit_smp_map_wn in HF2 as [ l' Heq HF' ] ; subst.
+  rewrite_all Heq.
+  apply co_r ; apply IHpi ; constructor...
+  apply Forall2_Type_app...
+  constructor...
+- apply Forall2_Type_app_inv_l in HF as ([ l' HF2 HF1 ] & Heq) ;
+    simpl in Heq ; subst.
+  eapply cut_r ; [ assumption | apply IHpi1 | apply IHpi2 ] ;
+    (apply Forall2_Type_cons ; [ apply munit_smp_id | ])...
+- specialize Hgax with a.
+  assert (projT2 (pgax P) a = l2') as Heq ; subst.
+  { remember (projT2 (pgax P) a) as l.
+    revert l2' Hgax HF ; clear.
+    induction l ; intros l2 Hgax HF ; inversion HF ; subst ; f_equal.
+    - inversion Hgax ; subst.
+      destruct a ; inversion H2 ; inversion H1 ; subst ; reflexivity.
+    - inversion Hgax ; subst.
+      apply IHl... }
+  constructor.
+Qed.
 
 
 (** ** Properties on axioms *)
