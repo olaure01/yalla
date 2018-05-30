@@ -16,6 +16,7 @@
 *.mlpack.d
 *.native
 *.o
+*.v.crashcoqide
 *.v.d
 *.vio
 *.vo
