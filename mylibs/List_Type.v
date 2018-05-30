@@ -54,7 +54,77 @@ Section Exists_Forall.
       intros ? ? H ; inversion H ; trivial.
     Qed.
 
+    Lemma Forall_Type_dec :
+      (forall x:A, P x + (P x -> False)) ->
+      forall l:list A, Forall_Type l + (Forall_Type l -> False).
+    Proof.
+      intro Pdec. induction l as [|a l' Hrec].
+      - left. apply Forall_Type_nil.
+      - destruct Hrec as [Hl'|Hl'].
+        + destruct (Pdec a) as [Ha|Ha].
+          * left. now apply Forall_Type_cons.
+          * right. abstract now inversion 1.
+        + right. abstract now inversion 1.
+    Defined.
+
   End One_predicate.
+
+  Lemma Forall_Exists_neg_Type (P:A->Type)(l:list A) :
+   Forall_Type (fun x => P x -> False) l -> Exists_Type P l -> False.
+  Proof.
+   induction l ; intros HF HE ; inversion HE ; inversion HF ; subst ; auto.
+  Qed.
+
+  Lemma Exists_neg_Forall_Type (P:A->Type)(l:list A) :
+   (Exists_Type P l -> False) -> Forall_Type (fun x => P x -> False) l.
+  Proof.
+   induction l ; intros HE ; constructor.
+   - intros Ha ; apply HE.
+     now constructor.
+   - apply IHl ; intros HF ; apply HE.
+     now constructor.
+  Qed.
+
+  Lemma Exists_Forall_neg_Type (P:A->Type)(l:list A) :
+    Exists_Type (fun x => P x -> False) l -> Forall_Type P l -> False.
+  Proof.
+   induction l ; intros HE HF ; inversion HE ; inversion HF ; subst ; auto.
+  Qed.
+
+  Lemma Forall_neg_Exists_Type (P:A->Type)(l:list A) :
+    (forall x, P x + (P x -> False)) ->
+    (Forall_Type P l -> False) -> Exists_Type (fun x => P x -> False) l.
+  Proof.
+   intro Dec.
+   induction l ; intros HF.
+   - contradiction HF. constructor.
+   - destruct (Dec a) as [ Ha | Hna ].
+     + apply Exists_Type_cons_tl.
+       apply IHl.
+       intros HFl.
+       apply HF ; now constructor.
+     + now apply Exists_Type_cons_hd.
+  Qed.
+
+  Lemma neg_Forall_Exists_neg_Type (P:A->Type) (l:list A) :
+    (forall x:A, P x + (P x -> False)) ->
+    (Forall_Type P l -> False) ->
+    Exists_Type (fun x => (P x -> False)) l.
+  Proof.
+    intro Dec.
+    apply Forall_neg_Exists_Type; intros.
+    destruct (Dec x); auto.
+  Qed.
+
+  Lemma Forall_Exists_Type_dec (P:A->Type) :
+    (forall x:A, P x + (P x -> False)) ->
+    forall l:list A,
+    Forall_Type P l + Exists_Type (fun x => P x -> False) l.
+  Proof.
+    intros Pdec l.
+    destruct (Forall_Type_dec P Pdec l); [left|right]; trivial.
+    now apply neg_Forall_Exists_neg_Type.
+  Defined.
 
   Lemma Forall_Type_arrow : forall (P Q : A -> Type), (forall a, P a -> Q a) ->
     forall l, Forall_Type P l -> Forall_Type Q l.
