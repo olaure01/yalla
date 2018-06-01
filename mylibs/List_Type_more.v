@@ -4,6 +4,7 @@
 Usefull properties apparently missing in the List library with Type-compatible outputs. *)
 
 Require Export List.
+Require Export List_Type.
 
 (** ** Decomposition of [app] *)
 
@@ -155,3 +156,26 @@ Ltac decomp_map_Type H :=
   end.
 
 
+(** ** [Forall] and [Exists] *)
+
+Lemma Forall_Type_app_inv {A} : forall P (l1 : list A) l2,
+  Forall_Type P (l1 ++ l2) -> Forall_Type P l1 * Forall_Type P l2.
+Proof with try assumption.
+induction l1 ; intros.
+- split...
+  constructor.
+- inversion X ; subst.
+  apply IHl1 in X1.
+  destruct X1.
+  split...
+  constructor...
+Qed.
+
+Lemma Forall_app {A} : forall P (l1 : list A) l2,
+  Forall P l1 -> Forall P l2 -> Forall P (l1 ++ l2).
+Proof with try assumption.
+induction l1 ; intros...
+inversion H ; subst.
+apply IHl1 in H0...
+constructor...
+Qed.
