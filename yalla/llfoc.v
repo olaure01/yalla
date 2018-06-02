@@ -834,108 +834,87 @@ eapply with_rev_f in Heq.
 apply Heq.
 Qed.
 
-Lemma llfoc_to_ll : forall l Pi s, llfoc l Pi s ->
-   (Pi = None -> exists s', ll_ll l s')
-/\ (forall C, Pi = Some C -> exists s', ll_ll (C :: l) s').
-Proof with (try PCperm_solve) ; myeeasy.
-intros l Pi s pi ; induction pi ;
+Lemma llfoc_to_ll : forall l Pi, llfoc l Pi ->
+   (Pi = None -> ll_ll l)
+ * (forall C, Pi = Some C -> ll_ll (C :: l)).
+Proof with (try PCperm_Type_solve) ; myeeasy.
+intros l Pi pi ; induction pi ;
   (split ; [ intros HN ; inversion HN ; subst
            | intros D HD ; inversion HD ; subst ]) ;
   try (destruct IHpi as [IHpiN IHpiS]) ;
   try (destruct IHpi1 as [IHpi1N IHpi1S]) ;
   try (destruct IHpi2 as [IHpi2N IHpi2S]) ;
-  try (destruct (IHpiS _ (eq_refl _)) as [s0' pi0']) ;
-  try (destruct (IHpi1S _ (eq_refl _)) as [s1' pi1']) ;
-  try (destruct (IHpi2S _ (eq_refl _)) as [s2' pi2']) ;
-  try (destruct (IHpiN (eq_refl _)) as [s0' pi0']) ;
-  try (destruct (IHpi1N (eq_refl _)) as [s1' pi1']) ;
-  try (destruct (IHpi2N (eq_refl _)) as [s2' pi2']) ;
-  try (now (eexists ; constructor ; myeeasy)) ;
-  try (now (eexists ; eapply ex_r ;
-             [ | apply perm_swap ] ; constructor ; myeeasy))...
-- eexists ; eapply ex_r.
-  + eassumption.
-  + idtac...
-- eexists ; eapply ex_r.
-  + eassumption.
-  + idtac...
-- eexists...
+  try (assert (pi0' := IHpiS _ eq_refl)) ;
+  try (assert (pi1' := IHpi1S _ eq_refl)) ;
+  try (assert (pi2' := IHpi2S _ eq_refl)) ;
+  try (assert (pi0' := IHpiN eq_refl)) ;
+  try (assert (pi1' := IHpi1N eq_refl)) ;
+  try (assert (pi2' := IHpi2N eq_refl)) ;
+  try (now (constructor ; myeeasy)) ;
+  try (now (eapply ex_r ;
+             [ | apply Permutation_Type_swap ] ; constructor ; myeeasy))...
+- eapply ex_r ; [ eassumption | ]...
+- eapply ex_r ; [ eassumption | ]...
 - destruct (polarity A) as [HsA | HaA].
   + rewrite_all (polconts A l1 HsA).
     rewrite_all (polfocs A HsA).
-    destruct (IHpi1S _ (eq_refl _)) as [s1' pi1'].
+    assert (pi1' := IHpi1S _ eq_refl).
     destruct (polarity B) as [HsB | HaB].
     * rewrite_all (polconts B l2 HsB).
       rewrite_all (polfocs B HsB).
-      destruct (IHpi2S _ (eq_refl _)) as [s2' pi2'].
-      eexists ; eapply ex_r ; [ apply tens_r | ].
-      -- eapply pi1'.
-      -- eapply pi2'.
-      -- idtac...
+      assert (pi2' := IHpi2S _ eq_refl).
+      eapply ex_r ; [ apply tens_r ; [ eapply pi1' | eapply pi2' ] | ]...
     * rewrite_all (polconta B l2 HaB).
       rewrite_all (polfoca B HaB).
-      destruct (IHpi2N (eq_refl _)) as [s2' pi2'].
-      eexists ; eapply ex_r ; [ apply tens_r | ].
-      -- eapply pi1'.
-      -- eapply pi2'.
-      -- idtac...
+      assert (pi2' := IHpi2N eq_refl).
+      eapply ex_r ; [ apply tens_r ; [ eapply pi1' | eapply pi2' ] | ]...
   + rewrite_all (polconta A l1 HaA).
     rewrite_all (polfoca A HaA).
-    destruct (IHpi1N (eq_refl _)) as [s1' pi1'].
+    assert (pi1' := IHpi1N eq_refl).
     destruct (polarity B) as [HsB | HaB].
     * rewrite_all (polconts B l2 HsB).
       rewrite_all (polfocs B HsB).
-      destruct (IHpi2S _ (eq_refl _)) as [s2' pi2'].
-      eexists ; eapply ex_r ; [ apply tens_r | ].
-      -- eapply pi1'.
-      -- eapply pi2'.
-      -- idtac...
+      assert (pi2' := IHpi2S _ eq_refl).
+      eapply ex_r ; [ apply tens_r ; [ eapply pi1' | eapply pi2' ] | ]...
     * rewrite_all (polconta B l2 HaB).
       rewrite_all (polfoca B HaB).
-      destruct (IHpi2N (eq_refl _)) as [s2' pi2'].
-      eexists ; eapply ex_r ; [ apply tens_r | ].
-      -- eapply pi1'.
-      -- eapply pi2'.
-      -- idtac...
-- eexists ; eapply ex_r ; [ apply parr_r | apply perm_swap ].
-  eapply ex_r.
-  + eassumption.
-  + idtac...
+      assert (pi2' := IHpi2N eq_refl).
+      eapply ex_r ; [ apply tens_r ; [ eapply pi1' | eapply pi2' ] | ]...
+- eapply ex_r ; [ apply parr_r | apply Permutation_Type_swap ].
+  eapply ex_r ; [ eassumption | ]...
 - destruct (polarity A) as [Hs | Ha].
   + rewrite_all (polconts A l Hs).
     rewrite_all (polfocs A Hs).
-    destruct (IHpiS _ (eq_refl _)) as [s0' pi0'].
-    eexists ; apply plus_r1...
+    apply plus_r1.
+    apply IHpiS...
   + rewrite_all (polconta A l Ha).
     rewrite_all (polfoca A Ha).
-    destruct (IHpiN (eq_refl _)) as [s0' pi0'].
-    eexists ; apply plus_r1...
+    apply plus_r1.
+    apply IHpiN...
 - destruct (polarity A) as [Hs | Ha].
   + rewrite_all (polconts A l Hs).
     rewrite_all (polfocs A Hs).
-    destruct (IHpiS _ (eq_refl _)) as [s0' pi0'].
-    eexists ; apply plus_r2...
+    apply plus_r2.
+    apply IHpiS...
   + rewrite_all (polconta A l Ha).
     rewrite_all (polfoca A Ha).
-    destruct (IHpiN (eq_refl _)) as [s0' pi0'].
-    eexists ; apply plus_r2...
-- eexists ; eapply ex_r ; [ apply with_r | apply perm_swap ].
-  + eapply ex_r ; [ apply pi1' | apply perm_swap ].
-  + eapply ex_r ; [ apply pi2' | apply perm_swap ].
+    apply plus_r2.
+    apply IHpiN...
+- eapply ex_r ; [ apply with_r | apply Permutation_Type_swap ].
+  + eapply ex_r ; [ apply pi1' | apply Permutation_Type_swap ].
+  + eapply ex_r ; [ apply pi2' | apply Permutation_Type_swap ].
 - destruct (polarity A) as [Hs | Ha].
   + rewrite_all (polconts A l Hs).
     rewrite_all (polfocs A Hs).
-    destruct (IHpiS _ (eq_refl _)) as [s0' pi0'].
-    eexists ; apply de_r...
+    apply de_r.
+    apply IHpiS...
   + rewrite_all (polconta A l Ha).
     rewrite_all (polfoca A Ha).
-    destruct (IHpiN (eq_refl _)) as [s0' pi0'].
-    eexists ; apply de_r...
-- eexists ; apply co_std_r...
-- eexists ; eapply ex_r ; [ apply co_std_r | apply perm_swap ].
-  eapply ex_r.
-  + eassumption.
-  + idtac...
+    apply de_r.
+    apply IHpiN...
+- apply co_std_r...
+- eapply ex_r ; [ apply co_std_r | apply Permutation_Type_swap ].
+  eapply ex_r ; [ eassumption | ]...
 Qed.
 
 
