@@ -185,24 +185,18 @@ Ltac dichot_elt_app_exec H :=
 
 Lemma in_elt {A} : forall (a:A) l1 l2, In a (l1 ++ a :: l2).
 Proof.
-induction l1.
-- apply in_eq.
-- intros.
-  apply in_cons.
-  apply IHl1.
+intros.
+apply in_or_app.
+right. intuition.
 Qed.
 
 Lemma in_elt_inv {A} : forall (a b : A) l1 l2,
   In a (l1 ++ b :: l2) -> a = b \/ In a (l1 ++ l2).
 Proof with try reflexivity ; try assumption.
-induction l1 ; intros l2 Hin ; inversion Hin ; subst.
-- left...
-- right...
-- right.
-  apply in_eq.
-- apply IHl1 in H.
-  destruct H ; [ left | right ]...
-  apply in_cons...
+intros.
+apply in_app_or in H.
+destruct H ; intuition.
+destruct H ; intuition.
 Qed.
 
 (** ** [last] *)
