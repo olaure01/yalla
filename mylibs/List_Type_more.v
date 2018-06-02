@@ -171,7 +171,7 @@ induction l1 ; intros.
   constructor...
 Qed.
 
-Lemma Forall_app {A} : forall P (l1 : list A) l2,
+Lemma Forall_Type_app {A} : forall P (l1 : list A) l2,
   Forall P l1 -> Forall P l2 -> Forall P (l1 ++ l2).
 Proof with try assumption.
 induction l1 ; intros...
@@ -179,3 +179,4 @@ inversion H ; subst.
 apply IHl1 in H0...
 constructor...
 Qed.
+
