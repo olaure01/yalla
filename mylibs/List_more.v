@@ -192,7 +192,7 @@ Qed.
 
 Lemma in_elt_inv {A} : forall (a b : A) l1 l2,
   In a (l1 ++ b :: l2) -> a = b \/ In a (l1 ++ l2).
-Proof with try reflexivity ; try assumption.
+Proof.
 intros.
 apply in_app_or in H.
 destruct H ; intuition.
