@@ -7,6 +7,180 @@ Require Export List.
 
 Set Implicit Arguments.
 
+
+Section In.
+
+Variable A:Type.
+
+Fixpoint In_Type (a:A) (l:list A) : Type :=
+    match l with
+      | nil => False
+      | b :: m => sum (b = a) (In_Type a m)
+    end.
+
+  (** Characterization of [In] *)
+
+  Theorem in_Type_eq : forall (a:A) (l:list A), In_Type a (a :: l).
+  Proof.
+    simpl; auto.
+  Qed.
+
+  Theorem in_Type_cons : forall (a b:A) (l:list A), In_Type b l -> In_Type b (a :: l).
+  Proof.
+    simpl; auto.
+  Qed.
+
+  Theorem not_in_Type_cons (x a : A) (l : list A):
+    (In_Type x (a::l) -> False) -> (x<>a) * (In_Type x l -> False).
+  Proof.
+    simpl. intuition.
+  Qed.
+
+  Theorem cons_not_in_Type (x a : A) (l : list A):
+    x<>a -> (In_Type x l -> False) -> In_Type x (a::l) -> False.
+  Proof.
+    simpl. intuition.
+  Qed.
+
+  Theorem in_Type_nil : forall a:A, In_Type a nil -> False.
+  Proof.
+    unfold not; intros a H; inversion_clear H.
+  Qed.
+
+  Theorem in_Type_split : forall x (l:list A), In_Type x l ->
+    { l' | l = (fst l')++(x::snd l') }.
+  Proof.
+  induction l; simpl; destruct 1.
+  subst a; auto.
+  exists (nil, l) ; auto.
+  destruct (IHl i) as ((l1,l2),H0).
+  exists (a::l1, l2); simpl. apply f_equal. auto.
+  Qed.
+
+  (** Inversion *)
+  Lemma in_Type_inv : forall (a b:A) (l:list A), In_Type b (a :: l) ->
+    sum (a = b) (In_Type b l).
+  Proof.
+    intros a b l H; inversion_clear H; auto.
+  Qed.
+
+  (** Decidability of [In] *)
+  Theorem in_Type_dec :
+    (forall x y:A, {x = y} + {x <> y}) ->
+    forall (a:A) (l:list A), (In_Type a l) + (In_Type a l -> False).
+  Proof.
+    intro H; induction l as [| a0 l IHl].
+    right; apply in_Type_nil.
+    destruct (H a0 a); simpl; auto.
+    destruct IHl; simpl; auto.
+    right; unfold not; intros [Hc1| Hc2]; auto.
+  Defined.
+
+  (** Compatibility with other operations *)
+  Lemma in_Type_app_or : forall (l m:list A) (a:A), In_Type a (l ++ m) ->
+    In_Type a l + In_Type a m.
+  Proof.
+    intros l m a.
+    elim l; simpl; auto.
+    intros a0 y H H0.
+    now_show (sum (sum (a0 = a) (In_Type a y)) (In_Type a m)).
+    elim H0; auto.
+    intro H1.
+    now_show (sum (sum (a0 = a) (In_Type a y)) (In_Type a m)).
+    elim (H H1); auto.
+  Qed.
+
+  Lemma in_Type_or_app : forall (l m:list A) (a:A),
+    sum (In_Type a l) (In_Type a m) -> In_Type a (l ++ m).
+  Proof.
+    intros l m a.
+    elim l; simpl; intro H.
+    now_show (In_Type a m).
+    elim H; auto; intro H0.
+    now_show (In_Type a m).
+    elim H0. (* subProof completed *)
+    intros y H0 H1.
+    destruct H1 ; intuition.
+  Qed.
+
+End In.
+
+Hint Resolve in_Type_eq in_Type_cons in_Type_inv in_Type_nil in_Type_app_or
+  in_Type_or_app: datatypes.
+
+
+(******************************)
+(** ** Set inclusion on list  *)
+(******************************)
+
+Section SetIncl.
+
+  Variable A : Type.
+
+  Definition incl_Type (l m:list A) := forall a:A, In_Type a l -> In_Type a m.
+  Hint Unfold incl_Type.
+
+  Lemma incl_Type_refl : forall l:list A, incl_Type l l.
+  Proof.
+    auto.
+  Qed.
+  Hint Resolve incl_Type_refl.
+
+  Lemma incl_Type_tl : forall (a:A) (l m:list A), incl_Type l m -> incl_Type l (a :: m).
+  Proof.
+    unfold incl_Type ; intros.
+    simpl ; intuition.
+  Qed.
+  Hint Immediate incl_Type_tl.
+
+  Lemma incl_Type_tran : forall l m n:list A, incl_Type l m -> incl_Type m n -> incl_Type l n.
+  Proof.
+    auto.
+  Qed.
+
+  Lemma incl_Type_appl : forall l m n:list A, incl_Type l n -> incl_Type l (n ++ m).
+  Proof.
+    auto with datatypes.
+  Qed.
+  Hint Immediate incl_Type_appl.
+
+  Lemma incl_Type_appr : forall l m n:list A, incl_Type l n -> incl_Type l (m ++ n).
+  Proof.
+    auto with datatypes.
+  Qed.
+  Hint Immediate incl_Type_appr.
+
+  Lemma incl_Type_cons :
+    forall (a:A) (l m:list A), In_Type a m -> incl_Type l m -> incl_Type (a :: l) m.
+  Proof.
+    unfold incl_Type; simpl; intros a l m H H0 a0 H1.
+    now_show (In_Type a0 m).
+    elim H1.
+    now_show (a = a0 -> In_Type a0 m).
+    elim H1; auto; intro H2.
+    now_show (a = a0 -> In_Type a0 m).
+    elim H2; auto. (* solves subgoal *)
+    now_show (In_Type a0 l -> In_Type a0 m).
+    auto.
+  Qed.
+  Hint Resolve incl_Type_cons.
+
+  Lemma incl_Type_app : forall l m n:list A, incl_Type l n -> incl_Type m n ->
+    incl_Type (l ++ m) n.
+  Proof.
+    unfold incl_Type; simpl; intros l m n H H0 a H1.
+    now_show (In_Type a n).
+    elim (in_Type_app_or _ _ _ H1); auto.
+  Qed.
+  Hint Resolve incl_Type_app.
+
+End SetIncl.
+
+Hint Resolve incl_Type_refl incl_Type_tl incl_Type_tran incl_Type_appl incl_Type_appr
+  incl_Type_cons incl_Type_app: datatypes.
+
+
+
 Section Exists_Forall.
 
   (** * Existential and universal predicates over lists *)
