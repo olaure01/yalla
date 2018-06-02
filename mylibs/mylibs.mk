@@ -13,6 +13,8 @@ $(MYLIBSDIR)/Permutation_solve.vo: $(MYLIBSDIR)/Permutation_solve.v $(MYLIBSDIR)
 $(MYLIBSDIR)/nattree.vo : $(MYLIBSDIR)/nattree.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/Surjective.vo
 $(MYLIBSDIR)/wf_prod.vo: $(MYLIBSDIR)/wf_prod.v
 
+$(MYLIBSDIR)/List_Type.vo: $(MYLIBSDIR)/List_Type.v
+$(MYLIBSDIR)/List_Type_more.vo: $(MYLIBSDIR)/List_Type_more.v $(MYLIBSDIR)/List_Type.vo 
 $(MYLIBSDIR)/CyclicPerm_Type.vo: $(MYLIBSDIR)/CyclicPerm_Type.v $(MYLIBSDIR)/List_Type.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo
 $(MYLIBSDIR)/genperm_Type.vo: $(MYLIBSDIR)/genperm_Type.v $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/CyclicPerm_Type.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/CPermutation_Type_solve.vo $(MYLIBSDIR)/Injective.vo
 $(MYLIBSDIR)/Permutation_Type.vo: $(MYLIBSDIR)/Permutation_Type_more.v
