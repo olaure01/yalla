@@ -156,6 +156,60 @@ Ltac decomp_map_Type H :=
   end.
 
 
+(** ** [In] *)
+
+Lemma in_Type_elt {A} : forall (a:A) l1 l2, In_Type a (l1 ++ a :: l2).
+Proof.
+intros.
+apply in_Type_or_app.
+right.
+intuition.
+Qed.
+
+Lemma in_Type_elt_inv {A} : forall (a b : A) l1 l2,
+  In_Type a (l1 ++ b :: l2) -> (a = b) + (In_Type a (l1 ++ l2)).
+Proof.
+intros.
+apply in_Type_app_or in X.
+destruct X ; intuition.
+destruct i ; intuition.
+Qed.
+
+
+(** ** Set inclusion on list *)
+
+Lemma incl_Type_nil {A} : forall l : list A, incl_Type nil l.
+Proof.
+intros l a Hin.
+inversion Hin.
+Qed.
+
+Lemma incl_Type_app_app {A} : forall l1 l2 m1 m2:list A,
+  incl_Type l1 m1 -> incl_Type l2 m2 -> incl_Type (l1 ++ l2) (m1 ++ m2).
+Proof.
+intros l1 l2 m1 m2 Hi1 Hi2.
+apply incl_Type_app.
+- apply incl_Type_appl.
+  assumption.
+- apply incl_Type_appr.
+  assumption.
+Qed.
+
+Lemma incl_Type_cons_inv {A} : forall (a:A) (l m:list A),
+  incl_Type (a :: l) m -> (In_Type a m) * (incl_Type l m).
+Proof.
+intros a l m Hi.
+split.
+- apply Hi.
+  constructor.
+  reflexivity.
+- intros b Hin.
+  apply Hi.
+  apply in_Type_cons.
+  assumption.
+Qed.
+
+
 (** ** [Forall] and [Exists] *)
 
 Lemma Forall_Type_app_inv {A} : forall P (l1 : list A) l2,
