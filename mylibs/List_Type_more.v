@@ -172,11 +172,11 @@ induction l1 ; intros.
 Qed.
 
 Lemma Forall_Type_app {A} : forall P (l1 : list A) l2,
-  Forall P l1 -> Forall P l2 -> Forall P (l1 ++ l2).
+  Forall_Type P l1 -> Forall_Type P l2 -> Forall_Type P (l1 ++ l2).
 Proof with try assumption.
 induction l1 ; intros...
-inversion H ; subst.
-apply IHl1 in H0...
+inversion X ; subst.
 constructor...
+apply IHl1...
 Qed.
 
