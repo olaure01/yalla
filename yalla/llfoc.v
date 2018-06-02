@@ -461,67 +461,89 @@ induction pi ; intros l1' l2' Heq ; subst.
   simpl ; omega.
 Qed.
 
-(*
-Lemma bot_rev_f : forall l Pi, llfoc l Pi ->
-  forall l1 l2, l = l1 ++ bot :: l2 -> llfoc (l1 ++ l2) Pi.
+Lemma parr_rev_f : forall l Pi (pi : llfoc l Pi),
+  forall A B l1 l2, l = l1 ++ parr A B :: l2 ->
+    { pi' : llfoc (l1 ++ A :: B :: l2) Pi & fpsize pi' < fpsize pi }.
 Proof with myeeasy.
 intros l Pi pi.
-induction pi ; intros l1' l2' Heq ; subst.
+induction pi ; intros A' B' l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
 - assert (HP := p).
-  apply Permutation_Type_vs_elt_inv in p.
+  simpl ; apply Permutation_Type_vs_elt_inv in p.
   destruct p as ((l3 & l4) & Heq) ; subst.
-  eapply ex_fr ; [ apply (IHpi l3 l4) | ]...
-  apply Permutation_Type_app_inv in HP...
+  simpl in IHpi ; simpl in HP ; simpl.
+  destruct (IHpi _ _ _ _ eq_refl) as [pi0 Hs].
+  simpl in HP ; apply Permutation_Type_app_inv in HP.
+  apply (Permutation_Type_elt B') in HP.
+  apply (Permutation_Type_elt A') in HP.
+  remember (ex_fr _ _ _ pi0 HP) as pi1.
+  exists pi1.
+  subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
   + exfalso.
-    apply sync_focus in pi.
+    clear IHpi ; apply sync_focus in pi.
     inversion pi.
-  + simpl ; apply foc_fr.
-    apply IHpi...
+  + destruct (IHpi _ _ _ _ eq_refl) as [pi0 Hs].
+    remember (foc_fr _ _ pi0) as pi1.
+    exists pi1.
+    subst ; simpl ; omega.
 - exfalso.
   destruct l1' ; inversion Heq.
-- destruct l1' ; inversion Heq ; subst...
-  simpl ; apply bot_fr.
-  apply IHpi...
+- destruct l1' ; inversion Heq ; subst.
+  destruct (IHpi _ _ _ _ eq_refl) as [pi0 Hs].
+  remember (bot_fr _ _ pi0) as pi1.
+  exists pi1.
+  subst ; simpl ; omega.
 - dichot_Type_elt_app_exec Heq ; subst.
   + destruct (polarity A) as [Hs | Ha].
-    * rewrite (polconts _ _ Hs) in pi1.
-      rewrite (polconts _ _ Hs) in IHpi1.
-      rewrite app_assoc.
-      apply tens_fr...
-      rewrite (polconts _ _ Hs).
-      apply IHpi1...
-    * rewrite (polconta _ _ Ha) in pi1.
-      rewrite (polconta _ _ Ha) in IHpi1.
-      rewrite app_comm_cons in IHpi1.
-      rewrite app_assoc.
-      apply tens_fr...
-      rewrite (polconta _ _ Ha).
-      rewrite app_comm_cons.
-      apply IHpi1...
-   + destruct (polarity B) as [Hs | Ha].
-    * rewrite (polconts _ _ Hs) in pi2.
-      rewrite (polconts _ _ Hs) in IHpi2.
+    * assert (H1 := IHpi1 _ _ _ _ (polconts _ _ Hs)).
+      rewrite <- (polconts _ (l1' ++ A' :: B' :: l) Hs) in H1.
+      destruct H1 as [pi1' Hs1].
+      remember (tens_fr _ _ _ _ pi1' pi2) as pi.
+      rewrite 2 app_comm_cons ; rewrite app_assoc.
+      exists pi.
+      subst ; simpl ; omega.
+    * assert (polcont (l1' ++ parr A' B' :: l) A = (A :: l1') ++ parr A' B' :: l) as Hpa
+        by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+      assert (H1 := IHpi1 _ _ _ _ Hpa).
+      rewrite <- app_comm_cons in H1.
+      rewrite <- (polconta _ (l1' ++ A' :: B' :: l) Ha) in H1.
+      destruct H1 as [pi1' Hs1].
+      remember (tens_fr _ _ _ _ pi1' pi2) as pi.
+      rewrite 2 app_comm_cons ; rewrite app_assoc.
+      exists pi.
+      subst ; simpl ; omega.
+  + destruct (polarity B) as [Hs | Ha].
+    * assert (H2 := IHpi2 _ _ _ _ (polconts _ _ Hs)).
+      rewrite <- (polconts _ (l0 ++ A' :: B' :: l2') Hs) in H2.
+      destruct H2 as [pi2' Hs2].
+      remember (tens_fr _ _ _ _ pi1 pi2') as pi.
       rewrite <- app_assoc.
-      apply tens_fr...
-      rewrite (polconts _ _ Hs).
-      apply IHpi2...
-    * rewrite (polconta _ _ Ha) in pi2.
-      rewrite (polconta _ _ Ha) in IHpi2.
-      rewrite app_comm_cons in IHpi2.
+      exists pi.
+      subst ; simpl ; omega.
+    * assert (polcont (l0 ++ parr A' B' :: l2') B = (B :: l0) ++ parr A' B' :: l2') as Hpa
+        by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+      assert (H2 := IHpi2 _ _ _ _ Hpa).
+      rewrite <- app_comm_cons in H2.
+      rewrite <- (polconta _ (l0 ++ A' :: B' :: l2') Ha) in H2.
+      destruct H2 as [pi2' Hs2].
+      remember (tens_fr _ _ _ _ pi1 pi2') as pi.
       rewrite <- app_assoc.
-      apply tens_fr...
-      rewrite (polconta _ _ Ha).
-      rewrite app_comm_cons.
-      apply IHpi2...
+      exists pi.
+      subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  list_simpl ; apply parr_fr.
-  rewrite 2 app_comm_cons in IHpi.
-  rewrite 2 app_comm_cons.
-  apply IHpi...
+  + exists pi.
+    simpl ; omega.
+  + assert (A :: B :: l1' ++ parr A' B' :: l2' = (A :: B :: l1') ++ parr A' B' :: l2')
+      as Heql by (list_simpl ; reflexivity).
+    assert (H0 := IHpi _ _ _ _ Heql).
+    rewrite <- 2 app_comm_cons in H0.
+    destruct H0 as [pi0 Hs].
+    remember (parr_fr _ _ _ _ pi0) as pi1.
+    exists pi1 ; subst.
+    simpl ; omega.
 - exfalso.
   destruct l1' ; inversion Heq ; subst.
   apply Forall_Type_app_inv in f.
@@ -529,492 +551,286 @@ induction pi ; intros l1' l2' Heq ; subst.
   inversion f ; subst.
   inversion H1 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    apply plus_fr1.
-    rewrite (polconts _ _ Hs)...
-    apply IHpi...
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    apply plus_fr1.
-    rewrite (polconta _ _ Ha)...
-    rewrite app_comm_cons.
-    apply IHpi...
+  + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
+    rewrite <- (polconts _ (l1' ++ A' :: B' :: l2') Hs) in H1.
+    destruct H1 as [pi1' Hs1].
+    remember (plus_fr1 _ B _ pi1') as pi0.
+    exists pi0.
+    subst ; simpl ; omega.
+  + assert (polcont (l1' ++ parr A' B' :: l2') A = (A :: l1') ++ parr A' B' :: l2') as Hpa
+      by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+    assert (H1 := IHpi _ _ _ _ Hpa).
+    rewrite <- app_comm_cons in H1.
+    rewrite <- (polconta _ (l1' ++ A' :: B' :: l2') Ha) in H1.
+    destruct H1 as [pi1' Hs1].
+    remember (plus_fr1 _ B _ pi1') as pi0.
+    exists pi0.
+    subst ; simpl ; omega.
 - destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    apply plus_fr2.
-    rewrite (polconts _ _ Hs)...
-    apply IHpi...
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    apply plus_fr2.
-    rewrite (polconta _ _ Ha)...
-    rewrite app_comm_cons.
-    apply IHpi...
+  + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
+    rewrite <- (polconts _ (l1' ++ A' :: B' :: l2') Hs) in H1.
+    destruct H1 as [pi1' Hs1].
+    remember (plus_fr2 _ B _ pi1') as pi0.
+    exists pi0.
+    subst ; simpl ; omega.
+  + assert (polcont (l1' ++ parr A' B' :: l2') A = (A :: l1') ++ parr A' B' :: l2') as Hpa
+      by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+    assert (H1 := IHpi _ _ _ _ Hpa).
+    rewrite <- app_comm_cons in H1.
+    rewrite <- (polconta _ (l1' ++ A' :: B' :: l2') Ha) in H1.
+    destruct H1 as [pi1' Hs1].
+    remember (plus_fr2 _ B _ pi1') as pi0.
+    exists pi0.
+    subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  rewrite app_comm_cons in IHpi1.
-  rewrite app_comm_cons in IHpi2.
-  simpl ; apply with_fr.
-  + rewrite app_comm_cons.
-    apply IHpi1...
-  + rewrite app_comm_cons.
-    apply IHpi2...
+  assert (A :: l1' ++ parr A' B' :: l2' = (A :: l1') ++ parr A' B' :: l2') as Heql1
+    by (list_simpl ; reflexivity).
+  assert (B :: l1' ++ parr A' B' :: l2' = (B :: l1') ++ parr A' B' :: l2') as Heql2
+    by (list_simpl ; reflexivity).
+  assert (H1 := IHpi1 _ _ _ _ Heql1).
+  assert (H2 := IHpi2 _ _ _ _ Heql2).
+  rewrite <- app_comm_cons in H1.
+  rewrite <- app_comm_cons in H2.
+  destruct H1 as [pi1' Hs1].
+  destruct H2 as [pi2' Hs2].
+  remember (with_fr _ _ _ _ pi1' pi2') as pi.
+  exists pi.
+  subst ; simpl ; lia.
 - exfalso.
   symmetry in Heq.
   decomp_map Heq.
   inversion Heq3.
 - destruct l1' ; inversion Heq ; subst.
   destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    simpl ; apply de_fr.
-    rewrite (polconts _ _ Hs)...
-    apply IHpi...
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    simpl ; apply de_fr...
-    rewrite (polconta _ _ Ha)...
-    rewrite app_comm_cons.
-    apply IHpi...
+  + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
+    rewrite <- (polconts _ (l1' ++ A' :: B' :: l2') Hs) in H1.
+    destruct H1 as [pi1' Hs1].
+    remember (de_fr _ _ pi1') as pi0.
+    exists pi0.
+    subst ; simpl ; omega.
+  + assert (polcont (l1' ++ parr A' B' :: l2') A = (A :: l1') ++ parr A' B' :: l2') as Hpa
+      by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+    assert (H1 := IHpi _ _ _ _ Hpa).
+    rewrite <- app_comm_cons in H1.
+    rewrite <- (polconta _ (l1' ++ A' :: B' :: l2') Ha) in H1.
+    destruct H1 as [pi1' Hs1].
+    remember (de_fr _ _ pi1') as pi0.
+    exists pi0.
+    subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  simpl ; apply wk_fr.
-  apply IHpi...
+  destruct (IHpi _ _ _ _ eq_refl) as [pi0 Hs].
+  remember (wk_fr A _ _ pi0) as pi1.
+  exists pi1.
+  subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  rewrite 2 app_comm_cons in IHpi.
-  simpl ; apply co_fr.
-  rewrite 2 app_comm_cons.
-  apply IHpi...
-Defined.
-
-Lemma bot_rev_f_smp : forall l1 l2 Pi,
-  llfoc (l1 ++ bot :: l2) Pi -> llfoc (l1 ++ l2) Pi.
-Proof with myeeasy.
-intros ; eapply bot_rev_f...
-Defined.
-
-Lemma bot_rev_f_size : forall l Pi (pi : llfoc l Pi) l1 l2 H,
-  fpsize (bot_rev_f _ _ pi l1 l2 H) < fpsize pi.
-Proof.
-intros l1 Pi pi.
-induction pi ; intros.
-- simpl. lia.
-remember (l1 ++ bot :: l2) as l ; revert Heq ;
-induction pi.
+  assert (wn A :: wn A :: l1' ++ parr A' B' :: l2' = (wn A :: wn A :: l1') ++ parr A' B' :: l2')
+    as Heql by (list_simpl ; reflexivity).
+  assert (H0 := IHpi _ _ _ _ Heql).
+  rewrite <- 2 app_comm_cons in H0.
+  destruct H0 as [pi0 Hs].
+  remember (co_fr _ _ _ pi0) as pi1.
+  exists pi1 ; subst.
+  simpl ; omega.
 Qed.
 
-*)
-
-
-Lemma parr_rev_f : forall l Pi s, llfoc l Pi s ->
-  forall A B l1 l2, l = l1 ++ parr A B :: l2 ->
-  exists s', llfoc (l1 ++ A :: B :: l2) Pi s' /\ s' < s.
+Lemma with_rev_f : forall l Pi (pi : llfoc l Pi),
+  forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
+    { pi' : llfoc (l1 ++ A :: l2) Pi & fpsize pi' < fpsize pi }
+  * { pi' : llfoc (l1 ++ B :: l2) Pi & fpsize pi' < fpsize pi }.
 Proof with myeeasy.
-intros l Pi s pi.
+intros l Pi pi.
 induction pi ; intros A' B' l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
-- assert (HP := H).
-  apply Permutation_vs_elt_inv in H.
-  destruct H as (l3 & l4 & Heq).
-  rewrite Heq in HP.
-  apply IHpi in Heq...
-  destruct Heq as (s' & IH & Hs).
-  eexists ; split.
-  + eapply ex_fr...
-    apply Permutation_app_inv in HP.
-    apply Permutation_elt.
-    apply Permutation_elt...
-  + omega.
+- assert (HP := p).
+  simpl ; apply Permutation_Type_vs_elt_inv in p.
+  destruct p as ((l3 & l4) & Heq) ; subst.
+  simpl in IHpi ; simpl in HP ; simpl.
+  destruct (IHpi _ _ _ _ eq_refl) as [[pi01 Hs1] [pi02 Hs2]].
+  simpl in HP ; apply Permutation_Type_app_inv in HP.
+  assert (HP2 := HP).
+  apply (Permutation_Type_elt B') in HP2.
+  apply (Permutation_Type_elt A') in HP.
+  remember (ex_fr _ _ _ pi01 HP) as pi1.
+  remember (ex_fr _ _ _ pi02 HP2) as pi2.
+  split ; [ exists pi1 | exists pi2 ] ; subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
   + exfalso.
-    apply sync_focus in pi.
+    clear IHpi ; apply sync_focus in pi.
     inversion pi.
-  + destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs).
-    eexists ; split.
-    * list_simpl ; eapply foc_fr...
-    * omega.
+  + destruct (IHpi _ _ _ _ eq_refl) as [[pi01 Hs1] [pi02 Hs2]].
+    remember (foc_fr _ _ pi01) as pi1.
+    remember (foc_fr _ _ pi02) as pi2.
+    split ; [ exists pi1 | exists pi2 ] ; subst ; simpl ; omega.
 - exfalso.
   destruct l1' ; inversion Heq.
 - destruct l1' ; inversion Heq ; subst.
-  destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs).
-  eexists ; split.
-  + list_simpl ; eapply bot_fr...
-  + omega.
-- dichot_elt_app_exec Heq ; subst.
+  destruct (IHpi _ _ _ _ eq_refl) as [[pi01 Hs1] [pi02 Hs2]].
+  remember (bot_fr _ _ pi01) as pi1.
+  remember (bot_fr _ _ pi02) as pi2.
+  split ; [ exists pi1 | exists pi2 ] ; subst ; simpl ; omega.
+- dichot_Type_elt_app_exec Heq ; subst.
   + destruct (polarity A) as [Hs | Ha].
-    * rewrite (polconts _ _ Hs) in pi1.
-      rewrite (polconts _ _ Hs) in IHpi1.
-      destruct (IHpi1 _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-      eexists ; split.
-      -- rewrite 2 app_comm_cons.
-         rewrite app_assoc.
-         eapply tens_fr...
-         rewrite (polconts _ _ Hs)...
-      -- omega.
-    * rewrite (polconta _ _ Ha) in pi1.
-      rewrite (polconta _ _ Ha) in IHpi1.
-      rewrite app_comm_cons in IHpi1.
-      destruct (IHpi1 _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-      eexists ; split.
-      -- rewrite 2 app_comm_cons.
-         rewrite app_assoc.
-         eapply tens_fr...
-         rewrite (polconta _ _ Ha)...
-      -- omega.
+    * assert (H1 := IHpi1 _ _ _ _ (polconts _ _ Hs)).
+      rewrite <- (polconts _ (l1' ++ A' :: l) Hs) in H1.
+      rewrite <- (polconts _ (l1' ++ B' :: l) Hs) in H1.
+      destruct H1 as [[pi1' Hs1] [pi1'' Hs2]].
+      remember (tens_fr _ _ _ _ pi1' pi2) as pi01.
+      remember (tens_fr _ _ _ _ pi1'' pi2) as pi02.
+      rewrite ? app_comm_cons ; rewrite 2 app_assoc.
+      split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
+    * assert (polcont (l1' ++ awith A' B' :: l) A = (A :: l1') ++ awith A' B' :: l) as Hpa
+        by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+      assert (H1 := IHpi1 _ _ _ _ Hpa).
+      rewrite <- 2 app_comm_cons in H1.
+      rewrite <- (polconta _ (l1' ++ A' :: l) Ha) in H1.
+      rewrite <- (polconta _ (l1' ++ B' :: l) Ha) in H1.
+      destruct H1 as [[pi1' Hs1] [pi2' Hs2]].
+      remember (tens_fr _ _ _ _ pi1' pi2) as pi01.
+      remember (tens_fr _ _ _ _ pi2' pi2) as pi02.
+      rewrite ? app_comm_cons ; rewrite 2 app_assoc.
+      split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
   + destruct (polarity B) as [Hs | Ha].
-    * rewrite (polconts _ _ Hs) in pi2.
-      rewrite (polconts _ _ Hs) in IHpi2.
-      destruct (IHpi2 _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-      eexists ; split.
-      -- list_simpl.
-         eapply tens_fr...
-         rewrite (polconts _ _ Hs)...
-      -- omega.
-    * rewrite (polconta _ _ Ha) in pi2.
-      rewrite (polconta _ _ Ha) in IHpi2.
-      rewrite app_comm_cons in IHpi2.
-      destruct (IHpi2 _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-      eexists ; split.
-      -- rewrite <- app_assoc.
-         eapply tens_fr...
-         rewrite (polconta _ _ Ha)...
-      -- omega.
+    * assert (H2 := IHpi2 _ _ _ _ (polconts _ _ Hs)).
+      rewrite <- (polconts _ (l0 ++ A' :: l2') Hs) in H2.
+      rewrite <- (polconts _ (l0 ++ B' :: l2') Hs) in H2.
+      destruct H2 as [[pi1' Hs1] [pi1'' Hs2]].
+      remember (tens_fr _ _ _ _ pi1 pi1') as pi01.
+      remember (tens_fr _ _ _ _ pi1 pi1'') as pi02.
+      rewrite <- 2 app_assoc.
+      split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
+    * assert (polcont (l0 ++ awith A' B' :: l2') B = (B :: l0) ++ awith A' B' :: l2') as Hpa
+        by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+      assert (H2 := IHpi2 _ _ _ _ Hpa).
+      rewrite <- 2 app_comm_cons in H2.
+      rewrite <- (polconta _ (l0 ++ A' :: l2') Ha) in H2.
+      rewrite <- (polconta _ (l0 ++ B' :: l2') Ha) in H2.
+      destruct H2 as [[pi1' Hs1] [pi1'' Hs2]].
+      remember (tens_fr _ _ _ _ pi1 pi1') as pi01.
+      remember (tens_fr _ _ _ _ pi1 pi1'') as pi02.
+      rewrite <- 2 app_assoc.
+      split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  + eexists ; split...
-  + rewrite 2 app_comm_cons in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs).
-    list_simpl in IH.
-    eexists ; split.
-    * list_simpl ; eapply parr_fr...
-    * omega.
+  assert (A :: B :: l1' ++ awith A' B' :: l2' = (A :: B :: l1') ++ awith A' B' :: l2')
+    as Heql by (list_simpl ; reflexivity).
+  assert (H0 := IHpi _ _ _ _ Heql).
+  rewrite <- ? app_comm_cons in H0.
+  destruct H0 as [[pi1' Hs1] [pi1'' Hs2]].
+  remember (parr_fr _ _ _ _ pi1') as pi01.
+  remember (parr_fr _ _ _ _ pi1'') as pi02.
+  split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
 - exfalso.
   destruct l1' ; inversion Heq ; subst.
-  apply Forall_app_inv in H0.
-  destruct H0 as [_ H0].
-  inversion H0 ; subst.
-  inversion H3 as [Ht | [Ht | [Ht | Ht]]]...
-  + inversion Ht.
-  + destruct Ht.
-    inversion H1.
-  + destruct Ht.
-    inversion H1.
-  + inversion Ht.
+  apply Forall_Type_app_inv in f.
+  destruct f as [_ f].
+  inversion f ; subst.
+  inversion H1 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-    eexists ; split.
-    * list_simpl ; eapply plus_fr1...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-    eexists ; split.
-    * list_simpl ; eapply plus_fr1...
-      rewrite (polconta _ _ Ha)...
-    * omega.
+  + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
+    rewrite <- (polconts _ (l1' ++ A' :: l2') Hs) in H1.
+    rewrite <- (polconts _ (l1' ++ B' :: l2') Hs) in H1.
+    destruct H1 as [[pi1' Hs1] [pi1'' Hs2]].
+    remember (plus_fr1 _ B _ pi1') as pi01.
+    remember (plus_fr1 _ B _ pi1'') as pi02.
+    split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
+  + assert (polcont (l1' ++ awith A' B' :: l2') A = (A :: l1') ++ awith A' B' :: l2') as Hpa
+      by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+    assert (H1 := IHpi _ _ _ _ Hpa).
+    rewrite <- 2 app_comm_cons in H1.
+    rewrite <- (polconta _ (l1' ++ A' :: l2') Ha) in H1.
+    rewrite <- (polconta _ (l1' ++ B' :: l2') Ha) in H1.
+    destruct H1 as [[pi1' Hs1] [pi1'' Hs2]].
+    remember (plus_fr1 _ B _ pi1') as pi01.
+    remember (plus_fr1 _ B _ pi1'') as pi02.
+    split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
 - destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-    eexists ; split.
-    * list_simpl ; eapply plus_fr2...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-    eexists ; split.
-    * list_simpl ; eapply plus_fr2...
-      rewrite (polconta _ _ Ha)...
-    * omega.
+  + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
+    rewrite <- (polconts _ (l1' ++ A' :: l2') Hs) in H1.
+    rewrite <- (polconts _ (l1' ++ B' :: l2') Hs) in H1.
+    destruct H1 as [[pi1' Hs1] [pi1'' Hs2]].
+    remember (plus_fr2 _ B _ pi1') as pi01.
+    remember (plus_fr2 _ B _ pi1'') as pi02.
+    split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
+  + assert (polcont (l1' ++ awith A' B' :: l2') A = (A :: l1') ++ awith A' B' :: l2') as Hpa
+      by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+    assert (H1 := IHpi _ _ _ _ Hpa).
+    rewrite <- 2 app_comm_cons in H1.
+    rewrite <- (polconta _ (l1' ++ A' :: l2') Ha) in H1.
+    rewrite <- (polconta _ (l1' ++ B' :: l2') Ha) in H1.
+    destruct H1 as [[pi1' Hs1] [pi1'' Hs2]].
+    remember (plus_fr2 _ B _ pi1') as pi01.
+    remember (plus_fr2 _ B _ pi1'') as pi02.
+    split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  rewrite app_comm_cons in IHpi1.
-  destruct (IHpi1 _ _ _ _ (eq_refl _)) as (s1' & IH1 & Hs1).
-  rewrite app_comm_cons in IHpi2.
-  destruct (IHpi2 _ _ _ _ (eq_refl _)) as (s2' & IH2 & Hs2).
-  eexists ; split.
-  + list_simpl ; eapply with_fr...
-  + lia.
+  + split ; [ exists pi1 | exists pi2 ] ; subst ; simpl ; lia.
+  + assert (A :: l1' ++ awith A' B' :: l2' = (A :: l1') ++ awith A' B' :: l2') as Heql1
+      by (list_simpl ; reflexivity).
+    assert (B :: l1' ++ awith A' B' :: l2' = (B :: l1') ++ awith A' B' :: l2') as Heql2
+      by (list_simpl ; reflexivity).
+    assert (H1 := IHpi1 _ _ _ _ Heql1).
+    assert (H2 := IHpi2 _ _ _ _ Heql2).
+    rewrite <- 2 app_comm_cons in H1.
+    rewrite <- 2 app_comm_cons in H2.
+    destruct H1 as [[pi1' Hs1] [pi1'' Hs1']].
+    destruct H2 as [[pi2' Hs2] [pi2'' Hs2']].
+    remember (with_fr _ _ _ _ pi1' pi2') as pi01.
+    remember (with_fr _ _ _ _ pi1'' pi2'') as pi02.
+    split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; lia.
 - exfalso.
   symmetry in Heq.
   decomp_map Heq.
   inversion Heq3.
 - destruct l1' ; inversion Heq ; subst.
   destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-    eexists ; split.
-    * list_simpl ; eapply de_fr...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs').
-    eexists ; split.
-    * list_simpl ; eapply de_fr...
-      rewrite (polconta _ _ Ha)...
-    * omega.
+  + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
+    rewrite <- (polconts _ (l1' ++ A' :: l2') Hs) in H1.
+    rewrite <- (polconts _ (l1' ++ B' :: l2') Hs) in H1.
+    destruct H1 as [[pi1' Hs1] [pi1'' Hs2]].
+    remember (de_fr _ _ pi1') as pi01.
+    remember (de_fr _ _ pi1'') as pi02.
+    split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
+  + assert (polcont (l1' ++ awith A' B' :: l2') A = (A :: l1') ++ awith A' B' :: l2') as Hpa
+      by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
+    assert (H1 := IHpi _ _ _ _ Hpa).
+    rewrite <- 2 app_comm_cons in H1.
+    rewrite <- (polconta _ (l1' ++ A' :: l2') Ha) in H1.
+    rewrite <- (polconta _ (l1' ++ B' :: l2') Ha) in H1.
+    destruct H1 as [[pi1' Hs1] [pi1'' Hs2]].
+    remember (de_fr _ _ pi1') as pi01.
+    remember (de_fr _ _ pi1'') as pi02.
+    split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs).
-  eexists ; split.
-  + list_simpl ; eapply wk_fr...
-  + omega.
+  destruct (IHpi _ _ _ _ eq_refl) as [[pi1' Hs1] [pi1'' Hs2]].
+  remember (wk_fr A _ _ pi1') as pi01.
+  remember (wk_fr A _ _ pi1'') as pi02.
+  split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
 - destruct l1' ; inversion Heq ; subst.
-  rewrite 2 app_comm_cons in IHpi.
-  destruct (IHpi _ _ _ _ (eq_refl _)) as (s' & IH & Hs).
-  eexists ; split.
-  + list_simpl ; eapply co_fr...
-  + omega.
+  assert (wn A :: wn A :: l1' ++ awith A' B' :: l2' = (wn A :: wn A :: l1') ++ awith A' B' :: l2')
+    as Heql by (list_simpl ; reflexivity).
+  assert (H0 := IHpi _ _ _ _ Heql).
+  rewrite <- ? app_comm_cons in H0.
+  destruct H0 as [[pi1' Hs1] [pi1'' Hs2]].
+  remember (co_fr _ _ _ pi1') as pi01.
+  remember (co_fr _ _ _ pi1'') as pi02.
+  split ; [ exists pi01 | exists pi02 ] ; subst ; simpl ; omega.
 Qed.
 
-Lemma with_rev_f : forall l Pi s, llfoc l Pi s ->
+Lemma with_rev1_f : forall l Pi (pi : llfoc l Pi),
   forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
-  (exists s1, llfoc (l1 ++ A :: l2) Pi s1 /\ s1 < s) /\
-  (exists s2, llfoc (l1 ++ B :: l2) Pi s2 /\ s2 < s).
-Proof with myeeasy.
-intros l Pi s pi.
-induction pi ; intros A' B' l1' l2' Heq ; subst.
-- exfalso.
-  destruct l1' ; inversion Heq.
-  destruct l1' ; inversion H1.
-- assert (HP := H).
-  apply Permutation_vs_elt_inv in H.
-  destruct H as (l3 & l4 & Heq).
-  rewrite Heq in HP.
-  apply IHpi in Heq...
-  destruct Heq as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-  split ; eexists ; split.
-  + eapply ex_fr ; [ apply IH1 | ].
-    apply Permutation_app_inv in HP.
-    apply Permutation_elt...
-  + omega.
-  + eapply ex_fr ; [ apply IH2 | ].
-    apply Permutation_app_inv in HP.
-    apply Permutation_elt...
-  + omega.
-- destruct l1' ; inversion Heq ; subst.
-  + exfalso.
-    apply sync_focus in pi.
-    inversion pi.
-  + destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-    split ; eexists ; split.
-    * list_simpl ; eapply foc_fr...
-    * omega.
-    * list_simpl ; eapply foc_fr...
-    * omega.
-- exfalso.
-  destruct l1' ; inversion Heq.
-- destruct l1' ; inversion Heq ; subst.
-  destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-  split ; eexists ; split.
-  + list_simpl ; eapply bot_fr...
-  + omega.
-  + list_simpl ; eapply bot_fr...
-  + omega.
-- dichot_elt_app_exec Heq ; subst.
-  + destruct (polarity A) as [Hs | Ha].
-    * rewrite (polconts _ _ Hs) in pi1.
-      rewrite (polconts _ _ Hs) in IHpi1.
-      destruct (IHpi1 _ _ _ _ (eq_refl _)) as [(s1' & IH1 & Hs1) (s2' & IH2 & Hs2)].
-      split ; eexists ; split.
-      -- rewrite app_comm_cons.
-         rewrite app_assoc.
-         eapply tens_fr...
-         rewrite (polconts _ _ Hs)...
-      -- omega.
-      -- rewrite app_comm_cons.
-         rewrite app_assoc.
-         eapply tens_fr...
-         rewrite (polconts _ _ Hs)...
-      -- omega.
-    * rewrite (polconta _ _ Ha) in pi1.
-      rewrite (polconta _ _ Ha) in IHpi1.
-      rewrite app_comm_cons in IHpi1.
-      destruct (IHpi1 _ _ _ _ (eq_refl _)) as [(s1' & IH1 & Hs1) (s2' & IH2 & Hs2)].
-      split ; eexists ; split.
-      -- rewrite app_comm_cons.
-         rewrite app_assoc.
-         eapply tens_fr...
-         rewrite (polconta _ _ Ha)...
-      -- omega.
-      -- rewrite app_comm_cons.
-         rewrite app_assoc.
-         eapply tens_fr...
-         rewrite (polconta _ _ Ha)...
-      -- omega.
-  + destruct (polarity B) as [Hs | Ha].
-    * rewrite (polconts _ _ Hs) in pi2.
-      rewrite (polconts _ _ Hs) in IHpi2.
-      destruct (IHpi2 _ _ _ _ (eq_refl _)) as [(s1' & IH1 & Hs1) (s2' & IH2 & Hs2)].
-      split ; eexists ; split.
-      -- rewrite <- app_assoc.
-         eapply tens_fr...
-         rewrite (polconts _ _ Hs)...
-      -- omega.
-      -- rewrite <- app_assoc.
-         eapply tens_fr...
-         rewrite (polconts _ _ Hs)...
-      -- omega.
-    * rewrite (polconta _ _ Ha) in pi2.
-      rewrite (polconta _ _ Ha) in IHpi2.
-      rewrite app_comm_cons in IHpi2.
-      destruct (IHpi2 _ _ _ _ (eq_refl _)) as [(s1' & IH1 & Hs1) (s2' & IH2 & Hs2)].
-      split ; eexists ; split.
-      -- rewrite <- app_assoc.
-         eapply tens_fr...
-         rewrite (polconta _ _ Ha)...
-      -- omega.
-      -- rewrite <- app_assoc.
-         eapply tens_fr...
-         rewrite (polconta _ _ Ha)...
-      -- omega.
-- destruct l1' ; inversion Heq ; subst.
-  rewrite 2 app_comm_cons in IHpi.
-  destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-  list_simpl in IH1.
-  list_simpl in IH2.
-  split ; eexists ; split.
-  + list_simpl ; eapply parr_fr...
-  + omega.
-  + list_simpl ; eapply parr_fr...
-  + omega.
-- exfalso.
-  destruct l1' ; inversion Heq ; subst.
-  apply Forall_app_inv in H0.
-  destruct H0 as [_ H0].
-  inversion H0 ; subst.
-  inversion H3 as [Ht | [Ht | [Ht | Ht]]]...
-  + inversion Ht.
-  + destruct Ht.
-    inversion H1.
-  + destruct Ht.
-    inversion H1.
-  + inversion Ht.
-- destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-    split ; eexists ; split.
-    * list_simpl ; eapply plus_fr1...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-    * list_simpl ; eapply plus_fr1...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-    split ; eexists ; split.
-    * list_simpl ; eapply plus_fr1...
-      rewrite (polconta _ _ Ha)...
-    * omega.
-    * list_simpl ; eapply plus_fr1...
-      rewrite (polconta _ _ Ha)...
-    * omega.
-- destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-    split ; eexists ; split.
-    * list_simpl ; eapply plus_fr2...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-    * list_simpl ; eapply plus_fr2...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-    split ; eexists ; split.
-    * list_simpl ; eapply plus_fr2...
-      rewrite (polconta _ _ Ha)...
-    * omega.
-    * list_simpl ; eapply plus_fr2...
-      rewrite (polconta _ _ Ha)...
-    * omega.
-- destruct l1' ; inversion Heq ; subst.
-  + split ; eexists ; split...
-  + rewrite app_comm_cons in IHpi1.
-    destruct (IHpi1 _ _ _ _ (eq_refl _)) as  [(s1' & IH1 & Hs1) (s2' & IH2 & Hs2)].
-    rewrite app_comm_cons in IHpi2.
-    destruct (IHpi2 _ _ _ _ (eq_refl _)) as  [(s1'' & IH1' & Hs1') (s2'' & IH2' & Hs2')].
-    split ; eexists ; split.
-    * list_simpl ; eapply with_fr...
-    * lia.
-    * list_simpl ; eapply with_fr...
-    * lia.
-- exfalso.
-  symmetry in Heq.
-  decomp_map Heq.
-  inversion Heq3.
-- destruct l1' ; inversion Heq ; subst.
-  destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in pi.
-    rewrite (polconts _ _ Hs) in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-    split ; eexists ; split.
-    * list_simpl ; eapply de_fr...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-    * list_simpl ; eapply de_fr...
-      rewrite (polconts _ _ Hs)...
-    * omega.
-  + rewrite (polconta _ _ Ha) in pi.
-    rewrite (polconta _ _ Ha) in IHpi.
-    rewrite app_comm_cons in IHpi.
-    destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-    split ; eexists ; split.
-    * list_simpl ; eapply de_fr...
-      rewrite (polconta _ _ Ha)...
-    * omega.
-    * list_simpl ; eapply de_fr...
-      rewrite (polconta _ _ Ha)...
-    * omega.
-- destruct l1' ; inversion Heq ; subst.
-  destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-  split ; eexists ; split.
-  + list_simpl ; eapply wk_fr...
-  + omega.
-  + list_simpl ; eapply wk_fr...
-  + omega.
-- destruct l1' ; inversion Heq ; subst.
-  rewrite 2 app_comm_cons in IHpi.
-  destruct (IHpi _ _ _ _ (eq_refl _)) as [(s1 & IH1 & Hs1) (s2 & IH2 & Hs2)].
-  split ; eexists ; split.
-  + list_simpl ; eapply co_fr...
-  + omega.
-  + list_simpl ; eapply co_fr...
-  + omega.
-Qed.
-
-Lemma with_rev1_f : forall l Pi s, llfoc l Pi s ->
-  forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
-  exists s', llfoc (l1 ++ A :: l2) Pi s' /\ s' < s.
+    { pi' : llfoc (l1 ++ A :: l2) Pi & fpsize pi' < fpsize pi }.
 Proof.
-intros l Pi s pi A B l1 l2 Heq.
-eapply with_rev_f in Heq ; [ | eassumption ].
+intros l Pi pi A B l1 l2 Heq.
+eapply with_rev_f in Heq.
 apply Heq.
 Qed.
 
-Lemma with_rev2_f : forall l Pi s, llfoc l Pi s ->
+Lemma with_rev2_f : forall l Pi (pi : llfoc l Pi),
   forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
-  exists s', llfoc (l1 ++ B :: l2) Pi s' /\ s' < s.
+    { pi' : llfoc (l1 ++ B :: l2) Pi & fpsize pi' < fpsize pi }.
 Proof.
-intros l Pi s pi A B l1 l2 Heq.
-eapply with_rev_f in Heq ; [ | eassumption ].
+intros l Pi pi A B l1 l2 Heq.
+eapply with_rev_f in Heq.
 apply Heq.
 Qed.
 
