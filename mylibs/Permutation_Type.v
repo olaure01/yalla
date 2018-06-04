@@ -21,6 +21,8 @@ Require Import List Compare_dec CMorphisms FinFun.
 
 Require Permutation.
 
+Require Import List_Type.
+
 Import ListNotations. (* For notations [] and [a;b;c] *)
 Set Implicit Arguments.
 (* Set Universe Polymorphism. *)
@@ -181,6 +183,19 @@ Global Instance Permutation_Type_in' :
  Proper (Logic.eq ==> @Permutation_Type A ==> iff) (@In A) | 10.
 Proof.
   repeat red; intros; subst; eauto using Permutation_Type_in.
+Qed.
+
+Theorem Permutation_Type_in_Type : forall (l l' : list A) (x : A),
+ Permutation_Type l l' -> In_Type x l -> In_Type x l'.
+Proof.
+  intros l l' x Hperm; induction Hperm; simpl; tauto.
+Qed.
+
+Global Instance Permutation_Type_in_Type' :
+ Proper (Logic.eq ==> @Permutation_Type A ==> Basics.arrow) (@In_Type A) | 10.
+Proof.
+  intros l1 l2 Heq l1' l2' HP Hi ; subst.
+  eauto using Permutation_Type_in_Type.
 Qed.
 
 Lemma Permutation_Type_app_tail : forall (l l' tl : list A),
