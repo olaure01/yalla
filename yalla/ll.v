@@ -30,6 +30,9 @@ Require Export formulas.
 
 (** ** Fragments for proofs *)
 
+Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
+Definition NoAxioms := (existT (fun x => x -> list formula) _ Empty_fun).
+
 (** Parameters for [ll] provability:
  - [pcut], [pmix0] and [pmix2] determine whether the corresponding rule is in the system or not;
  - [pperm] is [false] for exchange rule modulo cyclic permutations and [true] for exchange rule modulo arbitrary permutations;

@@ -18,7 +18,6 @@ Import FMSetNotations.
 (** ** 0. load the [ll] library *)
 
 Require ll.
-Require ll_fragments.
 Require fmformulas.
 
 
@@ -194,8 +193,8 @@ Qed.
 *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll.mk_pfrag false ll_fragments.NoAxioms false false true.
-(*                                   cut   axioms                mix0  mix2  perm  *)
+Definition pfrag_mell := ll.mk_pfrag false ll.NoAxioms false false true.
+(*                                   cut   axioms      mix0  mix2  perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)

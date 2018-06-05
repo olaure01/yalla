@@ -14,9 +14,6 @@ Require Import genperm_Type.
 Require Export ll.
 Require Import subs.
 
-Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
-Definition NoAxioms := (existT (fun x => x -> list formula) _ Empty_fun).
-
 
 (** ** Standard linear logic: [ll_ll] (no mix, no axiom) *)
 
