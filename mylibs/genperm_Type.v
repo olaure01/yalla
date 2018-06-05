@@ -204,7 +204,7 @@ Qed.
 
 Lemma PCperm_Type_map_inv {A B} b : forall (f : A -> B) l1 l2,
   PCperm_Type b l1 (map f l2) ->
-  { ml : { l | l1 = map f l } & (PCperm_Type b l2 (proj1_sig ml)) }.
+  { l : _ & l1 = map f l & (PCperm_Type b l2 l) }.
 Proof.
 destruct b ; intros.
 - eapply Permutation_Type_map_inv ; eassumption.
@@ -472,14 +472,12 @@ Qed.
 
 Lemma PEperm_Type_map_inv {A B} b : forall (f : A -> B) l1 l2,
   PEperm_Type b l1 (map f l2) ->
-  { ml : { l | l1 = map f l } & (PEperm_Type b l2 (proj1_sig ml)) }.
+  { l : _ & l1 = map f l & (PEperm_Type b l2 l) }.
 Proof.
 destruct b ; simpl ; intros f l1 l2 HP.
 - eapply Permutation_Type_map_inv ; eassumption.
 - subst.
-  eapply (existT _ (exist _ l2 _)).
-  reflexivity.
-  Unshelve. reflexivity.
+  exists l2 ; reflexivity.
 Qed.
 
 Instance PEperm_Type_rev {A} b : Proper (PEperm_Type b ==> PEperm_Type b) (@rev A).

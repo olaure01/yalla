@@ -228,7 +228,7 @@ revert m Heql ; induction pi ; intros m Heql ;
 - subst.
   simpl in p.
   apply Permutation_Type_map_inv in p.
-  destruct p as ((l' & Heq) & HP) ; subst.
+  destruct p as [l' Heq HP] ; subst.
   eapply ex_r.
   + apply IHpi...
   + symmetry...

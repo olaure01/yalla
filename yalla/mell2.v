@@ -168,7 +168,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply ax_r.
 - simpl in p.
   apply Permutation_Type_map_inv in p.
-  destruct p as ((l'' & Heq) & HP).
+  destruct p as [l'' Heq HP].
   apply Permutation_Type_sym in HP.
   eapply ex_r...
   apply IHpi...

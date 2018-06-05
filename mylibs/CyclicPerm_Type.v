@@ -102,7 +102,8 @@ apply (cperm_Type_app l1 (a :: nil)) ; assumption.
 Qed.
 
 Lemma cperm_Type_morph_cons {A} : forall P : list A -> Prop,
-  (forall a l, P (l ++ a :: nil) -> P (a :: l)) -> Proper (CPermutation_Type ==> Basics.impl) P.
+  (forall a l, P (l ++ a :: nil) -> P (a :: l)) ->
+  Proper (CPermutation_Type ==> Basics.impl) P.
 Proof with try eassumption.
 assert (forall P : list A -> Prop,
          (forall a l, P (l ++ a :: nil) -> P (a :: l)) ->
@@ -170,7 +171,8 @@ assumption.
 Qed.
 
 Lemma cperm_Type_two_inv {A} : forall (a : A) b l,
-  CPermutation_Type (a :: b :: nil) l -> { l = a :: b :: nil } + { l = b :: a :: nil }.
+  CPermutation_Type (a :: b :: nil) l ->
+  { l = a :: b :: nil } + { l = b :: a :: nil }.
 Proof.
 intros.
 apply Permutation_Type_length_2_inv.
@@ -296,26 +298,23 @@ Qed.
 
 Lemma cperm_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
   CPermutation_Type l1 (map f l2) ->
-    { ml : { l | l1 = map f l } & (CPermutation_Type l2 (proj1_sig ml)) }.
+    { l : _ & l1 = map f l & (CPermutation_Type l2 l) }.
 Proof with try assumption.
 induction l1 ; intros l2 HP.
-- eapply (existT _ (exist _ nil _)).
+- exists nil ; try reflexivity.
   simpl ; destruct l2...
   + apply cperm_Type_refl.
   + apply cperm_Type_nil in HP.
     inversion HP.
-  Unshelve. reflexivity.
 - apply cperm_Type_sym in HP.
   assert (Heq := HP).
   apply cperm_Type_vs_cons_inv in Heq.
   destruct Heq as ((l3 & l4) & Heq1 & Heq2).
-  symmetry in Heq2.
+  simpl in Heq1 ; simpl in Heq2 ; symmetry in Heq2.
   decomp_map_Type Heq2 ; subst ; simpl.
-  eapply (existT _ (exist _ (x :: l6 ++ l0) _)).
-  constructor.
-  Unshelve.
-  simpl in Heq3 ; simpl in Heq5 ; subst ; simpl ;
-    rewrite map_app ; reflexivity.
+  exists (x :: l6 ++ l0).
+  + simpl ; rewrite ? map_app ; reflexivity.
+  + constructor.
 Qed.
 
 Instance cperm_Type_Forall {A} (P : A -> Prop) :

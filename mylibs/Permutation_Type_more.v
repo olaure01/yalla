@@ -290,7 +290,7 @@ revert l2 ; induction HP ; intros l2 HF ; inversion HF ; subst.
 Qed.
 
 Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
-  Permutation_Type l1 (map f l2) -> { ml : { l | l1 = map f l } & (Permutation_Type l2 (proj1_sig ml)) }.
+  Permutation_Type l1 (map f l2) -> { l : _ & l1 = map f l & (Permutation_Type l2 l) }.
 (*
 Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
   Permutation_Type l1 (map f l2) -> { pl : { l : _ & Permutation_Type l2 l} | l1 = map f (projT1 pl) }.
@@ -299,9 +299,7 @@ Proof with try assumption.
 induction l1 ; intros l2 HP.
 - apply Permutation_Type_nil in HP.
   destruct l2 ; inversion HP.
-  eapply (existT _ (exist _ nil _)).
-  apply Permutation_Type_refl.
-  Unshelve. apply eq_refl.
+  exists nil ; reflexivity.
 - apply Permutation_Type_sym in HP.
   assert (Heq := HP).
   apply Permutation_Type_vs_cons_inv in Heq.
@@ -314,12 +312,11 @@ induction l1 ; intros l2 HP.
   specialize IHl1 with (l0 ++ l4).
   rewrite map_app in IHl1.
   apply IHl1 in HP.
-  destruct HP as ((l' & Heq) & HP') ; subst.
-  eapply (existT _ (exist _ (x :: l') _)).
+  destruct HP as [l' Heq HP'] ; subst.
+  exists (x :: l') ; simpl ; try reflexivity.
   apply Permutation_Type_sym.
   apply Permutation_Type_cons_app.
   apply Permutation_Type_sym...
-  Unshelve. apply eq_refl.
 Qed.
 
 Lemma Permutation_Type_image {A B} : forall (f : A -> B) a l l',
@@ -327,7 +324,7 @@ Lemma Permutation_Type_image {A B} : forall (f : A -> B) a l l',
 Proof.
 intros f a l l' HP.
 apply Permutation_Type_map_inv in HP.
-destruct HP as ((l'' & Heq) & _).
+destruct HP as [l'' Heq _].
 destruct l'' ; inversion Heq.
 eexists ; reflexivity.
 Qed.

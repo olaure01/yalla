@@ -429,7 +429,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   apply Permutation_Type_cons_app_inv in HP2.
   rewrite <- map_app in HP2.
   apply Permutation_Type_map_inv in HP2.
-  destruct HP2 as ((l & Heq) & HP).
+  destruct HP2 as [l Heq HP].
   rewrite list2fm_elt.
   apply list2fm_perm in HP ; simpl in HP.
   rewrite HP.
