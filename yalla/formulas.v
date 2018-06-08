@@ -209,17 +209,17 @@ Qed.
 
 (* unused
 
-Require Import genperm.
+Require Import genperm_Type.
 
 Lemma sub_perm_list :
-  forall b l l1 l2, subform_list l l1 -> PCperm b l1 l2 -> subform_list l l2
-.
+  forall b l l1 l2, subform_list l l1 ->
+    PCperm_Type b l1 l2 -> subform_list l l2.
 Proof with try eassumption.
 intros b l l1 l2 H1 HP ; revert H1 ; induction l ; intro H1.
 - constructor.
 - inversion H1 ; subst.
   constructor.
-  + eapply PCperm_Exists...
+  + eapply PCperm_Type_Exists...
   + apply IHl...
 Qed.
 *)
