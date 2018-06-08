@@ -62,7 +62,7 @@ mell_prop.vo: mell_prop.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(
 lambek.vo: lambek.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo ill.vo
 mell_mset.vo : mell_mset.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/nattree.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_more.vo $(MYLIBSDIR)/fmsetlist.vo ll.vo ll_fragments.vo fmformulas.vo
 mell_msetoid.vo : mell_msetoid.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/fmsetoidlist.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_more.vo ll.vo
-llpol.vo: llpol.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_more.vo $(MYLIBSDIR)/Permutation_solve.vo ll.vo
+llpol.vo: llpol.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/Permutation_Type_solve.vo ll.vo
 llfoc.vo: llfoc.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_more.vo $(MYLIBSDIR)/genperm.vo ll_fragments.vo
 tl.vo: tl.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/Bool_more.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/genperm.vo ill.vo ll.vo
 
