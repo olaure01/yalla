@@ -7,7 +7,6 @@
 
 (** * Example of a concrete use of the yalla library: polarized linear logic LLpol *)
 
-Require Import Bool.
 Require Import CMorphisms.
 
 Require Import Injective.
