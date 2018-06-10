@@ -234,3 +234,15 @@ constructor...
 apply IHl1...
 Qed.
 
+Lemma Forall_Type_rev {A} : forall P (l : list A),
+  Forall_Type P l -> Forall_Type P (rev l).
+Proof with try assumption.
+induction l ; intros HP.
+- constructor.
+- inversion HP ; subst.
+  apply IHl in X0.
+  apply Forall_Type_app...
+  constructor...
+  constructor.
+Qed.
+
