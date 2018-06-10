@@ -109,6 +109,42 @@ Hint Resolve in_Type_eq in_Type_cons in_Type_inv in_Type_nil in_Type_app_or
   in_Type_or_app: datatypes.
 
 
+(*********************************************)
+(** Reverse Induction Principle on Lists  *)
+(*********************************************)
+
+  Section Reverse_Induction.
+
+  Variable A : Type.
+
+    Lemma rev_list_ind_Type :
+      forall P:list A-> Type,
+	P nil ->
+	(forall (a:A) (l:list A), P (rev l) -> P (rev (a :: l))) ->
+	forall l:list A, P (rev l).
+    Proof.
+      induction l; auto.
+    Qed.
+
+    Theorem rev_ind_Type :
+      forall P:list A -> Type,
+	P nil ->
+	(forall (x:A) (l:list A), P l -> P (l ++ x :: nil)) -> forall l:list A, P l.
+    Proof.
+      intros.
+      generalize (rev_involutive l).
+      intros E; rewrite <- E.
+      apply (rev_list_ind_Type P).
+      - auto.
+      - simpl.
+        intros.
+        apply (X0 a (rev l0)).
+        auto.
+    Qed.
+
+  End Reverse_Induction.
+
+
 (******************************)
 (** ** Set inclusion on list  *)
 (******************************)
