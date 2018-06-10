@@ -230,6 +230,21 @@ destruct b ; intros l1 l2 HP HE.
 - eapply cperm_Type_Exists...
 Qed.
 
+Lemma PCperm_Type_Forall2 {A B} b (P : A -> B -> Type) :
+  forall l1 l1' l2, PCperm_Type b l1 l1' -> Forall2_Type P l1 l2 -> 
+    { l2' : _ & PCperm_Type b l2 l2' & Forall2_Type P l1' l2' }.
+Proof.
+destruct b ; [ apply Permutation_Type_Forall2 | apply cperm_Type_Forall2 ].
+Qed.
+
+Lemma PCperm_Type_image {A B} b : forall (f : A -> B) a l l',
+  PCperm_Type b (a :: l) (map f l') -> { a' | a = f a' }.
+Proof with try eassumption.
+destruct b ; intros.
+- eapply Permutation_Type_image...
+- eapply cperm_Type_image...
+Qed.
+
 Instance PCperm_Type_Forall_Type {A} b (P : A -> Type) :
   Proper (PCperm_Type b ==> Basics.arrow) (Forall_Type P).
 Proof with try eassumption.
@@ -244,21 +259,6 @@ Proof with try eassumption.
 destruct b ; intros l1 l2 HP HE.
 - eapply Permutation_Type_Exists_Type...
 - eapply cperm_Type_Exists_Type...
-Qed.
-
-Lemma PCperm_Type_Forall2 {A B} b (P : A -> B -> Type) :
-  forall l1 l1' l2, PCperm_Type b l1 l1' -> Forall2_Type P l1 l2 -> 
-    { l2' : _ & PCperm_Type b l2 l2' & Forall2_Type P l1' l2' }.
-Proof.
-destruct b ; [ apply Permutation_Type_Forall2 | apply cperm_Type_Forall2 ].
-Qed.
-
-Lemma PCperm_Type_image {A B} b : forall (f : A -> B) a l l',
-  PCperm_Type b (a :: l) (map f l') -> { a' | a = f a' }.
-Proof with try eassumption.
-destruct b ; intros.
-- eapply Permutation_Type_image...
-- eapply cperm_Type_image...
 Qed.
 
 
@@ -464,6 +464,22 @@ destruct b ; intros l l' HP.
   assumption.
 - simpl in HP ; subst.
   reflexivity.
+Qed.
+
+Instance PEperm_Type_Forall_Type {A} b (P : A -> Type) :
+  Proper (PEperm_Type b ==> Basics.arrow) (Forall_Type P).
+Proof with try eassumption.
+destruct b ; simpl ; intros l1 l2 HP HF.
+- eapply Permutation_Type_Forall_Type...
+- subst...
+Qed.
+
+Instance PEperm_Type_Exists_Type {A} b (P : A -> Type) :
+  Proper (PEperm_Type b ==> Basics.arrow) (Exists_Type P).
+Proof with try eassumption.
+destruct b ; simpl ; intros l1 l2 HP HF.
+- eapply Permutation_Type_Exists_Type...
+- subst...
 Qed.
 
 Lemma PEperm_Type_map_inv {A B} b : forall (f : A -> B) l1 l2,
