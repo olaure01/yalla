@@ -654,221 +654,193 @@ Qed.
 
 (** *** Comparisons between [ill] and [ll] *)
 
-Lemma wn_not_idefin : forall A F s1 s2,
-  ll_mix0 (dual (ill2ll A) :: nil) s1 -> ll_mix0 (oc F :: ill2ll A :: nil) s2
+Lemma wn_not_idefin : forall A F,
+  ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (oc F :: ill2ll A :: nil)
     -> False.
 Proof with myeeasy.
-cut (forall A F l2 s1 s2,
-  ll_mix0 (dual (ill2ll A) :: nil) s1 ->
-  Permutation (oc F :: ill2ll A :: nil) l2 -> ll_mix0 l2 s2 -> False).
-{ intros H A F s1 s2 pi1 pi2 ; eapply H... }
-induction A ; intros F l2 s1 s2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
+cut (forall A F l2,
+  ll_mix0 (dual (ill2ll A) :: nil) ->
+  Permutation_Type (oc F :: ill2ll A :: nil) l2 -> ll_mix0 l2 -> False).
+{ intros H A F pi1 pi2 ; eapply H... }
+induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
 - remember (covar (i2a i) :: nil) as l1 ; revert Heql1 ;
     clear - pi1 ; induction pi1 ; intros Heql1 ;
     try (now inversion Heql1) ; subst.
-  symmetry  in H ; apply Permutation_length_1_inv in H.
+  symmetry in p ; apply Permutation_Type_length_1_inv in p.
   apply IHpi1...
 - revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-    try (now (apply Permutation_length in HP2 ; inversion HP2)) ;
-    try (now (apply Permutation_length_2_inv in HP2 ; inversion HP2)).
+    try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
+    try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
   + apply IHpi2.
-    rewrite H...
-  + apply Permutation_length_2_inv in HP2.
-    destruct HP2 ; inversion H.
-    destruct l ; inversion H2.
+    symmetry in p.
+    transitivity l2...
+  + apply Permutation_Type_length_2_inv in HP2.
+    destruct HP2 ; inversion e.
+    destruct l ; inversion H1.
 - rewrite <- (app_nil_l (parr _ _ :: _)) in pi1.
   eapply parr_rev_axat in pi1 ;
-    [ | intros lax Hgax ; inversion Hgax | ]...
-  destruct pi1 as (s1' & pi & _).
-  list_simpl in pi.
-  assert ((exists s2' s2'', ll_mix0 (oc F :: ill2ll A1 :: nil) s2'
-                         /\ ll_mix0 (ill2ll A2 :: nil) s2'')
-       \/ (exists s2' s2'', ll_mix0 (ill2ll A1 :: nil) s2'
-                         /\ ll_mix0 (oc F :: ill2ll A2 :: nil) s2''))
-    as [(s2' & s2'' & pi2' & pi2'') | (s2' & s2'' & pi2' & pi2'')].
+    [ | intros a ; inversion a | ]...
+  list_simpl in pi1.
+  assert ((ll_mix0 (oc F :: ill2ll A1 :: nil) * ll_mix0 (ill2ll A2 :: nil))
+        + (ll_mix0 (ill2ll A1 :: nil) * ll_mix0 (oc F :: ill2ll A2 :: nil)))
+    as [[pi2' pi2''] | [pi2' pi2'']].
   { revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-      try (now (apply Permutation_length in HP2 ; inversion HP2)) ;
-      try (now (apply Permutation_length_2_inv in HP2 ; inversion HP2)).
+      try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
+      try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
     - apply IHpi2.
-      rewrite H...
-    - apply Permutation_length_2_inv in HP2.
-      destruct HP2 ; inversion H ; subst.
-      destruct l2 ; inversion H3 ; subst.
-      + destruct l1 ; inversion H3 ; subst.
-        left ; eexists ; eexists ; split...
-        eapply ex_r ; [ apply pi2_1 | PCperm_solve ]...
-      + apply app_eq_nil in H2 ; destruct H2 ; subst.
-        right ; eexists ; eexists ; split...
-        eapply ex_r ; [ apply pi2_2 | PCperm_solve ]...
-    - apply Permutation_length_2_inv in HP2.
-      destruct HP2 ; inversion H.
-      destruct l ; inversion H2. }
-  + eapply cut_mix0_r in pi ; [ | rewrite bidual ].
-    * destruct pi as [s pi].
-      eapply IHA1.
-      -- apply pi.
-      -- reflexivity.
-      -- eassumption.
-    * eassumption. 
-  + eapply ex_r in pi ; [ | apply perm_swap ].
-    eapply cut_mix0_r in pi ; [ | rewrite bidual ].
-    * destruct pi as [s pi].
-      eapply IHA2.
-      -- apply pi.
-      -- reflexivity.
-      -- eassumption.
-    * eassumption. 
+      symmetry in p ; etransitivity...
+    - apply Permutation_Type_length_2_inv in HP2.
+      destruct HP2 ; inversion e ; subst.
+      destruct l2 ; inversion H2 ; subst.
+      + destruct l1 ; inversion H2 ; subst.
+        left ; split...
+        eapply ex_r ; [ apply pi2_1 | PCperm_Type_solve ]...
+      + apply app_eq_nil in H1 ; destruct H1 ; subst.
+        right ; split...
+        eapply ex_r ; [ apply pi2_2 | PCperm_Type_solve ]...
+    - apply Permutation_Type_length_2_inv in HP2.
+      destruct HP2 ; inversion e.
+      destruct l ; inversion H1. }
+  + eapply cut_mix0_r in pi1 ; [ | rewrite bidual ]...
+    eapply IHA1 ; [ apply pi1 | reflexivity | ]...
+  + eapply ex_r in pi1 ; [ | apply Permutation_Type_swap ].
+    eapply cut_mix0_r in pi1 ; [ | rewrite bidual ]...
+    eapply IHA2 ; [ apply pi1 | reflexivity | ]...
 - eapply tens_rev_axat in pi1 ;
-    [ | intros lax Hgax ; inversion Hgax | ]...
+    [ | intros a ; inversion a | ]...
   cons2app in HP2.
   assert (Heq2 := HP2).
-  symmetry in Heq2 ; apply Permutation_vs_elt_inv in Heq2.
-  destruct Heq2 as (l' & l'' & Heq2) ; subst.
+  symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
+  destruct Heq2 as ((l' & l'') & Heq2) ; subst.
   eapply parr_rev_axat in pi2 ;
-    [ | intros lax Hgax ; inversion Hgax | ]...
-  destruct pi1 as (s1' & s1'' & pi1' & pi1'' & _ & _).
-  destruct pi2 as (s2' & pi2' & _).
+    [ | intros a ; inversion a | ]...
+  destruct pi1 as [pi1' pi1''].
   rewrite bidual in pi1'.
   eapply (cut_mix0_r _ (l' ++ ill2ll A2 :: l'')) in pi1' ;
-    [ | eapply ex_r ; [ apply pi2' | PCperm_solve ]].
-  destruct pi1' as [s' pi1'].
+    [ | eapply ex_r ; [ apply pi2 | PCperm_Type_solve ]].
   eapply IHA2.
   + eassumption.
-  + apply Permutation_app_inv in HP2 ; simpl in HP2.
-    etransitivity ; [ apply perm_swap | ].
-    apply Permutation_cons ; [ reflexivity | ].
-    eassumption.
+  + apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
+    etransitivity ; [ apply Permutation_Type_swap | ].
+    apply Permutation_Type_cons ; [ reflexivity | ]...
   + eapply ex_r ; [ apply pi1' | ].
-    PCperm_solve.
+    PCperm_Type_solve.
 - eapply tens_rev_axat in pi1 ;
-    [ | intros lax Hgax ; inversion Hgax | ]...
+    [ | intros a ; inversion a | ]...
   cons2app in HP2.
   assert (Heq2 := HP2).
-  symmetry in Heq2 ; apply Permutation_vs_elt_inv in Heq2.
-  destruct Heq2 as (l' & l'' & Heq2) ; subst.
+  symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
+  destruct Heq2 as ((l' & l'') & Heq2) ; subst.
   eapply parr_rev_axat in pi2 ;
-    [ | intros lax Hgax ; inversion Hgax | ]...
-  destruct pi1 as (s1' & s1'' & pi1' & pi1'' & _ & _).
-  destruct pi2 as (s2' & pi2' & _).
+    [ | intros a ; inversion a | ]...
+  destruct pi1 as [pi1' pi1''].
   rewrite bidual in pi1''.
   eapply (cut_mix0_r _ (l' ++ ill2ll A2 :: l'')) in pi1'' ;
-    [ | eapply ex_r ; [ apply pi2' | PCperm_solve ]].
-  destruct pi1'' as [s' pi1''].
+    [ | eapply ex_r ; [ apply pi2 | PCperm_Type_solve ]].
   eapply IHA2.
   + eassumption.
-  + apply Permutation_app_inv in HP2 ; simpl in HP2.
-    etransitivity ; [ apply perm_swap | ].
-    apply Permutation_cons ; [ reflexivity | ].
-    eassumption.
+  + apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
+    etransitivity ; [ apply Permutation_Type_swap | ].
+    apply Permutation_Type_cons ; [ reflexivity | ]...
   + eapply ex_r ; [ apply pi1'' | ].
-    PCperm_solve.
+    PCperm_Type_solve.
 - eapply tens_rev_axat in pi1 ;
-    [ | intros lax Hgax ; inversion Hgax | ]...
-  destruct pi1 as (s1' & s1'' & pi1' & pi1'' & _ & _).
+    [ | intros a ; inversion a | ]...
+  destruct pi1 as [pi1' _].
   clear - pi1'.
-  assert (exists l, Permutation (covar (i2a atN) :: nil) l)
+  assert ({ l & Permutation_Type (covar (i2a atN) :: nil) l })
     as [l HP] by (eexists ; reflexivity).
   eapply ex_r in pi1' ; [ | apply HP ].
-  remember (S s1') as s ; clear Heqs.
   revert HP ; induction pi1' ; intros HP ;
-    try (now (apply Permutation_length in HP ; inversion HP)) ;
-    try (now (apply Permutation_length_1_inv in HP ; inversion HP)).
+    try (now (apply Permutation_Type_length in HP ; inversion HP)) ;
+    try (now (apply Permutation_Type_length_1_inv in HP ; inversion HP)).
   apply IHpi1'.
-  rewrite H...
+  symmetry in p ; etransitivity...
 - remember (zero :: nil) as l1 ; revert Heql1 ;
     clear - pi1 ; induction pi1 ; intros Heql1 ;
     try (now inversion Heql1) ; subst.
-  symmetry  in H ; apply Permutation_length_1_inv in H.
+  symmetry in p ; apply Permutation_Type_length_1_inv in p.
   apply IHpi1...
 - eapply plus_rev_axat in pi1 ;
-    [ | intros lax Hgax ; inversion Hgax | ]...
-  destruct pi1 as (s' & [ pi1 | pi1 ] & _).
+    [ | intros a ; inversion a | ]...
+  destruct pi1 as [ pi1 | pi1 ].
   + cons2app in HP2.
     assert (Heq2 := HP2).
-    symmetry in Heq2 ; apply Permutation_vs_elt_inv in Heq2.
-    destruct Heq2 as (l' & l'' & Heq2) ; subst.
+    symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
+    destruct Heq2 as ((l' & l'') & Heq2) ; subst.
     eapply with_rev1_noax in pi2 ;
-      [ | intros lax Hgax ; inversion Hgax | ]...
-    destruct pi2 as (s1' & pi1').
+      [ | intros a ; inversion a | ]...
     eapply IHA1.
     * eassumption.
-    * apply Permutation_app_inv in HP2 ; simpl in HP2.
-      etransitivity ; [ apply perm_swap | ].
-      apply Permutation_cons ; [ reflexivity | ].
-      eassumption.
-    * eapply ex_r ; [ apply pi1' | ].
-      PCperm_solve.
+    * apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
+      etransitivity ; [ apply Permutation_Type_swap | ].
+      apply Permutation_Type_cons ; [ reflexivity | ]...
+    * eapply ex_r ; [ apply pi2 | ].
+      PCperm_Type_solve.
   + cons2app in HP2.
     assert (Heq2 := HP2).
-    symmetry in Heq2 ; apply Permutation_vs_elt_inv in Heq2.
-    destruct Heq2 as (l' & l'' & Heq2) ; subst.
+    symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
+    destruct Heq2 as ((l' & l'') & Heq2) ; subst.
     eapply with_rev2_noax in pi2 ;
-      [ | intros lax Hgax ; inversion Hgax | ]...
-    destruct pi2 as (s1' & pi1').
+      [ | intros a ; inversion a | ]...
     eapply IHA2.
     * eassumption.
-    * apply Permutation_app_inv in HP2 ; simpl in HP2.
-      etransitivity ; [ apply perm_swap | ].
-      apply Permutation_cons ; [ reflexivity | ].
-      eassumption.
-    * eapply ex_r ; [ apply pi1' | ].
-      PCperm_solve.
+    * apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
+      etransitivity ; [ apply Permutation_Type_swap | ].
+      apply Permutation_Type_cons ; [ reflexivity | ]...
+    * eapply ex_r ; [ apply pi2 | ].
+      PCperm_Type_solve.
 - revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-    try (now (apply Permutation_length in HP2 ; inversion HP2)) ;
-    try (now (apply Permutation_length_2_inv in HP2 ; inversion HP2)).
+    try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
+    try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
   + apply IHpi2.
-    rewrite H...
-  + apply Permutation_length_2_inv in HP2.
-    destruct HP2 ; inversion H.
-    destruct l ; inversion H2.
+    symmetry in p ; etransitivity...
+  + apply Permutation_Type_length_2_inv in HP2.
+    destruct HP2 ; inversion e.
+    destruct l ; inversion H1.
 - assert (pi0 := pi1).
   eapply with_rev1_noax in pi1 ;
-    [ | intros lax Hgax ; inversion Hgax
-    | rewrite app_nil_l ; reflexivity ]...
+    [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ]...
   eapply with_rev2_noax in pi0 ;
-    [ | intros lax Hgax ; inversion Hgax
-    | rewrite app_nil_l ; reflexivity ]...
-  destruct pi0 as [s0 pi0].
-  destruct pi1 as [s1' pi1].
-  assert ((exists s2', ll_mix0 (oc F :: ill2ll A1 :: nil) s2'
-                    \/ ll_mix0 (oc F :: ill2ll A2 :: nil) s2'))
-  as [s2' [ pi2' | pi2' ]].
+    [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ]...
+  assert (ll_mix0 (oc F :: ill2ll A1 :: nil)
+        + ll_mix0 (oc F :: ill2ll A2 :: nil))
+    as [ pi2' | pi2' ].
   { revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-      try (now (apply Permutation_length in HP2 ; inversion HP2)) ;
-      try (now (apply Permutation_length_2_inv in HP2 ; inversion HP2)).
+      try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
+      try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
     - apply IHpi2.
-      rewrite H...
-    - apply Permutation_length_2_inv in HP2.
-      destruct HP2 ; inversion H ; subst.
-      eexists ; left.
-      eapply ex_r ; [ apply pi2 | PCperm_solve ].
-    - apply Permutation_length_2_inv in HP2.
-      destruct HP2 ; inversion H ; subst.
-      eexists ; right.
-      eapply ex_r ; [ apply pi2 | PCperm_solve ].
-    - apply Permutation_length_2_inv in HP2.
-      destruct HP2 ; inversion H.
-      destruct l ; inversion H2. }
+      symmetry in p ; etransitivity...
+    - apply Permutation_Type_length_2_inv in HP2.
+      destruct HP2 ; inversion e ; subst.
+      left.
+      eapply ex_r ; [ apply pi2 | PCperm_Type_solve ].
+    - apply Permutation_Type_length_2_inv in HP2.
+      destruct HP2 ; inversion e ; subst.
+      right.
+      eapply ex_r ; [ apply pi2 | PCperm_Type_solve ].
+    - apply Permutation_Type_length_2_inv in HP2.
+      destruct HP2 ; inversion e.
+      destruct l ; inversion H1. }
   + eapply IHA1...
   + eapply IHA2...
 - revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-    try (now (apply Permutation_length in HP2 ; inversion HP2)) ;
-    try (now (apply Permutation_length_2_inv in HP2 ; inversion HP2)).
+    try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
+    try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
   + apply IHpi2.
-    rewrite H...
-  + apply Permutation_length_2_inv in HP2.
-    destruct HP2 ; inversion H ; destruct l ; inversion H2.
+    symmetry in p ; etransitivity...
+  + apply Permutation_Type_length_2_inv in HP2.
+    destruct HP2 ; inversion e ; destruct l ; inversion H1.
 Qed.
 
-Lemma bot_not_idefin : forall A s1 s2,
-  ll_mix0 (dual (ill2ll A) :: nil) s1 -> ll_mix0 (one :: ill2ll A :: nil) s2
+Lemma bot_not_idefin : forall A,
+  ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (one :: ill2ll A :: nil)
     -> False.
 Proof with myeeasy.
-intros A s1 s2 pi1 pi2.
+intros A pi1 pi2.
 eapply cut_mix0_r in pi2.
-- destruct pi2 as [s' pi2].
-  list_simpl in pi2.
-  eapply ex_r in pi2 ; [ | apply perm_swap ].
+- list_simpl in pi2.
+  eapply ex_r in pi2 ; [ | apply Permutation_Type_swap ].
   eapply wn_not_idefin...
 - apply bot_r.
   change nil with (map wn nil).
@@ -876,14 +848,13 @@ eapply cut_mix0_r in pi2.
   apply one_r.
 Qed.
 
-Lemma wn_one_not_idefin : forall A s1 s2,
-  ll_mix0 (wn one :: dual (ill2ll A) :: nil) s1 -> ll_mix0 (oc bot :: ill2ll A :: nil) s2
+Lemma wn_one_not_idefin : forall A,
+  ll_mix0 (wn one :: dual (ill2ll A) :: nil)-> ll_mix0 (oc bot :: ill2ll A :: nil)
     -> False.
 Proof with myeeasy.
-intros A s1 s2 pi1 pi2.
+intros A pi1 pi2.
 eapply cut_mix0_r in pi1.
-- destruct pi1 as [s' pi1].
-  list_simpl in pi1.
+- list_simpl in pi1.
   eapply wn_not_idefin...
 - change nil with (map wn nil).
   apply oc_r.
@@ -891,28 +862,29 @@ eapply cut_mix0_r in pi1.
   apply mix0_r...
 Qed.
 
-Lemma oc_bot_not_idefin : forall A s1 s2,
-  ll_ll (oc bot :: dual (ill2ll A) :: nil) s1 -> ll_mix0 (wn one :: ill2ll A :: nil) s2
+Lemma oc_bot_not_idefin : forall A,
+  ll_ll (oc bot :: dual (ill2ll A) :: nil) -> ll_mix0 (wn one :: ill2ll A :: nil)
     -> False.
 Proof with myeeasy.
-assert (forall l s, ll_ll (map dual (map ill2ll l)) s ->
-          (Forall (fun F => exists s, ll_mix0 (ill2ll F :: nil) s) l) -> False)
+assert (forall l, ll_ll (map dual (map ill2ll l)) ->
+          (Forall_Type (fun F => ll_mix0 (ill2ll F :: nil)) l) -> False)
   as Hgen.
-{ intros l s pi.
+{ intros l pi.
   remember (map dual (map ill2ll l)) as l0 ; revert l Heql0.
   induction pi ; intros l' Heq HF ; subst ;
     try (now inversion f).
   - destruct l' ; inversion Heq.
     destruct l' ; inversion Heq.
     destruct i0 ; inversion H3.
-  - apply PCperm_map_inv in H.
-    destruct H as (l1' & Heq & HP) ; subst.
+  - apply PCperm_Type_map_inv in p.
+    destruct p as [ l1' Heq HP ] ; subst.
     symmetry in HP.
-    apply PCperm_map_inv in HP.
-    destruct HP as (l1'' & Heq & HP) ; subst.
+    apply PCperm_Type_map_inv in HP.
+    destruct HP as [ l1'' Heq HP ] ; subst.
     eapply IHpi.
     + reflexivity.
-    + rewrite <- HP...
+    + eapply Permutation_Type_Forall_Type...
+      apply HP.
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0.
   - destruct l' ; inversion Heq ; subst.
@@ -922,171 +894,147 @@ assert (forall l s, ll_ll (map dual (map ill2ll l)) s ->
     decomp_map H1 ; decomp_map H1 ; subst.
     destruct i ; inversion H0 ; subst.
     + inversion HF ; subst.
-      destruct H2 as [s' pi'] ; simpl in pi'.
-      eapply parr_rev_axat in pi' ;
-        [ | intros lax Hgax ; inversion Hgax | rewrite app_nil_l ; reflexivity ].
-      destruct pi' as (s1' & pi' & _) ; list_simpl in pi'.
-      apply Forall_app_inv in H3 ; destruct H3.
+      simpl in X ; eapply parr_rev_axat in X ;
+        [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ].
+      list_simpl in X.
+      apply Forall_Type_app_inv in X0 ; destruct X0.
       rewrite bidual in pi1.
-      assert (exists s0, ll_mix0 (ill2ll i1 :: nil) s0) as [s0 pi0].
+      assert (ll_mix0 (ill2ll i1 :: nil)) as pi0.
       { eapply (stronger_pfrag _ pfrag_mix0) in pi1 ;
-          [ | nsplit 5 ; myeasy ; intros lax Hgax ; inversion Hgax ].
-        revert s1 pi1 H1 ; clear ; induction l5 ; intros s pi HF.
-        - eexists...
+          [ | nsplit 5 ; myeasy ; intros a ; inversion a ].
+        revert pi1 f0 ; clear ; induction l5 ; intros pi HF.
+        - assumption.
         - inversion HF ; subst.
-          destruct H1 as [s' pi'].
-          simpl in pi ; eapply ex_r in pi ; [ | apply perm_swap ].
-          apply (cut_mix0_r _ _ _ _ _ pi) in pi'.
-          destruct pi' as [s'' pi'].
+          simpl in pi ; eapply ex_r in pi ; [ | apply Permutation_Type_swap ].
+          apply (cut_mix0_r _ _ _ pi) in X.
           eapply IHl5... }
-      eapply ex_r in pi' ; [ | apply perm_swap ].
-      apply (cut_mix0_r _ _ _ _ _ pi') in pi0.
+      eapply ex_r in X ; [ | apply Permutation_Type_swap ].
+      apply (cut_mix0_r _ _ _ X) in pi0.
       apply (IHpi2 (i2 :: l4))...
       constructor...
     + inversion HF ; subst.
-      destruct H2 as [s' pi'] ; simpl in pi'.
-      eapply parr_rev_axat in pi' ;
-        [ | intros lax Hgax ; inversion Hgax | rewrite app_nil_l ; reflexivity ].
-      destruct pi' as (s1' & pi' & _) ; list_simpl in pi'.
-      apply Forall_app_inv in H3 ; destruct H3.
+      simpl in X ; eapply parr_rev_axat in X ;
+        [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ].
+      list_simpl in X.
+      apply Forall_Type_app_inv in X0 ; destruct X0.
       rewrite bidual in pi2.
-      assert (exists s0, ll_mix0 (ill2ll i1 :: nil) s0) as [s0 pi0].
+      assert (ll_mix0 (ill2ll i1 :: nil)) as pi0.
       { eapply (stronger_pfrag _ pfrag_mix0) in pi2 ;
-          [ | nsplit 5 ; myeasy ; intros lax Hgax ; inversion Hgax ].
-        revert s2 pi2 H ; clear ; induction l4 ; intros s pi HF.
-        - eexists...
+          [ | nsplit 5 ; myeasy ; intros a ; inversion a ].
+        revert pi2 f ; clear ; induction l4 ; intros pi HF.
+        - assumption.
         - inversion HF ; subst.
-          destruct H1 as [s' pi'].
-          simpl in pi ; eapply ex_r in pi ; [ | apply perm_swap ].
-          apply (cut_mix0_r _ _ _ _ _ pi) in pi'.
-          destruct pi' as [s'' pi'].
+          simpl in pi ; eapply ex_r in pi ; [ | apply Permutation_Type_swap ].
+          apply (cut_mix0_r _ _ _ pi) in X.
           eapply IHl4... }
-      apply (cut_mix0_r _ _ _ _ _ pi') in pi0.
+      apply (cut_mix0_r _ _ _ X) in pi0.
       apply (IHpi1 (i2 :: l5))...
       constructor...
     + inversion HF ; subst.
-      destruct H2 as [s' pi'] ; simpl in pi'.
-      eapply parr_rev_axat in pi' ;
-        [ | intros lax Hgax ; inversion Hgax | rewrite app_nil_l ; reflexivity ].
-      destruct pi' as (s1' & pi' & _) ; list_simpl in pi'.
-      apply Forall_app_inv in H3 ; destruct H3.
+      simpl in X ; eapply parr_rev_axat in X ;
+        [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ].
+      list_simpl in X.
+      apply Forall_Type_app_inv in X0 ; destruct X0.
       rewrite bidual in pi2.
-      assert (exists s0, ll_mix0 (ill2ll i :: nil) s0) as [s0 pi0].
+      assert (ll_mix0 (ill2ll i :: nil)) as pi0.
       { eapply (stronger_pfrag _ pfrag_mix0) in pi2 ;
-          [ | nsplit 5 ; myeasy ; intros lax Hgax ; inversion Hgax ].
-        revert s2 pi2 H ; clear ; induction l4 ; intros s pi HF.
-        - eexists...
+          [ | nsplit 5 ; myeasy ; intros a ; inversion a ].
+        revert pi2 f ; clear ; induction l4 ; intros pi HF.
+        - assumption.
         - inversion HF ; subst.
-          destruct H1 as [s' pi'].
-          simpl in pi ; eapply ex_r in pi ; [ | apply perm_swap ].
-          apply (cut_mix0_r _ _ _ _ _ pi) in pi'.
-          destruct pi' as [s'' pi'].
+          simpl in pi ; eapply ex_r in pi ; [ | apply Permutation_Type_swap ].
+          apply (cut_mix0_r _ _ _ pi) in X.
           eapply IHl4... }
-      apply (cut_mix0_r _ _ _ _ _ pi') in pi0.
+      apply (cut_mix0_r _ _ _ X) in pi0.
       apply (IHpi1 (ivar atN :: l5))...
       constructor...
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0 ; subst.
     inversion HF ; subst.
-    destruct H2 as [s' pi'] ; simpl in pi'.
-    eapply tens_rev_axat in pi' ; [ | intros lax Hgax ; inversion Hgax | ]...
-    destruct pi' as (s1 & s2 & pi1 & pi2 & _ & _).
+    simpl in X.
+    eapply tens_rev_axat in X ; [ | intros a ; inversion a | ]...
+    destruct X as [pi1 pi2].
     apply (IHpi (i2 :: i1 :: l'))...
     constructor...
-    + eexists...
-    + constructor...
-      eexists...
+    constructor...
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0 ; subst.
     inversion HF ; subst.
-    clear - H2.
-    destruct H2 as [s pi].
-    assert (exists l, Permutation (ill2ll izero :: nil) l) as [l HP]
+    clear - X.
+    assert ({ l & Permutation_Type (ill2ll izero :: nil) l }) as [l HP]
       by (eexists ; reflexivity ).
-    eapply ex_r in pi ; [ | apply HP ].
-    remember (S s) as s0 ; clear Heqs0.
-    revert HP ; clear - pi ; induction pi ; intros HP ;
-      try (now (apply Permutation_length in HP ; inversion HP)) ;
-      try (now (apply Permutation_length_1_inv in HP ; inversion HP)).
-    apply IHpi.
-    rewrite H...
+    eapply ex_r in X ; [ | apply HP ].
+    revert HP ; clear - X ; induction X ; intros HP ;
+      try (now (apply Permutation_Type_length in HP ; inversion HP)) ;
+      try (now (apply Permutation_Type_length_1_inv in HP ; inversion HP)).
+    apply IHX.
+    symmetry in p ; etransitivity...
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0 ; subst.
     inversion HF ; subst.
-    destruct H2 as [s' pi'] ; simpl in pi'.
-    rewrite <- (app_nil_l (awith _ _ :: _)) in pi'.
-    eapply with_rev1_noax in pi' ;
-      [ | intros lax Hgax ; inversion Hgax | ]...
+    simpl in X ; rewrite <- (app_nil_l (awith _ _ :: _)) in X.
+    eapply with_rev1_noax in X ;
+      [ | intros a ; inversion a | ]...
     apply (IHpi (i1 :: l'))...
     constructor...
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0 ; subst.
     inversion HF ; subst.
-    destruct H2 as [s' pi'] ; simpl in pi'.
-    rewrite <- (app_nil_l (awith _ _ :: _)) in pi'.
-    eapply with_rev2_noax in pi' ;
-      [ | intros lax Hgax ; inversion Hgax | ]...
+    simpl in X ; rewrite <- (app_nil_l (awith _ _ :: _)) in X.
+    eapply with_rev2_noax in X ;
+      [ | intros a ; inversion a | ]...
     apply (IHpi (i2 :: l'))...
     constructor...
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0 ; subst.
     inversion HF ; subst.
-    destruct H2 as [s pi] ; simpl in pi.
-    eapply plus_rev_axat in pi...
-    destruct pi as (s' & [ pi | pi ] & _).
+    simpl in X ; eapply plus_rev_axat in X ; [ | intros a ; inversion a | ]...
+    destruct X as [pi | pi].
     + apply (IHpi1 (i1 :: l'))...
       constructor...
-      eexists...
     + apply (IHpi2 (i2 :: l'))...
       constructor...
-      eexists...
-    + intros lax Hgax ; inversion Hgax.
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0.
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0 ; subst.
     inversion HF ; subst.
-    destruct H2 as [s' pi'] ; simpl in pi'.
-    rewrite <- (app_nil_l (oc _ :: _)) in pi'.
-    eapply oc_rev_noax in pi' ;
-      [ | intros lax Hgax ; inversion Hgax | ]...
+    simpl in X ; rewrite <- (app_nil_l (oc _ :: _)) in X.
+    eapply oc_rev_noax in X ;
+      [ | intros a ; inversion a | ]...
     apply (IHpi (i :: l'))...
     constructor...
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0 ; subst.
     inversion HF ; subst.
-    destruct H2 as [s' pi'] ; simpl in pi'.
-    rewrite <- (app_nil_l (oc _ :: _)) in pi'.
-    eapply oc_rev_noax in pi' ;
-      [ | intros lax Hgax ; inversion Hgax | ]...
+    simpl in X ; rewrite <- (app_nil_l (oc _ :: _)) in X.
+    eapply oc_rev_noax in X ;
+      [ | intros a ; inversion a | ]...
     apply (IHpi l')...
   - destruct l' ; inversion Heq.
     destruct i ; inversion H0.
     decomp_map H1.
     decomp_map H1 ; subst.
     apply ill2ll_map_ioc_inv in H4.
-    destruct H4 as (l2' & Heq' & Heq'') ; subst.
+    destruct H4 as [l2' Heq' Heq''] ; subst.
     inversion HF ; subst.
     apply (IHpi (ioc i :: map ioc l2' ++ ioc i :: l4))...
     + list_simpl ; rewrite <- ? ill2ll_map_ioc...
     + constructor...
-      apply Forall_app_inv in H3.
-      destruct H3.
-      apply Forall_app...
+      apply Forall_Type_app_inv in X0.
+      destruct X0.
+      apply Forall_Type_app...
       constructor...
-  - inversion H. }
-intros A s1 s2 pi1 pi2.
+  - inversion a. }
+intros A pi1 pi2.
 eapply cut_ll_r in pi1.
 eapply cut_mix0_r in pi2.
-- destruct pi1 as [s1' pi1].
-  change (dual (ill2ll A) :: nil)
+- change (dual (ill2ll A) :: nil)
     with (map dual (map ill2ll (A :: nil))) in pi1.
   rewrite app_nil_r in pi1.
-  destruct pi2 as [s2' pi2].
   list_simpl in pi2.
   eapply Hgen...
-  constructor ; [ | constructor ].
-  eexists...
+  constructor ; [ | constructor ]...
 - change nil with (map wn nil).
   apply oc_r.
   apply bot_r.
@@ -1099,10 +1047,9 @@ Qed.
 (** Translation of proof fragments *)
 Definition i2pfrag P := {|
   pcut := ipcut P ;
-  pgax := fun l =>
-            exists l0 C, 
-               l = ill2ll C :: rev (map dual (map ill2ll l0))
-            /\ ipgax P l0 C ;
+  pgax := existT (fun x => x -> list formula) (projT1 (ipgax P))
+          (fun a => ill2ll (snd (projT2 (ipgax P) a))
+                    :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a))))) ;
   pmix0 := false ;
   pmix2 := false ;
   pperm := ipperm P |}.
@@ -1113,77 +1060,73 @@ Proof.
 reflexivity.
 Qed.
 
-Proposition ill_to_ll {P} : forall l C s, ill P l C s -> exists s',
-  ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))) s'.
+Proposition ill_to_ll {P} : forall l C, ill P l C ->
+  ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))).
 Proof with myeeasy.
-intros l C s Hill.
+intros l C Hill.
 induction Hill ; 
-  try (destruct IHHill as [s' IHHill]) ;
-  try (destruct IHHill1 as [s1' IHHill1]) ;
-  try (destruct IHHill2 as [s2' IHHill2]) ;
   list_simpl ;
   try list_simpl in IHHill ;
   try list_simpl in IHHill1 ;
-  try list_simpl in IHHill2 ;
-  eexists.
+  try list_simpl in IHHill2.
 - eapply ex_r.
   apply ax_r.
-  apply PCperm_swap.
+  apply PCperm_Type_swap.
 - eapply ex_r...
-  hyps_PEperm_unfold ; unfold PCperm ; simpl ; destruct ipperm.
-  * apply Permutation_cons...
-    apply Permutation_map.
-    apply Permutation_map.
-    apply Permutation_rev'...
-  * rewrite H...
+  hyps_PEperm_Type_unfold ; unfold PCperm_Type ; simpl ; destruct ipperm.
+  * apply Permutation_Type_cons...
+    apply Permutation_Type_map.
+    apply Permutation_Type_map.
+    apply Permutation_Type_rev'...
+  * subst...
 - apply one_r.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply bot_r.
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - apply tens_r...
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply parr_r.
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - apply parr_r...
 - rewrite app_comm_cons.
   rewrite app_assoc.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite bidual.
   rewrite ? app_assoc.
   rewrite <- ? app_comm_cons.
   apply tens_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - apply parr_r...
   eapply ex_r...
   symmetry.
   rewrite (app_comm_cons _ _ (ill2ll B)).
-  apply PCperm_last.
+  apply PCperm_Type_last.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   rewrite <- ? app_assoc.
   rewrite bidual.
   apply tens_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - apply parr_r...
   eapply ex_r...
   symmetry.
   rewrite (app_comm_cons _ _ (ill2ll N)).
-  apply PCperm_last.
+  apply PCperm_Type_last.
 - cons2app.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   rewrite <- ? app_assoc.
   rewrite bidual.
@@ -1193,35 +1136,35 @@ induction Hill ;
 - apply top_r.
 - apply with_r...
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply plus_r1...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply plus_r2...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply top_r...
 - apply plus_r1...
 - apply plus_r2...
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply with_r...
   + eapply ex_r ; [ apply IHHill1 | ].
     rewrite ? app_comm_cons.
-    apply PCperm_app_comm.
+    apply PCperm_Type_app_comm.
   + eapply ex_r ; [ apply IHHill2 | ].
     rewrite ? app_comm_cons.
-    apply PCperm_app_comm.
+    apply PCperm_Type_app_comm.
 - assert (map dual (map ill2ll (map ioc (rev l))) =
           map wn (map dual (map ill2ll (rev l)))) as Hwn.
   { remember (rev l) as l'.
@@ -1230,19 +1173,19 @@ induction Hill ;
   rewrite_all Hwn.
   apply oc_r...
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply de_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply wk_r.
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - assert (map dual (map ill2ll (map ioc (rev lw))) =
           map wn (map dual (map ill2ll (rev lw)))) as Hwn.
   { remember (rev lw) as l'.
@@ -1250,25 +1193,26 @@ induction Hill ;
     simpl ; rewrite IHl'... }
   rewrite_all Hwn.
   rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   rewrite <- ? app_assoc.
   apply co_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
   rewrite (app_assoc (wn _ :: _)).
-  apply PCperm_app_comm.
+  apply PCperm_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_app_comm ].
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
   rewrite <- app_assoc.
   assert (pcut (i2pfrag P) = true) as fc by (now simpl).
   eapply (@cut_r _ fc)...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_app_comm.
-- apply gax_r.
-  exists l ; exists A ; split...
-  list_simpl...
+  apply PCperm_Type_app_comm.
+- replace (ill2ll (snd (projT2 (ipgax P) a))
+   :: map dual (map ill2ll (rev (fst (projT2 (ipgax P) a)))))
+  with (projT2 (pgax (i2pfrag P)) a) by (simpl ; rewrite 2 map_rev ; reflexivity).
+  apply gax_r.
 Qed.
 
 
