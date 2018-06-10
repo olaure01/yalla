@@ -397,26 +397,23 @@ Qed.
 
 Lemma PEperm_Type_vs_elt_inv {A} b : forall (a : A) l l1 l2,
   PEperm_Type b l (l1 ++ a :: l2) ->
-  { ll : { pl | l = fst pl ++ a :: snd pl } & PEperm_Type b (l1 ++ l2) (fst (proj1_sig ll) ++ snd (proj1_sig ll)) }.
-Proof.
+  { pl : _ & l = fst pl ++ a :: snd pl & PEperm_Type b (l1 ++ l2) (fst pl ++ snd pl) }.
+Proof with try reflexivity.
 destruct b ; simpl ; intros a l l1 l2 HP.
 - assert (HP' := HP).
   apply Permutation_Type_vs_elt_inv in HP'.
   destruct HP' as ((l' & l'') & Heq) ; subst.
   apply Permutation_Type_app_inv in HP.
   apply Permutation_Type_sym in HP.
-  eapply (existT _ (exist _ (l',l'') _)).
+  exists (l',l'')...
   assumption.
-  Unshelve. reflexivity.
 - subst.
-  eapply (existT _ (exist _ (l1,l2) _)).
-  reflexivity.
-  Unshelve. reflexivity.
+  exists (l1,l2)...
 Qed.
 
 Lemma PEperm_Type_vs_cons_inv {A} b : forall (a : A) l l1,
   PEperm_Type b l (a :: l1) ->
-  { ll : { pl | l = fst pl ++ a :: snd pl } & PEperm_Type b l1 (fst (proj1_sig ll) ++ snd (proj1_sig ll)) }.
+  { pl : _ & l = fst pl ++ a :: snd pl & PEperm_Type b l1 (fst pl ++ snd pl) }.
 Proof.
 intros a l l1 HP.
 rewrite <- (app_nil_l l1).
