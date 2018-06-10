@@ -29,6 +29,8 @@ Require Export iformulas.
 
 (** ** Intuitionistic fragments for proofs *)
 
+Definition NoIAxioms := (existT (fun x => x -> list iformula * iformula) _ Empty_fun).
+
 Record ipfrag := mk_ipfrag {
   ipcut : bool ;
   ipgax : { iptypgax : Type & iptypgax -> list iformula * iformula } ; (* Many thanks to Damien Pous! *)
@@ -2252,98 +2254,81 @@ Qed.
 
 
 (** Axiom-free conservativity *)
-Proposition ll_to_ill_nzeropos_axfree {P} : (forall l C, ~ ipgax P l C) -> forall l s,
-  ll (i2pfrag P) l s -> forall l0 C, Forall nonzerospos (C :: l0) ->
-    PCperm (pperm (i2pfrag P)) l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
-      exists s', ill P l0 C s'.
+Proposition ll_to_ill_nzeropos_axfree {P} :
+(forall a : projT1 (ipgax P), False) -> forall l,
+  ll (i2pfrag P) l -> forall l0 C, Forall_Type nonzerospos (C :: l0) ->
+    PCperm_Type (pperm (i2pfrag P)) l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
+      ill P l0 C.
 Proof with myeeasy.
-intros P_axfree l s pi l0 C Hnz HP.
+intros P_axfree l pi l0 C Hnz HP.
 apply cut_admissible_axfree in pi.
-- clear s ; destruct pi as [s pi]. 
-  rewrite cutrm_i2pfrag in pi.
+- rewrite cutrm_i2pfrag in pi.
   eapply ll_to_ill_nzeropos_cutfree in pi...
-  + clear s ; destruct pi as [s pi].
-    eexists.
-    eapply (stronger_ipfrag)...
+  + eapply (stronger_ipfrag)...
     nsplit 3...
-    simpl ; intros...
-  + intros l1 C1 Hgax.
-    apply P_axfree in Hgax.
-    inversion Hgax.
-- intros l1 Hgax.
-  destruct Hgax as (l' & C0 & Heq & Hgax).
-  apply P_axfree in Hgax...
+    simpl ; intros.
+    exfalso ; intuition.
+  + intros a.
+    exfalso ; intuition.
+- intros Hgax ; intuition.
 Qed.
 
 
 (** Axiom expansion using embedding into [ll] *)
 Lemma ax_exp_ill_nzeropos_by_ll {P} : forall A, nonzerospos A ->
-  exists s, ill P (A :: nil) A s.
+  ill P (A :: nil) A.
 Proof with myeeasy.
 intros A Hnz.
-assert (Hax :=
-  @ax_exp (i2pfrag (axupd_ipfrag P (fun _ _ => False))) (ill2ll A)).
-destruct Hax as [s pi].
+assert (pi :=
+  @ax_exp (i2pfrag (axupd_ipfrag P NoIAxioms)) (ill2ll A)).
 eapply ll_to_ill_nzeropos_axfree in pi...
-- clear s ; destruct pi as [s pi].
-  eexists.
-  eapply stronger_ipfrag...
+- eapply stronger_ipfrag...
   nsplit 3...
-  intros l a Hax.
-  inversion Hax.
-- intros l a Hax.
-  inversion Hax.
+  intros a ; inversion a.
+- intros a ; inversion a.
 - constructor...
   constructor...
   constructor.
-- PCperm_solve.
+- PCperm_Type_solve.
 Qed.
 
 (** Cut elimination *)
-Lemma cut_ir_nzeropos_axfree_by_ll {P} : (forall l C, ~ ipgax P l C) ->
-  forall A l0 l1 l2 C s1 s2, Forall nonzerospos (C :: l1 ++ l0 ++ l2) ->
-  ill P l0 A s1 -> ill P (l1 ++ A :: l2) C s2 -> exists s,
-    ill P (l1 ++ l0 ++ l2) C s.
+Lemma cut_ir_nzeropos_axfree_by_ll {P} : (forall a : projT1 (ipgax P), False) -> 
+  forall A l0 l1 l2 C, Forall_Type nonzerospos (C :: l1 ++ l0 ++ l2) ->
+  ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
 Proof with myeeasy.
-intros P_axfree A l0 l1 l2 C s1 s2 Hnz pi1 pi2.
+intros P_axfree A l0 l1 l2 C Hnz pi1 pi2.
 apply ill_to_ll in pi1.
-clear s1 ; destruct pi1 as [s1 pi1].
 apply ill_to_ll in pi2.
-clear s2 ; destruct pi2 as [s2 pi2].
 rewrite <- ? map_rev in pi2.
 rewrite rev_app_distr in pi2 ; simpl in pi2.
 rewrite ? map_app in pi2 ; simpl in pi2.
 rewrite <- ? app_assoc in pi2.
 rewrite <- ? app_comm_cons in pi2 ; simpl in pi2.
 rewrite app_comm_cons in pi2.
-eapply ex_r in pi2 ; [ | apply PCperm_app_comm ].
+eapply ex_r in pi2 ; [ | apply PCperm_Type_app_comm ].
 rewrite <- ? app_comm_cons in pi2.
-assert (forall l, ~ pgax (i2pfrag P) l) as P_axfree'.
-{ intros l Hgax.
-  destruct Hgax as (l' & C' & _ & Hgax).
-  apply P_axfree in Hgax... }
-apply (cut_r_axfree P_axfree' _ _ _ _ _ pi2) in pi1.
-clear s1 ; destruct pi1 as [s1 pi1].
+assert (forall a : projT1 (pgax (i2pfrag P)), False) as P_axfree'.
+{ intros Hgax.
+  apply P_axfree.
+  apply Hgax. }
+apply (cut_r_axfree P_axfree' _ _ _ pi2) in pi1.
 eapply ll_to_ill_nzeropos_axfree in pi1...
-PCperm_solve.
+PCperm_Type_solve.
 Qed.
 
-Proposition cut_admissible_ill_nzeropos_axfree_by_ll {P} : (forall l C, ~ ipgax P l C) ->
-  forall l C s, Forall nonzerospos (C :: l) -> ill P l C s ->
-    exists s', ill (cutrm_ipfrag P) l C s'.
+Proposition cut_admissible_ill_nzeropos_axfree_by_ll {P} :
+  (forall a : projT1 (ipgax P), False) -> 
+  forall l C, Forall_Type nonzerospos (C :: l) -> ill P l C ->
+    ill (cutrm_ipfrag P) l C.
 Proof with myeeasy.
-intros P_axfree l C s Hnz pi.
+intros P_axfree l C Hnz pi.
 apply ill_to_ll in pi.
-clear s ; destruct pi as [s pi].
-apply cut_admissible_axfree in pi.
-- clear s ; destruct pi as [s pi].
-  rewrite cutrm_i2pfrag in pi.
-  eapply ll_to_ill_nzeropos_cutfree in pi...
-  intros l1 C1 Hgax.
-  apply P_axfree in Hgax.
-  inversion Hgax.
-- intros l0 (l1 & C1 & _ & Hax).
-  apply P_axfree in Hax...
+apply cut_admissible_axfree in pi...
+rewrite cutrm_i2pfrag in pi.
+eapply ll_to_ill_nzeropos_cutfree in pi...
+intros Hgax.
+exfalso ; intuition.
 Qed.
 
 
