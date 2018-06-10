@@ -158,40 +158,36 @@ Qed.
 
 Lemma PCperm_Type_vs_elt_inv {A} b : forall (a : A) l l1 l2,
   PCperm_Type b l (l1 ++ a :: l2) ->
-  { ll : { pl | l = fst pl ++ a :: snd pl } & PEperm_Type b (l2 ++ l1) (snd (proj1_sig ll) ++ fst (proj1_sig ll)) }.
+  { pl : _ & l = fst pl ++ a :: snd pl & PEperm_Type b (l2 ++ l1) (snd pl ++ fst pl) }.
 Proof with try reflexivity.
 destruct b ; intros a l l1 l2 HC.
 - assert (Heq := HC).
   apply Permutation_Type_vs_elt_inv in Heq.
   destruct Heq as ((l' & l'') & Heq) ; subst.
-  eapply (existT _ (exist _ (l',l'') _)).
+  exists (l',l'')...
   simpl in HC ; simpl.
   apply Permutation_Type_app_inv in HC.
   apply Permutation_Type_sym in HC.
   eapply Permutation_Type_trans ; [ eapply Permutation_Type_app_comm | ].
   eapply Permutation_Type_trans ; [ eassumption | ].
   apply Permutation_Type_app_comm.
-  Unshelve. reflexivity.
 - apply cperm_Type_vs_elt_inv in HC.
-  destruct HC as ((l' & l'') & Heq1 & Heq2) ; subst.
-  eapply (existT _ (exist _ (l',l'') _)).
+  destruct HC as [(l' & l'') Heq1 Heq2] ; subst.
+  exists (l',l'')...
   assumption.
-  Unshelve. reflexivity.
 Qed.
 
 Lemma PCperm_Type_vs_cons_inv {A} b : forall (a : A) l l1,
   PCperm_Type b l (a :: l1) ->
-  { ll : { pl | l = fst pl ++ a :: snd pl } & PEperm_Type b l1 (snd (proj1_sig ll) ++ fst (proj1_sig ll)) }.
-Proof.
+  { pl : _ & l = fst pl ++ a :: snd pl & PEperm_Type b l1 (snd pl ++ fst pl) }.
+Proof with try reflexivity.
 intros a l l1 HP.
 rewrite <- app_nil_l in HP.
 apply PCperm_Type_vs_elt_inv in HP.
-destruct HP as (((l' & l'') & HP) & Heq) ; subst.
-eapply (existT _ (exist _ (l',l'') _)).
-simpl in Heq ; simpl.
+destruct HP as [(l' & l'') HP Heq] ; subst.
+exists (l',l'')...
 rewrite app_nil_r in Heq.
 assumption.
-Unshelve. reflexivity.
 Qed.
 
 Instance PCperm_Type_map {A B} (f : A -> B) b :

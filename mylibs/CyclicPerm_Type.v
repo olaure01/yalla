@@ -182,26 +182,26 @@ Qed.
 
 Lemma cperm_Type_vs_elt_inv {A} : forall (a : A) l l1 l2,
   CPermutation_Type l (l1 ++ a :: l2) ->
-    { pl | l2 ++ l1 = snd pl ++ fst pl /\ l = fst pl ++ a :: snd pl }.
+    { pl | l2 ++ l1 = snd pl ++ fst pl & l = fst pl ++ a :: snd pl }.
 Proof.
 intros a l l1 l2 HC.
 inversion HC ; subst.
 symmetry in H1.
 dichot_Type_elt_app_exec H1 ; subst.
-- exists (l0 ++ l1, l) ; simpl ; split ;
+- exists (l0 ++ l1, l) ; simpl ;
     rewrite <- app_assoc ; reflexivity.
-- exists (l4, l2 ++ l3) ; simpl ; split ;
+- exists (l4, l2 ++ l3) ; simpl ;
     rewrite <- app_assoc ; reflexivity.
 Qed.
 
 Lemma cperm_Type_vs_cons_inv {A} : forall (a : A) l l1,
   CPermutation_Type l (a :: l1) ->
-    { pl | l1 = snd pl ++ fst pl /\ l = fst pl ++ a :: snd pl }.
+    { pl | l1 = snd pl ++ fst pl & l = fst pl ++ a :: snd pl }.
 Proof.
 intros a l l1 HC.
 rewrite <- (app_nil_l (a::_)) in HC.
 apply cperm_Type_vs_elt_inv in HC.
-destruct HC as ((l' & l'') & H1 & H2).
+destruct HC as [(l' & l'') H1 H2].
 rewrite app_nil_r in H1 ; subst.
 exists (l', l'') ; split ; reflexivity.
 Qed.
@@ -275,7 +275,7 @@ intro l ; induction l ; intros l' HC.
 - apply cperm_Type_nil in HC ; subst ; apply cperm_Type_refl.
 - apply cperm_Type_sym in HC.
   apply cperm_Type_vs_cons_inv in HC.
-  destruct HC as ((l1 & l2) & Heq1 & Heq2) ; subst.
+  destruct HC as [(l1 & l2) Heq1 Heq2] ; subst.
   simpl ; rewrite ? rev_app_distr ; simpl.
   rewrite <- app_assoc.
   apply cperm_Type.
@@ -309,7 +309,7 @@ induction l1 ; intros l2 HP.
 - apply cperm_Type_sym in HP.
   assert (Heq := HP).
   apply cperm_Type_vs_cons_inv in Heq.
-  destruct Heq as ((l3 & l4) & Heq1 & Heq2).
+  destruct Heq as [(l3 & l4) Heq1 Heq2].
   simpl in Heq1 ; simpl in Heq2 ; symmetry in Heq2.
   decomp_map_Type Heq2 ; subst ; simpl.
   exists (x :: l6 ++ l0).

@@ -329,7 +329,7 @@ induction pi ; intros l1' l2' Heq ; subst.
   destruct l1' ; inversion H1.
   destruct l1' ; inversion H3.
 - apply PCperm_Type_vs_elt_inv in p.
-  destruct p as (((l3 & l4) & Heq) & HP').
+  destruct p as [(l3 & l4) Heq HP'].
   simpl in HP' ; simpl in Heq.
   apply IHpi in Heq...
   eapply ex_r...
@@ -429,7 +429,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   destruct l1' ; inversion H1.
   destruct l1' ; inversion H3.
 - apply PCperm_Type_vs_elt_inv in p.
-  destruct p as (((l3 & l4) & Heq) & HP').
+  destruct p as [(l3 & l4) Heq HP'].
   simpl in HP'.
   apply IHpi in Heq...
   eapply ex_r...
@@ -523,7 +523,7 @@ induction pi ; intros l1' l2' Heq ; subst.
   destruct l1' ; inversion H1.
   destruct l1' ; inversion H3.
 - apply PCperm_Type_vs_elt_inv in p.
-  destruct p as (((l3 & l4) & Heq) & HP').
+  destruct p as [(l3 & l4) Heq HP'].
   simpl in HP' ; apply IHpi in Heq...
   eapply ex_r...
   destruct (pperm P) ; simpl in HP' ; simpl.
@@ -614,7 +614,7 @@ induction pi ; intros A' l1' l2' Heq ; subst.
   destruct l1' ; inversion H1.
   destruct l1' ; inversion H3.
 - apply PCperm_Type_vs_elt_inv in p.
-  destruct p as (((l3 & l4) & Heq) & HP').
+  destruct p as [(l3 & l4) Heq HP'].
   simpl in HP' ; apply IHpi in Heq...
   simpl in Heq ; eapply ex_r...
   destruct (pperm P) ; simpl in HP' ; simpl.
