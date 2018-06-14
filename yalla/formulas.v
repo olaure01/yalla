@@ -233,12 +233,12 @@ match A, B with
 | covar X, covar Y => yalla_ax.ateq X Y
 | one, one => true
 | bot, bot => true
-| tens A1 A2, tens B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
-| parr A1 A2, parr B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
+| tens A1 A2, tens B1 B2 => eqb_form A1 B1 && eqb_form A2 B2
+| parr A1 A2, parr B1 B2 => eqb_form A1 B1 && eqb_form A2 B2
 | top, top => true
 | zero, zero => true
-| awith A1 A2, awith B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
-| aplus A1 A2, aplus B1 B2 => andb (eqb_form A1 B1) (eqb_form A2 B2)
+| awith A1 A2, awith B1 B2 => eqb_form A1 B1 && eqb_form A2 B2
+| aplus A1 A2, aplus B1 B2 => eqb_form A1 B1 && eqb_form A2 B2
 | oc A1, oc B1 => eqb_form A1 B1
 | wn A1, wn B1 => eqb_form A1 B1
 | _, _ => false
@@ -283,7 +283,7 @@ Qed.
 Fixpoint eqb_formlist l1 l2 :=
 match l1, l2 with
 | nil, nil => true
-| cons A t1, cons B t2 => andb (eqb_form A B) (eqb_formlist t1 t2)
+| cons A t1, cons B t2 => eqb_form A B && eqb_formlist t1 t2
 | _, _ => false
 end.
 
