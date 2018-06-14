@@ -97,11 +97,8 @@ induction pi ; list_simpl ; try (now constructor).
   rewrite <- Hmapwn...
 - eapply (cut_r _ (subs A x A0))...
   rewrite <- subs_dual...
-- assert ({ b | map (subs A x) (projT2 (pgax P) a) = projT2 (existT (fun x => x -> list formula) _
-                                                     (fun a => map (subs A x) (projT2 (pgax P) a))) b}) as [b Hgax]
-    by (now exists a).
-  rewrite Hgax.
-  apply gax_r.
+- apply (gax_r (axupd_pfrag P (existT (fun x => x -> list formula) _
+                      (fun a => map (subs A x) (projT2 (pgax P) a)))) a).
 Unshelve. simpl...
 Qed.
 
