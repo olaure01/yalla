@@ -51,7 +51,7 @@ formulas.vo: formulas.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/Bool_more.vo yall
 fmformulas.vo: fmformulas.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/nattree.vo $(MYLIBSDIR)/fmsetlist.vo formulas.vo
 ll_fragments.vo: ll_fragments.v $(MYLIBSDIR)/Permutation_more.vo $(MYLIBSDIR)/genperm_Type.vo ll.vo subs.vo
 ll.vo: ll.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/Bool_more.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/CyclicPerm_Type.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/CPermutation_Type_solve.vo $(MYLIBSDIR)/genperm_Type.vo basic_tactics.vo formulas.vo # flat_map_lemmas.vo 
-iformulas.vo: iformulas.v yalla_ax.vo
+iformulas.vo: iformulas.v $(MYLIBSDIR)/Bool_more.vo yalla_ax.vo
 fmiformulas.vo: fmiformulas.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/nattree.vo $(MYLIBSDIR)/fmsetlist.vo iformulas.vo
 ill.vo: ill.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/Bool_more.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_more.vo $(MYLIBSDIR)/CyclicPerm.vo $(MYLIBSDIR)/Permutation_solve.vo $(MYLIBSDIR)/CPermutation_solve.vo $(MYLIBSDIR)/genperm.vo ll.vo iformulas.vo ll_fragments.vo
 subs.vo: subs.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/genperm.vo ll.vo
