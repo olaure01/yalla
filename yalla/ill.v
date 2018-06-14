@@ -3875,103 +3875,106 @@ End Conservativity.
 Section Fragments.
 
 (** Version of [ill] with a predicate parameter for constraining sequents inside proofs. *)
-Inductive ill_ps P (PS : list iformula -> iformula -> Prop)
-          : list iformula -> iformula -> Prop :=
-| ax_ps_ir : forall X, PS (ivar X :: nil) (ivar X) ->
+Inductive ill_ps P PS : list iformula -> iformula -> Type :=
+| ax_ps_ir : forall X, is_true (PS (ivar X :: nil) (ivar X)) ->
                 ill_ps P PS (ivar X :: nil) (ivar X)
-| ex_ps_ir : forall l1 l2 A, PS l2 A -> ill_ps P PS l1 A ->
-                 PEperm (ipperm P) l1 l2 -> ill_ps P PS l2 A
-| one_ps_irr : PS nil ione -> ill_ps P PS nil ione
-| one_ps_ilr : forall l1 l2 A, PS (l1 ++ ione :: l2) A ->
+| ex_ps_ir : forall l1 l2 A, is_true (PS l2 A) -> ill_ps P PS l1 A ->
+                 PEperm_Type (ipperm P) l1 l2 -> ill_ps P PS l2 A
+| one_ps_irr : is_true (PS nil ione) -> ill_ps P PS nil ione
+| one_ps_ilr : forall l1 l2 A, is_true (PS (l1 ++ ione :: l2) A) ->
                               ill_ps P PS (l1 ++ l2) A ->
                               ill_ps P PS (l1 ++ ione :: l2) A
-| tens_ps_irr : forall A B l1 l2, PS (l1 ++ l2) (itens A B) ->
+| tens_ps_irr : forall A B l1 l2, is_true (PS (l1 ++ l2) (itens A B)) ->
                     ill_ps P PS l1 A -> ill_ps P PS l2 B ->
                     ill_ps P PS (l1 ++ l2) (itens A B)
-| tens_ps_ilr : forall A B l1 l2 C, PS (l1 ++ itens A B :: l2) C ->
+| tens_ps_ilr : forall A B l1 l2 C, is_true (PS (l1 ++ itens A B :: l2) C) ->
                     ill_ps P PS (l1 ++ A :: B :: l2) C ->
                     ill_ps P PS (l1 ++ itens A B :: l2) C
-| lpam_ps_irr : forall A B l, PS l (ilpam A B) ->
+| lpam_ps_irr : forall A B l, is_true (PS l (ilpam A B)) ->
                     ill_ps P PS (l ++ A :: nil) B ->
                     ill_ps P PS l (ilpam A B)
-| lpam_ps_ilr : forall A B l0 l1 l2 C, PS (l1 ++ ilpam A B :: l0 ++ l2) C ->
+| lpam_ps_ilr : forall A B l0 l1 l2 C, is_true (PS (l1 ++ ilpam A B :: l0 ++ l2) C) ->
                     ill_ps P PS l0 A -> ill_ps P PS (l1 ++ B :: l2) C ->
                     ill_ps P PS (l1 ++ ilpam A B :: l0 ++ l2) C
-| lmap_ps_irr : forall A B l, PS l (ilmap A B) ->
+| lmap_ps_irr : forall A B l, is_true (PS l (ilmap A B)) ->
                     ill_ps P PS (A :: l) B ->
                     ill_ps P PS l (ilmap A B)
-| lmap_ps_ilr : forall A B l0 l1 l2 C, PS (l1 ++ l0 ++ ilmap A B :: l2) C ->
+| lmap_ps_ilr : forall A B l0 l1 l2 C, is_true (PS (l1 ++ l0 ++ ilmap A B :: l2) C) ->
                     ill_ps P PS l0 A -> ill_ps P PS (l1 ++ B :: l2) C ->
                     ill_ps P PS (l1 ++ l0 ++ ilmap A B :: l2) C
-| neg_ps_irr : forall A l, PS l (ineg A) -> ill_ps P PS (A :: l) N ->
+| neg_ps_irr : forall A l, is_true (PS l (ineg A)) -> ill_ps P PS (A :: l) N ->
                           ill_ps P PS l (ineg A)
-| neg_ps_ilr : forall A l, PS (l ++ ineg A :: nil) N -> ill_ps P PS l A ->
+| neg_ps_ilr : forall A l, is_true (PS (l ++ ineg A :: nil) N) -> ill_ps P PS l A ->
                           ill_ps P PS (l ++ ineg A :: nil) N
-| top_ps_irr : forall l, PS l itop -> ill_ps P PS l itop
-| with_ps_irr : forall A B l, PS l (iwith A B) ->
+| top_ps_irr : forall l, is_true (PS l itop) -> ill_ps P PS l itop
+| with_ps_irr : forall A B l, is_true (PS l (iwith A B)) ->
                     ill_ps P PS l A -> ill_ps P PS l B ->
                     ill_ps P PS l (iwith A B)
-| with_ps_ilr1 : forall A B l1 l2 C, PS (l1 ++ iwith A B :: l2) C ->
+| with_ps_ilr1 : forall A B l1 l2 C, is_true (PS (l1 ++ iwith A B :: l2) C) ->
                            ill_ps P PS (l1 ++ A :: l2) C ->
                            ill_ps P PS (l1 ++ iwith A B :: l2) C
-| with_ps_ilr2 : forall A B l1 l2 C, PS (l1 ++ iwith B A :: l2) C ->
+| with_ps_ilr2 : forall A B l1 l2 C, is_true (PS (l1 ++ iwith B A :: l2) C) ->
                            ill_ps P PS (l1 ++ A :: l2) C ->
                            ill_ps P PS (l1 ++ iwith B A :: l2) C
-| zero_ps_ilr : forall l1 l2 C, PS (l1 ++ izero :: l2) C ->
+| zero_ps_ilr : forall l1 l2 C, is_true (PS (l1 ++ izero :: l2) C) ->
                                          ill_ps P PS (l1 ++ izero :: l2) C
-| plus_ps_irr1 : forall A B l, PS l (iplus A B) ->
+| plus_ps_irr1 : forall A B l, is_true (PS l (iplus A B)) ->
                                ill_ps P PS l A ->
                                ill_ps P PS l (iplus A B)
-| plus_ps_irr2 : forall A B l, PS l (iplus B A) ->
+| plus_ps_irr2 : forall A B l, is_true (PS l (iplus B A)) ->
                                ill_ps P PS l A ->
                                ill_ps P PS l (iplus B A)
-| plus_ps_ilr : forall A B l1 l2 C, PS (l1 ++ iplus A B :: l2) C ->
+| plus_ps_ilr : forall A B l1 l2 C, is_true (PS (l1 ++ iplus A B :: l2) C) ->
                         ill_ps P PS (l1 ++ A :: l2) C ->
                         ill_ps P PS (l1 ++ B :: l2) C ->
                         ill_ps P PS (l1 ++ iplus A B :: l2) C
-| oc_ps_irr : forall A l, PS (map ioc l) (ioc A) ->
+| oc_ps_irr : forall A l, is_true (PS (map ioc l) (ioc A)) ->
                           ill_ps P PS (map ioc l) A ->
                           ill_ps P PS (map ioc l) (ioc A)
-| de_ps_ilr : forall A l1 l2 C, PS (l1 ++ ioc A :: l2) C ->
+| de_ps_ilr : forall A l1 l2 C, is_true (PS (l1 ++ ioc A :: l2) C) ->
                         ill_ps P PS (l1 ++ A :: l2) C ->
                         ill_ps P PS (l1 ++ ioc A :: l2) C
-| wk_ps_ilr : forall A l1 l2 C, PS (l1 ++ ioc A :: l2) C ->
+| wk_ps_ilr : forall A l1 l2 C, is_true (PS (l1 ++ ioc A :: l2) C) ->
                         ill_ps P PS (l1 ++ l2) C ->
                         ill_ps P PS (l1 ++ ioc A :: l2) C
-| co_ps_ilr : forall A lw l1 l2 C, PS (l1 ++ map ioc lw ++ ioc A :: l2) C ->
+| co_ps_ilr : forall A lw l1 l2 C, is_true (PS (l1 ++ map ioc lw ++ ioc A :: l2) C) ->
                         ill_ps P PS (l1 ++ ioc A :: map ioc lw
                                   ++ ioc A :: l2) C ->
                         ill_ps P PS (l1 ++ map ioc lw ++ ioc A :: l2) C
 | cut_ps_ir {f : ipcut P = true} : forall A l0 l1 l2 C,
-                               PS (l1 ++ l0 ++ l2) C ->
+                               is_true (PS (l1 ++ l0 ++ l2) C) ->
                                ill_ps P PS l0 A -> ill_ps P PS (l1 ++ A :: l2) C ->
                                ill_ps P PS (l1 ++ l0 ++ l2) C
-| gax_ps_ir : forall l A, PS l A -> ipgax P l A -> ill_ps P PS l A.
+| gax_ps_ir : forall a, is_true (PS (fst (projT2 (ipgax P) a)) (snd (projT2 (ipgax P) a))) ->
+           ill_ps P PS (fst (projT2 (ipgax P) a)) (snd (projT2 (ipgax P) a)).
 
 Lemma stronger_ps_ipfrag P Q : le_ipfrag P Q ->
   forall PS l A, ill_ps P PS l A -> ill_ps Q PS l A.
 Proof with myeeasy.
 intros Hle PS l A H.
-induction H ; try (constructor ; myeasy ; fail).
+induction H ; try now constructor.
 - apply (ex_ps_ir _ _ l1)...
   inversion Hle.
-  destruct H3 as (_ & Hp).
-  unfold PEperm in H1.
-  unfold PEperm.
+  destruct X as (_ & Hp).
+  unfold PEperm_Type in p.
+  unfold PEperm_Type.
   destruct (ipperm P) ; destruct (ipperm Q) ;
     simpl in Hp ; try inversion Hp ; subst...
 - inversion Hle.
-  rewrite f in H2.
-  simpl in H2.
-  eapply (@cut_ps_ir _ _ H2)...
-- apply gax_ps_ir...
-  apply Hle...
+  rewrite f in H1 ; simpl in H1.
+  eapply (@cut_ps_ir _ _ H1)...
+- destruct (fst (snd Hle) a) as [b Heq] ; rewrite_all Heq.
+  apply gax_ps_ir...
 Qed.
 
-Lemma ill_ps_stronger {P} : forall (PS QS : list iformula -> iformula -> Prop) l A,
-  ill_ps P PS l A -> (forall x y, PS x y -> QS x y) -> ill_ps P QS l A.
+Lemma ill_ps_stronger {P} : forall PS QS l A,
+  ill_ps P PS l A -> (forall x y, leb (PS x y) (QS x y)) -> ill_ps P QS l A.
 Proof with try eassumption.
-intros PS QS l A pi Hs.
+intros PS QS l A pi Hsb.
+assert (forall x y, is_true (PS x y) -> is_true (QS x y)) as Hs.
+{ intros x y HP.
+  specialize Hsb with x y.
+  rewrite HP in Hsb... }
 induction pi ;
   try (constructor ; try apply Hs ; eassumption ; fail).
 - eapply ex_ps_ir...
@@ -3980,75 +3983,79 @@ induction pi ;
   apply Hs...
 Qed.
 
-Lemma ill_ps_is_ps {P} : forall l A PS, ill_ps P PS l A -> PS l A.
+Lemma ill_ps_is_ps {P} : forall l A PS, ill_ps P PS l A -> is_true (PS l A).
 Proof.
 intros l A PS pi.
 inversion pi ; try assumption.
 Qed.
 
-Lemma ill_ps_is_ill {P} : forall l A PS, ill_ps P PS l A -> exists s, ill P l A s.
+Lemma ill_ps_is_ill {P} : forall l A PS, ill_ps P PS l A -> ill P l A.
 Proof with try eassumption.
 intros l A PS pi.
-induction pi ;
-  try (destruct IHpi as [s IHpi]) ;
-  try (destruct IHpi1 as [s1 IHpi1]) ;
-  try (destruct IHpi2 as [s2 IHpi2]) ;
-  eexists ;
-  try (constructor ; eassumption ; fail).
+induction pi ; try now constructor.
 - eapply ex_ir...
 - eapply (@cut_ir _ f)...
 Qed.
 
-Lemma ill_is_ill_ps {P} : forall l A s, ill P l A s -> ill_ps P (fun _ _ => True) l A.
+Lemma ill_is_ill_ps {P} : forall l A, ill P l A -> ill_ps P (fun _ _ => true) l A.
 Proof with myeeasy.
-intros l A s pi.
-induction pi ;
-  try (constructor ; myeasy ; fail).
+intros l A pi.
+induction pi ; try now constructor.
 - eapply ex_ps_ir...
 - eapply (@cut_ps_ir _ _ f)...
 Qed.
 
 (** A fragment is a subset stable under sub-formula *)
-Definition ifragment (FS : iformula -> Prop) :=
-  forall A, FS A -> forall B, isubform B A -> FS B.
+Definition ifragment FS :=
+  forall A, is_true (FS A) -> forall B, isubform B A -> is_true (FS B).
 
 (** Conservativity over fragments *)
 Lemma iconservativity {P} : ipcut P = false -> forall FS, ifragment FS ->
-  forall l A, ill_ps P (fun _ _ => True) l A -> Forall FS (A :: l) ->
-    ill_ps P (fun l A => Forall FS (A :: l)) l A.
+  forall l A, ill_ps P (fun _ _ => true) l A -> is_true (Forallb FS (A :: l)) ->
+    ill_ps P (fun l0 A0 => Forallb FS (A0 :: l0)) l A.
 Proof with try eassumption ; try reflexivity.
 intros P_cutfree FS HFS l A pi.
 induction pi ; intros HFrag ;
-  inversion HFrag ; subst.
+  inversion HFrag ; apply andb_true_iff in HFrag ; destruct HFrag as [Hhd HFrag] ; subst.
 - apply ax_ps_ir...
 - apply (ex_ps_ir _ _ l1)...
   apply IHpi...
-  apply PEperm_sym in H0.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  eapply PEperm_Forall...
+  symmetry in p.
+  eapply PEperm_Type_Forall in p.
+  apply p in HFrag...
 - apply one_ps_irr...
 - apply one_ps_ilr...
   apply IHpi...
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   inversion HFtl ; apply Forall_app...
-- apply Forall_app_inv in H3.
-  destruct H3.
+- apply Forallb_Forall in HFrag.
+  apply Forall_app_inv in HFrag.
+  destruct HFrag.
   apply tens_ps_irr...
   + apply IHpi1...
+    apply Forallb_Forall.
     constructor...
     eapply HFS...
     apply isub_tens_l...
   + apply IHpi2...
+    apply Forallb_Forall.
     constructor...
     eapply HFS...
     apply isub_tens_r...
 - apply tens_ps_ilr...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   inversion HFtl ; apply Forall_app...
   constructor ; [ | constructor ]...
   + eapply HFS...
@@ -4057,6 +4064,8 @@ induction pi ; intros HFrag ;
     apply isub_tens_r...
 - apply lpam_ps_irr...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
   + eapply HFS...
     apply isub_lpam_r...
@@ -4066,20 +4075,24 @@ induction pi ; intros HFrag ;
     apply isub_lpam_l...
 - apply lpam_ps_ilr...
   + apply IHpi1...
-    apply Forall_app_inv in H3.
-    destruct H3 as [ HFhd HFtl ].
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
+    apply Forall_app_inv in HFrag.
+    destruct HFrag as [ HFhd HFtl ].
     inversion HFtl.
-    apply Forall_app_inv in H4.
-    destruct H4.
+    apply Forall_app_inv in H3.
+    destruct H3.
     constructor...
     eapply HFS...
     apply isub_lpam_l...
   + apply IHpi2...
-    apply Forall_app_inv in H3.
-    destruct H3 as [ HFhd HFtl ].
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
+    apply Forall_app_inv in HFrag.
+    destruct HFrag as [ HFhd HFtl ].
     inversion HFtl.
-    apply Forall_app_inv in H4.
-    destruct H4.
+    apply Forall_app_inv in H3.
+    destruct H3.
     constructor...
     apply Forall_app...
     constructor...
@@ -4087,6 +4100,8 @@ induction pi ; intros HFrag ;
     apply isub_lpam_r...
 - apply lmap_ps_irr...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
   + eapply HFS...
     apply isub_lmap_r...
@@ -4095,8 +4110,10 @@ induction pi ; intros HFrag ;
     apply isub_lmap_l...
 - apply lmap_ps_ilr...
   + apply IHpi1...
-    apply Forall_app_inv in H3.
-    destruct H3 as [ HFhd HFtl ].
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
+    apply Forall_app_inv in HFrag.
+    destruct HFrag as [ HFhd HFtl ].
     apply Forall_app_inv in HFtl.
     destruct HFtl.
     inversion H1.
@@ -4104,8 +4121,10 @@ induction pi ; intros HFrag ;
     eapply HFS...
     apply isub_lmap_l...
   + apply IHpi2...
-    apply Forall_app_inv in H3.
-    destruct H3 as [ HFhd HFtl ].
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
+    apply Forall_app_inv in HFrag.
+    destruct HFrag as [ HFhd HFtl ].
     apply Forall_app_inv in HFtl.
     destruct HFtl.
     inversion H1.
@@ -4116,6 +4135,8 @@ induction pi ; intros HFrag ;
     apply isub_lmap_r...
 - apply neg_ps_irr...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
   + eapply HFS...
     apply isub_neg_N.
@@ -4124,36 +4145,46 @@ induction pi ; intros HFrag ;
     constructor...
 - apply neg_ps_ilr...
   apply IHpi...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   inversion HFtl ; subst.
   constructor...
   eapply HFS...
-  apply isub_neg_l...
+  apply isub_neg...
 - apply top_ps_irr...
 - apply with_ps_irr...
   + apply IHpi1...
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
     constructor...
     eapply HFS...
     apply isub_with_l...
   + apply IHpi2...
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
     constructor...
     eapply HFS...
     apply isub_with_r...
 - apply with_ps_ilr1...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   inversion HFtl ; apply Forall_app...
   constructor...
   eapply HFS...
   apply isub_with_l...
 - apply with_ps_ilr2...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   inversion HFtl ; apply Forall_app...
   constructor...
   eapply HFS...
@@ -4161,56 +4192,72 @@ induction pi ; intros HFrag ;
 - apply zero_ps_ilr...
 - apply plus_ps_irr1...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
   eapply HFS...
   apply isub_plus_l...
 - apply plus_ps_irr2...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
   eapply HFS...
   apply isub_plus_r...
 - apply plus_ps_ilr...
   + apply IHpi1...
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
     constructor...
-    apply Forall_app_inv in H3.
-    destruct H3 as [ HFhd HFtl ].
+    apply Forall_app_inv in HFrag.
+    destruct HFrag as [ HFhd HFtl ].
     inversion HFtl ; apply Forall_app...
     constructor...
     eapply HFS...
     apply isub_plus_l...
   + apply IHpi2...
+    apply Forallb_Forall.
+    apply Forallb_Forall in HFrag.
     constructor...
-    apply Forall_app_inv in H3.
-    destruct H3 as [ HFhd HFtl ].
+    apply Forall_app_inv in HFrag.
+    destruct HFrag as [ HFhd HFtl ].
     inversion HFtl ; apply Forall_app...
     constructor...
     eapply HFS...
     apply isub_plus_r...
 - apply oc_ps_irr...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
   eapply HFS...
   apply isub_oc...
 - apply de_ps_ilr...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   inversion HFtl ; apply Forall_app...
   constructor...
   eapply HFS...
   apply isub_oc...
 - apply wk_ps_ilr...
   apply IHpi...
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   inversion HFtl ; apply Forall_app...
 - apply co_ps_ilr...
   apply IHpi.
+  apply Forallb_Forall.
+  apply Forallb_Forall in HFrag.
   constructor...
-  apply Forall_app_inv in H3.
-  destruct H3 as [ HFhd HFtl ].
+  apply Forall_app_inv in HFrag.
+  destruct HFrag as [ HFhd HFtl ].
   apply Forall_app...
   apply Forall_app_inv in HFtl.
   destruct HFtl.
@@ -4223,60 +4270,66 @@ induction pi ; intros HFrag ;
 Qed.
 
 (** Sub-formula property *)
-Proposition isubformula {P} : ipcut P = false -> forall l A s,
-  ill P l A s -> ill_ps P (fun l' C => isubform_list (C :: l') (A :: l)) l A.
+Proposition isubformula {P} : ipcut P = false -> forall l A,
+  ill P l A -> ill_ps P (fun l' C => isubformb_list (C :: l') (A :: l)) l A.
 Proof with try eassumption ; try reflexivity.
-intros P_cutfree l A s pi.
+intros P_cutfree l A pi.
 apply ill_is_ill_ps in pi.
 apply iconservativity...
 - intros C Hf B Hs.
   remember (A :: l) as l'.
-  revert Hf ; clear - Hs ; induction l' ; intro Hf ;
-    inversion Hf ; subst. 
-  + apply Exists_cons_hd.
-    etransitivity...
-  + apply Exists_cons_tl.
+  revert Hf ; clear - Hs ; induction l' ; intro Hf ; inversion Hf ; subst.
+  simpl ; apply orb_true_iff.
+  apply orb_true_iff in H0.
+  destruct H0.
+  + left.
+    eapply isubb_trans...
+    apply isubb_isub...
+  + right.
     apply IHl'...
-- apply (isub_id_list (A :: l) nil).
+- apply (isubb_id_list (A :: l) nil).
 Qed.
 
 (** Embedding of [IAtom] into [Atom] *)
 Variable i2a : IAtom -> Atom.
 Hypothesis i2a_inj : injective i2a.
 
-Lemma cut_admissible_nzeropos_ifragment {P} : (forall l A, ~ ipgax P l A) ->
-  forall FS, ifragment FS -> (forall C, FS C -> nonzerospos C) -> forall l A,
-    ill_ps P (fun l A => Forall FS (A :: l)) l A ->
-    ill_ps (cutrm_ipfrag P) (fun l A => Forall FS (A :: l)) l A.
+Lemma cut_admissible_nzeropos_ifragment {P} :
+(forall a : projT1 (ipgax P), False) ->
+  forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> forall l A,
+    ill_ps P (fun l A => Forallb FS (A :: l)) l A ->
+    ill_ps (cutrm_ipfrag P) (fun l A => Forallb FS (A :: l)) l A.
 Proof with myeeasy.
 intros P_axfree FS HFS Hnz l A pi.
-assert (Forall FS (A :: l)) as HFSl by (destruct pi ; myeeasy).
+assert (is_true (Forallb FS (A :: l))) as HFSl by (destruct pi ; myeeasy).
 apply ill_ps_is_ill in pi.
-destruct pi as [s pi].
 eapply cut_admissible_ill_nzeropos_axfree_by_ll in pi...
-- clear s ; destruct pi as [s pi].
-  apply ill_is_ill_ps in pi.
+- apply ill_is_ill_ps in pi.
   apply iconservativity...
-- eapply Forall_impl...
+- apply Forallb_Forall_Type in HFSl.
+  eapply Forall_Type_arrow...
+  apply Hnz.
 Qed.
 
-Lemma iconservativity_cut_nzeropos_axfree {P} : (forall l A, ~ ipgax P l A) ->
-  forall FS, ifragment FS -> (forall C, FS C -> nonzerospos C) -> 
-    forall l A s, ill P l A s -> Forall FS (A :: l) ->
-      ill_ps P (fun l A => Forall FS (A :: l)) l A.
+Lemma iconservativity_cut_nzeropos_axfree {P} :
+(forall a : projT1 (ipgax P), False) ->
+  forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> 
+    forall l A, ill P l A -> is_true (Forallb FS (A :: l)) ->
+      ill_ps P (fun l A => Forallb FS (A :: l)) l A.
 Proof with try eassumption ; try reflexivity.
-intros P_axfree FS Hf Hnz l A s pi HFS.
+intros P_axfree FS Hf Hnz l A pi HFS.
 eapply cut_admissible_ill_nzeropos_axfree_by_ll in pi...
-- clear s ; destruct pi as [s pi].
-  apply ill_is_ill_ps in pi.
+- apply ill_is_ill_ps in pi.
   eapply iconservativity in pi...
-  clear - pi ; induction pi ;
-    try (constructor ; assumption ; fail).
+  clear - P_axfree pi ; induction pi ; try now constructor.
   + eapply ex_ps_ir...
   + eapply @cut_ps_ir...
     destruct P.
     inversion f.
-- eapply Forall_impl...
+  + intuition.
+- apply Forallb_Forall_Type in HFS.
+  eapply Forall_Type_arrow...
+  apply Hnz.
 Qed.
 
 End Fragments.
@@ -4289,7 +4342,7 @@ Section Non_Conservativity.
 Variable P : ipfrag.
 Hypothesis fp : ipperm P = true.
 Hypothesis fc : ipcut P = false.
-Hypothesis fg : forall l a, ~ ipgax P l a.
+Hypothesis fg : forall a : projT1 (ipgax P), False.
 
 Variable i2a : IAtom -> Atom.
 
@@ -4302,7 +4355,7 @@ Definition cons_counter_ex :=
   ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
         (itens (ivar x) (ilpam izero (ivar z))).
 
-Lemma counter_haszero : ~ nonzerospos cons_counter_ex.
+Lemma counter_haszero : nonzerospos cons_counter_ex -> False.
 Proof.
 intros Hnzsp.
 inversion Hnzsp.
@@ -4311,180 +4364,171 @@ apply H8.
 constructor.
 Qed.
 
-Lemma counter_ll_prove : exists n,
-  ll (i2pfrag i2a P) (ill2ll i2a cons_counter_ex :: nil) n.
+Lemma counter_ll_prove :
+  ll (i2pfrag i2a P) (ill2ll i2a cons_counter_ex :: nil).
 Proof with myeeasy.
-eexists ; simpl.
+simpl.
 apply parr_r.
-eapply ex_r ; [ | apply PCperm_swap ].
+eapply ex_r ; [ | apply PCperm_Type_swap ].
 rewrite <- (app_nil_l (tens (var _) _ :: _)).
 apply tens_r.
 - apply parr_r.
   eapply ex_r ;
-    [ | unfold PCperm ; simpl ; rewrite fp ;
-        symmetry ; apply Permutation_cons_append ].
+    [ | unfold PCperm_Type ; simpl ; rewrite fp ;
+        symmetry ; apply Permutation_Type_cons_append ].
   eapply ex_r ;
-    [ | unfold PCperm ; simpl ; rewrite fp ;
-        symmetry ; apply Permutation_cons_append ].
+    [ | unfold PCperm_Type ; simpl ; rewrite fp ;
+        symmetry ; apply Permutation_Type_cons_append ].
   rewrite <- ? app_comm_cons.
   rewrite app_comm_cons.
   apply tens_r.
-  + eapply ex_r ; [ apply ax_r | PCperm_solve ].
+  + eapply ex_r ; [ apply ax_r | PCperm_Type_solve ].
   + apply parr_r.
     eapply ex_r ;
-    [ | unfold PCperm ; simpl ; rewrite fp ;
-        symmetry ; apply Permutation_cons_append ].
+    [ | unfold PCperm_Type ; simpl ; rewrite fp ;
+        symmetry ; apply Permutation_Type_cons_append ].
     rewrite <- ? app_comm_cons.
     apply top_r.
 - apply top_r.
 Qed.
 
-Fact no_at_prove_ill : forall i n, ~ ill P nil (ivar i) n.
+Fact no_at_prove_ill : forall i, ill P nil (ivar i) -> False.
 Proof with myeasy.
-intros i n.
-induction n using (well_founded_induction lt_wf).
-intros pi.
-inversion pi ;
-  try (now (destruct l1 ; inversion H0)) ;
-  subst...
-- symmetry in H1.
-  apply PEperm_nil in H1 ; subst.
-  apply H in H0...
-- destruct l1 ; destruct l0 ; inversion H0.
-- destruct l ; inversion H0.
-- destruct l1 ; destruct lw ; inversion H0.
+intros i pi.
+remember (ivar i) as C.
+remember nil as l.
+revert Heql HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  try now (destruct l1 ; inversion Heql) ; subst...
+- symmetry in p.
+  apply PEperm_Type_nil in p ; subst.
+  intuition.
+- destruct l1 ; destruct l0 ; inversion Heql.
+- destruct l ; inversion Heql.
+- destruct l1 ; destruct lw ; inversion Heql.
 - rewrite fc in f ; inversion f.
-- apply fg in H0...
 Qed.
 
-Fact no_biat_prove_ill : forall i j, i <> j -> forall n,
-  ~ ill P (ivar i :: nil) (ivar j) n.
+Fact no_biat_prove_ill : forall i j, i <> j ->
+  ill P (ivar i :: nil) (ivar j) -> False.
 Proof with myeasy.
-intros i j Ha n.
-induction n using (well_founded_induction lt_wf).
-intros pi.
-inversion pi ;
-  try now (destruct l1 ; inversion H0 ; subst ;
-           destruct l1 ; try inversion H6 ; try inversion H7) ;
-  subst...
-- apply Ha...
-- symmetry in H1.
-  apply PEperm_length_1_inv in H1 ; subst.
-  apply H in H0...
-- destruct l1 ; destruct l0 ; inversion H0 ;
-    try destruct l0 ; try destruct l1 ; inversion H7.
-- destruct l ; inversion H0 ; subst.
-  destruct l ; inversion H6.
-- destruct l1 ; inversion H0 ; subst.
-  + rewrite app_nil_l in H1 ; inversion H1.
-  + inversion H1.
-    destruct l1 ; inversion H4.
-- destruct l1 ; destruct lw ; inversion H0 ; destruct l1 ; inversion H6.
+intros i j Ha pi.
+remember (ivar j) as C.
+remember (ivar i :: nil) as l.
+revert Heql HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1) ; subst...
+- inversion HeqC ; inversion Heql ; subst ; intuition.
+- symmetry in p.
+  apply PEperm_Type_length_1_inv in p ; subst ; intuition.
+- destruct l1 ; destruct l0 ; inversion Heql ;
+    try destruct l0 ; try destruct l1 ; inversion Heql.
+- destruct l ; inversion Heql ; subst.
+  destruct l ; inversion H1.
+- destruct l1 ; destruct lw ; inversion Heql ; destruct l1 ; inversion H1.
 - rewrite fc in f ; inversion f.
-- apply fg in H0...
 Qed.
 
 Fact no_biat_map_prove_ill : forall i j, i <> j ->
-  forall n, ~ ill P nil (ilpam (ivar i) (ivar j)) n.
+  ill P nil (ilpam (ivar i) (ivar j)) -> False.
 Proof with myeasy.
-intros i j Ha n.
-induction n using (well_founded_induction lt_wf).
-intros pi.
-inversion pi ;
-  try now (destruct l1 ; inversion H0) ;
-  subst...
-- symmetry in H1.
-  apply PEperm_nil in H1 ; subst.
-  apply H in H0...
-- apply no_biat_prove_ill in H4...
-- destruct l1 ; destruct l0 ; inversion H0.
-- destruct l1 ; destruct lw ; inversion H0.
+intros i j Ha pi.
+remember (ilpam (ivar i) (ivar j)) as C.
+remember (nil) as l.
+revert Heql HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  try now (destruct l1 ; inversion Heql) ; subst...
+- symmetry in p.
+  apply PEperm_Type_nil in p ; subst.
+  intuition.
+- inversion HeqC ; subst.
+  eapply no_biat_prove_ill ; eassumption.
+- destruct l1 ; destruct l0 ; inversion Heql.
+- destruct l1 ; destruct lw ; inversion Heql.
 - rewrite fc in f ; inversion f.
-- apply fg in H0...
 Qed.
 
 (** We need two distinct atoms *)
 Hypothesis twoat : x <> y.
 
-Fact pre_pre_counter_ex_ill : forall n,
-  ~ ill P (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x) n.
+Fact pre_pre_counter_ex_ill :
+  ill P (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x) -> False.
 Proof with myeasy.
-induction n using (well_founded_induction lt_wf).
-intro pi.
-inversion pi ;
-  try (destruct l1 ; inversion H0 ; subst ;
-       destruct l1 ;
-       try (inversion H6 ; fail) ;
-       try (inversion H7 ; fail) ;
-       fail) ;
-  subst...
-- symmetry in H1.
-  apply PEperm_length_1_inv in H1 ; subst.
-  apply H in H0...
-- destruct l1 ; inversion H0 ; try rewrite app_nil_l in H0 ; subst.
-  + apply app_eq_nil in H6.
-    destruct H6 ; subst.
-    apply no_biat_map_prove_ill in H1...
-  + destruct l1 ; inversion H5.
-- destruct l1 ; destruct l0 ; inversion H0 ; 
-    try destruct l0 ; try destruct l1 ; inversion H5.
-- destruct l ; inversion H0 ; subst.
-  destruct l ; inversion H4.
-- destruct l1 ; inversion H1 ; destruct l1 ; inversion H3.
-- destruct l1 ; destruct lw ; inversion H0 ; destruct l1 ; inversion H4.
+intros pi.
+remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l.
+remember (ivar x) as C.
+revert Heql HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1) ; subst...
+- symmetry in p.
+  apply PEperm_Type_length_1_inv in p ; subst ; intuition.
+- destruct l1 ; inversion Heql ; try rewrite app_nil_l in Heql ; subst.
+  + apply app_eq_nil in H2.
+    destruct H2 ; subst.
+    eapply no_biat_map_prove_ill ; eassumption.
+  + destruct l1 ; inversion H1.
+- destruct l1 ; destruct l0 ; inversion Heql ; 
+    try destruct l0 ; try destruct l1 ; inversion H1.
+- destruct l ; inversion Heql ; subst.
+  destruct l ; inversion H1.
+- destruct l1 ; destruct lw ; inversion Heql ; destruct l1 ; inversion H1.
 - rewrite fc in f ; inversion f.
-- apply fg in H0...
 Qed.
 
-Fact pre_counter_ex_ill : forall n,
-  ~ @ill P (ilpam (ilpam (ivar x) (ivar y)) izero :: nil)
-           (itens (ivar x) (ilpam izero (ivar z))) n.
+Fact pre_counter_ex_ill :
+  @ill P (ilpam (ilpam (ivar x) (ivar y)) izero :: nil)
+         (itens (ivar x) (ilpam izero (ivar z))) -> False.
 Proof with myeasy.
-induction n using (well_founded_induction lt_wf).
-intro pi.
-inversion pi ;
-  try (destruct l1 ; inversion H0 ; subst ;
-       destruct l1 ;
-       try (inversion H6 ; fail) ;
-       try (inversion H7 ; fail) ;
-       fail) ;
-  subst...
-- symmetry in H1.
-  apply PEperm_length_1_inv in H1 ; subst.
-  apply H in H0...
-- destruct l1 ; inversion H0 ; try rewrite app_nil_l in H0 ; subst.
-  + apply no_at_prove_ill in H3...
-  + apply app_eq_nil in H4.
-    destruct H4 ; subst.
-    apply pre_pre_counter_ex_ill in H3...
-- destruct l1 ; inversion H0 ; subst.
-  + apply app_eq_nil in H6.
-    destruct H6 ; subst.
-    apply no_biat_map_prove_ill in H1...
-  + destruct l1 ; inversion H5.
-- destruct l1 ; destruct l0 ; inversion H0 ; 
-    try destruct l0 ; try destruct l1 ; inversion H5.
-- destruct l1 ; inversion H1 ; destruct l1 ; inversion H3.
-- destruct l1 ; destruct lw ; inversion H0 ; destruct l1 ; inversion H4.
+intros pi.
+remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l.
+remember (itens (ivar x) (ilpam izero (ivar z))) as C.
+revert Heql HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1) ; subst...
+- symmetry in p.
+  apply PEperm_Type_length_1_inv in p ; intuition.
+- destruct l1 ; inversion Heql ; inversion HeqC ; try rewrite app_nil_l in Heql ; subst.
+  + apply no_at_prove_ill in pi1...
+  + apply app_eq_nil in H1.
+    destruct H1 ; subst.
+    apply pre_pre_counter_ex_ill in pi1...
+- destruct l1 ; inversion Heql ; subst.
+  + apply app_eq_nil in H2.
+    destruct H2 ; subst.
+    apply no_biat_map_prove_ill in pi1...
+  + destruct l1 ; inversion H1.
+- destruct l1 ; destruct l0 ; inversion Heql ; 
+    try destruct l0 ; try destruct l1 ; inversion H1.
+- destruct l1 ; destruct lw ; inversion Heql ; destruct l1 ; inversion H1.
 - rewrite fc in f ; inversion f.
-- apply fg in H0...
 Qed.
 
-Fact counter_ex_ill : forall n, ~ @ill P nil cons_counter_ex n.
+Fact counter_ex_ill : @ill P nil cons_counter_ex -> False.
 Proof with myeasy.
-induction n using (well_founded_induction lt_wf).
-intro pi.
-inversion pi ;
-  try now (destruct l1 ; inversion H0) ;
-  subst.
-- symmetry in H1.
-  apply PEperm_nil in H1 ; subst.
-  apply H in H0...
-- apply pre_counter_ex_ill in H4...
-- destruct l1 ; destruct l0 ; inversion H0.
-- destruct l1 ; destruct lw ; inversion H0.
+intros pi.
+remember (cons_counter_ex) as C.
+remember (nil) as l.
+revert Heql HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  try now (destruct l1 ; inversion Heql) ; subst...
+- symmetry in p.
+  apply PEperm_Type_nil in p ; intuition.
+- inversion HeqC ; subst ; apply pre_counter_ex_ill in pi...
+- destruct l1 ; destruct l0 ; inversion Heql.
+- destruct l1 ; destruct lw ; inversion Heql.
 - rewrite fc in f ; inversion f.
-- apply fg in H0...
 Qed.
 
 End Non_Conservativity.
