@@ -67,6 +67,7 @@ Qed.
 
 (** * Forall on lists with [bool] output *)
 Require Import List.
+Require Import List_Type.
 
 Fixpoint Forallb {A} P (l : list A) :=
 match l with
@@ -91,6 +92,21 @@ induction l ; split ; intros H ; try (now constructor).
   apply IHl in H3.
   simpl.
   destruct (P a) ; destruct (Forallb P l) ; now inversion H2.
+Qed.
+
+Lemma Forallb_Forall_Type {A} : forall P (l : list A),
+  is_true (Forallb P l) -> Forall_Type (fun x => is_true (P x)) l.
+Proof.
+induction l ; intros H ; try (now constructor).
+constructor.
+- simpl in H ; destruct (P a).
+  + constructor.
+  + inversion H.
+- apply IHl.
+  simpl in H ; destruct (Forallb P l).
+  + constructor.
+  + rewrite andb_false_r in H.
+    inversion H.
 Qed.
 
 
