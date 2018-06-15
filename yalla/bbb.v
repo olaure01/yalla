@@ -9,6 +9,7 @@ Require Import Arith.
 Require Import Psatz.
 
 Require Import List_more.
+Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
@@ -94,7 +95,7 @@ induction H ; try now constructor.
 - apply co_bbb_r.
   eapply ex_bbb_r ; [ apply IHll | ].
   perm_Type_solve.
-- inversion a.
+- destruct a.
 Qed.
 
 (** [ll_bbb] is contained in [ll_mix02] *)
@@ -1343,47 +1344,35 @@ Qed.
 Lemma mix2_bb_r : forall l1 l2, llR (oc bot) l1 -> llR (oc bot) l2 ->
   llR (oc bot) (l2 ++ l1).
 Proof with myeeasy.
-intros.
-assert (pgax (pfrag_llR (oc bot)) (oc bot :: one :: nil))
-  as Hax by (right ; reflexivity).
-apply gax_r in Hax.
-eapply (wk_r _ one) in H0.
-eapply (@cut_r (pfrag_llR _) eq_refl) in H0...
-eapply bot_r in H.
-eapply ex_r in H0 ; [ | apply Permutation_app_comm ].
-eapply (@cut_r (pfrag_llR _) eq_refl) in H0 ; simpl...
-eexists...
+intros l1 l2 pi1 pi2.
+eapply (cut_r _ one)...
+- apply bot_r...
+- cons2app.
+  eapply (cut_r _ (oc bot)).
+  + apply wk_r...
+  + apply (gax_r (pfrag_llR (oc bot)) false).
+Unshelve. all : reflexivity.
 Qed.
 
-Lemma mix2_to_bb : forall l s, ll_mix2 l s -> exists s', llR (oc bot) l s'.
+Lemma mix2_to_bb : forall l, ll_mix2 l -> llR (oc bot) l.
 Proof with myeeasy.
-intros l s pi.
-induction pi ;
-  try destruct IHpi as [s' IHpi] ;
-  try destruct IHpi1 as [s1' IHpi1] ;
-  try destruct IHpi2 as [s2' IHpi2] ;
-  try (inversion f ; fail) ;
-  try (inversion H ; fail) ;
-  try (eapply mix2_bb_r ; myeeasy ; fail) ;
-  eexists ;
-  try (constructor ; myeeasy ; fail).
-eapply ex_r...
+intros l pi.
+induction pi ; try now constructor.
+- eapply ex_r...
+- apply mix2_bb_r...
+- destruct a.
 Qed.
 
-Theorem bb_to_bbb : forall l s, llR (oc bot) l s -> exists s', ll_bbb l s'.
-Proof with myeeasy ; try PCperm_solve.
-intros l s pi.
-induction pi ;
-  try (inversion f ; fail) ;
-  try destruct IHpi as [s' IHpi] ;
-  try destruct IHpi1 as [s1' IHpi1] ;
-  try destruct IHpi2 as [s2' IHpi2] ;
-  try (eexists ; constructor ; myeeasy ; fail).
-- eexists ; eapply ex_bbb_r...
-- eexists ; apply co_bbb_r.
+Theorem bb_to_bbb : forall l, llR (oc bot) l -> ll_bbb l.
+Proof with myeeasy ; try PCperm_Type_solve.
+intros l pi.
+induction pi ; try now constructor.
+- eapply ex_bbb_r...
+- inversion f.
+- apply co_bbb_r.
   eapply ex_bbb_r...
 - eapply cut_bbb_r...
-- destruct H ; subst ; eexists.
+- destruct a ; simpl.
   + apply de_bbb_r.
     apply one_bbb_r.
   + rewrite <- (app_nil_l (one :: _)).
@@ -1400,9 +1389,8 @@ Qed.
 
 (** *** Examples *)
 (*
-Goal exists s, ll_bbb (one :: oc (parr one one) :: nil) s.
+Goal ll_bbb (one :: oc (parr one one) :: nil).
 Proof with myeeasy.
-eexists.
 change (one :: oc (parr one one) :: nil)
   with ((one :: nil) ++ oc (parr one one) :: nil).
 eapply mix2_bbb_r.
@@ -1417,10 +1405,10 @@ eapply mix2_bbb_r.
 - eapply one_r.
 Qed.
 
-Goal exists s, llR (oc bot) (one :: oc (parr one one) :: nil) s.
+Goal llR (oc bot) (one :: oc (parr one one) :: nil).
 Proof with myeeasy.
-assert (exists s, llR (oc bot) ((one :: nil) ++ one :: nil) s)
-  as [s Hr] by (eapply mix2_bb_r ; apply one_r).
+assert (llR (oc bot) ((one :: nil) ++ one :: nil))
+  as Hr by (eapply mix2_bb_r ; apply one_r).
 change (one :: oc (parr one one) :: nil)
   with ((one :: nil) ++ oc (parr one one) :: nil).
 eapply mix2_bb_r.
@@ -1431,10 +1419,9 @@ eapply mix2_bb_r.
 Qed.
 *)
 
-Example bbb_ex : exists s,
-  ll_bbb (one :: oc (tens (parr one one) bot) :: nil) s.
-Proof with myeeasy ; try perm_solve.
-eexists.
+Example bbb_ex :
+  ll_bbb (one :: oc (tens (parr one one) bot) :: nil).
+Proof with myeeasy ; try perm_Type_solve.
 change (one :: oc (tens (parr one one) bot) :: nil)
   with ((one :: nil) ++ (oc (tens (parr one one) bot) :: nil)).
 apply (ex_bbb_r ((oc (tens (parr one one) bot) :: nil) ++ one :: nil))...
@@ -1455,18 +1442,15 @@ eapply mix2_bbb_r.
     eapply (@mix0_r pfrag_mix02 eq_refl).
 Qed.
 
-Example bb_ex : exists s,
-  llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil) s.
-Proof with myeeasy ; try perm_solve.
-assert (pgax (pfrag_llR (oc bot)) (oc bot :: one :: nil))
-  as Hax by (right ; reflexivity).
-apply gax_r in Hax.
-assert (exists s, llR (oc bot) ((one :: nil) ++ one :: nil) s)
-  as [s Hr] by (eapply mix2_bb_r ; apply one_r).
-eexists.
+Example bb_ex :
+  llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
+Proof with myeeasy ; try perm_Type_solve.
+assert (Hax :=  gax_r (pfrag_llR (oc bot)) false) ; simpl in Hax.
+assert (llR (oc bot) ((one :: nil) ++ one :: nil))
+  as Hr by (eapply mix2_bb_r ; apply one_r).
 eapply (@cut_r (pfrag_llR _) eq_refl) in Hax...
 - apply Hax.
-- eapply ex_r ; [ | apply PCperm_swap ].
+- eapply ex_r ; [ | apply PCperm_Type_swap ].
   simpl.
   change (wn one :: nil) with (map wn (one :: nil)).
   apply oc_r.
@@ -1484,82 +1468,78 @@ Qed.
 
 (** ** Additional results on a weakened version of [ll_bbb]
  without [mix2] above [mix2] on the [mix0] side *)
-Inductive ll_bbb0 : list formula -> nat -> Prop :=
-| ax_bbb0_r : forall X, ll_bbb0 (covar X :: var X :: nil) 1
-| ex_bbb0_r : forall l1 l2 s, ll_bbb0 l1 s -> Permutation l1 l2 -> ll_bbb0 l2 (S s)
-| mix2_bbb0_r : forall l1 l2 s1 s2, ll_bbb0 l1 s1 -> ll_mix0 l2 s2 ->
-                                    ll_bbb0 (l2 ++ l1) (S (s1 + s2))
-| one_bbb0_r : ll_bbb0 (one :: nil) 1
-| bot_bbb0_r : forall l s, ll_bbb0 l s -> ll_bbb0 (bot :: l) (S s)
-| tens_bbb0_r : forall A B l1 l2 s1 s2, ll_bbb0 (A :: l1) s1 -> ll_bbb0 (B :: l2) s2 ->
-                                        ll_bbb0 (tens A B :: l2 ++ l1) (S (s1 + s2))
-| parr_bbb0_r : forall A B l s, ll_bbb0 (A :: B :: l) s -> ll_bbb0 (parr A B :: l) (S s)
-| top_bbb0_r : forall l, ll_bbb0 (top :: l) 1
-| plus_bbb0_r1 : forall A B l s, ll_bbb0 (A :: l) s -> ll_bbb0 (aplus A B :: l) (S s)
-| plus_bbb0_r2 : forall A B l s, ll_bbb0 (A :: l) s -> ll_bbb0 (aplus B A :: l) (S s)
-| with_bbb0_r : forall A B l s1 s2, ll_bbb0 (A :: l) s1 -> ll_bbb0 (B :: l) s2 ->
-                                    ll_bbb0 (awith A B :: l) (S (max s1 s2))
-| oc_bbb0_r : forall A l s, ll_bbb0 (A :: map wn l) s -> ll_bbb0 (oc A :: map wn l) (S s)
-| de_bbb0_r : forall A l s, ll_bbb0 (A :: l) s -> ll_bbb0 (wn A :: l) (S s)
-| wk_bbb0_r : forall A l s, ll_bbb0 l s -> ll_bbb0 (wn A :: l) (S s)
-| co_bbb0_r : forall A l s, ll_bbb0 (wn A :: wn A :: l) s -> ll_bbb0 (wn A :: l) (S s).
+Inductive ll_bbb0 : list formula -> Type :=
+| ax_bbb0_r : forall X, ll_bbb0 (covar X :: var X :: nil)
+| ex_bbb0_r : forall l1 l2, ll_bbb0 l1 -> Permutation_Type l1 l2 -> ll_bbb0 l2
+| mix2_bbb0_r : forall l1 l2, ll_bbb0 l1 -> ll_mix0 l2 -> ll_bbb0 (l2 ++ l1)
+| one_bbb0_r : ll_bbb0 (one :: nil)
+| bot_bbb0_r : forall l, ll_bbb0 l -> ll_bbb0 (bot :: l)
+| tens_bbb0_r : forall A B l1 l2, ll_bbb0 (A :: l1) -> ll_bbb0 (B :: l2) ->
+                               ll_bbb0 (tens A B :: l2 ++ l1)
+| parr_bbb0_r : forall A B l, ll_bbb0 (A :: B :: l) -> ll_bbb0 (parr A B :: l)
+| top_bbb0_r : forall l, ll_bbb0 (top :: l)
+| plus_bbb0_r1 : forall A B l, ll_bbb0 (A :: l) -> ll_bbb0 (aplus A B :: l)
+| plus_bbb0_r2 : forall A B l, ll_bbb0 (A :: l) -> ll_bbb0 (aplus B A :: l)
+| with_bbb0_r : forall A B l, ll_bbb0 (A :: l) -> ll_bbb0 (B :: l) ->
+                              ll_bbb0 (awith A B :: l)
+| oc_bbb0_r : forall A l, ll_bbb0 (A :: map wn l) -> ll_bbb0 (oc A :: map wn l)
+| de_bbb0_r : forall A l, ll_bbb0 (A :: l) -> ll_bbb0 (wn A :: l)
+| wk_bbb0_r : forall A l, ll_bbb0 l -> ll_bbb0 (wn A :: l)
+| co_bbb0_r : forall A l, ll_bbb0 (wn A :: wn A :: l) -> ll_bbb0 (wn A :: l).
 
 (** The example given above in [ll_bbb] and [llR (oc bot)] is not cut-free provable
     in [ll_bbb0]. *)
-Lemma mix0_bbb0_false : forall s, ll_bbb0 nil s -> False.
+Lemma mix0_bbb0_false : ll_bbb0 nil -> False.
 Proof with myeasy.
-intros s H.
+intros pi.
 remember nil as l.
-revert Heql ; induction H ; intros Heql ; inversion Heql ; subst.
-- symmetry in H0.
-  apply Permutation_nil in H0 ; subst.
-  apply IHll_bbb0...
+revert Heql ; induction pi ; intros Heql ; inversion Heql ; subst.
+- symmetry in p.
+  apply Permutation_Type_nil in p ; intuition.
 - apply app_eq_nil in Heql.
-  destruct Heql ; subst.
-  apply IHll_bbb0...
+  destruct Heql ; subst ; intuition.
 Qed.
 
-Lemma ex_implies_mix2_mix02 : forall l s,
-  ll_bbb0 l s -> Permutation l (one :: oc (tens (parr one one) bot) :: nil) ->
-    exists s', ll_mix0 (one :: one :: nil) s'.
-Proof with myeeasy ; try perm_solve.
-intros l s H.
+Lemma ex_implies_mix2_mix02 : forall l,
+  ll_bbb0 l -> Permutation_Type l (one :: oc (tens (parr one one) bot) :: nil) ->
+    ll_mix0 (one :: one :: nil).
+Proof with myeeasy ; try perm_Type_solve.
+intros l H.
 induction H ; intro HP ;
-  try (apply Permutation_sym in HP ;
-       apply Permutation_length_2_inv in HP ;
+  try now (apply Permutation_Type_sym in HP ;
+       apply Permutation_Type_length_2_inv in HP ;
        destruct HP as [HP | HP] ;
-       inversion HP ;
-       fail).
+       inversion HP).
 - apply IHll_bbb0...
-- apply Permutation_sym in HP.
-  apply Permutation_length_2_inv in HP.
+- apply Permutation_Type_sym in HP.
+  apply Permutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP].
-  + apply eq_sym in HP.
+  + symmetry in HP.
     rewrite <- (app_nil_l (one :: _)) in HP.
-    dichot_elt_app_exec HP ; subst.
+    dichot_Type_elt_app_exec HP ; subst.
     * apply eq_sym in HP1.
-      apply app_eq_unit in HP1.
-      destruct HP1 ; destruct H1 ; subst.
+      apply app_eq_unit_Type in HP1.
+      destruct HP1 ; destruct p ; subst.
       -- clear - H.
          exfalso.
          remember (oc (tens (parr one one) bot) :: nil) as l.
          revert Heql ; induction H ; intro Heql ; inversion Heql ; subst.
-         ++ symmetry in H0.
-            apply Permutation_length_1_inv in H0.
+         ++ symmetry in p.
+            apply Permutation_Type_length_1_inv in p.
             apply IHll_bbb0...
          ++ apply app_eq_unit in Heql.
-            destruct Heql ; destruct H1 ; subst.
+            destruct Heql ; destruct H0 ; subst.
             ** apply IHll_bbb0...
             ** eapply mix0_bbb0_false...
          ++ rewrite_all H2.
             clear - H.
             remember (tens (parr one one) bot :: nil) as l.
             revert Heql ; induction H ; intro Heql ; inversion Heql ; subst.
-            ** symmetry in H0.
-               apply Permutation_length_1_inv in H0.
+            ** symmetry in p.
+               apply Permutation_Type_length_1_inv in p.
                apply IHll_bbb0...
             ** apply app_eq_unit in Heql.
-               destruct Heql ; destruct H1 ; subst.
+               destruct Heql ; destruct H0 ; subst.
                --- apply IHll_bbb0...
                --- eapply mix0_bbb0_false...
             ** apply app_eq_nil in H4.
@@ -1567,11 +1547,11 @@ induction H ; intro HP ;
                clear - H0.
                remember (bot :: nil) as l.
                revert Heql ; induction H0 ; intro Heql ; inversion Heql ; subst.
-               --- symmetry in H.
-                   apply Permutation_length_1_inv in H.
+               --- symmetry in p.
+                   apply Permutation_Type_length_1_inv in p.
                    apply IHll_bbb0...
-               --- apply app_eq_unit in Heql.
-                   destruct Heql ; destruct H1 ; subst.
+               --- apply app_eq_unit_Type in Heql.
+                   destruct Heql ; destruct p ; subst.
                    +++ apply IHll_bbb0...
                    +++ eapply mix0_bbb0_false...
                --- eapply mix0_bbb0_false...
@@ -1583,45 +1563,44 @@ induction H ; intro HP ;
       apply IHll_bbb0...
   + symmetry in HP.
     rewrite <- (app_nil_l (oc _::_)) in HP.
-    dichot_elt_app_exec HP ; subst.
+    dichot_Type_elt_app_exec HP ; subst.
     * symmetry in HP1.
-      apply app_eq_unit in HP1.
-      destruct HP1 ; destruct H1 ; subst.
-      -- clear - H0.
-         simpl in H0.
+      apply app_eq_unit_Type in HP1.
+      destruct HP1 ; destruct p ; subst.
+      -- clear - l ; rename l into H.
+         simpl in H.
          remember (oc (tens (parr one one) bot) :: nil) as l.
-         revert Heql ; induction H0 ; intro Heql ; inversion Heql ; subst.
-         ++ symmetry in H.
-           simpl in H.
-           apply Permutation_length_1_inv in H.
-           apply IHll...
+         revert Heql ; induction H ; intro Heql ; inversion Heql ; subst.
+         ++ symmetry in p.
+            simpl in p.
+            apply Permutation_Type_length_1_inv in p.
+            apply IHll...
          ++ inversion f.
          ++ rewrite_all H2.
-            clear - H0.
+            clear - H.
             remember (tens (parr one one) bot :: nil) as l.
-            revert Heql ; induction H0 ; intro Heql ; inversion Heql ; subst.
-            ** symmetry in H.
-               simpl in H.
-               apply Permutation_length_1_inv in H.
+            revert Heql ; induction H ; intro Heql ; inversion Heql ; subst.
+            ** symmetry in p.
+               simpl in p.
+               apply Permutation_Type_length_1_inv in p.
                apply IHll...
             ** inversion f.
-            ** apply app_eq_nil in H2.
-               destruct H2 ; subst.
-               clear - H0_.
+            ** apply app_eq_nil in H4.
+               destruct H4 ; subst.
+               clear - H.
                remember (parr one one :: nil) as l.
-               revert Heql ; induction H0_ ; intro Heql ; inversion Heql ; subst.
-               --- symmetry in H.
-                   simpl in H.
-                   apply Permutation_length_1_inv in H.
-                   apply IHH0_...
+               revert Heql ; induction H ; intro Heql ; inversion Heql ; subst...
+               --- symmetry in p.
+                   simpl in p.
+                   apply Permutation_Type_length_1_inv in p.
+                   apply IHll...
                --- inversion f.
-               --- eexists...
                --- inversion f.
-               --- inversion H.
+               --- destruct a.
             ** inversion f.
-            ** inversion H.
+            ** destruct a.
          ++ inversion f.
-         ++ inversion H.
+         ++ destruct a.
       -- exfalso.
          eapply mix0_bbb0_false...
     * symmetry in HP0.
@@ -1629,21 +1608,20 @@ induction H ; intro HP ;
       destruct HP0 ; subst.
       apply IHll_bbb0...
 - symmetry in HP.
-  apply Permutation_length_2_inv in HP.
+  apply Permutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP] ; inversion HP.
   destruct l ; inversion H2.
 Defined.
 
-Lemma ex_not_bbb0 : forall s, ~ ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil) s.
+Lemma ex_not_bbb0 :
+  ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil) -> False.
 Proof.
-intros s H.
-apply ex_implies_mix2_mix02 in H ; [ | reflexivity ].
-clear s ; destruct H as [s pi].
-apply mix0_not_mix2 in pi.
-assumption.
+intros H.
+apply mix0_not_mix2.
+eapply ex_implies_mix2_mix02 ; [ eassumption | reflexivity ].
 Qed.
 
-Lemma bbb_neq_bbb0 : exists l, (exists s, ll_bbb l s) /\ (forall s, ~ ll_bbb0 l s).
+Lemma bbb_neq_bbb0 : { l & prod (ll_bbb l) (ll_bbb0 l -> False) }.
 Proof.
 eexists ; split ; [ apply bbb_ex | apply ex_not_bbb0 ].
 Qed.
@@ -1653,25 +1631,19 @@ Qed.
 
 Section bbb0_with_cut.
 
-Hypothesis cut_bbb0_r : forall A l1 l2 s1 s2,
-  ll_bbb0 (dual A :: l1) s1 -> ll_bbb0 (A :: l2) s2 -> exists s,
-    ll_bbb0 (l2 ++ l1) s.
+Hypothesis cut_bbb0_r : forall A l1 l2,
+  ll_bbb0 (dual A :: l1) -> ll_bbb0 (A :: l2) -> ll_bbb0 (l2 ++ l1).
 
-Theorem llR_oc_bot_to_bbb0_cut : forall l s, llR (oc bot) l s ->
-  exists s', ll_bbb0 l s'.
-Proof with myeeasy ; try PCperm_solve.
-intros l s pi.
-induction pi ;
-  try (inversion f ; fail) ;
-  try destruct IHpi as [s' IHpi] ;
-  try destruct IHpi1 as [s1' IHpi1] ;
-  try destruct IHpi2 as [s2' IHpi2] ;
-  try (eexists ; constructor ; myeeasy ; fail).
-- eexists ; eapply ex_bbb0_r...
-- eexists ; apply co_bbb0_r.
+Theorem llR_oc_bot_to_bbb0_cut : forall l,
+  llR (oc bot) l -> ll_bbb0 l.
+Proof with myeeasy ; try PCperm_Type_solve.
+intros l pi.
+induction pi ; (try now inversion f) ; try now constructor.
+- eapply ex_bbb0_r...
+- apply co_bbb0_r.
   eapply ex_bbb0_r...
 - eapply cut_bbb0_r...
-- destruct H ; subst ; eexists.
+- destruct a ; simpl.
   + apply de_bbb0_r.
     apply one_bbb0_r.
   + rewrite <- (app_nil_l (one :: _)).
@@ -1684,24 +1656,23 @@ induction pi ;
       eapply (@mix0_r pfrag_mix0 eq_refl).
 Qed.
 
-Example bbb0_cut_ex : exists s,
-  ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil) s.
+Example bbb0_cut_ex :
+  ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil).
 Proof.
-destruct bb_ex as [s Hex].
-apply llR_oc_bot_to_bbb0_cut in Hex.
-assumption.
+apply llR_oc_bot_to_bbb0_cut.
+apply bb_ex.
 Qed.
 
 End bbb0_with_cut.
 
 Lemma cut_not_elim_bbb0 :
-~ forall A l1 l2 s1 s2, ll_bbb0 (dual A :: l1) s1 -> ll_bbb0 (A :: l2) s2 ->
-    exists s, ll_bbb0 (l2 ++ l1) s.
+(forall A l1 l2,
+  ll_bbb0 (dual A :: l1) -> ll_bbb0 (A :: l2) -> ll_bbb0 (l2 ++ l1))
+    -> False.
 Proof.
 intros Hcut.
-apply bbb0_cut_ex in Hcut.
-destruct Hcut as [s Hex].
-apply ex_not_bbb0 in Hex.
+apply ex_not_bbb0.
+apply bbb0_cut_ex.
 assumption.
 Qed.
 
