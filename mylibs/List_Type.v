@@ -108,6 +108,45 @@ End In.
 Hint Resolve in_Type_eq in_Type_cons in_Type_inv in_Type_nil in_Type_app_or
   in_Type_or_app: datatypes.
 
+  (**************************)
+  (** Facts about [app] *)
+  (**************************)
+
+Section App.
+
+
+  Variable A : Type.
+
+  (** Facts deduced from the result of a concatenation *)
+
+  Theorem app_eq_nil_Type : forall l l':list A, l ++ l' = nil -> (l = nil) * (l' = nil).
+  Proof.
+    destruct l as [| x l]; destruct l' as [| y l']; simpl; auto.
+    intro; discriminate.
+    intros H; discriminate H.
+  Qed.
+
+  Theorem app_eq_unit_Type :
+    forall (x y:list A) (a:A),
+      x ++ y = a::nil -> ((x = nil) * (y = a::nil)) + ((x = a::nil) * (y = nil)).
+  Proof.
+    destruct x as [| a l]; [ destruct y as [| a l] | destruct y as [| a0 l0] ];
+      simpl.
+    intros a H; discriminate H.
+    left; split; auto.
+    right; split; auto.
+    generalize H.
+    generalize (app_nil_r l); intros E.
+    rewrite -> E; auto.
+    intros.
+    injection H as H H0.
+    assert (nil = l ++ a0 :: l0) by auto.
+    apply app_cons_not_nil in H1 as [].
+  Qed.
+
+End App.
+
+
 
 (*********************************************)
 (** Reverse Induction Principle on Lists  *)
