@@ -175,7 +175,7 @@ case (polarity A).
 - intros ; reflexivity.
 Qed.
 
-Lemma Permutation_middle_polcont : forall l1 l2 A B,
+Lemma Permutation_Type_middle_polcont : forall l1 l2 A B,
   Permutation_Type (B :: polcont (l1 ++ l2) A) (polcont (l1 ++ B :: l2) A).
 Proof.
 intros l1 l2 A B.
