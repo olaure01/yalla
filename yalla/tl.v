@@ -35,8 +35,7 @@ Inductive tformula : Set :=
 | tplus : tformula -> tformula -> tformula
 | toc : tformula -> tformula.
 
-(* TODO
-Inductive tsubform : tformula -> tformula -> Prop :=
+Inductive tsubform : tformula -> tformula -> Type :=
 | tsub_id : forall A, tsubform A A
 | tsub_tens_l : forall A B C, tsubform A B -> tsubform A (ttens B C)
 | tsub_tens_r : forall A B C, tsubform A B -> tsubform A (ttens C B)
@@ -60,7 +59,6 @@ split.
 - intros l1 l2 l3.
   apply tsub_trans.
 Qed.
-*)
 
 (** ** 2. define embedding into [iformula] *)
 
@@ -120,6 +118,8 @@ Qed.
 
 
 (** ** 3. define proofs *)
+
+Definition NoTAxioms := (existT (fun x => x -> list tformula * option tformula) _ ll.Empty_fun).
 
 Record tpfrag := mk_tpfrag {
   tpcut : bool ;
