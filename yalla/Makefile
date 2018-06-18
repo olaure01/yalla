@@ -70,6 +70,6 @@ yalla_ax.vo: $(MYLIBSDIR)/Injective.vo yalla_ax.v
 
 bbb.vo: bbb.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/genperm_Type.vo ll.vo ll_fragments.vo
 nn.vo: nn.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/Bool_more.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/genperm_Type.vo subs.vo isubs.vo ll_fragments.vo bbb.vo
-nnfoc.vo: nnfoc.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_more.vo $(MYLIBSDIR)/Permutation_solve.vo $(MYLIBSDIR)/genperm.vo basic_tactics.vo ll_fragments.vo ill.vo llfoc.vo tl.vo nn.vo
+nnfoc.vo: nnfoc.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/genperm_Type.vo basic_tactics.vo ll_fragments.vo ill.vo llfoc.vo tl.vo nn.vo
 
 
