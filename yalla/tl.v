@@ -66,6 +66,7 @@ Definition i2ac := yalla_ax.i2ac.
 Definition i2ac_inj := yalla_ax.i2ac_inj.
 Definition t2i := yalla_ax.t2i.
 Definition t2i_inj := yalla_ax.t2i_inj.
+Definition atN_or_t2i := yalla_ax.atN_or_t2i.
 Definition notatN := yalla_ax.notatN.
 Definition iateq := yalla_ax.iateq.
 Definition iateq_eq := yalla_ax.iateq_eq.
@@ -80,6 +81,11 @@ match P with
 | tplus A B => iplus (tl2ill A) (tl2ill B)
 | toc A => ioc (tl2ill A)
 end.
+
+Lemma N_not_tl2ill : forall A, N = tl2ill A -> False.
+Proof.
+intros A Heq ; destruct A ; inversion Heq.
+Qed.
 
 Lemma tl2ill_inj : injective tl2ill.
 Proof with try reflexivity.
@@ -225,23 +231,114 @@ Qed.
 
 (** ** 4. characterize corresponding [ill] fragment *)
 
-(* TODO
-Definition tl_fragment A := A = N \/ exists B, A = tl2ill B.
+(*
+Lemma tl2ill_dec : forall A,
+   {B | A = tl2ill B} + (A = N)
+ + ((forall B, A = tl2ill B -> False) * (A = N -> False)).
+Proof with try reflexivity.
+induction A ;
+  (try now (right ; intros B Heq ; destruct B ; inversion Heq))
+ ;
+  try (destruct IHA1 as [[[B1 Heq1] | Hr1] | [Hr1 HN1]] ;
+  destruct IHA2 as [[[B2 Heq2] | Hr2] | [Hr2 HN2]] ; subst ;
+  (try now (right ; split ;
+     [ intros B Heq ; destruct B ; inversion Heq ; subst ;
+       eapply Hr1 ; reflexivity
+     | intros Heq ; inversion Heq])) ;
+  (try now (right ; split ;
+     [ intros B Heq ; destruct B ; inversion Heq ; subst ;
+       eapply Hr2 ; reflexivity
+     | intros Heq ; inversion Heq])) ;
+  (try now (right ; split ;
+     [ intros B Heq ; destruct B ; inversion Heq ; subst ;
+       eapply N_not_tl2ill ; assumption
+     | intros Heq ; inversion Heq])) ;
+  (try now (right ; split ; [ intros B Heq ; destruct B | intros Heq ] ;
+     inversion Heq ; eapply N_not_tl2ill ; eassumption))).
+- destruct (atN_or_t2i i) as [HatN | [ j Heq ]].
+  + left ; right ; subst...
+  + subst ; left ; left ; exists (tvar j)...
+- left ; left ; exists tone...
+- left ; left ; exists (ttens B1 B2)...
+- destruct IHA as [[[B Heq] | Hr] | [Hr HN]] ; subst.
+  + left ; left ; exists (tneg B)...
+  + right ; split ; [ intros B Heq ; destruct B | intros Heq ] ; inversion Heq.
+    eapply N_not_tl2ill ; eassumption.
+  + right ; split ; [ intros B Heq ; destruct B | intros Heq ] ; inversion Heq ; subst.
+    eapply Hr ; reflexivity.
+- right ; split ; [ intros B Heq ; destruct B | intros Heq ] ; inversion Heq.
+- left ; left ; exists tzero...
+- left ; left ; exists (tplus B1 B2)...
+- destruct IHA as [[[B Heq] | Hr] | [Hr HN]] ; subst.
+  + left ; left ; exists (toc B)...
+  + right ; split ; [ intros B Heq ; destruct B | intros Heq ] ; inversion Heq.
+    eapply N_not_tl2ill ; eassumption.
+  + right ; split ; [ intros B Heq ; destruct B | intros Heq ] ; inversion Heq ; subst.
+    eapply Hr ; reflexivity.
+Qed.
+
+Definition tl_fragment A :=
+match (tl2ill_dec A) with
+| inl _ => true
+| inr _ => false
+end.
 
 Lemma tl_is_fragment : ifragment tl_fragment.
-Proof.
+Proof with try reflexivity.
 intros A HfA B Hsf.
-induction Hsf ;
-  try (apply IHHsf ;
-       destruct HfA as [HfA | [F HfA]] ; (try destruct F) ; 
-       inversion HfA ;
-       right ; eexists ; reflexivity).
+
+induction Hsf ; unfold tl_fragment in HfA.
 - assumption.
-- apply IHHsf ;
-    destruct HfA as [HfA | [F HfA]] ; (try destruct F) ; 
-    inversion HfA ;
-    left ; eexists ; reflexivity.
-- left ; reflexivity.
+- destruct (tl2ill_dec (itens B C)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try now inversion Heq.
+  destruct B' ; inversion Heq ; subst.
+  apply IHHsf.
+  unfold tl_fragment ; destruct (tl2ill_dec (tl2ill B'1))...
+  exfalso ; eapply (fst p)...
+- destruct (tl2ill_dec (itens C B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try now inversion Heq.
+  destruct B' ; inversion Heq ; subst.
+  apply IHHsf.
+  unfold tl_fragment ; destruct (tl2ill_dec (tl2ill B'2))...
+  exfalso ; eapply (fst p)...
+- destruct (tl2ill_dec (ilpam B C)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
+- destruct (tl2ill_dec (ilpam C B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
+- destruct (tl2ill_dec (ilmap B C)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
+- destruct (tl2ill_dec (ilmap C B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
+- destruct (tl2ill_dec (ineg B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try now inversion Heq.
+  destruct B' ; inversion Heq ; subst.
+  apply IHHsf.
+  unfold tl_fragment ; destruct (tl2ill_dec (tl2ill B'))...
+  exfalso ; eapply (fst p)...
+- unfold tl_fragment ; destruct (tl2ill_dec N)...
+  exfalso ; apply (snd p)...
+- destruct (tl2ill_dec (iplus B C)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try now inversion Heq.
+  destruct B' ; inversion Heq ; subst.
+  apply IHHsf.
+  unfold tl_fragment ; destruct (tl2ill_dec (tl2ill B'1))...
+  exfalso ; eapply (fst p)...
+- destruct (tl2ill_dec (iplus C B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try now inversion Heq.
+  destruct B' ; inversion Heq ; subst.
+  apply IHHsf.
+  unfold tl_fragment ; destruct (tl2ill_dec (tl2ill B'2))...
+  exfalso ; eapply (fst p)...
+- destruct (tl2ill_dec (iwith B C)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
+- destruct (tl2ill_dec (iwith C B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
+- destruct (tl2ill_dec (ioc B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try now inversion Heq.
+  destruct B' ; inversion Heq ; subst.
+  apply IHHsf.
+  unfold tl_fragment ; destruct (tl2ill_dec (tl2ill B'))...
+  exfalso ; eapply (fst p)...
 Qed.
 *)
 
