@@ -141,6 +141,14 @@ intros x Heq ; inversion Heq.
 Qed.
 
 (* tl.v *)
+Fact atN_or_t2i : forall x, (atN = x) + { y | x = t2i y }.
+Proof.
+destruct x ; [ right | left ].
+- exists n ; reflexivity.
+- reflexivity.
+Qed.
+
+(* tl.v *)
 Fact a2t_inj : injective a2t.
 Proof.
 intros x y Heq.
