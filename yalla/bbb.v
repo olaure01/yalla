@@ -16,6 +16,84 @@ Require Import genperm_Type.
 
 Require Import ll_fragments.
 
+(** ** Preliminaries *)
+
+Lemma mix02_to_ll' : forall l,
+  ll_mix02 l -> ll_ll (wn one :: wn (tens (wn one) bot) :: l).
+Proof with myeeasy ; try PCperm_Type_solve.
+intros l pi.
+eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
+- eapply ex_r...
+- intros Hcut...
+- intros a ; destruct a.
+- intros Hpmix0 Hpmix0'.
+  apply de_r...
+  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  apply wk_r.
+  apply one_r.
+- intros _ _ l1 l2 pi1 pi2.
+  apply (ex_r _ (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1))...
+  apply co_std_r.
+  apply co_std_r.
+  apply de_r.
+  apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: wn one :: l2)
+                                   ++ (wn (tens (wn one) bot) :: l1)))...
+  apply tens_r.
+  + eapply ex_r ; [ apply pi1 | ]...
+  + apply bot_r ; eapply ex_r ; [ apply pi2 | ]...
+Unshelve. reflexivity.
+Qed.
+
+Lemma ll_to_mix02' : forall l,
+  ll_ll (wn one :: wn (tens (wn one) bot) :: l) -> ll_mix02 l.
+Proof with myeasy.
+intros l pi.
+apply cut_mix02_admissible.
+eapply stronger_pfrag in pi.
+- rewrite <- (app_nil_r l).
+  eapply (cut_r _ (wn (tens (wn one) bot))) ; simpl.
+  + change nil with (map wn nil).
+    apply oc_r.
+    apply parr_r.
+    change (one :: oc bot :: map wn nil) with ((one :: nil) ++ oc bot :: map wn nil).
+    eapply mix2_r...
+    * apply oc_r.
+      apply bot_r.
+      apply mix0_r...
+    * apply one_r.
+  + rewrite <- app_nil_r.
+    eapply cut_r ; [ | | apply pi ] ; simpl...
+    change nil with (map wn nil).
+    apply oc_r.
+    apply bot_r.
+    apply mix0_r...
+- nsplit 5...
+  intros a.
+  exists a...
+Unshelve.
+simpl...
+Qed.
+
+Lemma ll_to_mix02'' : forall l (l0 : list unit),
+  ll_ll (l ++ wn one :: map (fun _ => wn (tens (wn one) bot)) l0)  ->
+  ll_mix02 l.
+Proof.
+intros l l0 pi.
+apply ll_to_mix02'.
+revert l pi ; induction l0 ; intros l pi.
+- cons2app.
+  eapply ex_r ; [ | apply Permutation_Type_app_comm ].
+  simpl ; apply wk_r ; assumption.
+- cons2app.
+eapply ex_r ; [ | apply Permutation_Type_app_comm ].
+  simpl ; apply co_std_r.
+rewrite 2 app_comm_cons.
+eapply ex_r ; [ | apply Permutation_Type_app_comm ].
+list_simpl ; apply IHl0.
+list_simpl in pi.
+eapply ex_r ; [ apply pi | PCperm_Type_solve ].
+Qed.
+
 (** ** The system [ll_bbb] *)
 (** It contains [ll_mix2] but allows [mix0] as well above one side of each [mix2] rule. *)
 
@@ -81,6 +159,83 @@ apply co_bbb_r.
 eapply ex_bbb_r...
 Qed.
 
+(** Reversibility of [bot] in [ll_bbb] *)
+Lemma bot_rev_bbb : forall l, ll_bbb l ->
+  forall l1 l2, l = l1 ++ bot :: l2 -> ll_bbb (l1 ++ l2).
+Proof with myeeasy.
+intros l pi.
+induction pi ; intros l1' l2' Heq ; subst.
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+  destruct l1' ; inversion H3.
+- assert (HP := p).
+  apply Permutation_Type_vs_elt_inv in p.
+  destruct p as [(l3 & l4) Heq] ; simpl in Heq ; subst.
+  apply Permutation_Type_app_inv in HP.
+  eapply ex_bbb_r ; [ | apply HP ].
+  apply IHpi...
+- dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc ; apply mix2_bbb_r...
+    eapply bot_rev_axat...
+    intros a ; destruct a.
+  + rewrite <- app_assoc ; apply mix2_bbb_r...
+    apply IHpi...
+- exfalso.
+  destruct l1' ; inversion Heq.
+  destruct l1' ; inversion H1.
+- destruct l1' ; inversion Heq ; subst...
+  list_simpl ; eapply bot_bbb_r.
+  apply IHpi...
+- rewrite app_comm_cons in Heq ; dichot_Type_elt_app_exec Heq ; subst.
+  + destruct l1' ; inversion Heq0 ; subst.
+    list_simpl.
+    rewrite app_assoc ; apply tens_bbb_r...
+    rewrite app_comm_cons.
+    apply IHpi2...
+  + list_simpl.
+    apply tens_bbb_r...
+    rewrite app_comm_cons.
+    apply IHpi1...
+- destruct l1' ; inversion Heq ; subst.
+  rewrite 2 app_comm_cons in IHpi.
+  list_simpl ; eapply parr_bbb_r...
+  rewrite 2 app_comm_cons.
+  apply IHpi...
+- destruct l1' ; inversion Heq ; subst.
+  list_simpl ; apply top_bbb_r...
+- destruct l1' ; inversion Heq ; subst.
+  list_simpl ; eapply plus_bbb_r1...
+  rewrite app_comm_cons.
+  apply IHpi...
+- destruct l1' ; inversion Heq ; subst.
+  list_simpl ; eapply plus_bbb_r2...
+  rewrite app_comm_cons.
+  apply IHpi...
+- destruct l1' ; inversion Heq ; subst.
+  list_simpl ; eapply with_bbb_r...
+  + rewrite app_comm_cons.
+    apply IHpi1...
+  + rewrite app_comm_cons.
+    apply IHpi2...
+- exfalso.
+  destruct l1' ; inversion Heq.
+  symmetry in H1.
+  decomp_map H1.
+  inversion H1.
+- destruct l1' ; inversion Heq ; subst.
+  list_simpl ; eapply de_bbb_r...
+  rewrite app_comm_cons.
+  apply IHpi...
+- destruct l1' ; inversion Heq ; subst.
+  list_simpl ; eapply wk_bbb_r...
+  apply IHpi...
+- destruct l1' ; inversion Heq ; subst.
+  list_simpl ; eapply co_bbb_r...
+  rewrite 2 app_comm_cons.
+  apply IHpi...
+Qed.
+
 (** [ll_mix2] is contained in [ll_bbb] *)
 Lemma mix2_to_bbb : forall l, ll_mix2 l -> ll_bbb l.
 Proof with myeeasy.
@@ -108,1235 +263,420 @@ induction H ; try now constructor.
   apply co_r...
 Qed.
 
+Lemma mix2_std_bbb_r : forall l1 l2,
+  ll_bbb l1 -> ll_bbb l2 -> ll_bbb (l2 ++ l1).
+Proof.
+intros l1 l2 pi1 pi2.
+apply bbb_to_mix02 in pi2.
+apply mix2_bbb_r ; assumption.
+Qed.
+
+(** [ll_bbb] as an enriched [ll] system *)
+Lemma bbb_to_ll : forall l,
+  ll_bbb l -> ll_ll (wn (tens (wn one) bot) :: l).
+Proof with myeeasy ; try PCperm_Type_solve.
+intros l pi.
+induction pi ;
+  (try now (apply wk_r ; constructor)) ;
+  try now (eapply ex_r ; [ | apply Permutation_Type_swap ] ;
+           constructor ; eapply ex_r ; [ eassumption | PCperm_Type_solve ]).
+- eapply ex_r...
+- apply mix02_to_ll' in l.
+  apply co_std_r.
+  apply co_std_r.
+  apply de_r.
+  apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: l1)
+                                   ++ (wn (tens (wn one) bot) :: l2)))...
+  apply tens_r...
+  apply bot_r...
+- apply co_std_r.
+  apply (ex_r _ (tens A B :: (wn (tens (wn one) bot) :: l2)
+                          ++ (wn (tens (wn one) bot) :: l1)))...
+  apply tens_r ; eapply ex_r ; [ apply IHpi1 | | apply IHpi2 | ] ...
+- eapply ex_r ; [ | apply Permutation_Type_swap ].
+  apply with_r.
+  + eapply ex_r ; [ apply IHpi1 | ]...
+  + eapply ex_r ; [ apply IHpi2 | ]...
+- apply (ex_r _ (oc A :: map wn (tens (wn one) bot :: l)))...
+  apply oc_r.
+  eapply ex_r...
+- eapply ex_r ; [ | apply Permutation_Type_swap ].
+  apply co_std_r ; eapply ex_r...
+Qed.
+
+Lemma ll_to_bbb : forall l,
+  ll_ll l -> forall l' (l0 l1 : list unit),
+  Permutation_Type l (l' ++ map (fun _ => tens (wn one) bot) l1
+                         ++ map (fun _ => wn (tens (wn one) bot)) l0)  ->
+  ll_bbb l'.
+Proof with myeeasy ; try PCperm_Type_solve.
+intros l pi.
+induction pi ; intros l' l0' l1' HP.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  apply Permutation_Type_length_1_inv in HP.
+  apply app_eq_unit_Type in HP.
+  destruct HP as [[Heq1 Heq2] | [Heq1 Heq2]] ; subst ; destruct l' ; inversion Heq ; subst.
+  + destruct l1' ; inversion H0.
+    destruct l0' ; inversion H1.
+  + destruct l' ; inversion H1.
+    * destruct l1' ; inversion H0.
+      destruct l0' ; inversion H2.
+    * destruct l' ; inversion H2.
+      rewrite H3.
+      apply ax_bbb_r.
+  + destruct l1' ; inversion H0.
+    destruct l0' ; inversion H1.
+  + destruct l' ; inversion H1.
+    * destruct l1' ; inversion H0.
+      destruct l0' ; inversion H2.
+    * destruct l' ; inversion H2.
+      rewrite H3.
+      eapply ex_bbb_r ; [ apply ax_bbb_r | ]...
+- simpl in p.
+  eapply IHpi.
+  etransitivity...
+- inversion f.
+- apply Permutation_Type_app_app_inv in HP.
+  destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
+    simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
+  apply Permutation_Type_app_app_inv in HP4.
+  destruct HP4 as [[[l1b l2b] [l3b l4b]] [[HP1b HP2b] [HP3b HP4b]]] ;
+    simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
+  symmetry in HP1b.
+  apply Permutation_Type_map_inv in HP1b.
+  destruct HP1b as [la Heqa _].
+  decomp_map_Type Heqa ; simpl in Heqa1 ; simpl in Heqa2 ; subst.
+  symmetry in HP2b.
+  apply Permutation_Type_map_inv in HP2b.
+  destruct HP2b as [lb Heqb _].
+  decomp_map_Type Heqb ; simpl in Heqb1 ; simpl in Heqb2 ; subst.
+  apply (Permutation_Type_app_head l2a) in HP4b.
+  assert (IHP1 := Permutation_Type_trans HP2 HP4b).
+  apply (Permutation_Type_app_head l1a) in HP3b.
+  assert (IHP2 := Permutation_Type_trans HP1 HP3b).
+  apply IHpi1 in IHP1.
+  apply IHpi2 in IHP2.
+  symmetry in HP3.
+  eapply ex_bbb_r ; [ apply mix2_std_bbb_r | apply HP3 ]...
+- apply Permutation_Type_length_1_inv in HP.
+  destruct l' ; inversion HP.
+  + destruct l1' ; inversion H0.
+    destruct l0' ; inversion H1.
+  + apply app_eq_nil in H1 ; destruct H1 ; subst.
+    apply one_bbb_r.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply bot_bbb_r | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    remember (l'l ++ l) as l'.
+    apply Permutation_Type_app_app_inv in HP.
+    destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
+      simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
+    apply Permutation_Type_app_app_inv in HP4.
+    destruct HP4 as [[[l1b l2b] [l3b l4b]] [[HP1b HP2b] [HP3b HP4b]]] ;
+      simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
+    symmetry in HP1b.
+    apply Permutation_Type_map_inv in HP1b.
+    destruct HP1b as [la Heqa _].
+    decomp_map_Type Heqa ; simpl in Heqa1 ; simpl in Heqa2 ; subst.
+    symmetry in HP2b.
+    apply Permutation_Type_map_inv in HP2b.
+    destruct HP2b as [lb Heqb _].
+    decomp_map_Type Heqb ; simpl in Heqb1 ; simpl in Heqb2 ; subst.
+    apply (Permutation_Type_app_head l2a) in HP4b.
+    assert (IHP1 := Permutation_Type_trans HP2 HP4b).
+    apply (@Permutation_Type_cons _ A _ eq_refl) in IHP1.
+    rewrite app_comm_cons in IHP1.
+    apply (Permutation_Type_app_head l1a) in HP3b.
+    assert (IHP2 := Permutation_Type_trans HP1 HP3b).
+    apply (@Permutation_Type_cons _ B _ eq_refl) in IHP2.
+    rewrite app_comm_cons in IHP2.
+    apply IHpi1 in IHP1.
+    apply IHpi2 in IHP2.
+    symmetry in HP3.
+    apply (Permutation_Type_cons_app _ _ (tens A B)) in HP3.
+    eapply ex_bbb_r ; [ apply tens_bbb_r | apply HP3 ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0 ; subst ; list_simpl in HP.
+      rewrite (app_assoc (map _ l4)) in HP.
+      rewrite <- map_app in HP.
+      remember (l4 ++ l6) as l0 ; clear Heql0.
+      apply Permutation_Type_app_app_inv in HP.
+      destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
+        simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
+      apply Permutation_Type_app_app_inv in HP4.
+      destruct HP4 as [[[l1b l2b] [l3b l4b]] [[HP1b HP2b] [HP3b HP4b]]] ;
+        simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
+      symmetry in HP1b.
+      apply Permutation_Type_map_inv in HP1b.
+      destruct HP1b as [la Heqa _].
+      decomp_map_Type Heqa ; simpl in Heqa1 ; simpl in Heqa2 ; subst.
+      symmetry in HP2b.
+      apply Permutation_Type_map_inv in HP2b.
+      destruct HP2b as [lb Heqb _].
+      decomp_map_Type Heqb ; simpl in Heqb1 ; simpl in Heqb2 ; subst.
+      apply (Permutation_Type_app_head l2a) in HP4b.
+      assert (IHP1 := Permutation_Type_trans HP2 HP4b).
+      eapply (ex_r _ _ ((l2a ++ map (fun _ : unit => tens (wn one) bot) l7)
+                       ++ map (fun _ => wn one) (tt :: nil)
+                       ++ map (fun _ => wn (tens (wn one) bot)) l9)) in pi1...
+      assert (ll pfrag_ll (l2a ++ wn one ::
+                   map (fun _ : unit => wn (tens (wn one) bot)) (l7 ++ l9)))
+        as pi1'.
+      { clear - pi1 ; revert l2a l9 pi1 ; induction l7 ; intros l1 l2 pi ;
+          list_simpl in pi ; list_simpl...
+        list_simpl in IHl7.
+        apply (ex_r _ (l1 ++
+                wn one :: map (fun _ : unit => wn (tens (wn one) bot)) (l7 ++ tt :: l2)))...
+        apply IHl7.
+        eapply ex_r ; [ | apply Permutation_Type_app_comm ] ; list_simpl.
+        eapply ex_r ; [ | cons2app ; apply Permutation_Type_app_comm ] ; list_simpl.
+        apply de_r.
+        eapply ex_r ; [ apply pi | ]... }
+      eapply ll_to_mix02'' in pi1'...
+      apply (Permutation_Type_app_head l1a) in HP3b.
+      assert (IHP2 := Permutation_Type_trans HP1 HP3b).
+      apply (@Permutation_Type_cons _ bot _ eq_refl) in IHP2.
+      rewrite app_comm_cons in IHP2.
+      apply IHpi2 in IHP2.
+      assert (Permutation_Type (l2a ++ l1a) l') as HP' by perm_Type_solve.
+      eapply ex_bbb_r ; [ apply mix2_bbb_r | apply HP' ]...
+      rewrite <- app_nil_l.
+      eapply bot_rev_bbb...
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    apply (@Permutation_Type_cons _ B _ eq_refl) in HP.
+    apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
+    rewrite 2 app_comm_cons in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply parr_bbb_r | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + eapply ex_bbb_r ; [ apply top_bbb_r | apply Permutation_Type_middle ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
+    rewrite app_comm_cons in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply plus_bbb_r1 | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
+    rewrite app_comm_cons in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply plus_bbb_r2 | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    assert (HP2 := HP).
+    apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
+    rewrite app_comm_cons in HP.
+    apply IHpi1 in HP.
+    apply (@Permutation_Type_cons _ B _ eq_refl) in HP2.
+    rewrite app_comm_cons in HP2.
+    apply IHpi2 in HP2.
+    eapply ex_bbb_r ; [ apply with_bbb_r | apply Permutation_Type_middle ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + symmetry in HP.
+    apply Permutation_Type_map_inv in HP.
+    destruct HP as [l' Heq HP].
+    decomp_map_Type Heq ;
+      simpl in Heq1 ; simpl in Heq2 ; simpl in Heq3 ; simpl in Heq5 ; subst ;
+      simpl in HP.
+    apply (Permutation_Type_map wn) in HP.
+    list_simpl in HP.
+    rewrite app_assoc in HP.
+    rewrite <- map_app in HP.
+    apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
+    rewrite app_comm_cons in HP.
+    rewrite <- Heq2 in HP.
+    rewrite <- Heq5 in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply oc_bbb_r | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2.
+      inversion Heq2.
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
+    rewrite app_comm_cons in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply de_bbb_r | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2 ; simpl in Heq1 ; simpl in Heq2 ; simpl in Heq3 ; subst ; simpl in HP.
+      inversion Heq2 ; subst.
+      list_simpl in HP ; rewrite <- map_app in HP.
+      apply (@Permutation_Type_cons _ (tens (wn one) bot) _ eq_refl) in HP.
+      assert (Permutation_Type (tens (wn one) bot :: l)
+                               (l' ++ map (fun _ : unit => tens (wn one) bot) (tt :: l1')
+                                   ++ map (fun _ : unit => wn (tens (wn one) bot)) (l1 ++ l4)))
+        as HP' by (etransitivity ; [ apply HP | ] ; perm_Type_solve). 
+      apply IHpi in HP'...
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply wk_bbb_r | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2 ; simpl in Heq1 ; simpl in Heq2 ; simpl in Heq3 ; subst ; simpl in HP.
+      inversion Heq2 ; subst.
+      list_simpl in HP ; rewrite <- map_app in HP.
+      apply IHpi in HP...
+- assert (HP' := HP).
+  symmetry in HP'.
+  apply Permutation_Type_vs_cons_inv in HP'.
+  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  rewrite Heq in HP.
+  apply Permutation_Type_cons_app_inv in HP.
+  dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc in HP.
+    apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
+    apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
+    apply (@Permutation_Type_trans _ (wn A :: map wn lw ++ wn A :: l)) in HP...
+    rewrite 3 app_comm_cons in HP.
+    rewrite <- app_comm_cons in HP.
+    apply IHpi in HP.
+    eapply ex_bbb_r ; [ apply co_bbb_r | ]...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * decomp_map_Type Heq0.
+      inversion Heq0.
+    * decomp_map_Type Heq2 ; simpl in Heq1 ; simpl in Heq2 ; simpl in Heq3 ; subst ; simpl in HP.
+      inversion Heq2 ; subst.
+      list_simpl in HP ; rewrite <- map_app in HP.
+    apply (@Permutation_Type_cons _ (wn (tens (wn one) bot)) _ eq_refl) in HP.
+    apply (@Permutation_Type_cons _ (wn (tens (wn one) bot)) _ eq_refl) in HP.
+    apply (@Permutation_Type_trans _ (wn (tens (wn one) bot) :: map wn lw ++ wn (tens (wn one) bot) :: l)) in HP...
+    assert (Permutation_Type (wn (tens (wn one) bot) :: map wn lw ++ wn (tens (wn one) bot) :: l)
+       (l' ++ map (fun _ : unit => tens (wn one) bot) l1' ++
+              map (fun _ : unit => wn (tens (wn one) bot)) (tt :: tt :: l1 ++ l4)))
+      as HP' by (etransitivity ; [ apply HP | perm_Type_solve ]).
+    apply IHpi in HP'...
+- inversion f.
+- destruct a.
+Qed.
 
 
 
 (** ** Cut elimination for [ll_bbb] *)
 
-(* TODO *)
-Axiom cut_bbb_r : forall A l1 l2,
-  ll_bbb (dual A :: l1)-> ll_bbb (A :: l2) -> ll_bbb (l2 ++ l1).
-(* TODO
-Lemma key_case_oc_subst_bbb : forall A l lwn l1 l1' s s1,
-  (forall l2 l3 s2, ll_bbb (l2 ++ (dual A) :: l3) s2 ->
-     exists s' : nat, ll_bbb (l2 ++ (map wn l) ++ l3) s') ->
-  ll_bbb (A :: map wn l) s -> ll_bbb l1' s1 ->
-    Forall (fun x => x = wn (dual A)) lwn -> Permutation l1' (lwn ++ l1) -> 
-      exists s', ll_bbb (map wn l ++ l1) s'.
-Proof with myeeasy ; try perm_solve.
-intros A l lwn l1 l1' s s1 IHA Hbox H.
-revert l1 lwn.
-induction H ; intros l' lwn Hlwn HP.
-- (* ax *)
-  apply Permutation_length_2_inv in HP.
-  destruct HP as [HP | HP] ; destruct lwn ; inversion HP ; subst.
-  + simpl in HP ; subst.
-    clear.
-    induction l.
-    * eexists.
-      apply ax_bbb_r.
-    * destruct IHl as [s' IHl].
-      eexists.
-      eapply wk_bbb_r...
-  + apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + simpl in HP ; subst.
-    clear.
-    induction l.
-    * simpl.
-      eexists.
-      eapply ex_bbb_r ; [ apply ax_bbb_r | ]...
-    * destruct IHl as [s' IHl].
-      eexists.
-      eapply wk_bbb_r...
-  + apply Forall_inv in Hlwn.
-    inversion Hlwn.
-- (* ex *)
-  eapply IHll_bbb in Hlwn...
-- (* mix2 *)
-  apply Permutation_app_app_inv in HP.
-  destruct HP as (lwn' & lwn'' & l'' & l''' & H2 & H1 & Hwn & H').
-  assert (Forall (fun x : formula => x = wn (dual A)) (lwn' ++ lwn''))
-    as HP3 by (apply (Permutation_Forall _ lwn) ; myeasy).
-  apply Forall_app_inv in HP3.
-  destruct HP3 as [HP3 HP4].
-  apply IHll_bbb in H1...
-  destruct H1 as [s'1 H1].
-  apply bbb_to_mix02 in Hbox.
-  destruct lwn'.
-  + eexists.
-    eapply ex_r in H0 ; [ | apply H2 ].
-    apply (ex_bbb_r (l'' ++ (map wn l ++ l''')))...
-    apply mix2_bbb_r...
-  + revert s2 l2 H0 H2 HP3 ; clear - Hbox H1 H' ; induction lwn' ;
-      intros s2 l2 H0 H2 HP3.
-    * inversion HP3 ; subst.
-      apply (ex_r _ _ _ _ H0) in H2.
-      change (wn (dual A)) with (dual (oc A)) in H2.
-      eapply oc_r in Hbox.
-      eapply (cut_mix02_r _ _ _ _ _ H2) in Hbox.
-      destruct Hbox as [s0 Hbox].
-      eapply co_list_bbb_r.
-      eapply (ex_bbb_r ((map wn l ++ l'') ++ map wn l ++ l'''))...
-      apply mix2_bbb_r...
-    * inversion HP3.
-      inversion H5 ; subst.
-      apply (ex_r _ _ _ _ H0) in H2.
-      rewrite <- (app_nil_l (_ :: lwn')) in H2.
-      change nil with (map wn nil) in H2.
-      rewrite <- ? app_comm_cons in H2.
-      rewrite <- ? app_assoc in H2.
-      rewrite <- app_comm_cons in H2.
-      apply co_r in H2.
-      eapply IHlwn' ; [ apply H2 | | ]...
-- (* one *)
-  apply Permutation_length_1_inv in HP.
-  destruct lwn ; inversion HP ; subst.
-  + simpl in HP ; subst.
-    eapply wk_list_bbb_r.
-    eapply one_bbb_r.
-  + apply Forall_inv in Hlwn.
-    inversion Hlwn.
-- (* bot *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    eexists.
-    eapply ex_bbb_r ; [ apply bot_bbb_r | ]...
-- (* tens *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l1' & l1'' & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    apply Permutation_app_app_inv in HP.
-    destruct HP as (lwn' & lwn'' & l'' & l''' & H2 & H1 & Hwn & H').
-    assert (Forall (fun x : formula => x = wn (dual A)) (lwn' ++ lwn''))
-      as HP3 by (apply (Permutation_Forall _ lwn) ; myeasy).
-    apply Forall_app_inv in HP3.
-    destruct HP3 as [HP3 HP4].
-    apply (Permutation_cons_app _ _ A0) in H1.
-    apply IHll_bbb1 in H1...
-    destruct H1 as [s'1 H1].
-    apply (Permutation_cons_app _ _ B) in H2.
-    apply IHll_bbb2 in H2...
-    destruct H2 as [s'2 H2].
-    eapply co_list_bbb_r.
-    apply (ex_bbb_r (tens A0 B :: (map wn l ++ l'') ++ map wn l ++ l'''))...
-    * eapply tens_bbb_r...
-      -- apply (ex_bbb_r (map wn l ++ A0 :: l'''))...
-      -- apply (ex_bbb_r (map wn l ++ B :: l''))...
-    * (* Permutation: difficult case but should be automatically solvable *)
-      cons2app ; perm_rot...
-- (* parr *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    assert (HP2 := HP).
-    apply (Permutation_cons_app _ _ B) in HP.
-    apply (Permutation_cons_app _ _ A0) in HP.
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    eexists.
-    eapply (ex_bbb_r (parr A0 B :: map wn l ++ l4 ++ l3))...
-    eapply parr_bbb_r.
-    eapply (ex_bbb_r (map wn l ++ A0 :: B :: l4 ++ l3))...
-- (* top *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + eexists.
-    eapply (ex_bbb_r (top :: map wn l ++ l4 ++ l3))...
-    eapply top_bbb_r.
-- (* plus_1 *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    assert (HP2 := HP).
-    apply (Permutation_cons_app _ _ A0) in HP.
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    eexists.
-    eapply (ex_bbb_r (aplus A0 B :: map wn l ++ l4 ++ l3))...
-    eapply plus_bbb_r1.
-    eapply (ex_bbb_r (map wn l ++ A0 :: l4 ++ l3))...
-- (* plus_2 *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    assert (HP2 := HP).
-    apply (Permutation_cons_app _ _ A0) in HP.
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    eexists.
-    eapply (ex_bbb_r (aplus B A0 :: map wn l ++ l4 ++ l3))...
-    eapply plus_bbb_r2.
-    eapply (ex_bbb_r (map wn l ++ A0 :: l4 ++ l3))...
-- (* with *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    assert (HP1 := HP).
-    assert (HP2 := HP).
-    apply (Permutation_cons_app _ _ A0) in HP.
-    apply IHll_bbb1 in HP...
-    destruct HP as [s1' HP].
-    apply (Permutation_cons_app _ _ B) in HP1.
-    apply IHll_bbb2 in HP1...
-    destruct HP1 as [s2' HP1].
-    eexists.
-    eapply (ex_bbb_r (awith A0 B :: map wn l ++ l4 ++ l3))...
-    eapply with_bbb_r.
-    * eapply (ex_bbb_r (map wn l ++ A0 :: l4 ++ l3))...
-    * eapply (ex_bbb_r (map wn l ++ B :: l4 ++ l3))...
-- (* oc *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [_ Hlwn].
-    apply Forall_inv in Hlwn.
-    inversion Hlwn.
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    assert (HP2 := HP).
-    apply (Permutation_cons_app _ _ A0) in HP.
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    apply (Permutation_Forall (fun x => exists y, x = wn y)) in HP2.
-    apply Forall_app_inv in HP2.
-    * destruct HP2 as [_ HP2].
-      assert (exists l', l4 ++ l3 = map wn l').
-      { revert HP2.
-        clear.
-        revert l3.
-        induction l4 ; intros.
-        - revert HP2.
-          simpl.
-          induction l3 ; intros.
-          + exists (@nil formula)...
-          + inversion HP2 ; subst.
-            apply IHl3 in H2.
-            destruct H1 as [b H1] ; subst.
-            destruct H2 as [l' H2] ; subst.
-            exists (b::l')...
-        - inversion HP2 ; subst.
-          apply IHl4 in H2.
-          destruct H1 as [b H1] ; subst.
-          destruct H2 as [l' H2] ; subst.
-          rewrite <- app_comm_cons.
-          rewrite H2.
-          exists (b::l')... }
-      destruct H0 as [l' H0].
-      eexists.
-      eapply (ex_bbb_r (oc A0 :: map wn l ++ l4 ++ l3))...
-      rewrite_all H0.
-      rewrite <- map_app.
-      eapply oc_bbb_r...
-      rewrite map_app.
-      eapply (ex_bbb_r (map wn l ++ A0 :: map wn l'))...
-    * clear.
-      induction l0 ; constructor...
-      exists a...
-- (* de *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [Hlwn1 Hlwn2].
-    inversion Hlwn2 ; subst.
-    inversion H2 ; subst.
-    rewrite <- app_assoc in HP.
-    rewrite <- app_comm_cons in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite app_assoc in HP.
-    apply (Permutation_cons_app _ _ (dual A)) in HP.
-    apply IHll_bbb in HP.
-    * destruct HP as [s' HP].
-      apply IHA in HP...
-      destruct HP as [s'' HP].
-      eapply co_list_bbb_r...
-    * apply Forall_app...
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    assert (HP2 := HP).
-    apply (Permutation_cons_app _ _ A0) in HP.
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    eexists.
-    eapply (ex_bbb_r (wn A0 :: map wn l ++ l4 ++ l3))...
-    eapply de_bbb_r.
-    eapply (ex_bbb_r (map wn l ++ A0 :: l4 ++ l3))...
-- (* wk *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [Hlwn1 Hlwn2].
-    inversion Hlwn2 ; subst.
-    inversion H2 ; subst.
-    rewrite <- app_assoc in HP.
-    rewrite <- app_comm_cons in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite app_assoc in HP.
-    apply IHll_bbb in HP...
-    apply Forall_app...
-  + rewrite app_assoc in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite <- app_assoc in HP.
-    assert (HP2 := HP).
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    eexists.
-    eapply (ex_bbb_r (wn A0 :: map wn l ++ l4 ++ l3))...
-    eapply wk_bbb_r...
-- (* co *)
-  assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l2 & l3 & Heq).
-  symmetry in Heq.
-  dichot_elt_app_exec Heq ; subst.
-  + apply Forall_app_inv in Hlwn.
-    destruct Hlwn as [Hlwn1 Hlwn2].
-    inversion Hlwn2 ; subst.
-    inversion H2 ; subst.
-    rewrite <- app_assoc in HP.
-    rewrite <- app_comm_cons in HP.
-    apply Permutation_cons_app_inv in HP.
-    rewrite app_assoc in HP.
-    eapply (@Permutation_cons _ _ (wn (dual A)) eq_refl) in HP.
-    eapply (@Permutation_cons _ _ (wn (dual A)) eq_refl) in HP.
-    rewrite ?app_comm_cons in HP.
-    apply IHll_bbb in HP...
-    constructor...
-    constructor...
-    apply (Forall_app _ _ _ Hlwn1 H3).
-  + eapply (Permutation_cons_app _ _ (wn A0)) in HP.
-    apply IHll_bbb in HP...
-    destruct HP as [s' HP].
-    eexists.
-    eapply (ex_bbb_r (wn A0 :: map wn l ++ l4 ++ l3))...
-    eapply co_bbb_r...
-    eapply ex_bbb_r...
+Theorem cut_bbb_r : forall A l1 l2,
+  ll_bbb (dual A :: l1) -> ll_bbb (A :: l2) -> ll_bbb (l2 ++ l1).
+Proof.
+intros A l1 l2 pi1 pi2.
+apply bbb_to_ll in pi1.
+apply bbb_to_ll in pi2.
+eapply ex_r in pi1 ; [ | apply Permutation_Type_swap ].
+eapply ex_r in pi2 ; [ | apply Permutation_Type_swap ].
+apply (cut_ll_r _ _ _ pi1) in pi2.
+apply (ex_r _ _ ((l2 ++ l1) ++ map (fun _ => tens (wn one) bot) (@nil unit)
+                            ++ map (fun _ => wn (tens (wn one) bot)) (tt :: tt :: nil))) in pi2 ;
+ [ | PCperm_Type_solve ].
+eapply ll_to_bbb in pi2 ; [ | reflexivity ].
+assumption.
 Qed.
-
-Lemma key_case_oc_co_bbb : forall A l l1 s s1,
-  (forall l2 l3 s2, ll_bbb (l2 ++ (dual A) :: l3) s2 ->
-     exists s' : nat, ll_bbb (l2 ++ (map wn l) ++ l3) s') ->
-  ll_bbb (A :: map wn l) s -> ll_bbb (wn (dual A) :: wn (dual A) :: l1) s1 ->
-     exists s', ll_bbb (map wn l ++ l1) s'.
-Proof with myeeasy.
-intros.
-change (wn (dual A) :: wn (dual A) :: l1)
-  with ((wn (dual A) :: wn (dual A) :: nil) ++ l1) in H1.
-eapply key_case_oc_subst_bbb...
-constructor...
-constructor...
-constructor...
-Qed.
-
-Theorem cut_elim_bbb : forall c s A l1 l2 l3 s1 s2, 
-  ll_bbb (dual A :: l1) s1 -> ll_bbb (l2 ++ A :: l3) s2 ->
-    s = s1 + s2 -> fsize A <= c -> exists s',
-    ll_bbb (l2 ++ l1 ++ l3) s'.
-Proof with myeeasy ; try fsize_auto ; try perm_solve ; try PCperm_solve.
-induction c using (well_founded_induction lt_wf).
-assert (
-  forall A l1 l2 l3 s1 s2,
-    ll_bbb (dual A :: l1) s1 ->
-    ll_bbb (l2 ++ A :: l3) s2 ->
-    fsize A < c -> exists s' : nat, ll_bbb (l2 ++ l1 ++ l3) s'
-  ) as IHcut by (intros ; eapply H ; myeeasy).
-clear H.
-induction s using (well_founded_induction lt_wf).
-assert (
-  forall A l1 l2 l3 s1 s2,
-    ll_bbb (dual A :: l1) s1 ->
-    ll_bbb (l2 ++ A :: l3) s2 ->
-    s1 + s2 < s -> fsize A <= c -> exists s' : nat, ll_bbb (l2 ++ l1 ++ l3) s'
-  ) as IHsize by (intros ; eapply H ; myeeasy).
-clear H.
-intros A l1 l2 l3 s1 s2 Hl Hr Heqs Hc.
-rewrite_all Heqs ; clear s Heqs.
-inversion_ll_bbb Hr X l' Hl2 Hr2 HP2.
-- (* ax *)
-  destruct l2 ; inversion H.
-  + destruct l3 ; inversion H2 ; subst.
-    eexists.
-    eapply ex_bbb_r in Hl...
-  + destruct l2 ; inversion H2 ; subst.
-    * eexists.
-      eapply ex_bbb_r in Hl...
-    * destruct l2 ; inversion H4.
-- (* ex *)
-  assert (Heq := HP2).
-  apply Permutation_vs_elt_inv in Heq.
-  destruct Heq as (l2' & l3' & Heq).
-  subst.
-  eapply IHsize in Hl2...
-  destruct Hl2 as [s' Hl2].
-  eexists.
-  eapply ex_bbb_r in Hl2...
-- (* mix2 *)
-  dichot_elt_app_exec H ; subst.
-  + apply bbb_to_mix02 in Hl.
-    eapply ex_r in Hr2 ;
-      [ | unfold PCperm ; simpl ; symmetry ;
-          apply Permutation_cons_app ; reflexivity ].
-    eapply cut_mix02_r in Hr2...
-    destruct Hr2 as [s' Hr2].
-    eexists.
-    rewrite ? app_assoc.
-    apply mix2_bbb_r...
-    eapply ex_r...
-  + eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    rewrite <- app_assoc.
-    apply mix2_bbb_r...
-- (* one *)
-  destruct l2 ; inversion H ; subst.
-  + rewrite app_nil_r.
-    inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply mix2_bbb_r...
-      -- eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-    * eexists...
-  + destruct l2 ; inversion H2.
-- (* bot *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((l ++ l3) ++ l0))...
-         apply mix2_bbb_r...
-         eapply ex_r...
-      -- eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-    * eexists...
-  + eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    eapply bot_bbb_r...
-- (* tens *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      rewrite <- (bidual (tens A0 B)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ (l4 ++ l0) ++ l3'))...
-    * simpl in Hr.
-      rewrite <- (bidual (tens A0 B)) in Hr.
-      rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- change (parr (dual B) (dual A0)) with (dual (tens A0 B)) in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr ; rewrite ? bidual...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r (((l4 ++ l0) ++ l)++l2))...
-         apply mix2_bbb_r...
-      -- change (parr (dual B) (dual A0)) with (dual (tens A0 B)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r ((l4 ++ l0) ++ l1))...
-    * rewrite <- (bidual B) in Hr2.
-      rewrite <- (app_nil_l (_ :: _ :: l1)) in Hl1.
-      eapply (IHcut _ _ nil (dual A0 :: l1)) in Hr2...
-      destruct Hr2 as [s' Hr2].
-      rewrite <- (bidual A0) in Hl2.
-      eapply IHcut in Hl2...
-      destruct Hl2 as [s'' Hl2].
-      eexists.
-      eapply (ex_bbb_r _ _ _ Hl2)...
-  + dichot_elt_app_exec H2 ; subst.
-    * rewrite app_comm_cons in Hr2.
-      eapply IHsize in Hr2...
-      destruct Hr2 as [s' Hr2].
-      eexists.
-      rewrite <- app_comm_cons.
-      rewrite ? app_assoc.
-      eapply tens_bbb_r...
-      rewrite <- app_assoc...
-    * rewrite app_comm_cons in Hl2.
-      eapply IHsize in Hl2...
-      destruct Hl2 as [s' Hl2].
-      eexists.
-      rewrite app_comm_cons.
-      rewrite <- app_assoc.
-      apply tens_bbb_r...
-- (* parr *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      rewrite <- (bidual (parr A0 B)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * simpl in Hr.
-      rewrite <- (bidual (parr A0 B)) in Hr.
-      rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- change (tens (dual B) (dual A0)) with (dual (parr A0 B)) in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr ; rewrite ? bidual...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((l3 ++ l) ++ l0))...
-         apply mix2_bbb_r...
-      -- change (tens (dual B) (dual A0)) with (dual (parr A0 B)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-    * (* key case parr/tens bis *)
-      change (A0 :: B :: l3) with ((A0 :: nil) ++ B :: l3) in Hl2.
-      eapply IHcut in Hl2...
-      destruct Hl2 as [s' Hl2].
-      simpl in Hl2.
-      rewrite <- (app_nil_l (_ :: l0 ++ l3)) in Hl2.
-      eapply IHcut in Hl2...
-      destruct Hl2 as [s'' Hl2].
-      rewrite <- app_assoc.
-      eexists...
-  + rewrite ? app_comm_cons in Hl2.
-    eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    rewrite <- app_comm_cons.
-    eapply parr_bbb_r...
-- (* top *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((l ++ l3) ++ l0))...
-         apply mix2_bbb_r...
-         eapply ex_r...
-      -- eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-  + eexists.
-    rewrite <- app_comm_cons.
-    eapply top_bbb_r.
-- (* plus_1 *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      rewrite <- (bidual (aplus A0 B)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- simpl in Hr.
-         rewrite <- (bidual (aplus A0 B)) in Hr.
-         change (awith (dual A0) (dual B)) with (dual (aplus A0 B)) in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr ; rewrite ? bidual...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((l3 ++ l) ++ l0))...
-         apply mix2_bbb_r...
-      -- simpl in Hr.
-         rewrite <- (bidual (aplus A0 B)) in Hr.
-         change (awith (dual A0) (dual B)) with (dual (aplus A0 B)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-    * eapply IHcut in Hl1...
-  + rewrite app_comm_cons in Hl2.
-    eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    rewrite <- app_comm_cons.
-    eapply plus_bbb_r1...
-- (* plus_2 *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      rewrite <- (bidual (aplus B A0)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- simpl in Hr.
-         rewrite <- (bidual (aplus B A0)) in Hr.
-         change (awith (dual B) (dual A0)) with (dual (aplus B A0)) in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr ; rewrite ? bidual...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((l3 ++ l) ++ l0))...
-         apply mix2_bbb_r...
-      -- simpl in Hr.
-         rewrite <- (bidual (aplus B A0)) in Hr.
-         change (awith (dual B) (dual A0)) with (dual (aplus B A0)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-    * eapply IHcut in Hr1...
-  + rewrite app_comm_cons in Hl2.
-    eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    rewrite <- app_comm_cons.
-    eapply plus_bbb_r2...
-- (* with *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      rewrite <- (bidual (awith A0 B)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- simpl in Hr.
-         rewrite <- (bidual (awith A0 B)) in Hr.
-         change (aplus (dual A0) (dual B)) with (dual (awith A0 B)) in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr ; rewrite ? bidual...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((l3 ++ l) ++ l0))...
-         apply mix2_bbb_r...
-      -- simpl in Hr.
-         rewrite <- (bidual (awith A0 B)) in Hr.
-         change (aplus (dual A0) (dual B)) with (dual (awith A0 B)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-    * eapply IHcut in Hl1...
-    * eapply IHcut in Hl1...
-  + rewrite app_comm_cons in Hl2.
-    eapply IHsize in Hl2...
-    destruct Hl2 as [s1' Hl2].
-    rewrite app_comm_cons in Hr2.
-    eapply IHsize in Hr2...
-    destruct Hr2 as [s2' Hr2].
-    eexists.
-    rewrite <- app_comm_cons.
-    eapply with_bbb_r...
-- (* oc *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-        destruct Heq as (l2' & l3' & Heq).
-        subst.
-      rewrite <- (bidual (oc A0)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      eapply (ex_bbb_r (l2' ++ (map wn l) ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- simpl in Hr.
-         rewrite <- (bidual (oc A0)) in Hr.
-         change (wn (dual A0)) with (dual (oc A0)) in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr ; rewrite ? bidual...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((map wn l ++ l3) ++ l0))...
-         apply mix2_bbb_r...
-      -- simpl in Hr.
-         rewrite <- (bidual (oc A0)) in Hr.
-         change (wn (dual A0)) with (dual (oc A0)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         apply eq_sym in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         eapply (ex_bbb_r ((map wn l) ++ l1))...
-    * (* key case de *)
-      eapply IHcut in Hl1...
-    * (* key case wk *)
-      clear - Hl1.
-      eapply (wk_list_bbb_r l) in Hl1.
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (map wn l ++ l1))...
-    * eapply key_case_oc_co_bbb in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      eapply ex_bbb_r...
-      intros.
-      rewrite <- (bidual A0) in Hl2.
-      eapply IHcut...
-  + assert (Heq := H2).
-    apply eq_sym in Heq.
-    decomp_map Heq ; subst.
-    inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * inversion_ll_bbb Hl1 X l'' Hl1' Hr1' HP1'.
-      -- (* ax *)
-         apply Permutation_length_2_inv in HP1.
-         destruct HP1 ; inversion H0.
-      -- (* ex *)
-         eapply (ex_bbb_r _ (dual (wn x) :: l1)) in Hl1'...
-         eapply IHsize in Hl1'...
-      -- (* mix2 *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         apply eq_sym in Heq.
-         dichot_elt_app_exec Heq ; subst.
-         ++ eapply (ex_r _ _ (dual (wn x) :: l' ++ l)) in Hr1'...
-            apply bbb_to_mix02 in Hr.
-            eapply ex_r in Hr ; [ | 
-              symmetry ; apply Permutation_cons_app ; reflexivity].
-            eapply cut_mix02_r in Hr1' ; try rewrite bidual...
-           destruct Hr1' as [s' Hr1'].
-           eexists.
-           simpl.
-           eapply (ex_bbb_r
-              (((l' ++ l) ++ (oc A0 :: map wn l4) ++ map wn l6) ++ l0))...
-           eapply mix2_bbb_r...
-         ++ eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ l3)) in Hl1'...
-           eapply IHsize in Hl1'...
-           destruct Hl1' as [s' Hl1'].
-           eexists.
-           eapply (ex_bbb_r
-              (l2 ++ ((oc A0 :: map wn l4) ++ (l'' ++ l3) ++ map wn l6)))...
-           eapply mix2_bbb_r...
-      -- (* one *)
-         apply Permutation_length_1_inv in HP1.
-         inversion HP1.
-      -- (* bot *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         apply eq_sym in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ l')) in Hl1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eexists.
-         eapply (ex_bbb_r
-           (bot :: (oc A0 :: map wn l4) ++ (l'' ++ l') ++ map wn l6))...
-         eapply bot_bbb_r...
-      -- (* tens *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         apply eq_sym in Heq.
-         rewrite app_comm_cons in Heq.
-         dichot_elt_app_exec Heq ; subst.
-         ++ destruct l' ; inversion Heq0 ; subst.
-            eapply (ex_bbb_r _ (dual (wn x) :: B :: l' ++ l)) in Hr1'...
-            eapply IHsize in Hr1'...
-            destruct Hr1' as [s' Hr1'].
-            eexists.
-            eapply (ex_bbb_r
-              (tens A B :: ((oc A0 :: map wn l4)
-                ++ (l' ++ l) ++ map wn l6) ++ l0))...
-            eapply tens_bbb_r...
-            eapply (ex_bbb_r
-              ((oc A0 :: map wn l4) ++ (B :: l' ++ l) ++ map wn l6))...
-         ++ eapply (ex_bbb_r _ (dual (wn x) :: A :: l'' ++ l3)) in Hl1'...
-            eapply IHsize in Hl1'...
-            destruct Hl1' as [s' Hl1'].
-            eexists.
-            eapply (ex_bbb_r
-              (tens A B :: l2 ++ (oc A0 :: map wn l4)
-                ++ (l'' ++ l3) ++ map wn l6))...
-            eapply tens_bbb_r...
-            eapply (ex_bbb_r
-             ((oc A0 :: map wn l4) ++ (A :: l'' ++ l3) ++ map wn l6))...
-      -- (* parr *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         apply eq_sym in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ A :: B :: l')) in Hl1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eexists.
-         eapply (ex_bbb_r
-           (parr A B :: (oc A0 :: map wn l4)
-             ++ (l'' ++ l') ++ map wn l6))...
-         eapply parr_bbb_r...
-         eapply (ex_bbb_r
-           ((oc A0 :: map wn l4) ++ (l'' ++ A :: B :: l') ++ map wn l6))...
-      -- (* top *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l1'' & l2'' & Heq).
-         destruct l1'' ; inversion Heq ; subst.
-         eexists.
-         eapply (ex_bbb_r (top :: l1'' ++ l2'' ++
-                            (oc A0 :: map wn l4) ++ map wn l6))...
-         eapply top_bbb_r.
-      -- (* plus_1 *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         symmetry in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ A :: l')) in Hl1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eexists.
-         eapply (ex_bbb_r
-           (aplus A B :: (oc A0 :: map wn l4)
-           ++ (l'' ++ l') ++ map wn l6))...
-         eapply plus_bbb_r1...
-         eapply (ex_bbb_r
-           ((oc A0 :: map wn l4) ++ (l'' ++ A :: l') ++ map wn l6))...
-      -- (* plus_2 *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         symmetry in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ A :: l')) in Hl1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eexists.
-         eapply (ex_bbb_r
-           (aplus B A :: (oc A0 :: map wn l4)
-           ++ (l'' ++ l') ++ map wn l6))...
-         eapply plus_bbb_r2...
-         eapply (ex_bbb_r
-               ((oc A0 :: map wn l4) ++ (l'' ++ A :: l') ++ map wn l6))...
-      -- (* with *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         apply eq_sym in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ A :: l')) in Hl1'...
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ B :: l')) in Hr1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eapply IHsize in Hr1'...
-         destruct Hr1' as [s'' Hr1'].
-         eexists.
-         eapply (ex_bbb_r
-           (awith A B :: (oc A0 :: map wn l4)
-           ++ (l'' ++ l') ++ map wn l6))...
-         eapply with_bbb_r...
-         ++ eapply (ex_bbb_r
-             ((oc A0 :: map wn l4) ++ (l'' ++ A :: l') ++ map wn l6))...
-         ++ eapply (ex_bbb_r
-             ((oc A0 :: map wn l4) ++ (l'' ++ B :: l') ++ map wn l6))...
-      -- (* oc *)
-         assert (A = dual x).
-         {
-           symmetry in HP1.
-           apply (Permutation_in (dual (wn x))) in HP1.
-           - inversion HP1.
-             + inversion H0...
-             + exfalso.
-               simpl in H0.
-               revert H0 ; clear ; induction l ; intros.
-               * simpl in H0...
-               * inversion H0.
-                 inversion H.
-                 apply IHl...
-           - constructor...
-         }
-         subst.
-         change (oc (dual x)) with (dual (wn x)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         eexists.
-         eapply (ex_bbb_r ((oc A0 :: map wn l4) ++ map wn l ++ map wn l6))...
-      -- (* de *) 
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         symmetry in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ A :: l')) in Hl1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eexists.
-         eapply (ex_bbb_r
-           (wn A :: (oc A0 :: map wn l4)
-           ++ (l'' ++ l') ++ map wn l6))...
-         eapply de_bbb_r...
-         eapply (ex_bbb_r
-           ((oc A0 :: map wn l4) ++ (l'' ++ A :: l') ++ map wn l6))...
-      -- (* wk *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         symmetry in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _ (dual (wn x) :: l'' ++ l')) in Hl1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eexists.
-         eapply (ex_bbb_r
-           (wn A :: (oc A0 :: map wn l4)
-           ++ (l'' ++ l') ++ map wn l6))...
-         eapply wk_bbb_r...
-      -- (* co *)
-         assert (Heq := HP1).
-         apply Permutation_vs_cons_inv in Heq.
-         destruct Heq as (l' & l'' & Heq).
-         symmetry in Heq.
-         destruct l' ; inversion Heq ; subst.
-         eapply (ex_bbb_r _
-           (dual (wn x) :: l'' ++ wn A :: wn A :: l')) in Hl1'...
-         eapply IHsize in Hl1'...
-         destruct Hl1' as [s' Hl1'].
-         eexists.
-         eapply (ex_bbb_r
-           (wn A :: (oc A0 :: map wn l4)
-           ++ (l'' ++ l') ++ map wn l6))...
-         eapply co_bbb_r...
-         eapply (ex_bbb_r
-           ((oc A0 :: map wn l4)
-           ++ (l'' ++ wn A :: wn A :: l') ++ map wn l6))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- simpl in Hr.
-         rewrite <- (bidual (oc _)) in Hr1.
-         change (dual (oc (dual x))) with (dual (dual (wn x))) in Hr1.
-         rewrite bidual in Hr1.
-         rewrite app_comm_cons in Hr.
-         apply bbb_to_mix02 in Hr.
-         eapply ex_r in Hr ;
-           [ | symmetry ; apply Permutation_cons_app ; reflexivity ].
-         eapply cut_mix02_r in Hr...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         eapply (ex_bbb_r
-           ((((oc A0 :: map wn l4) ++ map wn l6) ++ l) ++ l0))...
-         eapply mix2_bbb_r...
-      -- symmetry in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         simpl in Hl1.
-         eapply IHsize in Hr...
-    * rewrite H2 in Hl2.
-      rewrite app_comm_cons in Hl2.
-      eapply IHsize in Hl2...
-      destruct Hl2 as [s' Hl2].
-      eexists.
-      rewrite <- app_comm_cons in Hl2.
-      rewrite <- ?map_app in Hl2.
-      rewrite <- app_comm_cons.
-      rewrite <- ?map_app.
-      eapply oc_bbb_r...
-- (* de *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-      destruct Heq as (l2' & l3' & Heq).
-      subst.
-      rewrite <- (bidual (wn A0)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr...
-         destruct Hr as [s' Hr].
-         eexists.
-         simpl.
-         apply (ex_bbb_r ((l3 ++ l) ++ l0))...
-         apply mix2_bbb_r...
-      -- eapply IHsize in Hl1 ; simpl ; try rewrite bidual...
-         destruct Hl1 as [s' Hl1].
-         symmetry in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-    * eapply IHcut in Hl1...
-  + rewrite app_comm_cons in Hl2.
-    eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    rewrite <- app_comm_cons.
-    eapply de_bbb_r...
-- (* wk *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-      destruct Heq as (l2' & l3' & Heq).
-      subst.
-      simpl in Hr.
-      rewrite <- (bidual (wn _)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- simpl in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr...
-         destruct Hr as [s' Hr].
-         eexists.
-         apply (ex_bbb_r ((l3 ++ l) ++ l0))...
-         apply mix2_bbb_r...
-      -- simpl in Hr.
-         replace (wn A0) with (dual (oc (dual A0))) in Hr.
-         ++ eapply IHsize in Hl1...
-            destruct Hl1 as [s' Hl1].
-            symmetry in H1.
-            apply app_eq_nil in H1.
-            destruct H1 ; subst.
-            eexists...
-            apply (ex_bbb_r (l3 ++ l1))...
-         ++ simpl.
-            rewrite bidual...
-    * clear - Hl2.
-      eapply (wk_list_bbb_r l) in Hl2.
-      destruct Hl2 as [s' Hl2].
-      eexists.
-      eapply ex_bbb_r...
-  + eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    eapply wk_bbb_r...
-- (* co *)
-  destruct l2 ; inversion H ; subst.
-  + inversion_ll_bbb Hl X l' Hl1 Hr1 HP1.
-    * assert (Heq := HP1).
-      apply Permutation_vs_cons_inv in Heq.
-      destruct Heq as (l2' & l3' & Heq).
-      subst.
-      rewrite <- (bidual (wn A0)) in Hr.
-      eapply IHsize in Hl1...
-      destruct Hl1 as [s' Hl1].
-      eexists.
-      apply (ex_bbb_r (l2' ++ l3 ++ l3'))...
-    * simpl in Hr.
-      rewrite <- (bidual (wn A0)) in Hr.
-      rewrite <- (app_nil_l (_ :: l1)) in H0.
-      dichot_elt_app_exec H0 ; subst.
-      -- change (oc (dual A0)) with (dual (wn A0)) in Hr1.
-         apply bbb_to_mix02 in Hr.
-         eapply cut_mix02_r in Hr ; try (rewrite bidual)...
-         destruct Hr as [s' Hr].
-         eexists.
-         apply (ex_bbb_r ((l3 ++ l) ++ l0))...
-         apply mix2_bbb_r...
-      -- change (oc (dual A0)) with (dual (wn A0)) in Hl1.
-         eapply IHsize in Hl1...
-         destruct Hl1 as [s' Hl1].
-         symmetry in H1.
-         apply app_eq_nil in H1.
-         destruct H1 ; subst.
-         eexists...
-         apply (ex_bbb_r (l3 ++ l1))...
-    * (* key case oc/co bis *)
-      eapply (key_case_oc_co_bbb (dual A0))...
-      intros.
-      rewrite bidual in H0.
-      eapply (IHcut A0)...
-      rewrite ? bidual...
-  + rewrite ? app_comm_cons in Hl2.
-    eapply IHsize in Hl2...
-    destruct Hl2 as [s' Hl2].
-    eexists.
-    rewrite <- app_comm_cons.
-    eapply co_bbb_r...
-Qed.
-
-Lemma cut_bbb_r : forall A l1 l2 s1 s2, 
-  ll_bbb (dual A :: l1) s1 -> ll_bbb (A :: l2) s2 -> exists s',
-    ll_bbb (l2 ++ l1) s'.
-Proof with myeeasy.
-intros.
-rewrite <- (app_nil_l (l2 ++ l1))...
-eapply cut_elim_bbb...
-rewrite bidual...
-Qed.
-*)
 
 
 (** ** Comparison with LL + [bot = oc bot] *)
