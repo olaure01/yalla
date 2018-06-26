@@ -159,7 +159,6 @@ induction A ; simpl.
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl.
-  eapply ex_ir ; [ | apply Permutation_Type_swap ].
   cons2app.
   apply tens_irr...
 - apply negR_irr.

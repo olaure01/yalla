@@ -83,7 +83,7 @@ match A with
 | one       => negR ione
 | bot       => ione
 | tens A B  => negR (itens (negR (trans A)) (negR (trans B)))
-| parr A B  => itens (trans A) (trans B)
+| parr A B  => itens (trans B) (trans A)
 | zero      => negR izero
 | top       => izero
 | aplus A B => negR (iplus (negR (trans A)) (negR (trans B)))
@@ -200,33 +200,21 @@ induction A ; simpl.
 - apply negR_ilr...
 - eapply ex_ir ; [ | apply Permutation_Type_swap ].
   apply negR_ilr...
-- apply (neg_tens_propag _ _ _ _ IHA2) in IHA1.
-  apply negR_ilr...
-  apply negR_irr.
-  cons2app.
-  rewrite <- (app_nil_l _).
-  eapply cut_ir ; [ | | apply IHA1 ]...
-  rewrite <- (app_nil_l _).
-  apply tens_ilr.
-  list_simpl.
-  eapply ex_ir ; [ | apply Permutation_Type_swap ].
-  cons2app.
-  apply tens_irr...
-- eapply ex_ir in IHA1 ; [ | apply Permutation_Type_swap ].
-  eapply ex_ir in IHA2 ; [ | apply Permutation_Type_swap ].
-  apply (neg_tens_propag _ _ _ _ IHA1) in IHA2.
-  eapply ex_ir ; [ | apply Permutation_Type_swap ].
+- apply (neg_tens_propag _ _ _ _ IHA1) in IHA2.
   apply negR_ilr...
   apply negR_irr.
   cons2app.
   rewrite <- (app_nil_l _).
   eapply cut_ir ; [ | | apply IHA2 ]...
-  rewrite <- (app_nil_l _).
-  apply tens_ilr.
-  list_simpl.
+- eapply ex_ir in IHA1 ; [ | apply Permutation_Type_swap ].
+  eapply ex_ir in IHA2 ; [ | apply Permutation_Type_swap ].
+  apply (neg_tens_propag _ _ _ _ IHA2) in IHA1.
   eapply ex_ir ; [ | apply Permutation_Type_swap ].
+  apply negR_ilr...
+  apply negR_irr.
   cons2app.
-  apply tens_irr...
+  rewrite <- (app_nil_l _).
+  eapply cut_ir ; [ | | apply IHA1 ]...
 - apply negR_ilr...
 - eapply ex_ir ; [ | apply Permutation_Type_swap ].
   apply negR_ilr...
@@ -420,7 +408,8 @@ induction Hll ;
   rewrite <- app_assoc.
   eapply co_list_ilr.
   apply (ex_ir _ _ _ _ Hax)...
-- apply tens_ilr...
+- apply tens_ilr.
+  eapply ex_ir...
 - apply zero_ilr.
 - apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l))
     in IHHll...
@@ -530,10 +519,10 @@ induction A ; simpl ; rewrite ? bidual.
        ++ eapply ex_r ; [ apply IHA1 | ]...
        ++ eapply ex_r ; [ apply IHA2 | ]...
 - apply (ex_r _ (parr A1 A2 ::
-                 tens (unill (trans A1)) (unill (trans A2)) :: nil))...
+                 tens (unill (trans A2)) (unill (trans A1)) :: nil))...
   apply parr_r.
-  apply (ex_r _ (tens (unill (trans A1)) (unill (trans A2))
-                  :: (A2 :: nil) ++ (A1 :: nil)))...
+  apply (ex_r _ (tens (unill (trans A2)) (unill (trans A1))
+                  :: (A1 :: nil) ++ (A2 :: nil)))...
   apply tens_r...
 - apply parr_r.
   apply top_r.
@@ -689,7 +678,6 @@ induction A ; intros Hgfn ; inversion Hgfn ;
   rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl.
-  eapply ex_ir ; [ | apply Permutation_Type_swap ].
   cons2app.
   apply tens_irr ; eassumption.
 - apply top_irr.
@@ -752,7 +740,8 @@ induction Hll ;
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll2) in Hax.
   apply (ex_ir _ _ _ _ Hax)...
 - rewrite <- (app_nil_l (itens _ _ :: _)).
-  apply tens_ilr...
+  apply tens_ilr.
+  eapply ex_ir...
 - rewrite <- (app_nil_l (izero :: _)).
   apply zero_ilr.
 - apply negR_irr in IHHll.
@@ -1116,7 +1105,8 @@ induction Hll ; (try now (inversion f)) ; simpl.
   + apply IHHll2.
   + PEperm_Type_solve.
 - rewrite <- (app_nil_l (itens _ _ :: _)).
-  apply tens_ilr...
+  apply tens_ilr.
+  eapply ex_ir...
 - rewrite <- (app_nil_l (izero :: _)).
   apply zero_ilr.
 - apply negR_ilr...
