@@ -95,6 +95,7 @@ induction A ; intros B Heq ;
   try apply IHA in H0 ;
   try apply IHA1 in H0 ;
   try apply IHA2 in H1 ; subst...
+intuition.
 Qed.
 
 Lemma tl2ill_nz : forall A, nonzerospos (tl2ill A).

@@ -10,7 +10,7 @@ Require Import EqNat.
 as a consistency guarantee *)
 
 Definition Atom : Set := nat. (* formulas.v *)
-Definition IAtom :Set := option nat. (* iformulas.v *)
+Definition IAtom : Set := option nat. (* iformulas.v *)
 Definition atN : IAtom := None. (* iformulas.v *)
 Definition TAtom : Set := nat. (* tl.v *)
 
@@ -170,4 +170,9 @@ Proof.
 intros x.
 unfold a2i ; unfold t2i ; unfold a2t ; reflexivity.
 Qed.
+
+
+(** Make definitions opaque, so that only properties can be used *)
+Global Opaque Atom IAtom atN TAtom ateq iateq a2n n2a i2n n2i i2a i2ac t2i a2t t2a a2i.
+
 

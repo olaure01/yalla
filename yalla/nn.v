@@ -32,7 +32,6 @@ Definition i2a := yalla_ax.i2a.
 Definition a2i := yalla_ax.a2i.
 Definition a2a_i := yalla_ax.a2a_i.
 Definition i2i_not_atN := yalla_ax.i2i_not_atN.
-
 Definition i2ac := yalla_ax.i2ac.
 Definition i2ac_inj := yalla_ax.i2ac_inj.
 Definition ateq_a2i := yalla_ax.ateq_a2i.

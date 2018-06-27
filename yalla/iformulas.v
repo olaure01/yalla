@@ -350,9 +350,7 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
   + apply isub_oc.
     apply IHB...
 - inversion H ; subst.
-  simpl ; unfold yalla_ax.iateq ;
-    destruct i ; simpl ; [ | reflexivity ].
-  rewrite <- beq_nat_refl.
+  simpl ; rewrite (proj2 (yalla_ax.iateq_eq _ _) eq_refl).
   constructor.
 - inversion H ; subst.
   + unfold isubformb.

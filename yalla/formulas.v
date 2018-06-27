@@ -397,12 +397,10 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
   + apply sub_wn.
     apply IHB...
 - inversion H ; subst.
-  simpl ; unfold yalla_ax.ateq ; simpl.
-  rewrite <- beq_nat_refl.
+  simpl ; rewrite (proj2 (yalla_ax.ateq_eq _ _) eq_refl).
   constructor.
 - inversion H ; subst.
-  simpl ; unfold yalla_ax.ateq ; simpl.
-  rewrite <- beq_nat_refl.
+  simpl ; rewrite (proj2 (yalla_ax.ateq_eq _ _) eq_refl).
   constructor.
 - inversion H ; subst.
   + unfold subformb.
