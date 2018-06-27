@@ -5,6 +5,8 @@
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
+Require Import Omega.
+
 Require Import Permutation_Type.
 
 Require Import List_more.
@@ -175,6 +177,18 @@ reflexivity.
 Qed.
 
 Definition nat_fresh_of_list l := fold_right (fun x y => nat_fresh_of x + y) 0 l.
+
+Lemma nat_fresh_of_list_fresh : forall l,
+  Forall (fun x => nat_fresh_of x <= nat_fresh_of_list l) l.
+Proof.
+induction l ; constructor ; simpl.
+- omega.
+- remember (nat_fresh_of_list l) as k.
+  revert IHl ; clear ; induction l ;
+    intros IHl' ; inversion IHl' ; subst ; constructor.
+  + omega.
+  + intuition.
+Qed.
 
 (** Provide an [Atom] which is fresh for all elements of [l] *)
 Definition fresh_of_list l := n2a (nat_fresh_of_list l).
