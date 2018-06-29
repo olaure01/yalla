@@ -2254,11 +2254,10 @@ Qed.
 
 
 (** Axiom-free conservativity *)
-Proposition ll_to_ill_nzeropos_axfree {P} :
-(forall a : projT1 (ipgax P), False) -> forall l,
-  ll (i2pfrag P) l -> forall l0 C, Forall_Type nonzerospos (C :: l0) ->
-    PCperm_Type (pperm (i2pfrag P)) l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
-      ill P l0 C.
+Proposition ll_to_ill_nzeropos_axfree {P} : (projT1 (ipgax P) -> False) -> forall l,
+ll (i2pfrag P) l -> forall l0 C, Forall_Type nonzerospos (C :: l0) ->
+  PCperm_Type (pperm (i2pfrag P)) l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
+    ill P l0 C.
 Proof with myeeasy.
 intros P_axfree l pi l0 C Hnz HP.
 apply cut_admissible_axfree in pi.
@@ -2293,7 +2292,7 @@ eapply ll_to_ill_nzeropos_axfree in pi...
 Qed.
 
 (** Cut elimination *)
-Lemma cut_ir_nzeropos_axfree_by_ll {P} : (forall a : projT1 (ipgax P), False) -> 
+Lemma cut_ir_nzeropos_axfree_by_ll {P} : (projT1 (ipgax P) -> False) -> 
   forall A l0 l1 l2 C, Forall_Type nonzerospos (C :: l1 ++ l0 ++ l2) ->
   ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
 Proof with myeeasy.
@@ -2308,17 +2307,15 @@ rewrite <- ? app_comm_cons in pi2 ; simpl in pi2.
 rewrite app_comm_cons in pi2.
 eapply ex_r in pi2 ; [ | apply PCperm_Type_app_comm ].
 rewrite <- ? app_comm_cons in pi2.
-assert (forall a : projT1 (pgax (i2pfrag P)), False) as P_axfree'.
-{ intros Hgax.
-  apply P_axfree.
-  apply Hgax. }
+assert (projT1 (pgax (i2pfrag P)) -> False) as P_axfree'
+  by intuition.
 apply (cut_r_axfree P_axfree' _ _ _ pi2) in pi1.
 eapply ll_to_ill_nzeropos_axfree in pi1...
 PCperm_Type_solve.
 Qed.
 
 Proposition cut_admissible_ill_nzeropos_axfree_by_ll {P} :
-  (forall a : projT1 (ipgax P), False) ->
+  (projT1 (ipgax P) -> False) ->
   forall l C, Forall_Type nonzerospos (C :: l) -> ill P l C ->
     ill (cutrm_ipfrag P) l C.
 Proof with myeeasy.
@@ -2441,7 +2438,7 @@ intros l s Hll ; induction Hll ; intros l0 lo C Hoclm Hocl HP lwk Hnil ; try (no
 Qed.
 *)
 Theorem ll_to_ill_oclpam_cutfree {P} :
-  ipcut P = false -> (forall a : projT1 (ipgax P), False) -> ipperm P = true ->
+  ipcut P = false -> (projT1 (ipgax P) -> False) -> ipperm P = true ->
   forall l, ll (i2pfrag P) l -> forall l0 l1 C, Forall_Type oclpam (C :: l0) ->
     Forall_Type oclike l1 ->
     PCperm_Type (pperm (i2pfrag P)) l
@@ -3848,7 +3845,7 @@ intros l Hll ; induction Hll ;
 Qed.
 
 Proposition ll_to_ill_oclpam_axfree {P} : ipperm P = true ->
-  (forall a : projT1 (ipgax P), False) -> forall l,
+  (projT1 (ipgax P) -> False) -> forall l,
   ll (i2pfrag P) l -> forall l0 C, Forall_Type oclpam (C :: l0) ->
     Permutation_Type l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
       ill P l0 C.
@@ -4294,11 +4291,10 @@ Qed.
 Variable i2a : IAtom -> Atom.
 Hypothesis i2a_inj : injective i2a.
 
-Lemma cut_admissible_nzeropos_ifragment {P} :
-(forall a : projT1 (ipgax P), False) ->
-  forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> forall l A,
-    ill_ps P (fun l A => Forallb FS (A :: l)) l A ->
-    ill_ps (cutrm_ipfrag P) (fun l A => Forallb FS (A :: l)) l A.
+Lemma cut_admissible_nzeropos_ifragment {P} : (projT1 (ipgax P) -> False) ->
+forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> forall l A,
+  ill_ps P (fun l A => Forallb FS (A :: l)) l A ->
+  ill_ps (cutrm_ipfrag P) (fun l A => Forallb FS (A :: l)) l A.
 Proof with myeeasy.
 intros P_axfree FS HFS Hnz l A pi.
 assert (is_true (Forallb FS (A :: l))) as HFSl by (destruct pi ; myeeasy).
@@ -4311,11 +4307,10 @@ eapply cut_admissible_ill_nzeropos_axfree_by_ll in pi...
   apply Hnz.
 Qed.
 
-Lemma iconservativity_cut_nzeropos_axfree {P} :
-(forall a : projT1 (ipgax P), False) ->
-  forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> 
-    forall l A, ill P l A -> is_true (Forallb FS (A :: l)) ->
-      ill_ps P (fun l A => Forallb FS (A :: l)) l A.
+Lemma iconservativity_cut_nzeropos_axfree {P} : (projT1 (ipgax P) -> False) ->
+forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> 
+  forall l A, ill P l A -> is_true (Forallb FS (A :: l)) ->
+    ill_ps P (fun l A => Forallb FS (A :: l)) l A.
 Proof with try eassumption ; try reflexivity.
 intros P_axfree FS Hf Hnz l A pi HFS.
 eapply cut_admissible_ill_nzeropos_axfree_by_ll in pi...
@@ -4342,7 +4337,7 @@ Section Non_Conservativity.
 Variable P : ipfrag.
 Hypothesis fp : ipperm P = true.
 Hypothesis fc : ipcut P = false.
-Hypothesis fg : forall a : projT1 (ipgax P), False.
+Hypothesis fg : projT1 (ipgax P) -> False.
 
 Variable i2a : IAtom -> Atom.
 

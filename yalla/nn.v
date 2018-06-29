@@ -47,7 +47,7 @@ Definition unill := ill2ll i2a.
 Section RTranslation.
 
 Context {P : pfrag}.
-Hypothesis P_axfree : forall a : projT1 (pgax P), False.
+Hypothesis P_axfree : projT1 (pgax P) -> False.
 Hypothesis P_perm : pperm P = true.
 
 (** We fix the parameter [R] of the translation. *)
@@ -888,7 +888,7 @@ eapply ll_to_ill_trans ; myeeasy.
   rewrite <- (app_nil_r (map _ l2 ++ map _ l1)).
 eapply cut_ir_nzeropos_axfree_by_ll.
   + apply i2ac_inj.
-  + intros ; destruct a.
+  + intros a ; destruct a.
   + list_simpl ; constructor.
     * constructor.
     * apply Forall_Type_app.
@@ -1048,7 +1048,7 @@ intros R l Hll.
 change (ioc R :: map (trans _) l)
   with (map ioc (R :: nil) ++ map (trans (ioc R)) l).
 eapply ll_to_ill_trans_gen ; intros ; simpl...
-- destruct a.
+- destruct X.
 - apply ax_exp_ill.
 - rewrite <- (app_nil_l (ioc R :: _)).
   rewrite <- (app_nil_r (map _ l1)).

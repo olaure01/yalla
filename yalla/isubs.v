@@ -103,9 +103,8 @@ Unshelve.
 simpl...
 Qed.
 
-Lemma subs_ill_axfree {P} :
-(forall a : projT1 (ipgax P), False) -> forall A x l C,
-  iateq atN x = false -> ill P l C ->
+Lemma subs_ill_axfree {P} : (projT1 (ipgax P) -> False) -> forall A x l C,
+iateq atN x = false -> ill P l C ->
   ill P (map (isubs A x) l) (isubs A x C).
 Proof with myeeasy.
 intros P_axfree A x l C HN pi.
