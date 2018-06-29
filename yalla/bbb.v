@@ -85,13 +85,13 @@ revert l pi ; induction l0 ; intros l pi.
   eapply ex_r ; [ | apply Permutation_Type_app_comm ].
   simpl ; apply wk_r ; assumption.
 - cons2app.
-eapply ex_r ; [ | apply Permutation_Type_app_comm ].
-  simpl ; apply co_std_r.
-rewrite 2 app_comm_cons.
-eapply ex_r ; [ | apply Permutation_Type_app_comm ].
-list_simpl ; apply IHl0.
-list_simpl in pi.
-eapply ex_r ; [ apply pi | PCperm_Type_solve ].
+  eapply ex_r ; [ | apply Permutation_Type_app_comm ].
+    simpl ; apply co_std_r.
+  rewrite 2 app_comm_cons.
+  eapply ex_r ; [ | apply Permutation_Type_app_comm ].
+  list_simpl ; apply IHl0.
+  list_simpl in pi.
+  eapply ex_r ; [ apply pi | PCperm_Type_solve ].
 Qed.
 
 (** ** The system [ll_bbb] *)
