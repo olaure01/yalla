@@ -293,7 +293,7 @@ Qed.
 
 Lemma bot_rev_f : forall l Pi (pi : llfoc l Pi),
   forall l1 l2, l = l1 ++ bot :: l2 ->
-    { pi' : llfoc (l1 ++ l2) Pi & fpsize pi' < fpsize pi }.
+    { pi' : llfoc (l1 ++ l2) Pi | fpsize pi' < fpsize pi }.
 Proof with myeeasy ; try (simpl ; omega).
 intros l Pi pi.
 induction pi ; intros l1' l2' Heq ; subst.
@@ -429,7 +429,7 @@ Qed.
 
 Lemma parr_rev_f : forall l Pi (pi : llfoc l Pi),
   forall A B l1 l2, l = l1 ++ parr A B :: l2 ->
-    { pi' : llfoc (l1 ++ A :: B :: l2) Pi & fpsize pi' < fpsize pi }.
+    { pi' : llfoc (l1 ++ A :: B :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof with myeeasy ; try (simpl ; omega).
 intros l Pi pi.
 induction pi ; intros A' B' l1' l2' Heq ; subst.
@@ -567,8 +567,8 @@ Qed.
 
 Lemma with_rev_f : forall l Pi (pi : llfoc l Pi),
   forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
-    { pi' : llfoc (l1 ++ A :: l2) Pi & fpsize pi' < fpsize pi }
-  * { pi' : llfoc (l1 ++ B :: l2) Pi & fpsize pi' < fpsize pi }.
+    { pi' : llfoc (l1 ++ A :: l2) Pi | fpsize pi' < fpsize pi }
+  * { pi' : llfoc (l1 ++ B :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof with myeeasy ; try (simpl ; omega).
 intros l Pi pi.
 induction pi ; intros A' B' l1' l2' Heq ; subst.
@@ -734,7 +734,7 @@ Qed.
 
 Lemma with_rev1_f : forall l Pi (pi : llfoc l Pi),
   forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
-    { pi' : llfoc (l1 ++ A :: l2) Pi & fpsize pi' < fpsize pi }.
+    { pi' : llfoc (l1 ++ A :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 intros l Pi pi A B l1 l2 Heq.
 eapply with_rev_f in Heq.
@@ -743,7 +743,7 @@ Qed.
 
 Lemma with_rev2_f : forall l Pi (pi : llfoc l Pi),
   forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
-    { pi' : llfoc (l1 ++ B :: l2) Pi & fpsize pi' < fpsize pi }.
+    { pi' : llfoc (l1 ++ B :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 intros l Pi pi A B l1 l2 Heq.
 eapply with_rev_f in Heq.
