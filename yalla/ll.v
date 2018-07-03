@@ -86,6 +86,14 @@ Qed.
 Definition cutupd_pfrag P b :=
   mk_pfrag b (pgax P) (pmix0 P) (pmix2 P) (pperm P).
 
+Lemma cutupd_pfrag_true : forall P, le_pfrag P (cutupd_pfrag P true).
+Proof.
+intros P.
+nsplit 5 ; try reflexivity.
+- apply leb_true.
+- intros a ; exists a ; reflexivity.
+Qed.
+
 (** Same proof fragment as [P] but with value [G] for [pgax]. *)
 Definition axupd_pfrag P G :=
   mk_pfrag (pcut P) G (pmix0 P) (pmix2 P) (pperm P).
