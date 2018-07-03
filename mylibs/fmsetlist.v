@@ -417,7 +417,7 @@ split with A (fun x y => leqb (f x) (f y)) ; intros.
 - apply Hi.
   apply asym...
 - eapply trans...
-Defined.  
+Defined.
 
 
 
