@@ -150,7 +150,7 @@ induction A ; simpl.
   assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
   cons2app in IHA2.
   eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H2) in IHA2...
-  apply (neg_tens_propag _ _ _ _ _ IHA1) in IHA2.
+  eapply (neg_tens_propag _ _ _ _ _ _ _ IHA1) in IHA2.
   assert (H' := @ineg_to_ilmap ipfrag_ill
              (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app in IHA2.
@@ -174,7 +174,7 @@ induction A ; simpl.
   assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
   cons2app in IHA2.
   eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H2) in IHA2...
-  apply (neg_plus_propag _ _ _ _ _ IHA1) in IHA2.
+  eapply (neg_plus_propag _ _ _ _ _ _ _ IHA1) in IHA2.
   assert (H' := @ineg_to_ilmap ipfrag_ill
                   (iplus (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app in IHA2.
@@ -204,6 +204,7 @@ induction A ; simpl.
   apply de_ilr.
   apply negR_irr...
 Unshelve.
+all : try reflexivity.
 all : try now (intros a ; destruct a).
 all : constructor ; [ constructor | ]...
 all : list_simpl.
