@@ -138,7 +138,7 @@ rewrite (app_assoc l2).
 apply Permutation_Type_app_comm.
 Qed.
 
-Lemma Permutation_Type_app_swap {A} : forall (l1 : list A) l2 l3,
+Lemma Permutation_Type_app_swap_app {A} : forall (l1 : list A) l2 l3,
   Permutation_Type (l1 ++ l2 ++ l3) (l2 ++ l1 ++ l3).
 Proof.
 intros.
@@ -153,11 +153,11 @@ Lemma Permutation_Type_app_middle {A} : forall (l : list A) l1 l2 l3 l4,
 Proof.
 intros.
 eapply Permutation_Type_trans.
-apply Permutation_Type_app_swap.
+apply Permutation_Type_app_swap_app.
 eapply Permutation_Type_trans.
 apply Permutation_Type_app_head.
 - eassumption.
-- apply Permutation_Type_app_swap.
+- apply Permutation_Type_app_swap_app.
 Qed.
 
 Lemma Permutation_Type_app_middle_inv {A} : forall (l : list A) l1 l2 l3 l4,
@@ -167,10 +167,10 @@ Proof.
 intros.
 apply (Permutation_Type_app_inv_l l).
 eapply Permutation_Type_trans.
-apply Permutation_Type_app_swap.
+apply Permutation_Type_app_swap_app.
 eapply Permutation_Type_trans.
 - eassumption.
-- apply Permutation_Type_app_swap.
+- apply Permutation_Type_app_swap_app.
 Qed.
 
 Lemma Permutation_Type_app_app_inv {A} : forall (l1 l2 l3 l4 : list A),
