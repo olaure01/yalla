@@ -196,6 +196,29 @@ intros l pi.
 induction pi ; simpl ; omega.
 Qed.
 
+(** List of the elements of [pgax P] used in [pi] *)
+Fixpoint gax_elts {P l} (pi : ll P l) :=
+match pi with
+| ax_r _ _ => nil
+| ex_r _ _ _ pi0 _ => gax_elts pi0
+| mix0_r _ => nil
+| mix2_r _ _ _ pi1 pi2 => (gax_elts pi1) ++ (gax_elts pi2)
+| one_r _ => nil
+| bot_r _ _ pi0 => gax_elts pi0
+| tens_r _ _ _ _ _ pi1 pi2 => (gax_elts pi1) ++ (gax_elts pi2)
+| parr_r _ _ _ _ pi0 => gax_elts pi0
+| top_r _ _ => nil
+| plus_r1 _ _ _ _ pi0 => gax_elts pi0
+| plus_r2 _ _ _ _ pi0 => gax_elts pi0
+| with_r _ _ _ _ pi1 pi2 => (gax_elts pi1) ++ (gax_elts pi2)
+| oc_r _ _ _ pi0 => gax_elts pi0
+| de_r _ _ _ pi0 => gax_elts pi0
+| wk_r _ _ _ pi0 => gax_elts pi0
+| co_r _ _ _ _ pi0 => gax_elts pi0
+| cut_r _ _ _ _ pi1 pi2 => (gax_elts pi1) ++ (gax_elts pi2)
+| gax_r _ a => a :: nil
+end.
+
 Lemma stronger_pfrag P Q : le_pfrag P Q -> forall l, ll P l -> ll Q l.
 Proof with myeeasy.
 intros Hle l H.
@@ -923,25 +946,44 @@ induction A ; simpl.
   apply oc_r...
 Qed.
 
+Lemma ax_gen_loc : forall P Q l, Bool.leb (pperm P) (pperm Q) ->
+  Bool.leb (pmix0 P) (pmix0 Q) ->
+  Bool.leb (pmix2 P) (pmix2 Q) ->
+  Bool.leb (pcut P) (pcut Q) ->
+  forall pi : ll P l,
+  Forall_Type (fun a => ll Q (projT2 (pgax P) a)) (gax_elts pi) ->
+  ll Q l.
+Proof with myeeasy.
+intros P Q l Hperm Hmix0 Hmix2 Hcut pi.
+induction pi ; simpl ; intros Hgax ;
+  try (destruct (Forall_Type_app_inv _ _ _ Hgax) as [Hgax1 Hgax2]) ;
+  try (apply IHpi1 in Hgax1) ;
+  try (apply IHpi2 in Hgax2) ;
+  try (constructor ; intuition ; fail).
+- apply IHpi in Hgax.
+  eapply ex_r...
+  destruct (pperm P) ; destruct (pperm Q) ; inversion Hperm ; simpl ; simpl in p...
+  apply cperm_perm_Type...
+- apply mix0_r.
+  rewrite f in Hmix0 ; destruct (pmix0 Q) ; inversion Hmix0 ; simpl...
+- apply mix2_r...
+  rewrite f in Hmix2 ; destruct (pmix2 Q) ; inversion Hmix2 ; simpl...
+- eapply cut_r...
+  rewrite f in Hcut ; destruct (pcut Q) ; inversion Hcut ; simpl...
+- inversion Hgax ; subst...
+Qed.
+
 Lemma ax_gen : forall P Q l, Bool.leb (pperm P) (pperm Q) ->
   Bool.leb (pmix0 P) (pmix0 Q) ->
   Bool.leb (pmix2 P) (pmix2 Q) ->
   Bool.leb (pcut P) (pcut Q) ->
   (forall a, ll Q (projT2 (pgax P) a)) ->
   ll P l -> ll Q l.
-Proof with myeeasy.
+Proof.
 intros P Q l Hperm Hmix0 Hmix2 Hcut Hgax pi.
-induction pi ; try (constructor ; myeeasy ; fail).
-- eapply ex_r...
-  destruct (pperm P) ; destruct (pperm Q) ; inversion Hperm ; simpl ; simpl in p...
-  apply cperm_perm_Type...
-- constructor.
-  rewrite f in Hmix0 ; destruct (pmix0 Q) ; inversion Hmix0 ; simpl...
-- constructor...
-  rewrite f in Hmix2 ; destruct (pmix2 Q) ; inversion Hmix2 ; simpl...
-- eapply cut_r...
-  rewrite f in Hcut ; destruct (pcut Q) ; inversion Hcut ; simpl...
-- apply Hgax...
+apply (ax_gen_loc _ _ _ Hperm Hmix0 Hmix2 Hcut pi).
+remember (gax_elts pi) as lax.
+clear - Hgax ; induction lax ; intuition.
 Qed.
 
 Lemma ax_exp_frag {P} : forall l P', ll P' l ->
