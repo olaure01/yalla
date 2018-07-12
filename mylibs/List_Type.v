@@ -298,6 +298,18 @@ Section Exists_Forall.
 
     Hint Constructors Forall_Type.
 
+    Lemma Forall_Type_forall (l:list A):
+      Forall_Type l -> forall x, In_Type x l -> P x.
+    Proof.
+      induction 1; firstorder; subst; auto.
+    Qed.
+
+    Lemma forall_Forall_Type (l:list A):
+      (forall x, In_Type x l -> P x) -> Forall_Type l.
+    Proof.
+      induction l; firstorder.
+    Qed.
+
     Lemma Forall_Type_inv : forall (a:A) l, Forall_Type (a :: l) -> P a.
     Proof.
       intros ? ? H ; inversion H ; trivial.
