@@ -18,7 +18,7 @@ $(MYLIBSDIR)/List_Type_more.vo: $(MYLIBSDIR)/List_Type_more.v $(MYLIBSDIR)/List_
 $(MYLIBSDIR)/CyclicPerm_Type.vo: $(MYLIBSDIR)/CyclicPerm_Type.v $(MYLIBSDIR)/List_Type.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo
 $(MYLIBSDIR)/genperm_Type.vo: $(MYLIBSDIR)/genperm_Type.v $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/CyclicPerm_Type.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/CPermutation_Type_solve.vo $(MYLIBSDIR)/Injective.vo
 $(MYLIBSDIR)/Permutation_Type.vo: $(MYLIBSDIR)/Permutation_Type_more.v $(MYLIBSDIR)/List_Type.vo
-$(MYLIBSDIR)/Permutation_Type_more.vo: $(MYLIBSDIR)/Permutation_Type_more.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type.vo
+$(MYLIBSDIR)/Permutation_Type_more.vo: $(MYLIBSDIR)/Permutation_Type_more.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_more.vo $(MYLIBSDIR)/Permutation_Type.vo
 $(MYLIBSDIR)/Permutation_Type_solve.vo: $(MYLIBSDIR)/Permutation_Type_solve.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_Type.vo $(MYLIBSDIR)/Permutation_Type_more.vo
 $(MYLIBSDIR)/CPermutation_Type_solve.vo: $(MYLIBSDIR)/CPermutation_Type_solve.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/CyclicPerm_Type.vo
 $(MYLIBSDIR)/fmsetlist_Type.vo : $(MYLIBSDIR)/fmsetlist_Type.v $(MYLIBSDIR)/Bool_more.vo $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/Permutation_Type.vo $(MYLIBSDIR)/COrders.vo
