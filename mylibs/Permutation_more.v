@@ -12,6 +12,7 @@
 (** * Add-ons for Permutation library
 Usefull properties apparently missing in the Permutation library. *)
 
+Require Import Psatz.
 Require Import Plus.
 Require Import Morphisms.
 Require Export Permutation.
@@ -433,5 +434,26 @@ induction HP ; intros Hr Ht Htr.
   + apply perm_perm_t...
   + apply IHHP2...
 Qed.
+
+
+Lemma Permutation_list_sum : forall l1 l2,
+  Permutation l1 l2 -> list_sum l1 = list_sum l2.
+Proof.
+unfold list_sum.
+intros l1 l2 HP.
+induction HP ; simpl ; intuition ; try lia.
+Qed.
+
+Lemma Permutation_list_max : forall l1 l2,
+  Permutation l1 l2 -> list_max l1 = list_max l2.
+Proof.
+unfold list_max.
+intros l1 l2 HP.
+induction HP ; simpl ; intuition ; try lia.
+Qed.
+
+
+
+
 
 
