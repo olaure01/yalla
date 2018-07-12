@@ -176,14 +176,16 @@ apply subs_fresh_le.
 reflexivity.
 Qed.
 
-Definition nat_fresh_of_list l := fold_right (fun x y => nat_fresh_of x + y) 0 l.
+Definition nat_fresh_of_list l := list_sum (map nat_fresh_of l).
 
 Lemma nat_fresh_of_list_fresh : forall l,
   Forall (fun x => nat_fresh_of x <= nat_fresh_of_list l) l.
 Proof.
+unfold nat_fresh_of_list.
+unfold list_sum.
 induction l ; constructor ; simpl.
 - omega.
-- remember (nat_fresh_of_list l) as k.
+- remember (map nat_fresh_of l) as k.
   revert IHl ; clear ; induction l ;
     intros IHl' ; inversion IHl' ; subst ; constructor.
   + omega.
@@ -196,6 +198,8 @@ Definition fresh_of_list l := n2a (nat_fresh_of_list l).
 Lemma subs_fresh_list_le : forall C l n,
   nat_fresh_of_list l <= n -> map (subs C (n2a n)) l = l.
 Proof with myeasy.
+unfold nat_fresh_of_list.
+unfold list_sum.
 intros C l n Hle.
 induction l...
 simpl in Hle ; simpl.
