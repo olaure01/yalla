@@ -15,7 +15,7 @@
 Usefull properties apparently missing in the List library. *)
 
 Require Export List.
-Require Import Lt Le Plus.
+Require Import Lt Le Plus Max.
 
 
 
@@ -596,6 +596,18 @@ Proof with try reflexivity.
 induction l1 ; intros l2...
 simpl ; rewrite IHl1.
 rewrite plus_assoc...
+Qed.
+
+(** ** Max of elements of a list of [nat] : [list_max] *)
+
+Definition list_max l := fold_right max 0 l.
+
+Lemma list_max_app : forall l1 l2,
+   list_max (l1 ++ l2) = max (list_max l1) (list_max l2).
+Proof with try reflexivity.
+induction l1 ; intros l2...
+simpl ; rewrite IHl1.
+rewrite max_assoc...
 Qed.
 
 
