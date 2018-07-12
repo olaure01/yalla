@@ -185,7 +185,7 @@ apply subs_ifresh_le.
 reflexivity.
 Qed.
 
-Definition inat_fresh_of_list l := fold_right (fun x y => inat_fresh_of x + y) 0 l.
+Definition inat_fresh_of_list l := list_max (map inat_fresh_of l).
 
 (** Provide an [IAtom] which is fresh for all elements of [l] *)
 Definition ifresh_of_list l := n2i (inat_fresh_of_list l).
@@ -193,6 +193,7 @@ Definition ifresh_of_list l := n2i (inat_fresh_of_list l).
 Lemma subs_ifresh_list_le : forall C l n,
   inat_fresh_of_list l <= n -> map (isubs C (n2i n)) l = l.
 Proof with myeasy.
+unfold inat_fresh_of_list.
 intros C l n Hle.
 induction l...
 simpl in Hle ; simpl.
