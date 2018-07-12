@@ -5,7 +5,7 @@
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-Require Import Omega.
+Require Import Psatz.
 
 Require Import Permutation_Type.
 
@@ -176,19 +176,18 @@ apply subs_fresh_le.
 reflexivity.
 Qed.
 
-Definition nat_fresh_of_list l := list_sum (map nat_fresh_of l).
+Definition nat_fresh_of_list l := list_max (map nat_fresh_of l).
 
 Lemma nat_fresh_of_list_fresh : forall l,
   Forall (fun x => nat_fresh_of x <= nat_fresh_of_list l) l.
 Proof.
 unfold nat_fresh_of_list.
-unfold list_sum.
 induction l ; constructor ; simpl.
-- omega.
+- lia.
 - remember (map nat_fresh_of l) as k.
   revert IHl ; clear ; induction l ;
     intros IHl' ; inversion IHl' ; subst ; constructor.
-  + omega.
+  + lia.
   + intuition.
 Qed.
 
@@ -199,7 +198,6 @@ Lemma subs_fresh_list_le : forall C l n,
   nat_fresh_of_list l <= n -> map (subs C (n2a n)) l = l.
 Proof with myeasy.
 unfold nat_fresh_of_list.
-unfold list_sum.
 intros C l n Hle.
 induction l...
 simpl in Hle ; simpl.
