@@ -1007,6 +1007,40 @@ eapply (ax_gen (axupd_pfrag P (existT (fun x => x -> list formula) _
 - eapply stronger_pfrag...
 Qed.
 
+Lemma ax_loc : forall P l (pi : ll P l),
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) (Fin.t (length (gax_elts pi)))
+                       (fun n => projT2 (pgax P) (Vector.nth (Vector.of_list (gax_elts pi)) n)))) l.
+Proof with myeasy.
+intros P l pi.
+refine (ax_gen_loc _ _ _ _ _ _ _ pi _)...
+remember (gax_elts pi) as l0 ; clear.
+remember l0 as l1.
+enough (Forall_Type
+  (fun a : projT1 (pgax P) =>
+   ll
+     (axupd_pfrag P
+        (existT (fun x : Type => x -> list formula) (Fin.t (length l1))
+           (fun n : Fin.t (length l1) => projT2 (pgax P) (Vector.nth (Vector.of_list l1) n)))) 
+     (projT2 (pgax P) a)) l0).
+{ subst ; assumption. }
+rewrite <- app_nil_l in Heql1 ; subst.
+remember nil as l ; clear ; revert l.
+induction l0 ; intros l ; constructor...
+- clear ; induction l.
+  + rewrite app_nil_l.
+    change (length (a :: l0)) with (S (length l0)).
+    pose (Q := axupd_pfrag P
+           (existT (fun x => x -> list formula) (Fin.t (length (a :: l0)))
+                   (fun n => projT2 (pgax P) (Vector.nth (Vector.of_list (a :: l0)) n)))).
+    replace (projT2 (pgax P) a) with (projT2 (pgax Q) Fin.F1) by reflexivity.
+    apply gax_r.
+  + eapply stronger_pfrag ; [ | apply IHl ].
+    nsplit 5 ; simpl...
+    intros a1 ; exists (Fin.FS a1)...
+- cons2app ; rewrite app_assoc.
+  apply IHl0.
+Qed.
+
 
 
 Axiom cut_elim :
