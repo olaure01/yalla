@@ -87,6 +87,20 @@ match A with
 | wn A      => ioc (negR (negR (trans A)))
 end.
 
+Lemma trans_inj : injective trans.
+Proof.
+intros a.
+induction a ; intros b Heq ; destruct b ; inversion Heq ;
+  (try apply IHa in H0) ;
+  (try apply IHa1 in H0) ;
+  (try apply IHa2 in H1) ; subst ;
+  intuition.
+apply IHa1 in H1.
+apply IHa2 in H0.
+subst.
+reflexivity.
+Qed.
+
 Lemma trans_wn : forall l,
   map trans (map wn l)
 = map ioc (map (fun x => (negR (negR (trans x)))) l).
