@@ -10,9 +10,20 @@ Require Import genperm_Type.
 Require Import basic_tactics.
 Require Export ill_def.
 
-(* TODO cut_ir_ill statement *)
 
-Axiom cut_admissible_ill : forall {P},
+Axiom cut_ir_gaxat : forall {P},
+  (forall a, Forall iqatomic (fst (projT2 (ipgax P) a))) ->
+  (forall a, iatomic (snd (projT2 (ipgax P) a))) ->
+  (forall a l, PEperm_Type (ipperm P) (fst (projT2 (ipgax P) a)) l ->
+               exists b, l = fst (projT2 (ipgax P) b)) ->
+  (forall a b l0 l1 l2 x z, fst (projT2 (ipgax P) a) = ivar x :: l0 ->
+                            snd (projT2 (ipgax P) a) = ivar z ->
+                            fst (projT2 (ipgax P) b) = l1 ++ ilmap (ivar x) (ivar z) :: l2 -> 
+                  exists c, l1 ++ l0 ++ l2 = fst (projT2 (ipgax P) c)
+                         /\ snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c)) ->
+forall A l0 l1 l2 C, ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
+
+Lemma cut_admissible_ill : forall {P},
     (forall a, Forall iqatomic (fst (projT2 (ipgax P) a))) ->
     (forall a, iatomic (snd (projT2 (ipgax P) a))) ->
     (forall a l, PEperm_Type (ipperm P) (fst (projT2 (ipgax P) a)) l ->
@@ -23,6 +34,16 @@ Axiom cut_admissible_ill : forall {P},
                     exists c, l1 ++ l0 ++ l2 = fst (projT2 (ipgax P) c)
                            /\ snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c)) ->
   forall l C, ill P l C -> ill (cutrm_ipfrag P) l C.
+Proof with myeeasy.
+intros P Hatl Hatr Hex Hcut l C pi.
+induction pi ; try (constructor ; myeeasy ; fail).
+- apply (ex_ir _ l1)...
+- eapply cut_ir_gaxat...
+- assert (ipgax P = ipgax (cutrm_ipfrag P)) as Hgax by reflexivity.
+  revert a.
+  rewrite Hgax.
+  apply gax_ir.
+Qed.
 
 Inductive ipgax_sat ax P (f : ax -> projT1 (ipgax P)) : projT1 (ipgax P) -> Prop :=
 | isat_ax : forall x, ipgax_sat ax P f (f x)
@@ -71,26 +92,4 @@ apply cut_admissible_ill ; simpl ; intuition.
   rewrite (Hax a)...
 Qed.
 
-(* TODO
-Axiom cut_ir_axfree : forall P, (forall l C, ~ ipgax P l C) -> forall A l0 l1 l2 C s1 s2,
-  ill P l0 A s1 -> ill P (l1 ++ A :: l2) C s2 -> exists s,
-    ill P (l1 ++ l0 ++ l2) C s.
-
-Lemma cut_admissible_ill_axfree : forall P, (forall l C, ~ ipgax P l C) ->
-  forall l C s, ill P l C s -> exists s', ill (cutrm_ipfrag P) l C s'.
-Proof with myeeasy.
-intros P Hgax l C s pi.
-induction pi ;
-  try (eexists ; constructor ; myeeasy ; fail) ;
-  try (destruct IHpi as [s' IHpi] ; eexists ; constructor ; myeeasy ; fail) ;
-  try (destruct IHpi1 as [s'1 IHpi1] ;
-       destruct IHpi2 as [s'2 IHpi2] ; eexists ; constructor ; myeeasy ; fail).
-- destruct IHpi as [s' IHpi].
-  eexists.
-  apply (ex_ir _ l1)...
-- destruct IHpi1 as [s'1 IHpi1].
-  destruct IHpi2 as [s'2 IHpi2].
-  eapply cut_ir_axfree...
-Qed.
-*)
 
