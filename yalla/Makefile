@@ -76,6 +76,6 @@ yalla_ax.vo: $(MYLIBSDIR)/Injective.vo yalla_ax.v
 bbb.vo: bbb.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/genperm_Type.vo ll_def.vo ll_fragments.vo
 nn_def.vo: nn_def.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/Permutation_Type.vo $(MYLIBSDIR)/genperm_Type.vo subs.vo isubs.vo
 nn_prop.vo: nn_prop.v $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type.vo $(MYLIBSDIR)/genperm_Type.vo subs.vo ll_fragments.vo ill_prop.vo nn_def.vo bbb.vo
-nnfoc.vo: nnfoc.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/genperm_Type.vo basic_tactics.vo ll_fragments.vo ill_prop.vo llfoc.vo tl.vo nn_prop.vo
+nn_foc.vo: nn_foc.v $(MYLIBSDIR)/Injective.vo $(MYLIBSDIR)/List_more.vo $(MYLIBSDIR)/List_Type_more.vo $(MYLIBSDIR)/Permutation_Type_more.vo $(MYLIBSDIR)/Permutation_Type_solve.vo $(MYLIBSDIR)/genperm_Type.vo basic_tactics.vo ll_fragments.vo ill_prop.vo llfoc.vo tl.vo nn_prop.vo
 
 

@@ -1,6 +1,4 @@
-(* nnfoc file for yalla library *)
-
-(* output in Type *)
+(* nn_foc file for yalla library *)
 
 
 (** * Focusing by Polarized Translation *)
