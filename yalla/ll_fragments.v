@@ -383,32 +383,7 @@ Qed.
 
 (** Provability in [ll_mix02] is equivalent to adding [wn (tens (wn one) (wn one))] in [ll] *)
 
-Lemma mix02_to_ll {P} : pperm P = true -> forall b1 b2 bp l,
-  ll (mk_pfrag P.(pcut) P.(pgax) b1 b2 bp) l -> ll P (wn (tens (wn one) (wn one)) :: l).
-Proof with myeeasy ; try PCperm_Type_solve.
-intros fp b1 b2 bp l pi.
-eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
-- eapply ex_r...
-- intros Hcut...
-- simpl ; intros a.
-  eapply ex_r ; [ | apply PCperm_Type_last ].
-  apply wk_r.
-  apply gax_r.
-- intros Hpmix0 Hpmix0'.
-  apply de_r...
-  rewrite <- (app_nil_l nil).
-  apply tens_r ; apply de_r ; apply one_r.
-- intros _ _ l1 l2 pi1 pi2.
-  apply (ex_r _ (wn (tens (wn one) (wn one)) :: l2 ++ l1))...
-  apply co_std_r.
-  apply co_std_r.
-  apply de_r.
-  eapply ex_r.
-  + apply tens_r ; apply wk_r ; [ apply pi1 | apply pi2 ].
-  + rewrite fp...
-Qed.
-
-Lemma ll_to_mix02 {P} : forall l,
+Lemma ll_to_mix02_cut {P} : forall l,
   ll P (wn (tens (wn one) (wn one)) :: l) -> ll (mk_pfrag true P.(pgax) true true P.(pperm)) l.
 Proof with myeasy.
 intros l pi.

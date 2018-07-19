@@ -829,6 +829,43 @@ induction pi ; intros l' l0' l1' HP.
     inversion Hgax.
 Qed.
 
+
+(** ** Results on [mix0] and [mix2] together *)
+
+Lemma mix02_to_ll {P} : pperm P = true -> forall b1 b2 bp l,
+  ll (mk_pfrag P.(pcut) P.(pgax) b1 b2 bp) l -> ll P (wn (tens (wn one) (wn one)) :: l).
+Proof with myeeasy ; try PCperm_Type_solve.
+intros fp b1 b2 bp l pi.
+eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
+- eapply ex_r...
+- intros Hcut...
+- simpl ; intros a.
+  eapply ex_r ; [ | apply PCperm_Type_last ].
+  apply wk_r.
+  apply gax_r.
+- intros Hpmix0 Hpmix0'.
+  apply de_r...
+  rewrite <- (app_nil_l nil).
+  apply tens_r ; apply de_r ; apply one_r.
+- intros _ _ l1 l2 pi1 pi2.
+  apply (ex_r _ (wn (tens (wn one) (wn one)) :: l2 ++ l1))...
+  apply co_std_r.
+  apply co_std_r.
+  apply de_r.
+  eapply ex_r.
+  + apply tens_r ; apply wk_r ; [ apply pi1 | apply pi2 ].
+  + rewrite fp...
+Qed.
+
+Lemma mix02_to_ll' {P} : pperm P = true -> forall b0 b2 bp l,
+  ll (mk_pfrag P.(pcut) P.(pgax) b0 b2 bp) l -> ll P (wn one :: wn (tens bot bot) :: l).
+Proof with myeasy.
+intros Hperm b0 b2 bp l pi.
+eapply mix0_to_ll...
+eapply mix2_to_ll...
+apply pi.
+Qed.
+
 Lemma ll_to_mix02 {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
   pperm P = true -> forall l,
   ll P (wn one :: wn (tens bot bot) :: l) -> ll (mix2add_pfrag (mix0add_pfrag P)) l.
@@ -837,6 +874,5 @@ intros Hgax Hperm l pi.
 apply ll_to_mix2...
 apply ll_to_mix0...
 Qed.
-
 
 

@@ -24,16 +24,6 @@ Definition n2a := yalla_ax.n2a.
 Definition n2n_a := yalla_ax.n2n_a.
 
 
-(* TODO move to appropriate place: ll_mix.v ? *)
-Lemma mix02_to_ll' {P} : pperm P = true -> forall b0 b2 bp l,
-  ll (mk_pfrag P.(pcut) P.(pgax) b0 b2 bp) l -> ll P (wn one :: wn (tens bot bot) :: l).
-Proof with myeasy.
-intros Hperm b0 b2 bp l pi.
-eapply mix0_to_ll...
-eapply mix2_to_ll...
-apply pi.
-Qed.
-
 (* TODO move to appropriate place *)
 Lemma munit_trans : forall A n, nat_fresh_of a2n A <= n ->
   munit_smp (subs bot (n2a n) (dual (unill (trans (ivar (a2i (n2a n))) A)))) A.
