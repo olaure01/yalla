@@ -19,7 +19,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ll] library *)
 
-Require ll_def.
+Require ll_cut.
 
 
 (** ** 1. define formulas *)
@@ -531,7 +531,7 @@ Proof with try eassumption.
 intros A l1 l2 pi1 pi2.
 apply llpol2llpolfrag in pi1 ; simpl in pi1.
 apply llpol2llpolfrag in pi2 ; simpl in pi2.
-eapply ll_def.cut_r_axfree in pi1 ;
+eapply ll_cut.cut_r_axfree in pi1 ;
   [ | | rewrite llpol2ll_dual ]...
 - rewrite <- map_app in pi1.
   eapply llpolfrag2llpol...

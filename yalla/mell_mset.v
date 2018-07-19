@@ -17,7 +17,7 @@ Import FMSetNotations.
 
 (** ** 0. load the [ll] library *)
 
-Require ll_def.
+Require ll_cut.
 Require fmformulas.
 
 
@@ -639,7 +639,7 @@ apply mell2mellfrag in pi2 ; destruct pi2 as [pi2].
 apply mellfrag2mell.
 eapply ll_def.ex_r ; [ | apply Permutation_Type_map ; symmetry ; apply elts_sum ].
 rewrite map_app.
-eapply ll_def.cut_r_axfree...
+eapply ll_cut.cut_r_axfree...
 - intros Hax ; inversion Hax.
 - assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
                            (map mell2ll (dual A :: elts m2)))
