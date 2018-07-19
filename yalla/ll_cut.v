@@ -2,9 +2,6 @@
 
 (** * Cut elimination and properties relying on it *)
 
-
-Require Import List.
-
 Require Import Bool_more.
 Require Import List_more.
 Require Import Permutation_Type.
