@@ -13,7 +13,7 @@ Require Import List_Type_more.
 
 (** ** 0. load the [ill] library *)
 
-Require ill.
+Require ill_def.
 
 
 (** ** 1. define formulas *)
@@ -66,14 +66,14 @@ Inductive lprove : list lform -> lform -> Type :=
 (** ** 4. characterize corresponding [ill] fragment *)
 
 (** cut / axioms / permutation *)
-Definition ipfrag_lambek := ill.mk_ipfrag false ill.NoIAxioms false.
-(*                                        cut   axioms        perm  *)
+Definition ipfrag_lambek := ill_def.mk_ipfrag false ill_def.NoIAxioms false.
+(*                                            cut   axioms            perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
 Lemma l2illfrag : forall l A, lprove l A ->
-  ill.ill ipfrag_lambek (map l2ill l) (l2ill A).
+  ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A).
 Proof with try reflexivity ; try eassumption.
 intros l A pi.
 induction pi ;
@@ -86,7 +86,7 @@ induction pi ;
 Qed.
 
 Lemma illfrag2l : forall l A,
-  ill.ill ipfrag_lambek (map l2ill l) (l2ill A) -> lprove l A.
+  ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A) -> lprove l A.
 Proof with try eassumption ; try reflexivity.
 intros l A pi.
 remember (map l2ill l) as l0.
@@ -143,7 +143,7 @@ Lemma ax_gen_r : forall A, lprove (A :: nil) A.
 Proof.
 intro A.
 apply illfrag2l.
-apply ill.ax_exp_ill.
+apply ill_def.ax_exp_ill.
 Qed.
 
 (** *** cut elimination *)
@@ -154,7 +154,7 @@ Proof with try eassumption.
 intros A l0 l1 l2 C pi1 pi2.
 apply l2illfrag in pi1.
 apply l2illfrag in pi2 ; list_simpl in pi2.
-eapply (@ill.cut_ir_nzeropos_axfree_by_ll _ i2ac_inj) in pi1...
+eapply (@ill_def.cut_ir_nzeropos_axfree_by_ll _ i2ac_inj) in pi1...
 - rewrite <- ? map_app in pi1.
   apply illfrag2l...
 - intros a ; destruct a.

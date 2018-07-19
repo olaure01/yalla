@@ -16,7 +16,7 @@ Require Import genperm_Type.
 
 Require Import basic_tactics.
 Require Import ll_fragments.
-Require Import ill.
+Require Import ill_def.
 Require Import llfoc.
 Require Import tl.
 Require Import nn.
