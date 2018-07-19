@@ -9,7 +9,6 @@ Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 
 Require Import ll_def.
-Require Import ll_cut.
 
 
 (** ** Results on [mix0] *)
