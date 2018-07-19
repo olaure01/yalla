@@ -3,7 +3,7 @@
 
 
 (** * Linear Logic with explicit permutations *)
-(* not cuts here, see ll_cut.v for cut elimination, etc. *)
+(* not cuts here, see ll_cut.v for cut elimination and ll_prop.v for other properties *)
 
 Require Import CMorphisms.
 

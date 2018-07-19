@@ -16,7 +16,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ll] library *)
 
-Require ll_cut.
+Require ll_prop.
 
 
 (** ** 1. define formulas *)
@@ -243,7 +243,7 @@ Proof with try eassumption.
 intros A l1 l2 pi1 pi2.
 apply mellfrag2mell.
 rewrite map_app.
-eapply ll_cut.cut_r_axfree.
+eapply ll_prop.cut_r_axfree.
 - intros a ; destruct a.
 - apply mell2mellfrag in pi2.
   simpl in pi2 ; rewrite <- mell2ll_dual in pi2...

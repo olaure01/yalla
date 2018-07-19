@@ -11,7 +11,7 @@ Require Import List.
 Require Import Permutation_Type_more.
 Require Import genperm_Type.
 
-Require Export ll_cut.
+Require Export ll_prop.
 Require Import subs.
 Require Import ll_mix.
 
