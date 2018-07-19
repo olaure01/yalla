@@ -19,7 +19,7 @@ Require Import ll_fragments.
 Require Import ill_prop.
 Require Import llfoc.
 Require Import tl.
-Require Import nn_def.
+Require Import nn_prop.
 
 
 (** ** Polarized Translation *)
