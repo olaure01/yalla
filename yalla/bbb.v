@@ -18,7 +18,8 @@ Require Import ll_fragments.
 
 (** ** Preliminaries *)
 
-Lemma mix02_to_ll' : forall l,
+(* TODO generalize and move to ll_mix *)
+Lemma mix02_to_ll'' : forall l,
   ll_mix02 l -> ll_ll (wn one :: wn (tens (wn one) bot) :: l).
 Proof with myeeasy ; try PCperm_Type_solve.
 intros l pi.
@@ -44,7 +45,7 @@ eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
 Unshelve. reflexivity.
 Qed.
 
-Lemma ll_to_mix02' : forall l,
+Lemma ll_to_mix02'' : forall l,
   ll_ll (wn one :: wn (tens (wn one) bot) :: l) -> ll_mix02 l.
 Proof with myeasy.
 intros l pi.
@@ -74,12 +75,12 @@ Unshelve.
 simpl...
 Qed.
 
-Lemma ll_to_mix02'' : forall l (l0 : list unit),
+Lemma ll_to_mix02''' : forall l (l0 : list unit),
   ll_ll (l ++ wn one :: map (fun _ => wn (tens (wn one) bot)) l0)  ->
   ll_mix02 l.
 Proof.
 intros l l0 pi.
-apply ll_to_mix02'.
+apply ll_to_mix02''.
 revert l pi ; induction l0 ; intros l pi.
 - cons2app.
   eapply ex_r ; [ | apply Permutation_Type_app_comm ].
@@ -281,7 +282,7 @@ induction pi ;
   try now (eapply ex_r ; [ | apply Permutation_Type_swap ] ;
            constructor ; eapply ex_r ; [ eassumption | PCperm_Type_solve ]).
 - eapply ex_r...
-- apply mix02_to_ll' in l.
+- apply mix02_to_ll'' in l.
   apply co_std_r.
   apply co_std_r.
   apply de_r.
@@ -458,7 +459,7 @@ induction pi ; intros l' l0' l1' HP.
         eapply ex_r ; [ | cons2app ; apply Permutation_Type_app_comm ] ; list_simpl.
         apply de_r.
         eapply ex_r ; [ apply pi | ]... }
-      eapply ll_to_mix02'' in pi1'...
+      eapply ll_to_mix02''' in pi1'...
       apply (Permutation_Type_app_head l1a) in HP3b.
       assert (IHP2 := Permutation_Type_trans HP1 HP3b).
       apply (@Permutation_Type_cons _ bot _ eq_refl) in IHP2.
