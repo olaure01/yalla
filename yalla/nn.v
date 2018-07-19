@@ -110,14 +110,6 @@ induction l...
 simpl ; rewrite IHl...
 Qed.
 
-Lemma trans_nz : (zeropos R -> False) -> nonzerospos R ->
-  forall A, nonzerospos (trans A).
-Proof with myeasy.
-intros Hnz Hnzsp.
-induction A ; simpl ; try now constructor ;
-  try (constructor ; try assumption ; now constructor).
-Qed.
-
 Lemma neg_tens_propag {P} : ipperm P = true -> ipcut P = true -> forall A1 A2 B1 B2,
   ill P (A1 :: negR A2 :: nil) R -> ill P (B1 :: negR B2 :: nil) R ->
     ill P (itens A1 B1 :: negR (itens A2 B2) :: nil) R.
@@ -504,6 +496,13 @@ change nil with (map ioc nil).
 eapply ll_to_ill_trans_gen...
 Qed.
 
+Lemma trans_nz : (zeropos R -> False) -> nonzerospos R ->
+  forall A, nonzerospos (trans A).
+Proof with myeasy.
+intros Hnz Hnzsp.
+induction A ; simpl ; try now constructor ;
+  try (constructor ; try assumption ; now constructor).
+Qed.
 
 (** In [llR] (where [bot] is equivalent to [R]),
   [A] is implied by the dual of its translation. *)
