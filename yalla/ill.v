@@ -23,7 +23,7 @@ Require Import Permutation_Type_solve.
 Require Import CPermutation_Type_solve.
 Require Import genperm_Type.
 
-Require Import ll.
+Require Import ll_def.
 Require Export iformulas.
 
 

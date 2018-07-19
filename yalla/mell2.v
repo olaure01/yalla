@@ -16,7 +16,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ll] library *)
 
-Require ll.
+Require ll_def.
 
 
 (** ** 1. define formulas *)
@@ -129,31 +129,31 @@ Qed.
 (** ** 4. characterize corresponding [ll] fragment *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll.mk_pfrag false ll.NoAxioms false true true.
-(*                                   cut   axioms      mix0  mix2 perm  *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false true true.
+(*                                       cut   axioms          mix0  mix2 perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
-Lemma mell2mellfrag : forall l, mell l -> ll.ll pfrag_mell (map mell2ll l).
+Lemma mell2mellfrag : forall l, mell l -> ll_def.ll pfrag_mell (map mell2ll l).
 Proof with try eassumption ; try reflexivity. 
 intros l pi.
 induction pi ; try (now constructor) ; try rewrite map_app.
-- eapply ll.ex_r...
+- eapply ll_def.ex_r...
   apply Permutation_Type_map...
-- apply ll.mix2_r...
-- eapply ll.ex_r.
-  + apply (ll.tens_r _ _ _ _ _ IHpi1 IHpi2).
+- apply ll_def.mix2_r...
+- eapply ll_def.ex_r.
+  + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
   + simpl ; perm_Type_solve.
 - simpl ; rewrite mell2ll_map_wn.
-  apply ll.oc_r.
+  apply ll_def.oc_r.
   rewrite <- mell2ll_map_wn...
 - simpl ; rewrite <- (app_nil_l (map _ _)).
   change nil with (map formulas.wn nil).
-  apply ll.co_r...
+  apply ll_def.co_r...
 Qed.
 
-Lemma mellfrag2mell : forall l, ll.ll pfrag_mell (map mell2ll l) -> mell l.
+Lemma mellfrag2mell : forall l, ll_def.ll pfrag_mell (map mell2ll l) -> mell l.
 Proof with try eassumption ; try reflexivity.
 intros l pi.
 remember (map mell2ll l) as l0.
@@ -232,7 +232,7 @@ Proof.
 intro A.
 apply mellfrag2mell.
 simpl ; rewrite <- mell2ll_dual.
-eapply ll.ex_r ; [ apply ll.ax_exp | apply Permutation_Type_swap ].
+eapply ll_def.ex_r ; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
 Qed.
 
 (** *** cut elimination *)
@@ -243,7 +243,7 @@ Proof with try eassumption.
 intros A l1 l2 pi1 pi2.
 apply mellfrag2mell.
 rewrite map_app.
-eapply ll.cut_r_axfree.
+eapply ll_def.cut_r_axfree.
 - intros a ; destruct a.
 - apply mell2mellfrag in pi2.
   simpl in pi2 ; rewrite <- mell2ll_dual in pi2...

@@ -12,7 +12,7 @@ Require Import Permutation_Type.
 Require Import List_more.
 Require Import genperm_Type.
 
-Require Export ll.
+Require Export ll_def.
 
 
 (** ** Decidable equality on [Atom], through value into [bool] *)

@@ -126,7 +126,7 @@ Qed.
 
 (** ** 3. define proofs *)
 
-Definition NoTAxioms := (existT (fun x => x -> list tformula * option tformula) _ ll.Empty_fun).
+Definition NoTAxioms := (existT (fun x => x -> list tformula * option tformula) _ ll_def.Empty_fun).
 
 Record tpfrag := mk_tpfrag {
   tpcut : bool ;
@@ -682,7 +682,7 @@ Qed.
 
 (** *** conservativity with respect to [ll] *)
 
-Require Import ll.
+Require Import ll_def.
 
 (*
 Theorem ll_is_tl_cutfree {P} : tpcut P = false -> forall l,

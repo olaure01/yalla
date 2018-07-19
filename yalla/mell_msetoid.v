@@ -16,7 +16,7 @@ Require Import Permutation_Type_more.
 
 (** ** 0. load the [ll] library *)
 
-Require ll.
+Require ll_def.
 
 
 (** ** 1. define formulas *)
@@ -158,14 +158,14 @@ Qed.
 *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll.mk_pfrag false ll.NoAxioms false false true.
-(*                                   cut   axioms      mix0  mix2  perm  *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
+(*                                       cut   axioms          mix0  mix2  perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
 Lemma mell2mellfrag : forall m,
-  mell m -> inhabited (ll.ll pfrag_mell (map mell2ll (elts m))).
+  mell m -> inhabited (ll_def.ll pfrag_mell (map mell2ll (elts m))).
 Proof with try eassumption ; try reflexivity.
 intros l pi.
 induction pi ;
@@ -175,15 +175,15 @@ induction pi ;
   constructor ; simpl ; rewrite ? map_app ;
   try (now (constructor ; eassumption)).
 - apply meq_perm in X.
-  eapply ll.ex_r...
+  eapply ll_def.ex_r...
   apply Permutation_Type_map...
-- eapply ll.ex_r.
-  + apply ll.tens_r.
+- eapply ll_def.ex_r.
+  + apply ll_def.tens_r.
     * assert (Helt := Permutation_Type_map mell2ll (elts_add A l1)).
-      apply (ll.ex_r _ _ _ IHpi1) in Helt.
+      apply (ll_def.ex_r _ _ _ IHpi1) in Helt.
       simpl in Helt...
     * assert (Helt := Permutation_Type_map mell2ll (elts_add B l2)).
-      apply (ll.ex_r _ _ _ IHpi2) in Helt.
+      apply (ll_def.ex_r _ _ _ IHpi2) in Helt.
       simpl in Helt...
   + apply Permutation_Type_cons...
     rewrite <- map_app.
@@ -205,13 +205,13 @@ induction pi ;
   simpl in IHpi.
   rewrite fold_id in IHpi.
   rewrite mell2ll_map_wn in IHpi.
-  apply ll.oc_r...
+  apply ll_def.oc_r...
 - change (map mell2ll l) with (map formulas.wn nil ++ map mell2ll l).
-  apply ll.co_r...
+  apply ll_def.co_r...
 Qed.
 
 Lemma mellfrag2mell : forall m,
-  ll.ll pfrag_mell (map mell2ll (elts m)) -> mell m.
+  ll_def.ll pfrag_mell (map mell2ll (elts m)) -> mell m.
 Proof with try eassumption ; try reflexivity.
 intros m pi.
 remember (map mell2ll (elts m)) as l.
@@ -312,7 +312,7 @@ Lemma ax_gen_r : forall A, mell (add (dual A) (add A empty)).
 Proof.
 intro A.
 apply mellfrag2mell.
-eapply ll.ex_r ; [ apply ll.ax_exp | ].
+eapply ll_def.ex_r ; [ apply ll_def.ax_exp | ].
 rewrite mell2ll_dual.
 apply Permutation_Type_swap.
 Qed.
@@ -327,16 +327,16 @@ intros A m1 m2 pi1 pi2.
 apply mell2mellfrag in pi1 ; destruct pi1 as [pi1] ; simpl in pi1.
 apply mell2mellfrag in pi2 ; destruct pi2 as [pi2] ; simpl in pi2.
 apply mellfrag2mell.
-eapply ll.ex_r ; [ | apply Permutation_Type_map ; symmetry ; apply elts_sum ].
+eapply ll_def.ex_r ; [ | apply Permutation_Type_map ; symmetry ; apply elts_sum ].
 rewrite map_app.
-eapply ll.cut_r_axfree...
+eapply ll_def.cut_r_axfree...
 - intros Hax ; inversion Hax.
 - assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
                            (map mell2ll (dual A :: elts m2)))
   as Helt2 by (apply Permutation_Type_map ; apply elts_add).
   simpl in Helt2 ; rewrite <- mell2ll_dual in Helt2.
   rewrite <- mell2ll_dual in pi2.
-  eapply ll.ex_r ; [ | apply Helt2 ]...
+  eapply ll_def.ex_r ; [ | apply Helt2 ]...
 Qed.
 
 

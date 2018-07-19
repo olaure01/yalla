@@ -19,7 +19,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ll] library *)
 
-Require ll.
+Require ll_def.
 
 
 (** ** 1. define formulas *)
@@ -146,14 +146,14 @@ Qed.
 *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll.mk_pfrag false ll.NoAxioms false false true.
-(*                                   cut   axioms      mix0  mix2  perm  *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
+(*                                       cut   axioms          mix0  mix2  perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
 Lemma mell2mellfrag : forall l, mell l ->
-  inhabited (ll.ll pfrag_mell (map mell2ll l)).
+  inhabited (ll_def.ll pfrag_mell (map mell2ll l)).
 Proof with try eassumption ; try reflexivity. 
 intros l pi.
 induction pi ; try (now ((try inversion IHpi) ; constructor ; constructor)) ;
@@ -162,7 +162,7 @@ induction pi ; try (now ((try inversion IHpi) ; constructor ; constructor)) ;
   induction H.
   + inversion IHpi ; constructor...
   + inversion IHpi ; constructor.
-    eapply ll.ex_r...
+    eapply ll_def.ex_r...
     apply Permutation_Type_map...
     perm_Type_solve.
   + apply IHPermutation_transp2.
@@ -170,21 +170,21 @@ induction pi ; try (now ((try inversion IHpi) ; constructor ; constructor)) ;
       eapply ex_r...
     * apply IHPermutation_transp1...
 - inversion IHpi1 ; inversion IHpi2 ; constructor.
-  eapply ll.ex_r.
-  + apply (ll.tens_r _ _ _ _ _ X X0).
+  eapply ll_def.ex_r.
+  + apply (ll_def.tens_r _ _ _ _ _ X X0).
   + simpl ; perm_Type_solve.
 - inversion IHpi ; constructor.
   simpl ; rewrite mell2ll_map_wn.
-  apply ll.oc_r.
+  apply ll_def.oc_r.
   rewrite <- mell2ll_map_wn...
 - inversion IHpi ; constructor.
   simpl.
   rewrite <- (app_nil_l (map _ _)).
   change nil with (map formulas.wn nil).
-  apply ll.co_r...
+  apply ll_def.co_r...
 Qed.
 
-Lemma mellfrag2mell : forall l, ll.ll pfrag_mell (map mell2ll l) -> mell l.
+Lemma mellfrag2mell : forall l, ll_def.ll pfrag_mell (map mell2ll l) -> mell l.
 Proof with try eassumption ; try reflexivity.
 intros l pi.
 remember (map mell2ll l) as l0.
@@ -253,10 +253,10 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
 Qed.
 
 Lemma inhmellfrag2mell : forall l,
-  inhabited (ll.ll pfrag_mell (map mell2ll l)) -> mell l.
+  inhabited (ll_def.ll pfrag_mell (map mell2ll l)) -> mell l.
 Proof.
 intros l.
-assert (inhabited (ll.ll pfrag_mell (map mell2ll l)) -> inhabited (mell l)) as Hi.
+assert (inhabited (ll_def.ll pfrag_mell (map mell2ll l)) -> inhabited (mell l)) as Hi.
 { apply inhabited_covariant.
   apply mellfrag2mell. }
 intros H.
@@ -275,7 +275,7 @@ Proof.
 intro A.
 apply mellfrag2mell.
 simpl ; rewrite <- mell2ll_dual.
-eapply ll.ex_r ; [ apply ll.ax_exp | apply Permutation_Type_swap ].
+eapply ll_def.ex_r ; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
 Qed.
 
 (** *** cut elimination *)
@@ -289,7 +289,7 @@ apply mell2mellfrag in pi2.
 apply inhmellfrag2mell.
 destruct pi1 as [ pi1 ] ; destruct pi2 as [ pi2 ] ; constructor.
 rewrite map_app.
-eapply ll.cut_r_axfree...
+eapply ll_def.cut_r_axfree...
 - intros a ; destruct a.
 - rewrite mell2ll_dual...
 Qed.

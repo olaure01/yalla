@@ -19,7 +19,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ll] library *)
 
-Require ll.
+Require ll_def.
 
 
 (** ** 1. define formulas *)
@@ -410,33 +410,33 @@ Qed.
 *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll.mk_pfrag false ll.NoAxioms false false true.
-(*                                   cut   axioms      mix0  mix2  perm  *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
+(*                                       cut   axioms          mix0  mix2  perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
 Lemma llpol2llpolfrag : forall l, llpol l ->
-  ll.ll pfrag_mell (map llpol2ll l).
+  ll_def.ll pfrag_mell (map llpol2ll l).
 Proof with try eassumption ; try reflexivity.
 intros l pi ; induction pi ; try now (constructor ; intuition).
-- eapply ll.ex_r...
+- eapply ll_def.ex_r...
   apply Permutation_Type_map...
-- eapply ll.ex_r.
-  + apply (ll.tens_r _ _ _ _ _ IHpi1 IHpi2).
+- eapply ll_def.ex_r.
+  + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
   + simpl ; perm_Type_solve.
 - simpl ; rewrite ? map_app.
   rewrite llpol2ll_map_wn.
-  apply ll.oc_r.
+  apply ll_def.oc_r.
   rewrite <- llpol2ll_map_wn...
 - simpl ; rewrite ? map_app.
   rewrite <- (app_nil_l (map _ _)).
   change nil with (map formulas.wn nil).
-  apply ll.co_r...
+  apply ll_def.co_r...
 Qed.
 
 Lemma llpolfrag2llpol : forall l,
-  ll.ll pfrag_mell (map llpol2ll l) -> llpol l.
+  ll_def.ll pfrag_mell (map llpol2ll l) -> llpol l.
 Proof with try reflexivity.
 intros l pi.
 remember (map llpol2ll l) as l0.
@@ -520,7 +520,7 @@ intro A.
 eapply ex_r ; [ | apply Permutation_Type_swap ].
 apply llpolfrag2llpol.
 simpl ; rewrite <- llpol2ll_dual.
-apply ll.ax_exp.
+apply ll_def.ax_exp.
 Qed.
 
 (** *** cut elimination *)
@@ -531,7 +531,7 @@ Proof with try eassumption.
 intros A l1 l2 pi1 pi2.
 apply llpol2llpolfrag in pi1 ; simpl in pi1.
 apply llpol2llpolfrag in pi2 ; simpl in pi2.
-eapply ll.cut_r_axfree in pi1 ;
+eapply ll_def.cut_r_axfree in pi1 ;
   [ | | rewrite llpol2ll_dual ]...
 - rewrite <- map_app in pi1.
   eapply llpolfrag2llpol...
