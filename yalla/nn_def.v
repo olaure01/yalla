@@ -485,3 +485,63 @@ Qed.
 
 End RTranslation.
 
+
+(** Ingredients for generating fresh variables *)
+Definition a2n := yalla_ax.a2n.
+Definition n2a := yalla_ax.n2a.
+Definition n2n_a := yalla_ax.n2n_a.
+
+Lemma munit_trans : forall A n, nat_fresh_of a2n A <= n ->
+  munit_smp (subs bot (n2a n) (dual (unill (trans (ivar (a2i (n2a n))) A)))) A.
+Proof with (try now (apply munit_smp_id)) ; myeasy.
+induction A ; intros n Hf ; simpl...
+- rewrite a2a_i.
+  rewrite repl_at_eq ; try reflexivity.
+  apply musmp_to.
+  apply (subs_fresh_le _ n2a n2n_a bot) in Hf.
+  simpl in Hf.
+  rewrite a2a_i.
+  rewrite Hf...
+- apply (subs_fresh_le _ n2a n2n_a bot) in Hf.
+  simpl in Hf.
+  rewrite a2a_i.
+  rewrite Hf...
+- rewrite a2a_i.
+  rewrite repl_at_eq ; try reflexivity.
+  apply musmp_to...
+- rewrite a2a_i.
+  rewrite repl_at_eq ; try reflexivity.
+  rewrite ? bidual.
+  apply musmp_to.
+  simpl in Hf.
+  apply musmp_tens ; apply musmp_pb ; [ apply IHA1 | apply IHA2 ]...
+- simpl in Hf.
+  apply musmp_parr ; [ apply IHA1 | apply IHA2 ]...
+- rewrite a2a_i.
+  rewrite repl_at_eq ; try reflexivity.
+  apply musmp_to...
+- rewrite a2a_i.
+  rewrite repl_at_eq ; try reflexivity.
+  rewrite ? bidual.
+  apply musmp_to.
+  simpl in Hf.
+  apply musmp_plus ; apply musmp_pb ; [ apply IHA1 | apply IHA2 ]...
+- simpl in Hf.
+  apply musmp_with ; [ apply IHA1 | apply IHA2 ]...
+- rewrite a2a_i.
+  rewrite repl_at_eq ; try reflexivity.
+  rewrite ? bidual.
+  apply musmp_to.
+  simpl in Hf.
+  apply musmp_oc ; apply musmp_pb ; apply IHA...
+- rewrite a2a_i.
+  rewrite repl_at_eq ; try reflexivity.
+  rewrite ? bidual.
+  apply musmp_wn.
+  apply musmp_to.
+  apply musmp_pb.
+  apply IHA.
+  simpl in Hf...
+Qed.
+
+
