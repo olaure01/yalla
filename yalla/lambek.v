@@ -13,7 +13,7 @@ Require Import List_Type_more.
 
 (** ** 0. load the [ill] library *)
 
-Require ill_def.
+Require ill_prop.
 
 
 (** ** 1. define formulas *)
@@ -154,7 +154,7 @@ Proof with try eassumption.
 intros A l0 l1 l2 C pi1 pi2.
 apply l2illfrag in pi1.
 apply l2illfrag in pi2 ; list_simpl in pi2.
-eapply (@ill_def.cut_ir_nzeropos_axfree_by_ll _ i2ac_inj) in pi1...
+eapply (@ill_prop.cut_ir_nzeropos_axfree_by_ll _ i2ac_inj) in pi1...
 - rewrite <- ? map_app in pi1.
   apply illfrag2l...
 - intros a ; destruct a.

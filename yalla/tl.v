@@ -19,7 +19,7 @@ Require Import genperm_Type.
 
 (** ** 0. load the [ill] library *)
 
-Require Import ill_def.
+Require Import ill_prop.
 
 (** ** 1. define formulas *)
 
