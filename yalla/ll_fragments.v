@@ -13,6 +13,7 @@ Require Import genperm_Type.
 
 Require Export ll_cut.
 Require Import subs.
+Require Import ll_mix.
 
 
 (** ** Standard linear logic: [ll_ll] (no mix, no axiom) *)
@@ -79,28 +80,7 @@ Qed.
 
 (** Provability in [ll_mix0] is equivalent to adding [wn one] in [ll] *)
 
-Lemma mix0_to_ll {P} : pperm P = true -> forall b0 bp l,
-  ll (mk_pfrag P.(pcut) P.(pgax) b0 P.(pmix2) bp) l -> ll P (wn one :: l).
-Proof with myeeasy ; try PCperm_Type_solve.
-intros fp b0 bp l pi.
-eapply (ext_wn_param _ P fp _ (one :: nil)) in pi.
-- eapply ex_r...
-- intros Hcut...
-- simpl ; intros a.
-  eapply ex_r ; [ | apply PCperm_Type_last ].
-  apply wk_r.
-  apply gax_r.
-- intros.
-  eapply de_r.
-  eapply one_r.
-- intros Hpmix2 Hpmix2'.
-  exfalso.
-  simpl in Hpmix2.
-  rewrite Hpmix2 in Hpmix2'.
-  inversion Hpmix2'.
-Qed.
-
-Lemma ll_to_mix0 {P} : forall l,
+Lemma ll_to_mix0_cut {P} : forall l,
   ll P (wn one :: l) -> ll (mk_pfrag true P.(pgax) true P.(pmix2) P.(pperm)) l.
 Proof with myeasy.
 intros l pi.
@@ -126,7 +106,7 @@ assert (pfrag_mix0 = mk_pfrag pfrag_mix0.(pcut) pfrag_mix0.(pgax)
                               true pfrag_mix0.(pmix2) true)
   as Heqfrag by reflexivity.
 apply cut_mix0_admissible.
-apply ll_to_mix0.
+apply ll_to_mix0_cut.
 apply co_std_r.
 eapply mix0_to_ll...
 Qed.
@@ -254,33 +234,7 @@ Qed.
 
 (** Provability in [ll_mix2] is equivalent to adding [wn (tens bot bot)] in [ll] *)
 
-Lemma mix2_to_ll {P} : pperm P = true -> forall b2 bp l,
-  ll (mk_pfrag P.(pcut) P.(pgax) P.(pmix0) b2 bp) l -> ll P (wn (tens bot bot) :: l).
-Proof with myeeasy ; try PCperm_Type_solve.
-intros fp b2 bp l pi.
-eapply (ext_wn_param _ P fp _ (tens bot bot :: nil)) in pi.
-- eapply ex_r...
-- intros Hcut...
-- simpl ; intros a.
-  eapply ex_r ; [ | apply PCperm_Type_last ].
-  apply wk_r.
-  apply gax_r.
-- intros Hpmix0 Hpmix0'.
-  exfalso.
-  simpl in Hpmix0.
-  rewrite Hpmix0 in Hpmix0'.
-  inversion Hpmix0'.
-- intros _ _ l1 l2 pi1 pi2.
-  apply (ex_r _ (wn (tens bot bot) :: l2 ++ l1))...
-  apply co_std_r.
-  apply co_std_r.
-  apply de_r.
-  eapply ex_r.
-  + apply tens_r ; apply bot_r ; [ apply pi1 | apply pi2 ].
-  + rewrite fp...
-Qed.
-
-Lemma ll_to_mix2 {P} : forall l,
+Lemma ll_to_mix2_cut {P} : forall l,
   ll P (wn (tens bot bot) :: l) -> ll (mk_pfrag true P.(pgax) P.(pmix0) true P.(pperm)) l.
 Proof with myeasy.
 intros l pi.
