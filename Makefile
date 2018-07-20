@@ -6,7 +6,7 @@ YALLADIR  = yalla
 YALLAHTMLDIR   = yalla_html
 
 YALLAHTMLFILE   = yalla_html.tgz
-OLLIBSVFILES = Bool_more.v Injective.v Surjective.v nattree.v List_more.v Permutation_more.v CyclicPerm.v Permutation_solve.v CPermutation_solve.v genperm.v fmsetlist.v fmsetoidlist.v
+OLLIBSVFILES = $(wildcard $(OLLIBSDIR)/*.v)
 YALLAVFILES  = $(wildcard $(YALLADIR)/*.v)
 
 all: ollibs yalla doc
@@ -20,7 +20,7 @@ yalla:
 doc:
 	cd $(OLLIBSDIR) && $(MAKE) $@
 	cd $(YALLADIR) && $(MAKE) $@
-	cd $(YALLADIR) && $(COQDOC) $(addprefix ../$(OLLIBSDIR)/,$(OLLIBSVFILES)) $(addprefix ../,$(YALLAVFILES))
+	cd $(YALLADIR) && $(COQDOC) $(addprefix ../,$(OLLIBSVFILES)) $(addprefix ../,$(YALLAVFILES))
 
 htmlfiles: doc
 	rm -f $(YALLAHTMLFILE)
