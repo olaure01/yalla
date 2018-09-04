@@ -13,6 +13,13 @@ Require Import List_Type.
 Require Import List_Type_more.
 
 
+Instance Permutation_Type_refl' {A} : Proper (Logic.eq ==> @Permutation_Type A) id.
+Proof.
+intros x y Heq.
+rewrite Heq.
+reflexivity.
+Qed.
+
 Lemma Permutation_Type_morph_transp {A} : forall P : list A -> Prop,
   (forall a b l1 l2, P (l1 ++ a :: b :: l2) -> P (l1 ++ b :: a :: l2)) ->
     Proper ((@Permutation_Type A) ==> iff) P.

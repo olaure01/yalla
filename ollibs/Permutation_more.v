@@ -1,13 +1,4 @@
 (* Permutation_more Library *)
-(* v0.2  2017/09/03   Olivier Laurent *)
-
-(* Release Notes
-     v0.2: remove Permutation_elt_inv
-             already Permutation_app_inv in standard library
-           add Permutation_elt_map_inv
-           add list_sum_perm
-*)
-
 
 (** * Add-ons for Permutation library
 Usefull properties apparently missing in the Permutation library. *)
@@ -20,6 +11,12 @@ Require Export Permutation.
 Require Import List_more.
 
 
+Instance Permutation_refl' {A} : Proper (Logic.eq ==> @Permutation A) id.
+Proof.
+intros x y Heq.
+rewrite Heq.
+reflexivity.
+Qed.
 
 Lemma Permutation_morph_transp {A} : forall P : list A -> Prop,
   (forall a b l1 l2, P (l1 ++ a :: b :: l2) -> P (l1 ++ b :: a :: l2)) ->

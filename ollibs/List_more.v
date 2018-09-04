@@ -1,15 +1,4 @@
 (* List_more Library *)
-(* v 0.3  2017/09/03   Olivier Laurent *)
-
-
-(* Release Notes
-     v0.2: change in decomp_map, etc up to symmetry
-             and better implementation
-     v0.3: change in cons2app and cons2app_hyp
-             dealing with existentials
-           add list_sum
-*)
-
 
 (** * Add-ons for List library
 Usefull properties apparently missing in the List library. *)
@@ -45,10 +34,11 @@ Ltac list_simpl_hyp H :=
     repeat rewrite map_app in H ).
 Tactic Notation "list_simpl" "in" hyp(H) := list_simpl_hyp H.
 Ltac list_simpl_hyps :=
-  repeat (
-    match goal with
-    | H : _ |- _ => progress list_simpl in H
-    end ).
+  match goal with
+  | H : _ |- _ => list_simpl in H ; revert H ; list_simpl_hyps ; intro H
+  | _ => idtac
+  end.
+Ltac list_simpl_all := list_simpl_hyps ; list_simpl.
 
 
 (** ** Removal of [cons] constructions *)
@@ -86,10 +76,10 @@ Ltac cons2app_hyp H :=
   end.
 Tactic Notation "cons2app" "in" hyp(H) := cons2app_hyp H.
 Ltac cons2app_hyps :=
-  repeat (
-    match goal with
-    | H : _ |- _ => progress cons2app in H
-    end ).
+  match goal with
+  | H : _ |- _ => cons2app in H ; revert H ; cons2app_hyps ; intro H
+  | _ => idtac
+  end.
 Ltac cons2app_all := cons2app_hyps ; cons2app.
 
 
