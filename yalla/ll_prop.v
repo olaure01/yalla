@@ -4,7 +4,7 @@
 
 Require Import Bool_more.
 Require Import List_more.
-Require Import Permutation_Type.
+Require Import Permutation_Type_more.
 Require Import CyclicPerm_Type.
 Require Import genperm_Type.
 
@@ -38,11 +38,10 @@ Lemma cut_admissible {P} :
   (forall a b x l1 l2 l3, projT2 (pgax P) a = (dual x :: l1) -> projT2 (pgax P) b = (l2 ++ x :: l3) ->
      exists c, projT2 (pgax P) c = l2 ++ l1 ++ l3) ->
   forall l, ll P l -> ll (cutrm_pfrag P) l.
-Proof with myeeasy.
+Proof.
 intros Hgax_at Hgax_ex Hgax_cut l H.
-induction H ; try (constructor ; myeeasy ; fail).
-- apply (ex_r _ l1)...
-- eapply cut_r_gaxat...
+induction H ; try (econstructor ; myeeasy ; fail).
+- eapply cut_r_gaxat ; eassumption.
 - revert a.
   assert (pgax P = pgax (cutrm_pfrag P)) as Hcut by reflexivity.
   rewrite Hcut.
@@ -121,6 +120,9 @@ Qed.
 Inductive ll_ps P PS : list formula -> Type :=
 | ax_ps_r : forall X, is_true (PS (covar X :: var X :: nil)) -> ll_ps P PS (covar X :: var X :: nil)
 | ex_ps_r : forall l1 l2, is_true (PS l2) -> ll_ps P PS l1 -> PCperm_Type (pperm P) l1 l2 -> ll_ps P PS l2
+| ex_wn_ps_r : forall l1 lw lw' l2, is_true (PS (l1 ++ map wn lw' ++ l2)) ->
+                 ll_ps P PS (l1 ++ map wn lw ++ l2) ->
+                 Permutation_Type lw lw' -> ll_ps P PS (l1 ++ map wn lw' ++ l2)
 | mix0_ps_r {f : pmix0 P = true} : is_true (PS nil) -> ll_ps P PS nil
 | mix2_ps_r {f : pmix2 P = true} : forall l1 l2, is_true (PS (l2 ++ l1)) -> 
                                      ll_ps P PS l1 -> ll_ps P PS l2 -> ll_ps P PS (l2 ++ l1)
@@ -143,9 +145,8 @@ Inductive ll_ps P PS : list formula -> Type :=
                                 ll_ps P PS (A :: map wn l) -> ll_ps P PS (oc A :: map wn l)
 | de_ps_r : forall A l, is_true (PS (wn A :: l)) -> ll_ps P PS (A :: l) -> ll_ps P PS (wn A :: l)
 | wk_ps_r : forall A l, is_true (PS (wn A :: l)) -> ll_ps P PS l -> ll_ps P PS (wn A :: l)
-| co_ps_r : forall A lw l, is_true (PS (wn A :: map wn lw ++ l)) ->
-                               ll_ps P PS (wn A :: map wn lw ++ wn A :: l) ->
-                               ll_ps P PS (wn A :: map wn lw ++ l)
+| co_ps_r : forall A l, is_true (PS (wn A :: l)) ->
+                            ll_ps P PS (wn A :: wn A :: l) -> ll_ps P PS (wn A :: l)
 | cut_ps_r {f : pcut P = true} : forall A l1 l2, is_true (PS (l2 ++ l1)) ->
                                ll_ps P PS (dual A :: l1) -> ll_ps P PS (A :: l2) ->
                                ll_ps P PS (l2 ++ l1)
@@ -155,7 +156,7 @@ Lemma stronger_ps_pfrag P Q : le_pfrag P Q -> forall PS l,
   ll_ps P PS l -> ll_ps Q PS l.
 Proof with myeeasy.
 intros Hle PS l H.
-induction H ; try (constructor ; myeasy ; fail).
+induction H ; try (econstructor ; myeeasy ; fail).
 - apply (ex_ps_r _ _ l1)...
   destruct Hle as (_ & _ & _ & _ & Hp).
   unfold PCperm_Type in p.
@@ -187,12 +188,7 @@ Lemma ll_ps_stronger {P} : forall PS QS l,
   ll_ps P PS l -> (forall x, is_true (PS x) -> is_true (QS x)) -> ll_ps P QS l.
 Proof with try eassumption.
 intros PS QS l pi Hs.
-induction pi ;
-  try (constructor ; try apply Hs ; eassumption ; fail).
-- eapply ex_ps_r...
-  apply Hs...
-- eapply (@cut_ps_r _ _ f)...
-  apply Hs...
+induction pi ; try (econstructor ; try apply Hs ; eassumption ; fail).
 Qed.
 
 Lemma ll_ps_is_ps {P} : forall l PS, ll_ps P PS l -> is_true (PS l).
@@ -204,18 +200,13 @@ Qed.
 Lemma ll_ps_is_ll {P} : forall l PS, ll_ps P PS l -> ll P l.
 Proof with try eassumption.
 intros l PS pi.
-induction pi ; try (constructor ; eassumption ; fail).
-- eapply ex_r...
-- eapply (@cut_r _ f)...
+induction pi ; try (econstructor ; eassumption ; fail).
 Qed.
 
 Lemma ll_is_ll_ps {P} : forall l, ll P l -> ll_ps P (fun _ => true) l.
 Proof with myeeasy.
 intros l pi.
-induction pi ;
-  try (constructor ; myeasy ; fail).
-- eapply ex_ps_r...
-- eapply (@cut_ps_r _ _ f)...
+induction pi ; try (econstructor ; myeeasy ; fail).
 Qed.
 
 (** A fragment is a subset of formulas closed under subformula. *)
@@ -235,6 +226,13 @@ induction pi ; intros HFrag.
   apply Forallb_Forall in HFrag.
   apply Forallb_Forall.
   eapply PCperm_Type_Forall...
+- eapply ex_wn_ps_r...
+  apply IHpi.
+  apply Forallb_Forall in HFrag.
+  apply Forallb_Forall.
+  apply (Permutation_Type_map wn) in p.
+  eapply Permutation_Type_Forall...
+  PCperm_Type_solve.
 - apply (@mix0_ps_r _ _ f)...
 - apply Forallb_Forall in HFrag.
   assert (HFrag2 := Forall_app_inv _ _ _ HFrag).
@@ -328,12 +326,6 @@ induction pi ; intros HFrag.
   apply co_ps_r...
   apply IHpi.
   simpl ; apply andb_true_iff ; split...
-  apply Forallb_Forall in H0.
-  apply Forall_app_inv in H0.
-  destruct H0.
-  apply Forallb_Forall.
-  apply Forall_app...
-  constructor...
 - rewrite P_cutfree in f.
   inversion f.
 - apply gax_ps_r...
@@ -383,8 +375,7 @@ apply cut_admissible_axfree in pi...
 apply ll_is_ll_ps in pi.
 eapply conservativity in pi...
 clear - pi ; induction pi ;
-  try (constructor ; assumption ; fail).
-- eapply ex_ps_r...
+  try (econstructor ; eassumption ; fail).
 - eapply @cut_ps_r...
   destruct P.
   inversion f.

@@ -267,7 +267,7 @@ Proof with myeeasy.
 intros Hmix0 Hmix2.
 intros A l1 l2 l0 pi1 pi2.
 eapply ex_r ; [ | rewrite Hperm ; rewrite app_assoc ; apply Permutation_Type_app_swap ].
-apply co_std_list_r.
+apply co_list_r.
 eapply ex_r ; [ | rewrite Hperm ; apply Permutation_Type_app_swap ].
 list_simpl ; rewrite app_assoc.
 eapply cut_elim_no_mix...

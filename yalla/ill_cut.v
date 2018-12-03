@@ -36,8 +36,7 @@ Lemma cut_admissible_ill : forall {P},
   forall l C, ill P l C -> ill (cutrm_ipfrag P) l C.
 Proof with myeeasy.
 intros P Hatl Hatr Hex Hcut l C pi.
-induction pi ; try (constructor ; myeeasy ; fail).
-- apply (ex_ir _ l1)...
+induction pi ; try (econstructor ; myeeasy ; fail).
 - eapply cut_ir_gaxat...
 - assert (ipgax P = ipgax (cutrm_ipfrag P)) as Hgax by reflexivity.
   revert a.

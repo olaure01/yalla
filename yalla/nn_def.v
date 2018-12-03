@@ -388,6 +388,12 @@ induction Hll ;
   apply PEperm_Type_app_head...
   apply PEperm_Type_map.
   simpl ; rewrite P_perm...
+- list_simpl in IHHll ; rewrite map_map in IHHll ; simpl in IHHll ;
+    rewrite <- (map_map _ _ lw) in IHHll.
+  list_simpl ; rewrite map_map ; simpl ; rewrite <- (map_map _ _ lw').
+  rewrite app_assoc in IHHll ; rewrite app_assoc.
+  eapply Permutation_Type_map in p.
+  eapply ex_oc_ir...
 - eapply ex_ir ; [ | simpl ; rewrite P_perm ; apply Permutation_Type_middle ].
   rewrite <- (app_nil_l _).
   rewrite <- (app_nil_l _).
@@ -404,9 +410,6 @@ induction Hll ;
   apply (tens_irr _ _ _ _ _ IHHll1) in IHHll2.
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll2) in Hax.
   rewrite <- (app_nil_l (map _ _ ++ _)).
-  change nil with (map ioc nil).
-  rewrite <- (app_nil_l (map _ _)).
-  rewrite <- app_assoc.
   eapply co_list_ilr.
   apply (ex_ir _ _ _ _ Hax)...
 - apply tens_ilr.
@@ -458,9 +461,7 @@ induction Hll ;
   eapply (@cut_ir _ Hcut _ _ _ _ _ IHHll2) in pi0.
   list_simpl in pi0 ; rewrite app_assoc in pi0.
   eapply (@cut_ir _ Hcut _ _ _ _ _ IHHll1) in pi0.
-  change (map ioc l0) with (map ioc nil ++ map ioc l0).
-  rewrite <- (app_nil_l (map ioc nil)).
-  rewrite <- ? app_assoc.
+  rewrite <- (app_nil_l (map ioc _ ++ _)).
   eapply co_list_ilr.
   eapply ex_ir...
 - rewrite <- (app_nil_l _).

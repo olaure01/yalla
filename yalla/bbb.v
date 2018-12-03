@@ -34,8 +34,8 @@ eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
   apply one_r.
 - intros _ _ l1 l2 pi1 pi2.
   apply (ex_r _ (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1))...
-  apply co_std_r.
-  apply co_std_r.
+  apply co_r.
+  apply co_r.
   apply de_r.
   apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: wn one :: l2)
                                    ++ (wn (tens (wn one) bot) :: l1)))...
@@ -87,7 +87,7 @@ revert l pi ; induction l0 ; intros l pi.
   simpl ; apply wk_r ; assumption.
 - cons2app.
   eapply ex_r ; [ | apply Permutation_Type_app_comm ].
-    simpl ; apply co_std_r.
+    simpl ; apply co_r.
   rewrite 2 app_comm_cons.
   eapply ex_r ; [ | apply Permutation_Type_app_comm ].
   list_simpl ; apply IHl0.
@@ -243,14 +243,14 @@ Proof with myeeasy.
 intros l H.
 induction H ; try now constructor.
 - apply (ex_bbb_r l1)...
+- apply (Permutation_Type_map wn) in p.
+  eapply ex_bbb_r...
+  perm_Type_solve.
 - inversion f.
 - apply mix2_bbb_r...
   eapply stronger_pfrag...
   nsplit 5...
   intros a ; exists a...
-- apply co_bbb_r.
-  eapply ex_bbb_r ; [ apply IHll | ].
-  perm_Type_solve.
 - destruct a.
 Qed.
 
@@ -259,9 +259,7 @@ Lemma bbb_to_mix02 : forall l, ll_bbb l -> ll_mix02 l.
 Proof with myeasy.
 intros l H.
 induction H ; try now constructor.
-- apply (ex_r _ l1)...
-- change l with (map wn nil ++ l).
-  apply co_r...
+apply (ex_r _ l1)...
 Qed.
 
 Lemma mix2_std_bbb_r : forall l1 l2,
@@ -283,14 +281,14 @@ induction pi ;
            constructor ; eapply ex_r ; [ eassumption | PCperm_Type_solve ]).
 - eapply ex_r...
 - apply mix02_to_ll'' in l.
-  apply co_std_r.
-  apply co_std_r.
+  apply co_r.
+  apply co_r.
   apply de_r.
   apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: l1)
                                    ++ (wn (tens (wn one) bot) :: l2)))...
   apply tens_r...
   apply bot_r...
-- apply co_std_r.
+- apply co_r.
   apply (ex_r _ (tens A B :: (wn (tens (wn one) bot) :: l2)
                           ++ (wn (tens (wn one) bot) :: l1)))...
   apply tens_r ; eapply ex_r ; [ apply IHpi1 | | apply IHpi2 | ] ...
@@ -301,8 +299,6 @@ induction pi ;
 - apply (ex_r _ (oc A :: map wn (tens (wn one) bot :: l)))...
   apply oc_r.
   eapply ex_r...
-- eapply ex_r ; [ | apply Permutation_Type_swap ].
-  apply co_std_r ; eapply ex_r...
 Qed.
 
 Lemma ll_to_bbb : forall l,
@@ -341,6 +337,9 @@ induction pi ; intros l' l0' l1' HP.
 - simpl in p.
   eapply IHpi.
   etransitivity...
+- eapply IHpi.
+  etransitivity...
+  apply (Permutation_Type_map wn) in p ; perm_Type_solve.
 - inversion f.
 - apply Permutation_Type_app_app_inv in HP.
   destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
@@ -636,9 +635,8 @@ induction pi ; intros l' l0' l1' HP.
   + rewrite app_assoc in HP.
     apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
     apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
-    apply (@Permutation_Type_trans _ (wn A :: map wn lw ++ wn A :: l)) in HP...
-    rewrite 3 app_comm_cons in HP.
-    rewrite <- app_comm_cons in HP.
+    apply (@Permutation_Type_trans _ (wn A :: wn A :: l)) in HP...
+    rewrite 2 app_comm_cons in HP.
     apply IHpi in HP.
     eapply ex_bbb_r ; [ apply co_bbb_r | ]...
   + dichot_Type_elt_app_exec Heq1 ; subst.
@@ -649,8 +647,9 @@ induction pi ; intros l' l0' l1' HP.
       list_simpl in HP ; rewrite <- map_app in HP.
     apply (@Permutation_Type_cons _ (wn (tens (wn one) bot)) _ eq_refl) in HP.
     apply (@Permutation_Type_cons _ (wn (tens (wn one) bot)) _ eq_refl) in HP.
-    apply (@Permutation_Type_trans _ (wn (tens (wn one) bot) :: map wn lw ++ wn (tens (wn one) bot) :: l)) in HP...
-    assert (Permutation_Type (wn (tens (wn one) bot) :: map wn lw ++ wn (tens (wn one) bot) :: l)
+    apply (@Permutation_Type_trans _ (wn (tens (wn one) bot) ::
+                                      wn (tens (wn one) bot) :: l)) in HP...
+    assert (Permutation_Type (wn (tens (wn one) bot) :: wn (tens (wn one) bot) :: l)
        (l' ++ map (fun _ : unit => tens (wn one) bot) l1' ++
               map (fun _ : unit => wn (tens (wn one) bot)) (tt :: tt :: l1 ++ l4)))
       as HP' by (etransitivity ; [ apply HP | perm_Type_solve ]).
@@ -698,20 +697,19 @@ Qed.
 Lemma mix2_to_bb : forall l, ll_mix2 l -> llR (oc bot) l.
 Proof with myeeasy.
 intros l pi.
-induction pi ; try now constructor.
+induction pi ; try now econstructor.
 - eapply ex_r...
+- eapply ex_wn_r...
 - apply mix2_bb_r...
-- destruct a.
 Qed.
 
 Theorem bb_to_bbb : forall l, llR (oc bot) l -> ll_bbb l.
 Proof with myeeasy ; try PCperm_Type_solve.
 intros l pi.
-induction pi ; try now constructor.
+induction pi ; try now econstructor.
 - eapply ex_bbb_r...
-- inversion f.
-- apply co_bbb_r.
-  eapply ex_bbb_r...
+- eapply ex_bbb_r...
+  apply (Permutation_Type_map wn) in p ; perm_Type_solve.
 - eapply cut_bbb_r...
 - destruct a ; simpl.
   + apply de_bbb_r.
@@ -916,6 +914,15 @@ induction H ; intro HP ;
             simpl in p.
             apply Permutation_Type_length_1_inv in p.
             apply IHll...
+         ++ destruct l1 ; inversion Heql.
+            ** destruct lw' ; inversion Heql ; simpl in H0 ; subst.
+               symmetry in p ; apply Permutation_Type_nil in p ; subst.
+               intuition.
+            ** apply app_eq_nil in H3 ; destruct H3 as [Heq1 Heq2] ; subst.
+               apply app_eq_nil in Heq2 ; destruct Heq2 as [Heq2 ?] ; subst.
+               destruct lw' ; inversion Heq2 ; subst.
+               symmetry in p ; apply Permutation_Type_nil in p ; subst.
+               intuition.
          ++ inversion f.
          ++ rewrite_all H2.
             clear - H.
@@ -925,6 +932,15 @@ induction H ; intro HP ;
                simpl in p.
                apply Permutation_Type_length_1_inv in p.
                apply IHll...
+            ** destruct l1 ; inversion Heql.
+               --- destruct lw' ; inversion Heql ; simpl in H0 ; subst.
+                   symmetry in p ; apply Permutation_Type_nil in p ; subst.
+                   intuition.
+               --- apply app_eq_nil in H3 ; destruct H3 as [Heq1 Heq2] ; subst.
+                   apply app_eq_nil in Heq2 ; destruct Heq2 as [Heq2 ?] ; subst.
+                   destruct lw' ; inversion Heq2 ; subst.
+                   symmetry in p ; apply Permutation_Type_nil in p ; subst.
+                   intuition.
             ** inversion f.
             ** apply app_eq_nil in H4.
                destruct H4 ; subst.
@@ -935,6 +951,15 @@ induction H ; intro HP ;
                    simpl in p.
                    apply Permutation_Type_length_1_inv in p.
                    apply IHll...
+               --- destruct l1 ; inversion Heql.
+                   +++ destruct lw' ; inversion Heql ; simpl in H0 ; subst.
+                       symmetry in p ; apply Permutation_Type_nil in p ; subst.
+                       intuition.
+                   +++ apply app_eq_nil in H3 ; destruct H3 as [Heq1 Heq2] ; subst.
+                       apply app_eq_nil in Heq2 ; destruct Heq2 as [Heq2 ?] ; subst.
+                       destruct lw' ; inversion Heq2 ; subst.
+                       symmetry in p ; apply Permutation_Type_nil in p ; subst.
+                       intuition.
                --- inversion f.
                --- inversion f.
                --- destruct a.
@@ -981,8 +1006,8 @@ Proof with myeeasy ; try PCperm_Type_solve.
 intros l pi.
 induction pi ; (try now inversion f) ; try now constructor.
 - eapply ex_bbb0_r...
-- apply co_bbb0_r.
-  eapply ex_bbb0_r...
+- eapply ex_bbb0_r...
+  apply (Permutation_Type_map wn) in p ; perm_Type_solve.
 - eapply cut_bbb0_r...
 - destruct a ; simpl.
   + apply de_bbb0_r.

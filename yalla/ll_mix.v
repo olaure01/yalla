@@ -78,6 +78,9 @@ induction pi ; intros l' l0' l1' HP.
 - rewrite Hperm in p ; simpl in p.
   eapply IHpi.
   etransitivity...
+- apply (Permutation_Type_map wn) in p.
+  eapply IHpi.
+  etransitivity...
 - apply Permutation_Type_nil in HP.
   destruct l' ; inversion HP.
   rewrite H0.
@@ -332,25 +335,22 @@ induction pi ; intros l' l0' l1' HP.
   + rewrite app_assoc in HP.
     apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
     apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
-    apply (@Permutation_Type_trans _ (wn A :: map wn lw ++ wn A :: l)) in HP...
-    rewrite 3 app_comm_cons in HP.
-    rewrite <- app_comm_cons in HP.
+    rewrite 2 app_comm_cons in HP.
     apply IHpi in HP.
-    eapply ex_r ; [ apply co_std_r | simpl ; rewrite Hperm ]...
+    eapply ex_r ; [ apply co_r | simpl ; rewrite Hperm ]...
   + dichot_Type_elt_app_exec Heq1 ; subst.
     * decomp_map_Type Heq0.
       inversion Heq0.
     * decomp_map_Type Heq2 ; simpl in Heq1 ; simpl in Heq2 ; simpl in Heq3 ; subst ; simpl in HP.
       inversion Heq2 ; subst.
       list_simpl in HP ; rewrite <- map_app in HP.
-    apply (@Permutation_Type_cons _ (wn one) _ eq_refl) in HP.
-    apply (@Permutation_Type_cons _ (wn one) _ eq_refl) in HP.
-    apply (@Permutation_Type_trans _ (wn one :: map wn lw ++ wn one :: l)) in HP...
-    assert (Permutation_Type (wn one :: map wn lw ++ wn one :: l)
-       (l' ++ map (fun _ : unit => one) l1' ++
-              map (fun _ : unit => wn one) (tt :: tt :: l1 ++ l4)))
-      as HP' by (etransitivity ; [ apply HP | perm_Type_solve ]).
-    apply IHpi in HP'...
+      apply (@Permutation_Type_cons _ (wn one) _ eq_refl) in HP.
+      apply (@Permutation_Type_cons _ (wn one) _ eq_refl) in HP.
+      assert (Permutation_Type (wn one :: wn one :: l)
+                               (l' ++ map (fun _ : unit => one) l1' ++
+                                  map (fun _ : unit => wn one) (tt :: tt :: l1 ++ l4)))
+        as HP' by (etransitivity ; [ apply HP | perm_Type_solve ]).
+      apply IHpi in HP'...
 - apply Permutation_Type_app_app_inv in HP.
   destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
     simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
@@ -423,8 +423,8 @@ eapply (ext_wn_param _ P fp _ (tens bot bot :: nil)) in pi.
   inversion Hpmix0'.
 - intros _ _ l1 l2 pi1 pi2.
   apply (ex_r _ (wn (tens bot bot) :: l2 ++ l1))...
-  apply co_std_r.
-  apply co_std_r.
+  apply co_r.
+  apply co_r.
   apply de_r.
   eapply ex_r.
   + apply tens_r ; apply bot_r ; [ apply pi1 | apply pi2 ].
@@ -470,6 +470,9 @@ induction pi ; intros l' l0' l1' HP.
       rewrite H3.
       eapply ex_r ; [ apply ax_r | ]...
 - rewrite Hperm in p ; simpl in p.
+  eapply IHpi.
+  etransitivity...
+- apply (Permutation_Type_map wn) in p.
   eapply IHpi.
   etransitivity...
 - apply Permutation_Type_nil in HP.
@@ -762,25 +765,22 @@ induction pi ; intros l' l0' l1' HP.
   + rewrite app_assoc in HP.
     apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
     apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
-    apply (@Permutation_Type_trans _ (wn A :: map wn lw ++ wn A :: l)) in HP...
     rewrite 3 app_comm_cons in HP.
-    rewrite <- app_comm_cons in HP.
     apply IHpi in HP.
-    eapply ex_r ; [ apply co_std_r | simpl ; rewrite Hperm ]...
+    eapply ex_r ; [ apply co_r | simpl ; rewrite Hperm ]...
   + dichot_Type_elt_app_exec Heq1 ; subst.
     * decomp_map_Type Heq0.
       inversion Heq0.
     * decomp_map_Type Heq2 ; simpl in Heq1 ; simpl in Heq2 ; simpl in Heq3 ; subst ; simpl in HP.
       inversion Heq2 ; subst.
       list_simpl in HP ; rewrite <- map_app in HP.
-    apply (@Permutation_Type_cons _ (wn (tens bot bot)) _ eq_refl) in HP.
-    apply (@Permutation_Type_cons _ (wn (tens bot bot)) _ eq_refl) in HP.
-    apply (@Permutation_Type_trans _ (wn (tens bot bot) :: map wn lw ++ wn (tens bot bot) :: l)) in HP...
-    assert (Permutation_Type (wn (tens bot bot) :: map wn lw ++ wn (tens bot bot) :: l)
-       (l' ++ map (fun _ : unit => tens bot bot) l1' ++
-              map (fun _ : unit => wn (tens bot bot)) (tt :: tt :: l1 ++ l4)))
-      as HP' by (etransitivity ; [ apply HP | perm_Type_solve ]).
-    apply IHpi in HP'...
+      apply (@Permutation_Type_cons _ (wn (tens bot bot)) _ eq_refl) in HP.
+      apply (@Permutation_Type_cons _ (wn (tens bot bot)) _ eq_refl) in HP.
+      assert (Permutation_Type (wn (tens bot bot) :: wn (tens bot bot) :: l)
+                               (l' ++ map (fun _ : unit => tens bot bot) l1' ++
+                                  map (fun _ : unit => wn (tens bot bot)) (tt :: tt :: l1 ++ l4)))
+        as HP' by (etransitivity ; [ apply HP | perm_Type_solve ]).
+      apply IHpi in HP'...
 - apply Permutation_Type_app_app_inv in HP.
   destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
     simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
@@ -849,8 +849,8 @@ eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
   apply tens_r ; apply de_r ; apply one_r.
 - intros _ _ l1 l2 pi1 pi2.
   apply (ex_r _ (wn (tens (wn one) (wn one)) :: l2 ++ l1))...
-  apply co_std_r.
-  apply co_std_r.
+  apply co_r.
+  apply co_r.
   apply de_r.
   eapply ex_r.
   + apply tens_r ; apply wk_r ; [ apply pi1 | apply pi2 ].

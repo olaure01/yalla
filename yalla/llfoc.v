@@ -828,8 +828,7 @@ intros l Pi pi ; induction pi ;
     rewrite_all (polfoca A Ha).
     apply de_r.
     apply IHpiN...
-- apply co_std_r...
-- eapply ex_r ; [ apply co_std_r | apply Permutation_Type_swap ].
+- eapply ex_r ; [ apply co_r | apply Permutation_Type_swap ].
   eapply ex_r ; [ eassumption | ]...
 Qed.
 
@@ -1855,7 +1854,6 @@ intros l Pi pi ; induction pi ;
     * rewrite (polconta _ _ HaA) in pi'.
       apply pi'.
     * PCperm_Type_solve.
-- apply co_std_r...
 Qed.
 
 

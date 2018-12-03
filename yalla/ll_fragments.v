@@ -37,13 +37,10 @@ Lemma cut_ll_admissible :
   forall l, ll (cutupd_pfrag pfrag_ll true) l -> ll_ll l.
 Proof with myeeasy.
 intros l pi.
-induction pi ; try (now constructor).
+induction pi ; try (now econstructor).
 - eapply ex_r...
+- eapply ex_wn_r...
 - eapply cut_ll_r...
-- assert ({ b | projT2 (pgax (cutupd_pfrag pfrag_ll true)) a = projT2 (pgax pfrag_ll) b}) as [b Hgax]
-    by (now exists a).
-  rewrite Hgax.
-  apply gax_r.
 Qed.
 
 
@@ -69,13 +66,10 @@ Lemma cut_mix0_admissible :
   forall l, ll (cutupd_pfrag pfrag_mix0 true) l -> ll_mix0 l.
 Proof with myeeasy.
 intros l pi.
-induction pi ; try (now constructor).
+induction pi ; try (now econstructor).
 - eapply ex_r...
+- eapply ex_wn_r...
 - eapply cut_mix0_r...
-- assert ({ b | projT2 (pgax (cutupd_pfrag pfrag_mix0 true)) a = projT2 (pgax pfrag_mix0) b}) as [b Hgax]
-    by (now exists a).
-  rewrite Hgax.
-  apply gax_r.
 Qed.
 
 (** Provability in [ll_mix0] is equivalent to adding [wn one] in [ll] *)
@@ -107,7 +101,7 @@ assert (pfrag_mix0 = mk_pfrag pfrag_mix0.(pcut) pfrag_mix0.(pgax)
   as Heqfrag by reflexivity.
 apply cut_mix0_admissible.
 apply ll_to_mix0_cut.
-apply co_std_r.
+apply co_r.
 eapply mix0_to_ll...
 Qed.
 
@@ -196,6 +190,11 @@ revert Heql ; induction pi ; intros Heql ; subst ; try inversion Heql.
   simpl in p ; apply Permutation_Type_sym in p.
   apply Permutation_Type_length_2_inv in p.
   destruct p ; assumption.
+- destruct l1 ; destruct lw' ; inversion Heql ; subst.
+  + now symmetry in p ; apply Permutation_Type_nil in p ; subst.
+  + now symmetry in p ; apply Permutation_Type_nil in p ; subst.
+  + destruct l1 ; inversion H2.
+    destruct l1 ; inversion H3.
 - inversion f.
 - inversion f.
 - destruct a.
@@ -223,13 +222,10 @@ Lemma cut_mix2_admissible :
   forall l, ll (cutupd_pfrag pfrag_mix2 true) l -> ll_mix2 l.
 Proof with myeeasy.
 intros l pi.
-induction pi ; try (now constructor).
+induction pi ; try (now econstructor).
 - eapply ex_r...
+- eapply ex_wn_r...
 - eapply cut_mix2_r...
-- assert ({ b | projT2 (pgax (cutupd_pfrag pfrag_mix2 true)) a = projT2 (pgax pfrag_mix2) b}) as [b Hgax]
-    by (now exists a).
-  rewrite Hgax.
-  apply gax_r.
 Qed.
 
 (** Provability in [ll_mix2] is equivalent to adding [wn (tens bot bot)] in [ll] *)
@@ -342,6 +338,11 @@ revert Heql ; induction pi ; intros Heql ; subst ; try inversion Heql.
   simpl in p ; apply Permutation_Type_sym in p.
   apply Permutation_Type_nil in p.
   assumption.
+- apply app_eq_nil in Heql ; destruct Heql as [Heql Heql2].
+  apply app_eq_nil in Heql2 ; destruct Heql2 as [Heql2 _] ; subst.
+  destruct lw' ; inversion Heql2.
+  symmetry in p ; apply Permutation_Type_nil in p ; subst.
+  intuition.
 - inversion f.
 - apply IHpi2.
   apply app_eq_nil in Heql.
@@ -372,13 +373,10 @@ Lemma cut_mix02_admissible :
   forall l, ll (cutupd_pfrag pfrag_mix02 true) l -> ll_mix02 l.
 Proof with myeeasy.
 intros l pi.
-induction pi ; try (now constructor).
+induction pi ; try (now econstructor).
 - eapply ex_r...
+- eapply ex_wn_r...
 - eapply cut_mix02_r...
-- assert ({ b | projT2 (pgax (cutupd_pfrag pfrag_mix02 true)) a = projT2 (pgax pfrag_mix02) b}) as [b Hgax]
-    by (now exists a).
-  rewrite Hgax.
-  apply gax_r.
 Qed.
 
 (** Provability in [ll_mix02] is equivalent to adding [wn (tens (wn one) (wn one))] in [ll] *)
@@ -539,6 +537,7 @@ Proof with myeeasy.
 intros R1 R2 HR1 HR2 l Hll.
 induction Hll ; try (now constructor).
 - eapply ex_r...
+- eapply ex_wn_r...
 - eapply cut_r...
 - destruct a.
   + rewrite <- (app_nil_l _).
@@ -568,9 +567,9 @@ Qed.
 Lemma ll_to_llR : forall R l, ll_ll l -> llR R l.
 Proof with myeeasy.
 intros R l pi.
-induction pi ; try (now constructor).
+induction pi ; try (now econstructor).
 - eapply ex_r...
-- destruct a.
+- eapply ex_wn_r...
 Qed.
 
 Lemma subs_llR : forall R C x l, llR R l -> llR (subs C x R) (map (subs C x) l).

@@ -334,7 +334,7 @@ match (llpol2ll_dec A) with
 | inr _ => false
 end.
 
-Lemma llpol_is_fragment : ll.fragment llpol_fragment.
+Lemma llpol_is_fragment : ll_prop.fragment llpol_fragment.
 Proof with try reflexivity.
 intros A HfA B Hsf.
 induction Hsf ;
@@ -429,10 +429,6 @@ intros l pi ; induction pi ; try now (constructor ; intuition).
   rewrite llpol2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- llpol2ll_map_wn...
-- simpl ; rewrite ? map_app.
-  rewrite <- (app_nil_l (map _ _)).
-  change nil with (map formulas.wn nil).
-  apply ll_def.co_r...
 Qed.
 
 Lemma llpolfrag2llpol : forall l,
@@ -461,6 +457,16 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   symmetry in HP.
   eapply ex_r ; [ | eassumption ].
   apply IHpi...
+- decomp_map_Type Heql0 ; subst.
+  simpl in Heql0 ; apply llpol2ll_map_wn_inv in Heql0 ;
+    destruct Heql0 as [l Heq1 Heq2] ; subst.
+  apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
+  apply (Permutation_Type_map wn) in HP.
+  apply (Permutation_Type_map neg) in HP.
+  eapply ex_r.
+  + rewrite <- llpol2ll_map_wn in IHpi.
+    apply IHpi ; rewrite <- ? map_app...
+  + perm_Type_solve.
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ;
     [ destruct p | destruct n ] ; inversion H0.
@@ -488,24 +494,6 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply oc_r.
   apply IHpi.
   simpl ; rewrite llpol2ll_map_wn...
-- destruct l' ; inversion Heql0.
-  destruct f ; inversion H0 ;
-    [ destruct p | destruct n ] ; inversion H0 ; subst.
-  decomp_map_Type H1 ; subst.
-  apply co_r.
-  apply llpol2ll_map_wn_inv in H4.
-  destruct H4 as [l'' Heq1 Heq2] ; simpl in Heq1 ; subst.
-  eapply ex_r.
-  + apply IHpi...
-    simpl.
-    rewrite <- llpol2ll_map_wn.
-    replace (formulas.wn (pllpol2ll p)
-                            :: map llpol2ll (map neg (map wn l''))
-          ++ formulas.wn (pllpol2ll p) :: map llpol2ll l2)
-      with (map llpol2ll (neg (wn p) :: map neg (map wn l'')
-                        ++ neg (wn p) :: l2))...
-    list_simpl...
-  + perm_Type_solve.
 - inversion a.
 Qed.
 

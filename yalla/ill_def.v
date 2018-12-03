@@ -69,6 +69,8 @@ Inductive ill P : list iformula -> iformula -> Type :=
 | ax_ir : forall X, ill P (ivar X :: nil) (ivar X)
 | ex_ir : forall l1 l2 A, ill P l1 A -> PEperm_Type (ipperm P) l1 l2 ->
                           ill P l2 A
+| ex_oc_ir : forall l1 lw lw' l2 A, ill P (l1 ++ map ioc lw ++ l2) A ->
+               Permutation_Type lw lw' -> ill P (l1 ++ map ioc lw' ++ l2) A
 | one_irr : ill P nil ione
 | one_ilr : forall l1 l2 A, ill P (l1 ++ l2) A ->
                             ill P (l1 ++ ione :: l2) A
@@ -107,9 +109,8 @@ Inductive ill P : list iformula -> iformula -> Type :=
            ill P (l1 ++ A :: l2) C -> ill P (l1 ++ ioc A :: l2) C
 | wk_ilr : forall A l1 l2 C,
            ill P (l1 ++ l2) C -> ill P (l1 ++ ioc A :: l2) C
-| co_ilr : forall A lw l1 l2 C,
-            ill P (l1 ++ ioc A :: map ioc lw ++ ioc A :: l2) C ->
-                        ill P (l1 ++ map ioc lw ++ ioc A :: l2) C
+| co_ilr : forall A l1 l2 C,
+            ill P (l1 ++ ioc A :: ioc A :: l2) C -> ill P (l1 ++ ioc A :: l2) C
 | cut_ir {f : ipcut P = true} : forall A l0 l1 l2 C,
            ill P l0 A -> ill P (l1 ++ A :: l2) C-> ill P (l1 ++ l0 ++ l2) C
 | gax_ir : forall a,
@@ -127,6 +128,7 @@ Fixpoint ipsize {P l A} (pi : ill P l A) :=
 match pi with
 | ax_ir _ _ => 1
 | ex_ir _ _ _ _ pi0 _ => S (ipsize pi0)
+| ex_oc_ir _ _ _ _ _ _ pi0 _ => S (ipsize pi0)
 | one_irr _ => 1
 | one_ilr _ _ _ _ pi0 => S (ipsize pi0)
 | tens_irr _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
@@ -148,7 +150,7 @@ match pi with
 | oc_irr _ _ _ pi0 => S (ipsize pi0)
 | de_ilr _ _ _ _ _ pi0 => S (ipsize pi0)
 | wk_ilr _ _ _ _ _ pi0 => S (ipsize pi0)
-| co_ilr _ _ _ _ _ _ pi0 => S (ipsize pi0)
+| co_ilr _ _ _ _ _ pi0 => S (ipsize pi0)
 | cut_ir _ _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
 | gax_ir _ _ => 1
 end.
@@ -156,7 +158,7 @@ end.
 Lemma stronger_ipfrag P Q : le_ipfrag P Q -> forall l A, ill P l A -> ill Q l A.
 Proof with myeeasy.
 intros Hle l A H.
-induction H ; try (constructor ; myeasy ; fail).
+induction H ; try (econstructor ; myeeasy ; fail).
 - apply (ex_ir _ l1)...
   destruct Hle as (_ & _ & Hp).
   hyps_PEperm_Type_unfold ; unfold PEperm_Type.
@@ -181,22 +183,20 @@ apply IHl...
 Qed.
 
 (** Generalized contraction for lists *)
-Lemma co_list_ilr {P} : forall l lw l1 l2 C,
-  ill P (l1 ++ map ioc l ++ map ioc lw ++ map ioc l ++ l2) C ->
-  ill P (l1 ++ map ioc lw ++ map ioc l ++ l2) C.
+Lemma co_list_ilr {P} : forall l l1 l2 C,
+  ill P (l1 ++ map ioc l ++ map ioc l ++ l2) C ->
+  ill P (l1 ++ map ioc l ++ l2) C.
 Proof with myeeasy ; try PEperm_Type_solve.
-induction l ; intros...
-simpl in X.
-rewrite app_assoc in X.
-rewrite <- map_app in X.
-apply co_ilr in X.
-eapply (ex_ir _ _
-  (l1 ++ map ioc l ++ map ioc (lw ++ a :: nil) ++ map ioc l ++ l2))
-  in X.
-- apply IHl in X.
-  eapply ex_ir...
-  list_simpl...
-- list_simpl...
+induction l ; intros l1 l2 C pi...
+simpl ; apply co_ilr.
+cons2app ; rewrite 2 app_assoc.
+apply IHl ; list_simpl.
+rewrite app_assoc ; rewrite 2 app_comm_cons.
+rewrite (app_assoc _ _ l2) in pi ; rewrite <- map_app in pi.
+replace (ioc a :: ioc a :: map ioc l ++ map ioc l)
+  with (map ioc (a :: a :: l ++ l))
+  by (list_simpl ; reflexivity).
+eapply ex_oc_ir...
 Qed.
 
 (** Axiom expansion *)
@@ -295,6 +295,20 @@ induction pi ; intros l1' l2' Heq ; subst ;
   + simpl in p ; subst.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
     exists pi'...
+- dichot_Type_elt_app_exec Heq ; subst.
+  + list_simpl in IHpi.
+    assert (pi':=IHpi _ _ eq_refl).
+    rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
+    destruct pi' as [pi' Hs].
+    rewrite app_comm_cons ; rewrite 2 app_assoc.
+    exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * exfalso.
+      decomp_map Heq0 ; inversion Heq0.
+    * rewrite 2 app_assoc in IHpi.
+      assert (pi':=IHpi _ _ eq_refl).
+      list_simpl in pi' ; destruct pi' as [pi' Hs].
+      list_simpl ; exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
 - destruct l1' ; inversion Heq.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite app_assoc in IHpi.
@@ -520,26 +534,18 @@ induction pi ; intros l1' l2' Heq ; subst ;
     rewrite 2 app_assoc.
     exists (wk_ilr _ _ _ _ _ pi')...
 - dichot_Type_elt_app_exec Heq ; subst.
-  + list_simpl in IHpi.
+  + rewrite 2 app_comm_cons in IHpi ; rewrite app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
-    destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (co_ilr _ _ _ _ _ _ pi')...
+    list_simpl in pi' ; destruct pi' as [pi' Hs].
+    list_simpl ; exists (co_ilr _ _ _ _ _ pi')...
   + symmetry in Heq1.
-    dichot_Type_elt_app_exec Heq1 ; subst.
-    * rewrite 2 app_comm_cons in IHpi.
-      rewrite 2 app_assoc in IHpi.
-      assert (pi' := IHpi _ _ eq_refl).
-      list_simpl in pi'.
-      destruct pi' as [pi' Hs].
-      list_simpl.
-      exists (co_ilr _ _ _ _ _ _ pi')...
-    * symmetry in Heq0.
-      decomp_map_Type Heq0 ; subst.
-      destruct l6 ; inversion Heq2.
+    destruct l3 ; inversion Heq1 ; subst.
+    list_simpl in IHpi.
+    assert (pi' := IHpi _ _ eq_refl).
+    rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
+    destruct pi' as [pi' Hs].
+    rewrite app_comm_cons ; rewrite 2 app_assoc.
+    exists (co_ilr _ _ _ _ _ pi')...
 - dichot_Type_elt_app_exec Heq ; subst.
   + list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
@@ -653,6 +659,11 @@ induction Hill ;
     apply Permutation_Type_map.
     apply Permutation_Type_rev'...
   * subst...
+- rewrite_all ill2ll_map_ioc.
+  rewrite_all app_comm_cons.
+  apply Permutation_Type_rev' in p.
+  do 2 eapply Permutation_Type_map in p. 
+  eapply ex_wn_r...
 - apply one_r.
 - rewrite app_comm_cons.
   eapply ex_r ; [ | apply PCperm_Type_app_comm ].
@@ -739,12 +750,7 @@ induction Hill ;
   + eapply ex_r ; [ apply IHHill2 | ].
     rewrite ? app_comm_cons.
     apply PCperm_Type_app_comm.
-- assert (map dual (map ill2ll (map ioc (rev l))) =
-          map wn (map dual (map ill2ll (rev l)))) as Hwn.
-  { remember (rev l) as l'.
-    clear ; induction l'...
-    simpl ; rewrite IHl'... }
-  rewrite_all Hwn.
+- rewrite_all ill2ll_map_ioc.
   apply oc_r...
 - rewrite ? app_comm_cons.
   eapply ex_r ; [ | apply PCperm_Type_app_comm ].
@@ -760,20 +766,12 @@ induction Hill ;
   eapply ex_r...
   rewrite ? app_comm_cons.
   apply PCperm_Type_app_comm.
-- assert (map dual (map ill2ll (map ioc (rev lw))) =
-          map wn (map dual (map ill2ll (rev lw)))) as Hwn.
-  { remember (rev lw) as l'.
-    clear ; induction l'...
-    simpl ; rewrite IHl'... }
-  rewrite_all Hwn.
-  rewrite ? app_comm_cons.
+- rewrite app_comm_cons.
   eapply ex_r ; [ | apply PCperm_Type_app_comm ].
-  rewrite <- ? app_comm_cons.
-  rewrite <- ? app_assoc.
+  rewrite <- app_comm_cons.
   apply co_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  rewrite (app_assoc (wn _ :: _)).
   apply PCperm_Type_app_comm.
 - rewrite app_comm_cons.
   eapply ex_r ; [ | apply PCperm_Type_app_comm ].

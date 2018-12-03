@@ -206,8 +206,6 @@ induction pi ;
   rewrite fold_id in IHpi.
   rewrite mell2ll_map_wn in IHpi.
   apply ll_def.oc_r...
-- change (map mell2ll l) with (map formulas.wn nil ++ map mell2ll l).
-  apply ll_def.co_r...
 Qed.
 
 Lemma mellfrag2mell : forall m,
@@ -232,6 +230,15 @@ revert m Heql ; induction pi ; intros m Heql ;
   eapply ex_r.
   + apply IHpi...
   + symmetry...
+- decomp_map Heql ; subst.
+  apply mell2ll_map_wn_inv in Heql3 ; destruct Heql3 as (l & Heq1 & Heq2) ; subst.
+  apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
+  simpl in Heql ; unfold id in Heql ; subst.
+  eapply ex_r ;
+    [ apply IHpi ; rewrite <- mell2ll_map_wn ; rewrite <- ? map_app | ]...
+  apply Permutation_Type_app_head.
+  apply Permutation_Type_app_tail.
+  symmetry in HP ; apply Permutation_Type_map...
 - destruct m ; inversion Heql.
   destruct f ; inversion H0 ; subst.
   destruct m ; inversion H1.
@@ -288,18 +295,9 @@ revert m Heql ; induction pi ; intros m Heql ;
   apply IHpi...
 - destruct m ; inversion Heql.
   destruct f ; inversion H0 ; subst.
-  assert (Heq := H1).
-  decomp_map H1 ; subst.
-  apply mell2ll_map_wn_inv in H3.
-  destruct H3 as (m' & Heq1 & Heq2) ; subst.
   apply co_r.
-  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons ;
-                               [reflexivity | apply Permutation_Type_middle ] ].
   apply IHpi.
-  change (formulas.wn (mell2ll f)) with (mell2ll (wn f)).
-  rewrite <- mell2ll_map_wn.
-  list_simpl.
-  reflexivity.
+  change (formulas.wn (mell2ll f)) with (mell2ll (wn f))...
 - inversion a.
 Qed.
 

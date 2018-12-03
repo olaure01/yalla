@@ -319,7 +319,7 @@ induction pi ; simpl ; rewrite ? map_app ;
     rewrite Helt.
     symmetry ; apply elts_add.
 - eapply ll_def.ex_r.
-  + apply (ll_def.co_r _ (mell2ll A) nil).
+  + apply (ll_def.co_r _ (mell2ll A)).
     simpl.
     assert (Permutation_Type (elts (add (wn A) (add (wn A) m)))
                              (wn A :: wn A :: elts m))
@@ -330,8 +330,7 @@ induction pi ; simpl ; rewrite ? map_app ;
     apply (Permutation_Type_map mell2ll) in Helt.
     apply (ll_def.ex_r _ _ _ IHpi) in Helt.
     simpl in Helt...
-  + change (formulas.wn (mell2ll A) :: map formulas.wn nil
-              ++ map mell2ll (proj1_sig m))
+  + change (formulas.wn (mell2ll A) :: map mell2ll (proj1_sig m))
       with (map mell2ll (wn A :: elts m)).
     apply Permutation_Type_map.
     rewrite <- (@insert_add border_formula).
@@ -377,6 +376,11 @@ revert m HP ; induction pi ; intros m HP ; subst ;
 - apply IHpi.
   simpl in p.
   etransitivity...
+- apply IHpi.
+  etransitivity...
+  apply Permutation_Type_app_head.
+  apply Permutation_Type_app_tail.
+  apply Permutation_Type_map...
 - apply Permutation_Type_length_1_inv in HP.
   remember (elts m) as l.
   destruct l ; inversion HP.
@@ -602,8 +606,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   list_simpl.
   apply Permutation_Type_cons_app.
   symmetry.
-  etransitivity ; [ apply HP2 | ].
-  apply Permutation_Type_middle.
+  etransitivity ; [ apply HP2 | ]...
 - inversion a.
 Qed.
 

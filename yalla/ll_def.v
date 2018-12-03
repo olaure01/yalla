@@ -10,7 +10,7 @@ Require Import CMorphisms.
 Require Import Bool_more.
 Require Import List_more.
 Require Import List_Type_more.
-Require Import Permutation_Type.
+Require Import Permutation_Type_more.
 Require Import CyclicPerm_Type.
 Require Import Permutation_Type_solve.
 Require Import CPermutation_Type_solve.
@@ -112,6 +112,7 @@ Choices between [plus] and [max] in binary cases are determined by the behavious
 All rules have their main formula at first position in the conclusion.
  - [ax_r]: identity rule restricted to propositional variables (general case proved later)
  - [ex_r]: exchange rule (parametrized by [pperm P] to determine allowed permutations)
+ - [ex_wn_r]: exchange rule between [wn] formulas
  - [mix0_r]: nullary linear mix rule (available only if [pmix0 P = true])
  - [mix2_r]: binary linear mix rule (the order of lists is matched with the [tens_r] case) (available only if [pmix2 P = true])
  - [one_r]: one rule
@@ -132,6 +133,8 @@ All rules have their main formula at first position in the conclusion.
 Inductive ll P : list formula -> Type :=
 | ax_r : forall X, ll P (covar X :: var X :: nil)
 | ex_r : forall l1 l2, ll P l1 -> PCperm_Type (pperm P) l1 l2 -> ll P l2
+| ex_wn_r : forall l1 lw lw' l2, ll P (l1 ++ map wn lw ++ l2) ->
+               Permutation_Type lw lw' -> ll P (l1 ++ map wn lw' ++ l2)
 | mix0_r {f : pmix0 P = true} : ll P nil
 | mix2_r {f : pmix2 P = true} : forall l1 l2, ll P l1 -> ll P l2 ->
                          ll P (l2 ++ l1)
@@ -148,22 +151,21 @@ Inductive ll P : list formula -> Type :=
 | oc_r : forall A l, ll P (A :: map wn l) -> ll P (oc A :: map wn l)
 | de_r : forall A l, ll P (A :: l) -> ll P (wn A :: l)
 | wk_r : forall A l, ll P l -> ll P (wn A :: l)
-| co_r : forall A lw l, ll P (wn A :: map wn lw ++ wn A :: l) ->
-                          ll P (wn A :: map wn lw ++ l)
+| co_r : forall A l, ll P (wn A :: wn A :: l) -> ll P (wn A :: l)
 | cut_r {f : pcut P = true} : forall A l1 l2,
     ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1)
 | gax_r : forall a, ll P (projT2 (pgax P) a).
 
 Instance ll_perm {P} : Proper ((@PCperm_Type _ (pperm P)) ==> Basics.arrow) (ll P).
 Proof.
-intros l1 l2 HP pi.
-eapply ex_r ; eassumption.
+intros l1 l2 HP pi ; eapply ex_r ; eassumption.
 Qed.
 
 Fixpoint psize {P l} (pi : ll P l) :=
 match pi with
 | ax_r _ _ => 1
 | ex_r _ _ _ pi0 _ => S (psize pi0)
+| ex_wn_r _ _ _ _ _ pi0 _ => S (psize pi0)
 | mix0_r _ => 1
 | mix2_r _ _ _ pi1 pi2 => S (psize pi1 + psize pi2)
 | one_r _ => 1
@@ -177,15 +179,14 @@ match pi with
 | oc_r _ _ _ pi0 => S (psize pi0)
 | de_r _ _ _ pi0 => S (psize pi0)
 | wk_r _ _ _ pi0 => S (psize pi0)
-| co_r _ _ _ _ pi0 => S (psize pi0)
+| co_r _ _ _ pi0 => S (psize pi0)
 | cut_r _ _ _ _ pi1 pi2 => S (psize pi1 + psize pi2)
 | gax_r _ _ => 1
 end.
 
 Lemma psize_pos P : forall l (pi : @ll P l), 0 < psize pi.
 Proof.
-intros l pi.
-induction pi ; simpl ; myeasy.
+intros l pi ; induction pi ; simpl ; myeasy.
 Qed.
 
 (** List of the elements of [pgax P] used in [pi] *)
@@ -193,6 +194,7 @@ Fixpoint gax_elts {P l} (pi : ll P l) :=
 match pi with
 | ax_r _ _ => nil
 | ex_r _ _ _ pi0 _ => gax_elts pi0
+| ex_wn_r _ _ _ _ _ pi0 _ => gax_elts pi0
 | mix0_r _ => nil
 | mix2_r _ _ _ pi1 pi2 => (gax_elts pi1) ++ (gax_elts pi2)
 | one_r _ => nil
@@ -206,7 +208,7 @@ match pi with
 | oc_r _ _ _ pi0 => gax_elts pi0
 | de_r _ _ _ pi0 => gax_elts pi0
 | wk_r _ _ _ pi0 => gax_elts pi0
-| co_r _ _ _ _ pi0 => gax_elts pi0
+| co_r _ _ _ pi0 => gax_elts pi0
 | cut_r _ _ _ _ pi1 pi2 => (gax_elts pi1) ++ (gax_elts pi2)
 | gax_r _ a => a :: nil
 end.
@@ -222,6 +224,7 @@ induction H ; try (constructor ; myeasy ; fail).
   destruct (pperm P) ; destruct (pperm Q) ;
     simpl in Hp ; try inversion Hp...
   apply cperm_perm_Type...
+- apply (ex_wn_r _ l1 lw)...
 - unfold le_pfrag in Hle.
   rewrite f in Hle.
   destruct Hle as (_ & _ & Hmix0 & _).
@@ -254,43 +257,32 @@ apply wk_r...
 Qed.
 
 (** Contraction on a list of formulas *)
-Lemma co_list_r {P} : forall l lw l',
-  ll P (map wn l ++ map wn lw ++ map wn l ++ l') ->
-    ll P (map wn l ++ map wn lw ++ l').
-Proof with myeeasy ; try PCperm_Type_solve.
-induction l ; intros lw l' H...
-simpl in H.
-rewrite app_assoc in H.
-rewrite <- map_app in H.
-apply co_r in H.
-rewrite map_app in H.
-eapply (ex_r _ _
-  (map wn l ++ map wn lw ++ map wn l ++ l' ++ wn a :: nil))
-  in H...
-apply IHl in H.
-eapply ex_r...
-Qed.
-
-(** More standard shape of contraction rule with adjacent principal formulas
-
-(this is stricly weaker than [co_r] in the case of cyclic permutations only). *)
-Lemma co_std_r {P} : forall A l,
-  ll P (wn A :: wn A :: l) -> ll P (wn A :: l).
-Proof.
-intros A l pi.
-change (wn A :: l) with (wn A :: map wn nil ++ l).
-apply co_r.
-assumption.
-Qed.
-
-(** Standard contraction rule on a list of formulas *)
-Lemma co_std_list_r {P} : forall l l',
+Lemma co_list_r {P} : forall l l',
   ll P (map wn l ++ map wn l ++ l') -> ll P (map wn l ++ l').
-Proof.
-intros l l' pi.
-change (map wn l ++ l') with (map wn l ++ map wn nil ++ l').
-eapply co_list_r.
-eassumption.
+Proof with myeeasy.
+induction l ; intros l' pi...
+rewrite <- app_nil_l.
+apply (ex_wn_r _ _ (l ++ a :: nil)) ; [ | perm_Type_solve ].
+list_simpl ; apply IHl.
+cons2app ; rewrite 2 app_assoc.
+replace ((map wn l ++ map wn l) ++ wn a :: nil)
+  with (nil ++ map wn (l ++ l ++ a :: nil))
+  by (list_simpl ; reflexivity).
+rewrite <- app_assoc.
+apply (ex_wn_r _ _ (a :: l ++ l)) ; [ | perm_Type_solve ].
+list_simpl.
+apply co_r.
+rewrite 2 app_comm_cons ; rewrite app_assoc.
+replace ((wn a :: wn a :: map wn l) ++ map wn l)
+   with (map wn (a :: a :: l ++ l))
+   by (list_simpl ; reflexivity).
+rewrite <- app_nil_l.
+rewrite app_assoc in pi.
+replace (map wn (a :: l) ++ (map wn (a :: l)))
+  with (map wn (a :: l ++ a :: l))
+  in pi by (list_simpl ; reflexivity).
+rewrite <- app_nil_l in pi.
+eapply ex_wn_r ; [ eassumption | perm_Type_solve ].
 Qed.
 
 
@@ -311,6 +303,7 @@ Ltac inversion_ll H f X l Hl Hr HP Hax :=
   match type of H with
   | ll _ _ => inversion H as [ X
                              | l ? Hl HP
+                             | l ? ? ? Hl HP
                              | f
                              | f ? ? Hl Hr
                              | 
@@ -324,7 +317,7 @@ Ltac inversion_ll H f X l Hl Hr HP Hax :=
                              | ? ? Hl
                              | ? ? Hl
                              | ? ? Hl
-                             | ? ? ? Hl
+                             | ? ? Hl
                              | f ? ? ? Hl Hr
                              | a ] ; subst
   end.
@@ -361,6 +354,16 @@ induction pi ; intros l1' l2' Heq ; subst.
   eapply PCperm_Type_trans ; [ apply PCperm_Type_app_comm | ].
   eapply PCperm_Type_trans ; [ apply HP' | ].
   apply PCperm_Type_app_comm.
+- dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_assoc.
+    eapply ex_wn_r...
+    list_simpl ; apply IHpi ; list_simpl...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * exfalso.
+      decomp_map Heq0 ; inversion Heq0.
+    * list_simpl ; eapply ex_wn_r...
+      rewrite 2 app_assoc.
+      apply IHpi ; list_simpl...
 - destruct l1' ; inversion Heq.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite app_assoc ; apply mix2_r...
@@ -417,15 +420,9 @@ induction pi ; intros l1' l2' Heq ; subst.
   list_simpl ; eapply wk_r...
   apply IHpi...
 - destruct l1' ; inversion Heq ; subst.
-  dichot_Type_elt_app_exec H1 ; subst.
-  + exfalso.
-    decomp_map H0.
-    inversion H0.
-  + list_simpl ; eapply co_r...
-    rewrite 2 app_comm_cons.
-    rewrite app_assoc.
-    apply IHpi...
-    list_simpl...
+  list_simpl ; apply co_r.
+  rewrite 2 app_comm_cons.
+  apply IHpi...
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite app_assoc ; eapply cut_r...
     rewrite app_comm_cons.
@@ -456,6 +453,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   simpl in HP'.
   apply IHpi in Heq...
   eapply ex_r...
+  (* TODO should be solved automatically *)
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
     eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
@@ -463,6 +461,16 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
     perm_Type_solve.
   + eapply cperm_Type_trans ; [ apply cperm_Type | ].
     list_simpl ; rewrite <- HP' ; cperm_Type_solve.
+- dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite 2 app_comm_cons ; rewrite app_assoc.
+    eapply ex_wn_r...
+    list_simpl ; apply IHpi ; list_simpl...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * exfalso.
+      decomp_map Heq0 ; inversion Heq0.
+    * list_simpl ; eapply ex_wn_r...
+      rewrite 2 app_assoc.
+      apply IHpi ; list_simpl...
 - destruct l1' ; inversion Heq.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite 2 app_comm_cons ; rewrite app_assoc ; apply mix2_r...
@@ -515,13 +523,8 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   list_simpl ; eapply wk_r...
   apply IHpi...
 - destruct l1' ; inversion Heq ; subst.
-  dichot_Type_elt_app_exec H1 ; subst.
-  + exfalso.
-    decomp_map H0.
-    inversion H0.
-  + list_simpl ; eapply co_r...
-    rewrite 2 app_comm_cons ; rewrite app_assoc ; apply IHpi.
-    list_simpl...
+  list_simpl ; eapply co_r...
+    rewrite 2 app_comm_cons ; apply IHpi ; list_simpl...
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite 2 app_comm_cons ; rewrite app_assoc ; eapply cut_r...
     rewrite app_comm_cons ; apply IHpi2...
@@ -549,13 +552,24 @@ induction pi ; intros l1' l2' Heq ; subst.
   destruct p as [(l3 & l4) Heq HP'].
   simpl in HP' ; apply IHpi in Heq...
   eapply ex_r...
+  (* TODO should be solved automatically *)
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
-      eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
-      eapply Permutation_Type_trans ; [ | apply Permutation_Type_app_comm ].
-      perm_Type_solve.
+    eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
+    eapply Permutation_Type_trans ; [ | apply Permutation_Type_app_comm ].
+    perm_Type_solve.
   + eapply cperm_Type_trans ; [ apply cperm_Type | ].
     list_simpl ; rewrite <- HP' ; cperm_Type_solve.
+- dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite 2 app_assoc.
+    eapply ex_wn_r...
+    list_simpl ; apply IHpi ; list_simpl...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * exfalso.
+      decomp_map Heq0 ; inversion Heq0.
+    * list_simpl ; eapply ex_wn_r...
+      rewrite 2 app_assoc.
+      apply IHpi ; list_simpl...
 - destruct l1' ; inversion Heq.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite 2 app_assoc ; apply mix2_r...
@@ -606,13 +620,8 @@ induction pi ; intros l1' l2' Heq ; subst.
   list_simpl ; eapply wk_r...
   apply IHpi...
 - destruct l1' ; inversion Heq ; subst.
-  dichot_Type_elt_app_exec H1 ; subst.
-  + exfalso.
-    decomp_map H0.
-    inversion H0.
-  + list_simpl ; eapply co_r...
-    rewrite 2 app_comm_cons ; rewrite app_assoc ; apply IHpi.
-    list_simpl...
+  list_simpl ; eapply co_r...
+  rewrite 2 app_comm_cons ; apply IHpi ; list_simpl...
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite 2 app_assoc ; eapply cut_r...
     list_simpl ; rewrite app_comm_cons ; apply IHpi2...
@@ -640,13 +649,24 @@ induction pi ; intros A' l1' l2' Heq ; subst.
   destruct p as [(l3 & l4) Heq HP'].
   simpl in HP' ; apply IHpi in Heq...
   simpl in Heq ; eapply ex_r...
+  (* TODO should be solved automatically *)
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
-      eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
-      eapply Permutation_Type_trans ; [ | apply Permutation_Type_app_comm ].
-      perm_Type_solve.
+    eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
+    eapply Permutation_Type_trans ; [ | apply Permutation_Type_app_comm ].
+    perm_Type_solve.
   + eapply cperm_Type_trans ; [ apply cperm_Type | ].
     list_simpl ; rewrite <- HP' ; cperm_Type_solve.
+- dichot_Type_elt_app_exec Heq ; subst.
+  + rewrite app_comm_cons ; rewrite app_assoc.
+    eapply ex_wn_r...
+    list_simpl ; apply IHpi ; list_simpl...
+  + dichot_Type_elt_app_exec Heq1 ; subst.
+    * exfalso.
+      decomp_map Heq0 ; inversion Heq0.
+    * list_simpl ; eapply ex_wn_r...
+      rewrite 2 app_assoc.
+      apply IHpi ; list_simpl...
 - destruct l1' ; inversion Heq.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite app_comm_cons ; rewrite app_assoc ; apply mix2_r...
@@ -698,13 +718,8 @@ induction pi ; intros A' l1' l2' Heq ; subst.
   list_simpl ; eapply wk_r...
   apply IHpi...
 - destruct l1' ; inversion Heq ; subst.
-  dichot_Type_elt_app_exec H1 ; subst.
-  + exfalso.
-    decomp_map H0.
-    inversion H0.
-  + list_simpl ; eapply co_r...
-    rewrite 2 app_comm_cons ; rewrite app_assoc ; apply IHpi.
-    list_simpl...
+  list_simpl ; eapply co_r...
+  rewrite 2 app_comm_cons ; apply IHpi ; list_simpl...
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite app_comm_cons ; rewrite app_assoc ; eapply cut_r...
     list_simpl ; rewrite app_comm_cons ; apply IHpi2...
@@ -729,6 +744,15 @@ remember (tens A B :: nil) as l ; revert A B Heql ;
 - apply PCperm_Type_sym in p.
   apply PCperm_Type_length_1_inv in p ; subst.
   apply IHpi...
+- destruct l1 ; inversion Heq.
+  + destruct lw' ; inversion H0 ; list_simpl in H0.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst.
+    apply IHpi...
+  + apply app_eq_nil in H1 ; destruct H1 ; subst.
+    apply app_eq_nil in H1 ; destruct H1 ; subst.
+    destruct lw' ; inversion H.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst.
+    apply IHpi...
 - destruct l2 ; inversion Heq.
   + destruct l1 ; inversion Heq ; subst.
     apply IHpi1...
@@ -756,6 +780,15 @@ remember (aplus A B :: nil) as l ; revert A B Heql ;
 - apply PCperm_Type_sym in p.
   apply PCperm_Type_length_1_inv in p ; subst.
   apply IHpi...
+- destruct l1 ; inversion Heq.
+  + destruct lw' ; inversion H0 ; list_simpl in H0.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst.
+    apply IHpi...
+  + apply app_eq_nil in H1 ; destruct H1 ; subst.
+    apply app_eq_nil in H1 ; destruct H1 ; subst.
+    destruct lw' ; inversion H.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst.
+    apply IHpi...
 - destruct l2 ; inversion Heq.
   + destruct l1 ; inversion Heq ; subst.
     apply IHpi1...
@@ -831,6 +864,21 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
   symmetry in HP.
   eapply ex_r ; [ | apply HP ].
   apply IHpi ; assumption.
+- apply Forall2_Type_app_inv_l in HF as ([ l' HF1 HF2 ] & Heq) ;
+    simpl in Heq ; subst.
+  apply Forall2_Type_app_inv_l in HF2 as ([ l'' HF2 HF3 ] & Heq) ;
+    simpl in Heq ; rewrite Heq ; clear Heq.
+  assert (HF4 := HF2).
+  apply munit_smp_map_wn in HF2 as [ l''' Heq HF2 ] ; rewrite_all Heq ; clear Heq.
+  symmetry in p.
+  apply (Permutation_Type_map wn) in p.
+  eapply Permutation_Type_Forall2 in p as [la HP] ; [ | eassumption ].
+  symmetry in HP.
+  apply Permutation_Type_map_inv in HP ; destruct HP as [lb Heq HP] ; subst.
+  symmetry in HP.
+  eapply ex_wn_r ; [ | apply HP ].
+  apply IHpi.
+  repeat apply Forall2_Type_app...
 - inversion HF ; subst.
   constructor...
 - apply Forall2_Type_app_inv_l in HF as ([ l' HF2 HF1 ] & Heq) ;
@@ -867,16 +915,6 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
   assert (HF' := H3).
   apply munit_smp_map_wn in H3 as [ l'' Heq HF'' ] ; subst.
   constructor ; apply IHpi ; constructor...
-- inversion HF ; subst.
-  inversion H1 ; subst.
-  apply Forall2_Type_app_inv_l in H3 as ([ l'' HF2 HF1 ] & Heq) ;
-    simpl in Heq ; subst.
-  assert (HF3 := HF2).
-  apply munit_smp_map_wn in HF2 as [ l' Heq HF' ] ; subst.
-  rewrite_all Heq.
-  apply co_r ; apply IHpi ; constructor...
-  apply Forall2_Type_app...
-  constructor...
 - apply Forall2_Type_app_inv_l in HF as ([ l' HF2 HF1 ] & Heq) ;
     simpl in Heq ; subst.
   eapply cut_r ; [ assumption | apply IHpi1 | apply IHpi2 ] ;
@@ -956,6 +994,8 @@ induction pi ; simpl ; intros Hgax ;
   eapply ex_r...
   destruct (pperm P) ; destruct (pperm Q) ; inversion Hperm ; simpl ; simpl in p...
   apply cperm_perm_Type...
+- apply IHpi in Hgax.
+  eapply ex_wn_r...
 - apply mix0_r.
   rewrite f in Hmix0 ; destruct (pmix0 Q) ; inversion Hmix0 ; simpl...
 - apply mix2_r...
@@ -1055,6 +1095,9 @@ induction pi ; try (now constructor).
   apply PCperm_perm_Type in p.
   rewrite Q_perm.
   apply Permutation_Type_app_tail...
+- list_simpl.
+  eapply ex_wn_r...
+  rewrite app_assoc in IHpi ; rewrite 2 app_assoc...
 - case_eq (pmix0 Q) ; intros Q_mix0.
   + list_simpl.
     rewrite <- app_nil_r.
@@ -1063,7 +1106,7 @@ induction pi ; try (now constructor).
   + apply Hpmix0 in Q_mix0...
 - case_eq (pmix2 Q) ; intros Q_mix2.
   + eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
-    apply co_std_list_r.
+    apply co_list_r.
     eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
     list_simpl ; rewrite app_assoc ; apply mix2_r...
     eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
@@ -1072,7 +1115,7 @@ induction pi ; try (now constructor).
   apply wk_list_r.
   apply one_r.
 - eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
-  apply co_std_list_r.
+  apply co_list_r.
   apply (ex_r _ (tens A B :: (l2 ++ map wn l0) ++ l1 ++ map wn l0)) ;
     [ | rewrite Q_perm ; PCperm_Type_solve ].
   apply tens_r...
@@ -1081,17 +1124,12 @@ induction pi ; try (now constructor).
   rewrite <- app_comm_cons.
   rewrite <- map_app.
   apply oc_r...
-- rewrite <- app_comm_cons.
-  rewrite <- app_assoc.
-  rewrite <- app_comm_cons in IHpi.
-  rewrite <- app_assoc in IHpi.
-  apply co_r...
 - eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
-  apply co_std_list_r.
+  apply co_list_r.
   apply (ex_r _ ((l2 ++ map wn l0) ++ l1 ++ map wn l0)) ;
     [ | rewrite Q_perm ; PCperm_Type_solve ].
   eapply cut_r...
-  apply Hpcut...
+  intuition.
 - apply Hpgax...
 Qed.
 

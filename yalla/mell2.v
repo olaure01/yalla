@@ -148,9 +148,6 @@ induction pi ; try (now constructor) ; try rewrite map_app.
 - simpl ; rewrite mell2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- mell2ll_map_wn...
-- simpl ; rewrite <- (app_nil_l (map _ _)).
-  change nil with (map formulas.wn nil).
-  apply ll_def.co_r...
 Qed.
 
 Lemma mellfrag2mell : forall l, ll_def.ll pfrag_mell (map mell2ll l) -> mell l.
@@ -172,6 +169,15 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_sym in HP.
   eapply ex_r...
   apply IHpi...
+- decomp_map_Type Heql0 ; subst.
+  simpl in Heql0 ; apply mell2ll_map_wn_inv in Heql0 ;
+    destruct Heql0 as (l & ? & ?) ; subst.
+  apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
+  eapply ex_r ;
+    [ apply IHpi ; rewrite <- mell2ll_map_wn ; rewrite <- ? map_app | ]...
+  apply Permutation_Type_app_head.
+  apply Permutation_Type_app_tail.
+  symmetry in HP ; apply Permutation_Type_map...
 - inversion f.
 - decomp_map_Type Heql0 ; subst.
   apply mix_r.
@@ -205,19 +211,8 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply IHpi...
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
-  decomp_map_Type H1.
-  simpl in H1 ; simpl in H3 ; simpl in H4 ; subst.
   apply co_r.
-  apply mell2ll_map_wn_inv in H3.
-  destruct H3 as (l'' & Heq1 & Heq2) ; subst.
-  simpl ; eapply ex_r.
-  + apply IHpi...
-    rewrite <- mell2ll_map_wn.
-    replace (formulas.wn (mell2ll f) :: map mell2ll (map wn l'')
-         ++ formulas.wn (mell2ll f) :: map mell2ll l2)
-       with (map mell2ll (wn f :: map wn l'' ++ wn f :: l2))...
-    simpl ; rewrite map_app...
-  + perm_Type_solve.
+  apply IHpi...
 - inversion f.
 - destruct a.
 Qed.

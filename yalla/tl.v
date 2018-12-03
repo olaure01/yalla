@@ -14,6 +14,7 @@ Require Import Injective.
 Require Import Bool_more.
 Require Import List_more.
 Require Import List_Type_more.
+Require Import Permutation_Type_more.
 Require Import genperm_Type.
 
 
@@ -163,6 +164,8 @@ Inductive tl P : list tformula -> option tformula -> Type :=
 | ax_tr : forall X, tl P (tvar X :: nil) (Some (tvar X))
 | ex_tr : forall l1 l2 A, tl P l1 A -> PEperm_Type (tpperm P) l1 l2 ->
                           tl P l2 A
+| ex_oc_tr : forall l1 lw lw' l2 A, tl P (l1 ++ map toc lw ++ l2) A ->
+               Permutation_Type lw lw' -> tl P (l1 ++ map toc lw' ++ l2) A
 | one_trr : tl P nil (Some tone)
 | one_tlr : forall l1 l2 A, tl P (l1 ++ l2) A ->
                             tl P (l1 ++ tone :: l2) A
@@ -194,10 +197,8 @@ Inductive tl P : list tformula -> option tformula -> Type :=
 | wk_tlr : forall A l1 l2 C,
                         tl P (l1 ++ l2) C ->
                         tl P (l1 ++ toc A :: l2) C
-| co_tlr : forall A lw l1 l2 C,
-                        tl P (l1 ++ toc A :: map toc lw
-                                  ++ toc A :: l2) C ->
-                        tl P (l1 ++ map toc lw ++ toc A :: l2) C
+| co_tlr : forall A l1 l2 C,
+              tl P (l1 ++ toc A :: toc A :: l2) C -> tl P (l1 ++ toc A :: l2) C
 | cut_tr {f : tpcut P = true} : forall A l0 l1 l2 C,
                                tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C ->
                                tl P (l1 ++ l0 ++ l2) C
@@ -220,6 +221,7 @@ induction H ; try (constructor ; try assumption ; fail).
   hyps_PEperm_Type_unfold ; unfold PEperm_Type.
   destruct (tpperm P) ; destruct (tpperm Q) ;
     simpl in Hp ; try inversion Hp ; subst...
+- eapply ex_oc_tr ; [ apply IHtl | ]...
 - destruct Hle as [Hcut _].
   rewrite f in Hcut.
   eapply (@cut_tr _ Hcut)...
@@ -387,20 +389,20 @@ induction pi ;
 - eapply ex_ir.
   + apply (piE HeqC).
   + apply PEperm_Type_map...
+- rewrite tl2ill_map_ioc.
+  apply (Permutation_Type_map tl2ill) in p.
+  eapply ex_oc_ir...
+  rewrite <- tl2ill_map_ioc.
+  eapply piS...
+- rewrite tl2ill_map_ioc.
+  apply (Permutation_Type_map tl2ill) in p.
+  eapply ex_oc_ir...
+  rewrite <- tl2ill_map_ioc.
+  eapply piE...
 - destruct D ; inversion HeqC ; subst.
   rewrite tl2ill_map_ioc ; simpl.
   apply oc_irr.
   rewrite <- tl2ill_map_ioc ; intuition.
-- rewrite tl2ill_map_ioc.
-  simpl ; apply co_ilr.
-  rewrite <- tl2ill_map_ioc.
-  assert (pi' := piS _ HeqC).
-  list_simpl in pi'...
-- rewrite tl2ill_map_ioc.
-  simpl ; apply co_ilr.
-  rewrite <- tl2ill_map_ioc.
-  assert (pi' := piE HeqC).
-  list_simpl in pi'...
 - eapply ex_ir...
   eapply (cut_ir _ _ _ _ _ _ (piS1 _ eq_refl) (piS2 _ HeqC))...
 - eapply ex_ir...
@@ -445,6 +447,20 @@ induction pi ;
   destruct p as [l0 Heq HP] ; subst.
   symmetry in HP.
   eapply ex_tr ; [ apply IHpi | ]...
+- decomp_map_Type Heql ; subst.
+  simpl in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
+  apply Permutation_Type_map_inv in p ; destruct p as [l' ? HP] ; subst.
+  symmetry in HP.
+  eapply ex_oc_tr ; [ | eassumption ].
+  apply IHpi...
+  rewrite <- tl2ill_map_ioc ; rewrite <- ? map_app...
+- decomp_map_Type Heql ; subst.
+  simpl in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
+  apply Permutation_Type_map_inv in p ; destruct p as [l' ? HP] ; subst.
+  symmetry in HP.
+  eapply ex_oc_tr ; [ | eassumption ].
+  apply IHpi...
+  rewrite <- tl2ill_map_ioc ; rewrite <- ? map_app...
 - destruct l'' ; inversion Heql.
   destruct A'' ; inversion HeqA ; subst.
   apply one_trr.
@@ -533,20 +549,14 @@ induction pi ;
   apply IHpi...
   list_simpl...
 - decomp_map_Type Heql ; subst.
-  apply tl2ill_map_ioc_inv in Heql3.
-  destruct Heql3 as [l0' Heq Heq'] ; simpl in Heq ; subst.
-  destruct x ; inversion Heql2 ; subst.
+  destruct x ; inversion Heql3 ; subst.
   apply co_tlr.
   apply IHpi...
-  rewrite <- tl2ill_map_ioc.
   list_simpl...
 - decomp_map_Type Heql ; subst.
-  apply tl2ill_map_ioc_inv in Heql3.
-  destruct Heql3 as [l0' Heq Heq'] ; simpl in Heq ; subst.
-  destruct x ; inversion Heql2 ; subst.
+  destruct x ; inversion Heql3 ; subst.
   apply co_tlr.
   apply IHpi...
-  rewrite <- tl2ill_map_ioc.
   list_simpl...
 - inversion f.
   rewrite H0 in Hcut ; inversion Hcut.
@@ -674,10 +684,10 @@ Lemma cut_admissible_tl_axfree {P} : (forall a : projT1 (tpgax P), False) ->
 Proof with try reflexivity ; try eassumption.
 intros Hgax.
 intros l Pi pi.
-induction pi ; try now constructor.
+induction pi ; try now econstructor.
 - apply (ex_tr _ l1)...
+- eapply ex_oc_tr ; [ apply IHpi | ]...
 - eapply cut_tl_r_axfree...
-- intuition.
 Qed.
 
 (** *** conservativity with respect to [ll] *)
