@@ -45,21 +45,34 @@ multisets for sequents (see mell_mset.v).
 Main files:
 
 - formulas.v(o)
-    definition of linear logic formulas
+    definition of (classical) linear logic formulas
 - fmformulas.v(o)
     additional structure on formulas (order, multiset)
-- ll.v(o)
-    main library for classical linear logic (LL)
+- ll_def.v(o)
+    main definitions for classical linear logic (LL)
+    and properties not requiring cut elimination
+- ll_mix.v(o)
+    properties of LL related to mix rules and not requiring cut elimination
+- ll_cut.v(o)
+    cut elimination properties for LL
+- ll_prop.v(o)
+    properties of LL deduced from cut elimination
 - iformulas.v(o)
     definition of intuitionistic linear logic formulas
 - fmiformulas.v(o)
     additional structure on intuitionistic formulas (order, multiset)
-- ill.v(o)
+- ill_def.v(o)
     intuitionistic linear logic (ILL)
     (Lambek calculus included when permutation is equality:
        ipperm P = false)
+- ill_cut.v(o)
+    cut elimination properties for ILL
+- ill_prop.v(o)
+    properties of ILL deduced from cut elimination
 - subs.v(o)
     susbtitution for LL
+- isubs.v(o)
+    susbtitution for ILL
 - ll_fragments.v(o)
     definitions of some common fragments of LL
 
@@ -67,6 +80,8 @@ Example files for interfaces:
 
 - mell2.v(o)
     unit-free MELL with mix2
+- mell_Prop.v(o)
+    unit-free MELL with proofs in Prop (i.e. provability only)
 - lambek.v(o)
     a variant of Lambek calculus
 - mell_mset.v(o)
@@ -82,9 +97,19 @@ Other files:
 
 - bbb.v(o)
     study of LL extended with the equation: bot = oc bot
-- nn.v(o)
+- nn_def.v(o)
     properties of double-negation translations from LL to ILL
-- consistency.v(o)
-     specific instances of axioms of the library
+    not requiring cut elimination
+- nn_prop.v(o)
+    properties of double-negation translations from LL to ILL
+    deduced from cut elimination
+- llfoc.v(o)
+    definitions of focused systems
+    and proof of strong focusing from weak focusing
+- nn_foc.v(o)
+    double-negation-based proof of weak focusing
+- yalla_ax.v(o)
+    specific instances of axioms of the library
+    showing consistency
 
 

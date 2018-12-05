@@ -63,7 +63,7 @@ subs.vo: subs.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/genperm.vo ll_def.vo
 isubs.vo: isubs.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/genperm.vo basic_tactics.vo ill_def.vo
 
 mell2.vo: mell2.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo ll_prop.vo ll_fragments.vo
-mell_prop.vo: mell_prop.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo ll_prop.vo ll_fragments.vo
+mell_Prop.vo: mell_Prop.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo ll_prop.vo ll_fragments.vo
 lambek.vo: lambek.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo ill_prop.vo
 mell_mset.vo : mell_mset.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/nattree.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/fmsetlist.vo ll_prop.vo ll_fragments.vo fmformulas.vo
 mell_msetoid.vo : mell_msetoid.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/fmsetoidlist.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo ll_prop.vo
