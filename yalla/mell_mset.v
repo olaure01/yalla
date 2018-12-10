@@ -180,7 +180,7 @@ Inductive mell : SortedList border_formula -> Prop :=
 (*
 Definition mell_fragment A := exists B, A = mell2ll B.
 
-Lemma mell_is_fragment : ll.fragment mell_fragment.
+Lemma mell_is_fragment : ll_prop.fragment mell_fragment.
 Proof.
 intros A HfA B Hsf.
 induction Hsf ; 
