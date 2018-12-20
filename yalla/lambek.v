@@ -13,7 +13,7 @@ Require Import List_Type_more.
 
 (** ** 0. load the [ill] library *)
 
-Require ill_prop.
+Require ill_cut.
 
 
 (** ** 1. define formulas *)
@@ -158,23 +158,12 @@ Lemma cut_r : forall A l0 l1 l2 C,
   lprove l0 A -> lprove (l1 ++ A :: l2) C -> lprove (l1 ++ l0 ++ l2) C.
 Proof with try eassumption.
 intros A l0 l1 l2 C pi1 pi2.
-apply l2illfrag in pi1.
-apply l2illfrag in pi2 ; list_simpl in pi2.
-eapply (@ill_prop.cut_ir_nzeropos_axfree_by_ll _ i2ac_inj) in pi1...
-- rewrite <- ? map_app in pi1.
-  apply illfrag2l...
-- intros a ; destruct a.
-- replace (l2ill C :: map l2ill l1 ++ map l2ill l0 ++ map l2ill l2)
-    with (map l2ill (C :: l1 ++ l0 ++ l2))
-    by (list_simpl ; reflexivity).
-  remember (C :: l1 ++ l0 ++ l2) as l ; clear.
-  induction l ; constructor...
-  clear ; induction a ; try now constructor.
-  constructor...
-  clear ; intros Hz.
-  induction a2 ; try now inversion Hz.
+apply illfrag2l.
+rewrite 2 map_app.
+eapply ill_cut.cut_ir_gaxat ; try (intros a ; destruct a ; fail).
+- apply l2illfrag in pi1...
+- apply l2illfrag in pi2.
+  rewrite map_app in pi2...
 Qed.
-
-
 
 
