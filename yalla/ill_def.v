@@ -93,7 +93,7 @@ Inductive ill P : list iformula -> iformula -> Type :=
 | top_irr : forall l, ill P l itop
 | with_irr : forall A B l,
              ill P l A -> ill P l B -> ill P l (iwith A B)
-| with_ilr1 : forall A B l1 l2 C, ill P (l1 ++ A :: l2) C->
+| with_ilr1 : forall A B l1 l2 C, ill P (l1 ++ A :: l2) C ->
                            ill P (l1 ++ iwith A B :: l2) C
 | with_ilr2 : forall A B l1 l2 C, ill P (l1 ++ A :: l2) C ->
                            ill P (l1 ++ iwith B A :: l2) C

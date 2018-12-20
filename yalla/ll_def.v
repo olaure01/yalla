@@ -299,7 +299,7 @@ Ltac ex_apply_with Hl Hr := eapply ex_r ;
 Ltac ex_apply_de H := eapply ex_r ;
   [ eapply (de_r _ _ _ H) | PCperm_Type_solve ].
 
-Ltac inversion_ll H f X l Hl Hr HP Hax :=
+Ltac inversion_ll H f X l Hl Hr HP Hax a :=
   match type of H with
   | ll _ _ => inversion H as [ X
                              | l ? Hl HP

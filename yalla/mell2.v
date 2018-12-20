@@ -1,8 +1,6 @@
 (* mell2 example file for yalla library *)
 
 
-(* output in Type *)
-
 
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
@@ -14,7 +12,7 @@ Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 
 
-(** ** 0. load the [ll] library *)
+(** ** 0. load the [yalla] library *)
 
 Require ll_prop.
 
