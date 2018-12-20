@@ -1,5 +1,5 @@
 
-COQ = coqc -R $(OLLIBSDIR) ''
+COQ = coqc -R $(OLLIBSDIR) '' -R $(MICROYALLADIR) ''
 COQDOC = coqdoc -g
 
 VFILES = $(wildcard *.v)
@@ -33,12 +33,17 @@ clean:
 
 OLLIBSDIR = ../ollibs
 
+MICROYALLADIR = ../microyalla
+
 .DEFAULT_GOAL := all
 
-all: cutelim
+all: microyalla cutelim
 
 ollibs:
 	cd $(OLLIBSDIR) && $(MAKE)
+
+microyalla:
+	cd $(MICROYALLADIR) && $(MAKE)
 
 cutelim: ollibs $(VFILES:.v=.vo)
 
@@ -61,6 +66,8 @@ ill_prop.vo: ill_prop.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Bool_more.vo $(OL
 subs.vo: subs.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/genperm.vo ll_def.vo
 isubs.vo: isubs.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/genperm.vo basic_tactics.vo ill_def.vo
 
+ll_smp.vo: ll_smp.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ll_fragments.vo $(MICROYALLADIR)/ll.vo
+ill_smp.vo: ill_smp.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ill_cut.vo $(MICROYALLADIR)/ill.vo
 mell2.vo: mell2.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ll_prop.vo
 mell_Prop.vo: mell_Prop.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo ll_prop.vo
 lambek.vo: lambek.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo ill_cut.vo
