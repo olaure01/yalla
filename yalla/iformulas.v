@@ -67,10 +67,6 @@ Ltac ifsize_auto :=
 Inductive iatomic : iformula -> Prop :=
 | iatomic_var : forall x, iatomic (ivar x).
 
-(** Quasi-Atomic [iformula] *)
-Inductive iqatomic : iformula -> Prop :=
-| iqatomic_var : forall x, iqatomic (ivar x)
-| iqatomic_nvar : forall x z, iqatomic (ilmap (ivar x) (ivar z)).
 
 (** ** Sub-formulas *)
 
