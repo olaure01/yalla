@@ -16,13 +16,13 @@ Require Export ll_cut.
 (** If axioms are atomic and closed under cut and exchange, then the cut rule is valid. *)
 Lemma cut_r_gaxat {P} :
   (forall a, Forall atomic (projT2 (pgax P) a)) ->
-  (forall a l, PCperm_Type (pperm P) (projT2 (pgax P) a) l -> exists b, l = projT2 (pgax P) b) ->
-  (forall a b x l1 l2 l3, projT2 (pgax P) a = (dual x :: l1) -> projT2 (pgax P) b = (l2 ++ x :: l3) ->
-     exists c, projT2 (pgax P) c = l2 ++ l1 ++ l3) ->
+  (forall a b x l1 l2 l3 l4,
+     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
+     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
   forall A l1 l2,
     ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
 Proof with myeeasy.
-intros Hgax_at Hgax_ex Hgax_cut A l1 l2 pi1 pi2.
+intros Hgax_at Hgax_cut A l1 l2 pi1 pi2.
 eapply cut_elim in pi1...
 - eapply (ex_r _ (nil ++ l1 ++ l2))...
   simpl.
@@ -34,12 +34,12 @@ Qed.
 provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible {P} :
   (forall a, Forall atomic (projT2 (pgax P) a)) ->
-  (forall a l, PCperm_Type (pperm P) (projT2 (pgax P) a) l -> exists b, l = projT2 (pgax P) b) ->
-  (forall a b x l1 l2 l3, projT2 (pgax P) a = (dual x :: l1) -> projT2 (pgax P) b = (l2 ++ x :: l3) ->
-     exists c, projT2 (pgax P) c = l2 ++ l1 ++ l3) ->
+  (forall a b x l1 l2 l3 l4,
+     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
+     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
   forall l, ll P l -> ll (cutrm_pfrag P) l.
 Proof.
-intros Hgax_at Hgax_ex Hgax_cut l H.
+intros Hgax_at Hgax_cut l H.
 induction H ; try (econstructor ; myeeasy ; fail).
 - eapply cut_r_gaxat ; eassumption.
 - revert a.
