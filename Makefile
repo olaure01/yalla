@@ -2,23 +2,29 @@
 COQDOC = coqdoc -g -toc
 
 OLLIBSDIR = ollibs
+MICROYALLADIR  = microyalla
 YALLADIR  = yalla
 YALLAHTMLDIR   = yalla_html
 
 YALLAHTMLFILE   = yalla_html.tgz
 OLLIBSVFILES = $(wildcard $(OLLIBSDIR)/*.v)
+MICROYALLAVFILES  = $(wildcard $(MICROYALLADIR)/*.v)
 YALLAVFILES  = $(wildcard $(YALLADIR)/*.v)
 
-all: ollibs yalla doc
+all: ollibs microyalla yalla doc
 
 ollibs:
 	cd $(OLLIBSDIR) && $(MAKE)
+
+microyalla:
+	cd $(MICROYALLADIR) && $(MAKE)
 
 yalla:
 	cd $(YALLADIR) && $(MAKE)
 
 doc:
 	cd $(OLLIBSDIR) && $(MAKE) $@
+	cd $(MICROYALLADIR) && $(MAKE) $@
 	cd $(YALLADIR) && $(MAKE) $@
 	cd $(YALLADIR) && $(COQDOC) $(addprefix ../,$(OLLIBSVFILES)) $(addprefix ../,$(YALLAVFILES))
 
@@ -32,7 +38,8 @@ htmlfiles: doc
 
 clean:
 	cd $(OLLIBSDIR) && $(MAKE) $@
+	cd $(MICROYALLADIR) && $(MAKE) $@
 	cd $(YALLADIR) && $(MAKE) $@
 
-.PHONY: ollibs yalla clean
+.PHONY: ollibs microyalla yalla clean
 
