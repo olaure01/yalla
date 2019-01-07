@@ -269,12 +269,12 @@ Ltac app_vs_app_flat_map_inv H :=
         (try simpl in Hnil) ; (try simpl in H1) ; (try simpl in H2) ; (try simpl in H3) ; subst
   end.
 
-Lemma perm_app_flat_map : forall A lw0 L lw l,
-  Permutation_Type lw (l ++ flat_map (cons (ioc A)) L) ->
+Lemma perm_app_flat_map {T} : forall (A : T) lw0 L lw l,
+  Permutation_Type lw (l ++ flat_map (cons A) L) ->
 { pl & prod (L <> nil -> fst pl <> nil)
-      (prod (lw = snd pl ++ flat_map (cons (ioc A)) (fst pl))
-            (Permutation_Type (snd pl ++ flat_map (app (map ioc lw0)) (fst pl))
-                              (l ++ flat_map (app (map ioc lw0)) L))) }.
+      (prod (lw = snd pl ++ flat_map (cons A) (fst pl))
+            (Permutation_Type (snd pl ++ flat_map (app lw0) (fst pl))
+                              (l ++ flat_map (app lw0) L))) }.
 Proof with myeasy.
 induction L ; intros lw l HP ; list_simpl in HP ; list_simpl.
 - exists (nil, lw) ; subst ; list_simpl ; nsplit 3...
@@ -306,22 +306,22 @@ induction L ; intros lw l HP ; list_simpl in HP ; list_simpl.
       rewrite app_assoc ; apply Permutation_Type_app_middle ; list_simpl...
 Qed.
 
-Lemma perm_ioc_app_flat_map : forall A lw0 L lw lw' l,
-  Permutation_Type lw lw' -> map ioc lw' = l ++ flat_map (cons (ioc A)) L ->
+Lemma perm_f_app_flat_map {T1 T2} : forall A (f : T1 -> T2) lw0 L lw lw' l,
+  Permutation_Type lw lw' -> map f lw' = l ++ flat_map (cons (f A)) L ->
 { pl & prod (L <> nil -> fst pl <> nil)
-      (prod (map ioc lw = snd pl ++ flat_map (cons (ioc A)) (fst pl))
-            (Permutation_Type (snd pl ++ flat_map (app (map ioc lw0)) (fst pl))
-                              (l ++ flat_map (app (map ioc lw0)) L))) }.
+      (prod (map f lw = snd pl ++ flat_map (cons (f A)) (fst pl))
+            (Permutation_Type (snd pl ++ flat_map (app (map f lw0)) (fst pl))
+                              (l ++ flat_map (app (map f lw0)) L))) }.
 Proof with myeasy.
-intros A lw0 L lw lw' l HP Heq.
-apply (Permutation_Type_map ioc) in HP ; rewrite Heq in HP.
+intros A f lw0 L lw lw' l HP Heq.
+apply (Permutation_Type_map f) in HP ; rewrite Heq in HP.
 apply perm_app_flat_map...
 Qed.
 
-Lemma map_ioc_flat_map : forall A lw' lw l L , map ioc lw = l ++ flat_map (cons (ioc A)) L -> 
-  {Lw | l ++ flat_map (app (map ioc lw')) L = map ioc Lw}.
+Lemma map_f_flat_map {T1 T2} : forall A (f : T1 -> T2) lw' lw l L ,
+  map f lw = l ++ flat_map (cons (f A)) L -> { Lw | l ++ flat_map (app (map f lw')) L = map f Lw }.
 Proof with myeasy.
-intros A lw' lw l L ; revert lw l ; induction L ; intros lw l Heq ; list_simpl in Heq ; list_simpl.
+intros A f lw' lw l L ; revert lw l ; induction L ; intros lw l Heq ; list_simpl in Heq ; list_simpl.
 - subst ; exists lw...
 - rewrite app_comm_cons in Heq ; rewrite app_assoc in Heq.
   apply IHL in Heq ; destruct Heq as [Lw Heq].
@@ -504,7 +504,7 @@ induction pi2 ; intros l' L Heq.
     destruct L ; inversion H1.
     apply ax_ir.
 - case_eq (ipperm P) ; intros Hperm ; rewrite Hperm in p ; simpl in p ; subst.
-  + destruct (perm_app_flat_map _ lw _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+  + destruct (perm_app_flat_map _ (map ioc lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
       simpl in Hnil' ; simpl in HeqL' ; simpl in HPL' ; subst.
     eapply ex_ir ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     refine (IHpi2 _ _ _)...
@@ -514,7 +514,7 @@ induction pi2 ; intros l' L Heq.
     * list_simpl ; eapply ex_oc_ir...
       rewrite 2 app_assoc.
       refine (IHpi2 _ _ _) ; list_simpl...
-    * destruct (perm_ioc_app_flat_map _ lw _ _ _ _ p Heq2) as [[L' l'] (Hnil' & HeqL' & HPL')] ;
+    * destruct (perm_f_app_flat_map _ ioc lw _ _ _ _ p Heq2) as [[L' l'] (Hnil' & HeqL' & HPL')] ;
         simpl in Hnil' ; simpl in HeqL' ; simpl in HPL'.
       rewrite flat_map_app ; list_simpl.
       rewrite (app_assoc l) ; rewrite (app_assoc (map ioc lw)) ; rewrite (app_assoc _ _ (l3 ++ _)).
@@ -522,8 +522,8 @@ induction pi2 ; intros l' L Heq.
       replace (l ++ flat_map (app (map ioc lw)) L0 ++ map ioc lw ++ l0)
          with (l ++ flat_map (app (map ioc lw)) (L0 ++ l0 :: nil))
         by (rewrite flat_map_app ; list_simpl ; reflexivity).
-      destruct (map_ioc_flat_map _ lw _ _ _ Heq2) as [Lw HeqLw].
-      destruct (map_ioc_flat_map _ lw _ _ _ HeqL') as [Lw' HeqLw'].
+      destruct (map_f_flat_map _ ioc lw _ _ _ Heq2) as [Lw HeqLw].
+      destruct (map_f_flat_map _ ioc lw _ _ _ HeqL') as [Lw' HeqLw'].
       assert (Permutation_Type Lw' Lw) as HPw.
       { rewrite HeqLw in HPL' ; rewrite HeqLw' in HPL'.
         apply Permutation_Type_map_inv_inj in HPL' ;
@@ -540,12 +540,12 @@ induction pi2 ; intros l' L Heq.
       list_simpl in IHpi2 ; rewrite <- flat_map_app in IHpi2 ; rewrite app_assoc in IHpi2.
       assert (pi2' := IHpi2 _ _ eq_refl).
       rewrite ? flat_map_app ; list_simpl ; rewrite ? flat_map_app in pi2' ; list_simpl in pi2'...
-    * destruct (perm_ioc_app_flat_map _ lw _ _ _ _ p Heq2) as [[L' l'] (Hnil' & HeqL' & HPL')] ;
+    * destruct (perm_f_app_flat_map _ ioc lw _ _ _ _ p Heq2) as [[L' l'] (Hnil' & HeqL' & HPL')] ;
         simpl in Hnil' ; simpl in HeqL' ; simpl in HPL'.
       rewrite flat_map_app ; list_simpl.
       rewrite (app_assoc l).
-      destruct (map_ioc_flat_map _ lw _ _ _ Heq2) as [Lw HeqLw].
-      destruct (map_ioc_flat_map _ lw _ _ _ HeqL') as [Lw' HeqLw'].
+      destruct (map_f_flat_map _ ioc lw _ _ _ Heq2) as [Lw HeqLw].
+      destruct (map_f_flat_map _ ioc lw _ _ _ HeqL') as [Lw' HeqLw'].
       assert (Permutation_Type Lw' Lw) as HPw.
       { rewrite HeqLw in HPL' ; rewrite HeqLw' in HPL'.
         apply Permutation_Type_map_inv_inj in HPL' ;
@@ -564,15 +564,15 @@ induction pi2 ; intros l' L Heq.
          with (flat_map (app (map ioc lw)) ((l ++ map ioc lw0 ++ l1) :: L1)) by (list_simpl ; reflexivity).
       rewrite <- flat_map_app ; refine (IHpi2 _ _ _)...
       rewrite ? flat_map_app ; list_simpl...
-    * destruct (perm_ioc_app_flat_map _ lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+    * destruct (perm_f_app_flat_map _ ioc lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
         simpl in Hnil' ; simpl in HeqL' ; simpl in HPL'.
       rewrite ? flat_map_app ; list_simpl ; rewrite ? flat_map_app ; list_simpl.
       rewrite (app_assoc l0) ; rewrite (app_assoc _ _ (l1 ++ _)) ; rewrite (app_assoc _ l1).
       replace (((l0 ++ flat_map (app (map ioc lw)) L) ++ map ioc lw) ++ l1)
          with (l0 ++ flat_map (app (map ioc lw)) (L ++ l1 :: nil))
         by (rewrite flat_map_app ; list_simpl ; reflexivity).
-      destruct (map_ioc_flat_map _ lw _ _ _ Heq1) as [Lw HeqLw].
-      destruct (map_ioc_flat_map _ lw _ _ _ HeqL') as [Lw' HeqLw'].
+      destruct (map_f_flat_map _ ioc lw _ _ _ Heq1) as [Lw HeqLw].
+      destruct (map_f_flat_map _ ioc lw _ _ _ HeqL') as [Lw' HeqLw'].
       assert (Permutation_Type Lw' Lw) as HPw.
       { rewrite HeqLw in HPL' ; rewrite HeqLw' in HPL'.
         apply Permutation_Type_map_inv_inj in HPL' ;
@@ -593,12 +593,12 @@ induction pi2 ; intros l' L Heq.
       list_simpl in IHpi2 ; rewrite <- 2 flat_map_app in IHpi2.
       assert (pi2' := IHpi2 _ _ eq_refl).
       rewrite ? flat_map_app ; list_simpl ; rewrite ? flat_map_app in pi2' ; list_simpl in pi2'...
-    * destruct (perm_ioc_app_flat_map _ lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+    * destruct (perm_f_app_flat_map _ ioc lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
         simpl in Hnil' ; simpl in HeqL' ; simpl in HPL'.
       rewrite flat_map_app ; list_simpl.
       rewrite (app_assoc l).
-      destruct (map_ioc_flat_map _ lw _ _ _ Heq1) as [Lw HeqLw].
-      destruct (map_ioc_flat_map _ lw _ _ _ HeqL') as [Lw' HeqLw'].
+      destruct (map_f_flat_map _ ioc lw _ _ _ Heq1) as [Lw HeqLw].
+      destruct (map_f_flat_map _ ioc lw _ _ _ HeqL') as [Lw' HeqLw'].
       assert (Permutation_Type Lw' Lw) as HPw.
       { rewrite HeqLw in HPL' ; rewrite HeqLw' in HPL'.
         apply Permutation_Type_map_inv_inj in HPL' ;
@@ -615,15 +615,15 @@ induction pi2 ; intros l' L Heq.
       rewrite ? flat_map_app ; list_simpl...
   + app_vs_flat_map_inv Heq2.
     * rewrite <- (app_nil_l (flat_map _ _)) in Heq1.
-      destruct (perm_ioc_app_flat_map _ lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+      destruct (perm_f_app_flat_map _ ioc lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
         simpl in Hnil' ; simpl in HeqL' ; simpl in HPL'.
       rewrite ? flat_map_app ; list_simpl ; rewrite ? flat_map_app ; list_simpl.
       rewrite (app_assoc _ _ (l ++ _)) ; rewrite (app_assoc _ l).
       replace (((flat_map (app (map ioc lw)) L) ++ map ioc lw) ++ l)
          with (flat_map (app (map ioc lw)) (L ++ l :: nil))
         by (rewrite flat_map_app ; list_simpl ; reflexivity).
-      destruct (map_ioc_flat_map _ lw _ _ _ Heq1) as [Lw HeqLw] ; list_simpl in HeqLw.
-      destruct (map_ioc_flat_map _ lw _ _ _ HeqL') as [Lw' HeqLw'].
+      destruct (map_f_flat_map _ ioc lw _ _ _ Heq1) as [Lw HeqLw] ; list_simpl in HeqLw.
+      destruct (map_f_flat_map _ ioc lw _ _ _ HeqL') as [Lw' HeqLw'].
       assert (Permutation_Type Lw' Lw) as HPw.
       { rewrite HeqLw in HPL' ; rewrite HeqLw' in HPL'.
         apply Permutation_Type_map_inv_inj in HPL' ;
@@ -655,11 +655,11 @@ induction pi2 ; intros l' L Heq.
          assert (pi2' := IHpi2 _ _ eq_refl).
          rewrite ? flat_map_app ; list_simpl ; rewrite ? flat_map_app in pi2' ; list_simpl in pi2'...
     * rewrite <- (app_nil_l (flat_map _ _)) in Heq1.
-      destruct (perm_ioc_app_flat_map _ lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+      destruct (perm_f_app_flat_map _ ioc lw _ _ _ _ p Heq1) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
         simpl in Hnil' ; simpl in HeqL' ; simpl in HPL'.
       rewrite ? flat_map_app ; list_simpl ; rewrite ? flat_map_app ; list_simpl.
-      destruct (map_ioc_flat_map _ lw _ _ _ Heq1) as [Lw HeqLw] ; list_simpl in HeqLw.
-      destruct (map_ioc_flat_map _ lw _ _ _ HeqL') as [Lw' HeqLw'].
+      destruct (map_f_flat_map _ ioc lw _ _ _ Heq1) as [Lw HeqLw] ; list_simpl in HeqLw.
+      destruct (map_f_flat_map _ ioc lw _ _ _ HeqL') as [Lw' HeqLw'].
       assert (Permutation_Type Lw' Lw) as HPw.
       { rewrite HeqLw in HPL' ; rewrite HeqLw' in HPL'.
         apply Permutation_Type_map_inv_inj in HPL' ;
