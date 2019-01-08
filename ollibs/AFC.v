@@ -79,7 +79,7 @@ induction m ; intros.
 - exists 0 ; intros n Hn.
   inversion Hn.
 - assert (exists k, P k m) as HS by (apply H0 ; apply lt_n_Sn).
-  assert (forall n : nat, n < m -> exists k : nat, P k n) as Hm
+  assert (forall n, n < m -> exists k, P k n) as Hm
     by (intros ;
         apply H0 ;
         etransitivity ;

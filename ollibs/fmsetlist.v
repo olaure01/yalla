@@ -12,12 +12,12 @@ Require Import Le.
 Require Import Compare_dec.
 Require Import Wf_nat.
 Require Import List.
-Require Import Permutation.
 Require Import Morphisms.
 Require Import Orders.
 
 Require Import Bool_more.
 Require Import Injective.
+Require Import Permutation_more.
 
 
 (** * Axiomatization *)
@@ -95,6 +95,13 @@ Global Instance elts_perm' : Proper (eq ==> @Permutation A) elts.
 Proof.
 intros m1 m2 Heq ; subst.
 reflexivity.
+Qed.
+
+Lemma elts_eq_nil : forall m, elts m = nil -> m = empty.
+Proof.
+intros m Heq.
+assert (Hr := retract m) ; rewrite Heq in Hr ; simpl in Hr.
+subst ; reflexivity.
 Qed.
 
 Lemma add_swap : forall m a b, add a (add b m) = add b (add a m).
@@ -208,6 +215,45 @@ induction l.
 Qed.
 
 End Fmmap.
+
+
+Section Induction.
+
+Context {M A : Type}.
+Context {fm : FinMultiset M A}.
+
+Lemma fm_rect : forall (P : M -> Type),
+  P empty -> (forall a m, P m -> P (add a m)) -> forall m, P m.
+Proof.
+intros P He Ha m.
+remember (elts m) as l.
+assert (HP := Permutation_refl l).
+rewrite Heql in HP at 2 ; clear Heql.
+revert m HP ; induction l ; intros m Heql.
+- apply Permutation_nil in Heql.
+  apply elts_eq_nil in Heql ; subst ; assumption.
+- assert (Hr := retract m).
+  symmetry in Heql ; rewrite (perm_eq _ _ Heql) in Hr ; simpl in Hr ; subst.
+  apply Ha.
+  apply IHl.
+  symmetry.
+  change (fold_right add empty l) with (list2fm l).
+  apply elts_perm.
+Defined.
+
+Lemma fm_ind : forall (P : M -> Prop),
+  P empty -> (forall a m, P m -> P (add a m)) -> forall m, P m.
+Proof.
+intros ; apply fm_rect ; assumption.
+Defined.
+
+Lemma fm_rec : forall (P : M -> Set),
+  P empty -> (forall a m, P m -> P (add a m)) -> forall m, P m.
+Proof.
+intros ; apply fm_rect ; assumption.
+Defined.
+
+End Induction.
 
 
 (** * Notations *)

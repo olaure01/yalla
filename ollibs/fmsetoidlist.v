@@ -93,6 +93,13 @@ induction l.
   reflexivity.
 Qed.
 
+Lemma elts_eq_nil : forall m, elts m = nil -> meq m empty.
+Proof.
+intros m Heq.
+assert (Hr := retract_meq m) ; rewrite Heq in Hr ; simpl in Hr.
+rewrite Hr ; reflexivity.
+Qed.
+
 Lemma add_swap : forall m a b, meq (add a (add b m)) (add b (add a m)).
 Proof.
 intros m a b.
