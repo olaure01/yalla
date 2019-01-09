@@ -199,6 +199,72 @@ replace (ioc a :: ioc a :: map ioc l ++ map ioc l)
 eapply ex_oc_ir...
 Qed.
 
+(** *** Some tactics for manipulating rules *)
+
+Ltac inversion_ill H f X l Hl Hr HP Hax a :=
+  match type of H with
+  | ill _ _ _ => inversion H as [ X
+                                | l ? ? Hl HP
+                                | l ? ? ? ? Hl HP
+                                | 
+                                | ? ? ? Hl
+                                | ? ? ? ? Hl Hr
+                                | ? ? ? ? ? Hl
+                                | ? ? ? Hl
+                                | ? ? ? ? ? ? Hl Hr
+                                | ? ? ? Hl
+                                | ? ? ? ? ? ? Hl Hr
+                                | ? ? Hl
+                                | ? ? Hl
+                                | l
+                                | ? ? ? Hl Hr
+                                | ? ? ? ? ? Hl
+                                | ? ? ? ? ? Hl
+                                | ? ? ?
+                                | ? ? ? Hl
+                                | ? ? ? Hl
+                                | ? ? ? ? ? Hl Hr
+                                | ? ? Hl
+                                | ? ? ? ? Hl
+                                | ? ? ? ? Hl
+                                | ? ? ? ? Hl
+                                | f ? ? ? ? ? Hl Hr
+                                | a ] ; subst
+  end.
+
+Ltac destruct_ill H f X l Hl Hr HP Hax a :=
+  match type of H with
+  | ill _ _ _ => destruct H as [ X
+                               | l ? ? Hl HP
+                               | l ? ? ? ? Hl HP
+                               | 
+                               | ? ? ? Hl
+                               | ? ? ? ? Hl Hr
+                               | ? ? ? ? ? Hl
+                               | ? ? ? Hl
+                               | ? ? ? ? ? ? Hl Hr
+                               | ? ? ? Hl
+                               | ? ? ? ? ? ? Hl Hr
+                               | ? ? Hl
+                               | ? ? Hl
+                               | l
+                               | ? ? ? Hl Hr
+                               | ? ? ? ? ? Hl
+                               | ? ? ? ? ? Hl
+                               | ? ? ?
+                               | ? ? ? Hl
+                               | ? ? ? Hl
+                               | ? ? ? ? ? Hl Hr
+                               | ? ? Hl
+                               | ? ? ? ? Hl
+                               | ? ? ? ? Hl
+                               | ? ? ? ? Hl
+                               | f ? ? ? ? ? Hl Hr
+                               | a ] ; subst
+  end.
+
+
+
 (** Axiom expansion *)
 Lemma ax_exp_ill {P} : forall A, ill P (A :: nil) A.
 Proof with myeeasy.
