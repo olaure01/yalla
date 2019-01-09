@@ -83,7 +83,17 @@ Ltac cons2app_hyps :=
 Ltac cons2app_all := cons2app_hyps ; cons2app.
 
 
-(** ** Decomposition of [app] *)
+(** ** Inversions of list equalities *)
+
+Ltac unit_vs_elt_inv H := 
+  match type of H with
+  | ?a :: nil = ?l1 ++ ?x :: ?l2 =>
+      let H1 := fresh H in
+      let H2 := fresh H in 
+        destruct l1 ; inversion H as [[H1 H2]] ;
+        [ (try subst x) ; (try subst l2)
+        | destruct l1 ; inversion H2 ]
+  end.
 
 Lemma dichot_app {A} : forall (l1 : list A) l2 l3 l4,
   l1 ++ l2 = l3 ++ l4 ->
@@ -166,6 +176,80 @@ Ltac dichot_elt_app_exec H :=
                               let H1 := fresh H in
                               let H2 := fresh H in
                               destruct H as [(l2 & H1 & H2) | (l4 & H1 & H2)]
+  end.
+
+Lemma trichot_elt_app {A} : forall l1 (a : A) l2 l3 l4 l5,
+  l1 ++ a :: l2 = l3 ++ l4 ++ l5 ->
+      (exists l2', l1 ++ a :: l2' = l3 /\ l2 = l2' ++ l4 ++ l5)
+   \/ (exists l2' l2'', l1 = l3 ++ l2' /\ l2' ++ a :: l2'' = l4 /\ l2 = l2'' ++ l5)
+   \/ (exists l5', l1 = l3 ++ l4 ++ l5' /\ l5' ++ a :: l2 = l5).
+Proof with try reflexivity ; try assumption.
+induction l1 ; induction l3 ; intros ;
+  simpl in H ; inversion H ; subst.
+- destruct l4 ; inversion H.
+  + right ; right ; exists nil ; split...
+  + right ; left ; exists nil ; exists l4 ; split ; [ | split ]...
+- left ; exists l3 ; split...
+- destruct l4 ; inversion H ; subst.
+  + right ; right ; exists (a :: l1) ; split...
+  + dichot_elt_app_exec H3 ; subst.
+    * right ; left ; exists (a1 :: l1) ; exists l ; split ; [ | split ]...
+    * right ; right ; exists l0 ; split...
+- apply IHl1 in H2.
+  destruct H2 as [(l' & H'1 & H'2) | [ (l2' & l2'' & H'2 & H'3) | (l' & H'1 & H'2) ]] ;
+    [ left | right ; left | right ; right ].
+  + exists l' ; try rewrite <- H'1 ; split...
+  + destruct H'3 ; subst ; exists l2' ; exists l2'' ; split ; [ | split ]...
+  + exists l' ; try rewrite H'1 ; split...
+Qed.
+
+Ltac trichot_elt_app_exec H :=
+  match type of H with
+  | _ ++ _ :: _ = _ ++ _ ++ _ => apply trichot_elt_app in H ;
+                                   let l2 := fresh "l" in
+                                   let l4 := fresh "l" in
+                                   let H1 := fresh H in
+                                   let H2 := fresh H in
+                                   destruct H as [ (l2 & H1 & H2)
+                                                 | [ (l2 & l4 & H1 & H2) | (l4 & H1 & H2) ]]
+  | _ ++ _ ++ _ = _ ++ _ :: _ => simple apply eq_sym in H ;
+                                   apply trichot_elt_app in H ;
+                                   let l2 := fresh "l" in
+                                   let l4 := fresh "l" in
+                                   let H1 := fresh H in
+                                   let H2 := fresh H in
+                                   destruct H as [ (l2 & H1 & H2)
+                                                 | [ (l2 & l4 & H1 & H2) | (l4 & H1 & H2) ]]
+  end.
+
+Lemma trichot_elt_elt {A} : forall l1 (a : A) l2 l3 b l4,
+  l1 ++ a :: l2 = l3 ++ b :: l4 ->
+      (exists l2', l1 ++ a :: l2' = l3 /\ l2 = l2' ++ b :: l4)
+   \/ (l1 = l3 /\ a = b /\ l2 = l4)
+   \/ (exists l4', l1 = l3 ++ b :: l4' /\ l4' ++ a :: l2 = l4).
+Proof with try assumption ; try reflexivity.
+intros l1 a l2 l3 b l4 Heq.
+change (b :: l4) with ((b :: nil) ++ l4) in Heq.
+apply trichot_elt_app in Heq ;
+  destruct Heq as [ | [ (l2' & l2'' & H'1 & H'2 & H'3) | ]] ; subst ;
+  [ left | right ; left | right ; right ]...
+destruct l2' ; inversion H'2 ; subst ; [ | destruct l2' ; inversion H1 ].
+split ; [ | split ]...
+rewrite app_nil_r...
+Qed.
+
+Ltac trichot_elt_elt_exec H :=
+  match type of H with
+  | ?lh ++ _ :: ?lr = ?l1 ++ ?x :: ?l2 =>
+      apply trichot_elt_elt in H ;
+        let l' := fresh "l" in
+        let H1 := fresh H in
+        let H2 := fresh H in
+        let H3 := fresh H in
+        destruct H as [(l' & H1 & H2) | [(H1 & H2 & H3) | (l' & H1 & H2)]] ;
+        [ (try subst l1) ; (try subst lr)
+        | (try subst x) ; (try subst l1) ; (try subst l2)
+        | (try subst l2) ; (try subst lh) ]
   end.
 
 
@@ -451,6 +535,12 @@ induction l ; split ; intro H.
   + exists a0...
   + apply IHl.
     exists l0...
+Qed.
+
+Lemma map_ext_Forall {A B} : forall (f g : A -> B) l,
+  Forall (fun x => f x = g x) l -> map f l = map g l.
+Proof.
+intros ; apply map_ext_in ; apply Forall_forall ; assumption.
 Qed.
 
 Lemma Forall_rev {A} : forall P (l : list A), Forall P l -> Forall P (rev l).

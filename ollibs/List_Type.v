@@ -184,6 +184,68 @@ End App.
   End Reverse_Induction.
 
 
+(***************************************************)
+(** * Applying functions to the elements of a list *)
+(***************************************************)
+
+(************)
+(** ** Map  *)
+(************)
+
+Section Map.
+  Variables (A : Type) (B : Type).
+  Variable f : A -> B.
+
+  Lemma in_Type_map :
+    forall (l:list A) (x:A), In_Type x l -> In_Type (f x) (map f l).
+  Proof.
+    induction l; firstorder (subst; auto).
+  Qed. 
+
+  Lemma in_Type_map_inv : forall l y, In_Type y (map f l) ->
+    { x : _ & prod (f x = y) (In_Type x l) }.
+  Proof.
+    induction l; firstorder (subst; auto).
+  Qed.
+
+  Lemma in_Type_flat_map : forall (f:A->list B)(l:list A)(y:B),
+    In_Type y (flat_map f l) -> { x : _ & prod (In_Type x l) (In_Type y (f x)) }.
+  Proof using A B.
+    induction l; simpl; intros.
+    contradiction.
+    destruct (in_Type_app_or _ _ _ X).
+    - exists a; auto.
+    - destruct (IHl y i) as (x,(H1,H2)).
+      exists x; auto.
+  Qed.
+
+  Lemma flat_map_in_Type : forall (f:A->list B)(l:list A)(y:B),
+    { x : _ & prod (In_Type x l) (In_Type y (f x)) } -> In_Type y (flat_map f l).
+  Proof using A B.
+    induction l; simpl; intros.
+    destruct X as (x,(X,_)); contradiction.
+    apply in_Type_or_app.
+    destruct X as (x,(H0,H1)); destruct H0.
+    - subst; auto.
+    - right ; apply (IHl y (existT _ x (i,H1))).
+  Qed.
+
+End Map.
+
+Lemma map_ext_in_Type :
+  forall (A B : Type)(f g:A->B) l, (forall a, In_Type a l -> f a = g a) -> map f l = map g l.
+Proof.
+  induction l; simpl; auto.
+  intros; rewrite H by intuition; rewrite IHl; auto.
+Qed.
+
+Lemma ext_in_Type_map :
+  forall (A B : Type)(f g:A->B) l, map f l = map g l -> forall a, In_Type a l -> f a = g a.
+Proof. induction l; intros [=] ? []; subst; auto. Qed.
+
+Arguments ext_in_Type_map [A B f g l].
+
+
 (******************************)
 (** ** Set inclusion on list  *)
 (******************************)

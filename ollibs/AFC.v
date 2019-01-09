@@ -7,6 +7,8 @@ Require Import Le Lt Max.
 Require Import Compare_dec.
 Require Import List.
 
+Require Vector_more.
+
 (** * Functional Axiom of Choice for finite functions *)
 Lemma AFC : forall k (R : nat -> nat -> Prop),
   (forall x, x < k -> exists y, R x y) ->
@@ -99,6 +101,68 @@ induction m ; intros.
   + etransitivity ; [ | apply le_max_l ].
     apply le_n_Sn.
 Qed.
+
+
+(** * Axioms of Finite Choices over vectors *)
+Lemma AFCvec : forall {A} (P : nat -> A -> Prop) n (l : Vector.t _ n),
+  (forall a i j, Vector.In a l -> P i a -> i <= j -> P j a) ->
+    (Vector.Forall (fun x => exists k, P k x) l) -> exists k, Vector.Forall (P k) l.
+Proof with try eassumption ; try reflexivity.
+induction l ; intros.
+- exists 0 ; constructor.
+- inversion H0 ; subst.
+  apply Vector_more.inj_pairT2_nat in H3 ; subst.
+  apply IHl in H5.
+  + destruct H4 as [k1 Hk1].
+    destruct H5 as [k2 Hk2].
+    exists (max k1 k2) ; constructor.
+    * eapply H...
+      -- left.
+      -- apply le_max_l.
+    * revert Hk2 ; clear - H.
+      induction l ; intro Hl ; constructor ; inversion Hl ; subst.
+      -- eapply H...
+         ++ right ; left.
+         ++ apply le_max_r.
+      -- apply Vector_more.inj_pairT2_nat in H2 ; subst.
+         apply IHl...
+         intros.
+         eapply H...
+         inversion H0 ; subst.
+         ++ left.
+         ++ apply Vector_more.inj_pairT2_nat in H8 ; subst.
+            right ; right...
+  + intros.
+    eapply H...
+    right...
+Qed.
+
+Lemma AFCvec_incdep : forall m (P : nat -> forall n, n < m -> Prop),
+  (forall i n H1 H2, P i n H1 -> P i n H2) ->
+  (forall n H i j, P i n H -> i <= j -> P j n H) ->
+    (forall n H, exists k, P k n H) -> exists k, forall n H, P k n H.
+Proof with try eassumption.
+induction m ; intros P Hext Hinc HI.
+- exists 0 ; intros n Hn ; inversion Hn.
+- assert (forall n H, exists k, P k n (lt_S _ _ H)) as Hm
+    by (intros ; apply HI).
+  apply IHm in Hm.
+  + destruct Hm as [k Hk].
+    assert (exists k, P k m (lt_n_Sn _)) as [k' Hk'] by (apply HI).
+    exists (max (S k) (S k')).
+    intros n Hn.
+    inversion Hn ; subst.
+    * apply (Hinc _ _ k').
+      -- eapply Hext ; apply Hk'.
+      -- etransitivity ; [ apply le_n_Sn | apply le_max_r ].
+    * apply (Hinc _ _ k)...
+      -- eapply Hext ; apply (Hk _ H0).
+      -- etransitivity ; [ apply le_n_Sn | apply le_max_l ].
+  + intros ; eapply Hext...
+  + intros ; apply (Hinc _ _ i)...
+Qed.
+
+
 
 
 

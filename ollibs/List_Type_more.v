@@ -6,7 +6,8 @@ Usefull properties apparently missing in the List library with Type-compatible o
 Require Export List.
 Require Export List_Type.
 
-(** ** Decomposition of [app] *)
+
+(** ** Inversions of list equalities *)
 
 Lemma dichot_Type_app {A} : forall (l1 : list A) l2 l3 l4,
   l1 ++ l2 = l3 ++ l4 ->
@@ -89,6 +90,82 @@ Ltac dichot_Type_elt_app_exec H :=
                               let H1 := fresh H in
                               let H2 := fresh H in
                               destruct H as [(l2 & H1 & H2) | (l4 & H1 & H2)]
+  end.
+
+Lemma trichot_Type_elt_app {A} : forall l1 (a : A) l2 l3 l4 l5,
+  l1 ++ a :: l2 = l3 ++ l4 ++ l5 ->
+     { l2' | l1 ++ a :: l2' = l3 /\ l2 = l2' ++ l4 ++ l5 }
+   + { pl | l1 = l3 ++ fst pl /\ fst pl ++ a :: snd pl = l4 /\ l2 = snd pl ++ l5 }
+   + { l5' | l1 = l3 ++ l4 ++ l5' /\ l5' ++ a :: l2 = l5 }.
+Proof with try reflexivity ; try assumption.
+induction l1 ; induction l3 ; intros ;
+  simpl in H ; inversion H ; subst.
+- destruct l4 ; inversion H.
+  + right ; exists nil ; split...
+  + left ; right ; exists (nil,l4) ; split ; [ | split ]...
+- left ; left ; exists l3 ; split...
+- destruct l4 ; inversion H ; subst.
+  + right ; exists (a :: l1) ; split...
+  + dichot_Type_elt_app_exec H3 ; subst.
+    * left ; right ; exists (a1 :: l1, l) ; split ; [ | split ]...
+    * right ; exists l0 ; split...
+- apply IHl1 in H2.
+  destruct H2 as [[(l' & H'1 & H'2) | ([pl1 pl2] & H'2 & H'3)] | (l' & H'1 & H'2)] ;
+    [ left ; left | left ; right | right ].
+  + exists l' ; try rewrite <- H'1 ; split...
+  + destruct H'3 ; subst ; exists (pl1,pl2) ; split ; [ | split ]...
+  + exists l' ; try rewrite H'1 ; split...
+Qed.
+
+Ltac trichot_Type_elt_app_exec H :=
+  match type of H with
+  | _ ++ _ :: _ = _ ++ _ ++ _ => apply trichot_Type_elt_app in H ;
+                                   let l2 := fresh "l" in
+                                   let l4 := fresh "l" in
+                                   let H1 := fresh H in
+                                   let H2 := fresh H in
+                                   destruct H as [ [ (l2 & H1 & H2) | ([l2 l4] & H1 & H2) ]
+                                                   | (l4 & H1 & H2) ] ;
+                                   simpl in H1 ; simpl in H2
+  | _ ++ _ ++ _ = _ ++ _ :: _ => simple apply eq_sym in H ;
+                                   apply trichot_Type_elt_app in H ;
+                                   let l2 := fresh "l" in
+                                   let l4 := fresh "l" in
+                                   let H1 := fresh H in
+                                   let H2 := fresh H in
+                                   destruct H as [ [ (l2 & H1 & H2) | ([l2 l4] & H1 & H2) ]
+                                                   | (l4 & H1 & H2) ] ;
+                                   simpl in H1 ; simpl in H2
+  end.
+
+Lemma trichot_Type_elt_elt {A} : forall l1 (a : A) l2 l3 b l4,
+  l1 ++ a :: l2 = l3 ++ b :: l4 ->
+     { l2' | l1 ++ a :: l2' = l3 /\ l2 = l2' ++ b :: l4 }
+   + { l1 = l3 /\ a = b /\ l2 = l4 }
+   + { l4' | l1 = l3 ++ b :: l4' /\ l4' ++ a :: l2 = l4 }.
+Proof with try assumption ; try reflexivity.
+intros l1 a l2 l3 b l4 Heq.
+change (b :: l4) with ((b :: nil) ++ l4) in Heq.
+apply trichot_Type_elt_app in Heq ;
+  destruct Heq as [[ | ([pl1 pl2] & H'1 & H'2 & H'3)] | ] ; subst ;
+  [ left ; left | left ; right | right ]...
+destruct pl1 ; inversion H'2 ; subst ; [ | destruct pl1 ; inversion H1 ].
+split ; [ | split ]...
+simpl ; rewrite app_nil_r...
+Qed.
+
+Ltac trichot_Type_elt_elt_exec H :=
+  match type of H with
+  | ?lh ++ _ :: ?lr = ?l1 ++ ?x :: ?l2 =>
+      apply trichot_Type_elt_elt in H ;
+        let l' := fresh "l" in
+        let H1 := fresh H in
+        let H2 := fresh H in
+        let H3 := fresh H in
+        destruct H as [[(l' & H1 & H2) | (H1 & H2 & H3)] | (l' & H1 & H2)] ;
+        [ (try subst l1) ; (try subst lr)
+        | (try subst x) ; (try subst l1) ; (try subst l2)
+        | (try subst l2) ; (try subst lh) ]
   end.
 
 
@@ -243,6 +320,38 @@ Proof.
 intros P l1 l2 a HF.
 eapply Forall_Type_In ; try eassumption.
 apply in_Type_elt.
+Qed.
+
+Lemma Forall_Type_map {A B} : forall (f : A -> B) l,
+  Forall_Type (fun x => { y | x = f y }) l -> { l0 | l = map f l0 }.
+Proof with try reflexivity.
+induction l ; intro H.
+- exists (@nil A)...
+- inversion H ; subst.
+  destruct X as [y Hy] ; subst.
+  apply IHl in X0.
+  destruct X0 as [l0 Hl0] ; subst.
+  exists (y :: l0)...
+Qed.
+
+Lemma map_Forall_Type_map {A B} : forall (f : A -> B) l,
+  { l0 | l = map f l0 } -> Forall_Type (fun x => { y | x = f y }) l.
+Proof with try reflexivity.
+induction l ; intro H.
+- constructor.
+- destruct H as [l0 Heq].
+  destruct l0 ; inversion Heq ; subst.
+  constructor.
+  + exists a0...
+  + apply IHl.
+    exists l0...
+Qed.
+
+Lemma map_ext_Forall_Type {A B} : forall (f g : A -> B) l,
+  Forall_Type (fun x => f x = g x) l -> map f l = map g l.
+Proof.
+intros f g l HF.
+apply map_ext_in_Type ; apply Forall_Type_forall ; assumption.
 Qed.
 
 Lemma Forall_Type_rev {A} : forall P (l : list A),
