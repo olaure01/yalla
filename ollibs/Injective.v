@@ -7,7 +7,6 @@
 Require Import Relations.
 Require Import RelationClasses.
 Require Import List_more.
-Require Import Permutation_more.
 
 (** Same definition as in standard library [Coq.Sets.Image] *)
 Definition injective {A B} (f : A -> B) := forall x y, f x = f y -> x = y.
@@ -53,29 +52,6 @@ induction l1 ; intros l2 Hmap.
     reflexivity.
 Qed.
 
-Lemma Permutation_map_inv_inj {A B} : forall f : A -> B, injective f ->
-  forall l1 l2, Permutation (map f l1) (map f l2) -> Permutation l1 l2.
-Proof with try assumption ; try reflexivity.
-intros f Hi l1 ; induction l1 ; intros l2 HP.
-- apply Permutation_nil in HP.
-  destruct l2 ; inversion HP...
-- assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l3 & l4 & Heq).
-  symmetry in Heq.
-  decomp_map Heq ; subst.
-  rewrite map_app in HP.
-  simpl in HP.
-  rewrite Heq3 in HP.
-  apply Permutation_cons_app_inv in HP.
-  specialize IHl1 with (l0 ++ l6).
-  rewrite map_app in IHl1.
-  apply IHl1 in HP.
-  apply Hi in Heq3 ; subst.
-  apply Permutation_cons_app...
-Qed.
-
 Lemma map_inj_local {A B} : forall f : A -> B, forall l1 l2,
   (forall x y, In x l1 -> In y l2 -> f x = f y -> x = y) ->
     map f l1 = map f l2 -> l1 = l2.
@@ -93,39 +69,6 @@ induction l1 ; intros l2 Hi Hmap.
     apply Hi...
     * apply in_cons...
     * apply in_cons...
-Qed.
-
-Lemma Permutation_map_inv_inj_local {A B} : forall (f : A -> B) l1 l2,
-  (forall x y, In x l1 -> In y l2 -> f x = f y -> x = y) ->
-    Permutation (map f l1) (map f l2) -> Permutation l1 l2.
-Proof with try assumption ; try reflexivity.
-induction l1 ; intros l2 Hi HP.
-- apply Permutation_nil in HP.
-  destruct l2 ; inversion HP...
-- assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l3 & l4 & Heq).
-  symmetry in Heq.
-  decomp_map Heq ; subst.
-  rewrite map_app in HP.
-  simpl in HP.
-  rewrite Heq3 in HP.
-  apply Permutation_cons_app_inv in HP.
-  specialize IHl1 with (l0 ++ l6).
-  rewrite map_app in IHl1.
-  apply IHl1 in HP...
-  + apply Hi in Heq3 ; subst.
-    * apply Permutation_cons_app...
-    * apply in_eq.
-    * apply in_elt.
-  + intros x' y' Hx' Hy' Hf.
-    apply Hi...
-    * apply in_cons...
-    * apply in_app_or in Hy'.
-      destruct Hy' as [ Hy' | Hy' ] ; apply in_or_app.
-      left...
-      right ; apply in_cons...
 Qed.
 
 

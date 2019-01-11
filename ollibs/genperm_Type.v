@@ -496,33 +496,6 @@ destruct b ; intros l1 l2 HP.
 - now (simpl in HP ; subst).
 Qed.
 
-
-(* TODO place elsewhere ??? *)
-Require Import List_Type_more.
-Lemma Permutation_Type_map_inv_inj {A B} : forall f : A -> B, injective f ->
-  forall l1 l2, Permutation_Type (map f l1) (map f l2) -> Permutation_Type l1 l2.
-Proof with try assumption.
-intros f Hi l1 ; induction l1 ; intros l2 HP.
-- apply Permutation_Type_nil in HP.
-  destruct l2 ; inversion HP.
-  apply Permutation_Type_refl.
-- assert (Heq := HP).
-  apply Permutation_Type_sym in Heq.
-  apply Permutation_Type_vs_cons_inv in Heq.
-  destruct Heq as ((l3 & l4) & Heq).
-  symmetry in Heq.
-  decomp_map_Type Heq ; subst.
-  rewrite map_app in HP.
-  simpl in HP.
-  rewrite Heq3 in HP.
-  apply Permutation_Type_cons_app_inv in HP.
-  specialize IHl1 with (l0 ++ l6).
-  rewrite map_app in IHl1.
-  apply IHl1 in HP.
-  apply Hi in Heq3 ; subst.
-  apply Permutation_Type_cons_app...
-Qed.
-
 Lemma PEperm_Type_map_inv_inj {A B} b : forall f : A -> B, injective f ->
   forall l1 l2, PEperm_Type b (map f l1) (map f l2) -> PEperm_Type b l1 l2.
 Proof with try assumption.

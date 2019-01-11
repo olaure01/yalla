@@ -61,28 +61,35 @@ Section Add_Type.
    induction 1; intros; simpl in *; rewrite ?IHX; tauto.
   Qed.
 
+  Lemma Add_Type_in_Type a l l' : Add_Type a l l' ->
+   forall x, In_Type x l' -> In_Type x (a::l).
+  Proof.
+   induction 1; intros; simpl in *; rewrite ?IHX; [ tauto | ].
+   destruct X0 ; [ right ; left ; assumption | ].
+   assert ((a = x0) + In_Type x0 l) ; try tauto.
+   apply IHX ; assumption.
+  Qed.
+
   Lemma Add_Type_length a l l' : Add_Type a l l' -> length l' = S (length l).
   Proof.
    induction 1; simpl; auto with arith.
   Qed.
 
-(* TODO *)
-(*
-  Lemma Add_Type_inv a l : In a l -> exists l', Add_Type a l' l.
+  Lemma Add_Type_inv a l : In_Type a l -> { l' : _ &  Add_Type a l' l }.
   Proof.
-   intro Ha. destruct (in_split _ _ Ha) as (l1 & l2 & ->).
-   exists (l1 ++ l2). apply Add_app.
+   intro Ha. destruct (in_Type_split _ _ Ha) as ([l1 l2] & ->).
+   exists (l1 ++ l2). apply Add_Type_app.
   Qed.
 
   Lemma incl_Add_Type_inv a l u v :
-    ~In a l -> incl (a::l) v -> Add_Type a u v -> incl l u.
+    (In_Type a l -> False) ->
+    incl_Type (a::l) v -> Add_Type a u v -> incl_Type l u.
   Proof.
    intros Ha H AD y Hy.
-   assert (Hy' : In y (a::u)).
-   { rewrite <- (Add_in AD). apply H; simpl; auto. }
+   assert (Hy' : In_Type y (a::u)).
+   { apply (Add_Type_in_Type AD). apply H; simpl; auto. }
    destruct Hy'; [ subst; now elim Ha | trivial ].
   Qed.
-*)
 
 End Add_Type.
 
