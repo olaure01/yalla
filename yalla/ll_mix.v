@@ -2,6 +2,7 @@
 
 (** * Results around [mix] rule not requiring cut elimination *)
 
+Require Import Bool_more.
 Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type_more.
@@ -9,6 +10,7 @@ Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 
 Require Import ll_def.
+Require Import ll_prop.
 
 
 (** ** Results on [mix0] *)
@@ -866,6 +868,37 @@ eapply mix2_to_ll...
 apply pi.
 Qed.
 
+Lemma mix02_to_ll'' {P} : pperm P = true -> forall b0 b2 bp l,
+  ll (mk_pfrag P.(pcut) P.(pgax) b0 b2 bp) l -> ll P (wn one :: wn (tens (wn one) bot) :: l).
+Proof with myeeasy ; try PCperm_Type_solve.
+intros Hperm b0 b2 bp l pi.
+eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
+- eapply ex_r...
+- intros Hcut...
+- simpl ; intros a.
+  eapply ex_r ; [ | apply PCperm_Type_app_comm ] ; list_simpl.
+  apply wk_r.
+  apply wk_r.
+  apply gax_r.
+- intros Hpmix0 Hpmix0'.
+  apply de_r...
+  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  apply wk_r.
+  apply one_r.
+- intros _ _ l1 l2 pi1 pi2.
+  apply (ex_r _ (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)) ; [ | rewrite Hperm ]...
+  apply co_r.
+  apply co_r.
+  apply de_r.
+  apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: wn one :: l2)
+                                   ++ (wn (tens (wn one) bot) :: l1))) ;
+    [ | rewrite Hperm ]...
+  apply tens_r.
+  + eapply ex_r ; [ apply pi1 | ]...
+  + apply bot_r ; eapply ex_r ; [ apply pi2 | rewrite Hperm ]...
+Unshelve. assumption.
+Qed.
+
 Lemma ll_to_mix02 {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
   pperm P = true -> forall l,
   ll P (wn one :: wn (tens bot bot) :: l) -> ll (mix2add_pfrag (mix0add_pfrag P)) l.
@@ -873,6 +906,73 @@ Proof with myeasy.
 intros Hgax Hperm l pi.
 apply ll_to_mix2...
 apply ll_to_mix0...
+Qed.
+
+(* Hgax_cut is here only to allow the use of cut_admissible
+   the more general result without Hgax_cut should be provable by induction as for [ll_to_mix2] *)
+Lemma ll_to_mix02'' {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+  (forall a b x l1 l2 l3 l4,
+     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
+     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
+  pperm P = true -> forall l,
+  ll P (wn one :: wn (tens (wn one) bot) :: l) -> ll (mix2add_pfrag (mix0add_pfrag P)) l.
+Proof with myeasy.
+intros Hgax_at Hgax_cut Hperm l pi.
+apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (mix2add_pfrag (mix0add_pfrag P)) true))).
+{ nsplit 5...
+  intros a ; exists a... }
+eapply cut_admissible...
+eapply stronger_pfrag in pi.
+- rewrite <- (app_nil_r l).
+  eapply (cut_r _ (wn (tens (wn one) bot))) ; simpl.
+  + change nil with (map wn nil).
+    apply oc_r.
+    apply parr_r.
+    change (one :: oc bot :: map wn nil) with ((one :: nil) ++ oc bot :: map wn nil).
+    eapply mix2_r...
+    * apply oc_r.
+      apply bot_r.
+      apply mix0_r...
+    * apply one_r.
+  + rewrite <- app_nil_r.
+    eapply cut_r ; [ | | apply pi ] ; simpl...
+    change nil with (map wn nil).
+    apply oc_r.
+    apply bot_r.
+    apply mix0_r...
+- etransitivity ; [ apply cutupd_pfrag_true| ].
+  nsplit 5...
+  + intros a ; exists a...
+  + apply leb_true.
+  + apply leb_true.
+Unshelve. reflexivity.
+Qed.
+
+(* Hgax_cut is here only to allow the use of cut_admissible
+   the more general result without Hgax_cut should be provable by induction as for [ll_to_mix2] *)
+Lemma ll_to_mix02''' {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+  (forall a b x l1 l2 l3 l4,
+     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
+     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
+  pperm P = true -> forall l (l0 : list unit),
+  ll P (wn one :: map (fun _ => wn (tens (wn one) bot)) l0 ++ l)  ->
+  ll (mix2add_pfrag (mix0add_pfrag P)) l.
+Proof with try assumption.
+intros Hgax_at Hgax_cut Hperm l l0 pi.
+apply ll_to_mix02''...
+revert l pi ; induction l0 ; intros l pi.
+- cons2app.
+  eapply ex_r ; [ | rewrite Hperm ; apply Permutation_Type_app_comm ].
+  simpl ; apply wk_r.
+  eapply ex_r ; [ | rewrite Hperm ; apply Permutation_Type_app_comm ]...
+- cons2app.
+  eapply ex_r ; [ | rewrite Hperm ; apply Permutation_Type_app_comm ].
+  simpl ; apply co_r.
+  rewrite 2 app_comm_cons.
+  eapply ex_r ; [ | rewrite Hperm ; apply Permutation_Type_app_comm ].
+  list_simpl ; apply IHl0.
+  list_simpl in pi.
+  eapply ex_r ; [ apply pi | rewrite Hperm ; PCperm_Type_solve ].
 Qed.
 
 

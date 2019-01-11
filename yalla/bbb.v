@@ -14,86 +14,9 @@ Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 
+Require Import ll_mix.
 Require Import ll_fragments.
 
-(** ** Preliminaries *)
-
-(* TODO generalize and move to ll_mix *)
-Lemma mix02_to_ll'' : forall l,
-  ll_mix02 l -> ll_ll (wn one :: wn (tens (wn one) bot) :: l).
-Proof with myeeasy ; try PCperm_Type_solve.
-intros l pi.
-eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
-- eapply ex_r...
-- intros Hcut...
-- intros a ; destruct a.
-- intros Hpmix0 Hpmix0'.
-  apply de_r...
-  eapply ex_r ; [ | apply PCperm_Type_swap ].
-  apply wk_r.
-  apply one_r.
-- intros _ _ l1 l2 pi1 pi2.
-  apply (ex_r _ (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1))...
-  apply co_r.
-  apply co_r.
-  apply de_r.
-  apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: wn one :: l2)
-                                   ++ (wn (tens (wn one) bot) :: l1)))...
-  apply tens_r.
-  + eapply ex_r ; [ apply pi1 | ]...
-  + apply bot_r ; eapply ex_r ; [ apply pi2 | ]...
-Unshelve. reflexivity.
-Qed.
-
-Lemma ll_to_mix02'' : forall l,
-  ll_ll (wn one :: wn (tens (wn one) bot) :: l) -> ll_mix02 l.
-Proof with myeasy.
-intros l pi.
-apply cut_mix02_admissible.
-eapply stronger_pfrag in pi.
-- rewrite <- (app_nil_r l).
-  eapply (cut_r _ (wn (tens (wn one) bot))) ; simpl.
-  + change nil with (map wn nil).
-    apply oc_r.
-    apply parr_r.
-    change (one :: oc bot :: map wn nil) with ((one :: nil) ++ oc bot :: map wn nil).
-    eapply mix2_r...
-    * apply oc_r.
-      apply bot_r.
-      apply mix0_r...
-    * apply one_r.
-  + rewrite <- app_nil_r.
-    eapply cut_r ; [ | | apply pi ] ; simpl...
-    change nil with (map wn nil).
-    apply oc_r.
-    apply bot_r.
-    apply mix0_r...
-- nsplit 5...
-  intros a.
-  exists a...
-Unshelve.
-simpl...
-Qed.
-
-Lemma ll_to_mix02''' : forall l (l0 : list unit),
-  ll_ll (l ++ wn one :: map (fun _ => wn (tens (wn one) bot)) l0)  ->
-  ll_mix02 l.
-Proof.
-intros l l0 pi.
-apply ll_to_mix02''.
-revert l pi ; induction l0 ; intros l pi.
-- cons2app.
-  eapply ex_r ; [ | apply Permutation_Type_app_comm ].
-  simpl ; apply wk_r ; assumption.
-- cons2app.
-  eapply ex_r ; [ | apply Permutation_Type_app_comm ].
-    simpl ; apply co_r.
-  rewrite 2 app_comm_cons.
-  eapply ex_r ; [ | apply Permutation_Type_app_comm ].
-  list_simpl ; apply IHl0.
-  list_simpl in pi.
-  eapply ex_r ; [ apply pi | PCperm_Type_solve ].
-Qed.
 
 (** ** The system [ll_bbb] *)
 (** It contains [ll_mix2] but allows [mix0] as well above one side of each [mix2] rule. *)
@@ -280,14 +203,14 @@ induction pi ;
   try now (eapply ex_r ; [ | apply Permutation_Type_swap ] ;
            constructor ; eapply ex_r ; [ eassumption | PCperm_Type_solve ]).
 - eapply ex_r...
-- apply mix02_to_ll'' in l.
-  apply co_r.
+-apply co_r.
   apply co_r.
   apply de_r.
   apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: l1)
                                    ++ (wn (tens (wn one) bot) :: l2)))...
   apply tens_r...
-  apply bot_r...
+  + eapply mix02_to_ll''...
+  + apply bot_r...
 - apply co_r.
   apply (ex_r _ (tens A B :: (wn (tens (wn one) bot) :: l2)
                           ++ (wn (tens (wn one) bot) :: l1)))...
@@ -458,7 +381,6 @@ induction pi ; intros l' l0' l1' HP.
         eapply ex_r ; [ | cons2app ; apply Permutation_Type_app_comm ] ; list_simpl.
         apply de_r.
         eapply ex_r ; [ apply pi | ]... }
-      eapply ll_to_mix02''' in pi1'...
       apply (Permutation_Type_app_head l1a) in HP3b.
       assert (IHP2 := Permutation_Type_trans HP1 HP3b).
       apply (@Permutation_Type_cons _ bot _ eq_refl) in IHP2.
@@ -466,8 +388,12 @@ induction pi ; intros l' l0' l1' HP.
       apply IHpi2 in IHP2.
       assert (Permutation_Type (l2a ++ l1a) l') as HP' by perm_Type_solve.
       eapply ex_bbb_r ; [ apply mix2_bbb_r | apply HP' ]...
-      rewrite <- app_nil_l.
-      eapply bot_rev_bbb...
+      -- rewrite <- app_nil_l.
+         eapply bot_rev_bbb...
+      -- apply (stronger_pfrag (mix2add_pfrag (mix0add_pfrag pfrag_ll))) ; [ | eapply ll_to_mix02''' ]...
+         ++ intros a ; destruct a.
+         ++ intros a ; destruct a.
+         ++ eapply ex_r in pi1' ; [  | apply Permutation_Type_app_comm ]...
     * decomp_map_Type Heq2.
       inversion Heq2.
 - assert (HP' := HP).

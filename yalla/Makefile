@@ -53,7 +53,7 @@ basic_tactics.vo: basic_tactics.v $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIB
 
 formulas.vo: formulas.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Bool_more.vo yalla_ax.vo
 fmformulas.vo: fmformulas.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/nattree.vo $(OLLIBSDIR)/fmsetlist_Type.vo formulas.vo
-ll_mix.vo: ll_mix.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_def.vo
+ll_mix.vo: ll_mix.v $(OLLIBSDIR)/Bool_more.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_def.vo ll_prop.vo
 ll_fragments.vo: ll_fragments.v $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/genperm_Type.vo ll_prop.vo ll_mix.vo subs.vo
 ll_def.vo: ll_def.v $(OLLIBSDIR)/Bool_more.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/CyclicPerm_Type.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/CPermutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo basic_tactics.vo formulas.vo
 ll_cut.vo: ll_cut.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/genperm_Type.vo $(OLLIBSDIR)/flat_map_Type_more.vo $(OLLIBSDIR)/wf_nat_more.vo ll_def.vo
@@ -79,7 +79,7 @@ tl.vo: tl.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Bool_more.vo $(OLLIBSDIR)/Lis
 
 yalla_ax.vo: $(OLLIBSDIR)/Injective.vo yalla_ax.v
 
-bbb.vo: bbb.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_def.vo ll_fragments.vo
+bbb.vo: bbb.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_mix.vo ll_fragments.vo
 nn_def.vo: nn_def.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_Type.vo $(OLLIBSDIR)/genperm_Type.vo subs.vo isubs.vo
 nn_prop.vo: nn_prop.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type.vo $(OLLIBSDIR)/genperm_Type.vo subs.vo ll_fragments.vo ill_prop.vo nn_def.vo bbb.vo
 nn_foc.vo: nn_foc.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo basic_tactics.vo ll_fragments.vo ill_prop.vo llfoc.vo tl.vo nn_prop.vo
