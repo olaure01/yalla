@@ -254,8 +254,8 @@ intros A Hgfn.
 eapply ex_ir ; [ | apply Permutation_Type_swap ].
 cons2app.
 rewrite <- (app_nil_l _).
-eapply cut_ir.
-- reflexivity.
+eapply cut_ir_axfree.
+- intros a ; destruct a.
 - apply ie_ie.
   assumption.
 - apply negR_ilr ; try apply ax_exp_ill.
@@ -340,11 +340,15 @@ induction Hll ;
   eapply ex_ir...
 - apply negR_irr in IHHll1.
   apply negR_irr in IHHll2.
-  assert (pi0 := @trans_dual R ipfrag_ill eq_refl eq_refl A).
+  apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll1.
+  apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll2.
+  assert (pi0 := @trans_dual R (cutupd_ipfrag ipfrag_ill true) eq_refl eq_refl A).
   rewrite <- (app_nil_l _) in pi0.
   eapply (cut_ir _ _ _ _ _ _ IHHll2) in pi0.
   list_simpl in pi0.
   eapply (cut_ir _ _ _ _ _ _ IHHll1) in pi0.
+  unfold ill_ll ;  change ipfrag_ill with (cutrm_ipfrag (cutupd_ipfrag ipfrag_ill true)).
+  apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
   eapply ex_ir...
 - destruct a ; subst.
   + apply ie_dual_diag...
@@ -495,7 +499,7 @@ intros l A Hll.
 simpl.
 cons2app.
 rewrite <- (app_nil_r (map _ _)).
-eapply cut_ir...
+eapply cut_ir_axfree ; try (now (intros a ; destruct a))...
 apply zero_ilr.
 Qed.
 
@@ -566,7 +570,9 @@ Proof with myeeasy.
 intros R l HR Hll.
 apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 true)) in Hll.
 - apply (ll_to_ill_trans R) in Hll ; myeasy.
-  + eapply stronger_ipfrag ; [ | apply Hll ].
+  + unfold ill_ll ; change ipfrag_ill with (cutrm_ipfrag (cutupd_ipfrag ipfrag_ill true)).
+    apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
+    eapply stronger_ipfrag ; [ | apply Hll ].
     nsplit 3...
     intros a ; destruct a.
   + intros f.
@@ -612,10 +618,11 @@ Proof with myeeasy.
 intros R l Hll.
 change (ioc R :: map (trans _) l)
   with (map ioc (R :: nil) ++ map (trans (ioc R)) l).
-
 apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
 - eapply (ll_to_ill_trans_gen (ioc R) _ _ (R :: nil)) in Hll ; myeasy.
-  + eapply stronger_ipfrag ; [ | apply Hll ].
+  + unfold ill_ll ; change ipfrag_ill with (cutrm_ipfrag (cutupd_ipfrag ipfrag_ill true)).
+    apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
+    eapply stronger_ipfrag ; [ | apply Hll ].
     nsplit 3...
     intros a ; destruct a.
   + intros ; apply ax_exp_ill.
@@ -659,9 +666,8 @@ induction Hll ; (try now (inversion f)) ; simpl.
 - apply (ll_mix02_to_ill_trans_gen R) in l.
   rewrite <- (app_nil_l (ioc _ :: _)) in l.
   rewrite map_app.
-  assert (ipcut ipfrag_ill = true) as Hcut by reflexivity.
   rewrite <- (app_nil_r (map _ l1)).
-  apply (@cut_ir _ Hcut (ioc R))...
+  eapply (cut_ir_axfree) ; [ intros a ; destruct a | | ]...
   eapply ex_ir ; [ | apply Permutation_Type_app_comm ]...
 - apply negR_ilr...
   apply one_irr.

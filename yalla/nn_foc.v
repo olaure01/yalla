@@ -145,15 +145,21 @@ induction A ; simpl.
                   (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app.
   refine (cut_ir_axfree _ _ _ _ _ _ H' _) ; [ intros a ; destruct a | ].
+  unfold ill_ll ; change ipfrag_ill with (cutrm_ipfrag (cutupd_ipfrag ipfrag_ill true)).
+  apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
   apply neg_tens_propag...
   + apply pntrans_to_trans in IHA1.
     cons2app in IHA1.
     assert (H1 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))).
-    refine (cut_ir_axfree _ _ _ _ _ _ H1 IHA1) ; intros a ; destruct a.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
+    refine (cut_ir _ _ _ _ _ _ H1 IHA1)...
   + apply pntrans_to_trans in IHA2.
     cons2app in IHA2.
     assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
-    refine (cut_ir_axfree _ _ _ _ _ _ H2 IHA2) ; intros a ; destruct a.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
+    refine (cut_ir _ _ _ _ _ _ H2 IHA2)...
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl.
@@ -169,15 +175,21 @@ induction A ; simpl.
                   (iplus (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app.
   refine (cut_ir_axfree _ _ _ _ _ _ H' _) ; [ intros a ; destruct a | ].
+  unfold ill_ll ; change ipfrag_ill with (cutrm_ipfrag (cutupd_ipfrag ipfrag_ill true)).
+  apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
   apply neg_plus_propag...
   + apply pntrans_to_trans in IHA1.
     cons2app in IHA1.
     assert (H1 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))).
-    refine (cut_ir_axfree _ _ _ _ _ _ H1 IHA1) ; intros a ; destruct a.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
+    refine (cut_ir _ _ _ _ _ _ H1 IHA1)...
   + apply pntrans_to_trans in IHA2.
     cons2app in IHA2.
     assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
-    refine (cut_ir_axfree _ _ _ _ _ _ H2 IHA2) ; intros a ; destruct a.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
+    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
+    refine (cut_ir _ _ _ _ _ _ H2 IHA2)...
 - rewrite <- (app_nil_l _).
   apply plus_ilr ; list_simpl.
   + apply plus_irr1...
