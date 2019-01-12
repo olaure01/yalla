@@ -56,11 +56,19 @@ split.
   apply le_ipfrag_trans.
 Qed.
 
-Definition cutupd_ipfrag P b := mk_ipfrag b (ipgax P) (ipperm P).
-
 Definition axupd_ipfrag P G := mk_ipfrag (ipcut P) G (ipperm P).
 
+Definition cutupd_ipfrag P b := mk_ipfrag b (ipgax P) (ipperm P).
+
 Definition cutrm_ipfrag P := cutupd_ipfrag P false.
+
+Lemma cutupd_ipfrag_true : forall P, le_ipfrag P (cutupd_ipfrag P true).
+Proof.
+intros P.
+nsplit 3 ; try reflexivity.
+- apply leb_true.
+- intros a ; exists a ; reflexivity.
+Qed.
 
 
 (** ** Rules *)
