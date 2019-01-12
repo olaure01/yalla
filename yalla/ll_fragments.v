@@ -28,9 +28,8 @@ Lemma cut_ll_r : forall A l1 l2,
   ll_ll (dual A :: l1) -> ll_ll (A :: l2) -> ll_ll (l2 ++ l1).
 Proof with myeeasy.
 intros A l1 l2 pi1 pi2.
-rewrite <- (app_nil_l (_ ++ _)).
-eapply cut_elim ; try (now (intros a ; contradiction a))...
-rewrite bidual...
+eapply cut_r_axfree...
+intros a ; destruct a.
 Qed.
 
 Lemma cut_ll_admissible :
@@ -57,9 +56,8 @@ Lemma cut_mix0_r : forall A l1 l2,
   ll_mix0 (dual A :: l1) -> ll_mix0 (A :: l2) -> ll_mix0 (l2 ++ l1).
 Proof with myeeasy.
 intros A l1 l2 pi1 pi2.
-rewrite <- (app_nil_l (_ ++ _)).
-eapply cut_elim ; try (now (intros a ; contradiction a))...
-rewrite bidual...
+eapply cut_r_axfree...
+intros a ; destruct a.
 Qed.
 
 Lemma cut_mix0_admissible :
@@ -213,9 +211,8 @@ Lemma cut_mix2_r : forall A l1 l2,
   ll_mix2 (dual A :: l1) -> ll_mix2 (A :: l2) -> ll_mix2 (l2 ++ l1).
 Proof with myeeasy.
 intros A l1 l2 pi1 pi2.
-rewrite <- (app_nil_l (_ ++ _)).
-eapply cut_elim ; try (now (intros a ; contradiction a))...
-rewrite bidual...
+eapply cut_r_axfree...
+intros a ; destruct a.
 Qed.
 
 Lemma cut_mix2_admissible :
@@ -364,9 +361,8 @@ Lemma cut_mix02_r : forall A l1 l2,
   ll_mix02 (dual A :: l1) -> ll_mix02 (A :: l2) -> ll_mix02 (l2 ++ l1).
 Proof with myeeasy.
 intros A l1 l2 pi1 pi2.
-rewrite <- (app_nil_l (_ ++ _)).
-eapply cut_elim ; try (now (intros a ; contradiction a))...
-rewrite bidual...
+eapply cut_r_axfree...
+intros a ; destruct a.
 Qed.
 
 Lemma cut_mix02_admissible :

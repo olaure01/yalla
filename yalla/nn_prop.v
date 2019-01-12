@@ -5,7 +5,7 @@
 
 
 (** * Parametric negative translation from [ll] into [ill]. *)
-(** Properties relying on cut elimination *)
+(** Properties relying on cut admissibility *)
 
 Require Import List_more.
 Require Import List_Type_more.
@@ -456,22 +456,8 @@ apply (ll_to_ill_trans ione) in Hll ; myeasy.
 - intros f l1 l2 pi1 pi2.
   rewrite <- (app_nil_l (map _ l2 ++ map _ l1)).
   rewrite <- (app_nil_r (map _ l2 ++ map _ l1)).
-eapply cut_ir_nzeropos_axfree_by_ll.
-  + apply i2ac_inj.
+  eapply cut_ir_axfree.
   + intros a ; destruct a.
-  + list_simpl ; constructor.
-    * constructor.
-    * apply Forall_Type_app.
-      -- clear ; induction l2 ; constructor...
-         apply trans_nz.
-         ++ intros Hz.
-            inversion Hz.
-         ++ constructor.
-      -- clear ; induction l1 ; constructor...
-         apply trans_nz.
-         ++ intros Hz.
-            inversion Hz.
-         ++ constructor.
   + apply tens_irr...
   + apply tens_ilr.
     apply one_ilr.

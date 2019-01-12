@@ -140,20 +140,20 @@ induction A ; simpl.
 - rewrite <- (app_nil_l _).
   apply one_ilr.
   apply one_irr.
-- apply pntrans_to_trans in IHA1.
-  apply pntrans_to_trans in IHA2.
-  assert (H1 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))).
-  cons2app in IHA1.
-  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H1) in IHA1...
-  assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
-  cons2app in IHA2.
-  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H2) in IHA2...
-  eapply (neg_tens_propag _ _ _ _ _ _ _ IHA1) in IHA2.
+- apply negR_irr.
   assert (H' := @ineg_to_ilmap ipfrag_ill
-             (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
-  cons2app in IHA2.
-  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H') in IHA2...
-  apply negR_irr...
+                  (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
+  cons2app.
+  refine (cut_ir_axfree _ _ _ _ _ _ H' _) ; [ intros a ; destruct a | ].
+  apply neg_tens_propag...
+  + apply pntrans_to_trans in IHA1.
+    cons2app in IHA1.
+    assert (H1 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))).
+    refine (cut_ir_axfree _ _ _ _ _ _ H1 IHA1) ; intros a ; destruct a.
+  + apply pntrans_to_trans in IHA2.
+    cons2app in IHA2.
+    assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
+    refine (cut_ir_axfree _ _ _ _ _ _ H2 IHA2) ; intros a ; destruct a.
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl.
@@ -164,20 +164,20 @@ induction A ; simpl.
   apply zero_ilr.
 - rewrite <- (app_nil_l _).
   apply zero_ilr.
-- apply pntrans_to_trans in IHA1.
-  apply pntrans_to_trans in IHA2.
-  assert (H1 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))).
-  cons2app in IHA1.
-  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H1) in IHA1...
-  assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
-  cons2app in IHA2.
-  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H2) in IHA2...
-  eapply (neg_plus_propag _ _ _ _ _ _ _ IHA1) in IHA2.
+- apply negR_irr.
   assert (H' := @ineg_to_ilmap ipfrag_ill
                   (iplus (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
-  cons2app in IHA2.
-  eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ H') in IHA2...
-  apply negR_irr...
+  cons2app.
+  refine (cut_ir_axfree _ _ _ _ _ _ H' _) ; [ intros a ; destruct a | ].
+  apply neg_plus_propag...
+  + apply pntrans_to_trans in IHA1.
+    cons2app in IHA1.
+    assert (H1 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A1))).
+    refine (cut_ir_axfree _ _ _ _ _ _ H1 IHA1) ; intros a ; destruct a.
+  + apply pntrans_to_trans in IHA2.
+    cons2app in IHA2.
+    assert (H2 := @ilmap_to_ineg ipfrag_ill (tl2ill (ptrans A2))).
+    refine (cut_ir_axfree _ _ _ _ _ _ H2 IHA2) ; intros a ; destruct a.
 - rewrite <- (app_nil_l _).
   apply plus_ilr ; list_simpl.
   + apply plus_irr1...
@@ -229,45 +229,27 @@ assert (forall l1 l2, ill_ll (map (trans N) l1 ++ map tl2ill (map ntrans l2)) N
   list_simpl in pi.
     assert (Ha := ntrans_to_trans a).
     eapply ex_ir in pi ; [ | apply Permutation_Type_middle ].
-    eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ _ _ _ _ Ha) in pi...
+    eapply (cut_ir_axfree _ _ _ _ _ _ Ha) in pi...
     list_simpl in pi.
     change (tl2ill (ntrans a) :: map tl2ill (map ntrans l2))
       with (map tl2ill (map ntrans (a :: l2))) in pi.
     apply IHl1 in pi.
     eapply ex_ir...
-    PEperm_Type_solve.
-  Unshelve.
-  + clear ; intros a ; destruct a.
-  + simpl.
-    constructor.
-    * constructor.
-    * apply Forall_Type_app.
-      -- clear ; induction l1 ; constructor...
-         apply trans_nz.
-         ++ intros Hz ; inversion Hz.
-         ++ constructor.
-      -- change (tl2ill (ntrans a) :: map tl2ill (map ntrans l2))
-           with (map tl2ill (map ntrans (a :: l2))).
-         remember (a :: l2) as l.
-         clear ; induction l ; constructor...
-         apply tl2ill_nz. }
+    PEperm_Type_solve. 
+  Unshelve. intros x ; destruct x. }
 rewrite <- (app_nil_r _) in pi.
 change nil with (map tl2ill (map ntrans nil)) in pi.
 apply IH in pi.
 list_simpl in pi.
-apply (cut_admissible_ill_nzeropos_axfree_by_ll _ i2ac_inj) in pi.
-- eapply (stronger_tpfrag (cutrm_tpfrag tpfrag_tl)).
-  + nsplit 3...
-    intros a ; destruct a.
-  + eapply tlfrag2tl_cutfree...
-    rewrite <- cutrm_t2ipfrag.
-    eapply stronger_ipfrag ; [ | apply pi].
-    nsplit 3...
-    intros a ; destruct a.
-- intros a ; destruct a.
-- constructor ; [ constructor | ]...
-  clear ; induction l ; constructor...
-  apply tl2ill_nz.
+apply cut_admissible_ill in pi ; try (now (intros a ; destruct a)).
+eapply (stronger_tpfrag (cutrm_tpfrag tpfrag_tl)).
+- nsplit 3...
+  intros a ; destruct a.
+- eapply tlfrag2tl_cutfree...
+  rewrite <- cutrm_t2ipfrag.
+  eapply stronger_ipfrag ; [ | apply pi].
+  nsplit 3...
+  intros a ; destruct a.
 Qed.
 
 (* ** Proof of Focusing *)

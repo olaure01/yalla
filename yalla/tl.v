@@ -1,6 +1,6 @@
 (* tl example file for yalla library *)
 
-(* output in Type *)
+(* TODO clean file: using cut admissibility of [ill] *)
 
 
 (** * Example of a concrete use of the yalla library: tensor logic *)
@@ -599,25 +599,16 @@ Lemma tlfrag2tl_axfree {P} : (forall a : projT1 (tpgax P), False) -> forall l,
 Proof with try reflexivity ; try assumption.
 intros Hgax.
 intros l ; split ; [ intros A | ] ; intros pi.
-- apply (cut_admissible_ill_nzeropos_axfree_by_ll _ i2ac_inj) in pi...
-  + rewrite cutrm_t2ipfrag in pi.
-    apply tlfrag2tl_cutfree in pi...
-    apply (stronger_tpfrag (cutrm_tpfrag P))...
-    split ; [ | split ] ; intuition...
-  + replace (tl2ill A :: map tl2ill l)
-      with (map tl2ill (A :: l)) by (list_simpl ; reflexivity).
-    remember (A :: l) as l0 ; clear.
-    induction l0 ; simpl ; constructor ; intuition.
-    apply tl2ill_nz.
-- apply (cut_admissible_ill_nzeropos_axfree_by_ll _ i2ac_inj) in pi...
-  + rewrite cutrm_t2ipfrag in pi.
-    apply tlfrag2tl_cutfree in pi...
-    apply (stronger_tpfrag (cutrm_tpfrag P))...
-    split ; [ | split ] ; intuition...
-  + constructor.
-    * constructor.
-    * clear ; induction l ; simpl ; constructor ; intuition.
-      apply tl2ill_nz.
+- apply cut_admissible_ill in pi ; (try (now (intros a ; exfalso ; apply (Hgax a)))).
+  rewrite cutrm_t2ipfrag in pi.
+  apply tlfrag2tl_cutfree in pi...
+  apply (stronger_tpfrag (cutrm_tpfrag P))...
+  split ; [ | split ] ; intuition...
+- apply cut_admissible_ill in pi ; (try (now (intros a ; exfalso ; apply (Hgax a)))).
+  rewrite cutrm_t2ipfrag in pi.
+  apply tlfrag2tl_cutfree in pi...
+  apply (stronger_tpfrag (cutrm_tpfrag P))...
+  split ; [ | split ] ; intuition...
 Qed.
 
 
@@ -635,7 +626,7 @@ apply (stronger_tpfrag (cutrm_tpfrag P)).
   apply ax_exp_ill.
 Qed.
 
-(** *** cut elimination *)
+(** *** cut admissibility *)
 
 Lemma cut_tl_r_axfree {P} : (forall a : projT1 (tpgax P), False) -> forall A l0 l1 l2 C,
   tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C -> tl P (l1 ++ l0 ++ l2) C.
@@ -649,34 +640,15 @@ case_eq (tpcut P) ; intros Hcut.
 - eapply cut_tr...
 - case_eq C.
   + intros D HeqD.
+    apply tlfrag2tl_cutfree...
     assert (pi := pi2' _ HeqD).
     list_simpl in pi.
-    eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ (map tl2ill l1)
-                                                 (map tl2ill l2) _ _ pi1'')
-      in pi...
-    rewrite <- ? map_app in pi.
-    apply tlfrag2tl_cutfree in pi...
+    list_simpl ; eapply cut_ir_axfree...
   + intros HeqD.
+    apply tlfrag2tl_cutfree...
     assert (pi := pi2'' HeqD).
-    list_simpl in pi.
-    eapply (cut_ir_nzeropos_axfree_by_ll _ i2ac_inj _ _ _ (map tl2ill l1)
-                                                 (map tl2ill l2) _ _ pi1'')
-      in pi...
-    rewrite <- ? map_app in pi.
-    apply tlfrag2tl_cutfree in pi...
-Unshelve.
-all : try intuition.
-* replace (tl2ill D :: map tl2ill l1 ++ map tl2ill l0 ++ map tl2ill l2)
-     with (map tl2ill (D :: l1 ++ l0 ++ l2)) by (list_simpl ; reflexivity).
-  remember (D :: l1 ++ l0 ++ l2) as l ; clear.
-  induction l ; simpl ; constructor ; intuition.
-  apply tl2ill_nz.
-* constructor.
-  -- constructor.
-  -- rewrite <- ? map_app.
-     remember (l1 ++ l0 ++ l2) as l ; clear.
-     induction l ; simpl ; constructor ; intuition.
-     apply tl2ill_nz.
+    list_simpl in pi ; rewrite <- ? map_app in pi.
+    list_simpl ; eapply cut_ir_axfree...
 Qed.
 
 Lemma cut_admissible_tl_axfree {P} : (forall a : projT1 (tpgax P), False) ->

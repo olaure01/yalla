@@ -586,7 +586,7 @@ Qed.
 
 
 
-(** ** Cut elimination for [ll_bbb] *)
+(** ** Cut admissibility for [ll_bbb] *)
 
 Theorem cut_bbb_r : forall A l1 l2,
   ll_bbb (dual A :: l1) -> ll_bbb (A :: l2) -> ll_bbb (l2 ++ l1).
@@ -919,7 +919,7 @@ eexists ; split ; [ apply bbb_ex | apply ex_not_bbb0 ].
 Qed.
 
 (** The same example is provable in [ll_bbb0] with cut,
-    thus cut-elimination does not hold for [ll_bbb0]. *)
+    thus cut admissibility does not hold for [ll_bbb0]. *)
 
 Section bbb0_with_cut.
 
@@ -957,7 +957,7 @@ Qed.
 
 End bbb0_with_cut.
 
-Lemma cut_not_elim_bbb0 :
+Lemma cut_not_rule_bbb0 :
 (forall A l1 l2,
   ll_bbb0 (dual A :: l1) -> ll_bbb0 (A :: l2) -> ll_bbb0 (l2 ++ l1))
     -> False.

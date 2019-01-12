@@ -152,18 +152,19 @@ apply illfrag2l.
 apply ill_def.ax_exp_ill.
 Qed.
 
-(** *** cut elimination *)
+(** *** cut admissibility *)
 
 Lemma cut_r : forall A l0 l1 l2 C,
   lprove l0 A -> lprove (l1 ++ A :: l2) C -> lprove (l1 ++ l0 ++ l2) C.
 Proof with try eassumption.
 intros A l0 l1 l2 C pi1 pi2.
+apply l2illfrag in pi1.
+apply l2illfrag in pi2.
+rewrite map_app in pi2.
 apply illfrag2l.
 rewrite 2 map_app.
-eapply ill_cut.cut_ir_gaxat ; try (intros a ; destruct a ; fail).
-- apply l2illfrag in pi1...
-- apply l2illfrag in pi2.
-  rewrite map_app in pi2...
+eapply ill_cut.cut_ir_axfree...
+intros a ; destruct a.
 Qed.
 
 

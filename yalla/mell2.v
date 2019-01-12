@@ -14,7 +14,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [yalla] library *)
 
-Require ll_prop.
+Require ll_cut.
 
 
 (** ** 1. define formulas *)
@@ -228,7 +228,7 @@ simpl ; rewrite <- mell2ll_dual.
 eapply ll_def.ex_r ; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
 Qed.
 
-(** *** cut elimination *)
+(** *** cut admissibility *)
 
 Lemma cut_r : forall A l1 l2, 
   mell (A :: l1) -> mell (dual A :: l2) -> mell (l1 ++ l2).
@@ -236,11 +236,11 @@ Proof with try eassumption.
 intros A l1 l2 pi1 pi2.
 apply mellfrag2mell.
 rewrite map_app.
-eapply ll_prop.cut_r_axfree.
-- intros a ; destruct a.
-- apply mell2mellfrag in pi2.
-  simpl in pi2 ; rewrite <- mell2ll_dual in pi2...
-- apply mell2mellfrag in pi1...
+apply mell2mellfrag in pi1.
+apply mell2mellfrag in pi2.
+simpl in pi2 ; rewrite <- mell2ll_dual in pi2.
+eapply ll_cut.cut_r_axfree...
+intros a ; destruct a.
 Qed.
 
 

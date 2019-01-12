@@ -3,7 +3,7 @@
 (* TODO clean file *)
 
 (** * Intuitionistic Linear Logic *)
-(* Properties depending on cut elimination *)
+(* Properties depending on cut admissibility *)
 
 Require Import Injective.
 Require Import Bool_more.
@@ -1499,62 +1499,6 @@ apply cut_admissible_axfree in pi.
   + intros a.
     exfalso ; intuition.
 - intros Hgax ; intuition.
-Qed.
-
-
-(** Axiom expansion using embedding into [ll] *)
-Lemma ax_exp_ill_nzeropos_by_ll {P} : forall A, nonzerospos A ->
-  ill P (A :: nil) A.
-Proof with myeeasy.
-intros A Hnz.
-assert (pi :=
-  @ax_exp (i2pfrag i2a (axupd_ipfrag P NoIAxioms)) (ill2ll i2a A)).
-eapply ll_to_ill_nzeropos_axfree in pi...
-- eapply stronger_ipfrag...
-  nsplit 3...
-  intros a ; inversion a.
-- intros a ; inversion a.
-- constructor...
-  constructor...
-  constructor.
-- PCperm_Type_solve.
-Qed.
-
-(** Cut elimination *)
-Lemma cut_ir_nzeropos_axfree_by_ll {P} : (projT1 (ipgax P) -> False) -> 
-  forall A l0 l1 l2 C, Forall_Type nonzerospos (C :: l1 ++ l0 ++ l2) ->
-  ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
-Proof with myeeasy.
-intros P_axfree A l0 l1 l2 C Hnz pi1 pi2.
-apply (ill_to_ll i2a) in pi1.
-apply (ill_to_ll i2a) in pi2.
-rewrite <- ? map_rev in pi2.
-rewrite rev_app_distr in pi2 ; simpl in pi2.
-rewrite ? map_app in pi2 ; simpl in pi2.
-rewrite <- ? app_assoc in pi2.
-rewrite <- ? app_comm_cons in pi2 ; simpl in pi2.
-rewrite app_comm_cons in pi2.
-eapply ex_r in pi2 ; [ | apply PCperm_Type_app_comm ].
-rewrite <- ? app_comm_cons in pi2.
-assert (projT1 (pgax (i2pfrag i2a P)) -> False) as P_axfree'
-  by intuition.
-apply (cut_r_axfree P_axfree' _ _ _ pi2) in pi1.
-eapply ll_to_ill_nzeropos_axfree in pi1...
-PCperm_Type_solve.
-Qed.
-
-Proposition cut_admissible_ill_nzeropos_axfree_by_ll {P} :
-  (projT1 (ipgax P) -> False) ->
-  forall l C, Forall_Type nonzerospos (C :: l) -> ill P l C ->
-    ill (cutrm_ipfrag P) l C.
-Proof with myeeasy.
-intros P_axfree l C Hnz pi.
-apply (ill_to_ll i2a) in pi.
-apply cut_admissible_axfree in pi...
-rewrite cutrm_i2pfrag in pi.
-eapply ll_to_ill_nzeropos_cutfree in pi...
-intros Hgax.
-exfalso ; intuition.
 Qed.
 
 
@@ -3533,37 +3477,31 @@ Qed.
 Variable i2a : IAtom -> Atom.
 Hypothesis i2a_inj : injective i2a.
 
-Lemma cut_admissible_nzeropos_ifragment {P} : (projT1 (ipgax P) -> False) ->
-forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> forall l A,
+Lemma cut_admissible_ifragment {P} : (projT1 (ipgax P) -> False) ->
+forall FS, ifragment FS -> forall l A,
   ill_ps P (fun l A => Forallb FS (A :: l)) l A ->
   ill_ps (cutrm_ipfrag P) (fun l A => Forallb FS (A :: l)) l A.
 Proof with myeeasy.
-intros P_axfree FS HFS Hnz l A pi.
+intros P_axfree FS HFS l A pi.
 assert (is_true (Forallb FS (A :: l))) as HFSl by (destruct pi ; myeeasy).
 apply ill_ps_is_ill in pi.
-eapply cut_admissible_ill_nzeropos_axfree_by_ll in pi...
-- apply ill_is_ill_ps in pi.
-  apply iconservativity...
-- apply Forallb_Forall_Type in HFSl.
-  eapply Forall_Type_arrow...
-  apply Hnz.
+eapply cut_admissible_ill_axfree in pi...
+apply ill_is_ill_ps in pi.
+apply iconservativity...
 Qed.
 
-Lemma iconservativity_cut_nzeropos_axfree {P} : (projT1 (ipgax P) -> False) ->
-forall FS, ifragment FS -> (forall C, is_true (FS C) -> nonzerospos C) -> 
+Lemma iconservativity_cut_axfree {P} : (projT1 (ipgax P) -> False) ->
+forall FS, ifragment FS ->
   forall l A, ill P l A -> is_true (Forallb FS (A :: l)) ->
     ill_ps P (fun l A => Forallb FS (A :: l)) l A.
 Proof with try eassumption ; try reflexivity.
-intros P_axfree FS Hf Hnz l A pi HFS.
-eapply cut_admissible_ill_nzeropos_axfree_by_ll in pi...
-- apply ill_is_ill_ps in pi.
-  eapply iconservativity in pi...
-  clear - P_axfree pi ; induction pi ; try now econstructor.
-  + eapply ex_ps_ir...
-  + eapply ex_oc_ps_ir...
-- apply Forallb_Forall_Type in HFS.
-  eapply Forall_Type_arrow...
-  apply Hnz.
+intros P_axfree FS Hf l A pi HFS.
+eapply cut_admissible_ill_axfree in pi...
+apply ill_is_ill_ps in pi.
+eapply iconservativity in pi...
+clear - P_axfree pi ; induction pi ; try now econstructor.
+- eapply ex_ps_ir...
+- eapply ex_oc_ps_ir...
 Qed.
 
 End Fragments.

@@ -1,6 +1,6 @@
 (* ll_prop library for yalla *)
 
-(** * Properties relying on cut elimination *)
+(** * Properties relying on cut admissibility *)
 
 Require Import Bool_more.
 Require Import List_more.
@@ -10,65 +10,6 @@ Require Import genperm_Type.
 
 Require Export ll_cut.
 
-
-(** ** Variants on cut elimination *)
-
-(** If axioms are atomic and closed under cut and exchange, then the cut rule is valid. *)
-Lemma cut_r_gaxat {P} :
-  (forall a, Forall atomic (projT2 (pgax P) a)) ->
-  (forall a b x l1 l2 l3 l4,
-     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-  forall A l1 l2,
-    ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
-Proof with myeeasy.
-intros Hgax_at Hgax_cut A l1 l2 pi1 pi2.
-eapply cut_elim in pi1...
-- eapply (ex_r _ (nil ++ l1 ++ l2))...
-  simpl.
-  apply PCperm_Type_app_comm.
-- eassumption.
-Qed.
-
-(** If axioms are atomic and closed under cut and exchange, then the cut rule is admissible:
-provability is preserved if we remove the cut rule. *)
-Lemma cut_admissible {P} :
-  (forall a, Forall atomic (projT2 (pgax P) a)) ->
-  (forall a b x l1 l2 l3 l4,
-     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-  forall l, ll P l -> ll (cutrm_pfrag P) l.
-Proof.
-intros Hgax_at Hgax_cut l H.
-induction H ; try (econstructor ; myeeasy ; fail).
-- eapply cut_r_gaxat ; eassumption.
-- revert a.
-  assert (pgax P = pgax (cutrm_pfrag P)) as Hcut by reflexivity.
-  rewrite Hcut.
-  apply gax_r.
-Qed.
-
-(** If there are no axioms (except the identity rule), then the cut rule is valid. *)
-Lemma cut_r_axfree {P} : (projT1 (pgax P) -> False) -> forall A l1 l2, 
-  ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
-Proof with myeeasy.
-intros P_axfree A l1 l2 pi1 pi2.
-case_eq (pcut P) ; intros Hcut.
-- eapply (@cut_r _ Hcut)...
-- eapply cut_r_gaxat ;
-    try (now (intros a ; exfalso ; apply P_axfree in a ; inversion a))...
-Qed.
-
-(** If there are no axioms (except the identity rule), then the cut rule is admissible:
-provability is preserved if we remove the cut rule. *)
-Lemma cut_admissible_axfree {P} : (projT1 (pgax P) -> False) -> forall l,
-  ll P l -> ll (cutrm_pfrag P) l.
-Proof.
-intros P_axfree l H.
-eapply cut_admissible ;
-  try (intros ; exfalso ; eapply P_axfree ; myeeasy ; fail) ;
-  eassumption.
-Qed.
 
 (** Some additional reversibility statements *)
 Lemma with_rev1_noax {P} : (projT1 (pgax P) -> False) ->

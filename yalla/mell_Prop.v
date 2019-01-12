@@ -19,7 +19,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ll] library *)
 
-Require ll_prop.
+Require ll_cut.
 
 
 (** ** 1. define formulas *)
@@ -269,7 +269,7 @@ simpl ; rewrite <- mell2ll_dual.
 eapply ll_def.ex_r ; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
 Qed.
 
-(** *** cut elimination *)
+(** *** cut admissibility *)
 
 Lemma cut_r : forall A l1 l2, 
   mell (A :: l1) -> mell (dual A :: l2) -> mell (l1 ++ l2).
@@ -280,7 +280,7 @@ apply mell2mellfrag in pi2.
 apply inhmellfrag2mell.
 destruct pi1 as [ pi1 ] ; destruct pi2 as [ pi2 ] ; constructor.
 rewrite map_app.
-eapply ll_prop.cut_r_axfree...
+eapply ll_cut.cut_r_axfree...
 - intros a ; destruct a.
 - rewrite mell2ll_dual...
 Qed.

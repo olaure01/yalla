@@ -3,7 +3,7 @@
 (* TODO clean file *)
 
 (** * Intuitionistic Linear Logic *)
-(* not cuts here, see ill_cut.v for cut elimination, and ill_prop.v for other properties *)
+(* not cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 
 Require Import CMorphisms.
 

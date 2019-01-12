@@ -1,6 +1,6 @@
 (* ll_cut library for yalla *)
 
-(** * Cut elimination for [ll] from cut elimination for [ill] *)
+(** * Cut admissibility for [ll] *)
 
 
 Require Import Arith.
@@ -302,17 +302,17 @@ Hypothesis P_gax_cut : forall a b x l1 l2 l3 l4,
   projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
   { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }.
 
-Theorem cut_elim : forall A l0 l1 l2,
-  ll P (dual A :: l0) -> ll P (l1 ++ A :: l2) -> ll P (l1 ++ l0 ++ l2).
+Theorem cut_r_gaxat : forall A l1 l2,
+  ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
 Proof with myeasy_perm_Type.
 case_eq (pcut P) ; intros P_cutfree.
-{ intros A l0 l1 l2 pi1 pi2.
-  apply (ex_r _ _ (A :: l2 ++ l1)) in pi2...
-  apply (ex_r _ ((l2 ++ l1) ++ l0))...
-  eapply cut_r... }
+{ intros A l1 l2 pi1 pi2 ; eapply cut_r... }
 enough (forall c s A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2)),
-          s = psize pi1 + psize pi2 -> fsize A <= c -> ll P (l1 ++ l0 ++ l2)) as IH
-by (intros A l0 l1 l2 pi1 pi2 ; refine (IH _ _ A _ _ _ pi1 pi2 _ _) ; myeasy_perm_Type).
+          s = psize pi1 + psize pi2 -> fsize A <= c -> ll P (l1 ++ l0 ++ l2)) as IH.
+{ intros A l1 l2 pi1 pi2.
+  rewrite <- (app_nil_l _) in pi2.
+  apply (ex_r _ (nil ++ l1 ++ l2))...
+  refine (IH _ _ A _ _ _ pi1 pi2 _ _)... }
 induction c as [c IHcut0] using lt_wf_rect.
 assert (forall A, fsize A < c -> forall l0 l1 l2,
           ll P (dual A :: l0) -> ll P (l1 ++ A :: l2) -> ll P (l1 ++ l0 ++ l2)) as IHcut
@@ -1228,4 +1228,40 @@ Qed.
 End Cut_Elim_Proof.
 
 
+(** ** Variants on cut admissibility *)
+
+(** If axioms are atomic and closed under cut, then the cut rule is admissible:
+provability is preserved if we remove the cut rule. *)
+Lemma cut_admissible {P} :
+  (forall a, Forall atomic (projT2 (pgax P) a)) ->
+  (forall a b x l1 l2 l3 l4,
+     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
+     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
+  forall l, ll P l -> ll (cutrm_pfrag P) l.
+Proof.
+intros Hgax_at Hgax_cut l pi.
+induction pi ; try (econstructor ; myeeasy ; fail).
+- eapply cut_r_gaxat ; eassumption.
+- assert (pgax P = pgax (cutrm_pfrag P)) as Hcut by reflexivity.
+  revert a ; rewrite Hcut ; apply gax_r.
+Qed.
+
+(** If there are no axioms (except the identity rule), then the cut rule is valid. *)
+Lemma cut_r_axfree {P} : (projT1 (pgax P) -> False) -> forall A l1 l2, 
+  ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
+Proof.
+intros P_axfree A l1 l2 pi1 pi2.
+eapply cut_r_gaxat ; try eassumption.
+all: intros a ; exfalso ; apply (P_axfree a).
+Qed.
+
+(** If there are no axioms (except the identity rule), then the cut rule is admissible:
+provability is preserved if we remove the cut rule. *)
+Lemma cut_admissible_axfree {P} : (projT1 (pgax P) -> False) -> forall l,
+  ll P l -> ll (cutrm_pfrag P) l.
+Proof.
+intros P_axfree l pi.
+eapply cut_admissible ; try eassumption.
+all: intros a ; exfalso ; apply (P_axfree a).
+Qed.
 

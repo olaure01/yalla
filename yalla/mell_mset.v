@@ -17,7 +17,7 @@ Import FMSetNotations.
 
 (** ** 0. load the [ll] library *)
 
-Require ll_prop.
+Require ll_cut.
 Require fmformulas.
 
 
@@ -631,7 +631,7 @@ reflexivity.
 Qed.
 
 
-(** *** cut elimination *)
+(** *** cut admissibility *)
 
 Lemma cut_r : forall A m1 m2, 
   mell (add A m1) -> mell (add (dual A) m2) -> mell (sum m1 m2).
@@ -642,8 +642,8 @@ apply mell2mellfrag in pi2 ; destruct pi2 as [pi2].
 apply mellfrag2mell.
 eapply ll_def.ex_r ; [ | apply Permutation_Type_map ; symmetry ; apply elts_sum ].
 rewrite map_app.
-eapply ll_prop.cut_r_axfree...
-- intros Hax ; inversion Hax.
+eapply ll_cut.cut_r_axfree...
+- intros a ; destruct a.
 - assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
                            (map mell2ll (dual A :: elts m2)))
   as Helt2 by (apply Permutation_Type_map ; apply elts_add).

@@ -3,7 +3,7 @@
 
 
 (** * Linear Logic with explicit permutations *)
-(* not cuts here, see ll_cut.v for cut elimination and ll_prop.v for other properties *)
+(* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
 Require Import CMorphisms.
 
@@ -107,7 +107,7 @@ Qed.
 (** The main predicate: [ll] proofs.
 
 The [nat] parameter is a size of proofs.
-Choices between [plus] and [max] in binary cases are determined by the behavious in cut elimination.
+Choices between [plus] and [max] in binary cases are determined by the behaviour in cut admissibility.
 
 All rules have their main formula at first position in the conclusion.
  - [ax_r]: identity rule restricted to propositional variables (general case proved later)

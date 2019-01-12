@@ -1,7 +1,7 @@
 (* ill library for yalla *)
 
 (** * Intuitionistic Linear Logic *)
-(* Cut elimination, see ill_prop.v for other properties *)
+(* Cut admissibility, see ill_prop.v for other properties *)
 
 Require Import Lia.
 Require Import Wf_nat.
@@ -1219,22 +1219,43 @@ Qed.
 
 End Cut_Elim_Proof.
 
+(** ** Variants on cut admissibility *)
 
-Lemma cut_admissible_ill : forall {P},
-    (forall a, In N (fst (projT2 (ipgax P) a)) -> False) ->
-    (forall a, Forall iatomic (fst (projT2 (ipgax P) a))) ->
-    (forall a, iatomic (snd (projT2 (ipgax P) a))) ->
-    (forall a b l1 l2, fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 -> 
-                    { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
-                          /\ snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }) ->
+(** If axioms are atomic and closed under cut, then the cut rule is admissible:
+provability is preserved if we remove the cut rule. *)
+Lemma cut_admissible_ill {P} :
+  (forall a, In N (fst (projT2 (ipgax P) a)) -> False) ->
+  (forall a, Forall iatomic (fst (projT2 (ipgax P) a))) ->
+  (forall a, iatomic (snd (projT2 (ipgax P) a))) ->
+  (forall a b l1 l2, fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 -> 
+                  { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
+                        /\ snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }) ->
   forall l C, ill P l C -> ill (cutrm_ipfrag P) l C.
 Proof with myeeasy.
-intros P HatNl Hatl Hatr Hcut l C pi.
+intros HatNl Hatl Hatr Hcut l C pi.
 induction pi ; try (econstructor ; myeeasy ; fail).
 - eapply cut_ir_gaxat...
 - assert (ipgax P = ipgax (cutrm_ipfrag P)) as Hgax by reflexivity.
-  revert a.
-  rewrite Hgax.
-  apply gax_ir.
+  revert a ; rewrite Hgax ; apply gax_ir.
 Qed.
+
+(** If there are no axioms (except the identity rule), then the cut rule is valid. *)
+Lemma cut_ir_axfree {P} : (projT1 (ipgax P) -> False) -> forall A l0 l1 l2 C, 
+  ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
+Proof.
+intros P_axfree A l0 l1 l2 C pi1 pi2.
+eapply cut_ir_gaxat ; try eassumption.
+all: intros a ; exfalso ; apply (P_axfree a).
+Qed.
+
+(** If there are no axioms (except the identity rule), then the cut rule is admissible:
+provability is preserved if we remove the cut rule. *)
+Lemma cut_admissible_ill_axfree {P} : (projT1 (ipgax P) -> False) -> forall l C,
+  ill P l C -> ill (cutrm_ipfrag P) l C.
+Proof.
+intros P_axfree l C pi.
+eapply cut_admissible_ill ; try eassumption.
+all: intros a ; exfalso ; apply (P_axfree a).
+Qed.
+
 

@@ -258,7 +258,7 @@ apply illfrag2ill.
 apply ill_def.ax_exp_ill.
 Qed.
 
-(** *** cut elimination *)
+(** *** cut admissibility *)
 
 Lemma cut_r : forall A l1 l2 C, 
   ill l1 A -> ill (A :: l2) C -> ill (l1 ++ l2) C.
@@ -267,9 +267,10 @@ intros A l1 l2 C pi1 pi2.
 apply illfrag2ill.
 rewrite map_app.
 rewrite <- (app_nil_l _).
-eapply ill_cut.cut_ir_gaxat ; try (intros a ; destruct a ; fail).
-- apply ill2illfrag in pi1...
-- apply ill2illfrag in pi2...
+apply ill2illfrag in pi1.
+apply ill2illfrag in pi2.
+eapply ill_cut.cut_ir_axfree...
+intros a ; destruct a.
 Qed.
 
 

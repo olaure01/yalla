@@ -1,6 +1,6 @@
 (* ll_mix library for yalla *)
 
-(** * Results around [mix] rule not requiring cut elimination *)
+(** * Results around [mix] rule *)
 
 Require Import Bool_more.
 Require Import List_more.
