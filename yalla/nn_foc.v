@@ -226,8 +226,8 @@ all : try (apply tl2ill_nz).
 all : constructor ; apply tl2ill_nz.
 Qed.
 
-Definition tpfrag_tl := mk_tpfrag true NoTAxioms true.
-(*                                cut  axioms            perm  *)
+Definition tpfrag_tl := mk_tpfrag false NoTAxioms true.
+(*                                cut   axioms            perm  *)
 Definition tl_ll := tl tpfrag_tl.
 
 Proposition ll_to_tl : forall l, ll_ll l -> tl_ll (map ntrans l) None.
