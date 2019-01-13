@@ -213,17 +213,6 @@ induction A ; simpl.
   rewrite <- (app_nil_l _).
   apply de_ilr.
   apply negR_irr...
-Unshelve.
-all : try reflexivity.
-all : try now (intros a ; destruct a).
-all : constructor ; [ constructor | ]...
-all : list_simpl.
-all : constructor ; constructor ; try constructor.
-all : try (apply trans_nz).
-all : try (now (intros HN ; inversion HN)).
-all : try (now constructor).
-all : try (apply tl2ill_nz).
-all : constructor ; apply tl2ill_nz.
 Qed.
 
 Definition tpfrag_tl := mk_tpfrag false NoTAxioms true.

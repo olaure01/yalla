@@ -26,14 +26,6 @@ Section RTranslation.
 
 Variable R : iformula.
 
-Lemma trans_nz : (zeropos R -> False) -> nonzerospos R ->
-  forall A, nonzerospos (trans R A).
-Proof with myeasy.
-intros Hnz Hnzsp.
-induction A ; simpl ; try now constructor ;
-  try (constructor ; try assumption ; now constructor).
-Qed.
-
 (** In [llR] (where [bot] is equivalent to [R]),
   [A] is implied by the dual of its translation. *)
 Lemma back_to_llR : forall A,

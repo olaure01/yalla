@@ -509,9 +509,9 @@ Definition easyipgax_nzeropos P := forall a,
      PCperm_Type (ipperm P) (ill2ll i2a (snd (projT2 (ipgax P) a))
                             :: rev (map dual (map (ill2ll i2a) (fst (projT2 (ipgax P) a)))))
                        (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l)))
-     -> { b | fst (projT2 (ipgax P) b) = l & snd (projT2 (ipgax P) b) = C })
+       -> ill P l C)
+(*     -> { b | fst (projT2 (ipgax P) b) = l & snd (projT2 (ipgax P) b) = C })    *)
 * (In_Type N (fst (projT2 (ipgax P) a)) -> False).
-
 
 Lemma dual_jfragment_zeropos {P} : ipcut P = false -> easyipgax_nzeropos P -> forall l0,
   Forall_Type nonzerospos l0 -> ll (i2pfrag i2a P) (map dual (map (ill2ll i2a) l0)) ->
@@ -1475,9 +1475,7 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
 - simpl in f.
   rewrite Hcut in f.
   inversion f.
-- apply (Hgax a) in HP.
-  destruct HP as [b Heq1 Heq2] ; subst.
-  apply gax_ir.
+- apply (Hgax a)...
 Qed.
 
 
@@ -1528,18 +1526,9 @@ Inductive oclpam : iformula -> Type :=
 | oclm_iplus : forall A B, oclpam A -> oclpam B -> oclpam (iplus A B)
 | oclm_ioc   : forall A, oclpam A -> oclpam (ioc A).
 
-(*
-Definition easyipgax_oclpam P := forall l0 C, ipgax P l0 C ->
-   (forall l C',
-     PCperm (ipperm P) (ill2ll C :: rev (map dual (map ill2ll l0)))
-                       (ill2ll C' :: l)
-     -> C = C' /\ l = rev (map dual (map ill2ll l0)))
-/\ ~ In N l0.
-*)
-
 (** Cut-free conservativity *)
 (* TODO try following statement for possibly shorter proof:
-Theorem ll_to_ill_oclpam_cutfree {P} : ipcut P = false -> (forall l C, ~ ipgax P l C) -> ipperm P = true ->
+Theorem ll_to_ill_oclpam_cutfree {P} : ipcut P = false -> (projT1 (ipgax P) -> False) -> ipperm P = true ->
   forall l s, ll (i2pfrag P) l s -> forall l0 l1 C, Forall oclpam (C :: l0) ->
     Forall oclike l1 ->
     PCperm (pperm (i2pfrag P)) l (ill2ll C :: map ill2ll l1 ++ rev (map dual (map ill2ll l0))) ->

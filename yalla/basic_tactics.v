@@ -35,4 +35,10 @@ Ltac myeasy_perm_Type :=
   try PCperm_Type_solve ;
   try (simpl_hyp_perm_all_Type ; PCperm_Type_solve).
 
+(** Misc *)
+Definition option_prop {A:Type} (P:A->Prop) o :=
+match o with
+| Some a => P a
+| None => True
+end.
 

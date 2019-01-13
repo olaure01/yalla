@@ -118,12 +118,6 @@ apply Forall_neg_Exists_Type in HnF.
   destruct Hd ; intuition.
 Qed.
 
-Definition option_prop {A:Type} (f:A->Prop) o :=
-match o with
-| Some a => f a
-| None => True
-end.
-
 Definition polcont l A :=
 match polarity A with
 | left _ => l

@@ -36,6 +36,9 @@ Inductive tformula : Set :=
 | tplus : tformula -> tformula -> tformula
 | toc : tformula -> tformula.
 
+Inductive tatomic : tformula -> Prop :=
+| tatomic_var : forall x, tatomic (tvar x).
+
 Inductive tsubform : tformula -> tformula -> Type :=
 | tsub_id : forall A, tsubform A A
 | tsub_tens_l : forall A B C, tsubform A B -> tsubform A (ttens B C)
@@ -97,6 +100,27 @@ induction A ; intros B Heq ;
   try apply IHA1 in H0 ;
   try apply IHA2 in H1 ; subst...
 intuition.
+Qed.
+
+Lemma tl2ll_inj : injective (fun x => ill2ll i2ac (tl2ill x)).
+Proof with try reflexivity.
+intros A.
+induction A ; intros B Heq ; destruct B ;
+ try (inversion Heq ;
+      try apply IHA in H0 ;
+      try apply IHA1 in H0 ;
+      try apply IHA2 in H1 ; subst ; reflexivity ; fail).
+- simpl in Heq.
+  f_equal.
+  apply t2i_inj.
+  apply i2ac_inj.
+  unfold t2i in Heq ; unfold i2ac in Heq.
+  remember (yalla_ax.i2ac (yalla_ax.t2i t)) as t1.
+  remember (yalla_ax.i2ac (yalla_ax.t2i t0)) as t2.
+  inversion Heq...
+- inversion Heq.
+  apply formulas.dual_inj in H0.
+  apply IHA in H0 ; subst...
 Qed.
 
 Lemma tl2ill_nz : forall A, nonzerospos (tl2ill A).
@@ -593,7 +617,7 @@ intros l ; split ; [ intros A | ] ; intros pi ; eapply tlfrag2tl_0 in pi...
 all : apply pi...
 Qed.
 
-Lemma tlfrag2tl_axfree {P} : (forall a : projT1 (tpgax P), False) -> forall l,
+Lemma tlfrag2tl_axfree {P} : (projT1 (tpgax P) -> False) -> forall l,
    (forall A, ill (t2ipfrag P) (map tl2ill l) (tl2ill A) -> tl P l (Some A))
  * (ill (t2ipfrag P) (map tl2ill l) N -> tl P l None).
 Proof with try reflexivity ; try assumption.
@@ -628,7 +652,7 @@ Qed.
 
 (** *** cut admissibility *)
 
-Lemma cut_tl_r_axfree {P} : (forall a : projT1 (tpgax P), False) -> forall A l0 l1 l2 C,
+Lemma cut_tl_r_axfree {P} : (projT1 (tpgax P) -> False) -> forall A l0 l1 l2 C,
   tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C -> tl P (l1 ++ l0 ++ l2) C.
 Proof with try reflexivity ; try eassumption.
 intros Hgax.
@@ -651,7 +675,7 @@ case_eq (tpcut P) ; intros Hcut.
     list_simpl ; eapply cut_ir_axfree...
 Qed.
 
-Lemma cut_admissible_tl_axfree {P} : (forall a : projT1 (tpgax P), False) ->
+Lemma cut_admissible_tl_axfree {P} : (projT1 (tpgax P) -> False) ->
   forall l Pi, tl P l Pi -> tl (cutrm_tpfrag P) l Pi.
 Proof with try reflexivity ; try eassumption.
 intros Hgax.
@@ -666,56 +690,172 @@ Qed.
 
 Require Import ll_def.
 
-(*
-Theorem ll_is_tl_cutfree {P} : tpcut P = false -> forall l,
+Definition easytpgax P := forall a,
+  (forall D, ill2ll i2ac (snd (projT2 (ipgax (t2ipfrag P)) a)) = dual (ill2ll i2ac D) -> False)
+* (forall A C, snd (projT2 (tpgax P) a) = Some A -> ill2ll i2ac C = ill2ll i2ac (tl2ill A) -> C = tl2ill A)
+* (forall A C, In_Type A (fst (projT2 (tpgax P) a)) -> ill2ll i2ac C = ill2ll i2ac (tl2ill A) -> C = tl2ill A).
+
+Lemma tatomic_easytpgax {P} :
+  (forall a, prod (option_prop tatomic (snd (projT2 (tpgax P) a)))
+                  (Forall_Type tatomic (fst (projT2 (tpgax P) a)))) -> easytpgax P.
+Proof.
+intros Hgax a ; split ; [ split | ].
+- destruct (Hgax a) as [Hat _].
+  simpl ; intros D Heq.
+  destruct (snd (projT2 (tpgax P) a)).
+  + destruct t ; inversion Hat ; subst.
+    destruct D ; inversion Heq.
+  + destruct D ; inversion Heq.
+- destruct (Hgax a) as [Hat _].
+  simpl ; intros A C Heq1 Heq2.
+  destruct (snd (projT2 (tpgax P) a)) ; inversion Heq1 ; subst.
+  destruct A ; inversion Hat ; subst.
+  destruct C ; inversion Heq2.
+  apply i2ac_inj in H0 ; subst ; reflexivity.
+- destruct (Hgax a) as [_ Hat].
+  simpl ; intros A C Hin Heq.
+  eapply Forall_Type_forall in Hat ; try eassumption.
+  destruct A ; inversion Hat ; subst.
+  destruct C ; inversion Heq.
+  apply i2ac_inj in H0 ; subst ; reflexivity.
+Qed.
+
+Lemma easytpgax_easyipgax {P} : easytpgax P -> easyipgax_nzeropos yalla_ax.i2ac (t2ipfrag P).
+Proof with try eassumption ; try reflexivity.
+intros Hgax.
+split ; [ split | ] ; simpl.
+- intros D Heq ; exfalso.
+  case_eq (snd (projT2 (tpgax P) a)) ; [intros t Heqa | intros Heqa] ; rewrite Heqa in Heq ; simpl in Heq.
+  + assert (Hgaxa := fst (fst (Hgax a)) D).
+    apply Hgaxa ; simpl.
+    unfold i2ac ; rewrite <- Heq.
+    rewrite Heqa...
+  + destruct D ; inversion Heq.
+- intros l C HP.
+  assert (prod (sum (snd (projT2 (tpgax P) a) = None /\ C = N)
+                    { C' | snd (projT2 (tpgax P) a) = Some C' /\ C = tl2ill C' })
+               (PEperm_Type (tpperm P) (map tl2ill (fst (projT2 (tpgax P) a))) l))
+    as [[[HeqNone HeqN] | [C' [Heq1 Heqé]]] HPE] ; subst.
+  { apply PCperm_Type_vs_cons_inv in HP.
+    destruct HP as [[l1 l2] Heq HP] ; simpl in Heq ; simpl in HP.
+    destruct l1 ; inversion Heq ; subst.
+    - split ; [ clear - Hgax H0 | clear - Hgax HP ].
+      + assert (Hgaxa := snd (fst (Hgax a))).
+        destruct (snd (projT2 (tpgax P) a)).
+        * specialize Hgaxa with t C.
+          right ; exists t ; split...
+          apply Hgaxa...
+          symmetry...
+        * left.
+          destruct C ; inversion H0 ; split...
+          apply i2ac_inj in H1 ; subst...
+      + rewrite app_nil_r in HP.
+        apply PEperm_Type_rev in HP ; rewrite 2 rev_involutive in HP.
+        apply PEperm_Type_map_inv_inj in HP ; [ | apply formulas.dual_inj ].
+        remember (fst (projT2 (tpgax P) a)) as l0.
+        assert (forall x, In_Type x l0 -> In_Type x (fst (projT2 (tpgax P) a))) as Hin
+          by (intros x H ; rewrite <- Heql0 ; assumption).
+        destruct (tpperm P) ; simpl in HP ; simpl.
+        * clear Heql0 ; revert l0 Hin HP ; induction l ; intros l0 Hin Heq ; simpl in Heq.
+          -- apply Permutation_Type_nil in Heq.
+             destruct l0 ; inversion Heq...
+          -- assert (HP := Heq).
+             symmetry in Heq ; apply Permutation_Type_vs_cons_inv in Heq.
+             destruct Heq as [[l1 l2] Heq] ; simpl in Heq.
+             rewrite map_map in Heq ; symmetry in Heq ; decomp_map_Type Heq ; subst ;
+               simpl in Hin ; simpl in Heq3 ; list_simpl.
+             assert (a0 = tl2ill x) ; subst.
+             { apply (snd (Hgax a))...
+               apply Hin ; apply in_Type_elt. }
+             symmetry ; apply Permutation_Type_cons_app.
+             symmetry ; rewrite <- map_app ; apply IHl.
+             ++ intros x0 Hin' ; apply Hin.
+                apply in_Type_app_or in Hin' ; destruct Hin' as [Hin' | Hin'] ; apply in_Type_or_app.
+                ** left...
+                ** right ; apply in_Type_cons...
+             ++ list_simpl in HP ; list_simpl.
+                eapply Permutation_Type_cons_app_inv...
+        * clear Heql0 ; revert l0 Hin HP ; induction l ; intros l0 Hin Heq ; simpl in Heq.
+          -- symmetry in Heq ; apply map_eq_nil in Heq...
+          -- destruct l0 ; inversion Heq.
+             assert (forall x, In_Type x l0 -> In_Type x (fst (projT2 (tpgax P) a))) as Hin'
+               by (intros x H ; apply Hin ; apply in_Type_cons ; assumption).
+             simpl ; rewrite (IHl _ Hin' H1) ; f_equal.
+             symmetry ; eapply (snd (Hgax _))...
+             apply Hin ; constructor...
+    - exfalso.
+      apply PEperm_Type_vs_elt_inv in HP ; destruct HP as [[l1' l2'] Heq' HP] ;
+        clear - Hgax Heq' ; simpl in Heq'.
+      apply (f_equal (@rev _)) in Heq'.
+      rewrite rev_involutive in Heq' ; list_simpl in Heq'.
+      rewrite map_map in Heq'.
+      symmetry in Heq' ; decomp_map Heq' ; subst.
+      assert (Hgaxa := fst (fst (Hgax a)) x).
+      apply Hgaxa ; simpl.
+      unfold i2ac ; rewrite <- Heq'3... }
+  + eapply ex_ir ; simpl...
+    refine (snd (tl2tlfrag _ _ _) _)...
+    apply gax_tr.
+  + eapply ex_ir ; simpl...
+    refine (fst (tl2tlfrag _ _ _) _ _)...
+    apply gax_tr.
+- intros Hin.
+  apply in_Type_split in Hin ; destruct Hin as [(l1,l2) Heq].
+  symmetry in Heq ; decomp_map Heq.
+  eapply N_not_tl2ill...
+Qed.
+
+Theorem ll_is_tl_cutfree {P} : tpcut P = false -> easytpgax P -> forall l,
   (forall A, tl P l (Some A)
-         <-> exists s,
-             ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
-                          rev (map dual (map (ill2ll i2ac) (map tl2ill l)))) s)
-/\          (tl P l None
-         <-> exists s,
-             ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac N ::
-                          rev (map dual (map (ill2ll i2ac) (map tl2ill l)))) s).
+         -> ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
+                          rev (map dual (map (ill2ll i2ac) (map tl2ill l)))))
+* (forall A, 
+        ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
+                          rev (map dual (map (ill2ll i2ac) (map tl2ill l))))
+        -> tl P l (Some A))
+* (tl P l None
+        -> ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac N ::
+                 rev (map dual (map (ill2ll i2ac) (map tl2ill l)))))
+* (ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac N ::
+                 rev (map dual (map (ill2ll i2ac) (map tl2ill l)))) 
+        -> tl P l None).
 Proof with try eassumption.
-intros Hcut.
-split ; split ; intros pi ; try destruct pi as [s pi].
+intros Hcut Hgax l.
+split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
 - apply tl2tlfrag in pi.
-  destruct (proj1 pi _ (eq_refl _)) as [s pi'].
+  assert (pi' := fst pi _ (eq_refl _)).
   eapply ill_to_ll...
-- eapply (ll_to_ill_cutfree _ i2ac_inj _ _ (ill2ll i2ac (tl2ill A)
+- eapply (ll_to_ill_nzeropos_cutfree _ i2ac_inj _ _ (ill2ll i2ac (tl2ill A)
             :: rev (map dual (map (ill2ll i2ac) (map tl2ill l))))) in pi ;
     [ | | reflexivity ]...
-  + clear s ; destruct pi as [s pi].
-    apply tlfrag2tl_cutfree in pi...
+  + apply tlfrag2tl_cutfree in pi...
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
-    apply Forall_forall.
+    apply forall_Forall_Type.
     intros x Hin.
-    apply in_map_iff in Hin.
+    apply in_Type_map_inv in Hin.
     destruct Hin as (s0 & Heq & Hin) ; subst.
     apply tl2ill_nz.
 - apply tl2tlfrag in pi.
-  destruct (proj2 pi (eq_refl _)) as [s pi'].
+  assert (pi' := snd pi (eq_refl _)).
   eapply ill_to_ll...
-- eapply (ll_to_ill_cutfree _ i2ac_inj _ _ (ill2ll i2ac N
+- eapply (ll_to_ill_nzeropos_cutfree _ i2ac_inj _ _ (ill2ll i2ac N
             :: rev (map dual (map (ill2ll i2ac) (map tl2ill l))))) in pi ;
     [ | | reflexivity ]...
-  + clear s ; destruct pi as [s pi].
-    apply tlfrag2tl_cutfree in pi...
+  + apply tlfrag2tl_cutfree in pi...
   + constructor ; [ constructor | ].
-    apply Forall_forall.
+    apply forall_Forall_Type.
     intros x Hin.
-    apply in_map_iff in Hin.
+    apply in_Type_map_inv in Hin.
     destruct Hin as (s0 & Heq & Hin) ; subst.
     apply tl2ill_nz.
 Unshelve.
 * simpl...
-* apply t2ipfrag_easyipgax.
+* apply easytpgax_easyipgax...
 * simpl...
-* apply t2ipfrag_easyipgax.
+* apply easytpgax_easyipgax...
 Qed.
-*)
 
-Theorem ll_is_tl_axfree {P} : (forall a : projT1 (tpgax P), False) -> forall l,
+Theorem ll_is_tl_axfree {P} : (projT1 (tpgax P) -> False) -> forall l,
    (forall A, tl P l (Some A)
            -> ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
                            rev (map dual (map (ill2ll i2ac) (map tl2ill l)))))
