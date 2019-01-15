@@ -16,7 +16,7 @@ Require Import subs.
 Require Import ll_mix.
 
 
-(** ** Standard linear logic: [ll_ll] (no mix, no axiom) *)
+(** ** Standard linear logic: [ll_ll] (no mix, no axiom, commutative) *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
 Definition pfrag_ll :=  mk_pfrag false NoAxioms false false true.
@@ -44,7 +44,7 @@ Qed.
 
 
 
-(** ** Linear logic with mix0: [ll_mix0] (no mix2, no axiom) *)
+(** ** Linear logic with mix0: [ll_mix0] (no mix2, no axiom, commutative) *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
 Definition pfrag_mix0 := mk_pfrag false NoAxioms true false true.
@@ -199,7 +199,7 @@ revert Heql ; induction pi ; intros Heql ; subst ; try inversion Heql.
 Qed.
 
 
-(** ** Linear logic with mix2: [ll_mix2] (no mix0, no axiom) *)
+(** ** Linear logic with mix2: [ll_mix2] (no mix0, no axiom, commutative) *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
 Definition pfrag_mix2 := mk_pfrag false NoAxioms false true true.
@@ -349,7 +349,7 @@ revert Heql ; induction pi ; intros Heql ; subst ; try inversion Heql.
 Qed.
 
 
-(** ** Linear logic with both mix0 and mix2: [ll_mix02] (no axiom) *)
+(** ** Linear logic with both mix0 and mix2: [ll_mix02] (no axiom, commutative) *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
 Definition pfrag_mix02 := mk_pfrag false NoAxioms true true true.

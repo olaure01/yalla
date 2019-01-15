@@ -1259,3 +1259,29 @@ all: intros a ; exfalso ; apply (P_axfree a).
 Qed.
 
 
+(** ** Standard intuitionistic linear logic: [ill_ll] (no axiom, commutative) *)
+
+(** cut / axioms / permutation *)
+Definition ipfrag_ill := mk_ipfrag false NoIAxioms true.
+(*                                 cut   axioms    perm  *)
+Definition ill_ll := ill ipfrag_ill.
+
+Lemma cut_ll_ir : forall A l0 l1 l2 C, 
+  ill_ll l0 A -> ill_ll (l1 ++ A :: l2) C -> ill_ll (l1 ++ l0 ++ l2) C.
+Proof with myeeasy.
+intros A l1 l2 pi1 pi2.
+eapply cut_ir_axfree...
+intros a ; destruct a.
+Qed.
+
+Lemma cut_ll_admissible :
+  forall l C, ill (cutupd_ipfrag ipfrag_ill true) l C -> ill_ll l C.
+Proof with myeeasy.
+intros l C pi.
+induction pi ; try (now econstructor).
+- eapply ex_ir...
+- eapply ex_oc_ir...
+- eapply cut_ll_ir...
+Qed.
+
+

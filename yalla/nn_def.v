@@ -24,10 +24,6 @@ Definition i2ac := yalla_ax.i2ac.
 Definition i2ac_inj := yalla_ax.i2ac_inj.
 Definition ateq_a2i := yalla_ax.ateq_a2i.
 
-Definition ipfrag_ill := mk_ipfrag false NoIAxioms true.
-(*                                 cut   axioms    perm  *)
-Definition ill_ll := ill ipfrag_ill.
-
 Definition unill := ill2ll i2a.
 
 (** ** The translation *)
