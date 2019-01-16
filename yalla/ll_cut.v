@@ -3,8 +3,7 @@
 (** * Cut admissibility for [ll] *)
 
 
-Require Import Arith.
-Require Import Lia.
+Require Import Arith_base.
 
 Require Import Injective.
 Require Import List_more.
@@ -29,7 +28,7 @@ Lemma cut_oc_comm : pcut P = false -> forall n A l1 l2, ll P (l1 ++ wn A :: l2) 
 Proof with myeasy_perm_Type.
 intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
   remember (l3 ++ oc (dual A) :: l4) as l ; destruct_ll pi1 f X l Hl Hr HP Hax a ;
-  try (exfalso ; simpl in Hs ; clear -Hs ; lia ; fail) ; try inversion Heql ; subst.
+  try (exfalso ; simpl in Hs ; clear -Hs ; myeasy ; fail) ; try inversion Heql ; subst.
 - destruct l3 ; inversion Heql ; subst.
   destruct l3 ; inversion H2 ; subst.
   destruct l3 ; inversion H3.

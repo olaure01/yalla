@@ -5,8 +5,6 @@
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-Require Import Psatz.
-
 Require Import Permutation_Type.
 
 Require Import List_more.
@@ -178,15 +176,13 @@ Definition nat_fresh_of_list l := list_max (map nat_fresh_of l).
 
 Lemma nat_fresh_of_list_fresh : forall l,
   Forall (fun x => nat_fresh_of x <= nat_fresh_of_list l) l.
-Proof.
+Proof with myeasy.
 unfold nat_fresh_of_list.
-induction l ; constructor ; simpl.
-- lia.
-- remember (map nat_fresh_of l) as k.
-  revert IHl ; clear ; induction l ;
-    intros IHl' ; inversion IHl' ; subst ; constructor.
-  + lia.
-  + intuition.
+induction l ; constructor ; simpl...
+remember (map nat_fresh_of l) as k.
+revert IHl ; clear ; induction l ;
+  intros IHl' ; inversion IHl' ; subst ; constructor...
+intuition.
 Qed.
 
 (** Provide an [Atom] which is fresh for all elements of [l] *)

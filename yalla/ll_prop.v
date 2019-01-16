@@ -346,7 +346,7 @@ induction lax ; intros l pi.
   simpl ; intros a.
   destruct a.
   + exists p...
-  + destruct s...
+  + exfalso ; destruct s as [k Hlt] ; inversion Hlt.
 - remember (axupd_pfrag P (existT (fun x => x -> list formula) (sum _ { k | k < length lax })
                                 (fun a => match a with
                                           | inl x => projT2 (pgax P) x

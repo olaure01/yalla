@@ -3,8 +3,7 @@
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
-Require Import Lia.
-Require Import Wf_nat.
+Require Import Arith_base.
 Require Import List.
 
 Require Import Injective.
@@ -36,7 +35,7 @@ Lemma cut_oc_comm_left : ipcut P = false -> forall n A C l1 l2, ill P (l1 ++ ioc
 Proof with myeasy_perm_Type.
 intros P_cutfree n A C l1 l2 pi2 ; induction n ; intros IH l0 pi1 Hs ;
   remember (ioc A) as B ; destruct_ill pi1 f X l Hl Hr HP Hax a ;
-  try (exfalso ; simpl in Hs ; clear -Hs ; lia ; fail) ; try inversion HeqB.
+  try (exfalso ; simpl in Hs ; clear -Hs ; myeasy ; fail) ; try inversion HeqB.
 - apply (ex_ir _ (l1 ++ l ++ l2)).
   + simpl in Hs.
     refine (IHn _ _ Hl _)...

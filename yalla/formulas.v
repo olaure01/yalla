@@ -6,8 +6,7 @@
 
 Require Import RelationClasses.
 Require Import List.
-Require Import Omega.
-Require Import Bool.
+Require Import Lia.
 
 Require Import Injective.
 Require Import Bool_more.
@@ -100,7 +99,7 @@ end.
 
 Lemma fsize_pos : forall A, 0 < fsize A.
 Proof.
-induction A ; simpl ; omega.
+induction A ; simpl ; lia.
 Qed.
 
 Lemma fsize_dual : forall A, fsize (dual A) = fsize A.
@@ -109,7 +108,7 @@ induction A ; simpl ;
   try (rewrite IHA1 ; rewrite IHA2) ;
   try rewrite IHA ;
   try reflexivity ;
-  try omega.
+  try lia.
 Qed.
 
 Ltac fsize_auto :=
@@ -121,7 +120,7 @@ Ltac fsize_auto :=
   | H: fsize _ <= _ |- _ => simpl in H
   | H: fsize _ = _ |- _ => simpl in H
   end ;
-  omega.
+  lia.
 
 (** Atomic [formula] *)
 Inductive atomic : formula -> Prop :=

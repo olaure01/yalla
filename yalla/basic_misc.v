@@ -3,7 +3,6 @@
 
 (** * A few basic ingredients used in [yalla] *)
 
-Require Import Omega.
 Require Import Lia.
 
 Require Import Permutation_Type_solve.
@@ -34,8 +33,7 @@ Ltac nsplit n :=
 Ltac myeasy_pattern assump :=
   try assump ;
   try reflexivity ;
-  try omega ;
-  try lia.             (* but less powerful than lia *)
+  try lia.
 
 Ltac myeasy := myeasy_pattern assumption.
 Ltac myeeasy := myeasy_pattern eassumption.

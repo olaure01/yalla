@@ -5,9 +5,8 @@
 
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
+Require Import Arith_base.
 Require Import CRelationClasses.
-Require Import Arith.
-Require Import Omega.
 Require Import CMorphisms.
 
 Require Import Injective.
@@ -444,7 +443,7 @@ Lemma tlfrag2tl_0 {P} : tpcut P = false -> forall l A,
   ill (t2ipfrag P) l A ->
       (forall l0 A0, l = map tl2ill l0 -> A = tl2ill A0 -> tl P l0 (Some A0))
     * (forall l0, l = map tl2ill l0 -> A = N -> tl P l0 None).
-Proof with try reflexivity ; try eassumption ; try omega.
+Proof with myeeasy.
 intros Hcut.
 intros l A pi.
 induction pi ;

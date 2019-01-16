@@ -6,8 +6,7 @@
 
 Require Import RelationClasses.
 Require Import List.
-Require Import Bool.
-Require Import Omega.
+Require Import Lia.
 
 Require Import Bool_more.
 
@@ -61,7 +60,7 @@ Ltac ifsize_auto :=
   | H: ifsize _ <= _ |- _ => simpl in H
   | H: ifsize _ = _ |- _ => simpl in H
   end ;
-  omega.
+  lia.
 
 (** Atomic [iformula] *)
 Inductive iatomic : iformula -> Prop :=
