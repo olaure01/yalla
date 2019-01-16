@@ -34,7 +34,7 @@ ollibs/wf_prod.v
 microyalla/ill.v
 microyalla/ll.v
 
-yalla/basic_tactics.v
+yalla/basic_misc.v
 yalla/bbb.v
 yalla/fmformulas.v
 yalla/fmiformulas.v

@@ -16,7 +16,7 @@ Require Import Permutation_Type_solve.
 Require Import CPermutation_Type_solve.
 Require Import genperm_Type.
 
-Require Export basic_tactics.
+Require Export basic_misc.
 Require Export formulas.
 
 

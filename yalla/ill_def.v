@@ -13,7 +13,7 @@ Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import genperm_Type.
 
-Require Export basic_tactics.
+Require Export basic_misc.
 Require Export iformulas.
 
 

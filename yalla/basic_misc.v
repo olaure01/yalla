@@ -1,14 +1,26 @@
-(* basic_tactics library for yalla *)
-(* v 1.0   Olivier Laurent *)
+(* basic_misc library for yalla *)
 
-(** * A few basic tactics used in [yalla] *)
+
+(** * A few basic ingredients used in [yalla] *)
 
 Require Import Omega.
-Require Import Psatz.
+Require Import Lia.
 
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 
+
+(** ** Definitions *)
+Definition option_prop {A:Type} (P:A->Prop) o :=
+match o with
+| Some a => P a
+| None => True
+end.
+
+Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
+
+
+(** ** Tactics *)
 (** Generalized version of [split] for [n] components *)
 
 Ltac nsplit n := 
@@ -22,7 +34,7 @@ Ltac nsplit n :=
 Ltac myeasy_pattern assump :=
   try assump ;
   try reflexivity ;
-  try omega ;          (* omega quicker *)
+  try omega ;
   try lia.             (* but less powerful than lia *)
 
 Ltac myeasy := myeasy_pattern assumption.
@@ -35,11 +47,3 @@ Ltac myeasy_perm_Type :=
   try PCperm_Type_solve ;
   try (simpl_hyp_perm_all_Type ; PCperm_Type_solve).
 
-(** Misc *)
-Definition option_prop {A:Type} (P:A->Prop) o :=
-match o with
-| Some a => P a
-| None => True
-end.
-
-Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
