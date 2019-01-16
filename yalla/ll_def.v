@@ -22,7 +22,6 @@ Require Export formulas.
 
 (** ** Fragments for proofs *)
 
-Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
 Definition NoAxioms := (existT (fun x => x -> list formula) _ Empty_fun).
 
 (** Parameters for [ll] provability:

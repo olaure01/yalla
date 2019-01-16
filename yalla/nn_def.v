@@ -3,8 +3,6 @@
 
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-Require Import List.
-
 Require Import Injective.
 Require Import List_more.
 Require Import Permutation_Type.
@@ -12,6 +10,7 @@ Require Import genperm_Type.
 
 Require Import subs.
 Require Import isubs.
+Require Export ill_vs_ll.
 
 
 (** ** Basic ingredients for links with [ill] *)

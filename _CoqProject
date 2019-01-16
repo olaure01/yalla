@@ -9,6 +9,7 @@ ollibs/CPermutation_solve.v
 ollibs/CPermutation_Type_solve.v
 ollibs/CyclicPerm_Type.v
 ollibs/CyclicPerm.v
+ollibs/flat_map_Type_more.v
 ollibs/fmsetlist_Type.v
 ollibs/fmsetlist.v
 ollibs/fmsetoidlist_Type.v
@@ -26,6 +27,8 @@ ollibs/Permutation_Type_more.v
 ollibs/Permutation_Type_solve.v
 ollibs/Permutation_Type.v
 ollibs/Surjective.v
+ollibs/Vector_more.v
+ollibs/wf_nat_more.v
 ollibs/wf_prod.v
 
 microyalla/ill.v
@@ -40,6 +43,7 @@ yalla/iformulas.v
 yalla/ill_cut.v
 yalla/ill_def.v
 yalla/ill_prop.v
+yalla/ill_vs_ll.v
 yalla/isubs.v
 yalla/lambek.v
 yalla/ll_cut.v

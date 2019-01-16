@@ -14,7 +14,6 @@ Require Import genperm_Type.
 
 Require Import subs.
 Require Import ll_fragments.
-Require Import ill_prop.
 Require Export nn_def.
 
 Require Import bbb.

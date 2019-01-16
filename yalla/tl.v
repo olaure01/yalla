@@ -20,7 +20,7 @@ Require Import genperm_Type.
 
 (** ** 0. load the [ill] library *)
 
-Require Import ill_prop.
+Require Import ill_vs_ll.
 
 (** ** 1. define formulas *)
 
@@ -151,7 +151,7 @@ Qed.
 
 (** ** 3. define proofs *)
 
-Definition NoTAxioms := (existT (fun x => x -> list tformula * option tformula) _ ll_def.Empty_fun).
+Definition NoTAxioms := (existT (fun x => x -> list tformula * option tformula) _ Empty_fun).
 
 Record tpfrag := mk_tpfrag {
   tpcut : bool ;

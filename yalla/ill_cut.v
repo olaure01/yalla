@@ -15,7 +15,6 @@ Require Import genperm_Type.
 Require Import flat_map_Type_more.
 Require Import wf_nat_more.
 
-Require Import basic_tactics.
 Require Export ill_def.
 
 

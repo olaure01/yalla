@@ -9,7 +9,6 @@ Require Import List_more.
 Require Import Permutation_Type.
 Require Import genperm_Type.
 
-Require Export basic_tactics.
 Require Export ill_def.
 
 

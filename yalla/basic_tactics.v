@@ -42,3 +42,4 @@ match o with
 | None => True
 end.
 
+Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
