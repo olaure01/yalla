@@ -1527,78 +1527,6 @@ Inductive oclpam : iformula -> Type :=
 | oclm_ioc   : forall A, oclpam A -> oclpam (ioc A).
 
 (** Cut-free conservativity *)
-(* TODO try following statement for possibly shorter proof:
-Theorem ll_to_ill_oclpam_cutfree {P} : ipcut P = false -> (projT1 (ipgax P) -> False) -> ipperm P = true ->
-  forall l s, ll (i2pfrag P) l s -> forall l0 l1 C, Forall oclpam (C :: l0) ->
-    Forall oclike l1 ->
-    PCperm (pperm (i2pfrag P)) l (ill2ll C :: map ill2ll l1 ++ rev (map dual (map ill2ll l0))) ->
-      forall l2, (l1 = nil -> l2 = nil) -> exists s', ill P (l0 ++ l2) C s'.
-Proof with myeeasy.
-intros Hcut Hgax Hperm.
-intros l s Hll ; induction Hll ; intros l0 lo C Hoclm Hocl HP lwk Hnil ; try (now inversion f).
-- apply PCperm_length_2_inv in HP.
-  destruct HP as [HP | HP] ; inversion HP ; destruct C ; inversion H0 ; subst.
-  destruct lo ; list_simpl in H1 ; inversion H1.
-  + induction l0 using rev_ind ; list_simpl in H2 ; inversion H2.
-    induction l0 using rev_ind ; list_simpl in H4 ; inversion H4.
-    destruct x ; inversion H3.
-    apply i2a_inj in H5 ; subst.
-    rewrite (Hnil eq_refl).
-    eexists ; apply ax_ir.
-  + destruct i0 ; inversion H2.
-- rewrite HP in H.
-  eapply IHHll in H...
-- apply PCperm_length_1_inv in HP.
-  inversion HP ; destruct C ; inversion H0 ; subst.
-  destruct lo ; inversion H1.
-  induction l0 using rev_ind ; list_simpl in H1 ; inversion H1.
-  rewrite (Hnil eq_refl).
-  eexists ; apply one_irr.
-- symmetry in HP ; apply PCperm_vs_cons_inv in HP.
-  destruct HP as (l' & l'' & HP & Heq).
-  destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  symmetry in H1 ; dichot_elt_app_exec H1 ; subst ;
-    [ decomp_map H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map H2 ; decomp_map H3 ; destruct x ; inversion H2 ;
-                                                         destruct x0 ; inversion H3 ] ; subst.
-  apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-  apply PEperm_PCperm in HP ; unfold id in HP.
-  assert (HP' := PCperm_trans _ _ _ _ HP (PCperm_app_comm _ _ _)).
-  specialize IHHll with (rev l8 ++ rev l6) lo C lwk.
-  list_simpl in IHHll ; list_simpl in HP' ; eapply IHHll in HP'...
-  + destruct HP' as [s' IH] ; list_simpl in IH.
-    eexists ; list_simpl ; apply one_ilr...
-  + inversion Hoclm ; constructor...
-    apply Forall_app_inv in H4 ; destruct H4 as [Hl Hr] ; apply Forall_app...
-    inversion Hr...
-- symmetry in HP ; apply PCperm_vs_cons_inv in HP.
-  destruct HP as (l' & l'' & HP & Heq).
-  simpl in HP ; rewrite Hperm in HP ; simpl in HP.
-  apply Permutation_app_app_inv in HP.
-  destruct HP as (l3' & l3'' & l4' & l4'' & HP1 & HP2 & HP3 & HP4).
-  destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  + apply Permutation_nil in HP4 ; apply app_eq_nil in HP4 ; destruct HP4 ; subst.
-    list_simpl in HP1 ; rewrite <- HP1 in HP3.
-    list_simpl in HP2 ; rewrite <- HP2 in HP3.
-    clear l3' l3'' HP1 HP2.
-    apply Permutation_app_app_inv in HP3.
-    destruct HP3 as (l3' & l3'' & l4' & l4'' & HP1 & HP2 & HP3 & HP4).
-    symmetry in HP1 ; apply Permutation_map_inv in HP1.
-    destruct HP1 as (l3 & Heq1 & HP1).
-    decomp_map Heq1 ; subst.
-    list_simpl in HP2.
-    rewrite map_map in HP2.
-    symmetry in HP2 ; apply Permutation_map_inv in HP2.
-    destruct HP2 as (l3 & Heq2 & HP2).
-    rewrite <- Permutation_rev in HP2.
-    rewrite <- map_map in Heq2.
-    decomp_map Heq2 ; decomp_map Heq2 ; subst.
-    specialize IHHll1 with (rev l9) l5 C1 lwk.
-    specialize IHHll2 with (rev l8) l4 C2 lwk.
-    rewrite HP1 in Hocl.
-    apply Forall_app_inv in Hocl ; destruct Hocl as [Hocl2 Hocl1].
-Qed.
-*)
 Theorem ll_to_ill_oclpam_cutfree {P} :
   ipcut P = false -> (projT1 (ipgax P) -> False) -> ipperm P = true ->
   forall l, ll (i2pfrag i2a P) l -> forall l0 l1 C, Forall_Type oclpam (C :: l0) ->
@@ -3015,19 +2943,18 @@ Proposition ll_to_ill_oclpam_axfree {P} : ipperm P = true ->
   ll (i2pfrag i2a P) l -> forall l0 C, Forall_Type oclpam (C :: l0) ->
     Permutation_Type l (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l0))) ->
       ill P l0 C.
-Proof with myeeasy.
+Proof with try eassumption ; try reflexivity.
 intros Hperm P_axfree l pi l0 C Hoclm HP.
 apply cut_admissible_axfree in pi.
 - rewrite cutrm_i2pfrag in pi.
-  eapply ll_to_ill_oclpam_cutfree with _ _ nil _ in pi...
+  eapply ll_to_ill_oclpam_cutfree in pi...
   + destruct pi as [pi _].
     eapply (stronger_ipfrag)...
     nsplit 3...
-    simpl ; intros...
-    intuition.
+    intros a ; destruct (P_axfree a).
   + constructor.
   + simpl ; rewrite Hperm ; simpl...
-- intuition.
+- assumption.
 Qed.
 
 End Conservativity.
