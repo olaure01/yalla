@@ -104,4 +104,5 @@ Other files:
     specific instances of axioms on atoms used in the library
     (this guarantees consistency of this set of axioms)
 
+The precise file dependencies are pictured in the [dependency graph](dependencies.png).
 
