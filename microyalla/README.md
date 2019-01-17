@@ -1,4 +1,5 @@
 # MicroYalla
+
 ## Kernel Linear Logic Library
 
 Contains definitions of linear logic systems (classical linear logic and intuitionistic linear logic) compatible with the [Yalla library](https://perso.ens-lyon.fr/olivier.laurent/yalla/).
