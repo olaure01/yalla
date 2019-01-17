@@ -1,7 +1,5 @@
 (* ill_prop library for yalla *)
 
-(* TODO clean file *)
-
 (** * Intuitionistic Linear Logic *)
 (* Properties depending on cut admissibility *)
 
@@ -442,7 +440,7 @@ apply iconservativity...
 - apply (isubb_id_list (A :: l) nil).
 Qed.
 
-Lemma cut_admissible_ifragment {P} : (projT1 (ipgax P) -> False) ->
+Lemma cut_admissible_ifragment_axfree {P} : (projT1 (ipgax P) -> False) ->
 forall FS, ifragment FS -> forall l A,
   ill_ps P (fun l A => Forallb FS (A :: l)) l A ->
   ill_ps (cutrm_ipfrag P) (fun l A => Forallb FS (A :: l)) l A.
@@ -455,7 +453,7 @@ apply ill_is_ill_ps in pi.
 apply iconservativity...
 Qed.
 
-Lemma iconservativity_cut_axfree {P} : (projT1 (ipgax P) -> False) ->
+Lemma iconservativity_axfree {P} : (projT1 (ipgax P) -> False) ->
 forall FS, ifragment FS ->
   forall l A, ill P l A -> is_true (Forallb FS (A :: l)) ->
     ill_ps P (fun l A => Forallb FS (A :: l)) l A.

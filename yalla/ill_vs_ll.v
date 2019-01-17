@@ -1,7 +1,5 @@
 (* ill_vs_ll library for yalla *)
 
-(* TODO clean file *)
-
 (** * Comparison between Intuitionistic Linear Logic and Linear Logic *)
 
 Require Import Injective.
@@ -1739,9 +1737,20 @@ Inductive oclpam : iformula -> Type :=
 | oclm_iplus : forall A B, oclpam A -> oclpam B -> oclpam (iplus A B)
 | oclm_ioc   : forall A, oclpam A -> oclpam (ioc A).
 
+Definition easyipgax_oclmap P := forall a,
+  (forall A, In_Type (dual (ill2ll i2a A)) (map (ill2ll i2a) (fst (projT2 (ipgax P) a))) ->
+     oclike A -> False)
+* (forall A, ill2ll i2a A = ill2ll i2a (snd (projT2 (ipgax P) a)) -> oclike A -> False)
+* (forall l C,
+     PCperm_Type (ipperm P) (ill2ll i2a (snd (projT2 (ipgax P) a))
+                            :: rev (map dual (map (ill2ll i2a) (fst (projT2 (ipgax P) a)))))
+                       (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l)))
+       -> ill P l C)
+* (In_Type N (fst (projT2 (ipgax P) a)) -> False).
+
 (** Cut-free conservativity *)
 Theorem ll_to_ill_oclpam_cutfree {P} :
-  ipcut P = false -> (projT1 (ipgax P) -> False) -> ipperm P = true ->
+  ipperm P = true -> ipcut P = false -> easyipgax_oclmap P ->
   forall l, ll (i2pfrag i2a P) l -> forall l0 l1 C, Forall_Type oclpam (C :: l0) ->
     Forall_Type oclike l1 ->
     PCperm_Type (pperm (i2pfrag i2a P)) l
@@ -1750,7 +1759,7 @@ Theorem ll_to_ill_oclpam_cutfree {P} :
       ill P l0 C
    *  (l1 <> nil -> forall l2, ill P (l0 ++ l2) C).
 Proof with myeeasy.
-intros Hcut Hgax Hperm.
+intros Hperm Hcut Hgax.
 intros l Hll ; induction Hll ;
   intros l0 lo C Hoclm Hocl HP ; try (now inversion f).
 - apply PCperm_Type_length_2_inv in HP.
@@ -2587,8 +2596,7 @@ intros l Hll ; induction Hll ;
                        simpl in HP4''.
                        apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
                        list_simpl ; perm_Type_solve.
-                   +++ clear - Hgax.
-                       intros Hax ; intuition.
+                   +++ intros a Ha ; apply (snd (Hgax a) Ha).
                    +++ eapply ex_ir ; [ apply Hocl5 | ].
                        rewrite Hperm ; simpl ; perm_Type_solve.
                --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
@@ -2613,8 +2621,7 @@ intros l Hll ; induction Hll ;
                            simpl in HP4''.
                            apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
                            list_simpl ; perm_Type_solve.
-                       *** clear - Hgax.
-                           intros Hax ; intuition.
+                       *** intros a Ha ; apply (snd (Hgax a) Ha).
                        *** eapply ex_ir ; [ apply Hocl5 | ].
                            rewrite Hperm ; simpl ; perm_Type_solve.
                    +++ assert (l17 ++ i :: l4r <> nil) as Hnil'
@@ -2638,8 +2645,7 @@ intros l Hll ; induction Hll ;
                            simpl in HP4''.
                            apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
                            list_simpl ; perm_Type_solve.
-                       *** clear - Hgax.
-                           intros Hax ; intuition.
+                       *** intros a Ha ; apply (snd (Hgax a) Ha).
                        *** eapply ex_ir ; [ apply Hnil'' | ].
                            rewrite Hperm ; simpl ; perm_Type_solve.
             ** inversion Hoclm ; subst.
@@ -3148,7 +3154,27 @@ intros l Hll ; induction Hll ;
     inversion H6.
     constructor...
 - simpl in f ; rewrite f in Hcut ; inversion Hcut.
-- exfalso ; intuition.
+- destruct lo.
+  + apply (snd (fst (Hgax a))) in HP.
+    split...
+    intros Hnil ; exfalso ; apply Hnil...
+  + exfalso.
+    inversion Hocl.
+    simpl in HP ; rewrite <- (app_nil_l (ill2ll i2a i :: _)) in HP.
+    rewrite app_comm_cons in HP.
+    apply PCperm_Type_vs_elt_inv in HP ; destruct HP as [(l1,l2) Heq _] ; simpl in Heq.
+    destruct l1 ; inversion Heq.
+    * symmetry in H4 ; apply (snd (fst (fst (Hgax a))) i)...
+    * apply (f_equal (@rev _)) in H5.
+      rewrite rev_involutive in H5 ; list_simpl in H5.
+      rewrite map_map in H5.
+      symmetry in H5 ; decomp_map H5.
+      apply (f_equal dual) in H5.
+      rewrite bidual in H5.
+      apply (f_equal (map (ill2ll i2a))) in H7 ; list_simpl in H7.
+      apply (fst (fst (fst (Hgax a))) i)...
+      rewrite <- H7 ; rewrite H5.
+      apply in_Type_elt.
 Qed.
 
 Proposition ll_to_ill_oclpam_axfree {P} : ipperm P = true ->
@@ -3165,6 +3191,7 @@ apply cut_admissible_axfree in pi.
     eapply (stronger_ipfrag)...
     nsplit 3...
     intros a ; destruct (P_axfree a).
+  + intros a ; destruct (P_axfree a).
   + constructor.
   + simpl ; rewrite Hperm ; simpl...
 - assumption.
@@ -3178,9 +3205,9 @@ End Conservativity.
 Section Non_Conservativity.
 
 Variable P : ipfrag.
-Hypothesis fp : ipperm P = true.
-Hypothesis fc : ipcut P = false.
-Hypothesis fg : projT1 (ipgax P) -> False.
+Hypothesis P_perm : ipperm P = true.
+Hypothesis P_cut : ipcut P = false.
+Hypothesis P_gax : projT1 (ipgax P) -> False.
 
 Variable i2a : IAtom -> Atom.
 
@@ -3212,10 +3239,10 @@ rewrite <- (app_nil_l (tens (var _) _ :: _)).
 apply tens_r.
 - apply parr_r.
   eapply ex_r ;
-    [ | unfold PCperm_Type ; simpl ; rewrite fp ;
+    [ | unfold PCperm_Type ; simpl ; rewrite P_perm ;
         symmetry ; apply Permutation_Type_cons_append ].
   eapply ex_r ;
-    [ | unfold PCperm_Type ; simpl ; rewrite fp ;
+    [ | unfold PCperm_Type ; simpl ; rewrite P_perm ;
         symmetry ; apply Permutation_Type_cons_append ].
   rewrite <- ? app_comm_cons.
   rewrite app_comm_cons.
@@ -3223,7 +3250,7 @@ apply tens_r.
   + eapply ex_r ; [ apply ax_r | PCperm_Type_solve ].
   + apply parr_r.
     eapply ex_r ;
-    [ | unfold PCperm_Type ; simpl ; rewrite fp ;
+    [ | unfold PCperm_Type ; simpl ; rewrite P_perm ;
         symmetry ; apply Permutation_Type_cons_append ].
     rewrite <- ? app_comm_cons.
     apply top_r.
@@ -3231,7 +3258,7 @@ apply tens_r.
 Qed.
 
 Fact no_at_prove_ill : forall i, ill P nil (ivar i) -> False.
-Proof with myeasy.
+Proof.
 intros i pi.
 remember (ivar i) as C.
 remember nil as l.
@@ -3239,7 +3266,7 @@ revert Heql HeqC.
 induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion Heql)) ;
   (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql) ; subst...
+  try now (destruct l1 ; inversion Heql) ; subst.
 - symmetry in p.
   apply PEperm_Type_nil in p ; subst.
   intuition.
@@ -3250,7 +3277,7 @@ induction pi ; intros Heql HeqC ; subst ;
   intuition.
 - destruct l1 ; destruct l0 ; inversion Heql.
 - destruct l ; inversion Heql.
-- rewrite fc in f ; inversion f.
+- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 Fact no_biat_prove_ill : forall i j, i <> j ->
@@ -3281,7 +3308,7 @@ induction pi ; intros Heql HeqC ; subst ;
     try destruct l0 ; try destruct l1 ; inversion Heql.
 - destruct l ; inversion Heql ; subst.
   destruct l ; inversion H1.
-- rewrite fc in f ; inversion f.
+- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 Fact no_biat_map_prove_ill : forall i j, i <> j ->
@@ -3306,7 +3333,7 @@ induction pi ; intros Heql HeqC ; subst ;
 - inversion HeqC ; subst.
   eapply no_biat_prove_ill ; eassumption.
 - destruct l1 ; destruct l0 ; inversion Heql.
-- rewrite fc in f ; inversion f.
+- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 (** We need two distinct atoms *)
@@ -3344,7 +3371,7 @@ induction pi ; intros Heql HeqC ; subst ;
     try destruct l0 ; try destruct l1 ; inversion H1.
 - destruct l ; inversion Heql ; subst.
   destruct l ; inversion H1.
-- rewrite fc in f ; inversion f.
+- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 Fact pre_counter_ex_ill :
@@ -3383,7 +3410,7 @@ induction pi ; intros Heql HeqC ; subst ;
   + destruct l1 ; inversion H1.
 - destruct l1 ; destruct l0 ; inversion Heql ; 
     try destruct l0 ; try destruct l1 ; inversion H1.
-- rewrite fc in f ; inversion f.
+- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 Fact counter_ex_ill : @ill P nil cons_counter_ex -> False.
@@ -3405,7 +3432,7 @@ induction pi ; intros Heql HeqC ; subst ;
   intuition.
 - inversion HeqC ; subst ; apply pre_counter_ex_ill in pi...
 - destruct l1 ; destruct l0 ; inversion Heql.
-- rewrite fc in f ; inversion f.
+- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 End Non_Conservativity.

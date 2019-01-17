@@ -1,7 +1,5 @@
 (* tl example file for yalla library *)
 
-(* TODO clean file: using cut admissibility of [ill] *)
-
 
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
@@ -85,11 +83,6 @@ match P with
 | toc A => ioc (tl2ill A)
 end.
 
-Lemma N_not_tl2ill : forall A, N = tl2ill A -> False.
-Proof.
-intros A Heq ; destruct A ; inversion Heq.
-Qed.
-
 Lemma tl2ill_inj : injective tl2ill.
 Proof with try reflexivity.
 intros A.
@@ -120,6 +113,11 @@ induction A ; intros B Heq ; destruct B ;
 - inversion Heq.
   apply formulas.dual_inj in H0.
   apply IHA in H0 ; subst...
+Qed.
+
+Lemma N_not_tl2ill : forall A, N = tl2ill A -> False.
+Proof.
+intros A Heq ; destruct A ; inversion Heq.
 Qed.
 
 Lemma tl2ill_nz : forall A, nonzerospos (tl2ill A).
@@ -154,7 +152,7 @@ Definition NoTAxioms := (existT (fun x => x -> list tformula * option tformula) 
 
 Record tpfrag := mk_tpfrag {
   tpcut : bool ;
-  tpgax : { tptypgax : Type & tptypgax -> list tformula * option tformula } ; (* Many thanks to Damien Pous! *)
+  tpgax : { tptypgax : Type & tptypgax -> list tformula * option tformula } ;
   tpperm : bool }.
 
 Definition le_tpfrag P Q :=
@@ -258,6 +256,8 @@ Qed.
 (** ** 4. characterize corresponding [ill] fragment *)
 
 (*
+Require Import ill_prop.
+
 Lemma tl2ill_dec : forall A,
    {B | A = tl2ill B} + (A = N)
  + ((forall B, A = tl2ill B -> False) * (A = N -> False)).
@@ -312,7 +312,6 @@ end.
 Lemma tl_is_fragment : ifragment tl_fragment.
 Proof with try reflexivity.
 intros A HfA B Hsf.
-
 induction Hsf ; unfold tl_fragment in HfA.
 - assumption.
 - destruct (tl2ill_dec (itens B C)) ; try now inversion HfA.
@@ -439,12 +438,16 @@ induction pi ;
 Unshelve. all : simpl...
 Qed.
 
-Lemma tlfrag2tl_0 {P} : tpcut P = false -> forall l A,
-  ill (t2ipfrag P) l A ->
-      (forall l0 A0, l = map tl2ill l0 -> A = tl2ill A0 -> tl P l0 (Some A0))
-    * (forall l0, l = map tl2ill l0 -> A = N -> tl P l0 None).
+Lemma tlfrag2tl_cutfree {P} : tpcut P = false -> forall l,
+   (forall A, ill (t2ipfrag P) (map tl2ill l) (tl2ill A) -> tl P l (Some A))
+ * (ill (t2ipfrag P) (map tl2ill l) N -> tl P l None).
 Proof with myeeasy.
 intros Hcut.
+enough (forall l A, ill (t2ipfrag P) l A ->
+      (forall l0 A0, l = map tl2ill l0 -> A = tl2ill A0 -> tl P l0 (Some A0))
+    * (forall l0, l = map tl2ill l0 -> A = N -> tl P l0 None)) as HI.
+{ intros l ; split ; [ intros A | ] ; intros pi ; eapply HI in pi...
+  all : apply pi... }
 intros l A pi.
 induction pi ;
   (split ; [ intros l'' A'' Heql HeqA | intros l'' Heql HeqN ]) ; subst ; 
@@ -606,14 +609,6 @@ induction pi ;
     rewrite <- Heq.
     apply map_inj in Heql ; [ | apply tl2ill_inj ] ; subst.
     apply gax_tr.
-Qed.
-
-Lemma tlfrag2tl_cutfree {P} : tpcut P = false -> forall l,
-   (forall A, ill (t2ipfrag P) (map tl2ill l) (tl2ill A) -> tl P l (Some A))
- * (ill (t2ipfrag P) (map tl2ill l) N -> tl P l None).
-Proof with try reflexivity ; try assumption.
-intros l ; split ; [ intros A | ] ; intros pi ; eapply tlfrag2tl_0 in pi...
-all : apply pi...
 Qed.
 
 Lemma tlfrag2tl_axfree {P} : (projT1 (tpgax P) -> False) -> forall l,

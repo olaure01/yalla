@@ -294,7 +294,7 @@ apply conservativity...
 Qed.
 
 (* Cut is admissible in any fragment with no axioms. *)
-Lemma cut_admissible_fragment {P} : (projT1 (pgax P) -> False) ->
+Lemma cut_admissible_fragment_axfree {P} : (projT1 (pgax P) -> False) ->
  forall FS, fragment FS -> forall l,
    ll_ps P (Forallb FS) l -> ll_ps (cutrm_pfrag P) (Forallb FS) l.
 Proof with myeeasy.
@@ -307,7 +307,7 @@ apply conservativity...
 Qed.
 
 (** Linear logic (with no axioms) is conservative over its fragments. *)
-Lemma conservativity_cut_axfree {P} : (projT1 (pgax P) -> False) ->
+Lemma conservativity_axfree {P} : (projT1 (pgax P) -> False) ->
   forall FS, fragment FS -> forall l,
     ll P l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
 Proof with try eassumption ; try reflexivity.

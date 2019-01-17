@@ -1,9 +1,6 @@
 (* nn_prop library for yalla *)
 
 
-(* TODO clean file *)
-
-
 (** * Parametric negative translation from [ll] into [ill]. *)
 (** Properties relying on cut admissibility *)
 
@@ -256,8 +253,7 @@ Qed.
 Lemma ie_dual_diag : forall A, ielem A ->
   ill_ll (trans A (dual (unill A)) :: nil) A.
 Proof.
-intros A.
-apply ie_dual.
+intros A ; apply ie_dual.
 Qed.
 
 Proposition llR_ie_to_ill_trans : forall R l, ielem R ->
@@ -642,10 +638,6 @@ Theorem ll_bbb_to_ill_trans : forall R l,
   ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
 Proof with myeeasy ; try PEperm_Type_solve ; try now (apply ax_exp_ill).
 intros R l Hll.
-(*
-destruct (@ax_exp_ill ipfrag_ill (ioc R)) as [sax Hax].
-rewrite <- (app_nil_l (ioc R :: _)) in Hax.
-*)
 induction Hll ; (try now (inversion f)) ; simpl.
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | ].

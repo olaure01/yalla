@@ -1,7 +1,5 @@
 (* ill library for yalla *)
 
-(* TODO clean file *)
-
 (** * Intuitionistic Linear Logic *)
 (* not cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 
@@ -23,7 +21,7 @@ Definition NoIAxioms := (existT (fun x => x -> list iformula * iformula) _ Empty
 
 Record ipfrag := mk_ipfrag {
   ipcut : bool ;
-  ipgax : { iptypgax : Type & iptypgax -> list iformula * iformula } ; (* Many thanks to Damien Pous! *)
+  ipgax : { iptypgax : Type & iptypgax -> list iformula * iformula } ;
   ipperm : bool }.
 
 Definition le_ipfrag P Q :=

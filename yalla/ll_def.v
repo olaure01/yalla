@@ -31,7 +31,7 @@ Definition NoAxioms := (existT (fun x => x -> list formula) _ Empty_fun).
 *)
 Record pfrag := mk_pfrag {
   pcut : bool ;
-  pgax : { ptypgax : Type & ptypgax -> list formula } ; (* Many thanks to Damien Pous! *)
+  pgax : { ptypgax : Type & ptypgax -> list formula } ;
   pmix0 : bool ;
   pmix2 : bool ;
   pperm : bool }.
@@ -475,7 +475,6 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   simpl in HP'.
   apply IHpi in Heq...
   eapply ex_r...
-  (* TODO should be solved automatically *)
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
     eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
@@ -574,7 +573,6 @@ induction pi ; intros l1' l2' Heq ; subst.
   destruct p as [(l3 & l4) Heq HP'].
   simpl in HP' ; apply IHpi in Heq...
   eapply ex_r...
-  (* TODO should be solved automatically *)
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
     eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
@@ -671,7 +669,6 @@ induction pi ; intros A' l1' l2' Heq ; subst.
   destruct p as [(l3 & l4) Heq HP'].
   simpl in HP' ; apply IHpi in Heq...
   simpl in Heq ; eapply ex_r...
-  (* TODO should be solved automatically *)
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
     eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
