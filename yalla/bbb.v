@@ -13,7 +13,6 @@ Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 
-Require Import ll_mix.
 Require Import ll_fragments.
 
 
@@ -389,7 +388,8 @@ induction pi ; intros l' l0' l1' HP.
       eapply ex_bbb_r ; [ apply mix2_bbb_r | apply HP' ]...
       -- rewrite <- app_nil_l.
          eapply bot_rev_bbb...
-      -- apply (stronger_pfrag (mix2add_pfrag (mix0add_pfrag pfrag_ll))) ; [ | eapply ll_to_mix02''' ]...
+      -- apply (stronger_pfrag (mix2add_pfrag (mix0add_pfrag pfrag_ll))) ;
+           [ | eapply ll_to_mix02'''_axcut ]...
          ++ intros a ; destruct a.
          ++ intros a ; destruct a.
          ++ eapply ex_r in pi1' ; [  | apply Permutation_Type_app_comm ]...
