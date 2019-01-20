@@ -47,6 +47,7 @@ match A with
 | ione      => ione
 | itens A B => itens (isubs C x A) (isubs C x B)
 | ilpam A B => ilpam (isubs C x A) (isubs C x B)
+| igen A => igen (isubs C x A)
 | ilmap A B => ilmap (isubs C x A) (isubs C x B)
 | ineg A => ineg (isubs C x A)
 | izero => izero
@@ -83,6 +84,12 @@ induction pi ; list_simpl ;
 - rewrite ? map_app in IHpi ; rewrite Hmapioc in IHpi ; rewrite Hmapioc.
   eapply Permutation_Type_map in p.
   eapply ex_oc_ir...
+- unfold repl_iat in IHpi.
+  rewrite HN in IHpi.
+  constructor...
+- unfold repl_iat.
+  rewrite HN.
+  constructor...
 - unfold repl_iat in IHpi.
   rewrite HN in IHpi.
   constructor...
@@ -151,6 +158,7 @@ match A with
 | ione      => 0
 | itens B C => inat_fresh_of B + inat_fresh_of C
 | ilpam B C => inat_fresh_of B + inat_fresh_of C
+| igen B => inat_fresh_of B + S (i2n atN)
 | ilmap B C => inat_fresh_of B + inat_fresh_of C
 | ineg B => inat_fresh_of B + S (i2n atN)
 | izero     => 0

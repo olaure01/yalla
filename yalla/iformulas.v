@@ -27,6 +27,7 @@ Inductive iformula : Set :=
 | ione  : iformula
 | itens : iformula -> iformula -> iformula
 | ilpam : iformula -> iformula -> iformula
+| igen  : iformula -> iformula
 | ilmap : iformula -> iformula -> iformula
 | ineg  : iformula -> iformula
 | itop  : iformula
@@ -44,6 +45,7 @@ match A with
 | ione       => 1
 | itens A B  => S (ifsize A + ifsize B)
 | ilpam A B  => S (ifsize A + ifsize B)
+| igen A     => S (ifsize A)
 | ilmap A B  => S (ifsize A + ifsize B)
 | ineg A     => S (ifsize A)
 | itop       => 1
@@ -76,6 +78,8 @@ Inductive isubform : iformula -> iformula -> Prop :=
 | isub_tens_r : forall A B C, isubform A B -> isubform A (itens C B)
 | isub_lpam_l : forall A B C, isubform A B -> isubform A (ilpam B C)
 | isub_lpam_r : forall A B C, isubform A B -> isubform A (ilpam C B)
+| isub_gen    : forall A B, isubform A B -> isubform A (igen B)
+| isub_gen_N  : forall A, isubform N (igen A)
 | isub_lmap_l : forall A B C, isubform A B -> isubform A (ilmap B C)
 | isub_lmap_r : forall A B C, isubform A B -> isubform A (ilmap C B)
 | isub_neg    : forall A B, isubform A B -> isubform A (ineg B)
@@ -90,8 +94,10 @@ Lemma isub_trans : forall A B C, isubform A B -> isubform B C -> isubform A C.
 Proof with try assumption.
 intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   try (constructor ; apply IHHr)...
-inversion Hl.
-apply isub_neg_N.
+- inversion Hl.
+  apply isub_gen_N.
+- inversion Hl.
+  apply isub_neg_N.
 Qed.
 
 Instance isub_po : PreOrder isubform.
@@ -177,6 +183,7 @@ match A, B with
 | ione, ione => true
 | itens A1 A2, itens B1 B2 => (eqb_iform A1 B1) && (eqb_iform A2 B2)
 | ilpam A1 A2, ilpam B1 B2 => (eqb_iform A1 B1) && (eqb_iform A2 B2)
+| igen A1, igen B1 => eqb_iform A1 B1
 | ilmap A1 A2, ilmap B1 B2 => (eqb_iform A1 B1) && (eqb_iform A2 B2)
 | ineg A1, ineg B1 => eqb_iform A1 B1
 | itop, itop => true
@@ -204,6 +211,8 @@ induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
 - subst ; simpl ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
+- apply IHA in H0 ; subst...
+- subst ; simpl ; apply IHA...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
@@ -279,6 +288,7 @@ eqb_iform A B ||
 match B with
 | itens B1 B2 => isubformb A B1 || isubformb A B2
 | ilpam B1 B2 => isubformb A B1 || isubformb A B2
+| igen B1 => isubformb A B1 || eqb_iform A N
 | ilmap B1 B2 => isubformb A B1 || isubformb A B2
 | ineg B1 => isubformb A B1 || eqb_iform A N
 | iwith B1 B2 => isubformb A B1 || isubformb A B2
@@ -310,6 +320,14 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB1...
   + apply isub_lpam_r.
     apply IHB2...
+- simpl in H.
+  apply orb_true_elim in H ; destruct H as [ H | H ] ;
+    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H ; subst ; constructor.
+  + apply isub_gen.
+    apply IHB...
+  + apply eqb_eq_iform in H ; subst.
+    apply isub_gen_N.
 - simpl in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
@@ -372,6 +390,15 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
   + apply IHB2 in H2.
     simpl ; rewrite H2 ; simpl.
     rewrite 2 orb_true_r...
+- inversion H ; subst.
+  + unfold isubformb.
+    replace (eqb_iform (igen B) (igen B)) with true...
+    symmetry ; apply eqb_eq_iform...
+  + apply IHB in H2.
+    simpl ; rewrite H2 ; simpl.
+    rewrite orb_true_r...
+  + simpl.
+    rewrite orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (ilmap B1 B2) (ilmap B1 B2)) with true...
