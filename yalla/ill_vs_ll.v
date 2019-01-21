@@ -10,7 +10,7 @@ Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 
 Require Import ll_fragments.
-Require Export ill_cut.
+Require Export ill_prop.
 
 
 
@@ -3593,11 +3593,6 @@ End Conservativity.
 
 Section Non_Conservativity.
 
-Variable P : ipfrag.
-Hypothesis P_perm : ipperm P = true.
-Hypothesis P_cut : ipcut P = false.
-Hypothesis P_gax : projT1 (ipgax P) -> False.
-
 Variable i2a : IAtom -> Atom.
 
 Variable x : IAtom.
@@ -3605,9 +3600,9 @@ Variable y : IAtom.
 Variable z : IAtom.
 
 (** Counter example from Harold Schellinx *)
-Definition cons_counter_ex :=
-  ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
-        (itens (ivar x) (ilpam izero (ivar z))).
+Notation cons_counter_ex :=
+  (ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
+        (itens (ivar x) (ilpam izero (ivar z)))).
 
 Lemma counter_haszero : nonzerospos cons_counter_ex -> False.
 Proof.
@@ -3619,34 +3614,25 @@ constructor.
 Qed.
 
 Lemma counter_ll_prove :
-  ll (i2pfrag i2a P) (ill2ll i2a cons_counter_ex :: nil).
-Proof with myeeasy.
+  ll_ll (ill2ll i2a cons_counter_ex :: nil).
+Proof.
 simpl.
 apply parr_r.
 eapply ex_r ; [ | apply PCperm_Type_swap ].
 rewrite <- (app_nil_l (tens (var _) _ :: _)).
 apply tens_r.
 - apply parr_r.
-  eapply ex_r ;
-    [ | unfold PCperm_Type ; simpl ; rewrite P_perm ;
-        symmetry ; apply Permutation_Type_cons_append ].
-  eapply ex_r ;
-    [ | unfold PCperm_Type ; simpl ; rewrite P_perm ;
-        symmetry ; apply Permutation_Type_cons_append ].
-  rewrite <- ? app_comm_cons.
-  rewrite app_comm_cons.
+  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
   apply tens_r.
   + eapply ex_r ; [ apply ax_r | PCperm_Type_solve ].
   + apply parr_r.
-    eapply ex_r ;
-    [ | unfold PCperm_Type ; simpl ; rewrite P_perm ;
-        symmetry ; apply Permutation_Type_cons_append ].
-    rewrite <- ? app_comm_cons.
+    eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
     apply top_r.
 - apply top_r.
 Qed.
 
-Fact no_at_prove_ill : forall i, ill P nil (ivar i) -> False.
+Fact no_at_prove_ill : forall i, ill_ll nil (ivar i) -> False.
 Proof.
 intros i pi.
 remember (ivar i) as C.
@@ -3655,7 +3641,7 @@ revert Heql HeqC.
 induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion Heql)) ;
   (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql) ; subst.
+  try now (destruct l1 ; inversion Heql).
 - symmetry in p.
   apply PEperm_Type_nil in p ; subst.
   intuition.
@@ -3666,12 +3652,11 @@ induction pi ; intros Heql HeqC ; subst ;
   intuition.
 - destruct l1 ; destruct l0 ; inversion Heql.
 - destruct l ; inversion Heql.
-- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 Fact no_biat_prove_ill : forall i j, i <> j ->
-  ill P (ivar i :: nil) (ivar j) -> False.
-Proof with myeasy.
+  ill_ll (ivar i :: nil) (ivar j) -> False.
+Proof.
 intros i j Ha pi.
 remember (ivar j) as C.
 remember (ivar i :: nil) as l.
@@ -3679,7 +3664,7 @@ revert Heql HeqC.
 induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion Heql)) ;
   (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1) ; subst...
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
 - inversion HeqC ; inversion Heql ; subst ; intuition.
 - symmetry in p.
   apply PEperm_Type_length_1_inv in p ; subst ; intuition.
@@ -3697,40 +3682,22 @@ induction pi ; intros Heql HeqC ; subst ;
     try destruct l0 ; try destruct l1 ; inversion Heql.
 - destruct l ; inversion Heql ; subst.
   destruct l ; inversion H1.
-- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 Fact no_biat_map_prove_ill : forall i j, i <> j ->
-  ill P nil (ilpam (ivar i) (ivar j)) -> False.
-Proof with myeasy.
+  ill_ll nil (ilpam (ivar i) (ivar j)) -> False.
+Proof.
 intros i j Ha pi.
-remember (ilpam (ivar i) (ivar j)) as C.
-remember (nil) as l.
-revert Heql HeqC.
-induction pi ; intros Heql HeqC ; subst ;
-  (try now (inversion Heql)) ;
-  (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql) ; subst...
-- symmetry in p.
-  apply PEperm_Type_nil in p ; subst.
-  intuition.
-- apply app_eq_nil in Heql ; destruct Heql as [? Heql] ; subst.
-  apply app_eq_nil in Heql ; destruct Heql as [Heql ?] ; subst.
-  destruct lw' ; inversion Heql.
-  symmetry in p ; apply Permutation_Type_nil in p ; subst.
-  intuition.
-- inversion HeqC ; subst.
-  eapply no_biat_prove_ill ; eassumption.
-- destruct l1 ; destruct l0 ; inversion Heql.
-- rewrite f in P_cut ; inversion P_cut.
+apply lpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+eapply no_biat_prove_ill ; eassumption.
 Qed.
 
 (** We need two distinct atoms *)
 Hypothesis twoat : x <> y.
 
 Fact pre_pre_counter_ex_ill :
-  ill P (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x) -> False.
-Proof with myeasy.
+  ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x) -> False.
+Proof.
 intros pi.
 remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l.
 remember (ivar x) as C.
@@ -3738,7 +3705,7 @@ revert Heql HeqC.
 induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion Heql)) ;
   (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1) ; subst...
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
 - symmetry in p.
   apply PEperm_Type_length_1_inv in p ; subst ; intuition.
 - destruct l1 ; inversion Heql ; subst.
@@ -3760,11 +3727,10 @@ induction pi ; intros Heql HeqC ; subst ;
     try destruct l0 ; try destruct l1 ; inversion H1.
 - destruct l ; inversion Heql ; subst.
   destruct l ; inversion H1.
-- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
 Fact pre_counter_ex_ill :
-  @ill P (ilpam (ilpam (ivar x) (ivar y)) izero :: nil)
+  ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil)
          (itens (ivar x) (ilpam izero (ivar z))) -> False.
 Proof with myeasy.
 intros pi.
@@ -3774,7 +3740,7 @@ revert Heql HeqC.
 induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion Heql)) ;
   (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1) ; subst...
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
 - symmetry in p.
   apply PEperm_Type_length_1_inv in p ; intuition.
 - destruct l1 ; inversion Heql ; subst.
@@ -3799,31 +3765,163 @@ induction pi ; intros Heql HeqC ; subst ;
   + destruct l1 ; inversion H1.
 - destruct l1 ; destruct l0 ; inversion Heql ; 
     try destruct l0 ; try destruct l1 ; inversion H1.
-- rewrite f in P_cut ; inversion P_cut.
 Qed.
 
-Fact counter_ex_ill : @ill P nil cons_counter_ex -> False.
+Fact counter_ex_ill : ill_ll nil cons_counter_ex -> False.
+Proof.
+intros pi.
+apply lpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply pre_counter_ex_ill in pi ; assumption.
+Qed.
+
+End Non_Conservativity.
+
+Section Non_Conservativity_Atom_Free.
+
+Variable i2a : IAtom -> Atom.
+
+(** Counter example from Jui-Hsuan Wu *)
+Notation cons_counter_ex_atfree :=
+ (ilpam (ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero) ione).
+
+Lemma counter_atfree_haszero : nonzerospos cons_counter_ex_atfree -> False.
+Proof.
+intros Hnzsp.
+inversion Hnzsp.
+inversion H1.
+apply H8.
+constructor.
+Qed.
+
+Lemma counter_atfree_ll_prove :
+  ll_ll (ill2ll i2a cons_counter_ex_atfree :: nil).
+Proof.
+simpl.
+apply parr_r.
+eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+apply tens_r.
+- apply parr_r.
+  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+  apply tens_r.
+  + apply parr_r.
+    eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+    apply top_r.
+  + apply bot_r.
+    apply one_r.
+- apply top_r.
+Qed.
+
+Fact counter_ex_atfree_ill : ill_ll nil cons_counter_ex_atfree -> False.
 Proof with myeasy.
 intros pi.
-remember (cons_counter_ex) as C.
-remember (nil) as l.
+apply lpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+remember (nil ++ ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero :: nil) as l.
+remember ione as C.
 revert Heql HeqC.
 induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion Heql)) ;
   (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql) ; subst...
-- symmetry in p.
-  apply PEperm_Type_nil in p ; intuition.
-- apply app_eq_nil in Heql ; destruct Heql as [? Heql] ; subst.
-  apply app_eq_nil in Heql ; destruct Heql as [Heql ?] ; subst.
-  destruct lw' ; inversion Heql.
-  symmetry in p ; apply Permutation_Type_nil in p ; subst.
-  intuition.
-- inversion HeqC ; subst ; apply pre_counter_ex_ill in pi...
-- destruct l1 ; destruct l0 ; inversion Heql.
-- rewrite f in P_cut ; inversion P_cut.
+  (try now (destruct l1 ; inversion Heql)) ;
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+- simpl in p ; symmetry in p.
+  apply Permutation_Type_length_1_inv in p ; subst.
+  apply IHpi...
+- apply IHpi...
+  destruct l1 ; inversion Heql.
+  + destruct lw' ; inversion H0.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst...
+  + apply app_eq_nil in H1.
+    destruct H1 as [? H1] ; subst.
+    apply app_eq_nil in H1.
+    destruct H1 as [H1 ?] ; subst.
+    destruct lw' ; inversion H1.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst...
+- destruct l1 ; inversion Heql ; subst.
+  + apply app_eq_nil in H2 ; destruct H2 ; subst.
+    clear - pi1.
+    apply lpam_rev_noax in pi1 ; [ | intros Hax ; inversion Hax ].
+    remember (nil ++ ilpam (ilpam izero ione) ione :: nil) as l.
+    remember izero as C.
+    revert Heql HeqC.
+    induction pi1 ; intros Heql HeqC ; subst ;
+      (try now (inversion Heql)) ;
+      (try now (inversion HeqC)) ;
+      (try now (destruct l1 ; inversion Heql)) ;
+      try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+    * simpl in p ; symmetry in p.
+      apply Permutation_Type_length_1_inv in p ; subst.
+      apply IHpi1...
+    * apply IHpi1...
+      destruct l1 ; inversion Heql.
+      -- destruct lw' ; inversion H0.
+         symmetry in p ; apply Permutation_Type_nil in p ; subst...
+      -- apply app_eq_nil in H1.
+         destruct H1 as [? H1] ; subst.
+         apply app_eq_nil in H1.
+         destruct H1 as [H1 ?] ; subst.
+         destruct lw' ; inversion H1.
+         symmetry in p ; apply Permutation_Type_nil in p ; subst...
+    * destruct l1 ; inversion Heql ; subst.
+      -- apply app_eq_nil in H2 ; destruct H2 ; subst.
+         clear - pi1_2.
+         remember (nil ++ ione :: nil) as l.
+         remember izero as C.
+         revert Heql HeqC.
+         induction pi1_2 ; intros Heql HeqC ; subst ;
+           (try now (inversion Heql)) ;
+           (try now (inversion HeqC)) ;
+           (try now (destruct l1 ; inversion Heql)) ;
+           try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+         ++ simpl in p ; symmetry in p.
+            apply Permutation_Type_length_1_inv in p ; subst.
+            apply IHpi1_2...
+         ++ apply IHpi1_2...
+            destruct l1 ; inversion Heql.
+            ** destruct lw' ; inversion H0.
+               symmetry in p ; apply Permutation_Type_nil in p ; subst...
+            ** apply app_eq_nil in H1.
+               destruct H1 as [? H1] ; subst.
+               apply app_eq_nil in H1.
+               destruct H1 as [H1 ?] ; subst.
+               destruct lw' ; inversion H1.
+               symmetry in p ; apply Permutation_Type_nil in p ; subst...
+         ++ destruct l1 ; inversion Heql ; subst.
+            ** clear - pi1_2.
+               remember (nil ++ nil) as l.
+               remember izero as C.
+               revert Heql HeqC.
+               induction pi1_2 ; intros Heql HeqC ; subst ;
+                 (try now (inversion Heql)) ;
+                 (try now (inversion HeqC)) ;
+                 (try now (destruct l1 ; inversion Heql)) ;
+                 try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+               --- symmetry in p ; apply Permutation_Type_nil in p ; subst.
+                   apply IHpi1_2...
+               --- apply app_eq_nil in Heql.
+                   destruct Heql as [? Heql] ; subst.
+                   apply app_eq_nil in Heql.
+                   destruct Heql as [Heql ?] ; subst.
+                   destruct lw' ; inversion Heql.
+                   symmetry in p ; apply Permutation_Type_nil in p ; subst.
+                   apply IHpi1_2...
+               --- destruct l1 ; destruct l0 ; inversion Heql.
+            ** destruct l1 ; inversion H1.
+         ++ destruct l1 ; inversion Heql.
+            ** destruct l0 ; inversion H0.
+               destruct l0 ; inversion H2.
+            ** destruct l1 ; destruct l0 ; inversion H1.
+      -- destruct l1 ; inversion H1.
+    * destruct l1 ; inversion Heql.
+      -- destruct l0 ; inversion H0.
+         destruct l0 ; inversion H2.
+      -- destruct l1 ; destruct l0 ; inversion H1.
+  + destruct l1 ; inversion H1.
+- destruct l1 ; inversion Heql.
+  + destruct l0 ; inversion H0.
+    destruct l0 ; inversion H2.
+  + destruct l1 ; destruct l0 ; inversion H1.
 Qed.
 
-End Non_Conservativity.
+End Non_Conservativity_Atom_Free.
 
 
