@@ -648,6 +648,10 @@ Lemma ll_to_mix2_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
   ll P (wn (tens bot bot) :: l) -> ll (mix2add_pfrag P) l.
 Proof with myeeasy ; try PCperm_Type_solve.
 intros Hgax Hperm.
+assert (forall a, In bot (projT2 (pgax P) a) -> False) as Hgaxbot.
+{ intros a Hbot.
+  apply (Forall_In _ _ _ (Hgax a)) in Hbot.
+  inversion Hbot. }
 enough (forall l, ll P l -> forall l' (l0 l1 : list unit),
   Permutation_Type l (l' ++ map (fun _ => tens bot bot) l1
                          ++ map (fun _ => wn (tens bot bot)) l0)  ->
@@ -796,7 +800,7 @@ induction pi ; intros l' l0' l1' HP.
       rewrite app_comm_cons in IHP1.
       apply IHpi1 in IHP1.
       rewrite <- app_nil_l in IHP1.
-      eapply bot_rev_axat in IHP1 ; [ | apply Hgax | reflexivity ].
+      eapply bot_rev in IHP1 ; [ | apply Hgaxbot | reflexivity ].
       list_simpl in IHP1.
       apply (Permutation_Type_app_head l1a) in HP3b.
       assert (IHP2 := Permutation_Type_trans HP1 HP3b).
@@ -804,7 +808,7 @@ induction pi ; intros l' l0' l1' HP.
       rewrite app_comm_cons in IHP2.
       apply IHpi2 in IHP2.
       rewrite <- app_nil_l in IHP2.
-      eapply bot_rev_axat in IHP2 ; [ | apply Hgax | reflexivity ].
+      eapply bot_rev in IHP2 ; [ | apply Hgaxbot | reflexivity ].
       list_simpl in IHP2.
       assert (Permutation_Type (l2a ++ l1a) l') as HP' by perm_Type_solve.
       eapply ex_r ; [ apply mix2_r | simpl ; rewrite Hperm ; apply HP' ]...
@@ -1089,7 +1093,7 @@ eapply stronger_pfrag in pi.
       - apply one_r.
       - apply bot_r.
         apply parr_r.
-         assert ({ b | one :: one :: nil = projT2 (pgax P') b })
+        assert ({ b | one :: one :: nil = projT2 (pgax P') b })
           as [b Hgax] by (rewrite HeqP' ; now (exists (inr tt))).
         rewrite Hgax.
         apply gax_r. }

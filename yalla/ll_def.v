@@ -357,7 +357,7 @@ Ltac ll_swap_in H :=
 
 (** ** Some reversibility statements *)
 
-Lemma bot_rev_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma bot_rev {P} : (forall a, In bot (projT2 (pgax P) a) -> False) ->
   forall l, ll P l -> forall l1 l2, l = l1 ++ bot :: l2 -> ll P (l1 ++ l2).
 Proof with myeeasy.
 intros Hgax l pi.
@@ -453,15 +453,12 @@ induction pi ; intros l1' l2' Heq ; subst.
     rewrite app_comm_cons.
     eapply IHpi1...
 - exfalso.
-  specialize Hgax with a.
-  rewrite Heq in Hgax.
-  destruct (Forall_app_inv _ _ _ Hgax) as [_ Hat].
-  inversion Hat.
-  inversion H1.
+  apply (Hgax a) ; rewrite Heq.
+  apply in_elt.
 Qed.
 
-Lemma parr_rev_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
-  forall l, ll P l -> forall A B l1 l2, l = l1 ++ parr A B :: l2 ->
+Lemma parr_rev {P} : (forall a A B, In (parr A B) (projT2 (pgax P) a) -> False) ->
+forall l, ll P l -> forall A B l1 l2, l = l1 ++ parr A B :: l2 ->
   ll P (l1 ++ A :: B :: l2).
 Proof with myeeasy.
 intros Hgax l pi.
@@ -552,14 +549,11 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   + rewrite <- app_assoc ; eapply cut_r...
     rewrite app_comm_cons ; apply IHpi1...
 - exfalso.
-  specialize Hgax with a.
-  rewrite Heq in Hgax.
-  destruct (Forall_app_inv _ _ _ Hgax) as [_ Hat].
-  inversion Hat.
-  inversion H1.
+  apply (Hgax a A' B') ; rewrite Heq.
+  apply in_elt.
 Qed.
 
-Lemma one_rev_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma one_rev {P} : (forall a, In one (projT2 (pgax P) a) -> False) ->
   forall l0 l, ll P l0 -> ll P l -> forall l1 l2, l = l1 ++ one :: l2 ->
   ll P (l1 ++ l0 ++ l2).
 Proof with myeeasy.
@@ -648,18 +642,17 @@ induction pi ; intros l1' l2' Heq ; subst.
   + rewrite <- app_assoc ; eapply cut_r...
     rewrite app_comm_cons ; apply IHpi1...
 - exfalso.
-  specialize Hgax with a.
-  rewrite Heq in Hgax.
-  destruct (Forall_app_inv _ _ _ Hgax) as [_ Hat].
-  inversion Hat.
-  inversion H1.
+  apply (Hgax a) ; rewrite Heq.
+  apply in_elt.
 Qed.
 
-Lemma tens_one_rev_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma tens_one_rev {P} :
+(forall a, In one (projT2 (pgax P) a) -> False) ->
+(forall a A, In (tens one A) (projT2 (pgax P) a) -> False) ->
   forall l, ll P l -> forall A l1 l2, l = l1 ++ tens one A :: l2 ->
   ll P (l1 ++ A :: l2).
 Proof with myeeasy.
-intros Hgax l pi.
+intros Hgax1 Hgaxt l pi.
 induction pi ; intros A' l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
@@ -699,7 +692,7 @@ induction pi ; intros A' l1' l2' Heq ; subst.
   apply IHpi...
 - rewrite app_comm_cons in Heq ; dichot_Type_elt_app_exec Heq ; subst.
   + destruct l1' ; inversion Heq0 ; subst.
-    * eapply (one_rev_axat Hgax _ _ pi2) in pi1 ;
+    * eapply (one_rev Hgax1 _ _ pi2) in pi1 ;
         [ | rewrite app_nil_l ; reflexivity ]...
     * rewrite <- app_comm_cons ; rewrite (app_comm_cons l) ; rewrite app_assoc ; apply tens_r...
       rewrite app_comm_cons ; apply IHpi2...
@@ -745,14 +738,11 @@ induction pi ; intros A' l1' l2' Heq ; subst.
   + rewrite <- app_assoc ; eapply cut_r...
     rewrite app_comm_cons ; apply IHpi1...
 - exfalso.
-  specialize Hgax with a.
-  rewrite Heq in Hgax.
-  destruct (Forall_app_inv _ _ _ Hgax) as [_ Hat].
-  inversion Hat.
-  inversion H1.
+  apply (Hgaxt a A') ; rewrite Heq.
+  apply in_elt.
 Qed.
 
-Lemma tens_rev_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma tens_rev {P} : (forall a A B, projT2 (pgax P) a = tens A B :: nil -> False) ->
   pcut P = false -> forall A B,
   ll P (tens A B :: nil) -> prod (ll P (A :: nil)) (ll P (B :: nil)).
 Proof with myeeasy.
@@ -782,13 +772,10 @@ remember (tens A B :: nil) as l ; revert A B Heql ;
   constructor...
 - rewrite Hcut in f ; inversion f.
 - exfalso.
-  specialize Hgax with a.
-  rewrite Heq in Hgax.
-  inversion Hgax.
-  inversion H1.
+  apply (Hgax a A' B')...
 Qed.
 
-Lemma plus_rev_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma plus_rev {P} : (forall a A B, projT2 (pgax P) a = aplus A B :: nil -> False) ->
   pcut P = false -> forall A B,
   ll P (aplus A B :: nil) -> sum (ll P (A :: nil)) (ll P (B :: nil)).
 Proof with myeeasy.
@@ -819,10 +806,7 @@ remember (aplus A B :: nil) as l ; revert A B Heql ;
   right...
 - rewrite Hcut in f ; inversion f.
 - exfalso.
-    specialize Hgax with a.
-  rewrite Heq in Hgax.
-  inversion Hgax.
-  inversion H1.
+  apply (Hgax a A' B')...
 Qed.
 
 
@@ -915,7 +899,11 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
     apply IHpi1 in HF1.
     apply (Forall2_Type_cons B y) in HF2...
     apply IHpi2 in HF2.
-    eapply (one_rev_axat Hgax _ (one :: l1') HF2) in HF1...
+    assert (forall a, In one (projT2 (pgax P) a) -> False) as Hgax1.
+    { intros a Hone.
+      apply (Forall_In _ _ _ (Hgax a)) in Hone.
+      inversion Hone. }
+    eapply (one_rev Hgax1 _ (one :: l1') HF2) in HF1...
     * rewrite app_nil_l in HF1 ; exact HF1.
     * reflexivity.
 - inversion HF ; subst.
@@ -925,7 +913,10 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
     apply (Forall2_Type_cons A y) in H3...
     apply IHpi in H3.
     rewrite <- (app_nil_l l') ; rewrite app_comm_cons.
-    eapply bot_rev_axat ; [ | | reflexivity ]...
+    eapply bot_rev ; [ | | reflexivity ]...
+    intros a Hbot.
+    apply (Forall_In _ _ _ (Hgax a)) in Hbot.
+    inversion Hbot.
 - inversion HF ; subst.
   inversion H1 ; subst.
   constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
