@@ -1066,8 +1066,10 @@ eapply stronger_pfrag in pi.
   + destruct pmix2...
 Qed.
 
-(** Provability in [ll_mix2] is equivalent to provability of [ll]
-extended with the provability of [one :: one :: nil] *)
+(** Provability in [ll_mix2] is equivalent to
+provability of [ll] extended with the provability of [one :: one :: nil]
+and to provability of [ll] extended with the provability of [parr (dual B) (dual A) :: tens A B :: nil]
+for all [A] and [B] *)
 
 Lemma mix2_to_ll_one_one {P} : pcut P = true -> pperm P = true -> forall bc b2 bp l,
   ll (mk_pfrag bc P.(pgax) P.(pmix0) b2 bp) l ->
@@ -1106,6 +1108,109 @@ eapply stronger_pfrag in pi.
   + rewrite fc.
     destruct bc...
   + exists a...
+Qed.
+
+Lemma ll_one_one_to_ll_tens_parr_one_one_cut {P} : (pcut P = true) ->
+  ll P (parr one one :: parr bot bot :: nil) -> ll P (one :: one :: nil).
+Proof.
+intros Hcut pi.
+assert (ll P (dual (parr (parr one one) (parr bot bot)) :: one :: one :: nil)) as pi'.
+{ simpl.
+  rewrite <- (app_nil_r _) ; rewrite <- app_comm_cons.
+  apply tens_r.
+  - rewrite <- (app_nil_r _) ; rewrite <- app_comm_cons.
+    apply tens_r ; apply one_r.
+  - rewrite <- (app_nil_l (one :: nil)).
+    rewrite (app_comm_cons _ _ one).
+    apply tens_r ; apply ax_exp. }
+rewrite <- (app_nil_l _).
+eapply cut_r ; [ assumption | apply pi' | ].
+apply parr_r ; apply pi.
+Qed.
+
+Lemma ll_tens_parr_one_one_to_ll_tens_parr {P} : forall l,
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                              (fun a => match a with
+                                        | inl x => projT2 (pgax P) x
+                                        | inr tt => parr one one :: parr bot bot :: nil
+                                        end))) l
+  -> ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                              (fun a => match a with
+                                        | inl x => projT2 (pgax P) x
+                                        | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
+                                        end))) l.
+Proof with myeeasy.
+intros l pi.
+remember (axupd_pfrag P (existT (fun x => x -> list formula) _
+                         (fun a => match a with
+                                   | inl x => projT2 (pgax P) x
+                                   | inr tt => parr one one :: parr bot bot :: nil
+                                   end))) as P'.
+apply (ax_gen P') ; (try now (rewrite HeqP' ; simpl ; reflexivity))...
+clear - HeqP' ; simpl ; intros a.
+revert a ; rewrite HeqP' ; intros a ; destruct a ; simpl.
+- assert ({ b | projT2 (pgax P) p =
+                projT2 (pgax (axupd_pfrag P (existT (fun x => x -> list formula) _
+                       (fun a => match a with
+                                 | inl x => projT2 (pgax P) x
+                                 | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
+                                 end)))) b })
+    as [b Hgax] by (now exists (inl p)).
+  rewrite Hgax.
+  apply gax_r.
+- destruct u.
+  assert ({ b | parr one one :: parr bot bot :: nil =
+                projT2 (pgax (axupd_pfrag P (existT (fun x => x -> list formula) _
+                       (fun a => match a with
+                                 | inl x => projT2 (pgax P) x
+                                 | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
+                                 end)))) b })
+    as [b Hgax] by (exists (inr (bot,bot)) ; reflexivity).
+  rewrite Hgax.
+  apply gax_r.
+Qed.
+
+Lemma ll_tens_parr_to_mix2 {P} : forall l,
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                              (fun a => match a with
+                                        | inl x => projT2 (pgax P) x
+                                        | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
+                                        end))) l
+  -> ll (mk_pfrag P.(pcut) P.(pgax) P.(pmix0) true P.(pperm)) l.
+Proof with myeeasy.
+intros l pi.
+remember (mk_pfrag P.(pcut) P.(pgax) P.(pmix0) true P.(pperm)) as P'.
+apply (stronger_pfrag _
+  (axupd_pfrag P' (existT (fun x => x -> list formula) _
+                          (fun a => match a with
+                                    | inl x => projT2 (pgax P) x
+                                    | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
+                                    end)))) in pi.
+- eapply ax_gen...
+  clear - HeqP' ; simpl ; intros a.
+  destruct a.
+  + assert ({ b | projT2 (pgax P) p = projT2 (pgax P') b })
+      as [b Hgax] by (rewrite HeqP' ; now exists p).
+    rewrite Hgax.
+    apply gax_r.
+  + destruct p as [A B].
+    apply parr_r.
+    apply (ex_r _ (parr A B :: (dual B :: nil) ++ (dual A) :: nil)) ;
+      [ |etransitivity ; [ apply PCperm_Type_last | reflexivity ] ].
+    apply parr_r.
+    eapply ex_r ;
+      [ | symmetry ; apply PCperm_Type_last ].
+    list_simpl.
+    rewrite <- (app_nil_l (dual A :: _)).
+    rewrite 2 app_comm_cons.
+    apply mix2_r.
+    * rewrite HeqP'...
+    * eapply ex_r ; [ | apply PCperm_Type_swap ].
+      apply ax_exp.
+    * apply ax_exp.
+- rewrite HeqP' ; nsplit 5 ; simpl ; intros...
+  + exists a...
+  + destruct (pmix2 P)...
 Qed.
 
 Lemma ll_one_one_to_mix2 {P} : forall l,
