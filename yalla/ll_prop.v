@@ -13,46 +13,44 @@ Require Export ll_cut.
 
 (** Some additional reversibility statements *)
 Lemma with_rev1_noax {P} : (projT1 (pgax P) -> False) ->
-  forall l, ll P l -> forall A B l1 l2, l = l1 ++ awith A B :: l2 ->
-  ll P (l1 ++ A :: l2).
+forall A B l1 l2, ll P (l1 ++ awith A B :: l2) -> ll P (l1 ++ A :: l2).
 Proof with myeeasy.
-intros Hgax l pi A B l1 l2 Heq ; subst.
-assert (Hax := @ax_exp P (dual A)).
-rewrite bidual in Hax.
-eapply (ex_r _ _ (awith A B :: l2 ++ l1)) in pi ; [ | PCperm_Type_solve ].
-eapply (cut_r_axfree _ _ (A :: nil)) in pi...
-- eapply ex_r ; [ apply pi | PCperm_Type_solve ].
-- apply plus_r1...
-Unshelve. assumption.
+intros Hgax A B l1 l2 pi.
+assert (ll P (dual (awith A B) :: A :: nil)) as pi'.
+{ apply plus_r1.
+  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  apply ax_exp. }
+eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
+eapply cut_r_axfree ; try eassumption.
+eapply ex_r ; [ apply pi | PCperm_Type_solve ].
 Qed.
 
 Lemma with_rev2_noax {P} : (projT1 (pgax P) -> False) ->
-  forall l, ll P l -> forall A B l1 l2, l = l1 ++ awith B A :: l2 ->
-  ll P (l1 ++ A :: l2).
+forall A B l1 l2, ll P (l1 ++ awith B A :: l2) -> ll P (l1 ++ A :: l2).
 Proof with myeeasy.
-intros Hgax l pi A B l1 l2 Heq ; subst.
-assert (Hax := @ax_exp P (dual A)).
-rewrite bidual in Hax.
-eapply (ex_r _ _ (awith B A :: l2 ++ l1)) in pi ; [ | PCperm_Type_solve ].
-eapply (cut_r_axfree _ _ (A :: nil)) in pi...
-- eapply ex_r ; [ apply pi | PCperm_Type_solve ].
-- apply plus_r2...
-Unshelve. assumption.
+intros Hgax A B l1 l2 pi.
+assert (ll P (dual (awith B A) :: A :: nil)) as pi'.
+{ apply plus_r2.
+  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  apply ax_exp. }
+eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
+eapply cut_r_axfree ; try eassumption.
+eapply ex_r ; [ apply pi | PCperm_Type_solve ].
 Qed.
 
 Lemma oc_rev_noax {P} : (projT1 (pgax P) -> False) ->
-  forall l, ll P l -> forall A l1 l2, l = l1 ++ oc A :: l2 ->
-  ll P (l1 ++ A :: l2).
+forall A l1 l2, ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
 Proof with myeeasy.
-intros Hgax l pi A l1 l2 Heq ; subst.
-assert (Hax := @ax_exp P (dual A)).
-rewrite bidual in Hax.
-eapply (ex_r _ _ (oc A :: l2 ++ l1)) in pi ; [ | PCperm_Type_solve ].
-eapply (cut_r_axfree _ _ (A :: nil)) in pi...
-- eapply ex_r ; [ apply pi | PCperm_Type_solve ].
-- apply de_r...
-Unshelve. assumption.
+intros Hgax A l1 l2 pi.
+assert (ll P (dual (oc A) :: A :: nil)) as pi'.
+{ apply de_r.
+  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  apply ax_exp. }
+eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
+eapply cut_r_axfree ; try eassumption.
+eapply ex_r ; [ apply pi | PCperm_Type_solve ].
 Qed.
+
 
 
 (** ** Subformula Property *)

@@ -279,7 +279,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     destruct HP2 ; inversion e.
     destruct l ; inversion H1.
 - rewrite <- (app_nil_l (parr _ _ :: _)) in pi1.
-  eapply parr_rev in pi1 ; [ | intros a ; inversion a | ]...
+  eapply parr_rev in pi1 ; [ | intros a ; inversion a ]...
   list_simpl in pi1.
   assert ((ll_mix0 (oc F :: ill2ll i2a A1 :: nil) * ll_mix0 (ill2ll i2a A2 :: nil))
         + (ll_mix0 (ill2ll i2a A1 :: nil) * ll_mix0 (oc F :: ill2ll i2a A2 :: nil)))
@@ -314,7 +314,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
   assert (Heq2 := HP2).
   symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
   destruct Heq2 as ((l' & l'') & Heq2) ; subst.
-  eapply parr_rev in pi2 ; [ | intros a ; inversion a | ]...
+  eapply parr_rev in pi2 ; [ | intros a ; inversion a ]...
   destruct pi1 as [pi1' pi1''].
   rewrite bidual in pi1'.
   eapply (cut_mix0_r _ (l' ++ ill2ll i2a A2 :: l'')) in pi1' ;
@@ -345,7 +345,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
   assert (Heq2 := HP2).
   symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
   destruct Heq2 as ((l' & l'') & Heq2) ; subst.
-  eapply parr_rev in pi2 ; [ | intros a ; inversion a | ]...
+  eapply parr_rev in pi2 ; [ | intros a ; inversion a ]...
   destruct pi1 as [pi1' pi1''].
   rewrite bidual in pi1''.
   eapply (cut_mix0_r _ (l' ++ ill2ll i2a A2 :: l'')) in pi1'' ;
@@ -386,8 +386,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     assert (Heq2 := HP2).
     symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
     destruct Heq2 as ((l' & l'') & Heq2) ; subst.
-    eapply with_rev1_noax in pi2 ;
-      [ | intros a ; inversion a | ]...
+    eapply with_rev1_noax in pi2 ; [ | intros a ; inversion a ]...
     eapply IHA1.
     * eassumption.
     * apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
@@ -399,8 +398,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     assert (Heq2 := HP2).
     symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
     destruct Heq2 as ((l' & l'') & Heq2) ; subst.
-    eapply with_rev2_noax in pi2 ;
-      [ | intros a ; inversion a | ]...
+    eapply with_rev2_noax in pi2 ; [ | intros a ; inversion a ]...
     eapply IHA2.
     * eassumption.
     * apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
@@ -419,10 +417,8 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     destruct HP2 ; inversion e.
     destruct l ; inversion H1.
 - assert (pi0 := pi1).
-  eapply with_rev1_noax in pi1 ;
-    [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ]...
-  eapply with_rev2_noax in pi0 ;
-    [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ]...
+  rewrite <- (app_nil_l _) in pi1 ; eapply with_rev1_noax in pi1 ; [ | intros a ; inversion a ]...
+  rewrite <- (app_nil_l _) in pi0 ; eapply with_rev2_noax in pi0 ; [ | intros a ; inversion a ]...
   assert (ll_mix0 (oc F :: ill2ll i2a A1 :: nil)
         + ll_mix0 (oc F :: ill2ll i2a A2 :: nil))
     as [ pi2' | pi2' ].
@@ -548,8 +544,7 @@ induction pi ; intros l' Heq HF ; subst ;
   decomp_map H1 ; decomp_map H1 ; subst.
   destruct i ; inversion H0 ; subst.
   + inversion HF ; subst.
-    simpl in X ; eapply parr_rev in X ;
-      [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ].
+    simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
     apply Forall_Type_app_inv in X0 ; destruct X0.
     rewrite bidual in pi1.
@@ -567,8 +562,7 @@ induction pi ; intros l' Heq HF ; subst ;
     apply (IHpi2 (i2 :: l4))...
     constructor...
   + inversion HF ; subst.
-    simpl in X ; eapply parr_rev in X ;
-      [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ].
+    simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
     apply Forall_Type_app_inv in X0 ; destruct X0.
     rewrite bidual in pi1.
@@ -586,8 +580,7 @@ induction pi ; intros l' Heq HF ; subst ;
     apply (IHpi2 (ivar atN  :: l4))...
     constructor...
   + inversion HF ; subst.
-    simpl in X ; eapply parr_rev in X ;
-      [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ].
+    simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
     apply Forall_Type_app_inv in X0 ; destruct X0.
     rewrite bidual in pi2.
@@ -604,8 +597,7 @@ induction pi ; intros l' Heq HF ; subst ;
     apply (IHpi1 (i2 :: l5))...
     constructor...
   + inversion HF ; subst.
-    simpl in X ; eapply parr_rev in X ;
-      [ | intros a ; inversion a | rewrite app_nil_l ; reflexivity ].
+    simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
     apply Forall_Type_app_inv in X0 ; destruct X0.
     rewrite bidual in pi2.
@@ -648,16 +640,14 @@ induction pi ; intros l' Heq HF ; subst ;
   destruct i ; inversion H0 ; subst.
   inversion HF ; subst.
   simpl in X ; rewrite <- (app_nil_l (awith _ _ :: _)) in X.
-  eapply with_rev1_noax in X ;
-    [ | intros a ; inversion a | ]...
+  eapply with_rev1_noax in X ; [ | intros a ; inversion a ]...
   apply (IHpi (i1 :: l'))...
   constructor...
 - destruct l' ; inversion Heq.
   destruct i ; inversion H0 ; subst.
   inversion HF ; subst.
   simpl in X ; rewrite <- (app_nil_l (awith _ _ :: _)) in X.
-  eapply with_rev2_noax in X ;
-    [ | intros a ; inversion a | ]...
+  eapply with_rev2_noax in X ; [ | intros a ; inversion a ]...
   apply (IHpi (i2 :: l'))...
   constructor...
 - destruct l' ; inversion Heq.
@@ -675,16 +665,14 @@ induction pi ; intros l' Heq HF ; subst ;
   destruct i ; inversion H0 ; subst.
   inversion HF ; subst.
   simpl in X ; rewrite <- (app_nil_l (oc _ :: _)) in X.
-  eapply oc_rev_noax in X ;
-    [ | intros a ; inversion a | ]...
+  eapply oc_rev_noax in X ; [ | intros a ; inversion a ]...
   apply (IHpi (i :: l'))...
   constructor...
 - destruct l' ; inversion Heq.
   destruct i ; inversion H0 ; subst.
   inversion HF ; subst.
   simpl in X ; rewrite <- (app_nil_l (oc _ :: _)) in X.
-  eapply oc_rev_noax in X ;
-    [ | intros a ; inversion a | ]...
+  eapply oc_rev_noax in X ; [ | intros a ; inversion a ]...
   apply (IHpi l')...
 - destruct l' ; inversion Heq.
   destruct i ; inversion H0 ; subst.

@@ -800,7 +800,7 @@ induction pi ; intros l' l0' l1' HP.
       rewrite app_comm_cons in IHP1.
       apply IHpi1 in IHP1.
       rewrite <- app_nil_l in IHP1.
-      eapply bot_rev in IHP1 ; [ | apply Hgaxbot | reflexivity ].
+      eapply bot_rev in IHP1 ; [ | apply Hgaxbot ].
       list_simpl in IHP1.
       apply (Permutation_Type_app_head l1a) in HP3b.
       assert (IHP2 := Permutation_Type_trans HP1 HP3b).
@@ -808,7 +808,7 @@ induction pi ; intros l' l0' l1' HP.
       rewrite app_comm_cons in IHP2.
       apply IHpi2 in IHP2.
       rewrite <- app_nil_l in IHP2.
-      eapply bot_rev in IHP2 ; [ | apply Hgaxbot | reflexivity ].
+      eapply bot_rev in IHP2 ; [ | apply Hgaxbot ].
       list_simpl in IHP2.
       assert (Permutation_Type (l2a ++ l1a) l') as HP' by perm_Type_solve.
       eapply ex_r ; [ apply mix2_r | simpl ; rewrite Hperm ; apply HP' ]...

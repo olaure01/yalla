@@ -93,10 +93,10 @@ eapply cut_ir_axfree ; eassumption.
 Qed.
 
 Lemma iwith_rev2_noax {P} : (projT1 (ipgax P) -> False) ->
-  forall l A B, ill P l (iwith A B) -> ill P l B.
+  forall l A B, ill P l (iwith B A) -> ill P l A.
 Proof.
 intros Hgax l A B pi.
-assert (ill P (iwith A B :: nil) B) as Hax.
+assert (ill P (iwith B A :: nil) A) as Hax.
 { rewrite <- (app_nil_l _).
   apply with_ilr2 ; apply ax_exp_ill. }
 rewrite <- (app_nil_r _).
@@ -115,17 +115,17 @@ eapply cut_ir_axfree ; eassumption.
 Qed.
 
 Lemma iplus_rev2_noax {P} : (projT1 (ipgax P) -> False) ->
-  forall l1 l2 A B C, ill P (l1 ++ iplus A B :: l2) C -> ill P (l1 ++ B :: l2) C.
+  forall l1 l2 A B C, ill P (l1 ++ iplus B A :: l2) C -> ill P (l1 ++ A :: l2) C.
 Proof.
 intros Hgax l1 l2 A B C pi.
-assert (ill P (B :: nil) (iplus A B)) as Hax.
+assert (ill P (A :: nil) (iplus B A)) as Hax.
 { apply plus_irr2 ;apply ax_exp_ill. }
 rewrite <- (app_nil_l l2) ; rewrite app_comm_cons.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
 Lemma ioc_rev_noax {P} : (projT1 (ipgax P) -> False) ->
-  forall l A, ill P (map ioc l) (ioc A) -> ill P (map ioc l) A.
+  forall l A, ill P l (ioc A) -> ill P l A.
 Proof.
 intros Hgax l A pi.
 assert (ill P (ioc A :: nil) A) as Hax.
