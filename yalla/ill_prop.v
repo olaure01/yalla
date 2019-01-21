@@ -11,6 +11,132 @@ Require Import genperm_Type.
 Require Export ill_cut.
 
 
+(** ** Reversibility statements *)
+(** axiom-free cases *)
+
+Lemma ione_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l1 l2 C, ill P (l1 ++ ione :: l2) C -> ill P (l1 ++ l2) C.
+Proof.
+intros Hgax l1 l2 C pi.
+rewrite <- (app_nil_l l2).
+eapply cut_ir_axfree ; try eassumption.
+apply one_irr.
+Qed.
+
+Lemma itens_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l1 l2 A B C, ill P (l1 ++ itens A B :: l2) C -> ill P (l1 ++ A :: B :: l2) C.
+Proof.
+intros Hgax l1 l2 A B C pi.
+assert (ill P (A :: B :: nil) (itens A B)) as Hax.
+{ cons2app.
+  apply tens_irr ;apply ax_exp_ill. }
+rewrite <- (app_nil_l l2) ; rewrite 2 app_comm_cons.
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma lpam_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l A B, ill P l (ilpam A B) -> ill P (l ++ A :: nil) B.
+Proof.
+intros Hgax l A B pi.
+assert (ill P (ilpam A B :: A :: nil) B) as Hax.
+{ rewrite <- (app_nil_r _) ; rewrite <- app_comm_cons ; rewrite <- (app_nil_l _).
+  apply lpam_ilr ; apply ax_exp_ill. }
+rewrite <- (app_nil_l _).
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma gen_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l A, ill P l (igen A) -> ill P (l ++ A :: nil) N.
+Proof.
+intros Hgax l A pi.
+assert (ill P (igen A :: A :: nil) N) as Hax.
+{ apply gen_ilr ; apply ax_exp_ill. }
+rewrite <- (app_nil_l _).
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma lmap_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l A B, ill P l (ilmap A B) -> ill P (A :: l) B.
+Proof.
+intros Hgax l A B pi.
+assert (ill P (A :: ilmap A B :: nil) B) as Hax.
+{ cons2app.
+  rewrite <- (app_nil_l (A :: _)) ; rewrite <- app_assoc.
+  apply lmap_ilr ; apply ax_exp_ill. }
+rewrite <- (app_nil_r _).
+rewrite <- (app_nil_l l) ; rewrite app_comm_cons ; rewrite <- app_assoc.
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma neg_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l A, ill P l (ineg A) -> ill P (A :: l) N.
+Proof.
+intros Hgax l A pi.
+assert (ill P (A :: ineg A :: nil) N) as Hax.
+{ cons2app.
+  apply neg_ilr ; apply ax_exp_ill. }
+rewrite <- (app_nil_r _).
+rewrite <- (app_nil_l l) ; rewrite app_comm_cons ; rewrite <- app_assoc.
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma iwith_rev1_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l A B, ill P l (iwith A B) -> ill P l A.
+Proof.
+intros Hgax l A B pi.
+assert (ill P (iwith A B :: nil) A) as Hax.
+{ rewrite <- (app_nil_l _).
+  apply with_ilr1 ; apply ax_exp_ill. }
+rewrite <- (app_nil_r _).
+rewrite <- (app_nil_l _).
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma iwith_rev2_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l A B, ill P l (iwith A B) -> ill P l B.
+Proof.
+intros Hgax l A B pi.
+assert (ill P (iwith A B :: nil) B) as Hax.
+{ rewrite <- (app_nil_l _).
+  apply with_ilr2 ; apply ax_exp_ill. }
+rewrite <- (app_nil_r _).
+rewrite <- (app_nil_l _).
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma iplus_rev1_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l1 l2 A B C, ill P (l1 ++ iplus A B :: l2) C -> ill P (l1 ++ A :: l2) C.
+Proof.
+intros Hgax l1 l2 A B C pi.
+assert (ill P (A :: nil) (iplus A B)) as Hax.
+{ apply plus_irr1 ;apply ax_exp_ill. }
+rewrite <- (app_nil_l l2) ; rewrite app_comm_cons.
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma iplus_rev2_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l1 l2 A B C, ill P (l1 ++ iplus A B :: l2) C -> ill P (l1 ++ B :: l2) C.
+Proof.
+intros Hgax l1 l2 A B C pi.
+assert (ill P (B :: nil) (iplus A B)) as Hax.
+{ apply plus_irr2 ;apply ax_exp_ill. }
+rewrite <- (app_nil_l l2) ; rewrite app_comm_cons.
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+Lemma ioc_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+  forall l A, ill P (map ioc l) (ioc A) -> ill P (map ioc l) A.
+Proof.
+intros Hgax l A pi.
+assert (ill P (ioc A :: nil) A) as Hax.
+{ rewrite <- (app_nil_l _).
+  apply de_ilr ; apply ax_exp_ill. }
+rewrite <- (app_nil_r _).
+rewrite <- (app_nil_l _).
+eapply cut_ir_axfree ; eassumption.
+Qed.
+
+
 (** ** Fragments of [ill] *)
 
 Section Fragments.
