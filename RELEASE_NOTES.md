@@ -1,6 +1,6 @@
 # YALLA: an LL library for Coq
 
-## v 2.0 (2019/01/??)
+## v 2.0 (2019/01/23)
 
 This major revision is based on a representation of proofs in `Type` rather than `Prop`.
 For this reason it is *not compatible with version 1.0*.
@@ -17,5 +17,5 @@ Tested with Coq v 8.8.2.
 
 ## v 1.0 (2017/07/18)
 
-First public release
+First public release.
 
