@@ -13,7 +13,6 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [yalla] library *)
 
-Require ll_cut.
 Require ll_fragments.
 
 

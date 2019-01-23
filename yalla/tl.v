@@ -256,15 +256,12 @@ Qed.
 (** ** 4. characterize corresponding [ill] fragment *)
 
 (*
-Require Import ill_prop.
-
 Lemma tl2ill_dec : forall A,
    {B | A = tl2ill B} + (A = N)
  + ((forall B, A = tl2ill B -> False) * (A = N -> False)).
 Proof with try reflexivity.
 induction A ;
-  (try now (right ; intros B Heq ; destruct B ; inversion Heq))
- ;
+  (try now (right ; intros B Heq ; destruct B ; inversion Heq)) ;
   try (destruct IHA1 as [[[B1 Heq1] | Hr1] | [Hr1 HN1]] ;
   destruct IHA2 as [[[B2 Heq2] | Hr2] | [Hr2 HN2]] ; subst ;
   (try now (right ; split ;
@@ -286,6 +283,7 @@ induction A ;
   + subst ; left ; left ; exists (tvar j)...
 - left ; left ; exists tone...
 - left ; left ; exists (ttens B1 B2)...
+- right ; split ; [ intros B Heq ; destruct B | intros Heq ] ; inversion Heq.
 - destruct IHA as [[[B Heq] | Hr] | [Hr HN]] ; subst.
   + left ; left ; exists (tneg B)...
   + right ; split ; [ intros B Heq ; destruct B | intros Heq ] ; inversion Heq.
@@ -330,6 +328,11 @@ induction Hsf ; unfold tl_fragment in HfA.
   destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
 - destruct (tl2ill_dec (ilpam C B)) ; try now inversion HfA.
   destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
+- destruct (tl2ill_dec (igen B)) ; try now inversion HfA.
+  destruct s as [[B' Heq] | Heq] ; try now inversion Heq.
+  destruct B' ; inversion Heq.
+- unfold tl_fragment ; destruct (tl2ill_dec N)...
+  exfalso ; apply (snd p)...
 - destruct (tl2ill_dec (ilmap B C)) ; try now inversion HfA.
   destruct s as [[B' Heq] | Heq] ; try destruct B' ; inversion Heq.
 - destruct (tl2ill_dec (ilmap C B)) ; try now inversion HfA.

@@ -5,9 +5,8 @@
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-Require Import Permutation_Type.
-
 Require Import List_more.
+Require Import Permutation_Type.
 Require Import genperm_Type.
 
 Require Export ll_def.
