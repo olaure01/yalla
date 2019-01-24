@@ -1,7 +1,6 @@
 (* ll library for yalla *)
 
 
-
 (** * Linear Logic with explicit permutations *)
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
@@ -287,17 +286,6 @@ Qed.
 
 (** *** Some tactics for manipulating rules *)
 
-Ltac ex_apply_ax := eapply ex_r ;
-  [ eapply ax_r | PCperm_Type_solve ].
-Ltac ex_apply_mix2 f Hl Hr := eapply ex_r ;
-  [ eapply (@mix2_r _ f _ _ Hl Hr) | PCperm_Type_solve ].
-Ltac ex_apply_tens Hl Hr := eapply ex_r ;
-  [ eapply (tens_r _ _ _ _ _ Hl Hr) | PCperm_Type_solve ].
-Ltac ex_apply_with Hl Hr := eapply ex_r ;
-  [ eapply (with_r _ _ _ _ Hl Hr) | PCperm_Type_solve ].
-Ltac ex_apply_de H := eapply ex_r ;
-  [ eapply (de_r _ _ _ H) | PCperm_Type_solve ].
-
 Ltac inversion_ll H f X l Hl Hr HP Hax a :=
   match type of H with
   | ll _ _ => inversion H as [ X
@@ -343,16 +331,16 @@ Ltac destruct_ll H f X l Hl Hr HP Hax a :=
                             | a ] ; subst
   end.
 
-
 Ltac ll_swap :=
   match goal with
   | |- ll ?P (?a1 :: ?a2 :: nil) => eapply ex_r ; [ | apply PCperm_Type_swap ]
   end.
-Ltac ll_swap_in H :=
+Ltac ll_swap_hyp H :=
   match goal with
   | H : ll ?P (?a1 :: ?a2 :: nil) |- _ =>
         eapply ex_r in H ;[ | apply PCperm_Type_swap ]
   end.
+Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
 
 
 (** ** Some reversibility statements *)
@@ -950,7 +938,8 @@ Qed.
 Lemma ax_exp {P} : forall A, ll P (A :: dual A :: nil).
 Proof with myeeasy.
 induction A ; simpl.
-- ex_apply_ax.
+- ll_swap.
+  apply ax_r.
 - apply ax_r.
 - ll_swap.
   apply bot_r.
@@ -959,29 +948,35 @@ induction A ; simpl.
   apply one_r.
 - ll_swap.
   apply parr_r.
-  ex_apply_tens IHA1 IHA2.
+  cons2app ; eapply ex_r ; [ | apply PCperm_Type_app_rot ].
+  rewrite app_assoc.
+  apply tens_r...
 - apply parr_r.
-  ll_swap_in IHA1.
-  ll_swap_in IHA2.
-  ex_apply_tens IHA2 IHA1.
+  ll_swap in IHA1.
+  ll_swap in IHA2.
+  cons2app ; eapply ex_r ; [ | apply PCperm_Type_app_rot ].
+  rewrite app_assoc.
+  apply tens_r...
 - ll_swap.
   apply top_r.
 - apply top_r.
 - eapply plus_r1 in IHA1.
-  ll_swap_in IHA1.
+  ll_swap in IHA1.
   eapply plus_r2 in IHA2.
-  ll_swap_in IHA2.
-  ex_apply_with IHA1 IHA2.
+  ll_swap in IHA2.
+  ll_swap.
+  apply with_r...
 - apply with_r ; ll_swap.
   + apply plus_r1 ; ll_swap...
   + apply plus_r2 ; ll_swap...
 - change (oc A :: wn (dual A) :: nil)
     with (oc A :: map wn (dual A :: nil)).
   apply oc_r.
-  ll_swap_in IHA.
-  ex_apply_de IHA.
-- eapply de_r in IHA.
-  ll_swap_in IHA.
+  ll_swap in IHA.
+  list_simpl ; ll_swap.
+  apply de_r...
+- apply de_r in IHA.
+  ll_swap in IHA.
   ll_swap.
   change (oc (dual A) :: wn A :: nil)
     with (oc (dual A) :: map wn (A :: nil)).
@@ -1175,6 +1170,4 @@ eapply (ext_wn_param P Q) in pi...
   rewrite P_mix2 in Q_mix2.
   inversion Q_mix2.
 Qed.
-
-
 
