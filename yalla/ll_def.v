@@ -1118,7 +1118,6 @@ induction pi ; try (now constructor).
 - apply Hpgax...
 Qed.
 
-
 (** By extending axioms of [P] with [map wn l0],
 one can turn any proof of [l] in [P] into a proof of [l ++ map wn l0]. *)
 Lemma ext_wn {P} {P_perm : pperm P = true} : forall l l0,
@@ -1147,5 +1146,43 @@ eapply (ext_wn_param P Q) in pi...
   rewrite HeqQ in Q_mix2 ; simpl in Q_mix2.
   rewrite P_mix2 in Q_mix2.
   inversion Q_mix2.
+Qed.
+
+
+(** ** Consistency properties *)
+
+Lemma weak_contradiction_contradiction {P} :
+  ll P nil -> { A : _ & ll P (A :: nil) & ll P (dual A :: nil) }.
+Proof.
+intros pi.
+split with bot.
+- apply bot_r ; assumption.
+- apply one_r.
+Qed.
+
+Lemma contradiction_weak_contradiction {P} : pcut P = true ->
+  forall A, ll P (A :: nil) -> ll P (dual A :: nil) -> ll P nil.
+Proof.
+intros Hcut A pi1 pi2.
+rewrite <- (app_nil_l).
+apply (@cut_r _ Hcut A) ; assumption.
+Qed.
+
+Lemma bot_contradiction_weak_contradiction {P} :
+  (forall a, In bot (projT2 (pgax P) a) -> False) ->
+  ll P (bot :: nil) -> ll P nil.
+Proof.
+intros Hgax pi.
+rewrite <- (app_nil_l).
+apply bot_rev ; assumption.
+Qed.
+
+Lemma strong_contradition_general_contradiction {P} : pcut P = true ->
+  ll P (zero :: nil) -> forall l, ll P l.
+Proof.
+intros Hcut pi l.
+rewrite <- (app_nil_l _).
+eapply (@cut_r _ Hcut) ; try eassumption.
+apply top_r.
 Qed.
 

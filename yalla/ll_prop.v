@@ -1,5 +1,6 @@
 (* ll_prop library for yalla *)
 
+
 (** * Properties relying on cut admissibility *)
 
 Require Import Bool_more.
@@ -9,6 +10,53 @@ Require Import CyclicPerm_Type.
 Require Import genperm_Type.
 
 Require Export ll_cut.
+
+
+(** Consistency statements *)
+
+Lemma weak_consistency_axfree {P} : (projT1 (pgax P) -> False) -> pmix0 P = false ->
+  ll P nil -> False.
+Proof.
+intros Hgax Hmix0 pi.
+apply cut_admissible_axfree in pi ; try assumption.
+remember nil as l ; revert Heql ; induction pi ; intros Heql ; inversion Heql ; subst.
+- apply IHpi.
+  symmetry in p.
+  apply (PCperm_Type_nil _ _ p).
+- apply IHpi.
+  destruct l1 ; destruct lw' ; destruct l2 ; inversion Heql ; subst.
+  symmetry in p ; apply Permutation_Type_nil in p ; subst.
+  list_simpl ; reflexivity.
+- simpl in f ; rewrite f in Hmix0 ; inversion Hmix0.
+- apply app_eq_nil in Heql ; destruct Heql ; subst.
+  apply IHpi1 ; reflexivity.
+- inversion f.
+- apply (Hgax a).
+Qed.
+
+Lemma strong_consistency_axfree {P} : (projT1 (pgax P) -> False) ->
+ ll P (zero :: nil) -> False.
+Proof.
+intros Hgax pi.
+apply cut_admissible_axfree in pi ; try assumption.
+remember (zero :: nil) as l ; revert Heql ; induction pi ;
+  intros Heql ; inversion Heql ; subst.
+- apply IHpi.
+  symmetry in p.
+  apply (PCperm_Type_length_1_inv _ _ _ p).
+- apply IHpi.
+  destruct l1 ; inversion Heql.
+  + destruct lw' ; inversion Heql.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst.
+    destruct l2 ; inversion H ; subst ; reflexivity.
+  + apply app_eq_nil in H2 ; destruct H2 as [? H2] ; subst.
+    apply app_eq_nil in H2 ; destruct H2 as [H2 ?] ; subst.
+    destruct lw' ; inversion Heql.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst ; reflexivity.
+- destruct l2 ; destruct l1 ; try destruct l2 ; inversion Heql ; subst ; intuition.
+- inversion f.
+- apply (Hgax a).
+Qed.
 
 
 (** Some additional reversibility statements *)

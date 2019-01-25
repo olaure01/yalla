@@ -1,5 +1,6 @@
  (* ill_prop library for yalla *)
 
+
 (** * Intuitionistic Linear Logic *)
 (* Properties depending on cut admissibility *)
 
@@ -9,6 +10,27 @@ Require Import Permutation_Type_more.
 Require Import genperm_Type.
 
 Require Export ill_cut.
+
+
+(** Consistency *)
+
+Lemma strong_consistency_ill_axfree {P} : (projT1 (ipgax P) -> False) ->
+ ill P nil izero -> False.
+Proof.
+intros Hgax pi.
+apply cut_admissible_ill_axfree in pi ; try assumption.
+remember nil as l ; remember izero as C ; revert Heql HeqC ; induction pi ;
+  intros Heql HeqC ; inversion Heql ; inversion HeqC ; subst ;
+  try now (destruct l1 ; inversion Heql).
+- apply IHpi ; try reflexivity.
+  symmetry in p.
+  apply (PEperm_Type_nil _ _ p).
+- apply IHpi ; try reflexivity.
+  destruct l1 ; destruct lw' ; destruct l2 ; inversion Heql.
+  symmetry in p ; apply Permutation_Type_nil in p ; subst ; reflexivity.
+- destruct l1 ; destruct l0 ; inversion Heql.
+- apply (Hgax a).
+Qed.
 
 
 (** ** Reversibility statements *)

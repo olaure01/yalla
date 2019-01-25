@@ -984,3 +984,16 @@ induction pi ; intros l1' l2' Heq ; subst ;
   apply in_Type_elt.
 Qed.
 
+
+(** ** Consistency properties *)
+
+Lemma strong_contradition_general_contradiction_ill {P} : ipcut P = true ->
+  ill P nil izero -> forall l C, ill P l C.
+Proof.
+intros Hcut pi l C.
+rewrite <- (app_nil_l _).
+rewrite <- (app_nil_l _).
+eapply (@cut_ir _ Hcut) ; try eassumption.
+apply zero_ilr.
+Qed.
+
