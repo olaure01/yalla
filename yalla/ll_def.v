@@ -286,29 +286,7 @@ Qed.
 
 (** *** Some tactics for manipulating rules *)
 
-Ltac inversion_ll H f X l Hl Hr HP Hax a :=
-  match type of H with
-  | ll _ _ => inversion H as [ X
-                             | l ? Hl HP
-                             | l ? ? ? Hl HP
-                             | f
-                             | f ? ? Hl Hr
-                             | 
-                             | ? Hl
-                             | ? ? ? ? Hl Hr
-                             | ? ? ? Hl
-                             | l
-                             | ? ? ? Hl
-                             | ? ? ? Hl
-                             | ? ? ? Hl Hr
-                             | ? ? Hl
-                             | ? ? Hl
-                             | ? ? Hl
-                             | ? ? Hl
-                             | f ? ? ? Hl Hr
-                             | a ] ; subst
-  end.
-Ltac destruct_ll H f X l Hl Hr HP Hax a :=
+Ltac destruct_ll H f X l Hl Hr HP a :=
   match type of H with
   | ll _ _ => destruct H as [ X
                             | l ? Hl HP

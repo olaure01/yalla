@@ -1,7 +1,5 @@
 (* bbb library for yalla *)
 
-(* output in Type *)
-
 
 (** * Study of Linear Logic enriched with [bot = oc bot] *)
 
@@ -37,28 +35,6 @@ Inductive ll_bbb : list formula -> Type :=
 | de_bbb_r : forall A l, ll_bbb (A :: l) -> ll_bbb (wn A :: l)
 | wk_bbb_r : forall A l, ll_bbb l -> ll_bbb (wn A :: l)
 | co_bbb_r : forall A l, ll_bbb (wn A :: wn A :: l) -> ll_bbb (wn A :: l).
-
-(*
-Ltac inversion_ll_bbb H X l Hl Hr HP :=
-  match type of H with 
-  | ll_bbb _ _ => inversion H as [ X
-                             | l ? ? Hl HP
-                             | ? ? ? ? Hl Hr
-                             | 
-                             | ? ? Hl
-                             | ? ? ? ? ? ? Hl Hr
-                             | ? ? ? ? Hl
-                             | l
-                             | ? ? ? ? Hl
-                             | ? ? ? ? Hl
-                             | ? ? ? ? ? Hl Hr
-                             | ? ? ? Hl
-                             | ? ? ? Hl
-                             | ? ? ? Hl
-                             | ? ? ? Hl] ;
-               subst
-  end.
-*)
 
 (** Generalized weakening for lists *)
 Lemma wk_list_bbb_r : forall l l', ll_bbb l' ->

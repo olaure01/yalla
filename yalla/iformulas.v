@@ -1,5 +1,4 @@
 (* iformulas library for yalla *)
-(* v 1.1   Olivier Laurent *)
 
 
 (** * Intuitionistic Linear Logic formulas *)

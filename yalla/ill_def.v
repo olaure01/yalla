@@ -1,5 +1,6 @@
 (* ill library for yalla *)
 
+
 (** * Intuitionistic Linear Logic *)
 (* not cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 
@@ -212,40 +213,7 @@ Qed.
 
 (** *** Some tactics for manipulating rules *)
 
-Ltac inversion_ill H f X l Hl Hr HP Hax a :=
-  match type of H with
-  | ill _ _ _ => inversion H as [ X
-                                | l ? ? Hl HP
-                                | l ? ? ? ? Hl HP
-                                | 
-                                | ? ? ? Hl
-                                | ? ? ? ? Hl Hr
-                                | ? ? ? ? ? Hl
-                                | ? ? ? Hl
-                                | ? ? ? ? ? ? Hl Hr
-                                | ? ? Hl
-                                | ? ? Hl
-                                | ? ? ? Hl
-                                | ? ? ? ? ? ? Hl Hr
-                                | ? ? Hl
-                                | ? ? Hl
-                                | l
-                                | ? ? ? Hl Hr
-                                | ? ? ? ? ? Hl
-                                | ? ? ? ? ? Hl
-                                | ? ? ?
-                                | ? ? ? Hl
-                                | ? ? ? Hl
-                                | ? ? ? ? ? Hl Hr
-                                | ? ? Hl
-                                | ? ? ? ? Hl
-                                | ? ? ? ? Hl
-                                | ? ? ? ? Hl
-                                | f ? ? ? ? ? Hl Hr
-                                | a ] ; subst
-  end.
-
-Ltac destruct_ill H f X l Hl Hr HP Hax a :=
+Ltac destruct_ill H f X l Hl Hr HP a :=
   match type of H with
   | ill _ _ _ => destruct H as [ X
                                | l ? ? Hl HP
@@ -277,7 +245,6 @@ Ltac destruct_ill H f X l Hl Hr HP Hax a :=
                                | f ? ? ? ? ? Hl Hr
                                | a ] ; subst
   end.
-
 
 
 (** Axiom expansion *)

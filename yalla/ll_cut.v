@@ -1,7 +1,7 @@
 (* ll_cut library for yalla *)
 
-(** * Cut admissibility for [ll] *)
 
+(** * Cut admissibility for [ll] *)
 
 Require Import Arith_base.
 
@@ -27,7 +27,7 @@ Lemma cut_oc_comm : pcut P = false -> forall n A l1 l2, ll P (l1 ++ wn A :: l2) 
   forall l3 l4 (pi1 : ll P (l3 ++ oc (dual A) :: l4)), psize pi1 <= n -> ll P (l1 ++ l4 ++ l3 ++ l2).
 Proof with myeasy_perm_Type.
 intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
-  remember (l3 ++ oc (dual A) :: l4) as l ; destruct_ll pi1 f X l Hl Hr HP Hax a ;
+  remember (l3 ++ oc (dual A) :: l4) as l ; destruct_ll pi1 f X l Hl Hr HP a ;
   try (exfalso ; simpl in Hs ; clear -Hs ; myeasy ; fail) ; try inversion Heql ; subst.
 - destruct l3 ; inversion Heql ; subst.
   destruct l3 ; inversion H2 ; subst.
@@ -323,7 +323,7 @@ assert (forall A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2
   as IHsize by (intros ; eapply IHsize0 ; myeasy_perm_Type) ; clear IHsize0.
 intros A l0 l1 l2 pi1 pi2 Heqs Hc.
 rewrite_all Heqs ; clear s Heqs.
-remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
+remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP a.
 - (* ax_r *)
   destruct l1 ; inversion Heql ; subst.
   + eapply ex_r...
@@ -379,7 +379,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* one_r *)
   unit_vs_elt_inv Heql ; list_simpl...
   remember (one_r _) as Hone ; clear HeqHone.
-  remember (dual one :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql' ;
+  remember (dual one :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql' ;
     simpl in IHsize.
   + (* ex_r *)
     destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -423,7 +423,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
     remember (bot_r _ _ Hl) as Hbot ; clear HeqHbot.
-    remember (dual bot :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql' ;
+    remember (dual bot :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql' ;
       simpl in IHsize.
     * (* ex_r *)
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -469,7 +469,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* tens_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (tens A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (tens A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (tens_r _ _ _ _ _ Hl Hr) as Htens ; clear HeqHtens.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -539,7 +539,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* parr_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (parr A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (parr A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (parr_r _ _ _ _ Hl) as Hparr ; clear HeqHparr.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -600,7 +600,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* top_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual top :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual top :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (top_r _ l2) as Htop ; clear HeqHtop.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -645,7 +645,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* plus_r1 *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (aplus A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (aplus A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (plus_r1 _ _ _ _ Hl) as Hplus ; clear HeqHplus.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -703,7 +703,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* plus_r2 *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (aplus B A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (aplus B A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (plus_r2 _ _ _ _ Hl) as Hplus ; clear HeqHplus.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -761,7 +761,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* with_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (awith A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (awith A0 B) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (with_r _ _ _ _ Hl Hr) as Hwith ; clear HeqHwith.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -824,7 +824,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* oc_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (oc A0) :: l0) as l' ; destruct_ll pi1 f X lo Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (oc A0) :: l0) as l' ; destruct_ll pi1 f X lo Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (oc_r _ _ _ Hl) as Hoc ; clear HeqHoc.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -922,7 +922,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* de_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (wn A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (wn A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (de_r _ _ _ Hl) as Hde ; clear HeqHde.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -979,7 +979,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* wk_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (wn A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (wn A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (wk_r _ A0 _ Hl) as Hwk ; clear HeqHwk.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.
@@ -1035,7 +1035,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* co_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
-    remember (dual (wn A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a ; try inversion Heql'.
+    remember (dual (wn A0) :: l0) as l' ; destruct_ll pi1 f X l Hl2 Hr2 HP a ; try inversion Heql'.
     * (* ex_r *)
       remember (co_r _ _ _ Hl) as Hco ; clear HeqHco.
       destruct (PCperm_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] Heq HP'] ; simpl in Heq ; simpl in HP' ; subst.

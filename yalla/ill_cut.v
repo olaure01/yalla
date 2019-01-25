@@ -1,5 +1,6 @@
 (* ill library for yalla *)
 
+
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
@@ -34,7 +35,7 @@ Lemma cut_oc_comm_left : ipcut P = false -> forall n A C l1 l2, ill P (l1 ++ ioc
   forall l0 (pi1 : ill P l0 (ioc A)), ipsize pi1 <= n -> ill P (l1 ++ l0 ++ l2) C.
 Proof with myeasy_perm_Type.
 intros P_cutfree n A C l1 l2 pi2 ; induction n ; intros IH l0 pi1 Hs ;
-  remember (ioc A) as B ; destruct_ill pi1 f X l Hl Hr HP Hax a ;
+  remember (ioc A) as B ; destruct_ill pi1 f X l Hl Hr HP a ;
   try (exfalso ; simpl in Hs ; clear -Hs ; myeasy ; fail) ; try inversion HeqB.
 - apply (ex_ir _ (l1 ++ l ++ l2)).
   + simpl in Hs.
@@ -499,7 +500,7 @@ assert (forall A l0 l1 l2 C (pi1 : ill P l0 A) (pi2 : ill P (l1 ++ A :: l2) C),
   as IHsize by (intros ; eapply IHsize0 ; myeasy_perm_Type) ; clear IHsize0.
 intros A l0 l1 l2 C pi1 pi2 Heqs Hc.
 rewrite_all Heqs ; clear s Heqs.
-remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
+remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
 - (* ax_ir *)
   unit_vs_elt_inv Heql ; list_simpl...
 - (* ex_ir *)
@@ -551,7 +552,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
     revert Hl IHsize ; simpl ; rewrite app_assoc ; intros Hl IHsize.
     rewrite app_assoc ; refine (IHsize _ _ _ _ _ pi1 Hl _ _)...
   + remember (one_ilr _ _ _ _ Hl) as Hone ; clear HeqHone.
-    remember (ione) as C ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqC.
+    remember (ione) as C ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqC.
     * apply (ex_ir _ (l3 ++ l ++ l4)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hone _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -614,7 +615,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
     rewrite 2 app_comm_cons ; rewrite app_assoc.
     refine (IHsize _ _ _ _ _ pi1 Hl _ _)...
   + remember (tens_ilr _ _ _ _ _ _ Hl) as Htens ; clear HeqHtens.
-    remember (itens A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (itens A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (l3 ++ l ++ l4)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Htens _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -679,7 +680,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
       refine (IHsize _ _ _ _ _ pi1 Hr _ _)...
   + change (S (ipsize Hl + ipsize Hr)) with (ipsize (lpam_ilr _ _ _ _ _ _ _ Hl Hr)) in IHsize.
     remember (lpam_ilr _ _ _ _ _ _ _ Hl Hr) as Hlpam ; clear HeqHlpam.
-    remember (ilpam A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (ilpam A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (l4 ++ l ++ l3 ++ l5)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hlpam _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -736,7 +737,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
 - (* gen_ilr *)
   destruct l1 ; inversion Heql ; subst.
   + remember (gen_ilr _ _ _ Hl) as Hgen ; clear HeqHgen.
-    remember (igen A0) as D ; destruct_ill pi1 f X l' Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (igen A0) as D ; destruct_ill pi1 f X l' Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (nil ++ l' ++ l2)).
       -- revert Hgen IHsize ; rewrite <- (app_nil_l _) ; intros Hgen IHsize.
          refine (IHsize _ _ _ _ _ Hl2 Hgen _ _) ; simpl...
@@ -810,7 +811,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
   + change (S (ipsize Hl + ipsize Hr)) with (ipsize (lmap_ilr _ _ _ _ _ _ _ Hl Hr)) in IHsize.
     remember (lmap_ilr _ _ _ _ _ _ _ Hl Hr) as Hlmap  ; clear HeqHlmap.
     revert Hlmap IHsize ; rewrite app_assoc ; intros Hlmap IHsize.
-    remember (ilmap A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (ilmap A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ ((l4 ++ l3) ++ l ++ l5)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hlmap _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -871,7 +872,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
   trichot_Type_elt_elt_exec Heql.
   + destruct l3 ; inversion Heql1.
   + remember (neg_ilr _ _ _ Hl) as Hneg ; clear HeqHneg.
-    remember (ineg A0) as D ; destruct_ill pi1 f X l' Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (ineg A0) as D ; destruct_ill pi1 f X l' Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (l ++ l' ++ nil)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hneg _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -935,7 +936,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
     rewrite app_comm_cons ; rewrite app_assoc.
     refine (IHsize _ _ _ _ _ pi1 Hl _ _)...
   + remember (with_ilr1 _ _ _ _ _ _ Hl) as Hwith ; clear HeqHwith.
-    remember (iwith A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (iwith A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (l3 ++ l ++ l4)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hwith _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -990,7 +991,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
     rewrite app_comm_cons ; rewrite app_assoc.
     refine (IHsize _ _ _ _ _ pi1 Hl _ _)...
   + remember (with_ilr2 _ _ _ _ _ _ Hl) as Hwith ; clear HeqHwith.
-    remember (iwith B A0) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (iwith B A0) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (l3 ++ l ++ l4)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hwith _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -1042,7 +1043,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
   + list_simpl.
     apply zero_ilr.
   + remember (zero_ilr _ l3 l4 C) as Hzero ; clear HeqHzero.
-    remember izero as D ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember izero as D ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (l3 ++ l ++ l4)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hzero _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -1105,7 +1106,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
       rewrite app_comm_cons ; rewrite app_assoc.
       refine (IHsize _ _ _ _ _ pi1 Hr _ _)...
   + remember (plus_ilr _ _ _ _ _ _ Hl Hr) as Hplus ; clear HeqHplus.
-    remember (iplus A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP Hax a ; try inversion HeqD.
+    remember (iplus A0 B) as D ; destruct_ill pi1 f X l Hl2 Hr2 HP a ; try inversion HeqD.
     * apply (ex_ir _ (l3 ++ l ++ l4)).
       -- simpl in IHsize ; refine (IHsize _ _ _ _ _ Hl2 Hplus _ _)...
       -- apply PEperm_Type_app_head ; apply PEperm_Type_app_tail...
@@ -1223,7 +1224,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP Hax a.
   apply Forall_elt in Hiq.
   simpl in IHsize.
   remember (gax_ir _ a) as Hgax ; apply (f_equal ipsize) in HeqHgax ; simpl in HeqHgax.
-  destruct_ill pi1 f X l Hl2 Hr2 HP Hax b ; try (exfalso ; inversion Hiq ; fail).
+  destruct_ill pi1 f X l Hl2 Hr2 HP b ; try (exfalso ; inversion Hiq ; fail).
   + list_simpl ; rewrite <- Heql ; apply (gax_ir _ a).
   + apply (ex_ir _ (l1 ++ l ++ l2)).
     * revert Hgax HeqHgax ; rewrite Heql ; intros Hgax HeqHgax.
