@@ -56,7 +56,7 @@ rewrite <- (app_nil_l l2) ; rewrite 2 app_comm_cons.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma lpam_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ilpam_rev_noax {P} : (projT1 (ipgax P) -> False) ->
   forall l A B, ill P l (ilpam A B) -> ill P (l ++ A :: nil) B.
 Proof.
 intros Hgax l A B pi.
@@ -67,7 +67,7 @@ rewrite <- (app_nil_l _).
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma gen_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma igen_rev_noax {P} : (projT1 (ipgax P) -> False) ->
   forall l A, ill P l (igen A) -> ill P (l ++ A :: nil) N.
 Proof.
 intros Hgax l A pi.
@@ -77,7 +77,7 @@ rewrite <- (app_nil_l _).
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma lmap_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ilmap_rev_noax {P} : (projT1 (ipgax P) -> False) ->
   forall l A B, ill P l (ilmap A B) -> ill P (A :: l) B.
 Proof.
 intros Hgax l A B pi.
@@ -90,7 +90,7 @@ rewrite <- (app_nil_l l) ; rewrite app_comm_cons ; rewrite <- app_assoc.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma neg_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ineg_rev_noax {P} : (projT1 (ipgax P) -> False) ->
   forall l A, ill P l (ineg A) -> ill P (A :: l) N.
 Proof.
 intros Hgax l A pi.

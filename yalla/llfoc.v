@@ -1032,9 +1032,9 @@ Qed.
 Theorem llfoc_to_llFoc : forall s l Pi (pi : llfoc l Pi), fpsize pi < s ->
    (Pi = None -> llFoc l None)
  * (forall C, Pi = Some C -> Forall_Type Foc l ->
-       { llw & prod (prod (Permutation_Type l (map wn (fst (snd llw)) ++ (fst llw)))
-                          (incl_Type (snd (snd llw)) (fst (snd llw))))
-                          (llFoc (map wn (snd (snd llw)) ++ (fst llw)) (Some C)) })
+       { l' & { lw1 & { lw2 & prod (Permutation_Type l (map wn lw1 ++ l'))
+                             (prod (incl_Type lw2 lw1)
+                                   (llFoc (map wn lw2 ++ l') (Some C))) }}})
  * (forall C, Pi = Some C -> (Forall_Type Foc l -> False) ->
       (llFoc (C :: l) None) * llFoc (wn C :: l) None).
 Proof with myeeasy.
@@ -1052,7 +1052,7 @@ Proof with myeeasy.
   apply X in H...
   destruct (Focl_dec l).
   + eapply (snd (fst H)) in f...
-    destruct f as ((l1 & lw & lw') & (HP & Hi) & IH).
+    destruct f as (l1 & lw & lw' & HP & Hi & IH).
     simpl in HP ; simpl in Hi ; simpl in IH.
     apply (Permutation_Type_cons_app _ _ A) in HP.
     symmetry in HP.
@@ -1088,7 +1088,7 @@ Proof with myeeasy.
     rewrite (polfocs _ Hs) in H.
     destruct (Focl_dec l).
     * eapply (snd (fst H)) in f...
-      destruct f as ((l1 & lw & lw') & (HP & Hi) & IH).
+      destruct f as (l1 & lw & lw' & HP & Hi & IH).
       simpl in HP ; simpl in Hi ; simpl in IH.
       apply (Permutation_Type_cons_app _ _ (wn A)) in HP.
       symmetry in HP.
@@ -1115,19 +1115,19 @@ Proof with myeeasy.
   apply co_Fr.
   apply H...
 (* second conjunct *)
-- exists (covar X0 :: nil,(nil , nil)) ; split ; [ split | ]...
+- exists (covar X0 :: nil), nil, nil ; nsplit 3...
   + apply incl_Type_nil.
   + apply ax_Fr.
 - symmetry in p.
   specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   apply (snd (fst H)) in H0.
-  + destruct H0 as ((l0 & lw & lw') & (HP & Hi) & IH).
+  + destruct H0 as (l0 & lw & lw' & HP & Hi & IH).
     simpl in HP ; simpl in Hi ; simpl in IH.
-    exists (l0,(lw,lw')) ; simpl ; split ; [ split | ]...
+    exists l0, lw, lw' ; simpl ; nsplit 3...
     etransitivity...
   + apply (Permutation_Type_Forall_Type _ _ _ p)...
-- exists (nil,(nil,nil)) ; simpl ; split ; [ split | ]...
+- exists nil, nil, nil ; simpl ; nsplit 3...
   + apply incl_Type_nil.
   + apply one_Fr.
 - exfalso.
@@ -1148,11 +1148,11 @@ Proof with myeeasy.
     rewrite (polfocs _ HsB) in H'.
     eapply (snd (fst H)) in HF1...
     eapply (snd (fst H')) in HF2...
-    destruct HF1 as ((l01 & lw1 & lw1') & (HP1 & Hi1) & pi1).
+    destruct HF1 as (l01 & lw1 & lw1' & HP1 & Hi1 & pi1).
     simpl in HP1 ; simpl in Hi1 ; simpl in pi1.
-    destruct HF2 as ((l02 & lw2 & lw2') & (HP2 & Hi2) & pi2).
+    destruct HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2).
     simpl in HP2 ; simpl in Hi2 ; simpl in pi2.
-    exists (l01 ++ l02,(lw1 ++ lw2,lw1' ++ lw2')) ; simpl ; split ; [ split | ].
+    exists (l01 ++ l02), (lw1 ++ lw2), (lw1' ++ lw2') ; simpl ; nsplit 3.
     * etransitivity ; [ apply (Permutation_Type_app HP1 HP2) | ].
       list_simpl.
       apply Permutation_Type_app_head.
@@ -1177,10 +1177,10 @@ Proof with myeeasy.
     rewrite (polconta _ _ HaB) in H'.
     rewrite (polfoca _ HaB) in H'.
     eapply (snd (fst H)) in HF1...
-    destruct HF1 as ((l01 & lw1 & lw1') & (HP1 & Hi1) & pi1).
+    destruct HF1 as (l01 & lw1 & lw1' & HP1 & Hi1 & pi1).
     simpl in HP1 ; simpl in Hi1 ; simpl in pi1.
     assert (pi2 := fst (fst H') eq_refl).
-    exists (l01 ++ l2,(lw1,lw1')) ; simpl ; split ; [ split | ]...
+    exists (l01 ++ l2), lw1, lw1' ; simpl ; nsplit 3...
     * etransitivity ; [ apply (Permutation_Type_app_tail _ HP1) | ].
       rewrite <- app_assoc...
     * eapply ex_Fr ; [ apply tens_Fr | ].
@@ -1197,9 +1197,9 @@ Proof with myeeasy.
     rewrite (polfocs _ HsB) in H'.
     assert (pi1 := fst (fst H) eq_refl).
     eapply (snd (fst H')) in HF2...
-    destruct HF2 as ((l02 & lw2 & lw2') & (HP2 & Hi2) & pi2).
+    destruct HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2).
     simpl in HP2 ; simpl in Hi2 ; simpl in pi2.
-    exists (l1 ++ l02,(lw2,lw2')) ; simpl ; split ; [ split | ]...
+    exists (l1 ++ l02), lw2, lw2' ; simpl ; nsplit 3...
     * etransitivity ; [ apply (Permutation_Type_app_head _ HP2) | ].
       rewrite 2 app_assoc...
       apply Permutation_Type_app_tail.
@@ -1220,7 +1220,7 @@ Proof with myeeasy.
     rewrite (polfoca _ HaB) in H'.
     assert (pi1 := fst (fst H) eq_refl).
     assert (pi2 := fst (fst H') eq_refl).
-    exists (l1 ++ l2,(nil,nil)) ; simpl ; split ; [ split | ]...
+    exists (l1 ++ l2), nil, nil ; simpl ; nsplit 3...
     * apply incl_Type_nil.
     * eapply ex_Fr ; [ apply tens_Fr | ].
       -- rewrite (polconta _ _ HaA).
@@ -1242,9 +1242,9 @@ Proof with myeeasy.
   + rewrite (polconts _ _ HsA) in H.
     rewrite (polfocs _ HsA) in H.
     eapply (snd (fst H)) in HF ; [ | reflexivity ].
-    destruct HF as ((l0 & lw & lw') & (HP & Hi) & pi).
+    destruct HF as (l0 & lw & lw' & HP & Hi & pi).
     simpl in HP ; simpl in Hi ; simpl in pi.
-    exists (l0,(lw,lw')) ; simpl ; split ; [ split | ]...
+    exists l0, lw, lw' ; simpl ; nsplit 3...
     apply plus_Fr1.
     * rewrite (polconts _ _ HsA).
       rewrite (polfocs _ HsA)...
@@ -1252,7 +1252,7 @@ Proof with myeeasy.
   + rewrite (polconta _ _ HaA) in H.
     rewrite (polfoca _ HaA) in H.
     assert (pi := fst (fst H) eq_refl).
-    exists (l,(nil,nil)) ; simpl ; split ; [ split | ]...
+    exists l, nil, nil ; simpl ; nsplit 3...
     * apply incl_Type_nil.
     * apply plus_Fr1...
       rewrite (polconta _ _ HaA).
@@ -1263,9 +1263,9 @@ Proof with myeeasy.
   + rewrite (polconts _ _ HsA) in H.
     rewrite (polfocs _ HsA) in H.
     eapply (snd (fst H)) in HF ; [ | reflexivity ].
-    destruct HF as ((l0 & lw & lw') & (HP & Hi) & pi).
+    destruct HF as (l0 & lw & lw' & HP & Hi & pi).
     simpl in HP ; simpl in Hi ; simpl in pi.
-    exists (l0,(lw,lw')) ; simpl ; split ; [ split | ]...
+    exists l0, lw, lw' ; simpl ; nsplit 3...
     apply plus_Fr2.
     * rewrite (polconts _ _ HsA).
       rewrite (polfocs _ HsA)...
@@ -1273,7 +1273,7 @@ Proof with myeeasy.
   + rewrite (polconta _ _ HaA) in H.
     rewrite (polfoca _ HaA) in H.
     assert (pi := fst (fst H) eq_refl).
-    exists (l,(nil,nil)) ; simpl ; split ; [ split | ]...
+    exists l, nil, nil ; simpl ; nsplit 3...
     * apply incl_Type_nil.
     * apply plus_Fr2...
       rewrite (polconta _ _ HaA).
@@ -1284,16 +1284,16 @@ Proof with myeeasy.
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   assert (pi := fst (fst H) eq_refl).
-  exists (map wn l,(nil,nil)) ; simpl ; split ; [ split | ]...
+  exists (map wn l), nil, nil ; simpl ; nsplit 3...
   * apply incl_Type_nil.
   * apply oc_Fr...
 - inversion HF ; subst.
   specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   eapply (snd (fst H)) in H4 ; [ | reflexivity ].
-  destruct H4 as ((l0 & lw & lw') & (HP & Hi) & pi).
+  destruct H4 as (l0 & lw & lw' & HP & Hi & pi).
   simpl in HP ; simpl in Hi ; simpl in pi.
-  exists (l0,(A :: lw,lw')) ; simpl ; split ; [ split | ]...
+  exists l0, (A :: lw), lw' ; simpl ; nsplit 3...
   + list_simpl ; apply Permutation_Type_cons...
   + apply incl_Type_tl...
 - inversion HF ; subst.
@@ -1302,7 +1302,7 @@ Proof with myeeasy.
   specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   eapply (snd (fst H)) in HF'...
-  destruct HF' as ((l0 & lw & lw') & (HP & Hi) & pi).
+  destruct HF' as (l0 & lw & lw' & HP & Hi & pi).
   simpl in HP ; simpl in Hi ; simpl in pi.
   symmetry in HP.
   assert (HP' := HP).
@@ -1323,7 +1323,7 @@ Proof with myeeasy.
     * rewrite <- map_app in Heq1.
       decomp_map_Type Heq1 ; subst.
       inversion Heq1 ; subst.
-      exists (l0,(l3 ++ l5,lw')) ; simpl ; split ; [ split | ]...
+      exists l0, (l3 ++ l5), lw' ; simpl ; nsplit 3...
       -- symmetry in HP.
          list_simpl in HP.
          apply Permutation_Type_cons_app_inv in HP.
@@ -1341,7 +1341,7 @@ Proof with myeeasy.
                --- apply IHlw'...
             ** apply incl_Type_cons...
                apply IHlw'...
-    * exists (l2 ++ l2',(l3 ++ x :: l5,x :: lw')) ; simpl ; split ; [ split | ]...
+    * exists (l2 ++ l2'), (l3 ++ x :: l5), (x :: lw') ; simpl ; nsplit 3...
       -- symmetry in HP.
          list_simpl in HP.
          apply Permutation_Type_cons_app_inv in HP.
@@ -1368,7 +1368,7 @@ Proof with myeeasy.
     dichot_Type_elt_app_exec Heq ; subst.
     * decomp_map_Type Heq0 ; subst.
       inversion Heq0 ; subst.
-      exists (l2 ++ l2',(l3 ++ x :: l5,x :: lw')) ; simpl ; split ; [ split | ]...
+      exists (l2 ++ l2'), (l3 ++ x :: l5), (x :: lw') ; simpl ; nsplit 3...
       -- symmetry in HP.
          list_simpl in HP.
          apply Permutation_Type_cons_app_inv in HP.
@@ -1383,7 +1383,7 @@ Proof with myeeasy.
          symmetry.
          rewrite ? app_assoc.
          apply Permutation_Type_cons_app...
-    * exists (l1 ++ l2'',(A :: lw,A :: A :: lw')) ; simpl ; split ; [ split | ]...
+    * exists (l1 ++ l2''), (A :: lw), (A :: A :: lw') ; simpl ; nsplit 3...
       -- symmetry in HP.
          rewrite app_assoc in HP.
          apply Permutation_Type_cons_app_inv in HP.
@@ -1417,7 +1417,7 @@ Proof with myeeasy.
     apply X in Hs'...
     destruct (Focl_dec (l1 ++ l2)) as [HF | HnF].
     * eapply (snd (fst Hs')) in HF...
-      destruct HF as ((l0 & lw & lw') & (HP & Hi) & pi').
+      destruct HF as (l0 & lw & lw' & HP & Hi & pi').
       simpl in HP ; simpl in Hi ; simpl in pi'.
       split.
       -- apply foc_Fr in pi'.
@@ -1451,7 +1451,7 @@ Proof with myeeasy.
     apply X in Hs'...
     destruct (Focl_dec (l1 ++ B' :: C' :: l2)) as [HF | HnF].
     * eapply (snd (fst Hs')) in HF...
-      destruct HF as ((l0 & lw & lw') & (HP & Hi) & pi').
+      destruct HF as (l0 & lw & lw' & HP & Hi & pi').
       simpl in HP ; simpl in Hi ; simpl in pi'.
       split.
       -- apply foc_Fr in pi'.
@@ -1523,14 +1523,14 @@ Proof with myeeasy.
          { apply Forall_Type_app...
            constructor... }
          eapply (snd (fst Hs1')) in HF1...
-         destruct HF1 as ((l01 & lw1 & lw1') & (HP1 & Hi1) & pi1').
+         destruct HF1 as (l01 & lw1 & lw1' & HP1 & Hi1 & pi1').
          simpl in HP1 ; simpl in Hi1 ; simpl in pi1'.
          destruct (Foc_dec C') as [HFC | HnFC].
          ++ assert (Forall_Type Foc (l1 ++ C' :: l2)) as HF2.
             { apply Forall_Type_app...
               constructor... }
             eapply (snd (fst Hs2')) in HF2...
-            destruct HF2 as ((l02 & lw2 & lw2') & (HP2 & Hi2) & pi2').
+            destruct HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2').
             simpl in HP2 ; simpl in Hi2 ; simpl in pi2'.
             split.
             ** apply foc_Fr in pi1'.
@@ -1647,7 +1647,7 @@ Proof with myeeasy.
             { apply Forall_Type_app...
               constructor... }
             eapply (snd (fst Hs2')) in HF2...
-            destruct HF2 as ((l02 & lw2 & lw2') & (HP2 & Hi2) & pi2').
+            destruct HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2').
             simpl in HP2 ; simpl in Hi2 ; simpl in pi2'.
             split.
             ** apply foc_Fr in pi2'.

@@ -3676,7 +3676,7 @@ Fact no_biat_map_prove_ill : forall i j, i <> j ->
   ill_ll nil (ilpam (ivar i) (ivar j)) -> False.
 Proof.
 intros i j Ha pi.
-apply lpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply ilpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
 eapply no_biat_prove_ill ; eassumption.
 Qed.
 
@@ -3758,7 +3758,7 @@ Qed.
 Fact counter_ex_ill : ill_ll nil cons_counter_ex -> False.
 Proof.
 intros pi.
-apply lpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply ilpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
 apply pre_counter_ex_ill in pi ; assumption.
 Qed.
 
@@ -3802,7 +3802,7 @@ Qed.
 Fact counter_ex_atfree_ill : ill_ll nil cons_counter_ex_atfree -> False.
 Proof with myeasy.
 intros pi.
-apply lpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply ilpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
 remember (nil ++ ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero :: nil) as l.
 remember ione as C.
 revert Heql HeqC.
@@ -3827,7 +3827,7 @@ induction pi ; intros Heql HeqC ; subst ;
 - destruct l1 ; inversion Heql ; subst.
   + apply app_eq_nil in H2 ; destruct H2 ; subst.
     clear - pi1.
-    apply lpam_rev_noax in pi1 ; [ | intros Hax ; inversion Hax ].
+    apply ilpam_rev_noax in pi1 ; [ | intros Hax ; inversion Hax ].
     remember (nil ++ ilpam (ilpam izero ione) ione :: nil) as l.
     remember izero as C.
     revert Heql HeqC.
