@@ -3912,4 +3912,149 @@ Qed.
 
 End Non_Conservativity_Atom_Free.
 
+Section Non_Conservativity_Ioc.
+
+Notation cons_counter_ex_ioc := (ilmap (ilmap (ilmap itop ione) izero) izero).
+
+Variable i2a : IAtom -> Atom.
+
+Goal
+ll_ll (ill2ll i2a (ilmap cons_counter_ex_ioc (ioc itop)) :: nil).
+Proof.
+simpl.
+apply parr_r.
+rewrite <- (app_nil_r (oc _ :: _)).
+apply tens_r.
+- apply top_r.
+- apply parr_r.
+  cons2app.
+  rewrite <- app_comm_cons.
+  rewrite app_nil_l.
+  apply tens_r.
+  + apply bot_r.
+    change nil with (map wn nil).
+    apply oc_r.
+    apply top_r.
+  + apply top_r.
+Qed.
+
+Goal ill_ll nil (ilmap cons_counter_ex_ioc itop).
+Proof.
+apply lmap_irr.
+apply top_irr.
+Qed.
+
+Lemma cons_counter_ex_ioc_ill : ill_ll nil (ilmap cons_counter_ex_ioc (ioc itop)) -> False.
+Proof with myeeasy.
+intros pi.
+apply ilmap_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+remember (ilmap (ilmap (ilmap itop ione) izero) izero :: nil) as L.
+remember (ioc itop) as C.
+revert HeqL HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  (try now (destruct l1 ; inversion Heql)) ;
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+- apply IHpi...
+  symmetry in p.
+  eapply PEperm_Type_length_1_inv...
+- apply IHpi...
+  destruct l1 ; inversion Heql.
+  + destruct lw' ; inversion H0.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst...
+  + apply app_eq_nil in H1.
+    destruct H1 as [? H1] ; subst.
+    apply app_eq_nil in H1.
+    destruct H1 as [H1 ?] ; subst.
+    destruct lw' ; inversion H1.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst...
+- destruct l1 ; inversion Heql.
+  + destruct l0 ; inversion Heql ; subst.
+    * clear - pi1.
+      apply ilmap_rev_noax in pi1 ; [ | intros Hax ; inversion Hax ].
+      remember (ilmap itop ione :: nil) as L.
+      remember izero as C.
+      revert HeqL HeqC.
+      induction pi1 ; intros Heql HeqC ; subst ;
+        (try now (inversion Heql)) ;
+        (try now (inversion HeqC)) ;
+        (try now (destruct l1 ; inversion Heql)) ;
+        try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+      -- apply IHpi1...
+         symmetry in p.
+         eapply PEperm_Type_length_1_inv...
+      -- apply IHpi1...
+         destruct l1 ; inversion Heql.
+         ++ destruct lw' ; inversion H0.
+            symmetry in p ; apply Permutation_Type_nil in p ; subst...
+         ++ apply app_eq_nil in H1.
+            destruct H1 as [? H1] ; subst.
+            apply app_eq_nil in H1.
+            destruct H1 as [H1 ?] ; subst.
+            destruct lw' ; inversion H1.
+            symmetry in p ; apply Permutation_Type_nil in p ; subst...
+      -- destruct l1 ; inversion Heql.
+         ++ destruct l0 ; inversion Heql ; subst.
+            ** clear - pi1_2.
+               apply ione_rev_noax in pi1_2 ; [ | intros Hax ; inversion Hax ].
+               simpl in pi1_2.
+               remember (nil) as L.
+               remember izero as C.
+               revert HeqL HeqC.
+               induction pi1_2 ; intros Heql HeqC ; subst ;
+                 (try now (inversion Heql)) ;
+                 (try now (inversion HeqC)) ;
+                 (try now (destruct l1 ; inversion Heql)) ;
+                 try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+               --- apply IHpi1_2...
+                   symmetry in p.
+                   eapply PEperm_Type_nil...
+               --- apply IHpi1_2...
+                   destruct l1 ; inversion Heql.
+                   destruct lw' ; inversion H0.
+                   symmetry in p ; apply Permutation_Type_nil in p ; subst...
+               --- destruct l1 ; destruct l0 ; inversion Heql ; subst.
+           ** destruct l0 ; inversion H2.
+         ++ destruct l1 ; destruct l0 ; inversion H1.
+    * destruct l0 ; inversion H2.
+  + destruct l1 ; destruct l0 ; inversion H1.
+- destruct l ; inversion Heql.
+Qed.
+
+Goal
+ll_ll (ill2ll i2a (ilmap cons_counter_ex_ioc ione) :: nil).
+Proof.
+simpl.
+apply parr_r.
+rewrite <- (app_nil_r (one :: _)).
+apply tens_r.
+- apply top_r.
+- apply parr_r.
+  cons2app.
+  rewrite <- app_comm_cons.
+  rewrite app_nil_l.
+  apply tens_r.
+  + apply bot_r.
+    apply one_r.
+  + apply top_r.
+Qed.
+
+Goal ill_ll nil (ilmap cons_counter_ex_ioc ione) -> False.
+Proof with myeeasy.
+intros pi.
+apply ilmap_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply cons_counter_ex_ioc_ill.
+apply lmap_irr.
+rewrite <- (app_nil_l _).
+rewrite <- (app_nil_r (_ :: _)).
+refine (cut_ir_axfree _ ione _ _ _ _ pi _) ; [ intros Hax ; inversion Hax | ].
+apply one_ilr.
+simpl ; change nil with (map ioc nil).
+apply oc_irr.
+apply top_irr.
+Qed.
+
+End Non_Conservativity_Ioc.
+
 
