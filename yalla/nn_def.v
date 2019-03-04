@@ -344,7 +344,6 @@ Definition p2ipfrag P := {|
   ipperm := pperm P |}.
 
 Context {P : pfrag}.
-(* Hypothesis P_axfree : projT1 (pgax P) -> False. *)
 Hypothesis P_perm : pperm P = true.
 
 

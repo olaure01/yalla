@@ -13,7 +13,7 @@ Many results have been added, including:
 * example files for additional related systems;
 * definition of the microyalla kernel.
 
-Tested with Coq v 8.8.2.
+Tested with Coq v 8.9.0.
 
 ## v 1.0 (2017/07/18)
 
