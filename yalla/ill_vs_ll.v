@@ -4057,4 +4057,119 @@ Qed.
 
 End Non_Conservativity_Ioc.
 
+Section Non_Conservativity_Neg.
+
+Variable X : IAtom.
+Hypothesis XnotN : X <> atN.
+Variable i2a : IAtom -> Atom.
+
+Notation cons_counter_ex_neg := (ilmap (ilmap (ineg (ivar X)) izero) (itens (ivar X) itop)).
+
+Lemma counter_neg_ll_prove :
+  ll_ll (ill2ll i2a cons_counter_ex_neg :: nil).
+Proof.
+simpl.
+apply parr_r.
+rewrite <- (app_nil_l nil).
+rewrite app_comm_cons.
+apply tens_r.
+- apply top_r.
+- apply parr_r.
+  apply (ex_r _ (tens (var (i2a X)) top :: (var (i2a atN) :: nil) ++ covar (i2a X) :: nil)) ;
+    [ | etransitivity ; [ apply Permutation_Type_cons_append
+                        | list_simpl ; apply Permutation_Type_swap ] ].
+  apply tens_r.
+  + ll_swap ; apply ax_r.
+  + apply top_r.
+Qed.
+
+Fact counter_ex_neg_ill : ill_ll nil cons_counter_ex_neg -> False.
+Proof with myeasy.
+intros pi.
+apply ilmap_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+remember (ilmap (ineg (ivar X)) izero :: nil) as l.
+remember (itens (ivar X) itop) as C.
+revert Heql HeqC.
+induction pi ; intros Heql HeqC ; subst ;
+  (try now (inversion Heql)) ;
+  (try now (inversion HeqC)) ;
+  (try now (destruct l1 ; inversion Heql)) ;
+  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+- apply IHpi...
+  simpl in p ; symmetry in p.
+  apply Permutation_Type_length_1_inv...
+- apply IHpi...
+  destruct l1 ; inversion Heql.
+  + destruct lw' ; inversion H0.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst...
+  + apply app_eq_nil in H1.
+    destruct H1 as [? H1] ; subst.
+    apply app_eq_nil in H1.
+    destruct H1 as [H1 ?] ; subst.
+    destruct lw' ; inversion H1.
+    symmetry in p ; apply Permutation_Type_nil in p ; subst...
+- destruct l1 ; destruct l2 ; inversion Heql ; destruct A ; destruct B ; inversion HeqC ; subst.
+  + clear - i2a XnotN pi1.
+    remember nil as l.
+    remember (ivar X) as C.
+    revert Heql HeqC.
+    induction pi1 ; intros Heql HeqC ; subst ;
+      (try now (inversion Heql)) ;
+      (try now (inversion HeqC)) ;
+      (try now (destruct l1 ; inversion Heql)) ;
+      try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+    * apply IHpi1...
+      simpl in p ; symmetry in p.
+      apply Permutation_Type_nil...
+    * apply IHpi1...
+      destruct l1 ; inversion Heql.
+      apply app_eq_nil in H0.
+      destruct H0 as [H0 ?] ; subst.
+      destruct lw' ; inversion H0.
+      symmetry in p ; apply Permutation_Type_nil in p ; subst...
+    * destruct l1 ; destruct l0 ; inversion Heql ; subst.
+    * destruct l ; inversion Heql.
+  + destruct l1 ; inversion H1.
+    clear - i2a XnotN pi1.
+    remember (ilmap (ineg (ivar X)) izero :: nil) as l.
+    remember (ivar X) as C.
+    revert Heql HeqC.
+    induction pi1 ; intros Heql HeqC ; subst ;
+      (try now (inversion Heql)) ;
+      (try now (inversion HeqC)) ;
+      (try now (destruct l1 ; inversion Heql)) ;
+      try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+    * apply IHpi1...
+      simpl in p ; symmetry in p.
+      apply Permutation_Type_length_1_inv...
+    * apply IHpi1...
+      destruct l1 ; inversion Heql.
+      -- destruct lw' ; inversion H0.
+         symmetry in p ; apply Permutation_Type_nil in p ; subst...
+      -- apply app_eq_nil in H1.
+         destruct H1 as [? H1] ; subst.
+         apply app_eq_nil in H1.
+         destruct H1 as [H1 ?] ; subst.
+         destruct lw' ; inversion H1.
+         symmetry in p ; apply Permutation_Type_nil in p ; subst...
+    * destruct l1 ; inversion Heql.
+      -- destruct l0 ; inversion Heql ; subst.
+         ++ clear - i2a XnotN pi1_1.
+            apply ineg_rev_noax in pi1_1 ; [ | intros Hax ; inversion Hax ].
+            apply (no_biat_prove_ill i2a) in pi1_1...
+         ++ destruct l0 ; inversion Heql.
+      -- destruct l1 ; destruct l0 ; inversion Heql.
+    * destruct l ; inversion Heql.
+      destruct l ; inversion H1.
+  + destruct l1 ; inversion H1.
+- destruct l1 ; inversion Heql.
+  + destruct l0 ; inversion H0 ; subst.
+    * clear - i2a XnotN pi1.
+      apply ineg_rev_noax in pi1 ; [ | intros Hax ; inversion Hax ].
+      apply (no_biat_prove_ill i2a) in pi1...
+    * destruct l0 ; inversion H2.
+  + destruct l1 ; destruct l0 ; inversion H1.
+Qed.
+
+End Non_Conservativity_Neg.
 
