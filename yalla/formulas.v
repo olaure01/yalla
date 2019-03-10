@@ -35,6 +35,37 @@ Inductive formula : Set :=
 | oc : formula -> formula
 | wn : formula -> formula.
 
+
+(** n-aire operators *)
+
+Fixpoint wn_n n A :=
+  match n with
+  | 0 => A
+  | S n => wn (wn_n n A)
+  end.
+
+Lemma wn_n_wn : forall n A,
+    wn_n n (wn A) = wn_n (S n) A.
+Proof with try reflexivity.
+  intros n A.
+  induction n...
+  simpl in *; rewrite IHn...
+Qed.
+
+Fixpoint tens_n n A :=
+  match n with
+  | 0 => one
+  | 1 => A
+  | S n => tens (tens_n n A) A
+  end.
+
+Fixpoint parr_n n A :=
+  match n with
+  | 0 => bot
+  | 1 => A
+  | S n => parr A (parr_n n A)
+  end.
+
 (** Orthogonal / dual of a [formula] *)
 
 (** (the dual of [tens] and [parr] is the one compatible with non-commutative systems) *)
