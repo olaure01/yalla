@@ -192,9 +192,9 @@ assumption.
 Qed.
 *)
 
-(** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
-(*                                       cut   axioms          mix0  mix2  perm  *)
+(** cut / axioms / pmix / permutation *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms (fun n => false) true.
+(*                                       cut   axioms                           perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)

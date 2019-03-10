@@ -83,6 +83,7 @@ mell_mset.vo : mell_mset.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/nattree.vo $(O
 mell_msetoid.vo : mell_msetoid.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/fmsetoidlist_Type.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo ll_cut.vo
 llpol.vo: llpol.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ll_cut.vo
 lambek.vo: lambek.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo ill_cut.vo
+lj.vo: lj.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo  $(OLLIBSDIR)/Permutation_Type_solve.vo ill_prop.vo
 
 Forall_Type_more2.vo: Forall_Type_more2.v $(OLLIBSDIR)/List_Type_more.vo
 Dependent_Forall_Type.vo : Dependent_Forall_Type.v $(OLLIBSDIR)/List_Type_more.vo Forall_Type_more2.vo

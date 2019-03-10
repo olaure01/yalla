@@ -113,6 +113,25 @@ rewrite H.
 reflexivity.
 Qed.
 
+Lemma dual_tens_n : forall n A, dual (tens_n n A) = parr_n n (dual A).
+Proof with try reflexivity.
+  induction n; intro A...
+  destruct n...
+  simpl; change (match n with
+                      | 0 => A
+                      | S _ => tens (tens_n n A) A
+                 end) with (tens_n (S n) A).
+  rewrite IHn...
+Qed.
+
+Lemma dual_parr_n : forall n A, dual (parr_n n A) = tens_n n (dual A).
+Proof with try reflexivity.
+  intros n A.
+  replace A with (dual (dual A)) at 1 by apply bidual.
+  rewrite<- dual_tens_n.
+  rewrite bidual...
+Qed.  
+
 (** Size of a [formula] as its number of symbols *)
 Fixpoint fsize A :=
 match A with
