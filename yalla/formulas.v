@@ -10,6 +10,8 @@ Require Import Lia.
 
 Require Import Injective.
 Require Import Bool_more.
+Require Import EqNat.
+Require Import Peano_dec.
 
 Require yalla_ax.
 
@@ -535,6 +537,55 @@ apply subb_sub_list in Hr.
 apply subb_sub_list.
 etransitivity ; eassumption.
 Qed.
+
+(** ** Decidable equality between formulas *)
+
+Lemma formula_eq_dec : forall (A B : formula),
+    {A = B} + {~ (A = B)}.
+Proof with try assumption; try reflexivity.
+  intros A.
+  induction A ; destruct B ; try (right; intro Heq; now inversion Heq);
+    try (now left);
+    try (destruct IHA with B as [e | n] ;
+         [ left; subst; reflexivity
+         | right; intro eq; inversion eq; apply n; try assumption]);
+    try (destruct IHA1 with B1 as [e1 | n1] ;
+         [ destruct IHA2 with B2 as [e2 | n2] ;
+           [ left; subst; reflexivity
+           | right; intro eq; inversion eq; apply n2; try assumption]
+         | right ; intro eq; inversion eq; apply n1; try assumption]) .
+  - assert ((a = a0) + (a <> a0)).
+    + destruct (eq_nat_decide a a0).
+      * left.
+        apply eq_nat_is_eq...
+      * right.
+        intro eq.
+        apply n.
+        apply eq_nat_is_eq...
+    + destruct H.
+      * left.
+        rewrite e...
+      * right.
+        intro.
+        inversion H as [eq].
+        apply n...
+  - assert ((a = a0) + (a <> a0)).
+    + destruct (eq_nat_decide a a0).
+      * left.
+        apply eq_nat_is_eq...
+      * right.
+        intro eq.
+        apply n.
+        apply eq_nat_is_eq...
+    + destruct H.
+      * left.
+        rewrite e...
+      * right.
+        intro.
+        inversion H as [eq].
+        apply n...
+Qed.
+
 
 
 
