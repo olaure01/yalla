@@ -1,18 +1,24 @@
 (* microyalla library for intuitionistic linear logic *)
 (*   Olivier Laurent *)
 
+Open Scope list_scope.
 
-Require Export List.
-Export ListNotations.
+Require List.
+(* only List.map from module List is used:
+Fixpoint map {A B : Type} (f: A -> B) l :=
+    match l with
+      | nil => nil
+      | a :: t => (f a) :: (map f t)
+    end.
+*)
 
-(* From ollibs/Permutation_Type.v *)
-
-Inductive Permutation_Type {A} : list A -> list A -> Type :=
-| Permutation_Type_nil_nil : Permutation_Type nil nil
-| Permutation_Type_skip x l l' : Permutation_Type l l' -> Permutation_Type (x::l) (x::l')
-| Permutation_Type_swap x y l : Permutation_Type (y::x::l) (x::y::l)
-| Permutation_Type_trans l l' l'' :
-    Permutation_Type l l' -> Permutation_Type l' l'' -> Permutation_Type l l''.
+(* Transpose elements of index n and n+1 in l *)
+Fixpoint transp {A} n (l : list A) :=
+match n, l with
+| 0, x :: y :: r => y :: x :: r
+| S n, x :: r => x :: transp n r
+| _, r => r
+end.
 
 
 (* Adapted from yalla/iformulas.v *)
@@ -38,7 +44,7 @@ Inductive iformula : Set :=
 (** Rules *)
 Inductive ill : list iformula -> iformula -> Type :=
 | ax_ir : forall X, ill (ivar X :: nil) (ivar X)
-| ex_ir : forall l1 l2 A, ill l1 A -> Permutation_Type l1 l2 -> ill l2 A
+| ex_t_ir : forall n l A, ill l A -> ill (transp n l) A
 | one_irr : ill nil ione
 | one_ilr : forall l A, ill l A -> ill (ione :: l) A
 | tens_irr : forall A B l1 l2, ill l1 A -> ill l2 B -> ill (l1 ++ l2) (itens A B)
@@ -53,10 +59,9 @@ Inductive ill : list iformula -> iformula -> Type :=
 | plus_irr1 : forall A B l, ill l A -> ill l (iplus A B)
 | plus_irr2 : forall A B l, ill l A -> ill l (iplus B A)
 | plus_ilr : forall A B l C, ill (A :: l) C -> ill (B :: l) C -> ill (iplus A B :: l) C
-| oc_irr : forall A l, ill (map ioc l) A -> ill (map ioc l) (ioc A)
+| oc_irr : forall A l, ill (List.map ioc l) A -> ill (List.map ioc l) (ioc A)
 | de_ilr : forall A l C, ill (A :: l) C -> ill (ioc A :: l) C
 | wk_ilr : forall A l C, ill l C -> ill (ioc A :: l) C
 | co_ilr : forall A l C, ill (ioc A :: ioc A :: l) C -> ill (ioc A :: l) C.
-
 
 
