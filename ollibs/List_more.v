@@ -474,16 +474,10 @@ apply IHl1 in H0...
 constructor...
 Qed.
 
-Lemma Forall_In {A} : forall P l (a : A), Forall P l -> In a l -> P a.
-Proof.
-intros.
-eapply (proj1 (Forall_forall _ _)) in H ; eassumption.
-Qed.
-
 Lemma Forall_elt {A} : forall P l1 l2 (a : A), Forall P (l1 ++ a :: l2) -> P a.
 Proof.
 intros P l1 l2 a HF.
-eapply Forall_In ; try eassumption.
+eapply Forall_forall ; try eassumption.
 apply in_elt.
 Qed.
 

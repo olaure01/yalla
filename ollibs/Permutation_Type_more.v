@@ -182,7 +182,7 @@ eapply Permutation_Type_trans.
 Qed.
 
 Lemma Permutation_Type_app_app_inv {A} : forall (l1 l2 l3 l4 : list A),
-  Permutation_Type (l1 ++ l2) (l3 ++ l4) -> { ql : _ & prod (prod
+  Permutation_Type (l1 ++ l2) (l3 ++ l4) -> { ql & prod (prod
     (Permutation_Type l1 (fst (fst ql) ++ fst (snd ql)))
     (Permutation_Type l2 (snd (fst ql) ++ snd (snd ql)))) (prod
     (Permutation_Type l3 (fst (fst ql) ++ snd (fst ql)))
@@ -301,7 +301,7 @@ Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
   Permutation_Type l1 (map f l2) -> { l : _ & l1 = map f l & (Permutation_Type l2 l) }.
 (*
 Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
-  Permutation_Type l1 (map f l2) -> { pl : { l : _ & Permutation_Type l2 l} | l1 = map f (projT1 pl) }.
+  Permutation_Type l1 (map f l2) -> { pl : { l & Permutation_Type l2 l} | l1 = map f (projT1 pl) }.
 *)
 Proof with try assumption.
 induction l1 ; intros l2 HP.

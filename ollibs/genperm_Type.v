@@ -190,6 +190,26 @@ rewrite app_nil_r in Heq.
 assumption.
 Qed.
 
+Lemma PCperm_Type_cons_vs_cons {A} B : forall (a b : A) la lb,
+  PCperm_Type B (b :: lb) (a :: la) ->
+    ( prod (a = b) (PEperm_Type B lb la) )
+  + { '(l1,l2) : _ & lb = l1 ++ a :: l2 & PEperm_Type B la (l2 ++ b :: l1) }.
+Proof with try reflexivity.
+intros a b l1 l2 HP.
+apply PCperm_Type_vs_cons_inv in HP.
+destruct HP as [pl Heq HP'].
+destruct (fst pl) ; inversion Heq ; subst.
+- left.
+  split.
+  + reflexivity.
+  + rewrite app_nil_r in HP'.
+    destruct B; symmetry; apply HP'.
+- right.
+  exists (l, snd pl).
+  + reflexivity.
+  + assumption.
+Qed.
+
 Instance PCperm_Type_map {A B} (f : A -> B) b :
   Proper (PCperm_Type b ==> PCperm_Type b) (map f).
 Proof with try assumption.

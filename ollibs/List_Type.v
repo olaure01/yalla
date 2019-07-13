@@ -48,7 +48,7 @@ Fixpoint In_Type (a:A) (l:list A) : Type :=
   Qed.
 
   Theorem in_Type_split : forall x (l:list A), In_Type x l ->
-    { l' | l = (fst l')++(x::snd l') }.
+    { '(l1,l2) | l = l1 ++  x:: l2 }.
   Proof.
   induction l; simpl; destruct 1.
   subst a; auto.
@@ -203,13 +203,13 @@ Section Map.
   Qed. 
 
   Lemma in_Type_map_inv : forall l y, In_Type y (map f l) ->
-    { x : _ & prod (f x = y) (In_Type x l) }.
+    { x & prod (f x = y) (In_Type x l) }.
   Proof.
     induction l; firstorder (subst; auto).
   Qed.
 
   Lemma in_Type_flat_map : forall (f:A->list B)(l:list A)(y:B),
-    In_Type y (flat_map f l) -> { x : _ & prod (In_Type x l) (In_Type y (f x)) }.
+    In_Type y (flat_map f l) -> { x & prod (In_Type x l) (In_Type y (f x)) }.
   Proof using A B.
     induction l; simpl; intros.
     contradiction.
@@ -220,7 +220,7 @@ Section Map.
   Qed.
 
   Lemma flat_map_in_Type : forall (f:A->list B)(l:list A)(y:B),
-    { x : _ & prod (In_Type x l) (In_Type y (f x)) } -> In_Type y (flat_map f l).
+    { x & prod (In_Type x l) (In_Type y (f x)) } -> In_Type y (flat_map f l).
   Proof using A B.
     induction l; simpl; intros.
     destruct X as (x,(X,_)); contradiction.

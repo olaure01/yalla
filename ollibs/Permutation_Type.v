@@ -75,7 +75,7 @@ Section Add_Type.
    induction 1; simpl; auto with arith.
   Qed.
 
-  Lemma Add_Type_inv a l : In_Type a l -> { l' : _ &  Add_Type a l' l }.
+  Lemma Add_Type_inv a l : In_Type a l -> { l' &  Add_Type a l' l }.
   Proof.
    intro Ha. destruct (in_Type_split _ _ Ha) as ([l1 l2] & ->).
    exists (l1 ++ l2). apply Add_Type_app.
