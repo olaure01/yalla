@@ -95,6 +95,25 @@ Proof with try assumption ; try reflexivity.
     right...
 Qed.
 
+(** ** Decomposition of lists *)
+
+Lemma decomp_length_plus {A} : forall (l : list A) n m,
+    length l = n + m ->
+    {' (l1 , l2) : _ & prod (length l1 = n) (prod (length l2 = m) (l = l1 ++ l2))}.
+Proof with try assumption; try reflexivity.
+  intros l n.
+  revert l.
+  induction n; intros l m Heq.
+  - split with (nil, l).
+    split ; [ | split ]...
+  - destruct l; try inversion Heq.
+    specialize (IHn l m H0) as ((l1 & l2) & (Heql1 & (Heql2 & HeqL))).
+    split with (a :: l1 , l2).
+    split ; [ | split ]...
+    + simpl; rewrite Heql1...
+    + simpl; rewrite HeqL... 
+Qed.
+
 (** ** Inversions of list equalities *)
 
 Lemma dichot_Type_app {A} : forall (l1 : list A) l2 l3 l4,
@@ -382,6 +401,29 @@ destruct X ; intuition.
 destruct i ; intuition.
 Qed.
 
+Lemma In_Type_to_In {A} : forall (a : A) l, In_Type a l -> In a l.
+Proof with try assumption; try reflexivity.
+  intros a l Hin.
+  induction l ; inversion Hin; subst.
+  - left...
+  - right.
+    apply IHl...
+Qed.
+
+Lemma map_in_Type {A} {B} : forall (f : A -> B) l L, In_Type l (map f L) -> {l' & prod (In_Type l' L) (l = f l')}.
+Proof with try assumption; try reflexivity.
+  intros f l L Hin.
+  revert l Hin.
+  induction L; intros l Hin; inversion Hin; subst.
+  - split with a.
+    split...
+    left...
+  - specialize (IHL l X) as (l' & (Hin' & Heq)).
+    split with l'...
+    split...
+    right...
+Qed.
+
 
 (** ** Set inclusion on list *)
 
@@ -565,5 +607,53 @@ Section In_Forall_Type.
     - simpl; rewrite IHPl1.
       apply Plus.plus_assoc.
   Qed.
+  
+  Lemma In_Forall_Type_to_In_Type : forall (l : A) (L : list A) p (PL : Forall_Type P L), In_Forall_Type l p PL -> In_Type l L.
+  Proof with try assumption ; try reflexivity.
+    intros l L p PL Hin.
+    induction PL.
+    - inversion Hin.
+    - inversion Hin.
+      + inversion H; subst.
+      left...
+      + right.
+        apply IHPL...
+  Qed.
 
 End In_Forall_Type.
+
+(** ** Definition and properties of the constant list *)
+Fixpoint const_list {A} n (a : A) :=
+  match n with
+  | 0 => nil
+  | S n => a :: (const_list n a)
+  end.
+
+Lemma const_list_length {A} : forall n (a : A),
+    length (const_list n a) = n.
+Proof with try reflexivity.
+  intros n a; induction n...
+  simpl; rewrite IHn...
+Qed. 
+
+Lemma const_list_cons {A} : forall n (a : A),
+    a :: const_list n a = const_list n a ++ (a :: nil).
+Proof with try reflexivity.
+  induction n; intros a...
+  simpl; rewrite IHn...
+Qed.
+
+Lemma const_list_to_concat {A} : forall n (a : A),
+    const_list n a = concat (const_list n (a :: nil)).
+Proof with try reflexivity.
+  induction n; intros a...
+  simpl; rewrite IHn...
+Qed. 
+
+Lemma In_Type_const_list {A} : forall n (a : A) b,
+    In_Type b (const_list n a) ->
+    b = a.
+Proof with try reflexivity.
+  induction n; intros a b Hin; inversion Hin; subst...
+  apply IHn; apply X.
+Qed.
