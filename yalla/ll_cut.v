@@ -10,11 +10,9 @@ Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import genperm_Type.
-Require Import flat_map_Type_more_new.
 Require Import wf_nat_more.
-Require Import Forall_Type_more2.
+Require Import flat_map_Type_more.
 Require Import Dependent_Forall_Type.
-Require Import concat_Type_more.
 Require Import Eqdep_dec.
 Require Import Lia.
 
@@ -63,7 +61,7 @@ intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
     list_simpl ; rewrite (app_assoc l) ; rewrite (app_assoc _ l6).
     refine (IHn _ _ _ Hl _)...
     intros ; refine (IH _ pi0 _)...
-- apply concat_elt in H0 as (L3 & L4 & l3' & l4' & eqb & eqt & eqL); subst...
+- apply concat_elt in H0 as ((((L3 & L4) & l3') & l4') & eqb & eqt & eqL); subst...
   apply ex_r with ((l3' ++ l2 ++ l1 ++ l4') ++ concat L4 ++ concat L3) ; [ | PCperm_Type_solve].
   rewrite <- concat_app.
   change ((l3' ++ l2 ++ l1 ++ l4') ++ concat (L4 ++ L3)) with (concat ((l3' ++ l2 ++ l1 ++ l4')  :: L4 ++ L3)).
@@ -207,17 +205,17 @@ induction pi2 using (ll_nested_ind P) ; intros l' L' Heq; try (rename L' into L)
     destruct l' ; inversion H1; try now (destruct (fst p); simpl in H2; inversion H0). 
     destruct l' ; inversion H3.
 - case_eq (pperm P) ; intros Hperm ; rewrite Hperm in p ; simpl in p ; subst.
-  + destruct (perm_Type_app_flat_map _ (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')];
+  + destruct (@perm_Type_app_flat_map _ _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')];
       simpl in Hnil' ; simpl in HeqL' ; simpl in HPL' ; subst.
     eapply ex_r ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     apply IHpi2...
   + change (fun p => wn (wn_n (fst p) A) :: snd p) with (fun p => wn_n (S (fst p)) A :: (snd p)) in p.
-    destruct (cperm_Type_app_flat_map _ (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+    destruct (@cperm_Type_app_flat_map _ _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
       simpl in Hnil' ; simpl in HeqL' ; simpl in HPL' ; subst.
     eapply ex_r ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     apply IHpi2...
 - assert (injective wn) as Hinj by (intros x y Hxy ; inversion Hxy ; reflexivity).
-  destruct (@perm_flat_map_cons_flat_map_app _ _ wn_n _ wn Hinj lw _ _ _ _ _ _ p Heq)
+  destruct (@perm_flat_map_cons_flat_map_app _ _ _ (fun p => wn_n p (wn A)) wn Hinj lw _ _ _ _ _ _ p Heq)
     as [(((((lw1' & lw2') & l1') & l2') & l'') & L') HH] ; simpl in HH ; destruct HH as (H1 & H2 & H3 & H4).
   rewrite <- H4 ; apply (ex_wn_r _ _ lw1')...
   rewrite H3 ; apply IHpi2...
@@ -255,7 +253,8 @@ induction pi2 using (ll_nested_ind P) ; intros l' L' Heq; try (rename L' into L)
              split with (l0', L0').
              split...
              right...            
-      + app_vs_flat_map_inv Heq1.
+      + change (fun p => (wn_n (fst p) (wn A) :: snd p)) with (fun p => (fun k => wn_n k (wn A)) (fst p) :: snd p) in Heq1.
+        app_vs_flat_map_inv Heq1.
         * destruct (IHL lw _ _ Heq3) as (L2 & (Heq & (Heql & FL))).
           split with ((l' ++ (flat_map (fun p => app (map wn lw) (snd p)) (L0 ++ (n , l) :: nil))) :: L2).
           nsplit 3.
@@ -308,7 +307,7 @@ induction pi2 using (ll_nested_ind P) ; intros l' L' Heq; try (rename L' into L)
     destruct (Forall_Type_forall FL l0 Hin) as ((l0' & L0') & (Heq0' & Hin0)).
     apply (In_Forall_Type_in _ _ _ PL) in Hin0 as (pi0 & Hin0').
     rewrite Heq0'.
-    refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ _ _ _ X Hin0' l0' L0' eq_refl).
+    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ _ X Hin0' l0' L0' eq_refl).
 - destruct L ; list_simpl in Heq ; subst.
   + list_simpl ; apply one_r.
   + exfalso.
@@ -318,6 +317,7 @@ induction pi2 using (ll_nested_ind P) ; intros l' L' Heq; try (rename L' into L)
   simpl ; apply bot_r.
   apply IHpi2...
 - destruct l' ; inversion Heq ; [ destruct L ; inversion H0; try now (destruct (fst p); inversion H1) | ] ; subst.
+  change (fun p => wn_n (fst p) (wn A) :: snd p) with (fun p => (fun k => wn_n k (wn A)) (fst p) :: snd p) in H1.
   app_vs_app_flat_map_inv H1.
   + list_simpl ; apply tens_r...
     rewrite app_comm_cons in IHpi2_1 ; rewrite app_comm_cons ; apply IHpi2_1...
@@ -478,7 +478,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     revert Hl IHsize ; simpl ; rewrite (app_assoc (map wn lw) l5 _) ; rewrite (app_assoc l) ; intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _ _)...
 - (* mix_r *)
-  apply concat_elt in Heql as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+  apply concat_elt in Heql as ((((L1 &L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
   rewrite<- app_assoc.
   replace (l1' ++ l0 ++ l2' ++ concat L2) with ((l1' ++ l0 ++ l2') ++ concat L2) by (rewrite ? app_assoc; reflexivity).
   change ((l1' ++ l0 ++ l2') ++ concat L2) with (concat ((l1' ++ l0 ++ l2') :: L2)).
@@ -525,7 +525,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
       refine (IHsize _ _ _ _ Hl2 Hone _ _)...
   + (* mix_r *)
     change (bot :: l0) with (nil ++ bot :: l0) in H0.
-    apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+    apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
     change (S (((fix
                psize_Forall (P : pfrag) (L : list (list formula))
                             (PL : Forall_Type (ll P) L) {struct PL} : nat :=
@@ -596,7 +596,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          refine (IHsize _ _ _ _ Hl2 Hbot _ _)...
     * (* mix_r *)
       change (one :: l0) with (nil ++ one :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       change (S (((fix
                      psize_Forall (P : pfrag) (L : list (list formula))
                      (PL : Forall_Type (ll P) L) {struct PL} : nat :=
@@ -676,7 +676,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (tens_r P A0 B l3 l4 Hl Hr) as Htens; clear HeqHtens.
       change (parr (dual B) (dual A0) :: l0) with (nil ++ parr (dual B) (dual A0) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with (((l4 ++ l3) ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -767,7 +767,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix2_r *)
       remember (parr_r P A0 B l2 Hl) as Hparr; clear HeqHparr.
       change (tens (dual B) (dual A0) :: l0) with (nil ++ tens (dual B) (dual A0) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -843,7 +843,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (top_r _ l2 ) as Htop; clear HeqHtop.
       change (zero :: l0) with (nil ++ zero :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -914,7 +914,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (plus_r1 _ _ _ _ Hl) as Hplus; clear HeqHplus.
       change (awith (dual A0) (dual B) :: l0) with (nil ++ awith (dual A0) (dual B) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -993,7 +993,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (plus_r2 P A0 B l2 Hl) as Hplus; clear HeqHplus.
       change (awith (dual B) (dual A0) :: l0) with (nil ++ awith (dual B) (dual A0) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -1072,7 +1072,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (with_r P A0 B l2 Hl) as Hwith; clear HeqHwith.
       change (aplus (dual A0) (dual B) :: l0) with (nil ++ aplus (dual A0) (dual B) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -1169,7 +1169,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (oc_r _ _ _ Hl) as Hoc; clear HeqHoc.
       change (wn (dual A0) :: l0) with (nil ++ wn (dual A0) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((map wn l ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -1277,7 +1277,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (de_r _ _ _ Hl) as Hde; clear HeqHde.
       change (oc (dual A0) :: l0) with (nil ++ oc (dual A0) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -1355,7 +1355,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix2 *)
       remember (wk_r _ A0 _ Hl) as Hwk; clear HeqHwk.
       change (oc (dual A0) :: l0) with (nil ++ oc (dual A0) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -1433,7 +1433,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* mix_r *)
       remember (co_r _ _ _ Hl) as Hco; clear HeqHco.
       change (oc (dual A0) :: l0) with (nil ++ oc (dual A0) :: l0) in H0.
-      apply concat_elt in H0 as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+      apply concat_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
       symmetry in Heqb.
       apply app_eq_nil_Type in Heqb as (Heqb1 & Heqb2).
       apply ex_r with ((l2 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
@@ -1523,7 +1523,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
       eapply ex_wn_r...
       list_simpl ; rewrite (app_assoc l0) ; rewrite (app_assoc _ l7).
       apply IHpi1 ; list_simpl...
-  + apply concat_elt in Heq as (L1 & (L2 & (l1' & (l2' & (Heqb & (Heqt & HeqL)))))); subst.
+  + apply concat_elt in Heq as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
     apply ex_r with (concat L1 ++ (l1' ++ l2 ++ l1 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
     change ((l1' ++ l2 ++ l1 ++ l2') ++ concat L2) with (concat ((l1' ++ l2 ++ l1 ++ l2') :: L2)).
     rewrite<- concat_app.
@@ -1535,7 +1535,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
       apply Forall_Type_cons...
       apply ex_r with (l1 ++ l2' ++ l1' ++ l2) ; [ | PCperm_Type_solve].
       destruct (In_Forall_Type_elt _ _ _ (l1' ++ dual A :: l2') PL) as (pi & Hin).
-      refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin _ _ eq_refl).
+      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin _ _ eq_refl).
   + exfalso ; destruct l4 ; inversion Heq.
     * destruct A ; inversion H0 ; subst ; inversion Hat.
     * destruct l4 ; inversion H1.
@@ -1634,7 +1634,7 @@ induction pi using (ll_nested_ind P) ; try (econstructor ; myeeasy ; fail).
   apply forall_Forall_Type.
   intros x Hin.
   apply In_Forall_Type_in with _ _ _ PL in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _  PL _ _ X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
 - eapply cut_r_gaxat ; eassumption.
 - assert (pgax P = pgax (cutrm_pfrag P)) as Hcut by reflexivity.
   revert a ; rewrite Hcut ; apply gax_r.

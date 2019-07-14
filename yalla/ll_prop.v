@@ -8,16 +8,13 @@ Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import CyclicPerm_Type.
 Require Import genperm_Type.
-Require Import Forall_Type_more2.
 Require Import Dependent_Forall_Type.
-Require Import concat_Type_more.
 Require Import flat_map_Type_more.
 Require Import EqdepFacts.
 Require Import Eqdep_dec.
 Require Import Lia.
 
 Require Export ll_cut.
-
 
 (** Some additional reversibility statements *)
 Lemma with_rev1_noax {P} : (projT1 (pgax P) -> False) ->
@@ -176,7 +173,7 @@ induction H using (ll_ps_nested_ind P PS) ; try (econstructor ; myeeasy ; fail).
   apply forall_Forall_Type.
   intros l' Hin.
   apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
 - destruct Hle as [Hle _].
   rewrite f in Hle.
   simpl in Hle.
@@ -196,7 +193,7 @@ apply mix_ps_r ; [ | apply Hs | ]...
 apply forall_Forall_Type.
 intros l' Hin.
 apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
 Qed.
 
 Lemma ll_ps_is_ps {P} : forall l PS, ll_ps P PS l -> is_true (PS l).
@@ -213,7 +210,7 @@ apply mix_r...
 apply forall_Forall_Type.
 intros l' Hin.
 apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
 Qed.
 
 Lemma ll_is_ll_ps {P} : forall l, ll P l -> ll_ps P (fun _ => true) l.
@@ -224,7 +221,7 @@ apply mix_ps_r...
 apply forall_Forall_Type.
 intros l' Hin.
 apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
 Qed.
 
 (** A fragment is a subset of formulas closed under subformula. *)
@@ -232,47 +229,6 @@ Definition fragment FS :=
   forall A, is_true (FS A) -> forall B, subform B A -> is_true (FS B).
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
-
-
-(* NEED MOVING *)
-
-Lemma In_Forall_Type_to_In_Type {A} {P} : forall (l : A) (L : list A) p (PL : Forall_Type P L), In_Forall_Type P l p PL -> In_Type l L.
-Proof with try assumption ; try reflexivity.
-  intros l L p PL Hin.
-  induction PL.
-  - inversion Hin.
-  - inversion Hin.
-    + inversion H; subst.
-      left...
-    + right.
-      apply IHPL...
-Qed.
-
-Lemma concat_In {A} : forall (l : list A) (L : list (list A)) a, In a l -> In l L -> In a (concat L).
-Proof with try assumption; try reflexivity.        
-  intros l L a Hin1 Hin2.
-  induction L; inversion Hin2; subst.
-  - clear IHL; induction l; inversion Hin1; subst.
-    + left...
-    + right.
-      apply IHl...
-      left...
-  - simpl.
-    specialize (IHL H).
-    clear - IHL.
-    induction a0...
-    right...
-Qed.
-
-Lemma In_Type_to_In {A} : forall (a : A) l, In_Type a l -> In a l.
-Proof with try assumption; try reflexivity.
-  intros a l Hin.
-  induction l ; inversion Hin; subst.
-  - left...
-  - right.
-    apply IHl...
-Qed.
-
 
 Lemma conservativity {P} : pcut P = false -> forall FS, fragment FS ->
   forall l, ll_ps P (fun _ => true) l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
@@ -299,15 +255,15 @@ induction pi using (ll_ps_nested_ind P (fun _ => true)) ; intros HFrag.
   + apply forall_Forall_Type.
     intros l' Hin.
     apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-    refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin _).
+    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin _).
     clear - Hin HFrag.
     apply Forallb_Forall.
     apply Forall_forall.
     intros A Hin'.
-    apply (Forall_In (fun x => is_true (FS x)) (concat L))...
+    apply (Forall_forall (fun x => is_true (FS x)) (concat L))...
+    apply in_concat with l'...
     apply In_Forall_Type_to_In_Type in Hin.
-    apply In_Type_to_In in Hin.
-    apply concat_In with l'...
+    apply In_Type_to_In in Hin...
 - apply one_ps_r...
 - apply bot_ps_r...
   inversion HFrag.
@@ -446,7 +402,7 @@ clear - pi ; induction pi using (ll_ps_nested_ind (cutrm_pfrag P) (Forallb FS));
   apply forall_Forall_Type.
   intros l' Hin.
   apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
 - eapply @cut_ps_r...
   destruct P.
   inversion f.

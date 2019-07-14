@@ -12,145 +12,13 @@ Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
-Require Import Forall_Type_more2.
 Require Import Dependent_Forall_Type.
 Require Import PeanoNat.
+Require Import Lia.
 
 Require Export ll_prop.
 Require Import subs.
 
-(* NEED MOVING *)
-
-Lemma add_le : (forall n m, {k | n + k = m} -> n <= m).
-Proof with try reflexivity; try assumption.
-  intros n m p.
-  destruct p as (k & Heq).
-  revert n m Heq.
-  induction k; intros n m Heq.
-  + rewrite Nat.add_0_r in Heq.
-    rewrite Heq.
-    apply Nat.le_refl.
-  + rewrite Nat.add_succ_r in Heq.
-    apply Nat.le_trans with (S n).
-    * apply Nat.le_succ_diag_r.
-    * apply IHk...
-Qed.
-
-Lemma decomp_length_plus {A} : forall (l : list A) n m,
-    length l = n + m ->
-    {' (l1 , l2) : _ & prod (length l1 = n) (prod (length l2 = m) (l = l1 ++ l2))}.
-Proof with try assumption; try reflexivity.
-  intros l n.
-  revert l.
-  induction n; intros l m Heq.
-  - split with (nil, l).
-    nsplit 3...
-  - destruct l; try inversion Heq.
-    specialize (IHn l m H0) as ((l1 & l2) & (Heql1 & (Heql2 & HeqL))).
-    split with (a :: l1 , l2).
-    nsplit 3...
-    + simpl; rewrite Heql1...
-    + simpl; rewrite HeqL... 
-Qed.
-      
-Fixpoint const_list {A} n (a : A) :=
-  match n with
-  | 0 => nil
-  | S n => a :: (const_list n a)
-  end.
-
-Lemma In_Type_const_list {A} : forall n (a : A) b,
-    In_Type b (const_list n a) ->
-    b = a.
-Proof with try reflexivity.
-  induction n; intros a b Hin; inversion Hin; subst...
-  apply IHn; apply X.
-Qed.
-
-Lemma const_list_length {A} : forall n (a : A),
-    length (const_list n a) = n.
-Proof with try reflexivity.
-  intros n a; induction n...
-  simpl; rewrite IHn...
-Qed. 
-
-Lemma const_list_cons {A} : forall n (a : A),
-    a :: const_list n a = const_list n a ++ (a :: nil).
-Proof with try reflexivity.
-  induction n; intros a...
-  simpl; rewrite IHn...
-Qed.
-
-Lemma const_list_to_concat {A} : forall n (a : A),
-    const_list n a = concat (const_list n (a :: nil)).
-Proof with try reflexivity.
-  induction n; intros a...
-  simpl; rewrite IHn...
-Qed. 
-
-Lemma duplicate_wn P : forall n A l,
-      ll P (const_list n (wn A) ++ l) -> ll P (wn A :: l).
-Proof with try assumption.
-  intros n.
-  induction n; intros A l pi.
-  - apply wk_r...
-  - apply co_r.
-    apply IHn.
-    simpl in pi.
-    change (wn A :: const_list n (wn A) ++ l) with ((wn A :: const_list n (wn A)) ++ l) in pi.
-    rewrite const_list_cons in pi.
-    rewrite<- app_assoc in pi...
-Qed.
-
-Lemma ex_concat_r P : pperm P = true -> forall l A L,
-      ll P (l ++ flat_map (cons A) L) -> ll P (l ++ const_list (length L) A ++ concat L).
-Proof with try assumption.
-  intros f l A L. revert f l A.
-  induction L; intros f l A pi...
-  simpl.
-  apply ex_r with ((A :: l ++ a) ++ const_list (length L) A ++ concat L) ; [ | rewrite f; simpl; perm_Type_solve]...
-  apply IHL...
-  eapply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L) ; [ | rewrite f; simpl; perm_Type_solve]...
-Qed.   
-
-Lemma tens_n_r P : forall L A,
-    Forall_Type (ll P) (map (cons A) L) ->
-    ll P (tens_n (length L) A :: concat L).
-Proof with try assumption.
-  induction L; intros A FL.
-  - apply one_r.
-  - destruct L.
-    + simpl; rewrite app_nil_r.
-      inversion FL...
-    + simpl.
-      inversion FL; subst.
-      apply tens_r...
-      change (match length L with
-     | 0 => A
-     | S _ => tens (tens_n (length L) A) A
-              end) with (tens_n (S (length L)) A).
-      change (tens_n (S (length L)) A :: l ++ concat L) with (tens_n (S (length L)) A :: concat (l :: L)).
-      apply IHL...
-Qed.
-
-Lemma parr_n_r P : forall l n A,
-    ll P (const_list n A ++ l) ->
-    ll P (parr_n n A :: l).
-Proof with try assumption.
-  intros l n; revert l.
-  induction n; intros l A pi.
-  - apply bot_r...
-  - destruct n...
-    simpl.
-    change (match n with
-               | 0 => A
-               | S _ => parr A (parr_n n A)
-            end) with (parr_n (S n) A).
-    apply parr_r.
-    apply ex_r with (parr_n (S n) A :: (l ++ (A :: nil))); [ | PCperm_Type_solve].
-    apply IHn.
-    eapply ex_r ; [apply pi | PCperm_Type_solve].
-Qed.  
 
 (** ** Property on mix_n *)
 
@@ -220,7 +88,7 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
   + simpl in H; rewrite Heq in H.
     apply ex_r with (map wn (tens_n n bot :: nil) ++ concat L)...
     simpl.
-    apply duplicate_wn with (S nL)...
+    apply co_const_list_r with (S nL)...
     change (const_list (S nL) (wn (tens_n n bot))) with ((wn (tens_n n bot) :: nil) ++ const_list nL (wn (tens_n n bot))).
     rewrite HeqnL.
     refine (ex_concat_r _ _ ((wn (tens_n n bot)) :: nil) (wn (tens_n n bot)) L _)...
@@ -237,7 +105,7 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
     destruct (in_Type_map_inv _ _ _ Hin'') as (l' & (Heql' & Hin')); subst; clear Hin''.
     replace (length L) with n by (symmetry; apply EqNat.beq_nat_true; apply Heq).
     apply ex_r with (l' ++ map wn (tens_n n bot :: nil)).
-    * apply Forall_Type_In with (map (fun l => l ++ map wn (tens_n n bot :: nil)) L)...
+    * apply Forall_Type_forall with (map (fun l => l ++ map wn (tens_n n bot :: nil)) L)...
       change (l' ++ map wn (tens_n n bot :: nil)) with ((fun l0 => l0 ++ map wn (tens_n n bot :: nil)) l').
       apply in_Type_map...
     * rewrite fp; simpl.
@@ -275,7 +143,7 @@ Proof with try assumption; try reflexivity.
     + apply forall_Forall_Type.
       intros l' Hin.
       apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
   - revert a.
     rewrite HeqP'; simpl.
@@ -338,7 +206,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
         apply forall_Forall_Type.
         intros l' Hin.
         apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
     + simpl in eqpmix.
       rewrite Heq in eqpmix.
       apply mix_r.
@@ -346,7 +214,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - simpl.
@@ -450,7 +318,7 @@ Proof with try assumption; try reflexivity.
     intros l' Hin.
     apply in_Type_app_or in Hin.
     destruct Hin as [Hin | Hin].
-    + apply Forall_Type_In with l1...
+    + apply Forall_Type_forall with l1...
     + inversion Hin ; [ | inversion X].
       rewrite<- H.
       apply mix_r...
@@ -475,14 +343,14 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
     + rewrite HeqP' in eqpmix.
       simpl in eqpmix; rewrite Heq in eqpmix.
       apply mix_r...
       apply forall_Forall_Type.
       intros l' Hin.
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP' in f...
   - revert a.
@@ -547,7 +415,7 @@ Proof with try assumption.
     + apply forall_Forall_Type.
       intros l' Hin.
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -582,7 +450,7 @@ Proof with try assumption; try reflexivity.
     + apply forall_Forall_Type.
       intros l' Hin.
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -617,12 +485,8 @@ Proof with try assumption; try reflexivity.
     + simpl.
       rewrite Nat.sub_succ_r.
       rewrite<- Heqk...
-    + apply add_le.
-      split with k.
-      simpl; rewrite<- Nat.add_succ_r.
-      apply Nat.add_sub_eq_nz.
-      * intro H'; inversion H'.
-      * symmetry...
+    + simpl.
+      lia.
     + apply Forall_Type_cons...
       change nil with (concat (@nil (list formula))).
       apply mix_r...
@@ -653,7 +517,7 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
     + apply mix_0_n_r with n.
       * rewrite HeqP'...
       * rewrite HeqP'.
@@ -666,7 +530,7 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -714,7 +578,7 @@ Proof with try assumption; try reflexivity.
     apply forall_Forall_Type.
     intros l' Hin.
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-    refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -780,7 +644,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   destruct (In_Forall_Type_in _ _ _ PL Hin) as (pi' & HFin).
-  refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X HFin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X HFin).
 - eapply cut_mix0_r...
 Qed.
 
@@ -945,7 +809,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   destruct (In_Forall_Type_in _ _ _ PL Hin) as (pi' & HFin).
-  refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X HFin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X HFin).
 - eapply cut_mix2_r...
 Qed.
 
@@ -1175,7 +1039,7 @@ revert Heql ; induction pi using (ll_nested_ind _) ; intros Heql ; subst ; try i
   destruct l0; inversion Heql; destruct l1; inversion Heql.
   destruct (In_Forall_Type_in _ _ nil PL) as (pi & Hin).
   + left; reflexivity.
-  + refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin eq_refl).
+  + refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin eq_refl).
 - inversion f.
 - destruct a.
 Qed.
@@ -1208,7 +1072,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ PL _ _ X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
 - eapply cut_mix02_r...
 Qed.
 
@@ -1243,7 +1107,7 @@ eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
          apply de_r.
          apply tens_r; apply wk_r...
       -- apply ex_r with (wn (tens (wn one) (wn one)) :: concat (l0 :: l1 :: l2 :: L)); [ | rewrite fp; simpl; perm_Type_solve].
-         apply duplicate_wn with (length (l0 :: l1 :: l2 :: L)).
+         apply co_const_list_r with (length (l0 :: l1 :: l2 :: L)).
          apply (ex_concat_r _ fp nil).
          rewrite app_nil_l; rewrite flat_map_concat_map.
          apply mix_r.

@@ -9,11 +9,9 @@ Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type.
 Require Import genperm_Type.
-Require Import Forall_Type_more2.
 Require Import Dependent_Forall_Type.
 
 Require Export ll_def.
-
 
 (** ** Decidable equality on [Atom], through value into [bool] *)
 Definition ateq := yalla_ax.ateq.
@@ -70,22 +68,6 @@ Qed.
 
 (** Substitution in proofs *)
 
-(* NEED MOVING *)
-
-Lemma map_In_Type {A} {B} : forall (f : A -> B) l L, In_Type l (map f L) -> {l' & prod (In_Type l' L) (l = f l')}.
-Proof with try assumption; try reflexivity.
-  intros f l L Hin.
-  revert l Hin.
-  induction L; intros l Hin; inversion Hin; subst.
-  - split with a.
-    split...
-    left...
-  - specialize (IHL l X) as (l' & (Hin' & Heq)).
-    split with l'...
-    split...
-    right...
-Qed.
-
 Lemma subs_ll {P} : forall A x l,
   ll P l ->
     ll (axupd_pfrag P (existT (fun x => x -> list formula) _
@@ -113,10 +95,10 @@ induction pi using (ll_nested_ind P) ; list_simpl ; try (now constructor).
     rewrite map_length...
   + apply forall_Forall_Type.
     intros l' Hin.
-    destruct (map_In_Type (map (subs A x)) l' L Hin) as (l0 & (Hin' & Heq)).
+    destruct (map_in_Type (map (subs A x)) l' L Hin) as (l0 & (Hin' & Heq)).
     rewrite Heq.
     apply (In_Forall_Type_in _ _ _ PL) in Hin' as (pi' & Hin').
-    refine (Dependent_Forall_Type_in (list_eq_dec formulas.formula_eq_dec) _ _ PL _ _ X Hin').
+    refine (Dependent_Forall_Type_forall (list_eq_dec formulas.formula_eq_dec) _ _ _ _ PL X Hin').
 - specialize Hmapwn with l0.
   rewrite Hmapwn.
   apply oc_r.

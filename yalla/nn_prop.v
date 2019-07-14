@@ -8,9 +8,7 @@ Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type.
 Require Import genperm_Type.
-Require Import Forall_Type_more2.
 Require Import Dependent_Forall_Type.
-Require Import concat_Type_more.
 Require Import Eqdep_dec.
 
 Require Import subs.
@@ -462,12 +460,12 @@ apply (ll_to_ill_trans ione) in Hll ; myeasy.
     { assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
       { left... }
       apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ FL _ _ FLind Hin). }
+      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ FL FLind Hin). }
     assert (ill (p2ipfrag ione pfrag_mix02) (map (trans ione) l1) ione).
     { assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
       { right; left... }
       apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ FL _ _ FLind Hin). }
+      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ FL FLind Hin). }
     rewrite map_app.
     rewrite <- (app_nil_l (map _ l0 ++ map _ l1)).
     rewrite <- (app_nil_r (map _ l0 ++ map _ l1)).
@@ -649,13 +647,13 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
       { assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
         { left... }
         apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ FL _ _ FLind Hin). }
+        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ FL FLind Hin). }
     assert (ill (p2ipfrag (ioc R) (cutupd_pfrag pfrag_mix02 true))
                (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
       { assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
         { right; left... }
         apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_in (list_eq_dec formula_eq_dec) _ _ FL _ _ FLind Hin). }
+        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ FL FLind Hin). }
       simpl.
       rewrite app_nil_r.
       rewrite map_app.
