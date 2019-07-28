@@ -104,6 +104,7 @@ split.
   apply le_pfrag_trans.
 Qed.
 
+(* Unused
 Definition eq_pfrag P Q :=
   prod (pcut P = pcut Q)
        (prod (prod (forall a, { b | projT2 (pgax P) a = projT2 (pgax Q) b}) (forall b, {a | projT2 (pgax P) a = projT2 (pgax Q) b}))
@@ -157,6 +158,7 @@ Proof with try reflexivity.
   nsplit 4...
   split; intro a; split with a...
 Qed.
+*)
 
 (** Same proof fragment as [P] but with value [b] for [pcut]. *)
 Definition cutupd_pfrag P b :=
@@ -516,7 +518,7 @@ Proof with try assumption;try reflexivity.
       apply IHFL with l' pi...
 Qed.
 
-
+(* Unused
 Lemma same_pfrag P Q : eq_pfrag P Q ->
                        forall l, ll P l -> ll Q l.
 Proof with myeeasy.
@@ -560,7 +562,8 @@ Proof with myeeasy.
     rewrite Heq.
     apply gax_r.
 Qed.
-    
+*)
+
 Lemma stronger_pfrag P Q : le_pfrag P Q -> forall l, ll P l -> ll Q l.
 Proof with myeeasy.
 intros Hle l H.
