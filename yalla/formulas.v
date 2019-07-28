@@ -360,6 +360,16 @@ induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
 - subst ; simpl ; apply IHA...
 Qed.
 
+Module Formula_beq <: UsualBoolEq.
+  Definition t := formula.
+  Definition eq := @eq formula.
+  Definition eqb := eqb_form.
+  Definition eqb_eq := eqb_eq_form.
+End Formula_beq.
+
+Module Formula_dec <: UsualDecidableTypeFull := Make_UDTF Formula_beq.
+
+(* Unused
 Fixpoint eqb_formlist l1 l2 :=
 match l1, l2 with
 | nil, nil => true
@@ -377,6 +387,7 @@ induction l1 ; destruct l2 ; (split ; [ intros Heqb | intros Heq ]) ;
 - subst ; simpl ; apply andb_true_iff.
   split ; [ apply eqb_eq_form | apply IHl1 ]...
 Qed.
+*)
 
 (* Unused
 (** * In with [bool] output for formula list *)
@@ -562,53 +573,5 @@ apply subb_sub_list in Hl.
 apply subb_sub_list in Hr.
 apply subb_sub_list.
 etransitivity ; eassumption.
-Qed.
-
-(** ** Decidable equality between formulas *)
-
-Lemma formula_eq_dec : forall (A B : formula),
-    {A = B} + {~ (A = B)}.
-Proof with try assumption; try reflexivity.
-  intros A.
-  induction A ; destruct B ; try (right; intro Heq; now inversion Heq);
-    try (now left);
-    try (destruct IHA with B as [e | n] ;
-         [ left; subst; reflexivity
-         | right; intro eq; inversion eq; apply n; try assumption]);
-    try (destruct IHA1 with B1 as [e1 | n1] ;
-         [ destruct IHA2 with B2 as [e2 | n2] ;
-           [ left; subst; reflexivity
-           | right; intro eq; inversion eq; apply n2; try assumption]
-         | right ; intro eq; inversion eq; apply n1; try assumption]) .
-  - assert ((a = a0) + (a <> a0)).
-    + destruct (eq_nat_decide a a0).
-      * left.
-        apply eq_nat_is_eq...
-      * right.
-        intro eq.
-        apply n.
-        apply eq_nat_is_eq...
-    + destruct H.
-      * left.
-        rewrite e...
-      * right.
-        intro.
-        inversion H as [eq].
-        apply n...
-  - assert ((a = a0) + (a <> a0)).
-    + destruct (eq_nat_decide a a0).
-      * left.
-        apply eq_nat_is_eq...
-      * right.
-        intro eq.
-        apply n.
-        apply eq_nat_is_eq...
-    + destruct H.
-      * left.
-        rewrite e...
-      * right.
-        intro.
-        inversion H as [eq].
-        apply n...
 Qed.
 

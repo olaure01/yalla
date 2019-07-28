@@ -307,7 +307,7 @@ induction pi2 using (ll_nested_ind P) ; intros l' L' Heq; try (rename L' into L)
     destruct (Forall_Type_forall FL l0 Hin) as ((l0' & L0') & (Heq0' & Hin0)).
     apply (In_Forall_Type_in _ _ _ PL) in Hin0 as (pi0 & Hin0').
     rewrite Heq0'.
-    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ _ X Hin0' l0' L0' eq_refl).
+    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ _ X Hin0' l0' L0' eq_refl).
 - destruct L ; list_simpl in Heq ; subst.
   + list_simpl ; apply one_r.
   + exfalso.
@@ -1535,7 +1535,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
       apply Forall_Type_cons...
       apply ex_r with (l1 ++ l2' ++ l1' ++ l2) ; [ | PCperm_Type_solve].
       destruct (In_Forall_Type_elt _ _ _ (l1' ++ dual A :: l2') PL) as (pi & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin _ _ eq_refl).
+      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin _ _ eq_refl).
   + exfalso ; destruct l4 ; inversion Heq.
     * destruct A ; inversion H0 ; subst ; inversion Hat.
     * destruct l4 ; inversion H1.
@@ -1634,7 +1634,7 @@ induction pi using (ll_nested_ind P) ; try (econstructor ; myeeasy ; fail).
   apply forall_Forall_Type.
   intros x Hin.
   apply In_Forall_Type_in with _ _ _ PL in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 - eapply cut_r_gaxat ; eassumption.
 - assert (pgax P = pgax (cutrm_pfrag P)) as Hcut by reflexivity.
   revert a ; rewrite Hcut ; apply gax_r.

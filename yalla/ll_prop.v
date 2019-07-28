@@ -174,7 +174,7 @@ induction H using (ll_ps_nested_ind P PS) ; try (econstructor ; myeeasy ; fail).
   apply forall_Forall_Type.
   intros l' Hin.
   apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 - destruct Hle as [Hle _].
   rewrite f in Hle.
   simpl in Hle.
@@ -194,7 +194,7 @@ apply mix_ps_r ; [ | apply Hs | ]...
 apply forall_Forall_Type.
 intros l' Hin.
 apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 Qed.
 
 Lemma ll_ps_is_ps {P} : forall l PS, ll_ps P PS l -> is_true (PS l).
@@ -211,7 +211,7 @@ apply mix_r...
 apply forall_Forall_Type.
 intros l' Hin.
 apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 Qed.
 
 Lemma ll_is_ll_ps {P} : forall l, ll P l -> ll_ps P (fun _ => true) l.
@@ -222,7 +222,7 @@ apply mix_ps_r...
 apply forall_Forall_Type.
 intros l' Hin.
 apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 Qed.
 
 (** A fragment is a subset of formulas closed under subformula. *)
@@ -256,7 +256,7 @@ induction pi using (ll_ps_nested_ind P (fun _ => true)) ; intros HFrag.
   + apply forall_Forall_Type.
     intros l' Hin.
     apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin _).
+    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin _).
     clear - Hin HFrag.
     apply Forallb_Forall.
     apply Forall_forall.
@@ -403,7 +403,7 @@ clear - pi ; induction pi using (ll_ps_nested_ind (cutrm_pfrag P) (Forallb FS));
   apply forall_Forall_Type.
   intros l' Hin.
   apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 - eapply @cut_ps_r...
   destruct P.
   inversion f.

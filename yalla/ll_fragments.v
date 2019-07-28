@@ -140,7 +140,7 @@ Proof with try assumption; try reflexivity.
     + apply forall_Forall_Type.
       intros l' Hin.
       apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
   - revert a.
     rewrite HeqP'; simpl.
@@ -203,7 +203,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
         apply forall_Forall_Type.
         intros l' Hin.
         apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
     + simpl in eqpmix.
       rewrite Heq in eqpmix.
       apply mix_r.
@@ -211,7 +211,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - simpl.
@@ -340,14 +340,14 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
     + rewrite HeqP' in eqpmix.
       simpl in eqpmix; rewrite Heq in eqpmix.
       apply mix_r...
       apply forall_Forall_Type.
       intros l' Hin.
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP' in f...
   - revert a.
@@ -412,7 +412,7 @@ Proof with try assumption.
     + apply forall_Forall_Type.
       intros l' Hin.
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -447,7 +447,7 @@ Proof with try assumption; try reflexivity.
     + apply forall_Forall_Type.
       intros l' Hin.
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -514,7 +514,7 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
     + apply mix_0_n_r with n.
       * rewrite HeqP'...
       * rewrite HeqP'.
@@ -527,7 +527,7 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -575,7 +575,7 @@ Proof with try assumption; try reflexivity.
     apply forall_Forall_Type.
     intros l' Hin.
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
@@ -641,7 +641,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   destruct (In_Forall_Type_in _ _ _ PL Hin) as (pi' & HFin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X HFin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X HFin).
 - eapply cut_mix0_r...
 Qed.
 
@@ -806,7 +806,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   destruct (In_Forall_Type_in _ _ _ PL Hin) as (pi' & HFin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X HFin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X HFin).
 - eapply cut_mix2_r...
 Qed.
 
@@ -1036,7 +1036,7 @@ revert Heql ; induction pi using (ll_nested_ind _) ; intros Heql ; subst ; try i
   destruct l0; inversion Heql; destruct l1; inversion Heql.
   destruct (In_Forall_Type_in _ _ nil PL) as (pi & Hin).
   + left; reflexivity.
-  + refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin eq_refl).
+  + refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin eq_refl).
 - inversion f.
 - destruct a.
 Qed.
@@ -1069,7 +1069,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 - eapply cut_mix02_r...
 Qed.
 

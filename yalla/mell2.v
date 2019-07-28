@@ -194,9 +194,9 @@ revert l Heql0 ; induction pi using (ll_def.ll_nested_ind pfrag_mell) ; intros l
   destruct l6; inversion Heql4; rewrite app_nil_r; clear Heql4.
   apply mix_r.
   + destruct (In_Forall_Type_in _ _ (map mell2ll l3) PL); [ left; reflexivity | ].
-    refine (Dependent_Forall_Type_forall (list_eq_dec formulas.formula_eq_dec) _ _ _ _ PL X i _ eq_refl).
+    refine (Dependent_Forall_Type_forall (list_eq_dec formulas.Formula_dec.eq_dec) _ _ _ _ PL X i _ eq_refl).
   + destruct (In_Forall_Type_in _ _ (map mell2ll l5) PL); [ right; left; reflexivity | ].
-    refine (Dependent_Forall_Type_forall (list_eq_dec formulas.formula_eq_dec) _ _ _ _ PL X i _ eq_refl).
+    refine (Dependent_Forall_Type_forall (list_eq_dec formulas.Formula_dec.eq_dec) _ _ _ _ PL X i _ eq_refl).
 - decomp_map_Type Heql0 ; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.

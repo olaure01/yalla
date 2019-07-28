@@ -171,7 +171,7 @@ induction H using (ll_nested_ind _); try now constructor.
   simpl; rewrite app_nil_r.
   assert (ll_bbb l1) as pi1.
   { destruct (In_Forall_Type_in _ _ _ PL (in_Type_elt l1 (l0 :: nil) nil)) as (pi & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin). }
+    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin). }
   inversion PL; inversion X1; subst; clear X1 X2 X3.
   apply mix2_bbb_r...
   eapply stronger_pfrag...
@@ -629,11 +629,11 @@ induction pi using (ll_nested_ind _); try now econstructor.
   + assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
     { right; left... }
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
   + assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
     { left... }
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hin).
+    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
 Qed.
 
 Theorem bb_to_bbb : forall l, llR (oc bot) l -> ll_bbb l.

@@ -460,7 +460,7 @@ Proof with try assumption.
   induction FL ; inversion Hin.
   - inversion H.
     subst.
-    apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply formula_eq_dec].
+    apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
     lia.
   - specialize (IHFL X).
     lia.
@@ -505,7 +505,7 @@ Proof with try assumption;try reflexivity.
   - inversion Hin.
     + inversion H.
       subst.
-      apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply formula_eq_dec].
+      apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
       subst.
       intros ax Hin_ax.
       apply in_Type_or_app.
@@ -931,7 +931,7 @@ induction pi using (ll_nested_ind P) ; intros A' B' l1' l2' Heq ; subst.
     apply Forall_Type_cons...
     destruct (In_Forall_Type_elt _ _ _ _ PL).
     refine (Dependent_Forall_Type_forall _ _ _ _ _ _ X i _ _ _ _ eq_refl).
-    apply list_eq_dec; apply formula_eq_dec.
+    apply list_eq_dec; apply Formula_dec.eq_dec.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -1034,7 +1034,7 @@ induction pi using (ll_nested_ind P); intros l1' l2' Heq ; subst.
     apply Forall_Type_cons...
     destruct (In_Forall_Type_elt _ _ _ _ PL).
     refine (Dependent_Forall_Type_forall _ _ _ _ _ _ X i _ _ eq_refl).
-    apply list_eq_dec; apply formula_eq_dec.
+    apply list_eq_dec; apply Formula_dec.eq_dec.
 - destruct l1' ; inversion Heq ; subst.
   + list_simpl...
   + destruct l1' ; inversion H1.
@@ -1136,7 +1136,7 @@ induction pi using (ll_nested_ind P) ; intros A' l1' l2' Heq ; subst.
     apply Forall_Type_cons...
     destruct (In_Forall_Type_elt _ _ _ _ PL).
     refine (Dependent_Forall_Type_forall _ _ _ _ _ _ X i _ _ _ eq_refl).
-    apply list_eq_dec; apply formula_eq_dec.
+    apply list_eq_dec; apply Formula_dec.eq_dec.
 - destruct l1' ; inversion Heq ; subst.
   destruct l1' ; inversion H1.
 - destruct l1' ; inversion Heq ; subst.
@@ -1349,7 +1349,7 @@ intros Hgax l1 pi ; induction pi using (ll_nested_ind P) ; intros l2' HF ;
     intros l' Hin.
     destruct @Forall2_Type_in_r with (list formula) (list formula) L L' l' (fun x y => Forall2_Type munit_smp x y) as (l & Hinl & Rll')...
     apply (In_Forall_Type_in _ _ _ PL) in Hinl as (pi' & Hinl).
-    refine (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ PL X Hinl _ Rll').
+    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hinl _ Rll').
 - inversion HF ; subst.
   inversion H1 ; inversion H3 ; subst.
   constructor.
@@ -1489,8 +1489,8 @@ induction pi using (ll_nested_ind P) ; simpl ; intros Hgax ;
     * inversion Hin.
       -- subst.
          inversion X.
-         apply inj_pair2_eq_dec in H ; [ | apply list_eq_dec; apply formula_eq_dec].
-         apply inj_pair2_eq_dec in H3 ; [ | apply list_eq_dec ; apply list_eq_dec; apply formula_eq_dec].
+         apply inj_pair2_eq_dec in H ; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
+         apply inj_pair2_eq_dec in H3 ; [ | apply list_eq_dec ; apply list_eq_dec; apply Formula_dec.eq_dec].
          subst.
          apply X0.
          destruct @Forall_Type_app_inv with (projT1 (pgax P)) (fun a : projT1 (pgax P) => ll Q (projT2 (pgax P) a)) (gax_elts p) ((fix
@@ -1503,8 +1503,8 @@ induction pi using (ll_nested_ind P) ; simpl ; intros Hgax ;
                    gax_elts Pl ++ gax_elts_Forall P L0 PL0
                end) P l0 PL)...
       -- inversion X.
-         apply inj_pair2_eq_dec in H ; [ | apply list_eq_dec; apply formula_eq_dec].
-         apply inj_pair2_eq_dec in H3 ; [ | apply list_eq_dec ; apply list_eq_dec; apply formula_eq_dec].
+         apply inj_pair2_eq_dec in H ; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
+         apply inj_pair2_eq_dec in H3 ; [ | apply list_eq_dec ; apply list_eq_dec; apply Formula_dec.eq_dec].
          subst.
          apply IHPL...
          destruct @Forall_Type_app_inv with (projT1 (pgax P)) (fun a : projT1 (pgax P) => ll Q (projT2 (pgax P) a)) (gax_elts p) ((fix
@@ -1622,7 +1622,7 @@ induction pi using (ll_nested_ind P); try (now constructor).
       intros l' Hin.
       apply in_Type_map_inv in Hin as (l1 & (eq & Hin)).
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pil1 & Hin).
-      apply (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ _ X) in Hin as pi.
+      apply (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ _ X) in Hin as pi.
       rewrite<- eq.
       apply ex_r with (l1 ++ map wn l0)...
       PCperm_Type_solve.
@@ -1631,7 +1631,7 @@ induction pi using (ll_nested_ind P); try (now constructor).
     intros l' Hin.
     apply in_Type_map_inv in Hin as (l1 & (eq & Hin)).
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pil1 & Hin).
-    apply (Dependent_Forall_Type_forall (list_eq_dec formula_eq_dec) _ _ _ _ _ X) in Hin as pi.
+    apply (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ _ X) in Hin as pi.
     rewrite<- eq...
 - eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
   apply wk_list_r.
