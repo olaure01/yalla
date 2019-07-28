@@ -1,11 +1,10 @@
 (* bbb library for yalla *)
 
-(* output in Type *)
-
 
 (** * Study of Linear Logic enriched with [bot = oc bot] *)
 
 Require Import Arith_base.
+Require Import Eqdep_dec.
 
 Require Import List_more.
 Require Import List_Type_more.
@@ -13,7 +12,6 @@ Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 Require Import Dependent_Forall_Type.
-Require Import Eqdep_dec.
 
 Require Import ll_fragments.
 

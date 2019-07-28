@@ -2,6 +2,10 @@
 
 (** * Properties relying on cut admissibility *)
 
+Require Import EqdepFacts.
+Require Import Eqdep_dec.
+Require Import Lia.
+
 Require Import Bool_more.
 Require Import List_more.
 Require Import List_Type_more.
@@ -10,9 +14,6 @@ Require Import CyclicPerm_Type.
 Require Import genperm_Type.
 Require Import Dependent_Forall_Type.
 Require Import flat_map_Type_more.
-Require Import EqdepFacts.
-Require Import Eqdep_dec.
-Require Import Lia.
 
 Require Export ll_cut.
 

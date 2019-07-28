@@ -1,10 +1,10 @@
 (* Parameter definitions for yalla library *)
-(* v 1.1   Olivier Laurent *)
 
-Require Import Injective.
 Require Import NPeano.
 Require Import EqNat.
+Require Import Equalities.
 
+Require Import Injective.
 
 (* We provide a possible value for parameters of the library
 as a consistency guarantee *)
@@ -18,9 +18,9 @@ Definition TAtom : Set := nat. (* tl.v *)
 Definition ateq : Atom -> Atom -> bool := beq_nat. (* subs.v *)
 Definition iateq : IAtom -> IAtom -> bool := fun x y => (* isubs.v & tl.v *)
   match x , y with
-  | None , None => true
+  | None, None => true
   | Some n, Some m => beq_nat n m
-  | _ , _ => false
+  | _, _ => false
   end.
 
 Definition a2n : Atom -> nat := id. (* fmformulas.v & nn.v *)

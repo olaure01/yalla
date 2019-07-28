@@ -1,5 +1,4 @@
 (* formulas library for yalla *)
-(* v 1.0   Olivier Laurent *)
 
 
 (** * Linear Logic formulas *)
@@ -7,11 +6,11 @@
 Require Import RelationClasses.
 Require Import List.
 Require Import Lia.
+Require Import EqNat.
+Require Import Equalities.
 
 Require Import Injective.
 Require Import Bool_more.
-Require Import EqNat.
-Require Import Peano_dec.
 
 Require yalla_ax.
 
@@ -36,35 +35,48 @@ Inductive formula : Set :=
 | wn : formula -> formula.
 
 
-(** n-aire operators *)
-
-Fixpoint wn_n n A :=
-  match n with
-  | 0 => A
-  | S n => wn (wn_n n A)
-  end.
-
-Lemma wn_n_wn : forall n A,
-    wn_n n (wn A) = wn_n (S n) A.
-Proof with try reflexivity.
-  intros n A.
-  induction n...
-  simpl in *; rewrite IHn...
-Qed.
+(** n-ary operators *)
 
 Fixpoint tens_n n A :=
-  match n with
-  | 0 => one
-  | 1 => A
-  | S n => tens (tens_n n A) A
-  end.
+match n with
+| 0 => one
+| 1 => A
+| S n => tens (tens_n n A) A
+end.
 
 Fixpoint parr_n n A :=
-  match n with
-  | 0 => bot
-  | 1 => A
-  | S n => parr A (parr_n n A)
-  end.
+match n with
+| 0 => bot
+| 1 => A
+| S n => parr A (parr_n n A)
+end.
+
+Fixpoint wn_n n A :=
+match n with
+| 0 => A
+| S n => wn (wn_n n A)
+end.
+
+Lemma wn_n_wn : forall n A, wn_n n (wn A) = wn_n (S n) A.
+Proof with try reflexivity.
+intros n A.
+induction n...
+simpl in *; rewrite IHn...
+Qed.
+
+Fixpoint oc_n n A :=
+match n with
+| 0 => A
+| S n => oc (oc_n n A)
+end.
+
+Lemma oc_n_oc : forall n A, oc_n n (oc A) = oc_n (S n) A.
+Proof with try reflexivity.
+intros n A.
+induction n...
+simpl in *; rewrite IHn...
+Qed.
+
 
 (** Orthogonal / dual of a [formula] *)
 
@@ -97,11 +109,9 @@ Lemma codual : forall A B, dual A = B <-> A = dual B.
 Proof.
 intros A B ; split ; intro H.
 - rewrite <- bidual at 1.
-  rewrite H.
-  reflexivity.
+  rewrite H; reflexivity.
 - rewrite <- bidual.
-  rewrite H.
-  reflexivity.
+  rewrite H; reflexivity.
 Qed.
 
 Lemma dual_inj : injective dual.
@@ -109,28 +119,36 @@ Proof.
 intros A B H.
 rewrite <- (bidual A).
 rewrite <- (bidual B).
-rewrite H.
-reflexivity.
+rewrite H; reflexivity.
 Qed.
 
 Lemma dual_tens_n : forall n A, dual (tens_n n A) = parr_n n (dual A).
 Proof with try reflexivity.
-  induction n; intro A...
-  destruct n...
-  simpl; change (match n with
-                      | 0 => A
-                      | S _ => tens (tens_n n A) A
-                 end) with (tens_n (S n) A).
-  rewrite IHn...
+induction n; intro A...
+destruct n...
+simpl in *; rewrite <- IHn...
 Qed.
 
 Lemma dual_parr_n : forall n A, dual (parr_n n A) = tens_n n (dual A).
 Proof with try reflexivity.
-  intros n A.
-  replace A with (dual (dual A)) at 1 by apply bidual.
-  rewrite<- dual_tens_n.
-  rewrite bidual...
-Qed.  
+induction n; intro A...
+destruct n...
+simpl in *; rewrite <- IHn...
+Qed.
+
+Lemma dual_wn_n : forall n A, dual (wn_n n A) = oc_n n (dual A).
+Proof with try reflexivity.
+induction n; intro A...
+destruct n...
+simpl in *; rewrite IHn...
+Qed.
+
+Lemma dual_oc_n : forall n A, dual (oc_n n A) = wn_n n (dual A).
+Proof with try reflexivity.
+induction n; intro A...
+destruct n...
+simpl in *; rewrite IHn...
+Qed.
 
 (** Size of a [formula] as its number of symbols *)
 Fixpoint fsize A :=
@@ -161,6 +179,18 @@ induction A ; simpl ;
   try rewrite IHA ;
   try reflexivity ;
   try lia.
+Qed.
+
+Lemma fsize_wn_n : forall n A, fsize (wn_n n A) = n + fsize A.
+Proof with try reflexivity.
+induction n; intros A; simpl...
+rewrite <- IHn...
+Qed.
+
+Lemma fsize_oc_n : forall n A, fsize (oc_n n A) = n + fsize A.
+Proof with try reflexivity.
+induction n; intros A; simpl...
+rewrite <- IHn...
 Qed.
 
 Ltac fsize_auto :=
@@ -258,8 +288,7 @@ split.
   apply sub_trans_list.
 Qed.
 
-(* unused
-
+(* Unused
 Require Import genperm_Type.
 
 Lemma sub_perm_list :
@@ -349,6 +378,7 @@ induction l1 ; destruct l2 ; (split ; [ intros Heqb | intros Heq ]) ;
   split ; [ apply eqb_eq_form | apply IHl1 ]...
 Qed.
 
+(* Unused
 (** * In with [bool] output for formula list *)
 Fixpoint inb_form A l :=
 match l with
@@ -356,7 +386,7 @@ match l with
 | cons hd tl => eqb_form A hd || inb_form A tl
 end.
 
-Lemma inb_in_form : forall A l, inb_form A l = true <-> In A l.
+Lemma inb_in_form : forall A l, is_true (inb_form A l) <-> In A l.
 Proof with assumption.
 induction l ; (split ; [ intros Heqb | intros Heq ]).
 - inversion Heqb.
@@ -370,11 +400,11 @@ induction l ; (split ; [ intros Heqb | intros Heq ]).
     apply IHl...
 - inversion Heq ; subst.
   + simpl ; apply orb_true_iff ; left.
-    apply eqb_eq_form.
-    reflexivity.
+    apply eqb_eq_form ; reflexivity.
   + simpl ; apply orb_true_iff ; right.
     apply IHl...
 Qed.
+*)
 
 
 (** ** Sub-formulas in [bool] *)
@@ -393,60 +423,28 @@ match B with
 end.
 
 Lemma subb_sub : forall A B, is_true (subformb A B) <-> subform A B.
-Proof with try assumption.
-intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructor)).
+Proof with try assumption; try reflexivity.
+intros A B ; split ; intros H ; induction B ;
+  try (now (inversion H ; constructor)) ;
+  try (now (destruct A ; simpl in H ; inversion H));
+  try (simpl in H;
+       apply orb_true_elim in H ; destruct H as [ H | H ] ;
+       [ | apply orb_true_elim in H ; destruct H as [ H | H ] ]; 
+       (try (apply eqb_eq_form in H ; subst)) ; now constructor; auto).
 - destruct A ; simpl in H ; try (now inversion H).
   rewrite orb_false_r in H.
   apply yalla_ax.ateq_eq in H ; subst ; constructor.
 - destruct A ; simpl in H ; try (now inversion H).
   rewrite orb_false_r in H.
   apply yalla_ax.ateq_eq in H ; subst ; constructor.
-- destruct A ; simpl in H ; try (now inversion H).
-- destruct A ; simpl in H ; try (now inversion H).
-- simpl in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_form in H ; subst ; constructor.
-  + apply sub_tens_l.
-    apply IHB1...
-  + apply sub_tens_r.
-    apply IHB2...
-- simpl in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_form in H ; subst ; constructor.
-  + apply sub_parr_l.
-    apply IHB1...
-  + apply sub_parr_r.
-    apply IHB2...
-- destruct A ; simpl in H ; try (now inversion H).
-- destruct A ; simpl in H ; try (now inversion H).
-- simpl in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_form in H ; subst ; constructor.
-  + apply sub_plus_l.
-    apply IHB1...
-  + apply sub_plus_r.
-    apply IHB2...
-- simpl in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_form in H ; subst ; constructor.
-  + apply sub_with_l.
-    apply IHB1...
-  + apply sub_with_r.
-    apply IHB2...
 - simpl in H.
   apply orb_true_elim in H ; destruct H as [ H | H ].
   + apply eqb_eq_form in H ; subst ; constructor.
-  + apply sub_oc.
-    apply IHB...
+  + now constructor; auto.
 - simpl in H.
   apply orb_true_elim in H ; destruct H as [ H | H ].
   + apply eqb_eq_form in H ; subst ; constructor.
-  + apply sub_wn.
-    apply IHB...
+  + now constructor; auto.
 - inversion H ; subst.
   simpl ; rewrite (proj2 (yalla_ax.ateq_eq _ _) eq_refl).
   constructor.
@@ -455,80 +453,58 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
   constructor.
 - inversion H ; subst.
   + unfold subformb.
-    replace (eqb_form (tens B1 B2) (tens B1 B2)) with true.
-    * reflexivity.
-    * symmetry ; apply eqb_eq_form.
-      reflexivity.
+    replace (eqb_form (tens B1 B2) (tens B1 B2)) with true
+      by (symmetry ; apply eqb_eq_form; reflexivity)...
   + apply IHB1 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite orb_true_r.
-    reflexivity.
+    rewrite orb_true_r...
   + apply IHB2 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite 2 orb_true_r.
-    reflexivity.
+    rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
-    replace (eqb_form (parr B1 B2) (parr B1 B2)) with true.
-    * reflexivity.
-    * symmetry ; apply eqb_eq_form.
-      reflexivity.
+    replace (eqb_form (parr B1 B2) (parr B1 B2)) with true
+      by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB1 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite orb_true_r.
-    reflexivity.
+    rewrite orb_true_r...
   + apply IHB2 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite 2 orb_true_r.
-    reflexivity.
+    rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
-    replace (eqb_form (aplus B1 B2) (aplus B1 B2)) with true.
-    * reflexivity.
-    * symmetry ; apply eqb_eq_form.
-      reflexivity.
+    replace (eqb_form (aplus B1 B2) (aplus B1 B2)) with true
+      by (symmetry ; apply eqb_eq_form; reflexivity)...
   + apply IHB1 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite orb_true_r.
-    reflexivity.
+    rewrite orb_true_r...
   + apply IHB2 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite 2 orb_true_r.
-    reflexivity.
+    rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
-    replace (eqb_form (awith B1 B2) (awith B1 B2)) with true.
-    * reflexivity.
-    * symmetry ; apply eqb_eq_form.
-      reflexivity.
+    replace (eqb_form (awith B1 B2) (awith B1 B2)) with true
+      by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB1 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite orb_true_r.
-    reflexivity.
+    rewrite orb_true_r...
   + apply IHB2 in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite 2 orb_true_r.
-    reflexivity.
+    rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
-    replace (eqb_form (oc B) (oc B)) with true.
-    * reflexivity.
-    * symmetry ; apply eqb_eq_form.
-      reflexivity.
+    replace (eqb_form (oc B) (oc B)) with true
+      by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite orb_true_r.
-    reflexivity.
+    rewrite orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
-    replace (eqb_form (wn B) (wn B)) with true.
-    * reflexivity.
-    * symmetry ; apply eqb_eq_form.
-      reflexivity.
+    replace (eqb_form (wn B) (wn B)) with true
+      by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB in H2.
     simpl ; rewrite H2 ; simpl.
-    rewrite orb_true_r.
-    reflexivity.
+    rewrite orb_true_r...
 Qed.
 
 Lemma subb_trans : forall A B C,
@@ -635,8 +611,4 @@ Proof with try assumption; try reflexivity.
         inversion H as [eq].
         apply n...
 Qed.
-
-
-
-
 

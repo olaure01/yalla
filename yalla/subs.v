@@ -1,7 +1,5 @@
 (* subs library for yalla *)
 
-(* output in Type *)
-
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 

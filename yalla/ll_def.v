@@ -6,6 +6,10 @@
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
 Require Import CMorphisms.
+Require Import EqdepFacts.
+Require Import Eqdep_dec.
+Require Import PeanoNat.
+Require Import Lia.
 
 Require Import Bool_more.
 Require Import List_more.
@@ -16,10 +20,6 @@ Require Import Permutation_Type_solve.
 Require Import CPermutation_Type_solve.
 Require Import genperm_Type.
 Require Import Dependent_Forall_Type.
-Require Import EqdepFacts.
-Require Import Eqdep_dec.
-Require Import Lia.
-Require Import PeanoNat.
 
 Require Export basic_misc.
 Require Export formulas.
@@ -156,7 +156,7 @@ Proof with try reflexivity.
   intros P.
   nsplit 4...
   split; intro a; split with a...
-Qed.    
+Qed.
 
 (** Same proof fragment as [P] but with value [b] for [pcut]. *)
 Definition cutupd_pfrag P b :=
@@ -1681,3 +1681,4 @@ eapply (ext_wn_param P Q) in pi...
   rewrite P_mix in Q_mix.
   inversion Q_mix.
 Qed.
+

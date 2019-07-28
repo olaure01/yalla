@@ -4,12 +4,13 @@
 (** * Parametric negative translation from [ll] into [ill]. *)
 (** Properties relying on cut admissibility *)
 
+Require Import Eqdep_dec.
+
 Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type.
 Require Import genperm_Type.
 Require Import Dependent_Forall_Type.
-Require Import Eqdep_dec.
 
 Require Import subs.
 Require Import ll_fragments.

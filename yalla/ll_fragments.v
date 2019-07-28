@@ -1,10 +1,10 @@
 (* ll_fragments library for yalla *)
 
 
-(* output in Type *)
-
-
 (** * Definitions of various Linear Logic fragments *)
+
+Require Import PeanoNat.
+Require Import Lia.
 
 Require Import Bool_more.
 Require Import List_more.
@@ -13,8 +13,6 @@ Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
 Require Import Dependent_Forall_Type.
-Require Import PeanoNat.
-Require Import Lia.
 
 Require Export ll_prop.
 Require Import subs.
@@ -36,8 +34,8 @@ Proof with try assumption.
       apply bot_r...
 Qed.
 
-(** Provability in [P + mix_n], adding [wn (tens_n n bot)] in [P] and provability i [P + cut + ax : parr_n n bot] are equivalent *)
-    
+(** Provability in [P + mix_n], adding [wn (tens_n n bot)] in [P] and provability in [P + cut + ax : parr_n n bot] are equivalent *)
+
 Lemma ll_to_mix_cut {P} : forall n l , ll P (wn (tens_n n bot) :: l) ->
                       ll (cutupd_pfrag (pmixupd_point_pfrag P n true) true) l.
 Proof with try assumption; try reflexivity; try PCperm_Type_solve.
@@ -58,8 +56,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
          ++ apply Forall_Type_nil.
          ++ apply Forall_Type_cons...
             apply one_r.
-    * clear.
-      induction n...
+    * clear; induction n...
       simpl; rewrite IHn...
   + apply stronger_pfrag with P...
     nsplit 4; simpl...
@@ -69,7 +66,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
     * intros n0.
       case_eq (n0 =? n); intros Heq...
       apply leb_true...
-Qed.  
+Qed.
 
 Lemma mix_to_ll {P} : pperm P = true -> forall n bn l,
   ll (pmixupd_point_pfrag P n bn) l -> ll P (wn (tens_n n bot) :: l).

@@ -4,6 +4,8 @@
 
 
 Require Import Arith_base.
+Require Import Eqdep_dec.
+Require Import Lia.
 
 Require Import Injective.
 Require Import List_more.
@@ -13,8 +15,6 @@ Require Import genperm_Type.
 Require Import wf_nat_more.
 Require Import flat_map_Type_more.
 Require Import Dependent_Forall_Type.
-Require Import Eqdep_dec.
-Require Import Lia.
 
 Require Export ll_def.
 
