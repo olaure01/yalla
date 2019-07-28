@@ -24,11 +24,15 @@ Require Import Dependent_Forall_Type.
 Require Export basic_misc.
 Require Export formulas.
 
+Notation Dependent_Forall_Type_forall_formula :=
+  (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec)).
 
 (** ** Fragments for proofs *)
 
 Definition NoAxioms := (existT (fun x => x -> list formula) _ Empty_fun).
-Definition nopmix (n : nat) := false.
+
+Definition pmix_none (n : nat) := false.
+Definition pmix_all (n : nat) := true.
 Definition pmix0 n :=
   match n with
   | 0 => true
@@ -46,13 +50,10 @@ Definition pmix02 n :=
   | _ => false
   end.
 
-Definition pmix_ge_k k n :=
-  if (k <=? n) then true else false.
+Definition pmix_ge_k k n := if (k <=? n) then true else false.
 
-Definition pmix_le_k k n :=
-  if (n <=? k) then true else false.
+Definition pmix_le_k k n := if (n <=? k) then true else false.
 
-Definition allpmix (n : nat) := true.
 
 (** Parameters for [ll] provability:
  - [pcut], [pmix0] and [pmix2] determine whether the corresponding rule is in the system or not;
@@ -89,9 +90,7 @@ Proof with myeeasy; try assumption.
     destruct (Ha2 b) as [c Heq2].
     exists c ; etransitivity...
   - intros n.
-    apply leb_trans with (pmix Q n).
-    + apply Hm1.
-    + apply Hm2.
+    apply leb_trans with (pmix Q n); [ apply Hm1 | apply Hm2 ].
 Qed.
 
 Instance le_pfrag_po : PreOrder le_pfrag.
@@ -107,7 +106,8 @@ Qed.
 (* Unused
 Definition eq_pfrag P Q :=
   prod (pcut P = pcut Q)
-       (prod (prod (forall a, { b | projT2 (pgax P) a = projT2 (pgax Q) b}) (forall b, {a | projT2 (pgax P) a = projT2 (pgax Q) b}))
+       (prod (prod (forall a, { b | projT2 (pgax P) a = projT2 (pgax Q) b})
+                   (forall b, {a | projT2 (pgax P) a = projT2 (pgax Q) b}))
        (prod (forall n, pmix P n = pmix Q n)
              (pperm P = pperm Q))).
 
@@ -161,8 +161,7 @@ Qed.
 *)
 
 (** Same proof fragment as [P] but with value [b] for [pcut]. *)
-Definition cutupd_pfrag P b :=
-  mk_pfrag b (pgax P) (pmix P) (pperm P).
+Definition cutupd_pfrag P b := mk_pfrag b (pgax P) (pmix P) (pperm P).
 
 Lemma cutupd_pfrag_true : forall P, le_pfrag P (cutupd_pfrag P true).
 Proof.
@@ -173,8 +172,7 @@ nsplit 4 ; try reflexivity.
 Qed.
 
 (** Same proof fragment as [P] but with value [G] for [pgax]. *)
-Definition axupd_pfrag P G :=
-  mk_pfrag (pcut P) G (pmix P) (pperm P).
+Definition axupd_pfrag P G := mk_pfrag (pcut P) G (pmix P) (pperm P).
 
 (** Same proof fragment as [P] but without the [cut] rule. *)
 Definition cutrm_pfrag P := cutupd_pfrag P false.
@@ -189,23 +187,22 @@ Qed.
 
 
 (** Same proof fragment as [P] but with a different pmix *)
-Definition pmixupd_pfrag P pmix :=
-  mk_pfrag (pcut P) (pgax P) pmix (pperm P).
+Definition pmixupd_pfrag P pmix := mk_pfrag (pcut P) (pgax P) pmix (pperm P).
 
 Definition pmixupd_point_pfrag P n b :=
   mk_pfrag (pcut P) (pgax P) (fun k => if (k =? n) then b else (pmix P k)) (pperm P).
 
 Lemma pmixupd_point_comm P : forall n1 n2 b1 b2,
     n1 <> n2 ->
-    forall k, pmix (pmixupd_point_pfrag (pmixupd_point_pfrag P n1 b1) n2 b2) k = pmix (pmixupd_point_pfrag (pmixupd_point_pfrag P n2 b2) n1 b1) k.
+    forall k, pmix (pmixupd_point_pfrag (pmixupd_point_pfrag P n1 b1) n2 b2) k
+            = pmix (pmixupd_point_pfrag (pmixupd_point_pfrag P n2 b2) n1 b1) k.
 Proof with try reflexivity.
   intros n1 n2 b1 b2 Hneq k.
   case_eq (k =? n1) ; intros Heq1; case_eq (k =? n2); intros Heq2; simpl; rewrite Heq1; rewrite Heq2...
   exfalso.
   apply Hneq.
   transitivity k.
-  - symmetry.
-    apply EqNat.beq_nat_true; apply Heq1.
+  - symmetry; apply EqNat.beq_nat_true; apply Heq1.
   - apply EqNat.beq_nat_true; apply Heq2.
 Qed.
 
@@ -241,7 +238,7 @@ Inductive ll P : list formula -> Type :=
 | ex_r : forall l1 l2, ll P l1 -> PCperm_Type (pperm P) l1 l2 -> ll P l2
 | ex_wn_r : forall l1 lw lw' l2, ll P (l1 ++ map wn lw ++ l2) ->
                Permutation_Type lw lw' -> ll P (l1 ++ map wn lw' ++ l2)
-| mix_r : forall L, pmix P (length L) = true ->
+| mix_r : forall L, is_true (pmix P (length L)) ->
                     Forall_Type (ll P) L ->
                     ll P (concat L)
 | one_r : ll P (one :: nil)
@@ -262,7 +259,7 @@ Inductive ll P : list formula -> Type :=
     ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1)
 | gax_r : forall a, ll P (projT2 (pgax P) a).
 
-Definition mix'_r P L : pmix P (length L) = true ->
+Definition mix'_r P L : is_true (pmix P (length L)) ->
    ll P (flat_map (@projT1 _ (ll P)) L).
 Proof.
 intros Hmix.
@@ -273,6 +270,7 @@ apply mix_r.
 Defined.
 
 Section ll_ind.
+
   Variable P : pfrag.
 
   Definition Forall_Proofs (Pred : forall l, ll P l -> Type) {L} (piL : Forall_Type (ll P) L) := Dependent_Forall_Type Pred piL.
@@ -282,19 +280,19 @@ Section ll_ind.
       Forall_Type (fun x => Pred (projT1 x) (projT2 x)) (Forall_to_list piL).
   Proof with try assumption.
     intros Pred L piL PpiL.
-    induction PpiL.
-    - apply Forall_Type_nil.
-    - apply Forall_Type_cons...
-  Qed. 
+    induction PpiL; now constructor.
+  Qed.
 
   Fixpoint ll_nested_ind {l} (pi : ll P l): forall (Pred : forall l, ll P l -> Type),
            (forall X, Pred (covar X :: var X :: nil) (ax_r P X)) ->
            (forall l1 l2 pi p, Pred l1 pi -> Pred l2 (ex_r P l1 l2 pi p)) ->
-           (forall l1 lw lw' l2 pi p, Pred (l1 ++ map wn lw ++ l2) pi -> Pred (l1 ++ map wn lw' ++ l2) (ex_wn_r P l1 lw lw' l2 pi p)) ->
+           (forall l1 lw lw' l2 pi p, Pred (l1 ++ map wn lw ++ l2) pi ->
+                     Pred (l1 ++ map wn lw' ++ l2) (ex_wn_r P l1 lw lw' l2 pi p)) ->
            (forall L eqpmix PL, Forall_Proofs Pred PL -> Pred (concat L) (mix_r P L eqpmix PL)) ->
            (Pred (one :: nil) (one_r P)) ->
            (forall l pi, Pred l pi -> Pred (bot :: l) (bot_r P l pi)) ->
-           (forall A B l1 l2 pi1 pi2, Pred (A :: l1) pi1 -> Pred (B :: l2) pi2 -> Pred (tens A B :: l2 ++ l1) (tens_r P A B l1 l2 pi1 pi2)) ->
+           (forall A B l1 l2 pi1 pi2, Pred (A :: l1) pi1 -> Pred (B :: l2) pi2 ->
+                     Pred (tens A B :: l2 ++ l1) (tens_r P A B l1 l2 pi1 pi2)) ->
            (forall A B l pi, Pred (A :: B :: l) pi -> Pred (parr A B :: l) (parr_r P A B l pi)) ->
            (forall l, Pred (top :: l) (top_r P l)) ->
            (forall A B l pi, Pred (A :: l) pi -> Pred (aplus A B :: l) (plus_r1 P A B l pi)) ->
@@ -304,21 +302,27 @@ Section ll_ind.
            (forall A l pi, Pred (A :: l) pi -> Pred (wn A :: l) (de_r P A l pi)) ->
            (forall A l pi, Pred l pi -> Pred (wn A :: l) (wk_r P A l pi)) ->
            (forall A l pi, Pred (wn A :: wn A :: l) pi -> Pred (wn A :: l) (co_r P A l pi)) ->
-           (forall f A l1 l2 pi1 pi2, Pred (dual A :: l1) pi1 -> Pred (A :: l2) pi2 -> Pred (l2 ++ l1) (@cut_r P f A l1 l2 pi1 pi2)) ->
+           (forall f A l1 l2 pi1 pi2, Pred (dual A :: l1) pi1 -> Pred (A :: l2) pi2 ->
+                     Pred (l2 ++ l1) (@cut_r P f A l1 l2 pi1 pi2)) ->
            (forall a, Pred (projT2 (pgax P) a) (gax_r P a)) ->
            Pred l pi
     :=
-      fun Pred ax_case ex_case ex_wn_case mix_case one_case bot_case tens_case parr_case top_case plus_case1 plus_case2 with_case oc_case de_case wk_case co_case cut_case gax_case => let rec_call {l : list formula} (pi : ll P l) := (ll_nested_ind pi Pred ax_case ex_case ex_wn_case mix_case one_case bot_case tens_case parr_case top_case plus_case1 plus_case2 with_case oc_case de_case wk_case co_case cut_case gax_case) in
+      fun Pred ax_case ex_case ex_wn_case mix_case one_case bot_case tens_case parr_case
+               top_case plus_case1 plus_case2 with_case oc_case de_case wk_case co_case cut_case gax_case =>
+      let rec_call {l : list formula} (pi : ll P l) :=
+        (ll_nested_ind pi Pred ax_case ex_case ex_wn_case mix_case one_case bot_case tens_case parr_case
+                               top_case plus_case1 plus_case2 with_case oc_case de_case wk_case co_case cut_case gax_case) in
     match pi with
     | ax_r _ X => ax_case X
     | ex_r _ l1 l2 pi p => ex_case l1 l2 pi p (rec_call pi)
     | ex_wn_r _ l1 lw lw' l2 pi p => ex_wn_case l1 lw lw' l2 pi p (rec_call pi)
     | mix_r _ L eqpmix PL => mix_case L eqpmix PL (
-                                        (fix ll_nested_ind_aux (L : list (list formula)) (PL : Forall_Type (ll P) L) : Forall_Proofs Pred PL :=
-                                           match PL with
-                                           | Forall_Type_nil _ => Dependent_Forall_Type_nil Pred
-                                           | @Forall_Type_cons _ _ l L Pil PiL => Dependent_Forall_Type_cons Pred l Pil PiL (rec_call Pil) (ll_nested_ind_aux L PiL)
-                                           end) L PL)
+                (fix ll_nested_ind_aux (L : list (list formula)) (PL : Forall_Type (ll P) L) : Forall_Proofs Pred PL :=
+                   match PL with
+                   | Forall_Type_nil _ => Dependent_Forall_Type_nil Pred
+                   | @Forall_Type_cons _ _ l L Pil PiL => Dependent_Forall_Type_cons Pred l Pil PiL (rec_call Pil)
+                                                            (ll_nested_ind_aux L PiL)
+                   end) L PL)
     | one_r _ => one_case
     | bot_r _ l pi => bot_case l pi (rec_call pi)
     | tens_r _ A B l1 l2 pi1 pi2 => tens_case A B l1 l2 pi1 pi2 (rec_call pi1) (rec_call pi2)
@@ -334,75 +338,63 @@ Section ll_ind.
     | @cut_r _ f A l1 l2 pi1 pi2 => cut_case f A l1 l2 pi1 pi2 (rec_call pi1) (rec_call pi2)
     | gax_r _ a => gax_case a
     end.
-  
+
   Import EqNotations.
-  
-  Lemma ll_nested_ind' {l} (pi : ll P l): forall (Pred : forall l, ll 
-P l -> Type),
+
+  Lemma ll_nested_ind' {l} (pi : ll P l): forall (Pred : forall l, ll P l -> Type),
             (forall X, Pred (covar X :: var X :: nil) (ax_r P X)) ->
-            (forall l1 l2 pi p, Pred l1 pi -> Pred l2 (ex_r P l1 l2 pi 
-p)) ->
-            (forall l1 lw lw' l2 pi p, Pred (l1 ++ map wn lw ++ l2) pi 
--> Pred (l1 ++ map wn lw' ++ l2) (ex_wn_r P l1 lw lw' l2 pi p)) ->
-            (forall L eqpmix, Forall_Type (fun x => Pred (projT1 x) 
-(projT2 x)) L -> Pred _ (mix'_r P L eqpmix)) ->
+            (forall l1 l2 pi p, Pred l1 pi -> Pred l2 (ex_r P l1 l2 pi p)) ->
+            (forall l1 lw lw' l2 pi p, Pred (l1 ++ map wn lw ++ l2) pi ->
+               Pred (l1 ++ map wn lw' ++ l2) (ex_wn_r P l1 lw lw' l2 pi p)) ->
+            (forall L eqpmix, Forall_Type (fun x => Pred (projT1 x) (projT2 x)) L ->
+               Pred _ (mix'_r P L eqpmix)) ->
             (Pred (one :: nil) (one_r P)) ->
             (forall l pi, Pred l pi -> Pred (bot :: l) (bot_r P l pi)) ->
-            (forall A B l1 l2 pi1 pi2, Pred (A :: l1) pi1 -> Pred (B :: 
-l2) pi2 -> Pred (tens A B :: l2 ++ l1) (tens_r P A B l1 l2 pi1 pi2)) ->
-            (forall A B l pi, Pred (A :: B :: l) pi -> Pred (parr A B :: 
-l) (parr_r P A B l pi)) ->
+            (forall A B l1 l2 pi1 pi2, Pred (A :: l1) pi1 -> Pred (B :: l2) pi2 ->
+               Pred (tens A B :: l2 ++ l1) (tens_r P A B l1 l2 pi1 pi2)) ->
+            (forall A B l pi, Pred (A :: B :: l) pi -> Pred (parr A B :: l) (parr_r P A B l pi)) ->
             (forall l, Pred (top :: l) (top_r P l)) ->
-            (forall A B l pi, Pred (A :: l) pi -> Pred (aplus A B :: l) 
-(plus_r1 P A B l pi)) ->
-            (forall A B l pi, Pred (A :: l) pi -> Pred (aplus B A :: l) 
-(plus_r2 P A B l pi)) ->
-            (forall A B l pi1 pi2, Pred (A :: l) pi1 -> Pred (B :: l) 
-pi2 -> Pred (awith A B :: l) (with_r P A B l pi1 pi2)) ->
-            (forall A l pi, Pred (A :: map wn l) pi -> Pred (oc A :: map 
-wn l) (oc_r P A l pi)) ->
-            (forall A l pi, Pred (A :: l) pi -> Pred (wn A :: l) (de_r P 
-A l pi)) ->
-            (forall A l pi, Pred l pi -> Pred (wn A :: l) (wk_r P A l 
-pi)) ->
-            (forall A l pi, Pred (wn A :: wn A :: l) pi -> Pred (wn A :: 
-l) (co_r P A l pi)) ->
-            (forall f A l1 l2 pi1 pi2, Pred (dual A :: l1) pi1 -> Pred 
-(A :: l2) pi2 -> Pred (l2 ++ l1) (@cut_r P f A l1 l2 pi1 pi2)) ->
+            (forall A B l pi, Pred (A :: l) pi -> Pred (aplus A B :: l) (plus_r1 P A B l pi)) ->
+            (forall A B l pi, Pred (A :: l) pi -> Pred (aplus B A :: l) (plus_r2 P A B l pi)) ->
+            (forall A B l pi1 pi2, Pred (A :: l) pi1 -> Pred (B :: l) pi2 ->
+               Pred (awith A B :: l) (with_r P A B l pi1 pi2)) ->
+            (forall A l pi, Pred (A :: map wn l) pi -> Pred (oc A :: map wn l) (oc_r P A l pi)) ->
+            (forall A l pi, Pred (A :: l) pi -> Pred (wn A :: l) (de_r P A l pi)) ->
+            (forall A l pi, Pred l pi -> Pred (wn A :: l) (wk_r P A l pi)) ->
+            (forall A l pi, Pred (wn A :: wn A :: l) pi -> Pred (wn A :: l) (co_r P A l pi)) ->
+            (forall f A l1 l2 pi1 pi2, Pred (dual A :: l1) pi1 -> Pred (A :: l2) pi2 ->
+              Pred (l2 ++ l1) (@cut_r P f A l1 l2 pi1 pi2)) ->
             (forall a, Pred (projT2 (pgax P) a) (gax_r P a)) ->
             Pred l pi.
-
   Proof with try eassumption.
     intros.
     apply ll_nested_ind...
     intros L e f HP.
-    enough ( Pred (flat_map (projT1 (P:=ll P)) (Forall_to_list f))
-                  (rew <- [fun l : list formula => ll P l] flat_map_concat_map 
-                       (projT1 (P:=ll P)) (Forall_to_list f) in
+    enough (Pred (flat_map (projT1 (P:=ll P)) (Forall_to_list f))
+                  (rew <- [fun l => ll P l] flat_map_concat_map (projT1 (P:=ll P)) (Forall_to_list f) in
                       mix_r P (map (projT1 (P:=ll P)) (Forall_to_list f))
-                            (eq_ind_r (fun n : nat => pmix P n = true)
-                                      (eq_ind_r (fun n : nat => pmix P n = true) e 
-                                                (Forall_to_list_length L f))
-                                      (map_length (projT1 (P:=ll P)) (Forall_to_list f))) 
+                            (eq_ind_r (fun n => pmix P n = true)
+                               (eq_ind_r (fun n => pmix P n = true) e (Forall_to_list_length L f))
+                               (map_length (projT1 (P:=ll P)) (Forall_to_list f)))
                             (list_to_Forall (Forall_to_list f)))) as HL.
     { clear - HL.
-      rewrite (flat_map_concat_map (@projT1 _ (ll P)) (Forall_to_list 
-                                                         f)) in HL ;
+      rewrite (flat_map_concat_map (@projT1 _ (ll P)) (Forall_to_list f)) in HL ;
         unfold eq_rect_r in HL ; simpl in HL.
       rewrite <- (Forall_to_list_to_Forall _ f).
       replace e with
           (rew [fun n : nat => pmix P n = true]
                f_equal (length (A:=list formula))
                (Forall_to_list_support L f) in
-              eq_ind_r (fun n : nat => pmix P n = true)
-                       (eq_ind_r (fun n : nat => pmix P n = true) e
-                                 (Forall_to_list_length L f)) (map_length (projT1 
-                                                                             (P:=ll P)) (Forall_to_list f))) by apply UIP_bool.
+              eq_ind_r (fun n => pmix P n = true)
+                       (eq_ind_r (fun n => pmix P n = true) e
+                                 (Forall_to_list_length L f))
+                       (map_length (projT1 (P:=ll P)) (Forall_to_list f))) by apply UIP_bool.
       rewrite <- (Forall_to_list_support L f) ; simpl ; assumption. }
     apply X2.
     clear e.
     induction HP ; simpl ; constructor...
   Qed.
+
 End ll_ind.
 
 Instance ll_perm {P} : Proper ((@PCperm_Type _ (pperm P)) ==> Basics.arrow) (ll P).
@@ -442,7 +434,7 @@ Proof.
 Qed.
 
 Lemma psize_mix P : forall L eq FL,
-    psize (mix_r P L eq FL) = S (Forall_Type_sum (ll P) (fun l (pi : ll P l) => psize pi) L FL).
+    psize (mix_r P L eq FL) = S (Forall_Type_sum _ (fun _ pi => psize pi) L FL).
 Proof with try assumption; try reflexivity.
   intros L eq FL.
   simpl.
@@ -453,19 +445,13 @@ Proof with try assumption; try reflexivity.
 Qed.
 
 Lemma psize_inf_mix P : forall L eq FL l pi,
-    In_Forall_Type (ll P) l pi FL ->
-    psize pi < psize (mix_r P L eq FL).
-Proof with try assumption.
-  intros L eq FL l pi Hin.
-  simpl.
-  destruct eq.
+  In_Forall_Type (ll P) l pi FL -> psize pi < psize (mix_r P L eq FL).
+Proof with try lia.
+  intros L eq FL l pi Hin ; simpl ; clear eq.
   induction FL ; inversion Hin.
-  - inversion H.
-    subst.
-    apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
-    lia.
-  - specialize (IHFL X).
-    lia.
+  - inversion H; subst.
+    apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec, Formula_dec.eq_dec]...
+  - specialize (IHFL X)...
 Qed.
 
 (** List of the elements of [pgax P] used in [pi] *)
@@ -495,27 +481,20 @@ match pi with
 | gax_r _ a => a :: nil
 end.
 
-Lemma gax_elts_mix {P} : forall L eq FL l pi,
-    In_Forall_Type (ll P) l pi FL ->
-    (forall ax, In_Type ax (gax_elts pi) -> In_Type ax (gax_elts (mix_r P L eq FL))).
+Lemma gax_elts_mix {P} : forall L eq FL l pi, In_Forall_Type (ll P) l pi FL ->
+  forall ax, In_Type ax (gax_elts pi) -> In_Type ax (gax_elts (mix_r P L eq FL)).
 Proof with try assumption;try reflexivity.
-  intros L eq FL.
-  simpl.
-  destruct eq.
-  induction FL; intros l' pi Hin.
-  - inversion Hin.
-  - inversion Hin.
-    + inversion H.
-      subst.
-      apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
-      subst.
-      intros ax Hin_ax.
-      apply in_Type_or_app.
-      left...
-    + intros ax Hin_ax.
-      apply in_Type_or_app.
-      right.
-      apply IHFL with l' pi...
+  intros L eq FL; simpl; clear eq.
+  induction FL; intros l' pi Hin; inversion Hin.
+  - inversion H; subst.
+    apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec, Formula_dec.eq_dec]; subst.
+    intros ax Hin_ax.
+    apply in_Type_or_app.
+    left...
+  - intros ax Hin_ax.
+    apply in_Type_or_app.
+    right.
+    apply IHFL with l' pi...
 Qed.
 
 (* Unused
@@ -688,53 +667,37 @@ Proof with try assumption.
   apply ex_r with ((A :: l ++ a) ++ const_list (length L) A ++ concat L) ; [ | rewrite f; simpl; perm_Type_solve]...
   apply IHL...
   eapply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L) ; [ | rewrite f; simpl; perm_Type_solve]...
-Qed.   
+Qed.
 
 
 (** n-ary versions of tens and parr rules *)
-Lemma tens_n_r P : forall L A,
-    Forall_Type (ll P) (map (cons A) L) ->
-    ll P (tens_n (length L) A :: concat L).
+Lemma tens_n_r P : forall L A, Forall_Type (ll P) (map (cons A) L) ->
+  ll P (tens_n (length L) A :: concat L).
 Proof with try assumption.
-  induction L; intros A FL.
-  - apply one_r.
-  - destruct L.
-    + simpl; rewrite app_nil_r.
-      inversion FL...
-    + simpl.
-      inversion FL; subst.
-      apply tens_r...
-      change (match length L with
-     | 0 => A
-     | S _ => tens (tens_n (length L) A) A
-              end) with (tens_n (S (length L)) A).
-      change (tens_n (S (length L)) A :: l ++ concat L) with (tens_n (S (length L)) A :: concat (l :: L)).
-      apply IHL...
+induction L; intros A FL.
+- apply one_r.
+- destruct L; list_simpl; inversion FL...
+  subst.
+  apply tens_r...
+  apply IHL...
 Qed.
 
-Lemma parr_n_r P : forall l n A,
-    ll P (const_list n A ++ l) ->
-    ll P (parr_n n A :: l).
+Lemma parr_n_r P : forall l n A, ll P (const_list n A ++ l) ->
+  ll P (parr_n n A :: l).
 Proof with try assumption.
   intros l n; revert l.
   induction n; intros l A pi.
   - apply bot_r...
   - destruct n...
-    simpl.
-    change (match n with
-               | 0 => A
-               | S _ => parr A (parr_n n A)
-            end) with (parr_n (S n) A).
     apply parr_r.
     apply ex_r with (parr_n (S n) A :: (l ++ (A :: nil))); [ | PCperm_Type_solve].
     apply IHn.
     eapply ex_r ; [apply pi | PCperm_Type_solve].
-Qed.  
+Qed.
 
 (** Permutation on mix *)
-Lemma ex_mix_r {P} : forall L L' (eq : pmix P (length L) = true) (p : Permutation_Type L L'),
-    Forall_Type (ll P) L ->
-    ll P (concat L').
+Lemma ex_mix_r {P} : forall L L' (eq : is_true (pmix P (length L))) (p : Permutation_Type L L'),
+    Forall_Type (ll P) L -> ll P (concat L').
 Proof with try assumption.
   intros L L' eq p FL.
   apply mix_r.
@@ -769,7 +732,6 @@ Ltac destruct_ll H f X l Hl Hr HP FL a :=
                             | f ? ? ? Hl Hr
                             | a ] ; subst
   end.
-
 
 Ltac ll_swap :=
   match goal with
@@ -818,13 +780,14 @@ induction pi using (ll_nested_ind P) ; intros l1' l2' Heq ; subst.
 - apply concat_elt in Heq as ([[[L1 L2] l1] l2] & eqb & eqt & eq); subst.
   apply Dependent_Forall_Type_app_inv in X as ((l1' & Fl1) & (l2' & Fl2)).
   inversion Fl2; subst.
-  replace ((concat L1 ++ l1) ++ l2 ++ concat L2) with (concat (L1 ++ (l1 ++ l2) :: L2)) ; [ |rewrite concat_app; simpl; rewrite 3 app_assoc; reflexivity].
+  replace ((concat L1 ++ l1) ++ l2 ++ concat L2) with (concat (L1 ++ (l1 ++ l2) :: L2)) ;
+    [ | rewrite concat_app; simpl; rewrite 3 app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
   + apply Forall_Type_app...
     apply Forall_Type_cons...
-    apply (X _ _ eq_refl).    
+    apply (X _ _ eq_refl).
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -924,7 +887,8 @@ induction pi using (ll_nested_ind P) ; intros A' B' l1' l2' Heq ; subst.
       rewrite 2 app_assoc.
       apply IHpi ; list_simpl...
 - apply concat_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
-  replace ((concat L1 ++ l1) ++ A' :: B' :: l2 ++ concat L2) with (concat (L1 ++ (l1 ++ A' :: B' :: l2) :: L2)) ; [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
+  replace ((concat L1 ++ l1) ++ A' :: B' :: l2 ++ concat L2) with (concat (L1 ++ (l1 ++ A' :: B' :: l2) :: L2)) ;
+    [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
@@ -933,8 +897,7 @@ induction pi using (ll_nested_ind P) ; intros A' B' l1' l2' Heq ; subst.
     inversion Fl2; subst.
     apply Forall_Type_cons...
     destruct (In_Forall_Type_elt _ _ _ _ PL).
-    refine (Dependent_Forall_Type_forall _ _ _ _ _ _ X i _ _ _ _ eq_refl).
-    apply list_eq_dec; apply Formula_dec.eq_dec.
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ _ X i _ _ _ _ eq_refl).
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -1027,7 +990,8 @@ induction pi using (ll_nested_ind P); intros l1' l2' Heq ; subst.
       rewrite 2 app_assoc.
       apply IHpi ; list_simpl...
 - apply concat_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
-  replace ((concat L1 ++ l1) ++ l0 ++ l2 ++ concat L2) with (concat (L1 ++ (l1 ++ l0 ++ l2) :: L2)) ; [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
+  replace ((concat L1 ++ l1) ++ l0 ++ l2 ++ concat L2) with (concat (L1 ++ (l1 ++ l0 ++ l2) :: L2)) ;
+    [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
@@ -1036,8 +1000,7 @@ induction pi using (ll_nested_ind P); intros l1' l2' Heq ; subst.
     inversion Fl2; subst.
     apply Forall_Type_cons...
     destruct (In_Forall_Type_elt _ _ _ _ PL).
-    refine (Dependent_Forall_Type_forall _ _ _ _ _ _ X i _ _ eq_refl).
-    apply list_eq_dec; apply Formula_dec.eq_dec.
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ _ X i _ _ eq_refl).
 - destruct l1' ; inversion Heq ; subst.
   + list_simpl...
   + destruct l1' ; inversion H1.
@@ -1129,7 +1092,8 @@ induction pi using (ll_nested_ind P) ; intros A' l1' l2' Heq ; subst.
       rewrite 2 app_assoc.
       apply IHpi ; list_simpl...
 - apply concat_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
-  replace ((concat L1 ++ l1) ++ A' :: l2 ++ concat L2) with (concat (L1 ++ (l1 ++ A' :: l2) :: L2)) ; [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
+  replace ((concat L1 ++ l1) ++ A' :: l2 ++ concat L2) with (concat (L1 ++ (l1 ++ A' :: l2) :: L2)) ;
+    [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
@@ -1138,8 +1102,7 @@ induction pi using (ll_nested_ind P) ; intros A' l1' l2' Heq ; subst.
     inversion Fl2; subst.
     apply Forall_Type_cons...
     destruct (In_Forall_Type_elt _ _ _ _ PL).
-    refine (Dependent_Forall_Type_forall _ _ _ _ _ _ X i _ _ _ eq_refl).
-    apply list_eq_dec; apply Formula_dec.eq_dec.
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ _ X i _ _ _ eq_refl).
 - destruct l1' ; inversion Heq ; subst.
   destruct l1' ; inversion H1.
 - destruct l1' ; inversion Heq ; subst.
@@ -1344,15 +1307,16 @@ intros Hgax l1 pi ; induction pi using (ll_nested_ind P) ; intros l2' HF ;
   apply IHpi.
   repeat apply Forall2_Type_app...
 - destruct (@concat_Forall2_Type formula) with formula L l2' munit_smp as [L' eq HF']...
-  rewrite<- eq.
+  rewrite <- eq.
   apply mix_r.
   + replace (length L') with (length L)...
-    apply Forall2_Type_length with (fun x y => Forall2_Type munit_smp x y)...
+    apply Forall2_Type_length with (Forall2_Type munit_smp)...
   + apply forall_Forall_Type.
     intros l' Hin.
-    destruct @Forall2_Type_in_r with (list formula) (list formula) L L' l' (fun x y => Forall2_Type munit_smp x y) as (l & Hinl & Rll')...
+    destruct @Forall2_Type_in_r with (list formula) (list formula) L L' l'
+                                     (Forall2_Type munit_smp) as (l & Hinl & Rll')...
     apply (In_Forall_Type_in _ _ _ PL) in Hinl as (pi' & Hinl).
-    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hinl _ Rll').
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hinl _ Rll').
 - inversion HF ; subst.
   inversion H1 ; inversion H3 ; subst.
   constructor.
@@ -1496,7 +1460,8 @@ induction pi using (ll_nested_ind P) ; simpl ; intros Hgax ;
          apply inj_pair2_eq_dec in H3 ; [ | apply list_eq_dec ; apply list_eq_dec; apply Formula_dec.eq_dec].
          subst.
          apply X0.
-         destruct @Forall_Type_app_inv with (projT1 (pgax P)) (fun a : projT1 (pgax P) => ll Q (projT2 (pgax P) a)) (gax_elts p) ((fix
+         destruct @Forall_Type_app_inv with (projT1 (pgax P))
+           (fun a : projT1 (pgax P) => ll Q (projT2 (pgax P) a)) (gax_elts p) ((fix
              gax_elts_Forall (P : pfrag) (L : list (list formula))
                              (PL : Forall_Type (ll P) L) {struct PL} :
                list (projT1 (pgax P)) :=
@@ -1510,7 +1475,8 @@ induction pi using (ll_nested_ind P) ; simpl ; intros Hgax ;
          apply inj_pair2_eq_dec in H3 ; [ | apply list_eq_dec ; apply list_eq_dec; apply Formula_dec.eq_dec].
          subst.
          apply IHPL...
-         destruct @Forall_Type_app_inv with (projT1 (pgax P)) (fun a : projT1 (pgax P) => ll Q (projT2 (pgax P) a)) (gax_elts p) ((fix
+         destruct @Forall_Type_app_inv with (projT1 (pgax P))
+           (fun a : projT1 (pgax P) => ll Q (projT2 (pgax P) a)) (gax_elts p) ((fix
              gax_elts_Forall (P : pfrag) (L : list (list formula))
                              (PL : Forall_Type (ll P) L) {struct PL} :
                list (projT1 (pgax P)) :=
@@ -1625,8 +1591,8 @@ induction pi using (ll_nested_ind P); try (now constructor).
       intros l' Hin.
       apply in_Type_map_inv in Hin as (l1 & (eq & Hin)).
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pil1 & Hin).
-      apply (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ _ X) in Hin as pi.
-      rewrite<- eq.
+      apply (Dependent_Forall_Type_forall_formula _ _ _ _ _ X) in Hin as pi.
+      rewrite <- eq.
       apply ex_r with (l1 ++ map wn l0)...
       PCperm_Type_solve.
   + apply Hpmix...
@@ -1634,8 +1600,8 @@ induction pi using (ll_nested_ind P); try (now constructor).
     intros l' Hin.
     apply in_Type_map_inv in Hin as (l1 & (eq & Hin)).
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pil1 & Hin).
-    apply (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ _ X) in Hin as pi.
-    rewrite<- eq...
+    apply (Dependent_Forall_Type_forall_formula _ _ _ _ _ X) in Hin as pi.
+    rewrite <- eq...
 - eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
   apply wk_list_r.
   apply one_r.

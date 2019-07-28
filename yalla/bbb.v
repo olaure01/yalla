@@ -171,7 +171,7 @@ induction H using (ll_nested_ind _); try now constructor.
   simpl; rewrite app_nil_r.
   assert (ll_bbb l1) as pi1.
   { destruct (In_Forall_Type_in _ _ _ PL (in_Type_elt l1 (l0 :: nil) nil)) as (pi & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin). }
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin). }
   inversion PL; inversion X1; subst; clear X1 X2 X3.
   apply mix2_bbb_r...
   eapply stronger_pfrag...
@@ -629,11 +629,11 @@ induction pi using (ll_nested_ind _); try now econstructor.
   + assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
     { right; left... }
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   + assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
     { left... }
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
 Qed.
 
 Theorem bb_to_bbb : forall l, llR (oc bot) l -> ll_bbb l.
@@ -860,7 +860,7 @@ induction H ; intro HP ;
                destruct lw' ; inversion Heq2 ; subst.
                symmetry in p ; apply Permutation_Type_nil in p ; subst.
                intuition.
-         ++ repeat (destruct L; inversion e; try now inversion Heql).
+         ++ repeat (destruct L; inversion i; try now inversion Heql).
          ++ rewrite_all H2.
             clear - H.
             remember (tens (parr one one) bot :: nil) as l.
@@ -878,7 +878,7 @@ induction H ; intro HP ;
                    destruct lw' ; inversion Heq2 ; subst.
                    symmetry in p ; apply Permutation_Type_nil in p ; subst.
                    intuition.
-            ** repeat (destruct L; inversion e; try now inversion H0).
+            ** repeat (destruct L; inversion i; try now inversion H0).
             ** apply app_eq_nil in H4.
                destruct H4 ; subst.
                clear - H.
@@ -897,7 +897,7 @@ induction H ; intro HP ;
                        destruct lw' ; inversion Heq2 ; subst.
                        symmetry in p ; apply Permutation_Type_nil in p ; subst.
                        intuition.
-               --- repeat (destruct L; inversion e; try now inversion H0).
+               --- repeat (destruct L; inversion i; try now inversion H0).
                --- inversion f.
                --- destruct a.
             ** inversion f.
@@ -980,5 +980,4 @@ apply ex_not_bbb0.
 apply bbb0_cut_ex.
 assumption.
 Qed.
-
 

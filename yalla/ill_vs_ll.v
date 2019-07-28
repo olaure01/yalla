@@ -67,7 +67,7 @@ Definition i2pfrag P := {|
   pgax := existT (fun x => x -> list formula) (projT1 (ipgax P))
           (fun a => ill2ll (snd (projT2 (ipgax P) a))
                     :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a))))) ;
-  pmix := nopmix ;
+  pmix := pmix_none ;
   pperm := ipperm P |}.
 
 Lemma cutrm_i2pfrag : forall P,
@@ -265,7 +265,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
     * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
     * destruct l1 ; inversion H1.
-  + destruct L; try inversion Heql1; try inversion e.
+  + destruct L; try inversion Heql1; try inversion i0.
 - revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
     try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
     try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
@@ -275,7 +275,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
   + apply IHpi2.
     apply (Permutation_Type_map wn) in p.
     perm_Type_solve.
-  + destruct L; try inversion e.
+  + destruct L; try inversion i.
     apply Permutation_Type_sym in HP2.
     apply Permutation_Type_nil_cons in HP2...
   + apply Permutation_Type_length_2_inv in HP2.
@@ -295,7 +295,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     - apply IHpi2.
       apply (Permutation_Type_map wn) in p.
       perm_Type_solve.
-    - destruct L; inversion e.
+    - destruct L; inversion i.
       apply Permutation_Type_sym in HP2.
       apply Permutation_Type_nil_cons in HP2.
       inversion HP2.
@@ -347,7 +347,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
   + apply IHpi1'.
     apply (Permutation_Type_map wn) in p.
     perm_Type_solve.
-  + destruct L; inversion e.
+  + destruct L; inversion i.
     apply Permutation_Type_sym in HP.
     apply Permutation_Type_nil_cons in HP...
 - eapply tens_rev in pi1 ; [ | intros a ; inversion a | ]...
@@ -381,7 +381,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
   + apply IHpi1'.
     apply (Permutation_Type_map wn) in p.
     perm_Type_solve.
-  + destruct L; inversion e.
+  + destruct L; inversion i.
     apply Permutation_Type_sym in HP.
     apply Permutation_Type_nil_cons in HP...
 - remember (zero :: nil) as l1 ; revert Heql1 ;
@@ -393,7 +393,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
     * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
     * destruct l1 ; inversion H1.
-  + destruct L; inversion e; inversion Heql1.
+  + destruct L; inversion i; inversion Heql1.
 - eapply plus_rev in pi1 ; [ | intros a ; inversion a | ]...
   destruct pi1 as [ pi1 | pi1 ].
   + cons2app in HP2.
@@ -427,7 +427,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     simpl in p ; perm_Type_solve.
   + apply IHpi2.
     apply (Permutation_Type_map wn) in p ; perm_Type_solve.
-  + destruct L; inversion e.
+  + destruct L; inversion i.
     apply Permutation_Type_sym in HP2.
     apply Permutation_Type_nil_cons in HP2...
   + apply Permutation_Type_length_2_inv in HP2.
@@ -446,7 +446,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
       simpl in p ; perm_Type_solve.
     - apply IHpi2.
       apply (Permutation_Type_map wn) in p ; perm_Type_solve.
-    - destruct L; inversion e.
+    - destruct L; inversion i.
       apply Permutation_Type_sym in HP2.
       apply Permutation_Type_nil_cons in HP2.
       inversion HP2.
@@ -470,7 +470,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     simpl in p ; perm_Type_solve.
   + apply IHpi2.
     apply (Permutation_Type_map wn) in p ; perm_Type_solve.
-  + destruct L; inversion e.
+  + destruct L; inversion i.
     apply Permutation_Type_sym in HP2.
     apply Permutation_Type_nil_cons in HP2...
   + apply Permutation_Type_length_2_inv in HP2.
@@ -664,7 +664,7 @@ induction pi ; intros l' Heq HF ; subst ;
     simpl in p ; perm_Type_solve.
   + apply IHX.
     apply (Permutation_Type_map wn) in p ; perm_Type_solve.
-  + destruct L; inversion e.
+  + destruct L; inversion i.
     apply Permutation_Type_sym in HP.
     apply Permutation_Type_nil_cons in HP...
 - destruct l' ; inversion Heq.
@@ -829,7 +829,7 @@ induction Hll ; intros l0 Hnzsp HP.
       rewrite app_assoc ; exists (C,(l1 ++ fst llw,snd llw ++ l8))...
     * rewrite 2 app_assoc.
       exists (C,((l1 ++ map ioc lw'') ++ l3, l2'))...
-- inversion e.
+- inversion i.
 - destruct l0 ; inversion HP.
   destruct i ; inversion H0.
 - rewrite map_map in HP.
@@ -1138,7 +1138,7 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
       rewrite <- (map_map _ _ (rev lw'')).
       rewrite ill2ll_map_ioc.
       PCperm_Type_solve.
-- inversion e.
+- inversion i.
 - apply PCperm_Type_length_1_inv in HP.
   inversion HP.
   destruct C ; inversion H0.
@@ -3940,5 +3940,4 @@ induction pi ; intros Heql HeqC ; subst ;
 Qed.
 
 End Non_Conservativity_Atom_Free.
-
 

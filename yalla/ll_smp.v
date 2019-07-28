@@ -165,7 +165,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_app_head.
   apply Permutation_Type_app_tail.
   symmetry in HP ; apply Permutation_Type_map...
-- inversion e.
+- inversion i.
 - destruct l' ; inversion Heql0 ; destruct f ; inversion H0.
   destruct l' ; inversion H1.
   apply one_r.
@@ -245,8 +245,4 @@ eapply ll_cut.cut_r_axfree.
   simpl in pi2 ; rewrite <- ll2ll_dual in pi2...
 - apply ll2llfrag in pi1...
 Qed.
-
-
-
-
 

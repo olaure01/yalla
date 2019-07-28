@@ -1,10 +1,6 @@
 (* mell_prop example file for yalla library *)
 
 
-
-(* output in Type *)
-
-
 (** * Example of a concrete use of the yalla library: unit-free MELL *)
 
 Require Import Morphisms.
@@ -146,8 +142,8 @@ Qed.
 *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms ll_def.nopmix true.
-(*                                       cut   axioms                        perm  *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms ll_def.pmix_none true.
+(*                                       cut   axioms          mix              perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -208,7 +204,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   eapply (ex_r (l0 ++ map wn l'' ++ l5)) ; [ | perm_solve ]...
   apply IHpi...
   list_simpl ; rewrite mell2ll_map_wn...
-- inversion e.
+- inversion i.
 - decomp_map Heql0 ; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.

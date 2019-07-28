@@ -21,11 +21,9 @@ Require Import subs.
 (** ** Property on mix_n *)
 
 Lemma mix_by_tens_n {P} : forall L,
-    Forall_Type (ll P) L ->
-    ll P (tens_n (length L) bot :: concat L).
+  Forall_Type (ll P) L -> ll P (tens_n (length L) bot :: concat L).
 Proof with try assumption.
-  intros L FL.
-  induction FL.
+  intros L FL; induction FL.
   - apply one_r.
   - destruct l.
     + apply bot_r.
@@ -34,10 +32,10 @@ Proof with try assumption.
       apply bot_r...
 Qed.
 
-(** Provability in [P + mix_n], adding [wn (tens_n n bot)] in [P] and provability in [P + cut + ax : parr_n n bot] are equivalent *)
+(** Provability in [P + mix_n] by adding [wn (tens_n n bot)], and provability in [P + cut + ax : parr_n n bot] are equivalent *)
 
-Lemma ll_to_mix_cut {P} : forall n l , ll P (wn (tens_n n bot) :: l) ->
-                      ll (cutupd_pfrag (pmixupd_point_pfrag P n true) true) l.
+Lemma ll_to_mix_cut {P} : forall n l, ll P (wn (tens_n n bot) :: l) ->
+  ll (cutupd_pfrag (pmixupd_point_pfrag P n true) true) l.
 Proof with try assumption; try reflexivity; try PCperm_Type_solve.
   intros n l pi.
   rewrite <- (app_nil_r _).
@@ -86,13 +84,16 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
     apply ex_r with (map wn (tens_n n bot :: nil) ++ concat L)...
     simpl.
     apply co_const_list_r with (S nL)...
-    change (const_list (S nL) (wn (tens_n n bot))) with ((wn (tens_n n bot) :: nil) ++ const_list nL (wn (tens_n n bot))).
+    change (const_list (S nL) (wn (tens_n n bot)))
+      with ((wn (tens_n n bot) :: nil) ++ const_list nL (wn (tens_n n bot))).
     rewrite HeqnL.
     refine (ex_concat_r _ _ ((wn (tens_n n bot)) :: nil) (wn (tens_n n bot)) L _)...
     replace n with nL by (apply EqNat.beq_nat_true; apply Heq).
     rewrite HeqnL.
     rewrite flat_map_concat_map.
-    replace ((wn (tens_n (length L) bot)) :: nil ) with (wn (tens_n (length (map (cons (wn (tens_n (length L) bot))) L)) bot) :: nil) by (rewrite map_length; reflexivity).
+    replace ((wn (tens_n (length L) bot)) :: nil )
+       with (wn (tens_n (length (map (cons (wn (tens_n (length L) bot))) L)) bot) :: nil)
+       by (rewrite map_length; reflexivity).
     apply de_r.
     apply tens_n_r.
     apply forall_Forall_Type.
@@ -111,14 +112,13 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
     simpl in H; rewrite Heq in H; rewrite H0 in H; inversion H.
 Qed.
 
-Lemma parr_n_to_mix {P} : forall n l,
-    pcut P = true ->
-    ll (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr tt => parr_n n one :: nil
-                                        end))) l ->
-    ll (pmixupd_point_pfrag P n true) l.
+Lemma parr_n_to_mix {P} : forall n l, pcut P = true ->
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                            (fun a => match a with
+                                      | inl x => projT2 (pgax P) x
+                                      | inr tt => parr_n n one :: nil
+                                      end))) l ->
+  ll (pmixupd_point_pfrag P n true) l.
 Proof with try assumption; try reflexivity.
   intros n l bcut pi.
   remember (axupd_pfrag P
@@ -140,13 +140,14 @@ Proof with try assumption; try reflexivity.
     + apply forall_Forall_Type.
       intros l' Hin.
       apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+      refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   - apply cut_r with A...
   - revert a.
     rewrite HeqP'; simpl.
     intro a.
     destruct a.
-    + change (ll (pmixupd_point_pfrag P n true) (projT2 (pgax P) p)) with (ll (pmixupd_point_pfrag P n true) (projT2 (pgax (pmixupd_point_pfrag P n true)) p)).
+    + change (ll (pmixupd_point_pfrag P n true) (projT2 (pgax P) p))
+        with (ll (pmixupd_point_pfrag P n true) (projT2 (pgax (pmixupd_point_pfrag P n true)) p)).
       apply gax_r.
     + destruct u.
       apply parr_n_r.
@@ -161,13 +162,12 @@ Proof with try assumption; try reflexivity.
         apply one_r.
 Qed.
 
-Lemma mix_to_parr_n {P} : forall n l,
-    ll (pmixupd_point_pfrag P n true) l ->
-    ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr tt => parr_n n one :: nil
-                                        end))) true) l.
+Lemma mix_to_parr_n {P} : forall n l, ll (pmixupd_point_pfrag P n true) l ->
+  ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> list formula) _
+                                          (fun a => match a with
+                                                    | inl x => projT2 (pgax P) x
+                                                    | inr tt => parr_n n one :: nil
+                                                    end))) true) l.
 Proof with try assumption; try reflexivity; try PCperm_Type_solve.
   intros n l pi.
   remember (cutupd_pfrag
@@ -203,7 +203,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
         apply forall_Forall_Type.
         intros l' Hin.
         apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
     + simpl in eqpmix.
       rewrite Heq in eqpmix.
       apply mix_r.
@@ -211,7 +211,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply In_Forall_Type_in with _ _ _ PL in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - simpl.
@@ -228,13 +228,12 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
     apply gax_r.
 Qed.
 
-Lemma ll_to_parr_n {P} : forall l n,
-    ll P (wn (tens_n n bot) :: l) ->
-    ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr tt => parr_n n one :: nil
-                                        end))) true) l.
+Lemma ll_to_parr_n {P} : forall l n, ll P (wn (tens_n n bot) :: l) ->
+  ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> list formula) _
+                                          (fun a => match a with
+                                                    | inl x => projT2 (pgax P) x
+                                                    | inr tt => parr_n n one :: nil
+                                                    end))) true) l.
 Proof with try assumption; try reflexivity.
   intros l n pi.
   rewrite<- (app_nil_r l).
@@ -261,15 +260,13 @@ Proof with try assumption; try reflexivity.
       split with (inl a)...
 Qed.
 
-Lemma parr_to_ll {P} : forall n l,
-    pcut P = true ->
-    pperm P = true ->
-    ll (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr tt => parr_n n one :: nil
-                                        end))) l ->
-    ll P (wn (tens_n n bot) :: l).
+Lemma parr_to_ll {P} : forall n l, pcut P = true -> pperm P = true ->
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                            (fun a => match a with
+                                      | inl x => projT2 (pgax P) x
+                                      | inr tt => parr_n n one :: nil
+                                      end))) l ->
+  ll P (wn (tens_n n bot) :: l).
 Proof with try assumption.
   intros n l Hcut Hperm pi.
   apply mix_to_ll with true...
@@ -278,12 +275,8 @@ Qed.
 
 (** provability in [P + mix_n + mix_m] is equivalent to provability in [P + mix_n + mix_m + pmix_(n+m-1)] *)
 
-Lemma mix_n_m_r {P} : forall n m,
-  P.(pmix) n = true ->
-  P.(pmix) m = true ->
-  forall L, length L = n + m - 1 ->
-            Forall_Type (ll P) L ->
-            ll P (concat L).
+Lemma mix_n_m_r {P} : forall n m, P.(pmix) n = true -> P.(pmix) m = true ->
+  forall L, length L = n + m - 1 -> Forall_Type (ll P) L -> ll P (concat L).
 Proof with try assumption; try reflexivity.
   intros n m Hpmixn Hpmixm L Heq FL.
   destruct n.
@@ -302,9 +295,8 @@ Proof with try assumption; try reflexivity.
   destruct (decomp_length_plus L n m Heq) as ((l1 & l2) & (Heql1 & (Heql2 & HeqL))).
   rewrite HeqL.
   rewrite concat_app.
-  replace (concat l1 ++ concat l2) with (concat (l1 ++ ((concat l2) :: nil))).
-  2:{ rewrite concat_app.
-      simpl; rewrite app_nil_r... }
+  replace (concat l1 ++ concat l2) with (concat (l1 ++ ((concat l2) :: nil)))
+    by (rewrite concat_app; simpl; rewrite app_nil_r; reflexivity).
   apply mix_r.
   - rewrite app_length.
     rewrite Nat.add_comm.
@@ -317,16 +309,13 @@ Proof with try assumption; try reflexivity.
     destruct Hin as [Hin | Hin].
     + apply Forall_Type_forall with l1...
     + inversion Hin ; [ | inversion X].
-      rewrite<- H.
+      rewrite <- H.
       apply mix_r...
       rewrite Heql2...
 Qed.
 
-Lemma mix_n_m_admissible {P} : forall n m,
-  P.(pmix) n = true ->
-  P.(pmix) m = true ->
-  forall l, ll (pmixupd_point_pfrag P (n + m - 1) true) l ->
-            ll P l.
+Lemma mix_n_m_admissible {P} : forall n m, P.(pmix) n = true -> P.(pmix) m = true ->
+  forall l, ll (pmixupd_point_pfrag P (n + m - 1) true) l -> ll P l.
 Proof with try assumption; try reflexivity.
   intros n m Hpmixn Hpmixm l pi.
   remember (pmixupd_point_pfrag P (n + m -1) true) as P'.
@@ -340,93 +329,83 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
     + rewrite HeqP' in eqpmix.
       simpl in eqpmix; rewrite Heq in eqpmix.
       apply mix_r...
       apply forall_Forall_Type.
       intros l' Hin.
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+      refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP' in f...
   - revert a.
     replace (pgax P') with (pgax P).
-    + intro a.
-      apply gax_r.
-    + rewrite HeqP'.
-      reflexivity.
+    + intro a; apply gax_r.
+    + rewrite HeqP'...
 Qed.
 
 (** provability in [P + mix_2] is equivalent to provability in [P + mix 2 + mix k] for all k > 2 *)
 
 Lemma mix_2_to_mix_k_r {P} : P.(pmix) 2 = true ->
-  forall L, length L >= 2 ->
-            Forall_Type (ll P) L ->
-            ll P (concat L).
+  forall L, 2 <= length L -> Forall_Type (ll P) L -> ll P (concat L).
 Proof with try assumption.
   intro Hpmix; induction L; intros H FL.
   - exfalso.
     inversion H.
-  - destruct L.
+  - destruct L; [ | destruct L ].
     + exfalso.
       inversion H; inversion H1.
-    + destruct L.
-      * apply mix_r...
-      * inversion FL; subst.
-        clear FL; rename X into pi1; rename X0 into FL.
-        replace (concat (a :: l :: l0 :: L)) with (concat (a :: (concat (l :: l0 :: L) :: nil))).
-        2:{ simpl; rewrite<- ? app_assoc; rewrite app_nil_r; reflexivity. }
-        apply mix_r...
-        apply Forall_Type_cons...
-        apply Forall_Type_cons ; [ | apply Forall_Type_nil].
-        apply IHL...
-        simpl; simpl in H.
-        do 2 apply le_n_S.
-        apply le_0_n.
+    + apply mix_r...
+    + inversion FL; subst.
+      clear FL; rename X into pi1; rename X0 into FL.
+      replace (concat (a :: l :: l0 :: L)) with (concat (a :: (concat (l :: l0 :: L) :: nil)))
+        by (simpl; rewrite<- ? app_assoc; rewrite app_nil_r; reflexivity).
+      apply mix_r...
+      apply Forall_Type_cons...
+      apply Forall_Type_cons ; [ | apply Forall_Type_nil].
+      apply IHL...
+      simpl; simpl in H.
+      do 2 apply le_n_S.
+      apply le_0_n.
 Qed.
 
 Lemma mix_2_to_mix_k_admissible {P} : P.(pmix) 2 = true ->
   forall l, ll P l ->
-            ll (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0 else ( if k =? 2 then true else false))) l.
+  ll (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0 else (if k =? 2 then true else false))) l.
 Proof with try assumption.
   intros Hpmix l pi.
-  remember (pmixupd_pfrag P
-                          (fun k : nat => if k =? 0 then pmix P 0 else if k =? 2 then true else false)) as P'.
+  remember (pmixupd_pfrag P (fun k => if k =? 0 then pmix P 0 else if k =? 2 then true else false))
+    as P'.
   induction pi using (ll_nested_ind _); try now constructor.
   - apply ex_r with l1...
     rewrite HeqP'...
   - apply ex_wn_r with lw...
-  - destruct L.
-    { apply mix_r.
-      - rewrite HeqP'...
-      - apply Forall_Type_nil. }
-    destruct L.
-    { simpl.
-      rewrite app_nil_r.
-      inversion X... }
-    apply mix_2_to_mix_k_r.
-    + rewrite HeqP'; reflexivity.
-    + do 2 apply le_n_S.
-      apply le_0_n.
-    + apply forall_Forall_Type.
-      intros l' Hin.
-      apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+  - destruct L; [ | destruct L ].
+    + apply mix_r.
+      * rewrite HeqP'...
+      * apply Forall_Type_nil.
+    + simpl; rewrite app_nil_r.
+      inversion X...
+    + apply mix_2_to_mix_k_r.
+      * rewrite HeqP'; reflexivity.
+      * do 2 apply le_n_S.
+        apply le_0_n.
+      * apply forall_Forall_Type.
+        intros l' Hin.
+        apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
     replace (pgax P) with (pgax P').
-    + intro a.
-      apply gax_r.
-    + rewrite HeqP'.
-      reflexivity.
+    + intro a; apply gax_r.
+    + rewrite HeqP'; reflexivity.
 Qed.
 
 (** provability in [P + mix_1] is equivalent to provability in [P] *)
 
-Lemma mix1_rm {P} : forall l,
-    ll P l -> ll (pmixupd_point_pfrag P 1 false) l.
+Lemma mix1_rm {P} : forall l, ll P l -> ll (pmixupd_point_pfrag P 1 false) l.
 Proof with try assumption; try reflexivity.
   intros l pi.
   remember (pmixupd_point_pfrag P 1 false) as P'.
@@ -434,41 +413,33 @@ Proof with try assumption; try reflexivity.
   - apply ex_r with l1...
     rewrite HeqP'...
   - apply ex_wn_r with lw...
-  - destruct L.
-    { apply mix_r.
-      - rewrite HeqP'...
-      - apply Forall_Type_nil. }
-    destruct L.
-    { simpl.
-      rewrite app_nil_r.
-      inversion X... }
-    apply mix_r.
-    + rewrite HeqP'; simpl in eqpmix; simpl; rewrite eqpmix...
-    + apply forall_Forall_Type.
-      intros l' Hin.
-      apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-      refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+  - destruct L; [ | destruct L ].
+    + apply mix_r.
+      * rewrite HeqP'...
+      * apply Forall_Type_nil.
+    + simpl; rewrite app_nil_r.
+      inversion X...
+    + apply mix_r.
+      * rewrite HeqP'; simpl in eqpmix; simpl; rewrite eqpmix...
+      * apply forall_Forall_Type.
+        intros l' Hin.
+        apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
     replace (pgax P) with (pgax P').
-    + intro a.
-      apply gax_r.
-    + rewrite HeqP'.
-      reflexivity.
+    + intro a; apply gax_r.
+    + rewrite HeqP'...
 Qed.
 
 (** provability in [P + mix_0 + mix_n] is equivalent to provability in [P + mix_0 + mix_n + pmix_k] for all k < n *)
 
-Lemma mix_0_n_r {P} : forall n,
-  P.(pmix) 0 = true ->
-  P.(pmix) n = true ->
-  forall L, length L <= n ->
-            Forall_Type (ll P) L ->
-            ll P (concat L).
+Lemma mix_0_n_r {P} : forall n, P.(pmix) 0 = true -> P.(pmix) n = true ->
+  forall L, length L <= n -> Forall_Type (ll P) L -> ll P (concat L).
 Proof with try assumption; try reflexivity.
   intros n Hpmix0 Hpmixn L.
-  remember (n - (length L)) as k.
+  remember (n - length L) as k.
   revert L Heqk.
   induction k; intros L Heqk H FL.
   - assert (length L = n).
@@ -479,25 +450,23 @@ Proof with try assumption; try reflexivity.
     rewrite H0...
   - change (concat L) with (concat (nil :: L)).
     apply IHk...
-    + simpl.
-      rewrite Nat.sub_succ_r.
-      rewrite<- Heqk...
-    + simpl.
-      lia.
+    + simpl; rewrite Nat.sub_succ_r.
+      rewrite <- Heqk...
+    + simpl; lia.
     + apply Forall_Type_cons...
       change nil with (concat (@nil (list formula))).
       apply mix_r...
       apply Forall_Type_nil.
 Qed.
 
-Lemma mix_0_n_admissible {P} : forall n,
-  P.(pmix) 0 = true ->
-  P.(pmix) n = true ->
+Lemma mix_0_n_admissible {P} : forall n, P.(pmix) 0 = true -> P.(pmix) n = true ->
   forall l, ll P l ->
-            ll (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0 else ( if n <=? k then P.(pmix) k else false))) l.
+  ll (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0
+                         else ( if n <=? k then P.(pmix) k else false))) l.
 Proof with try assumption; try reflexivity.
   intros n Hpmix0 Hpmixn l pi.
-  remember (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0 else ( if n <=? k then P.(pmix) k else false))) as P'.
+  remember (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0
+                                                else (if n <=? k then P.(pmix) k else false))) as P'.
   induction pi using (ll_nested_ind _); try now constructor.
   - apply ex_r with l1...
     rewrite HeqP'...
@@ -514,7 +483,7 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
     + apply mix_0_n_r with n.
       * rewrite HeqP'...
       * rewrite HeqP'.
@@ -527,43 +496,31 @@ Proof with try assumption; try reflexivity.
       * apply forall_Forall_Type.
         intros l' Hin.
         apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
     replace (pgax P) with (pgax P').
-    + intro a.
-      apply gax_r.
-    + rewrite HeqP'.
-      reflexivity.
+    + intro a; apply gax_r.
+    + rewrite HeqP'...
 Qed.
 
 (** provability in [P + mix_0 + mix_2] is equivalent to provability in [P + mix_k] for all k *)
 
-Lemma allmix_r {P} :
-  P.(pmix) 0 = true ->
-  P.(pmix) 2 = true ->
-  forall L, Forall_Type (ll P) L ->
-            ll P (concat L).
+Lemma allmix_r {P} : P.(pmix) 0 = true -> P.(pmix) 2 = true ->
+  forall L, Forall_Type (ll P) L -> ll P (concat L).
 Proof with try assumption; try reflexivity.
   intros Hpmix0 Hpimx2 L FL.
-  destruct L.
-  { apply mix_r... }
-  destruct L.
-  { simpl; rewrite app_nil_r.
-    inversion FL... }
-  destruct L.
+  destruct L; [ | destruct L ].
   - apply mix_r...
+  - simpl; rewrite app_nil_r.
+    inversion FL...
   - apply mix_2_to_mix_k_r...
-    do 2 apply le_n_S.
-    apply le_0_n.
+    simpl; lia.
 Qed.
 
-Lemma allmix_admissible {P} :
-  P.(pmix) 0 = true ->
-  P.(pmix) 2 = true ->
-  forall l, ll P l ->
-            ll (pmixupd_pfrag P pmix02) l.
+Lemma allmix_admissible {P} : P.(pmix) 0 = true -> P.(pmix) 2 = true ->
+  forall l, ll P l -> ll (pmixupd_pfrag P pmix02) l.
 Proof with try assumption; try reflexivity.
   intros Hpmix0 Hpmixn l pi.
   remember (pmixupd_pfrag P pmix02) as P'.
@@ -575,21 +532,19 @@ Proof with try assumption; try reflexivity.
     apply forall_Forall_Type.
     intros l' Hin.
     apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-    refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
   - apply cut_r with A...
     rewrite HeqP'...
   - revert a.
     replace (pgax P) with (pgax P').
-    + intro a.
-      apply gax_r.
-    + rewrite HeqP'.
-      reflexivity.
+    + intro a; apply gax_r.
+    + rewrite HeqP'...
 Qed.
 
 (** ** Standard linear logic: [ll_ll] (no mix, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_ll :=  mk_pfrag false NoAxioms nopmix true.
+Definition pfrag_ll :=  mk_pfrag false NoAxioms pmix_none true.
 (*                               cut   axioms    mix  perm  *)
 
 Definition ll_ll := ll pfrag_ll.
@@ -618,7 +573,7 @@ Qed.
 
 (** cut / axioms / pmix / permutation *)
 Definition pfrag_mix0 := mk_pfrag false NoAxioms pmix0 true.
-(*                                cut   axioms         perm  *)
+(*                                cut   axioms   mix   perm  *)
 
 Definition ll_mix0 := ll pfrag_mix0.
 
@@ -641,7 +596,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   destruct (In_Forall_Type_in _ _ _ PL Hin) as (pi' & HFin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X HFin).
+  refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X HFin).
 - eapply cut_mix0_r...
 Qed.
 
@@ -682,11 +637,11 @@ extended with the provability of [bot :: bot :: nil] *)
 
 Lemma mix0_to_ll_bot {P} : pcut P = true -> pperm P = true -> forall bc b0 bp l,
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 0) then b0 else P.(pmix) k) bp) l ->
-    ll (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr tt => bot :: bot :: nil
-                                        end))) l.
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                            (fun a => match a with
+                                      | inl x => projT2 (pgax P) x
+                                      | inr tt => bot :: bot :: nil
+                                      end))) l.
 Proof with myeeasy ; try (unfold PCperm_Type ; PCperm_Type_solve).
 remember (axupd_pfrag P (existT (fun x => x -> list formula) _
                                 (fun a => match a with
@@ -723,8 +678,8 @@ Lemma ll_bot_to_mix0 {P} : forall l,
                               (fun a => match a with
                                         | inl x => projT2 (pgax P) x
                                         | inr tt => bot :: bot :: nil
-                                        end))) l
-  -> ll (pmixupd_point_pfrag P 0 true) l.
+                                        end))) l ->
+  ll (pmixupd_point_pfrag P 0 true) l.
 Proof with myeeasy.
 intros l pi.
 remember (pmixupd_point_pfrag P 0 true) as P'.
@@ -773,7 +728,7 @@ revert Heql ; induction pi ; intros Heql ; subst ; try inversion Heql.
     destruct l1 ; inversion H3.
 - destruct L.
   + inversion H0.
-  + inversion e.
+  + inversion i.
 - inversion f.
 - destruct a.
 Qed.
@@ -783,7 +738,7 @@ Qed.
 
 (** cut / axioms / pmix / permutation *)
 Definition pfrag_mix2 := mk_pfrag false NoAxioms pmix2 true.
-(*                                cut   axioms   pmix  perm  *)
+(*                                cut   axioms   mix   perm  *)
 
 Definition ll_mix2 := ll pfrag_mix2.
 
@@ -806,7 +761,7 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   destruct (In_Forall_Type_in _ _ _ PL Hin) as (pi' & HFin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X HFin).
+  refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X HFin).
 - eapply cut_mix2_r...
 Qed.
 
@@ -836,11 +791,11 @@ for all [A] and [B] *)
 
 Lemma mix2_to_ll_one_one {P} : pcut P = true -> pperm P = true -> forall bc b2 bp l,
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 2) then b2 else P.(pmix) k) bp) l ->
-    ll (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr tt => one :: one :: nil
-                                        end))) l.
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                            (fun a => match a with
+                                      | inl x => projT2 (pgax P) x
+                                      | inr tt => one :: one :: nil
+                                      end))) l.
 Proof with myeeasy ; try (unfold PCperm_Type ; PCperm_Type_solve).
 remember (axupd_pfrag P (existT (fun x => x -> list formula) _
                                 (fun a => match a with
@@ -897,12 +852,12 @@ Lemma ll_tens_parr_one_one_to_ll_tens_parr {P} : forall l,
                               (fun a => match a with
                                         | inl x => projT2 (pgax P) x
                                         | inr tt => parr one one :: parr bot bot :: nil
-                                        end))) l
-  -> ll (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
-                                        end))) l.
+                                        end))) l ->
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                            (fun a => match a with
+                                      | inl x => projT2 (pgax P) x
+                                      | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
+                                      end))) l.
 Proof with myeeasy.
 intros l pi.
 remember (axupd_pfrag P (existT (fun x => x -> list formula) _
@@ -939,8 +894,8 @@ Lemma ll_tens_parr_to_mix2 {P} : forall l,
                               (fun a => match a with
                                         | inl x => projT2 (pgax P) x
                                         | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
-                                        end))) l
-  -> ll (pmixupd_point_pfrag P 2 true) l.
+                                        end))) l ->
+  ll (pmixupd_point_pfrag P 2 true) l.
 Proof with myeeasy.
 intros l pi.
 remember (pmixupd_point_pfrag P 2 true) as P'.
@@ -967,7 +922,8 @@ apply (stronger_pfrag _
     list_simpl.
     rewrite <- (app_nil_l (dual A :: _)).
     rewrite 2 app_comm_cons.
-    change ((B :: dual B :: nil) ++ dual A :: A :: nil) with (concat ((B :: dual B :: nil) :: (dual A :: A :: nil) :: nil)).
+    change ((B :: dual B :: nil) ++ dual A :: A :: nil)
+      with (concat ((B :: dual B :: nil) :: (dual A :: A :: nil) :: nil)).
     apply mix_r.
     * rewrite HeqP'...
     * apply Forall_Type_cons.
@@ -981,11 +937,11 @@ Qed.
 
 Lemma ll_one_one_to_mix2 {P} : forall l,
   ll (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr tt => one :: one :: nil
-                                        end))) l
-  -> ll (pmixupd_point_pfrag P 2 true) l.
+                            (fun a => match a with
+                                      | inl x => projT2 (pgax P) x
+                                      | inr tt => one :: one :: nil
+                                      end))) l ->
+  ll (pmixupd_point_pfrag P 2 true) l.
 Proof with myeeasy.
 intros l pi.
 remember (pmixupd_point_pfrag P 2 true) as P'.
@@ -1036,7 +992,7 @@ revert Heql ; induction pi using (ll_nested_ind _) ; intros Heql ; subst ; try i
   destruct l0; inversion Heql; destruct l1; inversion Heql.
   destruct (In_Forall_Type_in _ _ nil PL) as (pi & Hin).
   + left; reflexivity.
-  + refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin eq_refl).
+  + refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin eq_refl).
 - inversion f.
 - destruct a.
 Qed.
@@ -1046,7 +1002,7 @@ Qed.
 
 (** cut / axioms / mix0 / mix2 / permutation *)
 Definition pfrag_mix02 := mk_pfrag false NoAxioms pmix02 true.
-(*                                 cut   axioms   pmix   perm  *)
+(*                                 cut   axioms   mix    perm  *)
 
 Definition ll_mix02 := ll pfrag_mix02.
 
@@ -1069,14 +1025,16 @@ induction pi using (ll_nested_ind _) ; try (now econstructor).
   apply forall_Forall_Type.
   intros l' Hin.
   apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-  refine (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec) _ _ _ _ PL X Hin).
+  refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
 - eapply cut_mix02_r...
 Qed.
 
 (** Provability in [ll_mix02] is equivalent to adding [wn (tens (wn one) (wn one))] in [ll] *)
 
 Lemma mix02_to_ll {P} : pperm P = true -> forall b1 b2 bp l,
-  ll (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then b1 else (if (k =? 2) then b2 else P.(pmix) k)) bp) l -> ll P (wn (tens (wn one) (wn one)) :: l).
+  ll (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then b1
+                                     else (if (k =? 2) then b2 else P.(pmix) k)) bp) l ->
+  ll P (wn (tens (wn one) (wn one)) :: l).
 Proof with myeeasy ; try PCperm_Type_solve.
 intros fp b1 b2 bp l pi.
 eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
@@ -1100,10 +1058,13 @@ eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
          inversion FL; subst; inversion X0; subst.
          clear FL X0 X2.
          apply co_r; apply co_r.
-         apply ex_r with (wn (tens (wn one) (wn one)) :: ((l0 ++ wn (tens (wn one) (wn one)) :: nil) ++ (l1 ++ wn (tens (wn one) (wn one)) :: nil))) ; [ | rewrite fp; simpl; perm_Type_solve].
+         apply ex_r with (wn (tens (wn one) (wn one)) :: ((l0 ++ wn (tens (wn one) (wn one)) :: nil)
+                                                              ++ (l1 ++ wn (tens (wn one) (wn one)) :: nil))) ;
+           [ | rewrite fp; simpl; perm_Type_solve].
          apply de_r.
          apply tens_r; apply wk_r...
-      -- apply ex_r with (wn (tens (wn one) (wn one)) :: concat (l0 :: l1 :: l2 :: L)); [ | rewrite fp; simpl; perm_Type_solve].
+      -- apply ex_r with (wn (tens (wn one) (wn one)) :: concat (l0 :: l1 :: l2 :: L));
+           [ | rewrite fp; simpl; perm_Type_solve].
          apply co_const_list_r with (length (l0 :: l1 :: l2 :: L)).
          apply (ex_concat_r _ fp nil).
          rewrite app_nil_l; rewrite flat_map_concat_map.
@@ -1120,8 +1081,9 @@ eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
              (l0 :: l1 :: l2 :: L))...
 Qed.
 
-Lemma ll_to_mix02_cut {P} : forall l,
-  ll P (wn (tens (wn one) (wn one)) :: l) -> ll (mk_pfrag true P.(pgax) (fun k => if (k =? 0) then true else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
+Lemma ll_to_mix02_cut {P} : forall l, ll P (wn (tens (wn one) (wn one)) :: l) ->
+  ll (mk_pfrag true P.(pgax) (fun k => if (k =? 0) then true
+                                 else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
 Proof with myeasy.
 intros l pi.
 eapply stronger_pfrag in pi.
@@ -1130,7 +1092,8 @@ eapply stronger_pfrag in pi.
   change nil with (map wn nil).
   apply oc_r.
   apply parr_r.
-  change (oc bot :: oc bot :: map wn nil) with (concat ((oc bot :: map wn nil) :: (oc bot :: map wn nil) :: nil)).
+  change (oc bot :: oc bot :: map wn nil)
+    with (concat ((oc bot :: map wn nil) :: (oc bot :: map wn nil) :: nil)).
   apply mix_r...
   apply forall_Forall_Type.
   intros l' Hin.
@@ -1168,7 +1131,9 @@ apply pi.
 Qed.
 
 Lemma mix02_to_ll'' {P} : pperm P = true -> forall b0 b2 bp l,
-  ll (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then b0 else (if (k =? 2) then b2 else P.(pmix) k)) bp) l -> ll P (wn one :: wn (tens (wn one) bot) :: l).
+  ll (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then b0
+                                     else (if (k =? 2) then b2 else P.(pmix) k)) bp) l ->
+  ll P (wn one :: wn (tens (wn one) bot) :: l).
 Proof with myeeasy ; try PCperm_Type_solve.
 intros Hperm b0 b2 bp l pi.
 eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
@@ -1196,7 +1161,8 @@ eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
       rewrite Hpmix in Hpmix'; inversion Hpmix'. }
   intros _ _ FL.
   simpl.
-  inversion FL; inversion X0; subst; clear FL X0 X2; rename X into pi1; rename X1 into pi2; rename l1 into l2; rename l0 into l1.
+  inversion FL; inversion X0; subst; clear FL X0 X2;
+    rename X into pi1; rename X1 into pi2; rename l1 into l2; rename l0 into l1.
   apply (ex_r _ (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)) ; [ | rewrite Hperm ]...
   apply co_r.
   apply co_r.
@@ -1215,12 +1181,12 @@ extended with the provability of both [bot :: bot :: nil] and [one :: one :: nil
 
 Lemma mix02_to_ll_one_eq_bot {P} : pcut P = true -> pperm P = true -> forall bc b0 b2 bp l,
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 0) then b0 else (if (k =? 2) then b2 else P.(pmix) k)) bp) l ->
-    ll (axupd_pfrag P (existT (fun x => x -> list formula) _
-                              (fun a => match a with
-                                        | inl x => projT2 (pgax P) x
-                                        | inr true => one :: one :: nil
-                                        | inr false => bot :: bot :: nil
-                                        end))) l.
+  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+                            (fun a => match a with
+                                      | inl x => projT2 (pgax P) x
+                                      | inr true => one :: one :: nil
+                                      | inr false => bot :: bot :: nil
+                                      end))) l.
 Proof with myeeasy ; try (unfold PCperm_Type ; PCperm_Type_solve).
 remember (axupd_pfrag P (existT (fun x => x -> list formula) _
                                 (fun a => match a with
@@ -1280,11 +1246,13 @@ Lemma ll_one_eq_bot_to_mix02 {P} : forall l,
                                       | inl x => projT2 (pgax P) x
                                       | inr true => one :: one :: nil
                                       | inr false => bot :: bot :: nil
-                                      end))) l
-  -> ll (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then true else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
+                                      end))) l ->
+  ll (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then true
+                                     else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
 Proof with myeeasy.
 intros l pi.
-remember (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then true else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) as P'.
+remember (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then true
+                                         else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) as P'.
 apply (stronger_pfrag _
   (axupd_pfrag P' (existT (fun x => x -> list formula) _
                           (fun a => match a with
@@ -1320,15 +1288,18 @@ Qed.
 
 (* Hgax_cut is here only to allow the use of cut_admissible
    the more general result without Hgax_cut should be provable by induction as for [ll_to_mix2] *)
-Lemma ll_to_mix02''_axcut {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
-                                (forall a b x l1 l2 l3 l4,
-                                    projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-                                    { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-                                pperm P = true -> forall l,
-                                    ll P (wn one :: wn (tens (wn one) bot) :: l) -> ll (pmixupd_point_pfrag (pmixupd_point_pfrag P 0 true) 2 true) l.
+Lemma ll_to_mix02''_axcut {P} :
+    (forall a, Forall atomic (projT2 (pgax P) a)) ->
+    (forall a b x l1 l2 l3 l4,
+       projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
+       { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
+    pperm P = true ->
+  forall l, ll P (wn one :: wn (tens (wn one) bot) :: l) ->
+  ll (pmixupd_point_pfrag (pmixupd_point_pfrag P 0 true) 2 true) l.
 Proof with myeasy.
 intros Hgax_at Hgax_cut Hperm l pi.
-apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag (pmixupd_point_pfrag P 0 true) 2 true) true))).
+apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag
+                                                 (pmixupd_point_pfrag P 0 true) 2 true) true))).
 { nsplit 4...
   intros a ; exists a... }
 eapply cut_admissible...
@@ -1404,15 +1375,14 @@ Definition pfrag_llR R :=
                                   | true => dual R :: nil
                                   | false => R :: one :: nil
                                   end))
-             nopmix true.
-(*         cut  axioms
-                    perm  *)
+             pmix_none true.
+(*         cut  axioms  mix  perm  *)
 
 Definition llR R := ll (pfrag_llR R).
 
 Lemma llR1_R2 : forall R1 R2,
   llR R2 (dual R1 :: R2 :: nil) -> llR R2 (dual R2 :: R1 :: nil) ->
-    forall l, llR R1 l-> llR R2 l.
+  forall l, llR R1 l-> llR R2 l.
 Proof with myeeasy.
 intros R1 R2 HR1 HR2 l Hll.
 induction Hll ; try (now constructor).

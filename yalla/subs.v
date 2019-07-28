@@ -96,7 +96,7 @@ induction pi using (ll_nested_ind P) ; list_simpl ; try (now constructor).
     destruct (map_in_Type (map (subs A x)) l' L Hin) as (l0 & (Hin' & Heq)).
     rewrite Heq.
     apply (In_Forall_Type_in _ _ _ PL) in Hin' as (pi' & Hin').
-    refine (Dependent_Forall_Type_forall (list_eq_dec formulas.Formula_dec.eq_dec) _ _ _ _ PL X Hin').
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin').
 - specialize Hmapwn with l0.
   rewrite Hmapwn.
   apply oc_r.
