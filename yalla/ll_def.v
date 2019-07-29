@@ -190,7 +190,7 @@ Qed.
 Definition pmixupd_pfrag P pmix := mk_pfrag (pcut P) (pgax P) pmix (pperm P).
 
 Definition pmixupd_point_pfrag P n b :=
-  mk_pfrag (pcut P) (pgax P) (fun k => if (k =? n) then b else (pmix P k)) (pperm P).
+  pmixupd_pfrag P (fun k => if (k =? n) then b else (pmix P k)).
 
 Lemma pmixupd_point_comm P : forall n1 n2 b1 b2,
     n1 <> n2 ->

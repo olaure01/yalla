@@ -9,6 +9,7 @@ Require Import Lia.
 Require Import Bool_more.
 Require Import List_more.
 Require Import List_Type_more.
+Require Import CyclicPerm_Type.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
@@ -314,35 +315,66 @@ Proof with try assumption; try reflexivity.
       rewrite Heql2...
 Qed.
 
+Lemma mix_conservativity P Q :
+    Bool.leb (pcut P) (pcut Q) ->
+    Bool.leb (pperm P) (pperm Q) ->
+    (forall a, { b | projT2 (pgax P) a = projT2 (pgax Q) b }) ->
+  (forall n, pmix P n = true ->
+    forall L, length L = n -> Forall_Type (ll Q) L -> ll Q (concat L)) ->
+  forall l, ll P l -> ll Q l.
+Proof with try assumption; try reflexivity.
+intros Hcut Hperm Hgax Hpmix l pi.
+induction pi using (ll_nested_ind _); try now constructor.
+- apply ex_r with l1...
+  unfold PCperm_Type in p.
+  unfold PCperm_Type.
+  destruct (pperm P) ; destruct (pperm Q) ;
+    simpl in Hperm ; try inversion Hperm...
+  apply cperm_perm_Type...
+- apply ex_wn_r with lw...
+- apply (Hpmix (length L))...
+  apply forall_Forall_Type.
+  intros l' Hin.
+  apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
+  refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
+- rewrite f in Hcut.
+  apply cut_r with A...
+- destruct (Hgax a) as [b Hgaxb].
+  rewrite Hgaxb; apply gax_r.
+Qed.
+
+Lemma mix_conservativity_updl {P} : forall fmix, let Q := (pmixupd_pfrag P fmix) in
+  (forall n, pmix Q n = true ->
+    forall L, length L = n -> Forall_Type (ll P) L -> ll P (concat L)) ->
+  forall l, ll Q l -> ll P l.
+Proof with try assumption; try reflexivity.
+intros fmix Q Hpmix l pi.
+apply (mix_conservativity Q)...
+intros a; exists a...
+Qed.
+
+Lemma mix_conservativity_updr {P} : forall fmix, let Q := (pmixupd_pfrag P fmix) in
+  (forall n, pmix P n = true ->
+    forall L, length L = n -> Forall_Type (ll Q) L -> ll Q (concat L)) ->
+  forall l, ll P l -> ll Q l.
+Proof with try assumption; try reflexivity.
+intros fmix Q Hpmix l pi.
+apply (mix_conservativity P)...
+intros a; exists a...
+Qed.
+
 Lemma mix_n_m_admissible {P} : forall n m, P.(pmix) n = true -> P.(pmix) m = true ->
   forall l, ll (pmixupd_point_pfrag P (n + m - 1) true) l -> ll P l.
 Proof with try assumption; try reflexivity.
-  intros n m Hpmixn Hpmixm l pi.
-  remember (pmixupd_point_pfrag P (n + m -1) true) as P'.
-  induction pi using (ll_nested_ind _); try now constructor.
-  - apply ex_r with l1...
-    rewrite HeqP' in p...
-  - apply ex_wn_r with lw...
-  - case_eq (length L =? (n + m - 1)); intro Heq.
-    + apply mix_n_m_r with n m...
-      * apply EqNat.beq_nat_true...
-      * apply forall_Forall_Type.
-        intros l' Hin.
-        apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
-    + rewrite HeqP' in eqpmix.
-      simpl in eqpmix; rewrite Heq in eqpmix.
-      apply mix_r...
-      apply forall_Forall_Type.
-      intros l' Hin.
-      apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
-  - apply cut_r with A...
-    rewrite HeqP' in f...
-  - revert a.
-    replace (pgax P') with (pgax P).
-    + intro a; apply gax_r.
-    + rewrite HeqP'...
+intros n m Hpmixn Hpmixm l pi.
+eapply mix_conservativity_updl; [ | apply pi].
+simpl; intros k Hpmixk L Hl HF.
+case_eq (length L =? (n + m - 1)); intro Heq.
+- apply mix_n_m_r with n m...
+  apply EqNat.beq_nat_true...
+- rewrite <- Hl in Hpmixk.
+  rewrite Heq in Hpmixk.
+  apply mix_r...
 Qed.
 
 (** provability in [P + mix_2] is equivalent to provability in [P + mix 2 + mix k] for all k > 2 *)
@@ -373,64 +405,28 @@ Qed.
 Lemma mix_2_to_mix_k_admissible {P} : P.(pmix) 2 = true ->
   forall l, ll P l ->
   ll (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0 else (if k =? 2 then true else false))) l.
-Proof with try assumption.
-  intros Hpmix l pi.
-  remember (pmixupd_pfrag P (fun k => if k =? 0 then pmix P 0 else if k =? 2 then true else false))
-    as P'.
-  induction pi using (ll_nested_ind _); try now constructor.
-  - apply ex_r with l1...
-    rewrite HeqP'...
-  - apply ex_wn_r with lw...
-  - destruct L; [ | destruct L ].
-    + apply mix_r.
-      * rewrite HeqP'...
-      * apply Forall_Type_nil.
-    + simpl; rewrite app_nil_r.
-      inversion X...
-    + apply mix_2_to_mix_k_r.
-      * rewrite HeqP'; reflexivity.
-      * do 2 apply le_n_S.
-        apply le_0_n.
-      * apply forall_Forall_Type.
-        intros l' Hin.
-        apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
-  - apply cut_r with A...
-    rewrite HeqP'...
-  - revert a.
-    replace (pgax P) with (pgax P').
-    + intro a; apply gax_r.
-    + rewrite HeqP'; reflexivity.
+Proof with try assumption; try reflexivity.
+intros Hpmix l pi.
+eapply mix_conservativity_updr; [ | apply pi].
+simpl; intros k Hpmixk L Hl HF.
+destruct L; [ | destruct L ]; simpl in Hl; subst.
+- apply mix_r...
+- list_simpl; inversion HF...
+- apply mix_2_to_mix_k_r...
+  list_simpl; lia.
 Qed.
 
 (** provability in [P + mix_1] is equivalent to provability in [P] *)
 
 Lemma mix1_rm {P} : forall l, ll P l -> ll (pmixupd_point_pfrag P 1 false) l.
 Proof with try assumption; try reflexivity.
-  intros l pi.
-  remember (pmixupd_point_pfrag P 1 false) as P'.
-  induction pi using (ll_nested_ind _); try now constructor.
-  - apply ex_r with l1...
-    rewrite HeqP'...
-  - apply ex_wn_r with lw...
-  - destruct L; [ | destruct L ].
-    + apply mix_r.
-      * rewrite HeqP'...
-      * apply Forall_Type_nil.
-    + simpl; rewrite app_nil_r.
-      inversion X...
-    + apply mix_r.
-      * rewrite HeqP'; simpl in eqpmix; simpl; rewrite eqpmix...
-      * apply forall_Forall_Type.
-        intros l' Hin.
-        apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
-  - apply cut_r with A...
-    rewrite HeqP'...
-  - revert a.
-    replace (pgax P) with (pgax P').
-    + intro a; apply gax_r.
-    + rewrite HeqP'...
+intros l pi.
+eapply mix_conservativity_updr; [ | apply pi].
+simpl; intros k Hpmixk L Hl HF.
+destruct L; [ | destruct L ]; simpl in Hl; subst.
+- apply mix_r...
+- list_simpl; inversion HF...
+- apply mix_r...
 Qed.
 
 (** provability in [P + mix_0 + mix_n] is equivalent to provability in [P + mix_0 + mix_n + pmix_k] for all k < n *)
@@ -461,48 +457,22 @@ Qed.
 
 Lemma mix_0_n_admissible {P} : forall n, P.(pmix) 0 = true -> P.(pmix) n = true ->
   forall l, ll P l ->
-  ll (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0
-                         else ( if n <=? k then P.(pmix) k else false))) l.
+  ll (pmixupd_pfrag P (fun k => if k =? 0  then P.(pmix) 0
+                          else (if n <=? k then P.(pmix) k else false))) l.
 Proof with try assumption; try reflexivity.
-  intros n Hpmix0 Hpmixn l pi.
-  remember (pmixupd_pfrag P (fun k => if k =? 0 then P.(pmix) 0
-                                                else (if n <=? k then P.(pmix) k else false))) as P'.
-  induction pi using (ll_nested_ind _); try now constructor.
-  - apply ex_r with l1...
-    rewrite HeqP'...
-  - apply ex_wn_r with lw...
-  - destruct L.
-    { apply mix_r.
-      - rewrite HeqP'...
-      - apply Forall_Type_nil. }
-    case_eq (n <=? length (l0 :: L)); intros Heq.
-    + apply mix_r...
-      * rewrite HeqP'...
-        simpl; simpl in Heq.
-        rewrite Heq...
-      * apply forall_Forall_Type.
-        intros l' Hin.
-        apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
-    + apply mix_0_n_r with n.
-      * rewrite HeqP'...
-      * rewrite HeqP'.
-        destruct n...
-        simpl.
-        rewrite Nat.leb_refl...
-      * apply Nat.le_trans with (S (S (length L))).
-        -- apply Nat.le_succ_diag_r.
-        -- apply Compare_dec.leb_iff_conv...
-      * apply forall_Forall_Type.
-        intros l' Hin.
-        apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-        refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
-  - apply cut_r with A...
-    rewrite HeqP'...
-  - revert a.
-    replace (pgax P) with (pgax P').
-    + intro a; apply gax_r.
-    + rewrite HeqP'...
+intros n Hpmix0 Hpmixn l pi.
+eapply mix_conservativity_updr; [ | apply pi].
+simpl; intros k Hpmixk L Hl HF.
+destruct L ; [ apply mix_r | ]...
+rewrite <- Hl in Hpmixk.
+case_eq (n <=? length (l0 :: L)); intros Heq.
+- apply mix_r...
+  simpl; simpl in Heq; rewrite Heq...
+- apply mix_0_n_r with n; simpl...
+  + destruct n...
+    simpl; rewrite Nat.leb_refl...
+  + apply Nat.le_trans with (S (S (length L))); try lia.
+    apply Compare_dec.leb_iff_conv...
 Qed.
 
 (** provability in [P + mix_0 + mix_2] is equivalent to provability in [P + mix_k] for all k *)
@@ -521,25 +491,13 @@ Qed.
 
 Lemma allmix_admissible {P} : P.(pmix) 0 = true -> P.(pmix) 2 = true ->
   forall l, ll P l -> ll (pmixupd_pfrag P pmix02) l.
-Proof with try assumption; try reflexivity.
-  intros Hpmix0 Hpmixn l pi.
-  remember (pmixupd_pfrag P pmix02) as P'.
-  induction pi using (ll_nested_ind _); try now constructor.
-  - apply ex_r with l1...
-    rewrite HeqP'...
-  - apply ex_wn_r with lw...
-  - apply allmix_r; try now rewrite HeqP'.
-    apply forall_Forall_Type.
-    intros l' Hin.
-    apply (In_Forall_Type_in _ _ _ PL) in Hin as (pi' & Hin).
-    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin).
-  - apply cut_r with A...
-    rewrite HeqP'...
-  - revert a.
-    replace (pgax P) with (pgax P').
-    + intro a; apply gax_r.
-    + rewrite HeqP'...
+Proof.
+intros Hpmix0 Hpmix2 l pi.
+eapply mix_conservativity_updr; [ | apply pi].
+intros k Hpmixk L Hl HF.
+apply allmix_r; try assumption; reflexivity.
 Qed.
+
 
 (** ** Standard linear logic: [ll_ll] (no mix, no axiom, commutative) *)
 
