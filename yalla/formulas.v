@@ -123,9 +123,20 @@ Ltac fsize_auto :=
   lia.
 
 (** Atomic [formula] *)
-Inductive atomic : formula -> Prop :=
+Inductive atomic_Prop : formula -> Prop :=
+| atomic_Prop_var : forall x, atomic_Prop (var x)
+| atomic_Prop_covar : forall x, atomic_Prop (covar x).
+
+Inductive atomic : formula -> Type :=
 | atomic_var : forall x, atomic (var x)
 | atomic_covar : forall x, atomic (covar x).
+
+Lemma atomic_Prop_atomic : forall A, atomic_Prop A -> atomic A.
+Proof.
+induction A; intros Hat;
+  try (exfalso; inversion Hat; fail);
+  constructor.
+Qed.
 
 
 (** ** Sub-formulas *)

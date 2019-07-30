@@ -64,8 +64,18 @@ Ltac ifsize_auto :=
   lia.
 
 (** Atomic [iformula] *)
-Inductive iatomic : iformula -> Prop :=
+Inductive iatomic_Prop : iformula -> Prop :=
+| iatomic_Prop_var : forall x, iatomic_Prop (ivar x).
+
+Inductive iatomic : iformula -> Type :=
 | iatomic_var : forall x, iatomic (ivar x).
+
+Lemma iatomic_Prop_iatomic : forall A, iatomic_Prop A -> iatomic A.
+Proof.
+induction A; intros Hat;
+  try (exfalso; inversion Hat; fail);
+  constructor.
+Qed.
 
 
 (** ** Sub-formulas *)

@@ -33,7 +33,7 @@ Inductive tformula : Set :=
 | tplus : tformula -> tformula -> tformula
 | toc : tformula -> tformula.
 
-Inductive tatomic : tformula -> Prop :=
+Inductive tatomic : tformula -> Type :=
 | tatomic_var : forall x, tatomic (tvar x).
 
 Inductive tsubform : tformula -> tformula -> Type :=
@@ -695,7 +695,7 @@ Definition easytpgax P := forall a,
 * (forall A C, In_Type A (fst (projT2 (tpgax P) a)) -> ill2ll i2ac C = ill2ll i2ac (tl2ill A) -> C = tl2ill A).
 
 Lemma tatomic_easytpgax {P} :
-  (forall a, prod (option_prop tatomic (snd (projT2 (tpgax P) a)))
+  (forall a, prod (option_Type tatomic (snd (projT2 (tpgax P) a)))
                   (Forall_Type tatomic (fst (projT2 (tpgax P) a)))) -> easytpgax P.
 Proof.
 intros Hgax a ; split ; [ split | ].

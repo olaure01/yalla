@@ -323,7 +323,7 @@ Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
 
 (** ** Some reversibility statements *)
 
-Lemma bot_rev {P} : (forall a, In bot (projT2 (pgax P) a) -> False) ->
+Lemma bot_rev {P} : (forall a, In_Type bot (projT2 (pgax P) a) -> False) ->
   forall l1 l2, ll P (l1 ++ bot :: l2) -> ll P (l1 ++ l2).
 Proof with myeeasy.
 intros Hgax l1 l2 pi.
@@ -421,7 +421,7 @@ induction pi ; intros l1' l2' Heq ; subst.
     eapply IHpi1...
 - exfalso.
   apply (Hgax a) ; rewrite Heq.
-  apply in_elt.
+  apply in_Type_elt.
 Qed.
 
 Lemma parr_rev {P} : (forall a A B, In (parr A B) (projT2 (pgax P) a) -> False) ->
@@ -521,7 +521,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   apply in_elt.
 Qed.
 
-Lemma one_rev {P} : (forall a, In one (projT2 (pgax P) a) -> False) ->
+Lemma one_rev {P} : (forall a, In_Type one (projT2 (pgax P) a) -> False) ->
   forall l0, ll P l0 -> forall l1 l2, ll P (l1 ++ one :: l2) ->
   ll P (l1 ++ l0 ++ l2).
 Proof with myeeasy.
@@ -613,12 +613,12 @@ induction pi ; intros l1' l2' Heq ; subst.
     rewrite app_comm_cons ; apply IHpi1...
 - exfalso.
   apply (Hgax a) ; rewrite Heq.
-  apply in_elt.
+  apply in_Type_elt.
 Qed.
 
 Lemma tens_one_rev {P} :
-(forall a, In one (projT2 (pgax P) a) -> False) ->
-(forall a A, In (tens one A) (projT2 (pgax P) a) -> False) ->
+(forall a, In_Type one (projT2 (pgax P) a) -> False) ->
+(forall a A, In_Type (tens one A) (projT2 (pgax P) a) -> False) ->
   forall A l1 l2, ll P (l1 ++ tens one A :: l2) -> ll P (l1 ++ A :: l2).
 Proof with myeeasy.
 intros Hgax1 Hgaxt A l1 l2 pi.
@@ -709,7 +709,7 @@ induction pi ; intros A' l1' l2' Heq ; subst.
     rewrite app_comm_cons ; apply IHpi1...
 - exfalso.
   apply (Hgaxt a A') ; rewrite Heq.
-  apply in_elt.
+  apply in_Type_elt.
 Qed.
 
 Lemma tens_rev {P} : (forall a A B, projT2 (pgax P) a = tens A B :: nil -> False) ->
@@ -818,7 +818,7 @@ induction l1 ; intros l2 HF ; inversion HF ; subst.
   exists (B :: l'') ; constructor ; assumption.
 Qed.
 
-Lemma munit_elim {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma munit_elim {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   forall l1, ll P l1 -> forall l2, Forall2_Type munit_smp l1 l2 -> ll P l2.
 Proof with try eassumption.
 intros Hgax l1 pi ; induction pi ; intros l2' HF ;
@@ -869,12 +869,10 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
     apply IHpi1 in HF1.
     apply (Forall2_Type_cons B y) in HF2...
     apply IHpi2 in HF2.
-    assert (forall a, In one (projT2 (pgax P) a) -> False) as Hgax1.
+    assert (forall a, In_Type one (projT2 (pgax P) a) -> False) as Hgax1.
     { intros a Hone.
-      destruct (Forall_forall atomic (projT2 (pgax P) a)) as (H & _).
-      specialize (H (Hgax a) one).
-      specialize (H Hone).
-      inversion H. }
+      eapply Forall_Type_forall in Hone; [ | apply Hgax].
+      inversion Hone. }
     rewrite <- (app_nil_l _) in HF1 ; eapply (one_rev Hgax1 _ HF2) in HF1...
 - inversion HF ; subst.
   inversion H1 ; subst.
@@ -885,10 +883,8 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
     rewrite <- (app_nil_l l') ; rewrite app_comm_cons.
     eapply bot_rev...
     intros a Hbot.
-    destruct (Forall_forall atomic (projT2 (pgax P) a)) as (H & _).
-    specialize (H (Hgax a) bot).
-    specialize (H Hbot).
-    inversion H.
+    eapply Forall_Type_forall in Hbot; [ | apply Hgax].
+    inversion Hbot.
 - inversion HF ; subst.
   inversion H1 ; subst.
   constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
@@ -1173,7 +1169,7 @@ apply (@cut_r _ Hcut A) ; assumption.
 Qed.
 
 Lemma bot_contradiction_weak_contradiction {P} :
-  (forall a, In bot (projT2 (pgax P) a) -> False) ->
+  (forall a, In_Type bot (projT2 (pgax P) a) -> False) ->
   ll P (bot :: nil) -> ll P nil.
 Proof.
 intros Hgax pi.

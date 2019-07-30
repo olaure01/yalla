@@ -10,7 +10,13 @@ Require Import genperm_Type.
 
 
 (** ** Definitions *)
-Definition option_prop {A:Type} (P:A->Prop) o :=
+Definition option_Prop {A:Type} (P:A->Prop) o :=
+match o with
+| Some a => P a
+| None => True
+end.
+
+Definition option_Type {A:Type} (P:A->Type) o :=
 match o with
 | Some a => P a
 | None => True

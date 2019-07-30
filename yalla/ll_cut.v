@@ -18,7 +18,7 @@ Section Cut_Elim_Proof.
 
 Context {P : pfrag}.
 
-Hypothesis P_gax_at : forall a, Forall atomic (projT2 (pgax P) a).
+Hypothesis P_gax_at : forall a, Forall_Type atomic (projT2 (pgax P) a).
 
 Lemma cut_oc_comm : pcut P = false -> forall n A l1 l2, ll P (l1 ++ wn A :: l2) -> 
   (forall lw (pi0 : ll P (dual A :: map wn lw)), psize pi0 < n -> ll P (l1 ++ map wn lw ++ l2)) ->
@@ -155,7 +155,7 @@ intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
 - rewrite f in P_cutfree ; inversion P_cutfree.
 - exfalso.
   assert (Hat := P_gax_at a) ; rewrite H0 in Hat.
-  apply Forall_app_inv in Hat ; destruct Hat as [_ Hat] ; inversion Hat.
+  apply Forall_Type_app_inv in Hat ; destruct Hat as [_ Hat] ; inversion Hat.
   inversion H2.
 Qed.
 
@@ -289,7 +289,7 @@ induction pi2 ; intros l' L Heq ; subst.
   + list_simpl ; apply gax_r.
   + exfalso.
     specialize P_gax_at with a ; rewrite Heq in P_gax_at.
-    apply Forall_app_inv in P_gax_at.
+    apply Forall_Type_app_inv in P_gax_at.
     destruct P_gax_at as [_ Hat].
     inversion Hat ; inversion H1.
 Qed.
@@ -1100,7 +1100,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP a.
   clear IHcut IHsize Hc.
   specialize P_gax_at with a ; rewrite Heql in P_gax_at.
   assert (atomic A) as Hat.
-  { apply Forall_app_inv in P_gax_at ; destruct P_gax_at as [_ P_gax_at2] ; inversion P_gax_at2... }
+  { apply Forall_Type_app_inv in P_gax_at ; destruct P_gax_at as [_ P_gax_at2] ; inversion P_gax_at2... }
   remember (dual A :: l0) as l.
   rewrite <- (app_nil_l l2) ; rewrite <- (app_nil_l (dual A :: l0)) in Heql0.
   remember nil as l3 ; clear Heql3.
@@ -1230,7 +1230,7 @@ End Cut_Elim_Proof.
 (** If axioms are atomic and closed under cut, then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible {P} :
-  (forall a, Forall atomic (projT2 (pgax P) a)) ->
+  (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   (forall a b x l1 l2 l3 l4,
      projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
      { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->

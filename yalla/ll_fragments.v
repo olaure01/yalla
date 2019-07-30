@@ -97,7 +97,7 @@ eapply (ext_wn_param _ P fp _ (one :: nil)) in pi.
   inversion Hpmix2'.
 Qed.
 
-Lemma ll_to_mix0_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma ll_to_mix0_axat {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   pperm P = true -> forall l,
   ll P (wn one :: l) -> ll (mix0add_pfrag P) l.
 Proof with myeeasy ; try PCperm_Type_solve.
@@ -443,19 +443,19 @@ induction pi ; intros l' l0' l1' HP.
     apply Permutation_Type_vs_elt_inv in HP.
     specialize (Hgax a).
     destruct HP as [[l1 l2] Heq] ; rewrite Heq in Hgax.
-    apply Forall_elt in Hgax.
+    apply Forall_Type_elt in Hgax.
     inversion Hgax.
   + exfalso.
     apply Permutation_Type_vs_elt_inv in HP.
     specialize (Hgax a).
     destruct HP as [[l1 l2] Heq] ; rewrite Heq in Hgax.
-    apply Forall_elt in Hgax.
+    apply Forall_Type_elt in Hgax.
     inversion Hgax.
   + exfalso.
     apply Permutation_Type_vs_elt_inv in HP.
     specialize (Hgax a).
     destruct HP as [[l1 l2] Heq] ; rewrite Heq in Hgax.
-    apply Forall_elt in Hgax.
+    apply Forall_Type_elt in Hgax.
     inversion Hgax.
 Qed.
 
@@ -643,17 +643,15 @@ eapply (ext_wn_param _ P fp _ (tens bot bot :: nil)) in pi.
   + rewrite fp...
 Qed.
 
-Lemma ll_to_mix2_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma ll_to_mix2_axat {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   pperm P = true -> forall l,
   ll P (wn (tens bot bot) :: l) -> ll (mix2add_pfrag P) l.
 Proof with myeeasy ; try PCperm_Type_solve.
 intros Hgax Hperm.
-assert (forall a, In bot (projT2 (pgax P) a) -> False) as Hgaxbot.
+assert (forall a, In_Type bot (projT2 (pgax P) a) -> False) as Hgaxbot.
 { intros a Hbot.
-  destruct (Forall_forall atomic (projT2 (pgax P) a)) as (H & _).
-  specialize (H (Hgax a) bot).
-  specialize (H Hbot).
-  inversion H. }
+  eapply Forall_Type_forall in Hbot; [ | apply Hgax].
+  inversion Hbot. }
 enough (forall l, ll P l -> forall l' (l0 l1 : list unit),
   Permutation_Type l (l' ++ map (fun _ => tens bot bot) l1
                          ++ map (fun _ => wn (tens bot bot)) l0)  ->
@@ -1031,19 +1029,19 @@ induction pi ; intros l' l0' l1' HP.
     apply Permutation_Type_vs_elt_inv in HP.
     specialize (Hgax a).
     destruct HP as [[l1 l2] Heq] ; rewrite Heq in Hgax.
-    apply Forall_elt in Hgax.
+    apply Forall_Type_elt in Hgax.
     inversion Hgax.
   + exfalso.
     apply Permutation_Type_vs_elt_inv in HP.
     specialize (Hgax a).
     destruct HP as [[l1 l2] Heq] ; rewrite Heq in Hgax.
-    apply Forall_elt in Hgax.
+    apply Forall_Type_elt in Hgax.
     inversion Hgax.
   + exfalso.
     apply Permutation_Type_vs_elt_inv in HP.
     specialize (Hgax a).
     destruct HP as [[l1 l2] Heq] ; rewrite Heq in Hgax.
-    apply Forall_elt in Hgax.
+    apply Forall_Type_elt in Hgax.
     inversion Hgax.
 Qed.
 
@@ -1364,7 +1362,7 @@ eapply mix2_to_ll...
 apply pi.
 Qed.
 
-Lemma ll_to_mix02'_axat {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma ll_to_mix02'_axat {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   pperm P = true -> forall l,
   ll P (wn one :: wn (tens bot bot) :: l) -> ll (mix2add_pfrag (mix0add_pfrag P)) l.
 Proof with myeasy.
@@ -1406,7 +1404,7 @@ Qed.
 
 (* Hgax_cut is here only to allow the use of cut_admissible
    the more general result without Hgax_cut should be provable by induction as for [ll_to_mix2] *)
-Lemma ll_to_mix02''_axcut {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma ll_to_mix02''_axcut {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   (forall a b x l1 l2 l3 l4,
      projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
      { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
@@ -1446,7 +1444,7 @@ Qed.
 
 (* Hgax_cut is here only to allow the use of cut_admissible
    the more general result without Hgax_cut should be provable by induction as for [ll_to_mix2] *)
-Lemma ll_to_mix02'''_axcut {P} : (forall a, Forall atomic (projT2 (pgax P) a)) ->
+Lemma ll_to_mix02'''_axcut {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   (forall a b x l1 l2 l3 l4,
      projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
      { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
@@ -1772,8 +1770,4 @@ apply wk_r.
 apply de_r.
 eapply ex_r ; [ apply pi | PCperm_Type_solve ].
 Qed.
-
-
-
-
 

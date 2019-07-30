@@ -195,7 +195,7 @@ Inductive llfoc : list formula -> option formula -> Type :=
 | parr_fr : forall A B l Pi,
                     llfoc (A :: B :: l) Pi ->
                     llfoc (parr A B :: l) Pi
-| top_fr : forall l Pi, option_prop sformula Pi -> Forall_Type tFoc l ->
+| top_fr : forall l Pi, option_Prop sformula Pi -> Forall_Type tFoc l ->
                     llfoc (top :: l) Pi
 | plus_fr1 : forall A B l, llfoc (polcont l A) (polfoc A) ->
                              llfoc l (Some (aplus A B))
@@ -230,7 +230,7 @@ match pi with
 | co_fr _ _ _ pi0 => S (fpsize pi0)
 end.
 
-Lemma top_gen_fr : forall l Pi, option_prop sformula Pi -> llfoc (top :: l) Pi.
+Lemma top_gen_fr : forall l Pi, option_Prop sformula Pi -> llfoc (top :: l) Pi.
 Proof with myeeasy.
 intros l.
 remember (list_sum (map fsize l)) as n.

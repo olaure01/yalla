@@ -22,8 +22,8 @@ Section Cut_Elim_Proof.
 
 Context {P : ipfrag}.
 
-Hypothesis P_gax_noN_l : forall a, In N (fst (projT2 (ipgax P) a)) -> False.
-Hypothesis P_gax_at_l : forall a, Forall iatomic (fst (projT2 (ipgax P) a)).
+Hypothesis P_gax_noN_l : forall a, In_Type N (fst (projT2 (ipgax P) a)) -> False.
+Hypothesis P_gax_at_l : forall a, Forall_Type iatomic (fst (projT2 (ipgax P) a)).
 Hypothesis P_gax_at_r : forall a, iatomic (snd (projT2 (ipgax P) a)).
 Hypothesis P_gax_cut : forall a b l1 l2,
                             fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 -> 
@@ -475,7 +475,7 @@ induction pi2 ; intros l' L Heq.
 - assert (L = nil) as Hnil ; subst.
   { specialize P_gax_at_l with a.
     rewrite Heq in P_gax_at_l.
-    apply Forall_app_inv in P_gax_at_l ; destruct P_gax_at_l as [_ Hat].
+    apply Forall_Type_app_inv in P_gax_at_l ; destruct P_gax_at_l as [_ Hat].
     destruct L ; inversion Hat...
     inversion H1. }
   list_simpl in Heq ; list_simpl ; subst ; apply gax_ir.
@@ -1221,7 +1221,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
   rewrite f in P_cutfree ; inversion P_cutfree.
 - (* gax_ir *)
   assert (Hiq := P_gax_at_l a) ; rewrite Heql in Hiq.
-  apply Forall_elt in Hiq.
+  apply Forall_Type_elt in Hiq.
   simpl in IHsize.
   remember (gax_ir _ a) as Hgax ; apply (f_equal ipsize) in HeqHgax ; simpl in HeqHgax.
   destruct_ill pi1 f X l Hl2 Hr2 HP b ; try (exfalso ; inversion Hiq ; fail).
@@ -1251,7 +1251,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
   + exfalso.
     apply (P_gax_noN_l a).
     rewrite Heql.
-    apply in_elt.
+    apply in_Type_elt.
   + list_simpl ; rewrite app_assoc ; apply lmap_ilr...
     list_simpl ; rewrite app_comm_cons ; rewrite (app_assoc l1).
     revert Hgax HeqHgax ; rewrite Heql ; list_simpl ; rewrite app_comm_cons ; rewrite (app_assoc l3) ;
@@ -1260,7 +1260,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
   + exfalso.
     apply (P_gax_noN_l a).
     rewrite Heql.
-    apply in_elt.
+    apply in_Type_elt.
   + list_simpl ; rewrite app_assoc ; apply with_ilr1.
     list_simpl ; rewrite app_comm_cons ; rewrite (app_assoc l1).
     revert Hgax HeqHgax ; rewrite Heql ; list_simpl ; rewrite app_comm_cons ; rewrite (app_assoc l0) ;
@@ -1309,8 +1309,8 @@ End Cut_Elim_Proof.
 (** If axioms are atomic and closed under cut, then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible_ill {P} :
-  (forall a, In N (fst (projT2 (ipgax P) a)) -> False) ->
-  (forall a, Forall iatomic (fst (projT2 (ipgax P) a))) ->
+  (forall a, In_Type N (fst (projT2 (ipgax P) a)) -> False) ->
+  (forall a, Forall_Type iatomic (fst (projT2 (ipgax P) a))) ->
   (forall a, iatomic (snd (projT2 (ipgax P) a))) ->
   (forall a b l1 l2, fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 -> 
                   { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
