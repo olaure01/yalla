@@ -6,9 +6,7 @@
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
 Require Import CMorphisms.
-Require Import EqdepFacts.
-Require Import Eqdep_dec.
-Require Import PeanoNat.
+Require Import Arith_base.
 Require Import Lia.
 
 Require Import Bool_more.

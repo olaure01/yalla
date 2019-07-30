@@ -2,9 +2,6 @@
 
 (** * Cut admissibility for [ll] *)
 
-
-Require Import Arith_base.
-Require Import Eqdep_dec.
 Require Import Lia.
 
 Require Import Injective.
@@ -68,9 +65,8 @@ intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
   apply mix_r.
   + simpl.
     rewrite app_length.
-    rewrite plus_comm.
-    rewrite plus_n_Sm.
-    change (S (length L4)) with (length ((l3' ++ oc (dual A) :: l4') :: L4)).
+    replace (S (length L4 + length L3))
+       with (length L3 + length ((l3' ++ oc (dual A) :: l4') :: L4)) by (simpl; lia).
     rewrite <- app_length...
   + change ((l3' ++ l2 ++ l1 ++ l4') :: L4 ++ L3) with (((l3' ++ l2 ++ l1 ++ l4') :: L4) ++ L3).
     destruct (Forall_Type_app_inv _ _ _ FL) as (FL3 & FL4).
@@ -85,7 +81,7 @@ intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
       refine (IH _ _ _).
       constructor; apply H.
     * apply le_S_n.
-      apply le_trans with (psize (mix_r P (L3 ++ (l3' ++ oc (dual A) :: l4') :: L4) f FL))...
+      transitivity (psize (mix_r P (L3 ++ (l3' ++ oc (dual A) :: l4') :: L4) f FL))...
       apply psize_inf_mix...    
 - destruct l3 ; inversion H0.
   destruct l3 ; inversion H2.
@@ -516,9 +512,8 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
       destruct (In_Forall_Type_elt _ _ _ (nil ++ bot :: l2') Hax) as (pi & Hin).
       change (nil ++ l2') with (nil ++ nil ++ l2').
       refine (IHsize _ _ _ _ Hone pi _ _)...
-      rewrite plus_comm.
-      apply plus_lt_compat_r.
-      apply psize_inf_mix...
+      apply (psize_inf_mix _ _ f) in Hin.
+      simpl in Hin; simpl; lia.
   + (* bot_r *)
     inversion Heql' ; subst...
   + (* cut_r *)
@@ -576,9 +571,8 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          destruct (In_Forall_Type_elt _ _ _ (nil ++ one :: l2') Hax) as (pi & Hin).
          change (l2 ++ l2') with (nil ++ l2 ++ l2'). 
          refine (IHsize _ _ _ _ Hbot pi _ _)...
-         rewrite plus_comm.
-         apply plus_lt_compat_r.
-         apply psize_inf_mix...
+         apply (psize_inf_mix _ _ f) in Hin.
+         simpl in Hin; simpl; lia.
     * (* one_r *)
       list_simpl...
     * (* cut_r *)
@@ -647,10 +641,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Htens IHsize;
            replace (tens A0 B) with (dual (parr (dual B) (dual A0))) by (simpl; rewrite 2 bidual; reflexivity);
            intros Htens IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Htens pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite 2 fsize_dual...
     * (* parr_r *)
       clear IHsize ; subst.
@@ -734,10 +727,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hparr IHsize;
            replace (parr A0 B) with (dual (tens (dual B) (dual A0))) by (simpl; rewrite 2 bidual; reflexivity);
            intros Hparr IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Hparr pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite 2 fsize_dual...
     * (* tens_r *)
       clear IHsize ; subst.
@@ -803,11 +795,10 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          clear pi.
          destruct (In_Forall_Type_elt _ _ _ (nil ++ (zero) :: l2') Hax) as (pi & Hin).
          change (l2 ++ l2') with (nil ++ l2 ++ l2').
-         revert Htop IHsize; change one with (dual (zero)); intros Htop IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         rewrite plus_comm.
-         apply plus_lt_compat_r.
-         apply psize_inf_mix...
+         change top with (dual (zero)) in Htop.
+         refine (IHsize _ _ _ _ Htop pi _ _)...
+         apply (psize_inf_mix _ _ f) in Hin.
+         simpl in Hin; simpl; lia.
     * (* cut_r *)
       rewrite f in P_cutfree ; inversion P_cutfree.
     * (* gax_r *)
@@ -873,10 +864,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hplus IHsize; 
            replace (aplus A0 B) with (dual (awith (dual A0) (dual B))) by (simpl; rewrite 2 bidual; reflexivity);
            intros Hplus IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Hplus pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite 2 fsize_dual...
     * (* with_r *)
       clear IHsize ; subst.
@@ -948,10 +938,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hplus IHsize.
          replace (aplus B A0) with (dual (awith (dual B) (dual A0))) by (simpl; rewrite 2 bidual; reflexivity).
          intros Hplus IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Hplus pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite 2 fsize_dual...
     * (* with_r *)
       clear IHsize ; subst.
@@ -1023,10 +1012,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hwith IHsize;
            replace (awith A0 B) with (dual (aplus (dual A0) (dual B))) by (simpl; rewrite 2 bidual; reflexivity);
            intros Hwith IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ (Hwith Hr) pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite 2 fsize_dual...
     * (* plus_r1 *)
       clear IHsize ; subst.
@@ -1116,10 +1104,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hoc IHsize;
            replace (oc A0) with (dual (wn (dual A0))) by (simpl; rewrite bidual; reflexivity);
            intros Hparr IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Hparr pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite fsize_dual...
     * (* oc_r *)
       clear IHsize ; subst.
@@ -1220,10 +1207,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hde IHsize;
            replace (wn A0) with (dual (oc (dual A0))) by (simpl; rewrite bidual; reflexivity);
            intros Hde IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Hde pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite fsize_dual...
     * (* oc_r *)
       clear IHsize ; subst.
@@ -1294,10 +1280,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hwk IHsize;
            replace (wn A0) with (dual (oc (dual A0))) by (simpl; rewrite bidual; reflexivity);
            intros Hwk IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Hwk pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite fsize_dual...
     * (* oc_r *)
       clear IHsize ; subst.
@@ -1368,10 +1353,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
          revert Hco IHsize;
            replace (wn A0) with (dual (oc (dual A0))) by (simpl; rewrite bidual; reflexivity);
            intros Hco IHsize.
-         refine (IHsize _ _ _ _ _ pi _ _)...
-         ++ rewrite plus_comm.
-            apply plus_lt_compat_r.
-            apply psize_inf_mix...
+         refine (IHsize _ _ _ _ Hco pi _ _)...
+         ++ apply (psize_inf_mix _ _ f) in Hin.
+            simpl in Hin; simpl; lia.
          ++ simpl in Hc; simpl; rewrite fsize_dual...
     * (* oc_r *)
       clear IHsize ; subst.

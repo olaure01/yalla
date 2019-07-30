@@ -2,9 +2,6 @@
 
 (** * Properties relying on cut admissibility *)
 
-Require Import EqdepFacts.
-Require Import Eqdep_dec.
-
 Require Import Bool_more.
 Require Import List_more.
 Require Import List_Type_more.

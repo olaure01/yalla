@@ -4,8 +4,6 @@
 (** * Parametric negative translation from [ll] into [ill]. *)
 (** Properties relying on cut admissibility *)
 
-Require Import Eqdep_dec.
-
 Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type.

@@ -1,7 +1,6 @@
 (* Parameter definitions for yalla library *)
 
-Require Import NPeano.
-Require Import EqNat.
+Require Import Arith_base.
 Require Import Equalities.
 
 Require Import Injective.

@@ -3,7 +3,6 @@
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
-Require Import Arith_base.
 Require Import List.
 
 Require Import Injective.
@@ -1367,5 +1366,4 @@ induction pi ; try (now econstructor).
 - eapply ex_oc_ir...
 - eapply cut_ll_ir...
 Qed.
-
 

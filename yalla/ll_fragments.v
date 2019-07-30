@@ -3,7 +3,7 @@
 
 (** * Definitions of various Linear Logic fragments *)
 
-Require Import PeanoNat.
+Require Import Arith_base.
 Require Import Lia.
 
 Require Import Bool_more.
@@ -184,7 +184,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
     apply ex_r with l1...
   - apply ex_wn_r with lw...
   - case_eq (length L =? n); intros Heq.
-    + rewrite<- (app_nil_r _).
+    + rewrite <- (app_nil_r _).
       apply cut_r with (tens_n (length L) bot).
       * rewrite HeqP'...
       * rewrite dual_tens_n; change (dual bot) with one.
@@ -237,7 +237,7 @@ Lemma ll_to_parr_n {P} : forall l n, ll P (wn (tens_n n bot) :: l) ->
                                                     end))) true) l.
 Proof with try assumption; try reflexivity.
   intros l n pi.
-  rewrite<- (app_nil_r l).
+  rewrite <- (app_nil_r l).
   apply cut_r with (wn (tens_n n bot))...
   + simpl.
     change nil with (map wn nil).
@@ -392,7 +392,7 @@ Proof with try assumption.
     + inversion FL; subst.
       clear FL; rename X into pi1; rename X0 into FL.
       replace (concat (a :: l :: l0 :: L)) with (concat (a :: (concat (l :: l0 :: L) :: nil)))
-        by (simpl; rewrite<- ? app_assoc; rewrite app_nil_r; reflexivity).
+        by (simpl; rewrite <- ? app_assoc; rewrite app_nil_r; reflexivity).
       apply mix_r...
       apply Forall_Type_cons...
       apply Forall_Type_cons ; [ | apply Forall_Type_nil].
@@ -1515,8 +1515,4 @@ apply wk_r.
 apply de_r.
 eapply ex_r ; [ apply pi | PCperm_Type_solve ].
 Qed.
-
-
-
-
 

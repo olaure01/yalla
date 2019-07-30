@@ -1,12 +1,7 @@
 (* llfoc library for yalla *)
 
-
-(* output in Type *)
-
-
 (** * Focusing in Linear Logic *)
 
-Require Import Arith_base.
 Require Import CMorphisms.
 
 Require Import List_more.
@@ -15,6 +10,7 @@ Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
+Require Import wf_nat_more.
 
 Require Import ll_fragments.
 
@@ -234,7 +230,7 @@ Lemma top_gen_fr : forall l Pi, option_prop sformula Pi -> llfoc (top :: l) Pi.
 Proof with myeeasy.
 intros l.
 remember (list_sum (map fsize l)) as n.
-revert l Heqn ; induction n using (well_founded_induction lt_wf) ;
+revert l Heqn ; induction n using lt_wf_rect ;
   intros l Heqn Pi Hs ; subst.
 destruct (tFocl_dec l).
 - apply top_fr...
@@ -928,8 +924,7 @@ Lemma top_gen_Fr : forall l, llFoc (top :: l) None.
 Proof with myeeasy.
 intros l.
 remember (list_sum (map fsize l)) as n.
-revert l Heqn ; induction n using (well_founded_induction lt_wf) ;
-  intros l Heqn ; subst.
+revert l Heqn ; induction n using lt_wf_rect ; intros l Heqn ; subst.
 destruct (tFocl_dec l).
 - apply top_Fr...
 - apply not_tFocl in f.
@@ -1038,7 +1033,7 @@ Theorem llfoc_to_llFoc : forall s l Pi (pi : llfoc l Pi), fpsize pi < s ->
  * (forall C, Pi = Some C -> (Forall_Type Foc l -> False) ->
       (llFoc (C :: l) None) * llFoc (wn C :: l) None).
 Proof with myeeasy.
-  induction s using (well_founded_induction_type lt_wf) ;
+  induction s using lt_wf_rect ;
     intros l pi ; split ; [ split | ] ;
     [ intros Heq ; destruct pi0 ; inversion Heq ; subst ; simpl in H
     | intros PPi Heq HF ; destruct pi0 ; inversion Heq ; subst ; simpl in H
@@ -1845,6 +1840,4 @@ intros l Pi pi ; induction pi ;
       apply pi'.
     * PCperm_Type_solve.
 Qed.
-
-
 
