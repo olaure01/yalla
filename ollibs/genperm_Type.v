@@ -1,6 +1,4 @@
-(* genperm Library *)
-
-(* with output in Type *)
+(* genperm_Type Library *)
 
 (** * Factorized statements for different notions of permutation *)
 
@@ -60,6 +58,14 @@ Instance cperm_PCperm_Type {A} b : Proper (CPermutation_Type ==> PCperm_Type b) 
 Proof with try assumption.
 destruct b ; intros l l' HC...
 apply cperm_perm_Type...
+Qed.
+
+Lemma PCperm_Type_monot {A} : forall b1 b2, Bool.leb b1 b2 ->
+  forall l1 l2 : list A, PCperm_Type b1 l1 l2 -> PCperm_Type b2 l1 l2.
+Proof.
+intros b1 b2 Hleb l1 l2.
+destruct b1; destruct b2; try (now inversion Hleb).
+apply cperm_perm_Type.
 Qed.
 
 Instance PCperm_Type_refl {A} b : Reflexive (@PCperm_Type A b).
@@ -158,7 +164,7 @@ Qed.
 
 Lemma PCperm_Type_vs_elt_inv {A} b : forall (a : A) l l1 l2,
   PCperm_Type b l (l1 ++ a :: l2) ->
-  { pl : _ & l = fst pl ++ a :: snd pl & PEperm_Type b (l2 ++ l1) (snd pl ++ fst pl) }.
+  {' (l1',l2') : _ & l = l1' ++ a :: l2' & PEperm_Type b (l2 ++ l1) (l2' ++ l1') }.
 Proof with try reflexivity.
 destruct b ; intros a l l1 l2 HC.
 - assert (Heq := HC).
@@ -179,7 +185,7 @@ Qed.
 
 Lemma PCperm_Type_vs_cons_inv {A} b : forall (a : A) l l1,
   PCperm_Type b l (a :: l1) ->
-  { pl : _ & l = fst pl ++ a :: snd pl & PEperm_Type b l1 (snd pl ++ fst pl) }.
+  {' (l1',l2') : _ & l = l1' ++ a :: l2' & PEperm_Type b l1 (l2' ++ l1') }.
 Proof with try reflexivity.
 intros a l l1 HP.
 rewrite <- app_nil_l in HP.
@@ -188,6 +194,26 @@ destruct HP as [(l' & l'') HP Heq] ; subst.
 exists (l',l'')...
 rewrite app_nil_r in Heq.
 assumption.
+Qed.
+
+Lemma PCperm_Type_cons_vs_cons {A} B : forall (a b : A) la lb,
+  PCperm_Type B (b :: lb) (a :: la) ->
+    ( prod (a = b) (PEperm_Type B lb la) )
+  + { '(l1,l2) : _ & lb = l1 ++ a :: l2 & PEperm_Type B la (l2 ++ b :: l1) }.
+Proof with try reflexivity.
+intros a b l1 l2 HP.
+apply PCperm_Type_vs_cons_inv in HP.
+destruct HP as [(l1',l2') Heq HP'].
+destruct l1' ; inversion Heq ; subst.
+- left.
+  split.
+  + reflexivity.
+  + rewrite app_nil_r in HP'.
+    destruct B; symmetry; apply HP'.
+- right.
+  exists (l1', l2').
+  + reflexivity.
+  + assumption.
 Qed.
 
 Instance PCperm_Type_map {A B} (f : A -> B) b :
@@ -287,6 +313,14 @@ Ltac PEperm_Type_solve :=
 Instance PEperm_perm_Type {A} b : Proper (PEperm_Type b ==> (@Permutation_Type A)) id.
 Proof.
 destruct b ; intros l l' HP ; simpl in HP ; now subst.
+Qed.
+
+Lemma PEperm_Type_monot {A} : forall b1 b2, Bool.leb b1 b2 ->
+  forall l1 l2 : list A, PEperm_Type b1 l1 l2 -> PEperm_Type b2 l1 l2.
+Proof.
+intros b1 b2 Hleb l1 l2.
+destruct b1; destruct b2; try (now inversion Hleb).
+simpl; intros HP; subst; reflexivity.
 Qed.
 
 Instance PEperm_Type_refl {A} b : Reflexive (@PEperm_Type A b).

@@ -103,6 +103,34 @@ apply IHp.
 Qed.
 
 
+Lemma map_id {A n} : forall (v : t A n),
+  map (fun x => x) v = v.
+Proof.
+  induction v; simpl; auto; rewrite IHv; auto.
+Qed.
+
+Lemma map_map {A B C n} : forall (f:A->B) (g:B->C) (v : t A n),
+  map g (map f v) = map (fun x => g (f x)) v.
+Proof.
+induction v; simpl; auto.
+rewrite IHv; auto.
+Qed.
+
+Lemma map_ext_in {A B n} : forall (f g:A->B) (v : t A n),
+  (forall a, In a v -> f a = g a) -> map f v = map g v.
+Proof.
+  induction v; simpl; auto.
+  intros; rewrite H by constructor; rewrite IHv; intuition.
+  apply H ; now constructor.
+Qed.
+
+Lemma map_ext {A B n} : forall (f g:A->B), (forall a, f a = g a) ->
+  forall (v : t A n), map f v = map g v.
+Proof.
+  intros; apply map_ext_in; auto.
+Qed.
+
+
 Lemma Forall_impl {A} : forall (P Q : A -> Prop), (forall a, P a -> Q a) ->
   forall n (v : t A n), Forall P v -> Forall Q v.
 Proof.
@@ -110,13 +138,18 @@ induction v ; intros HP ; constructor ;
   inversion HP ; apply inj_pairT2_nat in H2 ; subst ; intuition.
 Qed.
 
-
-Lemma Forall_In {A} : forall P n (v : t A n) a, Forall P v -> In a v -> P a.
+Lemma Forall_forall {A} : forall P n (v : t A n),
+  Forall P v <-> forall a, In a v -> P a.
 Proof.
-intros P n v a HP Hin.
-revert HP ; induction Hin ; intros HP ; inversion HP ; subst.
-- assumption.
-- apply inj_pairT2_nat in H1 ; subst ; auto.
+intros P n v ; split.
+- intros HP a Hin.
+  revert HP ; induction Hin ; intros HP ; inversion HP ; subst.
+  + assumption.
+  + apply inj_pairT2_nat in H1 ; subst ; auto.
+- induction v ; intros Hin ; constructor.
+  + apply Hin ; constructor.
+  + apply IHv ; intros a Ha.
+    apply Hin ; now constructor.
 Qed.
 
 Lemma inc_Forall {A n} : forall (P : nat -> A -> Prop) (v : t A n) i j,

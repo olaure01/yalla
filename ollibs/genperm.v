@@ -1,13 +1,4 @@
 (* genperm Library *)
-(* v 0.2  2017/08/13   Olivier Laurent *)
-
-
-(* Release Notes
-     v0.2: more precise PEperm_vs_elt_inv and PEperm_vs_cons_inv
-           a few simplifications in proofs
-           added PEperm_PCperm_cons and PEperm_PCperm_app
-*)
-
 
 (** * Factorized statements for different notions of permutation *)
 
@@ -66,6 +57,14 @@ Instance cperm_PCperm {A} b : Proper (CPermutation ==> PCperm b) (@id (list A)).
 Proof with try assumption.
 destruct b ; intros l l' HC...
 apply cperm_perm...
+Qed.
+
+Lemma PCperm_monot {A} : forall b1 b2, Bool.leb b1 b2 ->
+  forall l1 l2 : list A, PCperm b1 l1 l2 -> PCperm b2 l1 l2.
+Proof.
+intros b1 b2 Hleb l1 l2.
+destruct b1; destruct b2; try (now inversion Hleb).
+apply cperm_perm.
 Qed.
 
 Instance PCperm_refl {A} b : Reflexive (@PCperm A b).
@@ -266,6 +265,14 @@ Ltac PEperm_solve :=
 Instance PEperm_perm {A} b : Proper (PEperm b ==> (@Permutation A)) id.
 Proof.
 destruct b ; intros l l' HP ; simpl in HP ; now subst.
+Qed.
+
+Lemma PEperm_monot {A} : forall b1 b2, Bool.leb b1 b2 ->
+  forall l1 l2 : list A, PEperm b1 l1 l2 -> PEperm b2 l1 l2.
+Proof.
+intros b1 b2 Hleb l1 l2.
+destruct b1; destruct b2; try (now inversion Hleb).
+simpl; intros HP; subst; reflexivity.
 Qed.
 
 Instance PEperm_refl {A} b : Reflexive (@PEperm A b).

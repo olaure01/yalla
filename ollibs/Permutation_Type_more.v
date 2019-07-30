@@ -5,6 +5,7 @@ Usefull properties apparently missing in the Permutation_Type library. *)
 
 Require Import Plus.
 Require Import CMorphisms.
+Require Import Lia.
 
 Require Import Injective.
 Require Import List_more.
@@ -21,11 +22,11 @@ rewrite Heq.
 reflexivity.
 Qed.
 
-Lemma Permutation_Type_morph_transp {A} : forall P : list A -> Prop,
+Lemma Permutation_Type_morph_transp {A} : forall P : list A -> Type,
   (forall a b l1 l2, P (l1 ++ a :: b :: l2) -> P (l1 ++ b :: a :: l2)) ->
-    Proper ((@Permutation_Type A) ==> iff) P.
+    Proper ((@Permutation_Type A) ==> arrow) P.
 Proof with try eassumption.
-assert (forall P : list A -> Prop,
+assert (forall P : list A -> Type,
          (forall a b l1 l2, P (l1 ++ a :: b :: l2) ->
                             P (l1 ++ b :: a :: l2)) ->
          forall l1 l2, Permutation_Type l1 l2 ->
@@ -42,14 +43,10 @@ assert (forall P : list A -> Prop,
   - apply IHPermutation_Type2.
     apply IHPermutation_Type1... }
 intros P HP l1 l2 H.
-split ; intro H'.
-- rewrite <- (app_nil_l l2).
-  rewrite <- (app_nil_l l1) in H'.
-  eapply Himp...
-- symmetry in H.
-  rewrite <- (app_nil_l l1).
-  rewrite <- (app_nil_l l2) in H'.
-  eapply Himp...
+intro H'.
+rewrite <- (app_nil_l l2).
+rewrite <- (app_nil_l l1) in H'.
+eapply Himp...
 Qed.
 
 Lemma Permutation_Type_elt {A} : forall (a : A) l1 l2 l1' l2',
@@ -182,7 +179,7 @@ eapply Permutation_Type_trans.
 Qed.
 
 Lemma Permutation_Type_app_app_inv {A} : forall (l1 l2 l3 l4 : list A),
-  Permutation_Type (l1 ++ l2) (l3 ++ l4) -> { ql : _ & prod (prod
+  Permutation_Type (l1 ++ l2) (l3 ++ l4) -> { ql & prod (prod
     (Permutation_Type l1 (fst (fst ql) ++ fst (snd ql)))
     (Permutation_Type l2 (snd (fst ql) ++ snd (snd ql)))) (prod
     (Permutation_Type l3 (fst (fst ql) ++ snd (fst ql)))
@@ -301,7 +298,7 @@ Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
   Permutation_Type l1 (map f l2) -> { l : _ & l1 = map f l & (Permutation_Type l2 l) }.
 (*
 Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
-  Permutation_Type l1 (map f l2) -> { pl : { l : _ & Permutation_Type l2 l} | l1 = map f (projT1 pl) }.
+  Permutation_Type l1 (map f l2) -> { pl : { l & Permutation_Type l2 l} | l1 = map f (projT1 pl) }.
 *)
 Proof with try assumption.
 induction l1 ; intros l2 HP.
@@ -421,5 +418,115 @@ intros l1 ; induction l1 ; intros l2 HP.
   simpl.
   rewrite 2 (plus_comm a).
   rewrite plus_assoc...
+Qed.
+
+
+(** ** Permutation definition based on transpositions for induction with fixed length *)
+Inductive Permutation_Type_transp {A} : list A -> list A -> Type :=
+| Permutation_Type_t_refl : forall l, Permutation_Type_transp l l
+| Permutation_Type_t_swap : forall x y l1 l2, Permutation_Type_transp (l1 ++ y :: x :: l2) (l1 ++ x :: y :: l2)
+| Permutation_Type_t_trans l l' l'' :
+    Permutation_Type_transp l l' -> Permutation_Type_transp l' l'' -> Permutation_Type_transp l l''.
+
+Instance Permutation_Type_transp_sym {A} : Symmetric (@Permutation_Type_transp A).
+Proof.
+intros l1 l2 HC.
+induction HC ; subst ; try (now constructor).
+eapply Permutation_Type_t_trans ; eassumption.
+Qed.
+
+Instance Permutation_Type_transp_equiv A : Equivalence (@Permutation_Type_transp A).
+Proof.
+split.
+- intros l ; apply Permutation_Type_t_refl.
+- apply Permutation_Type_transp_sym.
+- intros l1 l2 l3 ; apply Permutation_Type_t_trans.
+Qed.
+
+Lemma Permutation_Type_transp_cons {A} : forall (x : A) l1 l2,
+  Permutation_Type_transp l1 l2 -> Permutation_Type_transp (x :: l1) (x :: l2).
+Proof.
+intros x l1 l2 HP.
+induction HP ; try reflexivity.
+- rewrite 2 app_comm_cons.
+  apply Permutation_Type_t_swap.
+- etransitivity ; eassumption.
+Qed.
+
+Lemma perm_perm_t_Type {A} : forall l1 l2 : list A,
+  Permutation_Type l1 l2 -> Permutation_Type_transp l1 l2.
+Proof with try eassumption.
+intros l1 l2 HP; induction HP.
+- constructor.
+- apply Permutation_Type_transp_cons...
+- rewrite <- (app_nil_l (y :: _)).
+  rewrite <- (app_nil_l (x :: y :: _)).
+  apply Permutation_Type_t_swap.
+- etransitivity...
+Qed.
+
+Lemma perm_t_perm_Type {A} : forall l1 l2 : list A,
+  Permutation_Type_transp l1 l2 -> Permutation_Type l1 l2.
+Proof with try eassumption.
+intros l1 l2 HP ; induction HP.
+- reflexivity.
+- apply Permutation_Type_app_head.
+  apply Permutation_Type_swap.
+- etransitivity...
+Qed.
+
+Lemma Permutation_Type_ind_transp {A} : forall P : list A -> list A -> Prop,
+  (forall l, P l l) ->
+  (forall x y l1 l2, P (l1 ++ y :: x :: l2) (l1 ++ x :: y :: l2)) ->
+  (forall l l' l'',
+     Permutation_Type l l' -> P l l' -> Permutation_Type l' l'' -> P l' l'' -> P l l'') ->
+  forall l1 l2, Permutation_Type l1 l2 -> P l1 l2.
+Proof with try assumption.
+intros P Hr Ht Htr l1 l2 HP ; revert Hr Ht Htr.
+apply perm_perm_t_Type in HP.
+induction HP ; intros Hr Ht Htr.
+- apply Hr.
+- apply Ht.
+- apply (Htr _ l').
+  + apply perm_t_perm_Type...
+  + apply IHHP1...
+  + apply perm_t_perm_Type...
+  + apply IHHP2...
+Qed.
+
+Lemma Permutation_Type_rect_transp {A} : forall P : list A -> list A -> Type,
+  (forall l, P l l) ->
+  (forall x y l1 l2, P (l1 ++ y :: x :: l2) (l1 ++ x :: y :: l2)) ->
+  (forall l l' l'',
+     Permutation_Type l l' -> P l l' -> Permutation_Type l' l'' -> P l' l'' -> P l l'') ->
+  forall l1 l2, Permutation_Type l1 l2 -> P l1 l2.
+Proof with try assumption.
+intros P Hr Ht Htr l1 l2 HP ; revert Hr Ht Htr.
+apply perm_perm_t_Type in HP.
+induction HP ; intros Hr Ht Htr.
+- apply Hr.
+- apply Ht.
+- apply (Htr _ l').
+  + apply perm_t_perm_Type...
+  + apply IHHP1...
+  + apply perm_t_perm_Type...
+  + apply IHHP2...
+Qed.
+
+
+Lemma Permutation_Type_list_sum : forall l1 l2,
+  Permutation_Type l1 l2 -> list_sum l1 = list_sum l2.
+Proof.
+unfold list_sum.
+intros l1 l2 HP.
+induction HP ; simpl ; intuition ; try lia.
+Qed.
+
+Lemma Permutation_Type_list_max : forall l1 l2,
+  Permutation_Type l1 l2 -> list_max l1 = list_max l2.
+Proof.
+unfold list_max.
+intros l1 l2 HP.
+induction HP ; simpl ; intuition ; try lia.
 Qed.
 
