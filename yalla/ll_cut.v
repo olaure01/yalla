@@ -1097,7 +1097,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP a.
 - (* cut_r *)
   rewrite f in P_cutfree ; inversion P_cutfree.
 - (* gax_r *)
-  clear IHcut IHsize Hc.
+  clear IHcut IHsize c Hc.
   specialize P_gax_at with a ; rewrite Heql in P_gax_at.
   assert (atomic A) as Hat.
   { apply Forall_Type_app_inv in P_gax_at ; destruct P_gax_at as [_ P_gax_at2] ; inversion P_gax_at2... }
