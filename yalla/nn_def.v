@@ -5,8 +5,10 @@
 
 Require Import Injective.
 Require Import List_more.
+Require Import List_Type_more.
 Require Import Permutation_Type.
 Require Import genperm_Type.
+Require Import Dependent_Forall_Type.
 
 Require Import subs.
 Require Import isubs.
@@ -352,24 +354,20 @@ Hypothesis P_perm : pperm P = true.
 (under some conditions for [mix0] and [mix2]). **)
 
 Lemma ll_to_ill_trans_gen : forall l l0,
-  (pmix0 P = true -> ill (p2ipfrag P) (map ioc l0) R) ->
-  (pmix2 P = true -> forall l1 l2,
-    ill (p2ipfrag P) (map ioc l0 ++ map trans l1) R ->
-    ill (p2ipfrag P) (map ioc l0 ++ map trans l2) R ->
-      ill (p2ipfrag P) (map ioc l0 ++ map trans l2 ++ map trans l1) R) ->
+  (forall L, pmix P (length L) = true ->
+             forall (FL : Forall_Type (ll P) L),
+               Forall_Proofs P (fun l pi => ill (p2ipfrag P) (map ioc l0 ++ map trans l) R) FL ->
+               ill (p2ipfrag P) (map ioc l0 ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map ioc l0 ++ map trans l) R.
 Proof with myeeasy ; (try now (apply ax_exp_ill)) ;
                      try (simpl ; rewrite P_perm ; PEperm_Type_solve).
-intros l l0 Hmix0 Hmix2 Hll.
+intros l l0 Hmix Hll.
 assert (Hax := @ax_exp_ill (p2ipfrag P) R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
 assert (ill (p2ipfrag P) (nil ++ map ioc l0 ++ R :: nil) R) as Hax'.
 { apply wk_list_ilr.
   apply ax_exp_ill. }
-rewrite <- (app_nil_r (map _ _)) in Hmix0.
-induction Hll ; 
-  (try now (apply Hmix0)) ;
-  (try now (rewrite map_app ; eapply Hmix2)) ;
+induction Hll using (ll_nested_ind _); 
   (try now (apply P_axfree in H ; inversion H)) ;
   (try now (inversion f)) ;
   simpl.
@@ -389,6 +387,7 @@ induction Hll ;
   rewrite app_assoc in IHHll ; rewrite app_assoc.
   eapply Permutation_Type_map in p.
   eapply ex_oc_ir...
+- apply Hmix with PL...
 - eapply ex_ir ; [ | simpl ; rewrite P_perm ; apply Permutation_Type_middle ].
   rewrite <- (app_nil_l _).
   rewrite <- (app_nil_l _).
@@ -410,13 +409,13 @@ induction Hll ;
 - apply tens_ilr.
   eapply ex_ir...
 - apply zero_ilr.
-- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l))
+- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l1))
     in IHHll...
   apply negR_irr in IHHll.
   apply (plus_irr1 _ _ (negR (trans B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
   apply (ex_ir _ _ _ _ Hax)...
-- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l))
+- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l1))
     in IHHll...
   apply negR_irr in IHHll.
   apply (plus_irr2 _ _ (negR (trans B))) in IHHll.
@@ -425,7 +424,7 @@ induction Hll ;
 - apply plus_ilr...
 - simpl in IHHll ; rewrite map_map in IHHll.
   simpl in IHHll ; rewrite <- map_map in IHHll.
-  apply (ex_ir _ _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l)))
+  apply (ex_ir _ _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l1)))
     in IHHll...
   + apply negR_irr in IHHll.
     apply oc_irr in IHHll.
@@ -466,21 +465,20 @@ induction Hll ;
 Qed.
 
 Theorem ll_to_ill_trans : forall l,
-  (pmix0 P = true -> ill (p2ipfrag P) nil R) ->
-  (pmix2 P = true -> forall l1 l2,
-    ill (p2ipfrag P) (map trans l1) R ->
-    ill (p2ipfrag P) (map trans l2) R ->
-      ill (p2ipfrag P) (map trans l2 ++ map trans l1) R) ->
+  (forall L : list (list formula),
+      pmix P (length L) = true ->
+      forall FL : Forall_Type (ll P) L,
+        Forall_Proofs P (fun (l0 : list formula) (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
+        ill (p2ipfrag P) (map ioc nil ++ map trans (concat L)) R) ->
       ll P l -> ill (p2ipfrag P) (map trans l) R.
 Proof with myeeasy.
-intros l Hmix0 Hmix2 Hll.
+intros l Hmix Hll.
 rewrite <- (app_nil_l (map _ _)).
 change nil with (map ioc nil).
 eapply ll_to_ill_trans_gen...
 Qed.
 
 End RTranslation.
-
 
 (** Ingredients for generating fresh variables *)
 Definition a2n := yalla_ax.a2n.
@@ -539,5 +537,3 @@ induction A ; intros n Hf ; simpl...
   apply IHA.
   simpl in Hf...
 Qed.
-
-

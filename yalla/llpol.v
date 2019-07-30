@@ -409,9 +409,9 @@ unfold llpol_fragment in HfA ;
 Qed.
 *)
 
-(** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
-(*                                       cut   axioms          mix0  mix2  perm  *)
+(** cut / axioms / pmix / permutation *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms (fun x => false) true.
+(*                                       cut   axioms               pmix        perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)

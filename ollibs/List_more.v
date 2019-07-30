@@ -271,6 +271,22 @@ destruct H ; intuition.
 destruct H ; intuition.
 Qed.
 
+Lemma in_concat {A} : forall (l : list A) (L : list (list A)) a, In a l -> In l L -> In a (concat L).
+Proof with try assumption; try reflexivity.        
+  intros l L a Hin1 Hin2.
+  induction L; inversion Hin2; subst.
+  - clear IHL; induction l; inversion Hin1; subst.
+    + left...
+    + right.
+      apply IHl...
+      left...
+  - simpl.
+    specialize (IHL H).
+    clear - IHL.
+    induction a0...
+    right...
+Qed.
+
 (** ** [last] *)
 
 Lemma last_last {A} : forall l (a b : A), last (l ++ (a :: nil)) b = a.
@@ -474,16 +490,10 @@ apply IHl1 in H0...
 constructor...
 Qed.
 
-Lemma Forall_In {A} : forall P l (a : A), Forall P l -> In a l -> P a.
-Proof.
-intros.
-eapply (proj1 (Forall_forall _ _)) in H ; eassumption.
-Qed.
-
 Lemma Forall_elt {A} : forall P l1 l2 (a : A), Forall P (l1 ++ a :: l2) -> P a.
 Proof.
 intros P l1 l2 a HF.
-eapply Forall_In ; try eassumption.
+eapply Forall_forall ; try eassumption.
 apply in_elt.
 Qed.
 

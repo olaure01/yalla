@@ -18,7 +18,7 @@ $(OLLIBSDIR)/wf_prod.vo: $(OLLIBSDIR)/wf_prod.v
 $(OLLIBSDIR)/List_Type.vo: $(OLLIBSDIR)/List_Type.v
 $(OLLIBSDIR)/List_Type_more.vo: $(OLLIBSDIR)/List_Type_more.v $(OLLIBSDIR)/List_Type.vo 
 $(OLLIBSDIR)/CyclicPerm_Type.vo: $(OLLIBSDIR)/CyclicPerm_Type.v $(OLLIBSDIR)/List_Type.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo
-$(OLLIBSDIR)/flat_map_Type_more.vo: $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/CyclicPerm_Type.vo $(OLLIBSDIR)/flat_map_Type_more.v
+$(OLLIBSDIR)/flat_map_Type_more.vo: $(OLLIBSDIR)/flat_map_Type_more.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/CyclicPerm_Type.vo
 $(OLLIBSDIR)/genperm_Type.vo: $(OLLIBSDIR)/genperm_Type.v $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/CyclicPerm_Type.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/CPermutation_Type_solve.vo $(OLLIBSDIR)/Injective.vo
 $(OLLIBSDIR)/Permutation_Type.vo: $(OLLIBSDIR)/Permutation_Type_more.v $(OLLIBSDIR)/List_Type.vo
 $(OLLIBSDIR)/Permutation_Type_more.vo: $(OLLIBSDIR)/Permutation_Type_more.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_Type.vo
@@ -28,4 +28,5 @@ $(OLLIBSDIR)/fmsetlist_Type.vo : $(OLLIBSDIR)/fmsetlist_Type.v $(OLLIBSDIR)/Bool
 $(OLLIBSDIR)/fmsetoidlist_Type.vo : $(OLLIBSDIR)/fmsetoidlist_Type.v $(OLLIBSDIR)/Permutation_Type.vo
 $(OLLIBSDIR)/CEqualities.vo : $(OLLIBSDIR)/CEqualities.v
 $(OLLIBSDIR)/COrders.vo : $(OLLIBSDIR)/COrders.v $(OLLIBSDIR)/CEqualities.vo
+$(OLLIBSDIR)/Dependent_Forall_Type.vo : $(OLLIBSDIR)/Dependent_Forall_Type.v $(OLLIBSDIR)/List_Type_more.vo
 

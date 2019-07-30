@@ -17,5 +17,15 @@ induction n ; intros m Hm ; apply Hw ; intros m' Hm'.
   + clear - H0 ; inversion H0.
 - apply IHn.
   apply Lt.lt_le_trans with m ; [ | apply le_S_n ] ; assumption.
-Qed.
+Defined.
+
+Lemma lt_wf_double_rect :
+ forall P:nat -> nat -> Type,
+   (forall n m,
+     (forall p q, p < n -> P p q) ->
+     (forall p, p < m -> P n p) -> P n m) -> forall n m, P n m.
+Proof.
+  intros P Hrec p; pattern p; apply lt_wf_rect.
+  intros n H q; pattern q; apply lt_wf_rect; auto with arith.
+Defined.
 

@@ -95,7 +95,7 @@ apply cperm_Type.
 Qed.
 
 Lemma cperm_Type_cons {A} : forall l1 (a : A) l2,
-  CPermutation_Type (l1 ++ (a :: nil)) l2 -> CPermutation_Type (a :: l1) l2.
+  CPermutation_Type (l1 ++ a :: nil) l2 -> CPermutation_Type (a :: l1) l2.
 Proof.
 intros l1 a l2 HC.
 apply (cperm_Type_app l1 (a :: nil)) ; assumption.
@@ -153,7 +153,7 @@ Qed.
 
 Lemma cperm_Type_two {A} : forall a1 a2 b1 b2 : A,
   CPermutation_Type (a1 :: a2 :: nil) (b1 :: b2 :: nil) ->
-    { a1 = b1 /\ a2 = b2 } +  { a1 = b2 /\ a2 = b1 }.
+    { a1 = b1 /\ a2 = b2 } + { a1 = b2 /\ a2 = b1 }.
 Proof.
 intros.
 apply Permutation_Type_length_2.
@@ -208,25 +208,25 @@ Qed.
 
 Lemma cperm_Type_app_app_inv {A} : forall l1 l2 l3 l4 : list A,
   CPermutation_Type (l1 ++ l2) (l3 ++ l4) ->
-     { ql : _ & prod (prod 
+     { ql & prod (prod 
         (CPermutation_Type l1 (fst (fst ql) ++ fst (snd ql)))
         (CPermutation_Type l2 (snd (fst ql) ++ snd (snd ql))))
         (prod
         (CPermutation_Type l3 (fst (fst ql) ++ snd (fst ql)))
         (CPermutation_Type l4 (fst (snd ql) ++ snd (snd ql)))) }
-   + { pl : _ & prod (prod
+   + { pl & prod (prod
         (CPermutation_Type l1 (l4 ++ fst pl))
         (CPermutation_Type l3 (l2 ++ snd pl)))
         (CPermutation_Type (fst pl) (snd pl)) }
-   + { pl : _ & prod (prod
+   + { pl & prod (prod
         (CPermutation_Type l2 (l4 ++ fst pl))
         (CPermutation_Type l3 (l1 ++ snd pl)))
         (CPermutation_Type (fst pl) (snd pl)) }
-   + { pl : _ & prod (prod
+   + { pl & prod (prod
         (CPermutation_Type l1 (l3 ++ fst pl))
         (CPermutation_Type l4 (l2 ++ snd pl)))
         (CPermutation_Type (fst pl) (snd pl)) }
-   + { pl : _ & prod (prod
+   + { pl & prod (prod
         (CPermutation_Type l2 (l3 ++ fst pl))
         (CPermutation_Type l4 (l1 ++ snd pl)))
         (CPermutation_Type (fst pl) (snd pl)) }.
