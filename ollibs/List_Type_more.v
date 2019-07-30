@@ -8,7 +8,7 @@ Require Export List_Type.
 
 (** ** Properties about Forall_Type *)
 
-(** ** Translation from Forall_Type to a list of dependent pair *)
+(** ** Translation from Forall_Type to a list of dependent pairs *)
 
 Fixpoint list_to_Forall {T} {P} (l : list (sigT P)) : Forall_Type P (map (@projT1 T P) l) :=
   match l with
@@ -23,7 +23,7 @@ Fixpoint Forall_to_list {T} {P} {l : list T} (Fl : Forall_Type P l) : list (sigT
   end.
 
 Lemma Forall_to_list_support {T} {P} L FL :
-   map (@projT1 _ _) (@Forall_to_list T P L FL) = L.
+  map (@projT1 _ _) (@Forall_to_list T P L FL) = L.
 Proof.
 induction FL ; simpl ; try rewrite IHFL ; reflexivity.
 Defined.
@@ -39,9 +39,8 @@ Qed.
 
 Import EqNotations.
 
-Lemma Forall_to_list_to_Forall {T} {P} :
-   forall L FL, rew (Forall_to_list_support _ _) in list_to_Forall 
-(@Forall_to_list T P L FL) = FL.
+Lemma Forall_to_list_to_Forall {T} {P} : forall L FL,
+ rew (Forall_to_list_support _ _) in list_to_Forall (@Forall_to_list T P L FL) = FL.
 Proof.
 induction FL ; simpl.
 - reflexivity.
@@ -55,17 +54,15 @@ Qed.
 
 (** ** Properties about Forall2_Type *)
 
-Lemma Forall2_Type_length {A} {B} : forall l1 l2 (R : A -> B -> Type),
-    Forall2_Type R l1 l2 -> length l1 = length l2.
+Lemma Forall2_Type_length {A B} : forall l1 l2 (R : A -> B -> Type),
+  Forall2_Type R l1 l2 -> length l1 = length l2.
 Proof with try assumption ; try reflexivity.
-  intros l1 l2 R HF.
-  induction HF...
+  intros l1 l2 R HF; induction HF...
   simpl; rewrite IHHF...
 Qed.
 
-Lemma Forall2_Type_in_l {A} {B} : forall l1 l2 a (R : A -> B -> Type),
-    Forall2_Type R l1 l2 -> In_Type a l1 ->
-    {b & prod (In_Type b l2) (R a b)}.
+Lemma Forall2_Type_in_l {A B} : forall l1 l2 a (R : A -> B -> Type),
+  Forall2_Type R l1 l2 -> In_Type a l1 -> {b & prod (In_Type b l2) (R a b)}.
 Proof with try assumption ; try reflexivity.
   intros l1 l2 a R HF.
   induction HF ; intro Hin; inversion Hin.
@@ -79,9 +76,8 @@ Proof with try assumption ; try reflexivity.
     right...
 Qed.
 
-Lemma Forall2_Type_in_r {A} {B} : forall l1 l2 b (R : A -> B -> Type),
-    Forall2_Type R l1 l2 -> In_Type b l2 ->
-    {a & prod (In_Type a l1) (R a b)}.
+Lemma Forall2_Type_in_r {A B} : forall l1 l2 b (R : A -> B -> Type),
+  Forall2_Type R l1 l2 -> In_Type b l2 -> {a & prod (In_Type a l1) (R a b)}.
 Proof with try assumption ; try reflexivity.
   intros l1 l2 b R HF.
   induction HF ; intro Hin; inversion Hin.
@@ -362,7 +358,7 @@ Qed.
 
 Lemma concat_Forall2_Type {A B} : forall (L : list (list A)) (l : list B) R,
     Forall2_Type R (concat L) l ->
-    { L' : _ & concat L' = l & Forall2_Type (fun x y => Forall2_Type R x y) L L' }.
+    { L' : _ & concat L' = l & Forall2_Type (Forall2_Type R) L L' }.
 Proof with try assumption.
   induction L; intros l R F2R.
   - inversion F2R; subst.
@@ -599,7 +595,7 @@ Section In_Forall_Type.
 
   Lemma Forall_Type_sum_app : forall f l1 l2 Pl1 Pl2,
       Forall_Type_sum f (l1 ++ l2) (Forall_Type_App l1 l2 Pl1 Pl2)
-      = Forall_Type_sum f l1 Pl1 + Forall_Type_sum f l2 Pl2.
+    = Forall_Type_sum f l1 Pl1 + Forall_Type_sum f l2 Pl2.
   Proof.
     intros f l1 l2 Pl1 Pl2.
     induction Pl1.
@@ -607,17 +603,13 @@ Section In_Forall_Type.
     - simpl; rewrite IHPl1.
       apply Plus.plus_assoc.
   Qed.
-  
-  Lemma In_Forall_Type_to_In_Type : forall (l : A) (L : list A) p (PL : Forall_Type P L), In_Forall_Type l p PL -> In_Type l L.
+
+  Lemma In_Forall_Type_to_In_Type : forall l (L : list A) p (PL : Forall_Type P L),
+    In_Forall_Type l p PL -> In_Type l L.
   Proof with try assumption ; try reflexivity.
-    intros l L p PL Hin.
-    induction PL.
-    - inversion Hin.
-    - inversion Hin.
-      + inversion H; subst.
-      left...
-      + right.
-        apply IHPL...
+    intros l L p PL Hin; induction PL; inversion Hin.
+    - left; inversion H; subst...
+    - right; apply IHPL...
   Qed.
 
 End In_Forall_Type.
@@ -657,3 +649,4 @@ Proof with try reflexivity.
   induction n; intros a b Hin; inversion Hin; subst...
   apply IHn; apply X.
 Qed.
+

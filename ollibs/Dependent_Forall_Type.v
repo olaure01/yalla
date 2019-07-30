@@ -1,5 +1,9 @@
+(* Dependent_Forall_Type Library *)
+
+(** * Generalization of Forall_Type to dependent product *)
+
 Require Import List_Type_more.
-Require Import Eqdep_dec.
+Require Export Eqdep_dec.
 
 Inductive Dependent_Forall_Type {A} {P : A -> Type} (Pred : forall a, P a -> Type) :
    forall {l}, Forall_Type P l -> Type :=
@@ -12,16 +16,12 @@ Section Eq_Dec.
   Hypothesis eq_dec : forall (x y : A), {x = y} + {x <> y}.
 
   Lemma Dependent_Forall_Type_forall : forall {P : A -> Type} Pred,
-      forall l a Pa (Fl : Forall_Type P l),
-        Dependent_Forall_Type Pred Fl ->
-        In_Forall_Type P a Pa Fl ->
-        Pred a Pa.
+    forall l a Pa (Fl : Forall_Type P l),
+      Dependent_Forall_Type Pred Fl -> In_Forall_Type P a Pa Fl -> Pred a Pa.
   Proof with try assumption.
-    intros P Pred l a Pa Fl DFl.
-    revert a Pa.
-    induction DFl; intros a' Pa' Hin; inversion Hin.
-    - inversion H.
-      subst.
+    intros P Pred l a Pa Fl DFl; revert a Pa;
+     induction DFl; intros a' Pa' Hin; inversion Hin.
+    - inversion H; subst.
       apply inj_pair2_eq_dec in H2...
       rewrite H2...
     - apply IHDFl...
@@ -32,13 +32,11 @@ Section Eq_Dec.
         (forall a Pa, In_Forall_Type P a Pa Fl -> Pred a Pa) ->
         Dependent_Forall_Type Pred Fl.
   Proof with try assumption.
-    intros P Pred l Fl.
-    induction Fl; intros f.
+    intros P Pred l Fl; induction Fl; intros f.
     - apply Dependent_Forall_Type_nil.
     - apply Dependent_Forall_Type_cons.
       + apply f.
-        left.
-        reflexivity.
+        left; reflexivity.
       + apply IHFl.
         intros a Pa Hin.
         apply f.
@@ -49,20 +47,17 @@ Section Eq_Dec.
     Dependent_Forall_Type Pred (Forall_Type_cons a Pa Pl) -> Pred a Pa.
   Proof with try assumption.
     intros P Pred a l Pa Pl DPl.
-    inversion DPl.
-    subst.
+    inversion DPl; subst.
     replace Pa with Pa0...
     apply inj_pair2_eq_dec...
   Qed.
 
-  Lemma Dependent_Forall_Type_dec :
-    forall {P :A -> Type} Pred,
+  Lemma Dependent_Forall_Type_dec : forall {P :A -> Type} Pred,
       (forall a Pa, Pred a Pa + (Pred a Pa -> False)) ->
       forall l (Fl : Forall_Type P l),
         Dependent_Forall_Type Pred Fl + (Dependent_Forall_Type Pred Fl -> False).
   Proof with try assumption.
-    intros P Pred dec_Pred l Fl.
-    induction Fl.
+    intros P Pred dec_Pred l Fl; induction Fl.
     - left.
       apply Dependent_Forall_Type_nil.
     - destruct IHFl as [HFl | HFl].
@@ -70,14 +65,12 @@ Section Eq_Dec.
         * left.
           apply Dependent_Forall_Type_cons...
         * right.
-          intro DFl.
-          inversion DFl.
+          intro DFl; inversion DFl.
           apply HnPa.
           replace p with Pa...
           apply inj_pair2_eq_dec...
       + right.
-        intro DFl.
-        inversion DFl.
+        intro DFl; inversion DFl.
         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec]...
         apply HFl; subst...
   Qed.
@@ -93,13 +86,10 @@ Section Eq_Dec.
 
   Lemma Dependent_Forall_Type_app : forall {P : A -> Type} Pred,
       forall l1 l2 (Fl1 : Forall_Type P l1) (Fl2 : Forall_Type P l2),
-        Dependent_Forall_Type Pred Fl1 ->
-        Dependent_Forall_Type Pred Fl2 ->
+        Dependent_Forall_Type Pred Fl1 -> Dependent_Forall_Type Pred Fl2 ->
         {Fl : Forall_Type P (l1 ++ l2) & Dependent_Forall_Type Pred Fl}.
   Proof with try assumption.
-    intros P Pred l1 l2 Fl1 Fl2 DFl1.
-    revert Fl2.
-    induction DFl1; intros Fl2 DFl2.
+    intros P Pred l1 l2 Fl1 Fl2 DFl1; revert Fl2; induction DFl1; intros Fl2 DFl2.
     - split with Fl2...
     - destruct IHDFl1 with Fl2 as (Fl0 & DFl)...
       split with (Forall_Type_cons a Pa Fl0).
@@ -111,8 +101,7 @@ Section Eq_Dec.
          {Fl1 : Forall_Type P l1 & Dependent_Forall_Type Pred Fl1}
        * {Fl2 : Forall_Type P l2 & Dependent_Forall_Type Pred Fl2}.
   Proof with try assumption.
-    intros P Pred l1 l2 Fl .
-    induction l1; intro DFl.
+    intros P Pred l1 l2 Fl; induction l1; intro DFl.
     - split.
       + split with (Forall_Type_nil P).
         apply Dependent_Forall_Type_nil.
@@ -127,8 +116,7 @@ Section Eq_Dec.
 
   Lemma Dependent_Forall_Type_elt_inv : forall {P : A -> Type} Pred,
       forall l1 l2 a (Fl : Forall_Type P (l1 ++ a :: l2)),
-        Dependent_Forall_Type Pred Fl ->
-        {Pa : P a & Pred a Pa}.
+        Dependent_Forall_Type Pred Fl -> {Pa : P a & Pred a Pa}.
   Proof with try assumption.
     intros P Pred l1 l2 a Fl DFl.
     apply Dependent_Forall_Type_app_inv in DFl.
@@ -138,3 +126,4 @@ Section Eq_Dec.
   Qed.
 
 End Eq_Dec.
+

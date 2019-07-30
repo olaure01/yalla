@@ -26,7 +26,6 @@ flat_map_concat_map...
    assumption.
 Qed.
 
-
 Lemma app_vs_flat_map {B T} {f : B -> T} : forall L l1 l2,
   l1 ++ l2 = flat_map (fun p => f (fst p) :: (snd p)) L ->
       {' (L1, L2, n, l3, l4) | l4 <> nil
@@ -86,7 +85,6 @@ Ltac app_vs_flat_map_inv H :=
                      | [[L1 L2] (H1 & H2 & H3)]] ;
         (try simpl in Hnil) ; (try simpl in H1) ; (try simpl in H2) ; (try simpl in H3) ; subst
   end.
-
 
 Lemma app_vs_app_flat_map {B T} {f : B -> T} : forall l0 L l1 l2,
   l1 ++ l2 = l0 ++ flat_map (fun p => f (fst p) :: (snd p)) L ->
@@ -208,7 +206,6 @@ Ltac elt_vs_app_flat_map_inv H :=
         (try simpl in H1) ; (try simpl in H2) ; (try simpl in H3) ; subst
   end.
 
-
 Lemma map_f_flat_map {T T1 T2} {g : T -> T2} : forall (f : T1 -> T2) lw' lw l L,
   map f lw = l ++ flat_map (fun p => g (fst p) :: (snd p)) L ->
   { Lw | l ++ flat_map (fun p => app (map f lw') (snd p)) L = map f Lw }.
@@ -224,10 +221,9 @@ intros f lw' lw l L ; revert lw l ; induction L ; intros lw l Heq ; simpl in Heq
   rewrite <- app_assoc ; reflexivity.
 Qed.
 
-
 Lemma perm_Type_app_flat_map {B T} {f : B -> T}: forall lw0 L lw l,
   Permutation_Type lw (l ++ flat_map (fun p => f (fst p) :: snd p) L) ->
-{' (L'  , lw') : _  & prod (L <> nil -> L' <> nil)
+{' (L', lw') : _ & prod (L <> nil -> L' <> nil)
       (prod (lw = lw' ++ flat_map (fun p => f (fst p) :: snd p) L')
             (Permutation_Type (lw' ++ flat_map (fun p => app lw0 (snd p)) L')
                               (l ++ flat_map (fun p => app lw0 (snd p)) L))) }.
