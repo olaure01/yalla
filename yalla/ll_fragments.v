@@ -650,8 +650,10 @@ Proof with myeeasy ; try PCperm_Type_solve.
 intros Hgax Hperm.
 assert (forall a, In bot (projT2 (pgax P) a) -> False) as Hgaxbot.
 { intros a Hbot.
-  apply (Forall_In _ _ _ (Hgax a)) in Hbot.
-  inversion Hbot. }
+  destruct (Forall_forall atomic (projT2 (pgax P) a)) as (H & _).
+  specialize (H (Hgax a) bot).
+  specialize (H Hbot).
+  inversion H. }
 enough (forall l, ll P l -> forall l' (l0 l1 : list unit),
   Permutation_Type l (l' ++ map (fun _ => tens bot bot) l1
                          ++ map (fun _ => wn (tens bot bot)) l0)  ->

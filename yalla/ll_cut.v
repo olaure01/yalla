@@ -3,15 +3,13 @@
 
 (** * Cut admissibility for [ll] *)
 
-Require Import Arith_base.
-
 Require Import Injective.
 Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import genperm_Type.
 Require Import flat_map_Type_more.
-Require Import wf_nat_more.
+Require Import Wf_nat_more.
 
 Require Export ll_def.
 
@@ -175,17 +173,17 @@ induction pi2 ; intros l' L Heq ; subst.
     destruct l' ; inversion H1.
     destruct l' ; inversion H3.
 - case_eq (pperm P) ; intros Hperm ; rewrite Hperm in p ; simpl in p ; subst.
-  + destruct (perm_Type_app_flat_map _ (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+  + destruct (perm_Type_app_flat_map_cst _ (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
       simpl in Hnil' ; simpl in HeqL' ; simpl in HPL' ; subst.
     eapply ex_r ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     apply IHpi2...
-  + destruct (cperm_Type_app_flat_map _ (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+  + destruct (cperm_Type_app_flat_map_cst _ (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
       simpl in Hnil' ; simpl in HeqL' ; simpl in HPL' ; subst.
     eapply ex_r ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     apply IHpi2...
 - assert (injective wn) as Hinj by (intros x y Hxy ; inversion Hxy ; reflexivity).
-  destruct (perm_flat_map_cons_flat_map_app  _ wn Hinj lw _ _ _ _ _ _ p Heq)
-    as [(((lw1',lw2'),(l1',l2')),(l'',L')) HH] ; simpl in HH ; destruct HH as (H1 & H2 & H3 & H4).
+  destruct (perm_flat_map_cons_flat_map_app_cst _ wn Hinj lw _ _ _ _ _ _ p Heq)
+    as [(((((lw1' & lw2') & l1') & l2') & l'') & L') HH] ; simpl in HH ; destruct HH as (H1 & H2 & H3 & H4).
   rewrite <- H4 ; apply (ex_wn_r _ _ lw1')...
   rewrite H3 ; apply IHpi2...
 - symmetry in Heq.
@@ -193,7 +191,7 @@ induction pi2 ; intros l' L Heq ; subst.
   destruct Heq as [Heq' Heq] ; subst.
   destruct L ; inversion Heq.
   list_simpl ; apply mix0_r...
-- app_vs_app_flat_map_inv Heq.
+- app_vs_app_flat_map_cst_inv Heq.
   + list_simpl ; apply mix2_r...
     apply IHpi2_1...
   + rewrite flat_map_app ; list_simpl.
@@ -217,7 +215,7 @@ induction pi2 ; intros l' L Heq ; subst.
   simpl ; apply bot_r.
   apply IHpi2...
 - destruct l' ; inversion Heq ; [ destruct L ; inversion H0 | ] ; subst.
-  app_vs_app_flat_map_inv H1.
+  app_vs_app_flat_map_cst_inv H1.
   + list_simpl ; apply tens_r...
     rewrite app_comm_cons in IHpi2_1 ; rewrite app_comm_cons ; apply IHpi2_1...
   + rewrite flat_map_app ; list_simpl.

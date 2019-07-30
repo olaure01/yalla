@@ -871,8 +871,10 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
     apply IHpi2 in HF2.
     assert (forall a, In one (projT2 (pgax P) a) -> False) as Hgax1.
     { intros a Hone.
-      apply (Forall_In _ _ _ (Hgax a)) in Hone.
-      inversion Hone. }
+      destruct (Forall_forall atomic (projT2 (pgax P) a)) as (H & _).
+      specialize (H (Hgax a) one).
+      specialize (H Hone).
+      inversion H. }
     rewrite <- (app_nil_l _) in HF1 ; eapply (one_rev Hgax1 _ HF2) in HF1...
 - inversion HF ; subst.
   inversion H1 ; subst.
@@ -883,8 +885,10 @@ intros Hgax l1 pi ; induction pi ; intros l2' HF ;
     rewrite <- (app_nil_l l') ; rewrite app_comm_cons.
     eapply bot_rev...
     intros a Hbot.
-    apply (Forall_In _ _ _ (Hgax a)) in Hbot.
-    inversion Hbot.
+    destruct (Forall_forall atomic (projT2 (pgax P) a)) as (H & _).
+    specialize (H (Hgax a) bot).
+    specialize (H Hbot).
+    inversion H.
 - inversion HF ; subst.
   inversion H1 ; subst.
   constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
