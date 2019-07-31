@@ -1,5 +1,4 @@
 (* microyalla library for intuitionistic linear logic *)
-(*   Olivier Laurent *)
 
 Open Scope list_scope.
 
@@ -63,5 +62,4 @@ Inductive ill : list iformula -> iformula -> Type :=
 | de_ilr : forall A l C, ill (A :: l) C -> ill (ioc A :: l) C
 | wk_ilr : forall A l C, ill l C -> ill (ioc A :: l) C
 | co_ilr : forall A l C, ill (ioc A :: ioc A :: l) C -> ill (ioc A :: l) C.
-
 

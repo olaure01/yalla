@@ -1,5 +1,5 @@
 
-COQ = coqc
+COQ = coqc -R $(OLLIBSDIR) "" -R $(YALLADIR) ""
 COQDOC = coqdoc -g
 
 VFILES = $(wildcard *.v)
@@ -32,7 +32,8 @@ clean :
 
 
 
-OLLIBSDIR = .
+OLLIBSDIR = ../ollibs
+YALLADIR  = ../yalla
 
 .DEFAULT_GOAL := microyalla
 
@@ -40,3 +41,8 @@ all: microyalla doc
 
 microyalla: $(VFILES:.v=.vo)
 
+micro_macro_ll.vo: micro_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ll_def.vo ll.vo
+
+micro_macro_ill.vo: micro_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo ill.vo
+
+transp_perm.vo : transp_perm.v $(OLLIBSDIR)/Permutation_Type.vo

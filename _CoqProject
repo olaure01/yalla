@@ -32,8 +32,11 @@ ollibs/Vector_more.v
 ollibs/wf_nat_more.v
 ollibs/wf_prod.v
 
-microyalla/ill.v
 microyalla/ll.v
+microyalla/ill.v
+microyalla/micro_macro_ll.v
+microyalla/micro_macro_ill.v
+microyalla/transp_perm.v
 
 yalla/basic_misc.v
 yalla/bbb.v
