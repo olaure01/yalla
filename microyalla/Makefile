@@ -45,8 +45,8 @@ nano_macro_ll.vo: nano_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/l
 
 nano_macro_ill.vo: nano_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo nanoill.vo
 
-transp_perm.vo : transp_perm.v $(OLLIBSDIR)/Permutation_Type.vo
 micro_macro_ll.vo: micro_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ll_def.vo microll.vo
 
 micro_macro_ill.vo: micro_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo microill.vo
 
+transp_perm.vo : transp_perm.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Permutation_Type.vo
