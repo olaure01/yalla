@@ -35,18 +35,22 @@ clean :
 OLLIBSDIR = ../ollibs
 YALLADIR  = ../yalla
 
-.DEFAULT_GOAL := microyalla
+.DEFAULT_GOAL := all
 
-all: microyalla doc
+all: yallaneeded microyalla
+
+yallaneeded:
+	cd $(YALLADIR) && $(MAKE) microyallaneeded
 
 microyalla: $(VFILES:.v=.vo)
 
-nano_macro_ll.vo: nano_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ll_def.vo nanoll.vo
+nano_macro_ll.vo: nano_macro_ll.v nanoll.vo
 
-nano_macro_ill.vo: nano_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo nanoill.vo
+nano_macro_ill.vo: nano_macro_ill.v nanoill.vo
 
-micro_macro_ll.vo: micro_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ll_def.vo microll.vo
+micro_macro_ll.vo: micro_macro_ll.v microll.vo
 
-micro_macro_ill.vo: micro_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo microill.vo
+micro_macro_ill.vo: micro_macro_ill.v microill.vo
 
-transp_perm.vo : transp_perm.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Permutation_Type.vo
+transp_perm.vo : transp_perm.v
+

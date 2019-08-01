@@ -1,5 +1,5 @@
 
-COQ = coqc -R $(OLLIBSDIR) "" -R $(MICROYALLADIR) ""
+COQ = coqc -R $(OLLIBSDIR) ""
 COQDOC = coqdoc -g
 
 VFILES = $(wildcard *.v)
@@ -33,19 +33,16 @@ clean:
 
 OLLIBSDIR = ../ollibs
 
-MICROYALLADIR = ../microyalla
-
 .DEFAULT_GOAL := all
 
-all: microyalla cutelim
+all: cutelim
 
 ollibs:
 	cd $(OLLIBSDIR) && $(MAKE)
 
-microyalla:
-	cd $(MICROYALLADIR) && $(MAKE)
-
 cutelim: ollibs $(VFILES:.v=.vo)
+
+microyallaneeded: $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Permutation_Type.vo ll_def.vo ill_def.vo
 
 include $(OLLIBSDIR)/ollibs.mk
 
@@ -75,8 +72,8 @@ nn_def.vo: nn_def.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBS
 nn_prop.vo: nn_prop.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type.vo $(OLLIBSDIR)/genperm_Type.vo subs.vo ll_fragments.vo nn_def.vo bbb.vo
 nn_foc.vo: nn_foc.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_fragments.vo llfoc.vo tl.vo nn_prop.vo
 
-ll_smp.vo: ll_smp.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ll_fragments.vo $(MICROYALLADIR)/ll.vo
-ill_smp.vo: ill_smp.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ill_cut.vo $(MICROYALLADIR)/ill.vo
+ll_smp.vo: ll_smp.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ll_fragments.vo
+ill_smp.vo: ill_smp.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ill_cut.vo
 mell2.vo: mell2.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ll_cut.vo
 mell_Prop.vo: mell_Prop.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo ll_cut.vo
 mell_mset.vo : mell_mset.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/nattree.vo $(OLLIBSDIR)/fmsetlist_Type.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo ll_cut.vo fmformulas.vo

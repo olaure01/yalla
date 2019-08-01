@@ -82,7 +82,7 @@ Definition pfrag_ll := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
 
 Theorem ll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.
-intros l pi; induction pi; simpl; try (now constructor).
+intros l pi; induction pi ; simpl; try (now constructor).
 - apply (ex_r _ (map ll2ll l)); try assumption.
   simpl; rewrite <- transp_map.
   apply transp_perm.
@@ -92,8 +92,7 @@ intros l pi; induction pi; simpl; try (now constructor).
   + simpl; apply Permutation_Type_cons; try reflexivity.
     apply Permutation_Type_app_comm.
 - rewrite ll2ll_map_wn.
-  constructor.
-  rewrite <- ll2ll_map_wn.
-  assumption.
+  apply ll_def.oc_r.
+  rewrite <- ll2ll_map_wn; assumption.
 Qed.
 

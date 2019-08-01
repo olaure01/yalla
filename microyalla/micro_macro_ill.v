@@ -79,24 +79,20 @@ Definition ipfrag_ill := ill_def.mk_ipfrag false ill_def.NoIAxioms true.
 
 Theorem ill2ill_proof : forall l A, ill l A -> ill_def.ill ipfrag_ill (map ill2ill l) (ill2ill A).
 Proof.
-intros l A pi; induction pi; simpl;
-  try (now constructor);
-  try (now (rewrite <- (app_nil_l _); constructor; assumption)).
+intros l A pi.
+induction pi; rewrite <- (app_nil_l _) ; try (now constructor).
 - apply (ex_ir _ (map ill2ill l)); try assumption.
   simpl; rewrite <- transp_map.
   apply transp_perm.
-- rewrite map_app.
-  now constructor.
-- rewrite map_app.
-  apply (ex_ir _ (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
+- now rewrite map_app; rewrite app_nil_l ; constructor.
+- apply (ex_ir _ (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
   + now constructor.
-  + simpl.
+  + simpl; rewrite map_app.
     etransitivity; [ apply Permutation_Type_app_comm | ].
     apply Permutation_Type_cons; try reflexivity.
     apply Permutation_Type_app_comm.
 - rewrite ill2ill_map_ioc.
   constructor.
-  rewrite <- ill2ill_map_ioc.
-  assumption.
+  rewrite <- ill2ill_map_ioc; assumption.
 Qed.
 

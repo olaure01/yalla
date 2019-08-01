@@ -17,19 +17,20 @@ Require ll_fragments.
 
 
 (** ** 1. define formulas *)
-Require Export ll.
 
-Lemma pt2ypt : forall A l1 l2, @Permutation_Type A l1 l2 ->
-  @Permutation_Type.Permutation_Type A l1 l2.
-Proof.
-intros A l1 l2 HP ; induction HP ; econstructor ; eassumption.
-Qed.
-
-Lemma ypt2pt : forall A l1 l2, @Permutation_Type.Permutation_Type A l1 l2 ->
-  @Permutation_Type A l1 l2.
-Proof.
-intros A l1 l2 HP ; induction HP ; econstructor ; eassumption.
-Qed.
+Inductive formula : Set :=
+| var : formulas.Atom -> formula
+| covar : formulas.Atom -> formula
+| one : formula
+| bot : formula
+| tens : formula -> formula -> formula
+| parr : formula -> formula -> formula
+| zero : formula
+| top : formula
+| aplus : formula -> formula -> formula
+| awith : formula -> formula -> formula
+| oc : formula -> formula
+| wn : formula -> formula.
 
 Fixpoint dual A :=
 match A with
@@ -109,6 +110,22 @@ Qed.
 
 (** ** 3. define proofs *)
 
+Inductive ll : list formula -> Type :=
+| ax_r : forall X, ll (covar X :: var X :: nil)
+| ex_r : forall l1 l2, ll l1 -> Permutation_Type l1 l2 -> ll l2
+| one_r : ll (one :: nil)
+| bot_r : forall l, ll l -> ll (bot :: l)
+| tens_r : forall A B l1 l2, ll (A :: l1) -> ll (B :: l2) -> ll (tens A B :: l1 ++ l2)
+| parr_r : forall A B l, ll (A :: B :: l) -> ll (parr A B :: l)
+| top_r : forall l, ll (top :: l)
+| plus_r1 : forall A B l, ll (A :: l) -> ll (aplus A B :: l)
+| plus_r2 : forall A B l, ll (A :: l) -> ll (aplus B A :: l)
+| with_r : forall A B l, ll (A :: l) -> ll (B :: l) -> ll (awith A B :: l)
+| oc_r : forall A l, ll (A :: List.map wn l) -> ll (oc A :: List.map wn l)
+| de_r : forall A l, ll (A :: l) -> ll (wn A :: l)
+| wk_r : forall A l, ll l -> ll (wn A :: l)
+| co_r : forall A l, ll (wn A :: wn A :: l) -> ll (wn A :: l).
+
 Instance ll_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) ll.
 Proof.
 intros l1 l2 HP pi.
@@ -125,8 +142,7 @@ Lemma ll2llfrag : forall l, ll l -> ll_fragments.ll_ll (map ll2ll l).
 Proof with try eassumption ; try reflexivity. 
 intros l pi.
 induction pi ; try (now constructor) ; try rewrite map_app.
-- apply pt2ypt in p.
-  eapply ll_def.ex_r...
+- eapply ll_def.ex_r...
   apply Permutation_Type_map...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
@@ -152,7 +168,6 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_map_inv in p.
   destruct p as [l'' Heq HP].
   apply Permutation_Type_sym in HP.
-  apply ypt2pt in HP.
   eapply ex_r...
   apply IHpi...
 - decomp_map_Type Heql0 ; subst.
@@ -161,7 +176,6 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
   eapply ex_r ;
     [ apply IHpi ; rewrite <- ll2ll_map_wn ; rewrite <- ? map_app | ]...
-  apply ypt2pt.
   apply Permutation_Type_app_head.
   apply Permutation_Type_app_tail.
   symmetry in HP ; apply Permutation_Type_map...
@@ -177,7 +191,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply tens_r.
   + apply IHpi1...
   + apply IHpi2...
-  + apply ypt2pt ; perm_Type_solve.
+  + perm_Type_solve.
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply parr_r.
@@ -244,8 +258,4 @@ eapply ll_cut.cut_r_axfree.
   simpl in pi2 ; rewrite <- ll2ll_dual in pi2...
 - apply ll2llfrag in pi1...
 Qed.
-
-
-
-
 
