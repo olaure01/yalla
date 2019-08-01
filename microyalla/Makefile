@@ -41,8 +41,12 @@ all: microyalla doc
 
 microyalla: $(VFILES:.v=.vo)
 
-micro_macro_ll.vo: micro_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ll_def.vo ll.vo
+nano_macro_ll.vo: nano_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ll_def.vo nanoll.vo
 
-micro_macro_ill.vo: micro_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo ill.vo
+nano_macro_ill.vo: nano_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo nanoill.vo
 
 transp_perm.vo : transp_perm.v $(OLLIBSDIR)/Permutation_Type.vo
+micro_macro_ll.vo: micro_macro_ll.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ll_def.vo microll.vo
+
+micro_macro_ill.vo: micro_macro_ill.v $(OLLIBSDIR)/Permutation_Type.vo $(YALLADIR)/ill_def.vo microill.vo
+
