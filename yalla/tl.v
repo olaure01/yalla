@@ -3,8 +3,6 @@
 
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
-Require Import Arith_base.
-Require Import CRelationClasses.
 Require Import CMorphisms.
 
 Require Import Injective.

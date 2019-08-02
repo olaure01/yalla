@@ -1,16 +1,15 @@
 (* subs library for yalla *)
 
-(* output in Type *)
-
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
 Require Import List_more.
+Require Import List_Type_more.
 Require Import Permutation_Type.
 Require Import genperm_Type.
+Require Import Dependent_Forall_Type.
 
 Require Export ll_def.
-
 
 (** ** Decidable equality on [Atom], through value into [bool] *)
 Definition ateq := yalla_ax.ateq.
@@ -81,14 +80,24 @@ assert
 { clear.
   induction l...
   simpl ; rewrite IHl... }
-induction pi ; list_simpl ; try (now constructor).
+induction pi using (ll_nested_ind P) ; list_simpl ; try (now constructor).
 - eapply ex_r ; [ apply ax_exp | apply PCperm_Type_swap ].
 - eapply PCperm_Type_map in p.
   eapply ex_r...
 - rewrite ? map_app in IHpi ; rewrite Hmapwn in IHpi ; rewrite Hmapwn.
   eapply Permutation_Type_map in p.
   eapply ex_wn_r...
-- specialize Hmapwn with l.
+- rewrite concat_map.
+  apply mix_r.
+  + simpl.
+    rewrite map_length...
+  + apply forall_Forall_Type.
+    intros l' Hin.
+    destruct (map_in_Type (map (subs A x)) l' L Hin) as (l0 & (Hin' & Heq)).
+    rewrite Heq.
+    apply (In_Forall_Type_in _ _ _ PL) in Hin' as (pi' & Hin').
+    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin').
+- specialize Hmapwn with l0.
   rewrite Hmapwn.
   apply oc_r.
   rewrite <- Hmapwn...
@@ -105,7 +114,7 @@ Proof with myeeasy.
 intros P_axfree A x l pi.
 apply (subs_ll A x) in pi.
 eapply stronger_pfrag...
-nsplit 5...
+nsplit 4...
 simpl ; intros a.
 contradiction P_axfree.
 Qed.

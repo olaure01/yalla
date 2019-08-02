@@ -10,6 +10,7 @@ Require Import Injective.
 Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
+Require Import Dependent_Forall_Type.
 
 
 (** ** 0. load the [yalla] library *)
@@ -126,9 +127,9 @@ Qed.
 
 (** ** 4. characterize corresponding [ll] fragment *)
 
-(** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false true true.
-(*                                       cut   axioms          mix0  mix2 perm  *)
+(** cut / axioms / pmix / permutation *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms ll_def.pmix2 true.
+(*                                       cut   axioms          mix          perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -139,7 +140,11 @@ intros l pi.
 induction pi ; try (now constructor) ; try rewrite map_app.
 - eapply ll_def.ex_r...
   apply Permutation_Type_map...
-- apply ll_def.mix2_r...
+- replace (map mell2ll l1 ++ map mell2ll l2) with (concat (map mell2ll l1 :: map mell2ll l2 :: nil)) by (simpl; rewrite app_nil_r; reflexivity).
+  apply ll_def.mix_r...
+  apply Forall_Type_cons...
+  apply Forall_Type_cons...
+  apply Forall_Type_nil...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
   + simpl ; perm_Type_solve.
@@ -152,11 +157,11 @@ Lemma mellfrag2mell : forall l, ll_def.ll pfrag_mell (map mell2ll l) -> mell l.
 Proof with try eassumption ; try reflexivity.
 intros l pi.
 remember (map mell2ll l) as l0.
-revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
+revert l Heql0 ; induction pi using (ll_def.ll_nested_ind pfrag_mell) ; intros l' Heql0 ; subst ;
   try (destruct l' ; inversion Heql0 ;
        destruct f ; inversion H0 ; fail).
 - decomp_map_Type Heql0 ; subst.
-  destruct l1 ; inversion Heql4.
+  destruct l2 ; inversion Heql4.
   destruct x ; inversion Heql2.
   destruct x0 ; inversion Heql0.
   subst ; subst.
@@ -176,11 +181,22 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_app_head.
   apply Permutation_Type_app_tail.
   symmetry in HP ; apply Permutation_Type_map...
-- inversion f.
-- decomp_map_Type Heql0 ; subst.
+- remember (length L) as n.
+  destruct n; inversion eqpmix.
+  destruct n; inversion eqpmix.
+  destruct n; inversion eqpmix.
+  destruct L; inversion Heqn.
+  destruct L; inversion Heqn.
+  destruct L; inversion Heqn.
+  simpl in Heql0.
+  decomp_map_Type Heql0; subst.
+  simpl in *; clear H0 H1 H2 H3 Heqn eqpmix.
+  destruct l6; inversion Heql4; rewrite app_nil_r; clear Heql4.
   apply mix_r.
-  + apply IHpi2...
-  + apply IHpi1...
+  + destruct (In_Forall_Type_in _ _ (map mell2ll l3) PL); [ left; reflexivity | ].
+    refine (ll_def.Dependent_Forall_Type_forall_formula _ _ _ _ PL X i _ eq_refl).
+  + destruct (In_Forall_Type_in _ _ (map mell2ll l5) PL); [ right; left; reflexivity | ].
+    refine (ll_def.Dependent_Forall_Type_forall_formula _ _ _ _ PL X i _ eq_refl).
 - decomp_map_Type Heql0 ; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.

@@ -1,10 +1,9 @@
 (* Parameter definitions for yalla library *)
-(* v 1.1   Olivier Laurent *)
+
+Require Import Arith_base.
+Require Import Equalities.
 
 Require Import Injective.
-Require Import NPeano.
-Require Import EqNat.
-
 
 (* We provide a possible value for parameters of the library
 as a consistency guarantee *)
@@ -18,10 +17,49 @@ Definition TAtom : Set := nat. (* tl.v *)
 Definition ateq : Atom -> Atom -> bool := beq_nat. (* subs.v *)
 Definition iateq : IAtom -> IAtom -> bool := fun x y => (* isubs.v & tl.v *)
   match x , y with
-  | None , None => true
+  | None, None => true
   | Some n, Some m => beq_nat n m
-  | _ , _ => false
+  | _, _ => false
   end.
+
+(* subs.v *)
+Fact ateq_eq : forall x y, ateq x y = true <-> x = y.
+Proof.
+split ; simpl ; intros H.
+- apply beq_nat_true in H ; subst ; reflexivity.
+- symmetry ; subst.
+  apply beq_nat_refl.
+Qed.
+
+(* isubs.v & tl.v *)
+Fact iateq_eq : forall x y, iateq x y = true <-> x = y.
+Proof.
+destruct x ; destruct y ; split ; simpl ;
+  intros H ; try (now inversion H).
+- apply beq_nat_true in H ; subst ; reflexivity.
+- inversion H ; subst.
+  symmetry.
+  apply beq_nat_refl.
+Qed.
+
+Module Atom_beq <: UsualBoolEq.
+  Definition t := Atom.
+  Definition eq := @eq Atom.
+  Definition eqb := ateq.
+  Definition eqb_eq := ateq_eq.
+End Atom_beq.
+
+Module Atom_dec <: UsualDecidableTypeFull := Make_UDTF Atom_beq.
+
+Module IAtom_beq <: UsualBoolEq.
+  Definition t := IAtom.
+  Definition eq := @eq IAtom.
+  Definition eqb := iateq.
+  Definition eqb_eq := iateq_eq.
+End IAtom_beq.
+
+Module IAtom_dec <: UsualDecidableTypeFull := Make_UDTF IAtom_beq.
+
 
 Definition a2n : Atom -> nat := id. (* fmformulas.v & nn.v *)
 Definition n2a : nat -> Atom := id. (* fmformulas.v & nn.v *)
@@ -63,26 +101,6 @@ Fact i2i_n : forall X, n2i (i2n X) = X.
 Proof.
 unfold n2i ; unfold i2n.
 destruct X ; simpl ; reflexivity.
-Qed.
-
-(* subs.v *)
-Fact ateq_eq : forall x y, ateq x y = true <-> x = y.
-Proof.
-split ; simpl ; intros H.
-- apply beq_nat_true in H ; subst ; reflexivity.
-- symmetry ; subst.
-  apply beq_nat_refl.
-Qed.
-
-(* isubs.v & tl.v *)
-Fact iateq_eq : forall x y, iateq x y = true <-> x = y.
-Proof.
-destruct x ; destruct y ; split ; simpl ;
-  intros H ; try (now inversion H).
-- apply beq_nat_true in H ; subst ; reflexivity.
-- inversion H ; subst.
-  symmetry.
-  apply beq_nat_refl.
 Qed.
 
 (* lambek.v & nn.v & tl.v *)

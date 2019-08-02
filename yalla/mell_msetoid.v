@@ -1,9 +1,6 @@
 (* mell_msetoid example file for yalla library *)
 
 
-(* output in Type *)
-
-
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 
 Require Import CMorphisms.
@@ -157,9 +154,9 @@ assumption.
 Qed.
 *)
 
-(** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
-(*                                       cut   axioms          mix0  mix2  perm  *)
+(** cut / axioms / pmix / permutation *)
+Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms ll_def.pmix_none true.
+(*                                       cut   axioms          mix              perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -336,7 +333,4 @@ eapply ll_cut.cut_r_axfree...
   rewrite <- mell2ll_dual in pi2.
   eapply ll_def.ex_r ; [ | apply Helt2 ]...
 Qed.
-
-
-
 

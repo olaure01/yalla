@@ -77,8 +77,8 @@ induction n; destruct l...
   apply IHn.
 Qed.
 
-Definition pfrag_ll := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
-(*                                     cut   axioms          mix0  mix2  perm  *)
+Definition pfrag_ll := mk_pfrag false NoAxioms pmix_none true.
+(*                              cut   axioms   mix       perm  *)
 
 Theorem ll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.

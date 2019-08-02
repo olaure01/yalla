@@ -33,12 +33,17 @@ clean:
 
 OLLIBSDIR = ../ollibs
 
+MICROYALLADIR = ../microyalla
+
 .DEFAULT_GOAL := all
 
 all: cutelim
 
 ollibs:
 	cd $(OLLIBSDIR) && $(MAKE)
+
+microyalla:
+	cd $(MICROYALLADIR) && $(MAKE)
 
 cutelim: ollibs $(VFILES:.v=.vo)
 
@@ -65,7 +70,7 @@ ill_cut.vo: ill_cut.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLI
 ill_prop.vo: ill_prop.v $(OLLIBSDIR)/Bool_more.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/genperm_Type.vo ill_cut.vo
 ill_vs_ll.vo: ill_vs_ll.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_fragments.vo ill_prop.vo
 
-llfoc.vo: llfoc.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_fragments.vo
+llfoc.vo: llfoc.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo $(OLLIBSDIR)/Wf_nat_more.vo ll_fragments.vo
 bbb.vo: bbb.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/Permutation_Type_solve.vo $(OLLIBSDIR)/genperm_Type.vo ll_fragments.vo
 tl.vo: tl.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Bool_more.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type_more.vo $(OLLIBSDIR)/Permutation_Type_more.vo $(OLLIBSDIR)/genperm_Type.vo ill_vs_ll.vo ll_def.vo
 nn_def.vo: nn_def.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_Type.vo $(OLLIBSDIR)/genperm_Type.vo subs.vo isubs.vo ill_vs_ll.vo

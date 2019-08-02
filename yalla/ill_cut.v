@@ -4,8 +4,8 @@
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
-Require Import Arith_base.
 Require Import List.
+Require Import Arith_base.
 
 Require Import Injective.
 Require Import List_more.
@@ -1230,8 +1230,8 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
              revert Hgax HeqHgax ; rewrite Heql ; list_simpl ;
              rewrite ? app_comm_cons ; rewrite (app_assoc l0) ;
              intros Hgax HeqHgax;
-             simpl in IHsize ; refine (IHsize _ _ _ _ _ _ Hgax _ _);
-             [ rewrite HeqHgax; do 2 (rewrite  plus_comm; simpl); apply lt_n_Sn
+             refine (IHsize _ _ _ _ _ _ Hgax _ _);
+             [ rewrite HeqHgax; do 2 (rewrite plus_comm; simpl); apply lt_n_Sn
              | assumption ]).
   + rewrite <- Heql ; apply (gax_ir _ a).
   + apply (ex_ir _ (l1 ++ l ++ l2)).

@@ -8,6 +8,7 @@ Require Import List_more.
 Require Import List_Type_more.
 Require Import Permutation_Type.
 Require Import genperm_Type.
+Require Import Dependent_Forall_Type.
 
 Require Import subs.
 Require Import ll_fragments.
@@ -131,7 +132,7 @@ Lemma ill_trans_to_llR : forall l,  ill_ll (map (trans R) l) R -> llR (unill R) 
 Proof with myeeasy ; try PCperm_Type_solve.
 intros l Hill.
 apply (ill_to_ll i2a) in Hill.
-apply (stronger_pfrag _ (mk_pfrag true NoAxioms false false true))
+apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true))
   in Hill.
 - eapply cut_admissible_axfree in Hill.
   + apply (ll_to_llR (unill R)) in Hill.
@@ -161,7 +162,7 @@ apply (stronger_pfrag _ (mk_pfrag true NoAxioms false false true))
     symmetry.
     apply Permutation_Type_rev.
   + intros Hax ; inversion Hax.
-- nsplit 5 ; myeasy.
+- nsplit 4 ; myeasy.
   intros Hax ; inversion Hax.
 Qed.
 
@@ -401,8 +402,8 @@ apply (ll_to_ill_trans R) in Hll ; myeasy.
 - eapply stronger_ipfrag ; [ | apply Hll ].
   nsplit 3 ; myeasy.
   intros a ; destruct a.
-- intros f ; inversion f.
-- intros f ; inversion f.
+- intros L eqpmix.
+  inversion eqpmix.
 Qed.
 
 
@@ -429,9 +430,13 @@ induction pi ; try now constructor.
 - eapply cut_mix02_r...
 - destruct a ; simpl.
   + apply bot_r.
-    apply mix0_r...
-  + change (one :: one :: nil) with ((one :: nil) ++ (one :: nil)).
-    apply mix2_r ; try apply one_r...
+    change nil with (concat (@nil (list formula))).
+    apply mix_r...
+    apply Forall_Type_nil.
+  + change (one :: one :: nil) with (concat ((one :: nil) :: (one :: nil) :: nil)).
+    apply mix_r...
+    repeat (apply Forall_Type_cons; try apply one_r)...
+    apply Forall_Type_nil.
 Qed.
 
 Theorem ll_mix02_to_ill_trans : forall l,
@@ -442,20 +447,36 @@ apply (ll_to_ill_trans ione) in Hll ; myeasy.
 - eapply stronger_ipfrag ; [ | apply Hll ].
   nsplit 3 ; myeasy.
   intros a ; destruct a.
-- intros f.
-  apply one_irr.
-- intros f l1 l2 pi1 pi2.
-  rewrite <- (app_nil_l (map _ l2 ++ map _ l1)).
-  rewrite <- (app_nil_r (map _ l2 ++ map _ l1)).
-  eapply cut_ir_axfree.
-  + intros a ; destruct a.
-  + apply tens_irr...
-  + apply tens_ilr.
-    apply one_ilr.
-    apply one_ilr.
-    apply one_irr.
+- intros L eqpmix FL FLind.
+  destruct L.
+  { apply one_irr. }
+  destruct L.
+  { inversion eqpmix. }
+  destruct L.
+  { simpl.
+    rewrite app_nil_r.
+    assert (ill (p2ipfrag ione pfrag_mix02) (map (trans ione) l0) ione).
+    { assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
+      { left... }
+      apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
+      refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+    assert (ill (p2ipfrag ione pfrag_mix02) (map (trans ione) l1) ione).
+    { assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
+      { right; left... }
+      apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
+      refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+    rewrite map_app.
+    rewrite <- (app_nil_l (map _ l0 ++ map _ l1)).
+    rewrite <- (app_nil_r (map _ l0 ++ map _ l1)).
+    eapply cut_ir_axfree.
+    + intros a ; destruct a.
+    + apply tens_irr...
+    + apply tens_ilr.
+      apply one_ilr.
+      apply one_ilr.
+      apply one_irr. }
+    inversion eqpmix.
 Qed.
-
 
 (** ** Study of the case [R = zero] *)
 
@@ -546,7 +567,9 @@ induction pi ; try now constructor.
   + change nil with (map wn nil).
     apply oc_r.
     apply bot_r.
-    apply mix0_r...
+    change (map wn nil) with (concat (@nil (list formula))).
+    apply mix_r...
+    apply Forall_Type_nil.
   + apply wk_r.
     apply one_r.
 Qed.
@@ -562,15 +585,15 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 true)) in Hll.
     eapply stronger_ipfrag ; [ | apply Hll ].
     nsplit 3...
     intros a ; destruct a.
-  + intros f.
+  + intros L eqpmix FL FLind.
+    destruct L; try now inversion eqpmix.
+    simpl.
     eapply stronger_ipfrag ; [ | apply HR ].
     nsplit 3...
     intros a ; destruct a.
-  + intros f ; inversion f.
-- nsplit 5...
+- nsplit 4...
   intros a ; destruct a.
 Qed.
-
 
 (** ** Study of the case [R = oc bot] *)
 
@@ -612,24 +635,44 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
     eapply stronger_ipfrag ; [ | apply Hll ].
     nsplit 3...
     intros a ; destruct a.
-  + intros ; apply ax_exp_ill.
-  + intros ; simpl.
-    rewrite <- (app_nil_l (ioc R :: _)).
-    rewrite <- (app_nil_r (map _ l1)).
-    rewrite app_comm_cons.
-    rewrite (app_assoc _ (map _ l1)).
-    eapply (cut_ir _ (itens (ioc R) (ioc R))).
-    * rewrite <- 2 (app_nil_l (ioc R :: _)).
-      rewrite <- ? app_assoc.
-      change nil with (map ioc nil) at 2.
-      apply co_ilr.
-      eapply ex_ir.
-      -- apply tens_irr ; [ apply X | apply X0 ].
-      -- PEperm_Type_solve.
-    * apply tens_ilr.
-      apply wk_ilr.
-      apply ax_exp_ill.
-- nsplit 5...
+  + intros L eqpmix FL FLind.
+    destruct L.
+    { intros ; apply ax_exp_ill. }
+    destruct L.
+    { inversion eqpmix. }
+    destruct L.
+    { assert (ill (p2ipfrag (ioc R) (cutupd_pfrag pfrag_mix02 true))
+               (map ioc (R :: nil) ++ map (trans (ioc R)) l0) (ioc R)).
+      { assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
+        { left... }
+        apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+    assert (ill (p2ipfrag (ioc R) (cutupd_pfrag pfrag_mix02 true))
+               (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
+      { assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
+        { right; left... }
+        apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
+        refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+      simpl.
+      rewrite app_nil_r.
+      rewrite map_app.
+      rewrite <- (app_nil_l (ioc R :: _)).
+      rewrite <- (app_nil_r (map _ l1)).
+      rewrite app_comm_cons.
+      rewrite (app_assoc _ (map _ l1)).
+      eapply (cut_ir _ (itens (ioc R) (ioc R))).
+      - rewrite <- 2 (app_nil_l (ioc R :: _)).
+        rewrite <- ? app_assoc.
+        change nil with (map ioc nil) at 2.
+        apply co_ilr.
+        eapply ex_ir.
+        + apply tens_irr ; [ apply X | apply X0 ].
+        + PEperm_Type_solve.
+      - apply tens_ilr.
+        apply wk_ilr.
+        apply ax_exp_ill. }
+    inversion eqpmix.
+- nsplit 4...
   intros a ; destruct a.
 Unshelve. all: reflexivity.
 Qed.
@@ -706,5 +749,4 @@ apply ill_trans_to_llR_oc_bot.
 intros R.
 apply ll_bbb_to_ill_trans ; eassumption.
 Qed.
-
 

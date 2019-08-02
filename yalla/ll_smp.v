@@ -179,6 +179,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_app_head.
   apply Permutation_Type_app_tail.
   symmetry in HP ; apply Permutation_Type_map...
+- inversion i.
 - destruct l' ; inversion Heql0 ; destruct f ; inversion H0.
   destruct l' ; inversion H1.
   apply one_r.
