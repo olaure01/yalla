@@ -267,7 +267,7 @@ Defined.
 
 Section ll_ind.
 
-  Variable P : pfrag.
+  Context { P : pfrag }.
 
   Definition Forall_Proofs (Pred : forall l, ll P l -> Type) {L} (piL : Forall_Type (ll P) L) := Dependent_Forall_Type Pred piL.
 
@@ -498,7 +498,7 @@ Lemma same_pfrag P Q : eq_pfrag P Q ->
                        forall l, ll P l -> ll Q l.
 Proof with myeeasy.
   intros Heq l pi.
-  induction pi using (ll_nested_ind' P) ; try (constructor ; myeasy ; fail).
+  induction pi using ll_nested_ind' ; try (constructor ; myeasy ; fail).
   - apply (ex_r _ l1)...
     destruct Heq as (_ & _ & _  & Hp).
     unfold PCperm_Type in p.
@@ -542,7 +542,7 @@ Qed.
 Lemma stronger_pfrag P Q : le_pfrag P Q -> forall l, ll P l -> ll Q l.
 Proof with myeeasy.
 intros Hle l H.
-induction H using (ll_nested_ind' P) ; try (constructor ; myeasy ; fail).
+induction H using ll_nested_ind' ; try (constructor ; myeasy ; fail).
 - apply (ex_r _ l1)...
   destruct Hle as (_ & _ & _  & Hp).
   unfold PCperm_Type in p.
@@ -748,7 +748,7 @@ Lemma bot_rev {P} : (forall a, In_Type bot (projT2 (pgax P) a) -> False) ->
 Proof with myeeasy.
 intros Hgax l1 l2 pi.
 remember (l1 ++ bot :: l2) as l ; revert l1 l2 Heql.
-induction pi using (ll_nested_ind P) ; intros l1' l2' Heq ; subst.
+induction pi using ll_nested_ind ; intros l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -855,7 +855,7 @@ Proof with myeeasy.
 intros Hgax A B l1 l2 pi.
 remember (l1 ++ parr A B :: l2) as l.
 revert A B l1 l2 Heql.
-induction pi using (ll_nested_ind P) ; intros A' B' l1' l2' Heq ; subst.
+induction pi using ll_nested_ind ; intros A' B' l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -959,7 +959,7 @@ Proof with myeeasy.
 intros Hgax l0 pi0 l1 l2 pi.
 remember (l1 ++ one :: l2) as l.
 revert l1 l2 Heql.
-induction pi using (ll_nested_ind P); intros l1' l2' Heq ; subst.
+induction pi using ll_nested_ind ; intros l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -1061,7 +1061,7 @@ Proof with myeeasy.
 intros Hgax1 Hgaxt A l1 l2 pi.
 remember (l1 ++ tens one A :: l2) as l.
 revert A l1 l2 Heql.
-induction pi using (ll_nested_ind P) ; intros A' l1' l2' Heq ; subst.
+induction pi using ll_nested_ind ; intros A' l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -1161,7 +1161,7 @@ Lemma tens_rev {P} : (forall a A B, projT2 (pgax P) a = tens A B :: nil -> False
 Proof with myeeasy.
 intros Hgax Hcut A B pi.
 remember (tens A B :: nil) as l ; revert A B Heql ;
-  induction pi using (ll_nested_ind P) ; intros A' B' Heq ; subst ;
+  induction pi using ll_nested_ind ; intros A' B' Heq ; subst ;
   try (now inversion Heq).
 - apply PCperm_Type_sym in p.
   apply PCperm_Type_length_1_inv in p ; subst.
@@ -1197,7 +1197,7 @@ Lemma plus_rev {P} : (forall a A B, projT2 (pgax P) a = aplus A B :: nil -> Fals
 Proof with myeeasy.
 intros Hgax Hcut A B pi.
 remember (aplus A B :: nil) as l ; revert A B Heql ;
-  induction pi using (ll_nested_ind P) ; intros A' B' Heq ; subst ;
+  induction pi using ll_nested_ind ; intros A' B' Heq ; subst ;
   try (now inversion Heq).
 - apply PCperm_Type_sym in p.
   apply PCperm_Type_length_1_inv in p ; subst.
@@ -1271,7 +1271,7 @@ Qed.
 Lemma munit_elim {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
   forall l1, ll P l1 -> forall l2, Forall2_Type munit_smp l1 l2 -> ll P l2.
 Proof with try eassumption.
-intros Hgax l1 pi ; induction pi using (ll_nested_ind P) ; intros l2' HF ;
+intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
   try now (inversion HF ; subst ;
            inversion H1 ; subst ;
            constructor ; apply IHpi ; try eassumption ;
@@ -1425,7 +1425,7 @@ Lemma ax_gen_loc : forall P Q l, Bool.leb (pperm P) (pperm Q) ->
   ll Q l.
 Proof with myeeasy.
 intros P Q l Hperm Hmix Hcut pi.
-induction pi using (ll_nested_ind P) ; simpl ; intros Hgax ;
+induction pi using ll_nested_ind ; simpl ; intros Hgax ;
   try (destruct (Forall_Type_app_inv _ _ _ Hgax) as [Hgax1 Hgax2]) ;
   try (apply IHpi1 in Hgax1) ;
   try (apply IHpi2 in Hgax2) ;
@@ -1561,7 +1561,7 @@ Lemma ext_wn_param P Q (Q_perm : pperm Q = true) : forall l l0,
   ll Q (l ++ map wn l0).
 Proof with myeeasy.
 intros l l0 pi Hpcut Hpgax Hpmix.
-induction pi using (ll_nested_ind P); try (now constructor).
+induction pi using ll_nested_ind ; try (now constructor).
 - eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
   apply wk_list_r.
   apply ax_r.

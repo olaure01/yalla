@@ -60,8 +60,7 @@ Qed.
 Lemma bot_rev_bbb : forall l, ll_bbb l ->
   forall l1 l2, l = l1 ++ bot :: l2 -> ll_bbb (l1 ++ l2).
 Proof with myeeasy.
-intros l pi.
-induction pi ; intros l1' l2' Heq ; subst.
+intros l pi ; induction pi ; intros l1' l2' Heq ; subst.
 - exfalso.
   destruct l1' ; inversion Heq.
   destruct l1' ; inversion H1.
@@ -136,8 +135,7 @@ Qed.
 (** [ll_mix2] is contained in [ll_bbb] *)
 Lemma mix2_to_bbb : forall l, ll_mix2 l -> ll_bbb l.
 Proof with myeeasy.
-intros l H.
-induction H using (ll_nested_ind _); try now constructor.
+intros l H ; induction H using ll_nested_ind ; try now constructor.
 - apply (ex_bbb_r l1)...
 - apply (Permutation_Type_map wn) in p.
   eapply ex_bbb_r...
@@ -160,15 +158,14 @@ Qed.
 (** [ll_bbb] is contained in [ll_mix02] *)
 Lemma bbb_to_mix02 : forall l, ll_bbb l -> ll_mix02 l.
 Proof with myeasy.
-  intros l H.
-  induction H ; try now constructor.
-  - apply (ex_r _ l1)...
-  - rewrite<- (app_nil_r _).
-    rewrite<- app_assoc.
-    change (l2 ++ l1 ++ nil) with (concat (l2 :: l1 :: nil)).
-    apply mix_r...
-    do 2 (apply Forall_Type_cons; try assumption).
-    apply Forall_Type_nil.
+intros l H ; induction H ; try now constructor.
+- apply (ex_r _ l1)...
+- rewrite<- (app_nil_r _).
+  rewrite<- app_assoc.
+  change (l2 ++ l1 ++ nil) with (concat (l2 :: l1 :: nil)).
+  apply mix_r...
+  do 2 (apply Forall_Type_cons; try assumption).
+  apply Forall_Type_nil.
 Qed.
 
 Lemma mix2_std_bbb_r : forall l1 l2,
@@ -184,8 +181,7 @@ Qed.
 Lemma bbb_to_ll : forall l,
   ll_bbb l -> ll_ll (wn (tens (wn one) bot) :: l).
 Proof with myeeasy ; try PCperm_Type_solve.
-intros l pi.
-induction pi ;
+intros l pi ; induction pi ;
   (try now (apply wk_r ; constructor)) ;
   try now (eapply ex_r ; [ | apply Permutation_Type_swap ] ;
            constructor ; eapply ex_r ; [ eassumption | PCperm_Type_solve ]).
@@ -222,8 +218,7 @@ Lemma ll_to_bbb : forall l,
                          ++ map (fun _ => wn (tens (wn one) bot)) l0)  ->
   ll_bbb l'.
 Proof with myeeasy ; try PCperm_Type_solve.
-intros l pi.
-induction pi using (ll_nested_ind _); intros l' l0' l1' HP.
+intros l pi ; induction pi using ll_nested_ind ; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -594,8 +589,7 @@ Qed.
 
 Lemma mix2_to_bb : forall l, ll_mix2 l -> llR (oc bot) l.
 Proof with myeeasy.
-intros l pi.
-induction pi using (ll_nested_ind _); try now econstructor.
+intros l pi; induction pi using ll_nested_ind ; try now econstructor.
 - eapply ex_r...
 - eapply ex_wn_r...
 - repeat (destruct L; try now inversion eqpmix).
@@ -755,8 +749,7 @@ Lemma ex_implies_mix2_mix02 : forall l,
   ll_bbb0 l -> Permutation_Type l (one :: oc (tens (parr one one) bot) :: nil) ->
     ll_mix0 (one :: one :: nil).
 Proof with myeeasy ; try perm_Type_solve.
-intros l H.
-induction H ; intro HP ;
+intros l H ; induction H ; intro HP ;
   try now (apply Permutation_Type_sym in HP ;
        apply Permutation_Type_length_2_inv in HP ;
        destruct HP as [HP | HP] ;

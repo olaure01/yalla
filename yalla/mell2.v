@@ -1,7 +1,6 @@
 (* mell2 example file for yalla library *)
 
 
-
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
 Require Import CMorphisms.
@@ -157,7 +156,7 @@ Lemma mellfrag2mell : forall l, ll_def.ll pfrag_mell (map mell2ll l) -> mell l.
 Proof with try eassumption ; try reflexivity.
 intros l pi.
 remember (map mell2ll l) as l0.
-revert l Heql0 ; induction pi using (ll_def.ll_nested_ind pfrag_mell) ; intros l' Heql0 ; subst ;
+revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; subst ;
   try (destruct l' ; inversion Heql0 ;
        destruct f ; inversion H0 ; fail).
 - decomp_map_Type Heql0 ; subst.
@@ -258,8 +257,4 @@ simpl in pi2 ; rewrite <- mell2ll_dual in pi2.
 eapply ll_cut.cut_r_axfree...
 intros a ; destruct a.
 Qed.
-
-
-
-
 

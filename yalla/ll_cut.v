@@ -181,7 +181,7 @@ Proof with myeasy_perm_Type; try assumption.
   intros P_cutfree A lw pi1 IHcut l' L pi2.
   remember (l' ++ flat_map (fun p => wn_n (fst p) (wn A) :: (snd p)) L) as l.
   revert l' L Heql.
-induction pi2 using (ll_nested_ind P) ; intros l' L' Heq; try (rename L' into L) ; subst.
+induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; subst.
 - destruct L ; list_simpl in Heq ; subst.
   + list_simpl ; apply ax_r.
   + exfalso.
@@ -1386,7 +1386,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
   remember (dual A :: l0) as l.
   rewrite <- (app_nil_l l2) ; rewrite <- (app_nil_l (dual A :: l0)) in Heql0.
   remember nil as l3 ; clear Heql3.
-  revert l3 l0 Heql0 ; induction pi1 using (ll_nested_ind P); intros l4 l5 Heq ; subst.
+  revert l3 l0 Heql0 ; induction pi1 using ll_nested_ind ; intros l4 l5 Heq ; subst.
   + destruct l4 ; inversion Heq ; subst.
     * destruct A ; inversion H0 ; subst.
       list_simpl ; rewrite <- Heql ; apply (gax_r _ a).
@@ -1521,7 +1521,7 @@ Lemma cut_admissible {P} :
   forall l, ll P l -> ll (cutrm_pfrag P) l.
 Proof with try assumption.
 intros Hgax_at Hgax_cut l pi.
-induction pi using (ll_nested_ind P) ; try (econstructor ; myeeasy ; fail).
+induction pi using ll_nested_ind ; try (econstructor ; myeeasy ; fail).
 - apply mix_r; simpl...
   apply forall_Forall_Type.
   intros x Hin.

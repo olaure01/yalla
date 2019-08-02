@@ -355,7 +355,7 @@ Hypothesis P_perm : pperm P = true.
 Lemma ll_to_ill_trans_gen : forall l l0,
   (forall L, pmix P (length L) = true ->
              forall (FL : Forall_Type (ll P) L),
-               Forall_Proofs P (fun l pi => ill (p2ipfrag P) (map ioc l0 ++ map trans l) R) FL ->
+               Forall_Proofs (fun l pi => ill (p2ipfrag P) (map ioc l0 ++ map trans l) R) FL ->
                ill (p2ipfrag P) (map ioc l0 ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map ioc l0 ++ map trans l) R.
 Proof with myeeasy ; (try now (apply ax_exp_ill)) ;
@@ -366,10 +366,7 @@ rewrite <- (app_nil_l (R :: _)) in Hax.
 assert (ill (p2ipfrag P) (nil ++ map ioc l0 ++ R :: nil) R) as Hax'.
 { apply wk_list_ilr.
   apply ax_exp_ill. }
-induction Hll using (ll_nested_ind _); 
-  (try now (apply P_axfree in H ; inversion H)) ;
-  (try now (inversion f)) ;
-  simpl.
+induction Hll using ll_nested_ind.
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | apply Hax' ].
     eapply (ax_ir _ (a2i X)).
@@ -467,7 +464,7 @@ Theorem ll_to_ill_trans : forall l,
   (forall L : list (list formula),
       pmix P (length L) = true ->
       forall FL : Forall_Type (ll P) L,
-        Forall_Proofs P (fun (l0 : list formula) (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
+        Forall_Proofs (fun (l0 : list formula) (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
         ill (p2ipfrag P) (map ioc nil ++ map trans (concat L)) R) ->
       ll P l -> ill (p2ipfrag P) (map trans l) R.
 Proof with myeeasy.
@@ -536,3 +533,4 @@ induction A ; intros n Hf ; simpl...
   apply IHA.
   simpl in Hf...
 Qed.
+

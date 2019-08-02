@@ -21,7 +21,7 @@ Lemma weak_consistency_axfree {P} : (projT1 (pgax P) -> False) -> pmix P 0 = fal
 Proof.
 intros Hgax Hmix0 pi.
 apply cut_admissible_axfree in pi ; try assumption.
-remember nil as l ; revert Heql ; induction pi using (ll_nested_ind _) ; intros Heql ; inversion Heql ; subst.
+remember nil as l ; revert Heql ; induction pi using ll_nested_ind ; intros Heql ; inversion Heql ; subst.
 - apply IHpi.
   symmetry in p.
   apply (PCperm_Type_nil _ _ p).
@@ -43,7 +43,7 @@ Lemma strong_consistency_axfree {P} : (projT1 (pgax P) -> False) ->
 Proof.
 intros Hgax pi.
 apply cut_admissible_axfree in pi ; try assumption.
-remember (zero :: nil) as l ; revert Heql ; induction pi using (ll_nested_ind _) ;
+remember (zero :: nil) as l ; revert Heql ; induction pi using ll_nested_ind ;
   intros Heql ; inversion Heql ; subst.
 - apply IHpi.
   symmetry in p.
@@ -278,7 +278,7 @@ Qed.
 Lemma ll_is_ll_ps {P} : forall l, ll P l -> ll_ps P (fun _ => true) l.
 Proof with myeeasy.
 intros l pi.
-induction pi using (ll_nested_ind P); try (econstructor ; myeeasy ; fail).
+induction pi using ll_nested_ind ; try (econstructor ; myeeasy ; fail).
 apply mix_ps_r...
 apply forall_Forall_Type.
 intros l' Hin.

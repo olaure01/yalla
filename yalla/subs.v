@@ -80,7 +80,7 @@ assert
 { clear.
   induction l...
   simpl ; rewrite IHl... }
-induction pi using (ll_nested_ind P) ; list_simpl ; try (now constructor).
+induction pi using ll_nested_ind ; list_simpl ; try (now constructor).
 - eapply ex_r ; [ apply ax_exp | apply PCperm_Type_swap ].
 - eapply PCperm_Type_map in p.
   eapply ex_r...

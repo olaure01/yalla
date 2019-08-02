@@ -130,7 +130,7 @@ Proof with try assumption; try reflexivity.
                    | inl x => projT2 (pgax P) x
                    | inr tt => parr_n n one :: nil
                    end))) as P'.
-  induction pi using (ll_nested_ind _); try now constructor.
+  induction pi using ll_nested_ind ; try now constructor.
   - apply ex_r with l1...
     simpl; rewrite HeqP' in p; simpl in p...
   - apply ex_wn_r with lw...
@@ -179,7 +179,7 @@ Proof with try assumption; try reflexivity; try PCperm_Type_solve.
               | inl x => projT2 (pgax P) x
               | inr tt => parr_n n one :: nil
               end))) true) as P'.
-  induction pi using (ll_nested_ind _); try now constructor...
+  induction pi using ll_nested_ind ; try now constructor...
   - rewrite HeqP'; rewrite HeqP' in IHpi.
     apply ex_r with l1...
   - apply ex_wn_r with lw...
@@ -324,7 +324,7 @@ Lemma mix_conservativity P Q :
   forall l, ll P l -> ll Q l.
 Proof with try assumption; try reflexivity.
 intros Hcut Hperm Hgax Hpmix l pi.
-induction pi using (ll_nested_ind _); try now constructor.
+induction pi using ll_nested_ind ; try now constructor.
 - apply ex_r with l1...
   unfold PCperm_Type in p.
   unfold PCperm_Type.
@@ -519,7 +519,7 @@ Lemma cut_ll_admissible :
   forall l, ll (cutupd_pfrag pfrag_ll true) l -> ll_ll l.
 Proof with myeeasy.
 intros l pi.
-induction pi using (ll_nested_ind _); try (now econstructor).
+induction pi using ll_nested_ind ; try (now econstructor).
 - eapply ex_r...
 - eapply ex_wn_r...
 - eapply cut_ll_r...
@@ -547,7 +547,7 @@ Lemma cut_mix0_admissible :
   forall l, ll (cutupd_pfrag pfrag_mix0 true) l -> ll_mix0 l.
 Proof with myeeasy.
 intros l pi.
-induction pi using (ll_nested_ind _) ; try (now econstructor).
+induction pi using ll_nested_ind ; try (now econstructor).
 - eapply ex_r...
 - eapply ex_wn_r...
 - apply mix_r...
@@ -712,7 +712,7 @@ Lemma cut_mix2_admissible :
   forall l, ll (cutupd_pfrag pfrag_mix2 true) l -> ll_mix2 l.
 Proof with myeeasy.
 intros l pi.
-induction pi using (ll_nested_ind _) ; try (now econstructor).
+induction pi using ll_nested_ind ; try (now econstructor).
 - eapply ex_r...
 - eapply ex_wn_r...
 - apply mix_r...
@@ -933,7 +933,7 @@ Lemma mix2_not_mix0 : ll_mix2 nil -> False.
 Proof.
 intros pi.
 remember nil as l.
-revert Heql ; induction pi using (ll_nested_ind _) ; intros Heql ; subst ; try inversion Heql.
+revert Heql ; induction pi using ll_nested_ind ; intros Heql ; subst ; try inversion Heql.
 - apply IHpi.
   simpl in p ; apply Permutation_Type_sym in p.
   apply Permutation_Type_nil in p.
@@ -975,7 +975,7 @@ Lemma cut_mix02_admissible :
   forall l, ll (cutupd_pfrag pfrag_mix02 true) l -> ll_mix02 l.
 Proof with myeeasy.
 intros l pi.
-induction pi using (ll_nested_ind _) ; try (now econstructor).
+induction pi using ll_nested_ind ; try (now econstructor).
 - eapply ex_r...
 - eapply ex_wn_r...
 - apply mix_r...
