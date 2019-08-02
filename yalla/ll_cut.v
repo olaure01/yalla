@@ -13,6 +13,7 @@ Require Import flat_map_Type_more.
 Require Import Dependent_Forall_Type.
 Require Import Wf_nat_more.
 
+Require Import ll_cut_at.
 Require Export ll_def.
 
 
@@ -1379,131 +1380,12 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* cut_r *)
   rewrite f in P_cutfree ; inversion P_cutfree.
 - (* gax_r *)
-  clear IHcut IHsize c Hc.
+  rewrite <- (app_nil_r l0); rewrite <- app_assoc.
+  rewrite <- (bidual A) in Heql.
+  apply cut_gax_l with (dual A) a; auto.
   specialize P_gax_at with a ; rewrite Heql in P_gax_at.
-  assert (atomic A) as Hat.
-  { apply Forall_Type_app_inv in P_gax_at ; destruct P_gax_at as [_ P_gax_at2] ; inversion P_gax_at2... }
-  remember (dual A :: l0) as l.
-  rewrite <- (app_nil_l l2) ; rewrite <- (app_nil_l (dual A :: l0)) in Heql0.
-  remember nil as l3 ; clear Heql3.
-  revert l3 l0 Heql0 ; induction pi1 using ll_nested_ind ; intros l4 l5 Heq ; subst.
-  + destruct l4 ; inversion Heq ; subst.
-    * destruct A ; inversion H0 ; subst.
-      list_simpl ; rewrite <- Heql ; apply (gax_r _ a).
-    * destruct l4 ; inversion H1 ; subst.
-      -- destruct A ; inversion H0 ; subst.
-         list_simpl ; rewrite <- Heql ; apply (gax_r _ a).
-      -- destruct l4 ; inversion H2.
-  + apply PCperm_Type_vs_elt_inv in p.
-    destruct p as [[l4' l5'] Heq p] ; simpl in Heq ; simpl in p ; subst.
-    assert (PEperm_Type (pperm P) (l1 ++ l5' ++ l4' ++ l2) (l1 ++ l5 ++ l4 ++ l2)) as HP'.
-    { apply PEperm_Type_app_head.
-      rewrite 2 app_assoc ; apply PEperm_Type_app_tail.
-      symmetry... }
-    apply PEperm_PCperm_Type in HP'.
-    apply (ex_r _ (l1 ++ l5' ++ l4' ++ l2))...
-    apply IHpi1...
-  + symmetry in Heq ; trichot_Type_elt_app_exec Heq ; subst.
-    * list_simpl ; rewrite app_assoc.
-      eapply ex_wn_r...
-      list_simpl.
-      rewrite (app_assoc l6) ; rewrite (app_assoc _ l3) ; rewrite <- (app_assoc l6).
-      apply IHpi1 ; list_simpl...
-    * destruct Heq1 as [Heq1 Heq2] ; decomp_map_Type Heq1.
-      exfalso ; destruct A ; inversion Heq1 ; subst ; inversion Hat.
-    * list_simpl ; rewrite 2 app_assoc.
-      eapply ex_wn_r...
-      list_simpl ; rewrite (app_assoc l0) ; rewrite (app_assoc _ l7).
-      apply IHpi1 ; list_simpl...
-  + apply concat_elt in Heq as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
-    apply ex_r with (concat L1 ++ (l1' ++ l2 ++ l1 ++ l2') ++ concat L2); [ | PCperm_Type_solve].
-    change ((l1' ++ l2 ++ l1 ++ l2') ++ concat L2) with (concat ((l1' ++ l2 ++ l1 ++ l2') :: L2)).
-    rewrite <- concat_app.
-    apply mix_r.
-    * rewrite app_length; simpl; rewrite app_length in eqpmix; simpl in eqpmix...
-    * destruct (Forall_Type_app_inv _ _ _ PL) as (FL1 & FL2).
-      inversion FL2; subst; clear FL2; clear X0; rename X1 into FL2.
-      apply Forall_Type_app...
-      apply Forall_Type_cons...
-      apply ex_r with (l1 ++ l2' ++ l1' ++ l2) ; [ | PCperm_Type_solve].
-      destruct (In_Forall_Type_elt _ _ _ (l1' ++ dual A :: l2') PL) as (pi & Hin).
-      refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin _ _ eq_refl).
-  + exfalso ; destruct l4 ; inversion Heq.
-    * destruct A ; inversion H0 ; subst ; inversion Hat.
-    * destruct l4 ; inversion H1.
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply bot_r...
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply IHpi1 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    dichot_Type_elt_app_exec H1 ; subst.
-    * list_simpl.
-      eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-      rewrite app_comm_cons ; eapply ex_r ; [ | symmetry ; apply PCperm_Type_app_rot ] ; list_simpl.
-      rewrite 3 app_assoc ; apply tens_r...
-      list_simpl ; rewrite app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-      rewrite app_comm_cons ; apply IHpi1_2 ; list_simpl...
-    * eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-      apply tens_r...
-      list_simpl ; rewrite app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-      rewrite app_comm_cons ; apply IHpi1_1 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply parr_r...
-    rewrite 2 app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    rewrite 2 app_comm_cons ; apply IHpi1 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply top_r...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply plus_r1...
-    rewrite app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    rewrite app_comm_cons ; apply IHpi1 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply plus_r2...
-    rewrite app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    rewrite app_comm_cons ; apply IHpi1 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply with_r...
-    * rewrite app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-      rewrite app_comm_cons ; apply IHpi1_1 ; list_simpl...
-    * rewrite app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-      rewrite app_comm_cons ; apply IHpi1_2 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    exfalso ; symmetry in H1 ; decomp_map_Type H1 ; destruct A ; inversion H1 ; subst ; inversion Hat.
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply de_r...
-    rewrite app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    rewrite app_comm_cons ; apply IHpi1 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply wk_r...
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply IHpi1 ; list_simpl...
-  + destruct l4 ; inversion Heq ; subst ;
-      try (exfalso ; destruct A ; inversion H0 ; subst ; inversion Hat ; fail).
-    eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    apply co_r...
-    rewrite 2 app_comm_cons ; eapply ex_r ; [ | apply PCperm_Type_app_rot ] ; list_simpl.
-    rewrite 2 app_comm_cons ; apply IHpi1 ; list_simpl...
-  + rewrite f in P_cutfree ; inversion P_cutfree.
-  + destruct (P_gax_cut a0 a _ _ _ _ _ Heq Heql) as [x Hcut].
-    rewrite <- Hcut ; apply (gax_r _ x).
+  apply Forall_Type_app_inv in P_gax_at ; destruct P_gax_at as [_ P_gax_at2] ; inversion P_gax_at2.
+  destruct A; inversion H1; simpl; constructor.
 Qed.
 
 End Cut_Elim_Proof.
