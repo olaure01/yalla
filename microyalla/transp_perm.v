@@ -1,6 +1,6 @@
 Require Import List Lia.
 
-Require Import Injective Permutation_Type.
+Require Import Injective List_more Permutation_Type.
 
 (* Transpose elements of index n and n+1 in l *)
 Fixpoint transp {A} n (l : list A) :=
@@ -23,8 +23,7 @@ intros n l l0; revert n l; induction l0 using rev_ind; intros n l; try reflexivi
 rewrite <- ? app_assoc; rewrite <- app_comm_cons; simpl.
 rewrite <- transp_cons; rewrite <- IHl0.
 f_equal.
-rewrite <- rev_length; rewrite rev_app_distr; rewrite app_length; rewrite ? rev_length.
-simpl; lia.
+rewrite last_length; simpl; lia.
 Qed.
 
 Lemma transp_transp {A} : forall l1 l2 (a b : A),

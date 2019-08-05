@@ -47,7 +47,7 @@ microyalla:
 
 cutelim: ollibs $(VFILES:.v=.vo)
 
-microyallaneeded: $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Permutation_Type.vo ll_def.vo ill_def.vo
+microyallaneeded: $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_Type.vo ll_def.vo ill_def.vo
 
 include $(OLLIBSDIR)/ollibs.mk
 
