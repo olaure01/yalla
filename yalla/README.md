@@ -4,8 +4,8 @@
 
 
 
-If you have any trouble, question or request for extension, if you need help to write interfaces,
-please contact:  `Olivier.Laurent@ens-lyon.fr`
+*If you have any trouble, question or request for extension, if you need help to write interfaces,
+please contact:  `Olivier.Laurent@ens-lyon.fr`*
 
 
 This library defines notions of proofs for various fragments of linear logic.
@@ -16,8 +16,7 @@ This allows us to provide a study of proofs which is compatible with the computa
 
 Parameters in the definition of proofs allow the user:
 
-* to include the `mix0` rule or not;
-* to include the `mix2` rule or not;
+* to include some `mix` rules or not;
 * to define arbitrary axioms
      (which allows in particular to work with open proofs);
 * to use the usual exchange rule (arbitrary permutations)
@@ -33,76 +32,80 @@ It is possible to hide the explicit exchange rule by introducing multisets for s
 
 Main files:
 
-* formulas.v(o):
+* formulas.v:
     definition of (classical) linear logic formulas
-* fmformulas.v(o):
+* fmformulas.v:
     additional structure on formulas (order, multiset)
-* ll_def.v(o):
+* ll_def.v:
     main definitions for classical linear logic (LL)
     and properties not requiring cut admissibility
-* subs.v(o):
+* subs.v:
     susbtitution for LL
-* ll_cut.v(o):
+* ll_cut_at.v:
+    cut admissibility for atomic cut formulas in LL
+* ll_cut.v:
     cut admissibility properties for LL
-* ll_prop.v(o):
+* ll_prop.v:
     properties of LL relying on cut admissibility
-* ll_fragments.v(o):
+* ll_fragments.v:
     definitions of some common fragments of LL
-* iformulas.v(o):
+* iformulas.v:
     definition of intuitionistic linear logic formulas
-* fmiformulas.v(o):
+* fmiformulas.v:
     additional structure on intuitionistic formulas (order, multiset)
-* ill_def.v(o):
+* ill_def.v:
     main defintions for intuitionistic linear logic (ILL)
     (Lambek calculus included when permutation is equality:
        ipperm P = false)
-* isubs.v(o):
+* isubs.v:
     susbtitution for ILL
-* ill_cut.v(o):
+* ill_cut.v:
     cut admissibility properties for ILL
-* ill_prop.v(o):
+* ill_prop.v:
     properties of ILL relying on cut admissibility
-* ill_vs_ll.v(o):
+* ill_vs_ll.v:
     relations between ILL and LL
-* nn_def.v(o):
+* nn_def.v:
     main properties of double-negation translations from LL to ILL
-* nn_prop.v(o):
+* nn_prop.v:
     properties of double-negation translations from LL to ILL
     related to expressiveness analysis
-* llfoc.v(o):
+* llfoc.v:
     definitions of focused systems
     and proof of strong focusing from weak focusing
-* nn_foc.v(o):
+* nn_foc.v:
     double-negation-based proof of weak focusing
 
 Example files for interfaces:
 
-* mell2.v(o):
+* mell2.v:
     unit-free MELL with mix2
-* mell_Prop.v(o):
+* mell_Prop.v:
     unit-free MELL with proofs in Prop (i.e. provability only)
-* lambek.v(o):
+* lambek.v:
     a variant of Lambek calculus
-* mell_mset.v(o):
+* mell_mset.v:
     multiset-based MELL (no exchange rule)
-* mell_msetoid.v(o):
+* mell_msetoid.v:
     setoid multiset-based MELL
-* llpol.v(o):
+* llpol.v:
     polarized fragment of LL
-* tl.v(o):
+* tl.v:
     tensor logic
-* ll_smp.v(o):
-    interface with the microyalla self-contained version of LL
-* ill_smp.v(o):
-    interface with the microyalla self-contained version of ILL
+* ll_smp.v:
+    interface for the standard version of LL
+* ill_smp.v:
+    interface for the standard version of ILL
 
 Other files:
 
-* bbb.v(o):
+* bbb.v:
     study of LL extended with the equation: bot = oc bot
-* yalla_ax.v(o):
+* yalla_ax.v:
     specific instances of axioms on atoms used in the library
     (this guarantees consistency of this set of axioms)
+* basic_misc.v:
+    basic definitions and tactics
 
 The precise file dependencies are pictured in the [dependency graph](dependencies.png).
 

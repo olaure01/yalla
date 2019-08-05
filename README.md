@@ -10,4 +10,9 @@ See the [more detailed README](yalla/README.md) for more informations.
 
 ----
 
-Many thanks to Damien Pous and Christian Doczkal for important discussions, suggestions and help.
+## Main contributors
+
+* Olivier Laurent
+* Christophe Lucas
+
+Many thanks also to Damien Pous and Christian Doczkal for important discussions, suggestions and help.
