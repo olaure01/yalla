@@ -1,7 +1,7 @@
 # ollibs
 Add-ons for the Coq Standard Library
 
-Working with `Coq 8.8.1`
+Working with `Coq 8.9.0`
 
 ## Misc
 
@@ -13,6 +13,8 @@ Working with `Coq 8.8.1`
 * `List_more`    : add-ons for standard library List
 * `nattree`      : nat-labelled trees and coding into nat
 * `Surjective`   : properties of surjective functions
+* `Vector_more`  : add-ons for standard library Vector
+* `Wf_nat_more`  : add-ons for standard library Wf_nat
 * `wf_prod`      : well-founded order on product (application to `nat`)
 
 ## More About Permutations
@@ -20,8 +22,8 @@ Working with `Coq 8.8.1`
 * `CPermutation_solve` : automatic tactic for cyclic permutation goals
 * `CyclicPerm`         : library for cyclic permutations
 * `genperm`            : factorized common properties of
-  * permutation and cyclic permutation
-  * permutation and equality
+    * permutation and cyclic permutation
+    * permutation and equality
 * `Permutation_more`   : add-ons for standard library Permutation
 * `Permutation_solve`  : automatic tactic for permutation goals
 
@@ -42,8 +44,9 @@ Working with `Coq 8.8.1`
 
 ## Misc with output in `Type`
 
+* `Dependent_Forall_Type`   : generalization of `Forall_Type` to dependent product
+* `flat_map_Type_more`      : decomposition properties for `flat_map`
 * `fmsetlist_Type`          : `fmsetlist` with output in `Type`
 * `fmsetoidlist_Type`       : `fmsetoidlist` with output in `Type`
 * `List_Type_more`          : `List_more` with output in `Type`
-
 

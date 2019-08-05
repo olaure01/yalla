@@ -1,5 +1,4 @@
 (* Bool_more Library *)
-(* v0   Olivier Laurent *)
 
 
 (** * Add-ons for Bool library
@@ -58,8 +57,7 @@ intros b1 b2 f1 f2.
 assert (forall f, f = eq_refl_bool_ext b1 b2 f1) as Heq.
 { destruct f.
   revert f1.
-  destruct b1 ; reflexivity.
-}
+  destruct b1 ; reflexivity. }
 rewrite (Heq f2).
 apply Heq.
 Qed.
