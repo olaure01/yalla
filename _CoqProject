@@ -55,6 +55,7 @@ yalla/ill_smp.v
 yalla/ill_vs_ll.v
 yalla/isubs.v
 yalla/lambek.v
+yalla/lj.v
 yalla/ll_cut.v
 yalla/ll_cut_at.v
 yalla/ll_def.v

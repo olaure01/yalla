@@ -96,6 +96,8 @@ Example files for interfaces:
     interface for the standard version of LL
 * ill_smp.v:
     interface for the standard version of ILL
+* lj.v:
+    intuitionistic logic (with the 2 Girard's translations)
 
 Other files:
 

@@ -1,5 +1,22 @@
 # YALLA: an LL library for Coq
 
+## v 2.x
+
+Modifications in definitions leading to possible incompatibilities with version 2.0:
+
+* generalized mix rules
+    (no real impact if mix rules are not used except that the `mix0` and `mix2` rules are replaced by only one rule)
+* output of `atomic` is now in `Type` (only requires simple updates if `atomic` is used, it is also possible to use the previous version under the name `atomic_Prop`)
+
+New results added, including:
+
+* results about the generalized `mix` rule
+* consistency properties
+* additional counter-examples to conservativity of `ill` over `ll`
+* simplified defition of `micro_ll` and new `nano_ll`
+* decidability of equality on formulas
+* Girard's translations into intuitionistic logic
+
 ## v 2.0 (2019/01/23)
 
 This major revision is based on a representation of proofs in `Type` rather than `Prop`.
