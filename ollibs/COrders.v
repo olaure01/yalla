@@ -83,7 +83,7 @@ Inductive CompareSpec (Peq Plt Pgt : Type) : comparison -> Type :=
  | CompEq : Peq -> CompareSpec Peq Plt Pgt Eq
  | CompLt : Plt -> CompareSpec Peq Plt Pgt Lt
  | CompGt : Pgt -> CompareSpec Peq Plt Pgt Gt.
-Hint Constructors CompareSpec.
+Hint Constructors CompareSpec : core.
 
 Module Type CmpSpec (Import E:EqLt')(Import C:HasCmp E).
   Axiom compare_spec : forall x y, CompareSpec (x==y) (x<y) (y<x) (compare x y).
@@ -207,7 +207,7 @@ Module OTF_to_TotalOrder (O:OrderedTypeFull) <: TotalOrder
     we coerce [bool] into [Prop]. *)
 
 Local Coercion is_true : bool >-> Sortclass.
-Hint Unfold is_true.
+Hint Unfold is_true : core.
 
 Module Type HasLeb (Import T:Typ).
  Parameter Inline leb : t -> t -> bool.

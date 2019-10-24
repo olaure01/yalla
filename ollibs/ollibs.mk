@@ -4,7 +4,7 @@ $(OLLIBSDIR)/CPermutation_solve.vo: $(OLLIBSDIR)/CPermutation_solve.v $(OLLIBSDI
 $(OLLIBSDIR)/CyclicPerm.vo: $(OLLIBSDIR)/CyclicPerm.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo
 $(OLLIBSDIR)/fmsetlist.vo : $(OLLIBSDIR)/fmsetlist.v $(OLLIBSDIR)/Bool_more.vo $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Permutation_more.vo
 $(OLLIBSDIR)/fmsetoidlist.vo : $(OLLIBSDIR)/fmsetoidlist.v
-$(OLLIBSDIR)/genperm.vo: $(OLLIBSDIR)/genperm.v $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo $(OLLIBSDIR)/CyclicPerm.vo $(OLLIBSDIR)/CPermutation_solve.vo $(OLLIBSDIR)/Injective.vo
+$(OLLIBSDIR)/genperm.vo: $(OLLIBSDIR)/genperm.v $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo $(OLLIBSDIR)/CyclicPerm.vo $(OLLIBSDIR)/CPermutation_solve.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Injective.vo
 $(OLLIBSDIR)/Injective.vo: $(OLLIBSDIR)/Injective.v $(OLLIBSDIR)/List_more.vo
 $(OLLIBSDIR)/Surjective.vo: $(OLLIBSDIR)/Surjective.v
 $(OLLIBSDIR)/List_more.vo: $(OLLIBSDIR)/List_more.v

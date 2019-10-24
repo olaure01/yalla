@@ -288,6 +288,74 @@ Proof with try assumption; try reflexivity.
     right...
 Qed.
 
+
+(** ** [remove] *)
+
+Lemma remove_cons {A} : forall Hdec l (x : A), remove Hdec x (x :: l) = remove Hdec x l.
+Proof. induction l; simpl; intros x; destruct (Hdec x x); try reflexivity; now exfalso. Qed.
+
+Lemma remove_app {A} : forall Hdec l1 l2 (x : A),
+  remove Hdec x (l1 ++ l2) = remove Hdec x l1 ++ remove Hdec x l2.
+Proof.
+induction l1; intros l2 x; simpl.
+- reflexivity.
+- destruct (Hdec x a).
+  + apply IHl1.
+  + rewrite <- app_comm_cons; f_equal.
+    apply IHl1.
+Qed.
+
+Lemma remove_remove_eq {A} : forall Hdec l (x : A), remove Hdec x (remove Hdec x l) = remove Hdec x l.
+Proof.
+induction l; simpl; intros x; [ reflexivity | ].
+destruct (Hdec x a).
+- apply IHl.
+- simpl; destruct (Hdec x a).
+  + now exfalso.
+  + now rewrite IHl.
+Qed.
+
+Lemma remove_remove_neq {A} : forall Hdec l (x y: A), x <> y ->
+  remove Hdec x (remove Hdec y l) = remove Hdec y (remove Hdec x l).
+Proof.
+induction l; simpl; intros x y Hneq; [ reflexivity | ].
+destruct (Hdec y a); simpl; destruct (Hdec x a); subst.
+- now apply IHl.
+- rewrite remove_cons; now apply IHl.
+- now apply IHl.
+- simpl; destruct (Hdec y a).
+  + now exfalso.
+  + now rewrite IHl.
+Qed.
+
+Lemma in_remove {A} : forall Hdec l (x y : A), In x (remove Hdec y l) -> In x l /\ x <> y.
+Proof.
+induction l; intros x y Hin.
+- inversion Hin.
+- simpl in Hin.
+  destruct (Hdec y a); subst; split.
+  + right; now apply IHl with a.
+  + intros Heq; revert Hin; subst; apply remove_In.
+  + inversion Hin; subst; [left; reflexivity|right].
+    now apply IHl with y.
+  + inversion Hin; subst.
+    * now intros Heq; apply n.
+    * intros Heq; revert H; subst; apply remove_In.
+Qed.
+
+Lemma in_in_remove {A} : forall Hdec l (x y : A), x <> y -> In x l -> In x (remove Hdec y l).
+Proof.
+induction l; simpl; intros x y Hneq Hin.
+- inversion Hin.
+- destruct (Hdec y a); subst.
+  + destruct Hin.
+    * exfalso; now apply Hneq.
+    * now apply IHl.
+  + simpl; destruct Hin; [now left|right].
+    now apply IHl.
+Qed.
+
+
 (** ** [last] *)
 
 Lemma last_last {A} : forall l (a b : A), last (l ++ (a :: nil)) b = a.
@@ -416,6 +484,19 @@ Ltac decomp_map H :=
   end.
 
 
+(** ** [concat] *)
+
+Lemma concat_is_nil {A} : forall (L : list (list A)),
+  concat L = nil <-> Forall (fun x => x = nil) L.
+Proof.
+induction L; simpl; split; intros Hc; try constructor.
+- now apply app_eq_nil in Hc.
+- apply IHL; now apply app_eq_nil in Hc.
+- inversion Hc; subst; simpl.
+  now apply IHL.
+Qed.
+
+
 (** ** [flat_map] *)
 
 Lemma flat_map_app {A B} : forall (f : A -> list B) l1 l2,
@@ -446,6 +527,9 @@ Proof.
 intros l a Hin.
 inversion Hin.
 Qed.
+
+Lemma incl_nil_inv {A} : forall (l : list A), incl l nil -> l = nil.
+Proof. now induction l; intros Hincl; [ | exfalso; apply Hincl with a; constructor ]. Qed.
 
 Lemma incl_app_app {A} : forall l1 l2 m1 m2:list A,
   incl l1 m1 -> incl l2 m2 -> incl (l1 ++ l2) (m1 ++ m2).
@@ -504,7 +588,7 @@ eapply Forall_forall ; try eassumption.
 apply in_elt.
 Qed.
 
-Lemma Forall_wedge {A} : forall P Q (l : list A),
+Lemma Forall_and_inv {A} : forall P Q (l : list A),
   (Forall (fun x => P x /\ Q x) l) -> Forall P l /\ Forall Q l.
 Proof with try assumption.
 induction l ; intro Hl ; split ; constructor ; inversion Hl ; subst.
@@ -512,6 +596,14 @@ induction l ; intro Hl ; split ; constructor ; inversion Hl ; subst.
 - apply IHl...
 - destruct H1...
 - apply IHl...
+Qed.
+
+Lemma Forall_and {A} : forall P Q (l : list A),
+  Forall P l -> Forall Q l -> Forall (fun x => P x /\ Q x) l.
+Proof.
+induction l; intros HP HQ; constructor; inversion HP; inversion HQ; subst.
+- now split.
+- now apply IHl.
 Qed.
 
 Lemma Forall_nth {A} : forall P l,
@@ -629,6 +721,22 @@ intros P Q Hi.
 induction l ; intros He ; inversion He ; subst.
 - apply Hi in H0 ; now constructor.
 - apply IHl in H0 ; now constructor.
+Qed.
+
+Lemma Exists_or_inv {A} : forall P Q (l : list A),
+  (Exists (fun x => P x \/ Q x) l) -> Exists P l \/ Exists Q l.
+Proof with try assumption.
+induction l ; intro Hl; inversion Hl; subst.
+- inversion H0; [left|right]; now constructor.
+- destruct (IHl H0) as [IHP|IHQ]; [left|right]; now constructor.
+Qed.
+
+Lemma Exists_or {A} : forall P Q (l : list A),
+  Exists P l \/ Exists Q l -> Exists (fun x => P x \/ Q x) l.
+Proof.
+induction l; intros [H|H]; inversion H; subst; try now repeat constructor.
+- eapply or_introl in H1; apply IHl in H1; now constructor.
+- eapply or_intror in H1; apply IHl in H1; now constructor.
 Qed.
 
 

@@ -6,6 +6,7 @@ Require Import Morphisms.
 Require Import List.
 
 Require Import Injective.
+Require Import List_more.
 Require Import Permutation_more.
 Require Import Permutation_solve.
 Require Import CyclicPerm.
@@ -183,6 +184,22 @@ exists l' ; exists l'' ; split.
 - rewrite app_nil_r in HP.
   apply HP.
 - reflexivity.
+Qed.
+
+Lemma PCperm_cons_cons_inv {A} b : forall (a : A) l l1, ~ In a l -> ~ In a l1 ->
+  PCperm b (a :: l) (a :: l1) -> PEperm b l l1.
+Proof.
+intros a l l1 Hin1 Hin2 HP.
+destruct b.
+- now apply Permutation_cons_inv with a.
+- assert (HP' := HP).
+  rewrite <- app_nil_l in HP; apply PCperm_vs_elt_inv in HP; rewrite app_nil_r in HP.
+  destruct HP as (l' & l'' & HP & Heq) ; subst.
+  rewrite HP; simpl.
+  destruct l'; inversion Heq; subst.
+  + symmetry; apply app_nil_r.
+  + exfalso; apply Hin1.
+    apply in_elt.
 Qed.
 
 Instance PCperm_map {A B} (f : A -> B) b :

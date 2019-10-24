@@ -255,20 +255,20 @@ Section SetIncl.
   Variable A : Type.
 
   Definition incl_Type (l m:list A) := forall a:A, In_Type a l -> In_Type a m.
-  Hint Unfold incl_Type.
+  Hint Unfold incl_Type : core.
 
   Lemma incl_Type_refl : forall l:list A, incl_Type l l.
   Proof.
     auto.
   Qed.
-  Hint Resolve incl_Type_refl.
+  Hint Resolve incl_Type_refl : core.
 
   Lemma incl_Type_tl : forall (a:A) (l m:list A), incl_Type l m -> incl_Type l (a :: m).
   Proof.
     unfold incl_Type ; intros.
     simpl ; intuition.
   Qed.
-  Hint Immediate incl_Type_tl.
+  Hint Immediate incl_Type_tl : core.
 
   Lemma incl_Type_tran : forall l m n:list A, incl_Type l m -> incl_Type m n -> incl_Type l n.
   Proof.
@@ -279,13 +279,13 @@ Section SetIncl.
   Proof.
     auto with datatypes.
   Qed.
-  Hint Immediate incl_Type_appl.
+  Hint Immediate incl_Type_appl : core.
 
   Lemma incl_Type_appr : forall l m n:list A, incl_Type l n -> incl_Type l (m ++ n).
   Proof.
     auto with datatypes.
   Qed.
-  Hint Immediate incl_Type_appr.
+  Hint Immediate incl_Type_appr : core.
 
   Lemma incl_Type_cons :
     forall (a:A) (l m:list A), In_Type a m -> incl_Type l m -> incl_Type (a :: l) m.
@@ -300,7 +300,7 @@ Section SetIncl.
     now_show (In_Type a0 l -> In_Type a0 m).
     auto.
   Qed.
-  Hint Resolve incl_Type_cons.
+  Hint Resolve incl_Type_cons : core.
 
   Lemma incl_Type_app : forall l m n:list A, incl_Type l n -> incl_Type m n ->
     incl_Type (l ++ m) n.
@@ -309,7 +309,7 @@ Section SetIncl.
     now_show (In_Type a n).
     elim (in_Type_app_or _ _ _ H1); auto.
   Qed.
-  Hint Resolve incl_Type_app.
+  Hint Resolve incl_Type_app : core.
 
 End SetIncl.
 
@@ -332,7 +332,7 @@ Section Exists_Forall.
       | Exists_Type_cons_hd : forall x l, P x -> Exists_Type (x::l)
       | Exists_Type_cons_tl : forall x l, Exists_Type l -> Exists_Type (x::l).
 
-    Hint Constructors Exists_Type.
+    Hint Constructors Exists_Type : core.
 
     Lemma Exists_Type_nil : Exists_Type nil -> False.
     Proof. inversion 1. Qed.
@@ -358,7 +358,7 @@ Section Exists_Forall.
       | Forall_Type_nil : Forall_Type nil
       | Forall_Type_cons : forall x l, P x -> Forall_Type l -> Forall_Type (x::l).
 
-    Hint Constructors Forall_Type.
+    Hint Constructors Forall_Type : core.
 
     Lemma Forall_Type_forall (l:list A):
       Forall_Type l -> forall x, In_Type x l -> P x.
@@ -457,8 +457,8 @@ Section Exists_Forall.
 
 End Exists_Forall.
 
-Hint Constructors Exists_Type.
-Hint Constructors Forall_Type.
+Hint Constructors Exists_Type : core.
+Hint Constructors Forall_Type : core.
 
 Section Forall2.
 
@@ -472,7 +472,7 @@ Section Forall2.
     | Forall2_Type_cons : forall x y l l',
       R x y -> Forall2_Type l l' -> Forall2_Type (x::l) (y::l').
 
-  Hint Constructors Forall2_Type.
+  Hint Constructors Forall2_Type : core.
 
   Theorem Forall2_Type_refl : Forall2_Type nil nil.
   Proof. intros; apply Forall2_Type_nil. Qed.
@@ -522,5 +522,5 @@ Section Forall2.
   Qed.
 End Forall2.
 
-Hint Constructors Forall2.
+Hint Constructors Forall2 : core.
 

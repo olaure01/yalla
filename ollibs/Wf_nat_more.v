@@ -3,7 +3,7 @@
 (** * Add-ons for Wf_nat library
 Usefull properties apparently missing in the Wf_nat library. *)
 
-Require Import Wf_nat.
+Require Export Wf_nat.
 
 Lemma lt_wf_rect :
   forall n (P:nat -> Type), (forall n, (forall m, m < n -> P m) -> P n) -> P n.

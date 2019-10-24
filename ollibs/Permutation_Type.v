@@ -106,7 +106,7 @@ Inductive Permutation_Type : list A -> list A -> Type :=
 | Permutation_Type_trans l l' l'' :
     Permutation_Type l l' -> Permutation_Type l' l'' -> Permutation_Type l l''.
 
-Local Hint Constructors Permutation_Type.
+Local Hint Constructors Permutation_Type : core.
 
 (** Some facts about [Permutation] *)
 
@@ -148,13 +148,13 @@ Qed.
 
 End Permutation.
 
-Hint Resolve Permutation_Type_refl Permutation_Type_nil_nil Permutation_Type_skip.
+Hint Resolve Permutation_Type_refl Permutation_Type_nil_nil Permutation_Type_skip : core.
 
 (* These hints do not reduce the size of the problem to solve and they
    must be used with care to avoid combinatoric explosions *)
 
-Local Hint Resolve Permutation_Type_swap Permutation_Type_trans.
-Local Hint Resolve Permutation_Type_sym.
+Local Hint Resolve Permutation_Type_swap Permutation_Type_trans : core.
+Local Hint Resolve Permutation_Type_sym : core.
 
 (* This provides reflexivity, symmetry and transitivity and rewriting
    on morphims to come *)
@@ -249,7 +249,7 @@ Lemma Permutation_Type_cons_append : forall (l : list A) x,
 Proof. induction l; intros; auto. simpl.
 eapply Permutation_Type_trans ; [ apply Permutation_Type_swap | apply Permutation_Type_skip ].
 apply IHl. Qed.
-Local Hint Resolve Permutation_Type_cons_append.
+Local Hint Resolve Permutation_Type_cons_append : core.
 
 Theorem Permutation_Type_app_comm : forall (l l' : list A),
   Permutation_Type (l ++ l') (l' ++ l).
@@ -262,7 +262,7 @@ Proof.
     by (rewrite <- app_assoc ; reflexivity).
   apply Permutation_Type_app_tail. apply Permutation_Type_cons_append.
 Qed.
-Local Hint Resolve Permutation_Type_app_comm.
+Local Hint Resolve Permutation_Type_app_comm : core.
 
 Theorem Permutation_Type_cons_app : forall (l l1 l2:list A) a,
   Permutation_Type l (l1 ++ l2) -> Permutation_Type (a :: l) (l1 ++ a :: l2).
@@ -274,7 +274,7 @@ Proof.
     by (rewrite <- app_assoc ; reflexivity).
   apply Permutation_Type_app_tail. apply Permutation_Type_cons_append.
 Qed.
-Local Hint Resolve Permutation_Type_cons_app.
+Local Hint Resolve Permutation_Type_cons_app : core.
 
 Lemma Permutation_Type_Add_Type a l l' : Add_Type a l l' -> Permutation_Type (a::l) l'.
 Proof.
@@ -288,7 +288,7 @@ Theorem Permutation_Type_middle : forall (l1 l2:list A) a,
 Proof.
   auto.
 Qed.
-Local Hint Resolve Permutation_Type_middle.
+Local Hint Resolve Permutation_Type_middle : core.
 
 Theorem Permutation_Type_rev : forall (l : list A), Permutation_Type l (rev l).
 Proof.
