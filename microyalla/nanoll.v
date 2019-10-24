@@ -5,10 +5,10 @@ Open Scope list_scope.
 Require List.
 (* only List.map from module List is used:
 Fixpoint map {A B : Type} (f: A -> B) l :=
-    match l with
-      | nil => nil
-      | a :: t => (f a) :: (map f t)
-    end.
+match l with
+| nil => nil
+| a :: t => f a :: map f t
+end.
 *)
 
 

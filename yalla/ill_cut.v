@@ -477,7 +477,7 @@ induction pi2 ; intros l' L Heq.
     rewrite Heq in P_gax_at_l.
     apply Forall_Type_app_inv in P_gax_at_l ; destruct P_gax_at_l as [_ Hat].
     destruct L ; inversion Hat...
-    inversion H1. }
+    inversion H0. }
   list_simpl in Heq ; list_simpl ; subst ; apply gax_ir.
 Qed.
 

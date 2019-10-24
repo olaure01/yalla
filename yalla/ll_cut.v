@@ -171,7 +171,7 @@ intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
 - exfalso.
   assert (Hat := P_gax_at a) ; rewrite H0 in Hat.
   apply Forall_Type_app_inv in Hat ; destruct Hat as [_ Hat] ; inversion Hat.
-  inversion H2.
+  inversion H1.
 Qed.
 
 Lemma substitution_oc : pcut P = false -> forall A lw,
@@ -368,7 +368,7 @@ induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; s
     specialize P_gax_at with a ; rewrite Heq in P_gax_at.
     apply Forall_Type_app_inv in P_gax_at.
     destruct P_gax_at as [_ Hat].
-    inversion Hat ; inversion H1; destruct (fst p); inversion H4.
+    inversion Hat ; inversion H0; destruct (fst p); inversion H3.
 Qed.
 
 
@@ -522,7 +522,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
   + (* gax_r *)
     exfalso.
     assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-    inversion H2.
+    inversion H1.
 - (* bot_r *)
   destruct l1 ; inversion Heql ; subst ; list_simpl.
   + (* main case *)
@@ -581,7 +581,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply bot_r.
     refine (IHsize _ _ _ _ pi1 Hl _ _) ; simpl...
@@ -662,7 +662,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     dichot_Type_elt_app_exec H1 ; subst.
     * rewrite 2 app_assoc ; apply tens_r...
@@ -742,7 +742,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply parr_r.
     revert Hl IHsize ; simpl ; rewrite (app_comm_cons l1 _ B) ; rewrite (app_comm_cons _ _ A0) ;
@@ -805,7 +805,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply top_r.
 - (* plus_r1 *)
@@ -877,7 +877,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply plus_r1.
     revert Hl IHsize ; simpl ; rewrite (app_comm_cons l1 _ A0) ; intros Hl IHsize.
@@ -951,7 +951,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply plus_r2.
     revert Hl IHsize ; simpl ; rewrite (app_comm_cons l1 _ A0) ; intros Hl IHsize.
@@ -1028,7 +1028,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply with_r.
     * revert Hl IHsize ; simpl ; rewrite (app_comm_cons l1 _ A0) ; intros Hl IHsize.
@@ -1135,7 +1135,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     symmetry in H1 ; decomp_map_Type H1 ; subst ; simpl in pi1 ; simpl in Hl ; simpl.
     rewrite app_comm_cons ; rewrite <- (app_nil_l (map wn l6)).
@@ -1220,7 +1220,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply de_r.
     revert Hl IHsize ; simpl ; rewrite (app_comm_cons l1 _ A0) ; intros Hl IHsize.
@@ -1293,7 +1293,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply wk_r.
     refine (IHsize _ _ _ _ pi1 Hl _ _) ; simpl...
@@ -1371,7 +1371,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
     * (* gax_r *)
       exfalso.
       assert (Hat := P_gax_at a) ; rewrite H0 in Hat ; inversion Hat.
-      inversion H2.
+      inversion H1.
   + (* commutative case *)
     apply co_r.
     revert Hl IHsize ; simpl ; rewrite (app_comm_cons l1 _ (wn A0)) ; rewrite (app_comm_cons _ _ (wn A0)) ;
@@ -1385,7 +1385,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
   apply cut_gax_l with (dual A) a; auto.
   specialize P_gax_at with a ; rewrite Heql in P_gax_at.
   apply Forall_Type_app_inv in P_gax_at ; destruct P_gax_at as [_ P_gax_at2] ; inversion P_gax_at2.
-  destruct A; inversion H1; simpl; constructor.
+  destruct A ; inversion H0; simpl; constructor.
 Qed.
 
 End Cut_Elim_Proof.

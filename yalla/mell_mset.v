@@ -345,8 +345,8 @@ Lemma mellfrag2mell : forall m,
 Proof with try eassumption ; try reflexivity.
 intros m pi.
 remember (map mell2ll (elts m)) as l.
-assert (HP := Permutation_Type_refl l).
-rewrite Heql in HP at 2 ; clear Heql.
+assert (Permutation_Type l (map mell2ll (elts m))) as HP by now subst.
+clear Heql.
 revert m HP ; induction pi ; intros m HP ; subst ;
   try (now inversion f) ;
   try (now (apply Permutation_Type_image in HP ;

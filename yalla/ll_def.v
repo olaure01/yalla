@@ -1262,9 +1262,9 @@ Lemma munit_smp_map_wn : forall l1 l2, Forall2_Type munit_smp (map wn l1) l2 ->
 Proof.
 induction l1 ; intros l2 HF ; inversion HF ; subst.
 - exists nil ; constructor.
-- inversion H1 ; subst.
-  apply IHl1 in H3.
-  destruct H3 as [ l'' Heq HF' ] ; subst.
+- inversion H2; subst.
+  apply IHl1 in X.
+  destruct X as [ l'' Heq HF' ] ; subst.
   exists (B :: l'') ; constructor ; assumption.
 Qed.
 
@@ -1273,7 +1273,7 @@ Lemma munit_elim {P} : (forall a, Forall_Type atomic (projT2 (pgax P) a)) ->
 Proof with try eassumption.
 intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
   try now (inversion HF ; subst ;
-           inversion H1 ; subst ;
+           inversion H2 ; subst ;
            constructor ; apply IHpi ; try eassumption ;
            constructor ; eassumption).
 - inversion HF as [ | C D lc ld Hc' HF'] ; subst.
@@ -1314,12 +1314,12 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
     apply (In_Forall_Type_in _ _ _ PL) in Hinl as (pi' & Hinl).
     refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hinl _ Rll').
 - inversion HF ; subst.
-  inversion H1 ; inversion H3 ; subst.
+  inversion H2 ; inversion X ; subst.
   constructor.
 - inversion HF ; subst.
-  apply Forall2_Type_app_inv_l in H3 as ([ (l2' & l1') HF2 HF1 ] & Heq) ;
+  apply Forall2_Type_app_inv_l in X as ([ (l2' & l1') HF2 HF1 ] & Heq) ;
     simpl in Heq ; subst ; simpl in HF1 ; simpl in HF2.
-  inversion H1 ; subst.
+  inversion H2 ; subst.
   + constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
   + apply (Forall2_Type_cons one one) in HF1 ; [ | constructor ].
     apply IHpi1 in HF1.
@@ -1331,23 +1331,23 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
       inversion Hone. }
     rewrite <- (app_nil_l _) in HF1 ; eapply (one_rev Hgax1 _ HF2) in HF1...
 - inversion HF ; subst.
-  inversion H1 ; subst.
+  inversion H2 ; subst.
   + constructor ; apply IHpi ; constructor ; try constructor...
-  + apply (Forall2_Type_cons bot bot) in H3 ; [ | constructor ].
-    apply (Forall2_Type_cons A y) in H3...
-    apply IHpi in H3.
+  + apply (Forall2_Type_cons bot bot) in X ; [ | constructor ].
+    apply (Forall2_Type_cons A y) in X...
+    apply IHpi in X.
     rewrite <- (app_nil_l l') ; rewrite app_comm_cons.
     eapply bot_rev...
     intros a Hbot.
     eapply Forall_Type_forall in Hbot; [ | apply Hgax].
     inversion Hbot.
 - inversion HF ; subst.
-  inversion H1 ; subst.
+  inversion H2 ; subst.
   constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
 - inversion HF ; subst.
-  inversion H1 ; subst.
-  assert (HF' := H3).
-  apply munit_smp_map_wn in H3 as [ l'' Heq HF'' ] ; subst.
+  inversion H2 ; subst.
+  assert (HF' := X).
+  apply munit_smp_map_wn in X as [ l'' Heq HF'' ] ; subst.
   constructor ; apply IHpi ; constructor...
 - apply Forall2_Type_app_inv_l in HF as ([ l' HF2 HF1 ] & Heq) ;
     simpl in Heq ; subst.
@@ -1359,7 +1359,7 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
     revert l2' Hgax HF ; clear.
     induction l ; intros l2 Hgax HF ; inversion HF ; subst ; f_equal.
     - inversion Hgax ; subst.
-      destruct a ; inversion H2 ; inversion H1 ; subst ; reflexivity.
+      destruct a ; inversion H0 ; inversion H2 ; subst ; reflexivity.
     - inversion Hgax ; subst.
       apply IHl... }
   constructor.
