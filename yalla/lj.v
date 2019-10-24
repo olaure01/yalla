@@ -11,7 +11,7 @@ Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ill] library *)
 
-Require ill_cut.
+Require ill_cut ill_vs_ll.
 
 
 (** ** 1. define formulas *)
@@ -283,6 +283,47 @@ Proof.
   apply map_ext ; intros ; apply ill2lj_lj2ill_cbv_id.
 Qed.
 
+Notation ill2ll := (ill_vs_ll.ill2ll yalla_ax.i2ac).
+
+Lemma lj2ill_cbv_oclpam : forall A, ill_vs_ll.oclpam (lj2ill_cbv A).
+Proof.
+induction A; (try now constructor); simpl.
+- constructor; constructor; assumption.
+- constructor; try constructor; assumption.
+- constructor; constructor; assumption.
+Qed.
+
+Lemma lj2llfrag_cbv : forall l A,
+  lj l A -> ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
+Proof.
+intros l A pi.
+apply lj2illfrag_cbv in pi.
+eapply ill_vs_ll.ill_to_ll in pi.
+eapply ll_def.stronger_pfrag; [ | apply pi ].
+split; [ | split ; [ | split ] ]; try (intros; simpl; constructor).
+intros a; inversion a.
+Qed.
+
+Lemma llfrag2lj_cbv : forall l A,
+  ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))) -> lj l A.
+Proof.
+intros l A pi.
+apply illfrag2lj_cbv.
+apply ill_vs_ll.ll_to_ill_oclpam_axfree
+  with yalla_ax.i2ac (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
+- apply yalla_ax.i2ac_inj.
+- reflexivity.
+- intros H; inversion H.
+- eapply ll_def.stronger_pfrag; [ | apply pi ].
+  split; [ | split ; [ | split ] ]; try (intros; simpl; constructor).
+  intros a; inversion a.
+- constructor; [  constructor; apply lj2ill_cbv_oclpam | ].
+  clear pi; induction l; constructor.
+  + constructor; apply lj2ill_cbv_oclpam.
+  + apply IHl.
+- reflexivity.
+Qed.
+
 (** ** 5 define embedding into [iformulas.iformula] by call-by-name Girard's translation with top and with *)
 Fixpoint lj2ill_cbn A :=
   match A with
@@ -379,6 +420,45 @@ Proof.
   rewrite map_map ; rewrite <- (map_id l) at 2.
   apply map_ext ; intros ; apply ill2lj_lj2ill_cbn_id.
 Qed.
+
+Lemma lj2ill_cbn_oclpam : forall A, ill_vs_ll.oclpam (lj2ill_cbn A).
+Proof.
+induction A; (try now constructor); simpl.
+- constructor; constructor; assumption.
+- constructor; try constructor; assumption.
+Qed.
+
+Lemma lj2llfrag_cbn : forall l A,
+  lj l A -> ll_fragments.ll_ll (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
+Proof.
+intros l A pi.
+apply lj2illfrag_cbn in pi.
+eapply ill_vs_ll.ill_to_ll in pi.
+eapply ll_def.stronger_pfrag; [ | apply pi ].
+split; [ | split ; [ | split ] ]; try (intros; simpl; constructor).
+intros a; inversion a.
+Qed.
+
+Lemma llfrag2lj_cbn : forall l A,
+  ll_fragments.ll_ll (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))) -> lj l A.
+Proof.
+intros l A pi.
+apply illfrag2lj_cbn.
+apply ill_vs_ll.ll_to_ill_oclpam_axfree
+  with yalla_ax.i2ac (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
+- apply yalla_ax.i2ac_inj.
+- reflexivity.
+- intros H; inversion H.
+- eapply ll_def.stronger_pfrag; [ | apply pi ].
+  split; [ | split ; [ | split ] ]; try (intros; simpl; constructor).
+  intros a; inversion a.
+- constructor; [ apply lj2ill_cbn_oclpam | ].
+  clear pi; induction l; constructor.
+  + constructor; apply lj2ill_cbn_oclpam.
+  + apply IHl.
+- reflexivity.
+Qed.
+
 
 (** ** 6 Import properties *)
 
