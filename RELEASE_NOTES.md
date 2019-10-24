@@ -1,5 +1,9 @@
 # YALLA: an LL library for Coq
 
+### v 2.0.1
+
+Tested with Coq v 8.11.0.
+
 ## v 2.0 (2019/01/23)
 
 This major revision is based on a representation of proofs in `Type` rather than `Prop`.
@@ -13,7 +17,7 @@ Many results have been added, including:
 * example files for additional related systems;
 * definition of the microyalla kernel.
 
-Tested with Coq v 8.8.2.
+Tested with Coq v 8.9.0.
 
 ## v 1.0 (2017/07/18)
 

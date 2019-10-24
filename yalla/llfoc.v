@@ -15,6 +15,7 @@ Require Import List_Type_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import genperm_Type.
+Require Import wf_nat_more.
 
 Require Import ll_fragments.
 
@@ -110,7 +111,7 @@ apply Forall_neg_Exists_Type in HnF.
 - induction l ; inversion HnF ; subst.
   + exists (a,(nil,l))...
     simpl ; apply not_tFoc...
-  + apply IHl in H0 as [l' Heq Hf] ; subst.
+  + apply IHl in X as [l' Heq Hf] ; subst.
     exists (fst l',(a::fst (snd l'),snd (snd l')))...
 - intros x.
   assert (Hd := tFoc_dec x).
@@ -234,23 +235,23 @@ Lemma top_gen_fr : forall l Pi, option_prop sformula Pi -> llfoc (top :: l) Pi.
 Proof with myeeasy.
 intros l.
 remember (list_sum (map fsize l)) as n.
-revert l Heqn ; induction n using (well_founded_induction lt_wf) ;
+revert l Heqn ; induction n using lt_wf_rect;
   intros l Heqn Pi Hs ; subst.
 destruct (tFocl_dec l).
 - apply top_fr...
 - apply not_tFocl in f.
   destruct f as [(A & l1 & l2) Heq [[Hb | ([B C] & Hp)] | ([B C] & Hw)]] ;
-    subst ; simpl ; simpl in H ; [simpl in Hb | simpl in Hp | simpl in Hw] ; subst.
+    subst ; simpl ; simpl in X ; [simpl in Hb | simpl in Hp | simpl in Hw] ; subst.
   + apply (ex_fr (bot :: l2 ++ top :: l1)) ; [ apply bot_fr | perm_Type_solve ].
-    apply (ex_fr (top :: l1 ++ l2)) ; [ eapply H | perm_Type_solve ]...
+    apply (ex_fr (top :: l1 ++ l2)) ; [ eapply X | perm_Type_solve ]...
     rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
   + apply (ex_fr (parr B C :: l2 ++ top :: l1)) ; [ apply parr_fr | perm_Type_solve ].
-    apply (ex_fr (top :: l1 ++ B :: C :: l2)) ; [ eapply H | perm_Type_solve ]...
+    apply (ex_fr (top :: l1 ++ B :: C :: l2)) ; [ eapply X | perm_Type_solve ]...
     rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
   + apply (ex_fr (awith B C :: l2 ++ top :: l1)) ; [ apply with_fr | perm_Type_solve ].
-    * apply (ex_fr (top :: l1 ++ B :: l2)) ; [ eapply H | perm_Type_solve ]...
+    * apply (ex_fr (top :: l1 ++ B :: l2)) ; [ eapply X | perm_Type_solve ]...
       rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
-    * apply (ex_fr (top :: l1 ++ C :: l2)) ; [ eapply H | perm_Type_solve ]...
+    * apply (ex_fr (top :: l1 ++ C :: l2)) ; [ eapply X | perm_Type_solve ]...
       rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
 Qed.
 
@@ -353,7 +354,7 @@ induction pi ; intros l1' l2' Heq ; subst.
   apply Forall_Type_app_inv in f.
   destruct f as [_ f].
   inversion f ; subst.
-  inversion H1 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
+  inversion H0 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ (polconts _ _ Hs)).
     rewrite <- (polconts _ (l1' ++ l2') Hs) in H1.
@@ -490,7 +491,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   apply Forall_Type_app_inv in f.
   destruct f as [_ f].
   inversion f ; subst.
-  inversion H1 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
+  inversion H0 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
     rewrite <- (polconts _ (l1' ++ A' :: B' :: l2') Hs) in H1.
@@ -641,7 +642,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   apply Forall_Type_app_inv in f.
   destruct f as [_ f].
   inversion f ; subst.
-  inversion H1 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
+  inversion H0 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
     rewrite <- (polconts _ (l1' ++ A' :: l2') Hs) in H1.
@@ -877,7 +878,7 @@ apply Forall_neg_Exists_Type in HnF.
 - induction l ; inversion HnF ; subst.
   + exists (a,(nil,l))...
     simpl ; apply not_Foc...
-  + apply IHl in H0 as [l' Heq Hf] ; subst.
+  + apply IHl in X as [l' Heq Hf] ; subst.
     exists (fst l',(a::fst (snd l'),snd (snd l')))...
 - intros x.
   assert (Hd := Foc_dec x).
@@ -928,7 +929,7 @@ Lemma top_gen_Fr : forall l, llFoc (top :: l) None.
 Proof with myeeasy.
 intros l.
 remember (list_sum (map fsize l)) as n.
-revert l Heqn ; induction n using (well_founded_induction lt_wf) ;
+revert l Heqn ; induction n using lt_wf_rect;
   intros l Heqn ; subst.
 destruct (tFocl_dec l).
 - apply top_Fr...
@@ -937,12 +938,12 @@ destruct (tFocl_dec l).
     subst ; simpl.
   + simpl in Hb ; subst ; rewrite app_comm_cons.
     eapply ex_Fr ; [ apply bot_Fr | apply Permutation_Type_middle ].
-    list_simpl ; eapply H...
+    list_simpl ; eapply X...
     simpl ; rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
   + simpl in Hp ; subst ; rewrite app_comm_cons.
     eapply ex_Fr ; [ apply parr_Fr | apply Permutation_Type_middle ].
     list_simpl ; eapply ex_Fr ;
-    [ eapply H
+    [ eapply X
     | etransitivity ; [ apply Permutation_Type_swap
                       | apply (Permutation_Type_cons eq_refl) ;
                         etransitivity ; [ apply Permutation_Type_swap |  ]]]...
@@ -950,11 +951,11 @@ destruct (tFocl_dec l).
   + simpl in Hw ; subst ; rewrite app_comm_cons.
     eapply ex_Fr ; [ apply with_Fr | apply Permutation_Type_middle ].
     * list_simpl ; eapply ex_Fr ;
-        [ eapply H
+        [ eapply X
         | etransitivity ; [ apply Permutation_Type_swap | apply Permutation_Type_cons ; reflexivity ]]...
     simpl ; rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
     * list_simpl ; eapply ex_Fr ;
-        [ eapply H
+        [ eapply X
         | etransitivity ; [ apply Permutation_Type_swap | apply Permutation_Type_cons ; reflexivity ]]...
     simpl ; rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
 Qed.
@@ -1132,7 +1133,7 @@ Proof with myeeasy.
   + apply one_Fr.
 - exfalso.
   inversion HF ; subst.
-  destruct H3 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
 - destruct (Forall_Type_app_inv _ _ _ HF) as [HF1 HF2].
   assert (X':=X).
   assert (H' := H).
@@ -1232,10 +1233,10 @@ Proof with myeeasy.
       -- reflexivity.
 - exfalso.
   inversion HF ; subst.
-  destruct H3 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
 - exfalso.
   inversion HF ; subst.
-  destruct H3 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   destruct (polarity A) as [HsA | HaA].
@@ -1280,7 +1281,7 @@ Proof with myeeasy.
       rewrite (polfoca _ HaA)...
 - exfalso.
   inversion HF ; subst.
-  destruct H3 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   assert (pi := fst (fst H) eq_refl).
@@ -1290,8 +1291,8 @@ Proof with myeeasy.
 - inversion HF ; subst.
   specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
-  eapply (snd (fst H)) in H4 ; [ | reflexivity ].
-  destruct H4 as ((l0 & lw & lw') & (HP & Hi) & pi).
+  eapply (snd (fst H)) in X0 ; [ | reflexivity ].
+  destruct X0 as ((l0 & lw & lw') & (HP & Hi) & pi).
   simpl in HP ; simpl in Hi ; simpl in pi.
   exists (l0,(A :: lw,lw')) ; simpl ; split ; [ split | ]...
   + list_simpl ; apply Permutation_Type_cons...

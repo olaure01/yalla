@@ -454,7 +454,7 @@ induction pi ; intros HF HC l1' l2' HP.
   rewrite app_assoc.
   apply IHpi...
   + Forall_Type_simpl_hyp ; subst.
-    destruct H1 as [S Hs].
+    destruct H0 as [S Hs].
     constructor.
     * exists S.
       etransitivity ; [ | apply Hs].
@@ -491,7 +491,7 @@ induction pi ; intros HF HC l1' l2' HP.
     apply IHpi...
     * intros D HD.
       inversion HD ; subst.
-      destruct H1 as [D' HD'].
+      destruct H0 as [D' HD'].
       eexists.
       etransitivity ; [ | apply HD'].
       constructor ; constructor...
@@ -508,7 +508,7 @@ induction pi ; intros HF HC l1' l2' HP.
     apply IHpi...
     * intros D HD.
       inversion HD ; subst.
-      destruct H1 as [D' HD'].
+      destruct H0 as [D' HD'].
       eexists.
       etransitivity ; [ | apply HD'].
       constructor ; constructor...
@@ -545,7 +545,7 @@ induction pi ; intros HF HC l1' l2' HP.
   constructor ; rewrite app_comm_cons ; rewrite app_assoc.
   + apply IHpi1...
     * constructor...
-      destruct H1 as [D' HD'].
+      destruct H0 as [D' HD'].
       eexists.
       etransitivity ; [ | apply HD'].
       constructor ; constructor...
@@ -555,7 +555,7 @@ induction pi ; intros HF HC l1' l2' HP.
       apply Permutation_Type_elt...
   + apply IHpi2...
     * constructor...
-      destruct H1 as [D' HD'].
+      destruct H0 as [D' HD'].
       eexists.
       etransitivity ; [ | apply HD'].
       constructor ; constructor...
@@ -589,7 +589,7 @@ induction pi ; intros HF HC l1' l2' HP.
   + list_simpl in HP ; list_simpl.
     apply Permutation_Type_map...
 - Forall_Type_simpl_hyp ; subst.
-  destruct H1 as [At HAt].
+  destruct H0 as [At HAt].
   destruct (tsubform_toc_ntrans _ _ HAt) as [B HeqB] ; subst.
   assert (HP' := HP).
   apply Permutation_Type_elt_map_inv in HP' ; [ | intros b Hf ; inversion Hf ].
@@ -903,5 +903,4 @@ eapply (fst (fst (llfoc_to_llFoc (S (fpsize pi)) _ _ pi _))).
 reflexivity.
 Unshelve. unfold lt ; reflexivity.
 Qed.
-
 
