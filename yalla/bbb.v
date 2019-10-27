@@ -282,10 +282,10 @@ intros l pi ; induction pi using ll_nested_ind ; intros l' l0' l1' HP.
   + rewrite app_assoc in HP.
     remember (l'l ++ l) as l'.
     apply Permutation_Type_app_app_inv in HP.
-    destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
+    destruct HP as [[[[l1a l2a] l3a] l4a] [[HP1 HP2] [HP3 HP4]]] ;
       simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
     apply Permutation_Type_app_app_inv in HP4.
-    destruct HP4 as [[[l1b l2b] [l3b l4b]] [[HP1b HP2b] [HP3b HP4b]]] ;
+    destruct HP4 as [[[[l1b l2b] l3b] l4b] [[HP1b HP2b] [HP3b HP4b]]] ;
       simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
     symmetry in HP1b.
     apply Permutation_Type_map_inv in HP1b.
@@ -315,10 +315,10 @@ intros l pi ; induction pi using ll_nested_ind ; intros l' l0' l1' HP.
       rewrite <- map_app in HP.
       remember (l5 ++ l7) as l0 ; clear Heql0.
       apply Permutation_Type_app_app_inv in HP.
-      destruct HP as [[[l1a l2a] [l3a l4a]] [[HP1 HP2] [HP3 HP4]]] ;
+      destruct HP as [[[[l1a l2a] l3a] l4a] [[HP1 HP2] [HP3 HP4]]] ;
         simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
       apply Permutation_Type_app_app_inv in HP4.
-      destruct HP4 as [[[l1b l2b] [l3b l4b]] [[HP1b HP2b] [HP3b HP4b]]] ;
+      destruct HP4 as [[[[l1b l2b] l3b] l4b] [[HP1b HP2b] [HP3b HP4b]]] ;
         simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
       symmetry in HP1b.
       apply Permutation_Type_map_inv in HP1b.

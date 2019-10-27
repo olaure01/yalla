@@ -1287,10 +1287,8 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
   symmetry in HP.
   eapply ex_r ; [ | apply HP ].
   apply IHpi ; assumption.
-- apply Forall2_Type_app_inv_l in HF as ([ l' HF1 HF2 ] & Heq) ;
-    simpl in Heq ; subst.
-  apply Forall2_Type_app_inv_l in HF2 as ([ l'' HF2 HF3 ] & Heq) ;
-    simpl in Heq ; rewrite Heq ; clear Heq.
+- apply Forall2_Type_app_inv_l in HF as [(l'1, l'2) [HF1 HF2] Heq]; subst.
+  apply Forall2_Type_app_inv_l in HF2 as [(l''1, l''2) [HF2 HF3] Heq]; subst.
   assert (HF4 := HF2).
   apply munit_smp_map_wn in HF2 as [ l''' Heq HF2 ] ; rewrite_all Heq ; clear Heq.
   symmetry in p.
@@ -1317,8 +1315,7 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
   inversion H2 ; inversion X ; subst.
   constructor.
 - inversion HF ; subst.
-  apply Forall2_Type_app_inv_l in X as ([ (l2' & l1') HF2 HF1 ] & Heq) ;
-    simpl in Heq ; subst ; simpl in HF1 ; simpl in HF2.
+  apply Forall2_Type_app_inv_l in X as [(l2', l1') [HF2 HF1] Heq]; subst.
   inversion H2 ; subst.
   + constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
   + apply (Forall2_Type_cons one one) in HF1 ; [ | constructor ].
@@ -1349,8 +1346,7 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
   assert (HF' := X).
   apply munit_smp_map_wn in X as [ l'' Heq HF'' ] ; subst.
   constructor ; apply IHpi ; constructor...
-- apply Forall2_Type_app_inv_l in HF as ([ l' HF2 HF1 ] & Heq) ;
-    simpl in Heq ; subst.
+- apply Forall2_Type_app_inv_l in HF as [(l', l'') [HF2 HF1] Heq]; subst.
   eapply cut_r ; [ assumption | apply IHpi1 | apply IHpi2 ] ;
     (apply Forall2_Type_cons ; [ apply munit_smp_id | ])...
 - specialize Hgax with a.

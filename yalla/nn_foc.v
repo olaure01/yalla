@@ -1,6 +1,5 @@
 (* nn_foc file for yalla library *)
 
-
 (** * Focusing by Polarized Translation *)
 
 Require Import CMorphisms.
@@ -414,7 +413,7 @@ induction pi ; intros HF HC l1' l2' HP.
   list_simpl in HP.
   apply Permutation_Type_app_inv in HP...
 - apply Permutation_Type_app_app_inv in HP.
-  destruct HP as [[[l3' l3''] [l4' l4'']] [[HP1 HP2] [HP3 HP4]]] ;
+  destruct HP as [[[[l3' l3''] l4'] l4''] [[HP1 HP2] [HP3 HP4]]] ;
     simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
   symmetry in HP4.
   apply Permutation_Type_map_inv in HP4.

@@ -1,6 +1,4 @@
 (* mell_mset example file for yalla library *)
-(* v 1.0   Olivier Laurent *)
-
 
 (** * Example of a concrete use of the yalla library: multi-set based MELL *)
 
@@ -445,7 +443,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
     eapply Permutation_Type_trans ; [ | apply elts_fmmap ].
     unfold fmmap.
     eapply Permutation_Type_trans ; [ | symmetry ; apply elts_perm ].
-    change (mell2ll x1 :: map mell2ll l9) with (map mell2ll (x1 :: l9)).
+    change (mell2ll x1 :: map mell2ll l7) with (map mell2ll (x1 :: l7)).
     apply Permutation_Type_map.
     symmetry.
     etransitivity.
@@ -456,7 +454,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
     eapply Permutation_Type_trans ; [ | apply elts_fmmap ].
     unfold fmmap.
     eapply Permutation_Type_trans ; [ | symmetry ; apply elts_perm ].
-    change (mell2ll x2 :: map mell2ll l8) with (map mell2ll (x2 :: l8)).
+    change (mell2ll x2 :: map mell2ll l4) with (map mell2ll (x2 :: l4)).
     apply Permutation_Type_map.
     symmetry.
     etransitivity.
