@@ -1,6 +1,4 @@
 (* Surjective Library *)
-(* v0   Olivier Laurent *)
-
 
 (** * Some properties of surjective functions *)
 
@@ -41,6 +39,4 @@ induction l1.
   exists (b :: l).
   reflexivity.
 Qed.
-
-
 

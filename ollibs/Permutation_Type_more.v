@@ -62,7 +62,7 @@ eapply Permutation_Type_trans.
 Qed.
 
 Lemma Permutation_Type_vs_elt_inv {A} : forall (a : A) l l1 l2,
-  Permutation_Type l (l1 ++ a :: l2) -> { pl | l = fst pl ++ a :: snd pl}.
+  Permutation_Type l (l1 ++ a :: l2) -> {'(l1', l2') | l = l1' ++ a :: l2' }.
 Proof with try assumption ; try reflexivity.
 intros a l l1 l2 HP.
 remember (l1 ++ a :: l2) as l0.
@@ -71,21 +71,21 @@ revert l1 l2 Heql0 ; induction HP ; intros l1 l2 Heql.
 - destruct l1 ; inversion Heql.
   + exists (@nil A, l)...
   + apply IHHP in H1.
-    destruct H1 as (pl & Heq) ; subst.
-    exists (a0 :: fst pl, snd pl)...
+    destruct H1 as ((l1', l2') & Heq) ; subst.
+    exists (a0 :: l1', l2')...
 - destruct l1 ; inversion Heql ; subst.
   + exists (y :: nil, l)...
   + destruct l1 ; inversion H1 ; subst.
     * exists (@nil A, a0 :: l2)...
     * exists (a1 :: a0 :: l1, l2)...
-- destruct (IHHP2 _ _ Heql) as (pl & Heq) ; subst.
-  assert (Heq := IHHP1 (fst pl) (snd pl) eq_refl).
-  destruct Heq as (pl' & Heq) ; subst.
-  exists pl'...
+- destruct (IHHP2 _ _ Heql) as ((l1', l2') & Heq) ; subst.
+  assert (Heq := IHHP1 l1' l2' eq_refl).
+  destruct Heq as ((l1'', l2'') & Heq) ; subst.
+  exists (l1'', l2'')...
 Qed.
 
 Lemma Permutation_Type_vs_cons_inv {A} : forall (a : A) l l1,
-  Permutation_Type l (a :: l1) -> {pl | l = fst pl ++ a :: snd pl}.
+  Permutation_Type l (a :: l1) -> {'(l1', l2') | l = l1' ++ a :: l2' }.
 Proof.
 intros a l l1 HP.
 rewrite <- (app_nil_l (a :: l1)) in HP.
@@ -104,35 +104,25 @@ apply Permutation_Type_refl.
 Qed.
 
 Lemma Permutation_Type_vs_2elts_inv : forall A D (s : A) t G,
-  Permutation_Type D (s :: t :: G) -> { tG |
-    D = fst tG ++ s :: fst (snd tG) ++ t :: snd (snd tG)
- \/ D = fst tG ++ t :: fst (snd tG) ++ s :: snd (snd tG)}.
+  Permutation_Type D (s :: t :: G) -> {'(D1, D2, D3) |
+    D = D1 ++ s :: D2 ++ t :: D3
+ \/ D = D1 ++ t :: D2 ++ s :: D3 }.
 Proof.
 intros A D s t G HP.
 assert (HP' := HP).
 apply Permutation_Type_vs_cons_inv in HP'.
-destruct HP' as (pl & HP') ; subst.
+destruct HP' as ((l1', l2') & HP') ; subst.
 apply Permutation_Type_sym in HP.
 apply Permutation_Type_cons_app_inv in HP.
 apply Permutation_Type_sym in HP.
 apply Permutation_Type_vs_cons_inv in HP.
-destruct HP as (pl' & HP).
+destruct HP as ((l1'', l2'') & HP).
 symmetry in HP.
 dichot_Type_elt_app_exec HP ; subst ;
 rewrite <- ? app_assoc ;
 rewrite <- ? app_comm_cons.
-- exists (fst pl', (l, snd pl)).
-  right.
-  rewrite <- HP0.
-  simpl.
-  rewrite <- app_assoc.
-  rewrite <- app_comm_cons.
-  reflexivity.
-- exists (fst pl, (l0, snd pl')).
-  left.
-  simpl.
-  rewrite HP1.
-  reflexivity.
+- exists (l1'', l, l2'); right; reflexivity.
+- exists (l1', l0, l2''); left; reflexivity.
 Qed.
 
 Lemma Permutation_Type_app_rot {A} : forall (l1 : list A) l2 l3,
@@ -179,19 +169,19 @@ eapply Permutation_Type_trans.
 Qed.
 
 Lemma Permutation_Type_app_app_inv {A} : forall (l1 l2 l3 l4 : list A),
-  Permutation_Type (l1 ++ l2) (l3 ++ l4) -> { ql & prod (prod
-    (Permutation_Type l1 (fst (fst ql) ++ fst (snd ql)))
-    (Permutation_Type l2 (snd (fst ql) ++ snd (snd ql)))) (prod
-    (Permutation_Type l3 (fst (fst ql) ++ snd (fst ql)))
-    (Permutation_Type l4 (fst (snd ql) ++ snd (snd ql)))) }.
+  Permutation_Type (l1 ++ l2) (l3 ++ l4) -> {'(l1', l2', l3', l4') : _ & prod (prod
+    (Permutation_Type l1 (l1' ++ l3'))
+    (Permutation_Type l2 (l2' ++ l4'))) (prod
+    (Permutation_Type l3 (l1' ++ l2'))
+    (Permutation_Type l4 (l3' ++ l4'))) }.
 Proof with try assumption.
 induction l1 ; intros l2 l3 l4 HP.
-- exists (@nil A, l3, (@nil A, l4)).
+- exists (@nil A, l3, @nil A, l4).
   split ; try split ; try split ; try apply Permutation_Type_refl...
 - assert (Heq := HP).
   apply Permutation_Type_sym in Heq.
   apply Permutation_Type_vs_cons_inv in Heq.
-  destruct Heq as [pl Heq].
+  destruct Heq as [(l1', l2') Heq].
   dichot_Type_elt_app_exec Heq ; subst.
   + rewrite <- ?app_comm_cons in HP.
     rewrite <- app_assoc in HP.
@@ -199,8 +189,8 @@ induction l1 ; intros l2 l3 l4 HP.
     apply Permutation_Type_cons_app_inv in HP.
     rewrite app_assoc in HP.
     apply IHl1 in HP.
-    destruct HP as (ql & (H1 & H2) & H3 & H4).
-    exists (a :: fst (fst ql), snd (fst ql), (fst (snd ql), snd (snd ql))).
+    destruct HP as [[[[l1'' l2''] l3''] l4''] [[H1 H2] [H3 H4]]].
+    exists (a :: l1'', l2'', l3'', l4'').
     simpl ; split ; try split ; try split...
     * apply Permutation_Type_skip...
     * apply Permutation_Type_sym.
@@ -211,8 +201,8 @@ induction l1 ; intros l2 l3 l4 HP.
     apply Permutation_Type_cons_app_inv in HP.
     rewrite <- app_assoc in HP.
     apply IHl1 in HP.
-    destruct HP as (ql & (H1 & H2) & H3 & H4).
-    exists (fst (fst ql), snd (fst ql), (a :: fst (snd ql), snd (snd ql))).
+    destruct HP as [[[[l1'' l2''] l3''] l4''] [[H1 H2] [H3 H4]]].
+    exists (l1'', l2'', a :: l3'', l4'').
     simpl ; split ; try split ; try split...
     * apply Permutation_Type_cons_app...
     * apply Permutation_Type_sym.
@@ -296,10 +286,6 @@ Qed.
 
 Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
   Permutation_Type l1 (map f l2) -> { l : _ & l1 = map f l & (Permutation_Type l2 l) }.
-(*
-Lemma Permutation_Type_map_inv {A B} : forall(f : A -> B) l1 l2,
-  Permutation_Type l1 (map f l2) -> { pl : { l & Permutation_Type l2 l} | l1 = map f (projT1 pl) }.
-*)
 Proof with try assumption.
 induction l1 ; intros l2 HP.
 - apply Permutation_Type_nil in HP.
@@ -308,7 +294,7 @@ induction l1 ; intros l2 HP.
 - apply Permutation_Type_sym in HP.
   assert (Heq := HP).
   apply Permutation_Type_vs_cons_inv in Heq.
-  destruct Heq as (pl & Heq).
+  destruct Heq as ((l1', l2') & Heq).
   symmetry in Heq.
   decomp_map_Type Heq ; subst.
   apply Permutation_Type_sym in HP.
@@ -360,12 +346,12 @@ Qed.
 
 Lemma Permutation_Type_elt_map_inv {A B} : forall (f : A -> B) a l1 l2 l3 l4,
   Permutation_Type (l1 ++ a :: l2) (l3 ++ map f l4) ->
-  (forall b, a <> f b) -> { pl | l3 = fst pl ++ a :: snd pl }.
+  (forall b, a <> f b) -> {'(l1', l2') | l3 = l1' ++ a :: l2' }.
 Proof.
 intros a l1 l2 l3 l4 f HP Hf.
 apply Permutation_Type_sym in HP.
 apply Permutation_Type_vs_elt_inv in HP.
-destruct HP as ((l' & l'') & Heq).
+destruct HP as ((l', l'') & Heq).
 dichot_Type_elt_app_exec Heq.
 - subst.
   exists (l', l) ; reflexivity.

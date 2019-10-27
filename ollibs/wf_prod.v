@@ -1,6 +1,4 @@
 (* wf_prod Library *)
-(* v0   Olivier Laurent *)
-
 
 (** * Well-founded order on product and applications to products of nat *)
 

@@ -1,6 +1,4 @@
 (* Injective Library *)
-(* v0   Olivier Laurent *)
-
 
 (** * Some properties of injective functions *)
 
@@ -127,7 +125,4 @@ intros Ro Rp x y ; split ; intros H.
 Qed.
 
 End Relation_inj.
-
-
-
 

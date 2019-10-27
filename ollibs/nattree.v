@@ -1,6 +1,4 @@
 (* natree Library *)
-(* v0   Olivier Laurent *)
-
 
 (** * [nat]-labelled binary trees and embedding into nat *)
 
@@ -269,5 +267,4 @@ destruct y.
   exists (Bnt n t1 t2).
   assumption.
 Qed.
-
 

@@ -11,8 +11,7 @@ Require Import CyclicPerm_Type.
 
 Lemma flat_map_elt {A B} {f : A -> list B} : forall a L l1 l2,
      flat_map f L = l1 ++ a :: l2 ->
-     {' (L1,L2,L0,l1',l2') | l1 = flat_map f L1 ++ l1' /\ l2 = l2' ++ 
-flat_map f L2
+     {' (L1,L2,L0,l1',l2') | l1 = flat_map f L1 ++ l1' /\ l2 = l2' ++ flat_map f L2
                           /\ L = L1 ++ L0 :: L2 /\ f L0 = l1' ++ a :: l2' }.
 Proof with try reflexivity.
    intros a L l1 l2 Heq.

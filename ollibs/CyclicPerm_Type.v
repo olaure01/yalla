@@ -182,7 +182,7 @@ Qed.
 
 Lemma cperm_Type_vs_elt_inv {A} : forall (a : A) l l1 l2,
   CPermutation_Type l (l1 ++ a :: l2) ->
-    { pl | l2 ++ l1 = snd pl ++ fst pl & l = fst pl ++ a :: snd pl }.
+    {'(l1',l2') | l2 ++ l1 = l2' ++ l1' & l = l1' ++ a :: l2' }.
 Proof.
 intros a l l1 l2 HC.
 inversion HC ; subst.
@@ -196,40 +196,39 @@ Qed.
 
 Lemma cperm_Type_vs_cons_inv {A} : forall (a : A) l l1,
   CPermutation_Type l (a :: l1) ->
-    { pl | l1 = snd pl ++ fst pl & l = fst pl ++ a :: snd pl }.
+    {'(l1',l2') | l1 = l2' ++ l1' & l = l1' ++ a :: l2' }.
 Proof.
 intros a l l1 HC.
 rewrite <- (app_nil_l (a::_)) in HC.
 apply cperm_Type_vs_elt_inv in HC.
-destruct HC as [(l' & l'') H1 H2].
+destruct HC as [(l1',l2') H1 H2].
 rewrite app_nil_r in H1 ; subst.
-exists (l', l'') ; split ; reflexivity.
+exists (l1', l2') ; split ; reflexivity.
 Qed.
 
 Lemma cperm_Type_app_app_inv {A} : forall l1 l2 l3 l4 : list A,
   CPermutation_Type (l1 ++ l2) (l3 ++ l4) ->
-     { ql & prod (prod 
-        (CPermutation_Type l1 (fst (fst ql) ++ fst (snd ql)))
-        (CPermutation_Type l2 (snd (fst ql) ++ snd (snd ql))))
-        (prod
-        (CPermutation_Type l3 (fst (fst ql) ++ snd (fst ql)))
-        (CPermutation_Type l4 (fst (snd ql) ++ snd (snd ql)))) }
-   + { pl & prod (prod
-        (CPermutation_Type l1 (l4 ++ fst pl))
-        (CPermutation_Type l3 (l2 ++ snd pl)))
-        (CPermutation_Type (fst pl) (snd pl)) }
-   + { pl & prod (prod
-        (CPermutation_Type l2 (l4 ++ fst pl))
-        (CPermutation_Type l3 (l1 ++ snd pl)))
-        (CPermutation_Type (fst pl) (snd pl)) }
-   + { pl & prod (prod
-        (CPermutation_Type l1 (l3 ++ fst pl))
-        (CPermutation_Type l4 (l2 ++ snd pl)))
-        (CPermutation_Type (fst pl) (snd pl)) }
-   + { pl & prod (prod
-        (CPermutation_Type l2 (l3 ++ fst pl))
-        (CPermutation_Type l4 (l1 ++ snd pl)))
-        (CPermutation_Type (fst pl) (snd pl)) }.
+     {'(l1',l2',l3',l4') : _ & prod
+        (prod  (CPermutation_Type l1 (l1' ++ l3'))
+               (CPermutation_Type l2 (l2' ++ l4')))
+        (prod  (CPermutation_Type l3 (l1' ++ l2'))
+               (CPermutation_Type l4 (l3' ++ l4'))) }
+   + {'(l1',l2') : _ & prod (prod
+        (CPermutation_Type l1 (l4 ++ l1'))
+        (CPermutation_Type l3 (l2 ++ l2')))
+        (CPermutation_Type l1' l2') }
+   + {'(l1',l2') : _ & prod (prod
+        (CPermutation_Type l2 (l4 ++ l1'))
+        (CPermutation_Type l3 (l1 ++ l2')))
+        (CPermutation_Type l1' l2') }
+   + {'(l1',l2') : _ & prod (prod
+        (CPermutation_Type l1 (l3 ++ l1'))
+        (CPermutation_Type l4 (l2 ++ l2')))
+        (CPermutation_Type l1' l2') }
+   + {'(l1',l2') : _ & prod (prod
+        (CPermutation_Type l2 (l3 ++ l1'))
+        (CPermutation_Type l4 (l1 ++ l2')))
+        (CPermutation_Type l1' l2') }.
 Proof with try assumption.
 intros l1 l2 l3 l4 HC.
 inversion HC as [lx ly Hx Hy].
@@ -241,7 +240,7 @@ dichot_Type_app_exec Hx ; dichot_Type_app_exec Hy ; subst.
   apply cperm_Type.
 - dichot_Type_app_exec Hy0 ; subst.
   + left ; left ; left ; left.
-    exists (l, l0, (lx, l5)).
+    exists (l, l0, lx, l5).
     simpl ; split ; [ split | split ] ; try apply cperm_Type...
     * apply cperm_Type_refl.
     * apply cperm_Type_refl.
@@ -257,7 +256,7 @@ dichot_Type_app_exec Hx ; dichot_Type_app_exec Hy ; subst.
       try (rewrite <- ? app_assoc ; apply cperm_Type_app_rot)...
     apply cperm_Type.
   + left ; left ; left ; left.
-    exists (l, ly, (l3, l0)).
+    exists (l, ly, l3, l0).
     simpl ; split ; [ split | split ] ; try apply cperm_Type...
     * apply cperm_Type_refl.
     * apply cperm_Type_refl.
@@ -364,7 +363,7 @@ revert l2 ; induction HP ; intros l2' HF ; inversion HF ; subst.
     exists (y :: l').
     * reflexivity.
     * rewrite app_nil_l in HF ; simpl ; rewrite app_nil_r ; assumption.
-  + apply Forall2_Type_app_inv_l in X0 as ([(la & lb) H1 H2] & Heq).
+  + apply Forall2_Type_app_inv_l in X0 as [(la, lb) [HF1 HF2] Heq].
     simpl in Heq ; rewrite Heq.
     exists (lb ++ y :: la).
     * rewrite app_comm_cons ; constructor.

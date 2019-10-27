@@ -198,7 +198,7 @@ Ltac dichot_Type_elt_app_exec H :=
 Lemma trichot_Type_elt_app {A} : forall l1 (a : A) l2 l3 l4 l5,
   l1 ++ a :: l2 = l3 ++ l4 ++ l5 ->
      { l2' | l1 ++ a :: l2' = l3 /\ l2 = l2' ++ l4 ++ l5 }
-   + { pl | l1 = l3 ++ fst pl /\ fst pl ++ a :: snd pl = l4 /\ l2 = snd pl ++ l5 }
+   + {'(l3', l4') | l1 = l3 ++ l3' /\ l3' ++ a :: l4' = l4 /\ l2 = l4' ++ l5 }
    + { l5' | l1 = l3 ++ l4 ++ l5' /\ l5' ++ a :: l2 = l5 }.
 Proof with try reflexivity ; try assumption.
 induction l1 ; induction l3 ; intros ;
@@ -276,7 +276,7 @@ Ltac trichot_Type_elt_elt_exec H :=
 
 Lemma app_eq_map_Type {A B} : forall (f : A -> B) l1 l2 l3,
   l1 ++ l2 = map f l3 ->
-    { pl | l3 = fst pl ++ snd pl /\ l1 = map f (fst pl) /\ l2 = map f (snd pl) }.
+    {'(l1', l2') | l3 = l1' ++ l2' /\ l1 = map f l1' /\ l2 = map f l2' }.
 Proof with try assumption ; try reflexivity.
 intros f.
 induction l1 ; intros.
@@ -291,7 +291,7 @@ Qed.
 
 Lemma cons_eq_map_Type {A B} : forall (f : A -> B) a l2 l3,
   a :: l2 = map f l3 ->
-    { pl | l3 = fst pl :: snd pl /\ a = f (fst pl) /\ l2 = map f (snd pl) }.
+    {'(a', l2') | l3 = a' :: l2' /\ a = f a' /\ l2 = map f l2' }.
 Proof.
 intros f a l2 l3 H.
 destruct l3 ; inversion H ; subst.
@@ -368,7 +368,7 @@ Proof with try assumption.
   - simpl in F2R.
     destruct Forall2_Type_app_inv_l with A B R a (concat L) l...
     destruct x.
-    destruct x.
+    destruct y.
     simpl in *.
     destruct IHL with l1 R as [L' p1 p2]...
     split with (l0 :: L').
@@ -418,6 +418,26 @@ Proof with try assumption; try reflexivity.
     split with l'...
     split...
     right...
+Qed.
+
+Lemma nth_In_Type {A} : forall n l (d:A), n < length l ->
+  In_Type (nth n l d) l.
+Proof.
+  unfold lt; induction n as [| n hn]; simpl; destruct l; simpl; intros d ie;
+    try (now inversion ie).
+  - left; reflexivity.
+  - right; apply hn; auto with arith.
+Qed.
+
+Lemma In_nth_Type {A} l (x:A) d : In_Type x l ->
+  { n : _ & n < length l & nth n l d = x }.
+Proof.
+  induction l as [|a l IH]; intros Hin.
+  - inversion Hin.
+  - destruct Hin as [Hin|Hin].
+    + subst; exists 0; simpl; auto with arith.
+    + destruct (IH Hin) as [n Hn Hn'].
+      exists (S n); simpl; auto with arith.
 Qed.
 
 
@@ -613,40 +633,4 @@ Section In_Forall_Type.
   Qed.
 
 End In_Forall_Type.
-
-(** ** Definition and properties of the constant list *)
-Fixpoint const_list {A} n (a : A) :=
-  match n with
-  | 0 => nil
-  | S n => a :: (const_list n a)
-  end.
-
-Lemma const_list_length {A} : forall n (a : A),
-    length (const_list n a) = n.
-Proof with try reflexivity.
-  intros n a; induction n...
-  simpl; rewrite IHn...
-Qed. 
-
-Lemma const_list_cons {A} : forall n (a : A),
-    a :: const_list n a = const_list n a ++ (a :: nil).
-Proof with try reflexivity.
-  induction n; intros a...
-  simpl; rewrite IHn...
-Qed.
-
-Lemma const_list_to_concat {A} : forall n (a : A),
-    const_list n a = concat (const_list n (a :: nil)).
-Proof with try reflexivity.
-  induction n; intros a...
-  simpl; rewrite IHn...
-Qed. 
-
-Lemma In_Type_const_list {A} : forall n (a : A) b,
-    In_Type b (const_list n a) ->
-    b = a.
-Proof with try reflexivity.
-  induction n; intros a b Hin; inversion Hin; subst...
-  apply IHn; apply X.
-Qed.
 

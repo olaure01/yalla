@@ -479,40 +479,30 @@ Section Forall2.
 
   Theorem Forall2_Type_app_inv_l : forall l1 l2 l0,
     Forall2_Type (l1 ++ l2) l0 ->
-    { l'' : { l' : _ & Forall2_Type l1 (fst l') & Forall2_Type l2 (snd l') }
-          | l0 = fst (projT1 (sigT_of_sigT2 l'')) ++ snd (projT1 (sigT_of_sigT2 l'')) }.
+    {'(l1', l2') : _ & prod (Forall2_Type l1 l1') (Forall2_Type l2 l2') & l0 = l1' ++ l2' }.
   Proof.
     induction l1; intros.
-    - assert (Forall2_Type nil nil) as H1 by auto.
-      assert (Forall2_Type l2 l0) as H2 by auto.
-      exists (existT2 _ _ (nil,l0) H1 H2).
-      reflexivity.
+    - assert (Forall2_Type nil nil) as HF1 by auto.
+      assert (Forall2_Type l2 l0) as HF2 by auto.
+      exists (nil,l0); [ split; assumption | reflexivity ].
     - simpl in X; inversion X; subst; clear X.
-      apply IHl1 in X1 as (l0' & Hl).
-      destruct l0' as [ l'' H1 H2 ].
-      simpl in Hl.
-      assert (Forall2_Type (a :: l1) (y :: fst l'')) as H3 by auto.
-      exists (existT2 _ _ (y :: fst l'', snd l'') H3 H2).
-      simpl ; rewrite Hl ; auto.
+      apply IHl1 in X1 as [(l1',l2') [HF1 HF2] Heq]; subst.
+      assert (Forall2_Type (a :: l1) (y :: l1')) as HF3 by auto.
+      exists (y :: l1', l2'); [ split; assumption | reflexivity ].
   Qed.
 
   Theorem Forall2_Type_app_inv_r : forall l1 l2 l0,
     Forall2_Type l0 (l1 ++ l2) ->
-    { l'' : { l' : _ & Forall2_Type (fst l') l1 & Forall2_Type (snd l') l2 }
-          | l0 = fst (projT1 (sigT_of_sigT2 l'')) ++ snd (projT1 (sigT_of_sigT2 l'')) }.
+    {'(l1', l2') : _ & prod (Forall2_Type l1' l1) (Forall2_Type l2' l2) & l0 = l1' ++ l2' }.
   Proof.
     induction l1; intros.
-    - assert (Forall2_Type nil nil) as H1 by auto.
-      assert (Forall2_Type l0 l2) as H2 by auto.
-      exists (existT2 _ _ (nil,l0) H1 H2).
-      reflexivity.
+    - assert (Forall2_Type nil nil) as HF1 by auto.
+      assert (Forall2_Type l0 l2) as HF2 by auto.
+      exists (nil,l0); [ split; assumption | reflexivity ].
     - simpl in X; inversion X; subst; clear X.
-      apply IHl1 in X1 as (l0' & Hl).
-      destruct l0' as [ l'' H1 H2 ].
-      simpl in Hl.
-      assert (Forall2_Type (x :: fst l'') (a :: l1)) as H3 by auto.
-      exists (existT2 _ _ (x :: fst l'', snd l'') H3 H2).
-      simpl ; rewrite Hl ; auto.
+      apply IHl1 in X1 as [(l1',l2') [HF1 HF2] Heq]; subst.
+      assert (Forall2_Type (x :: l1') (a :: l1)) as HF3 by auto.
+      exists (x :: l1', l2'); [ split; assumption | reflexivity ].
   Qed.
 
   Theorem Forall2_Type_app : forall l1 l2 l1' l2',
