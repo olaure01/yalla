@@ -1,6 +1,5 @@
 (* List_more Library *)
 
-
 (** * Add-ons for List library
 Usefull properties apparently missing in the List library. *)
 
@@ -984,16 +983,6 @@ Qed.
 
 (* seq *)
 
-(* exists in recent versions of stdlib cf 8.10 *)
-Lemma seq_app : forall len1 len2 start,
-  seq start (len1 + len2) = seq start len1 ++ seq (start + len1) len2.
-Proof.
-induction len1; intros start len2.
-- simpl; f_equal; lia.
-- simpl; rewrite IHlen1.
-  f_equal; f_equal; f_equal; lia.
-Qed.
-
 Lemma seq_cons : forall s l, s :: seq (S s) l = seq s (S l).
 Proof. intros s l; revert s; induction l; intros s; simpl; now rewrite ? IHl. Qed.
 
@@ -1006,28 +995,37 @@ f_equal; lia.
 Qed.
 
 
-(* skipn *)
-(* exists in recent versions of stdlib cf 8.10 *)
-(* note in these versions skipn_none = skipn_all *)
-Lemma skipn_all2 {A} : forall n (l : list A),
-  length l <= n -> skipn n l = nil.
+(** ** Definition and properties of the constant list *)
+Fixpoint const_list {A} n (a : A) :=
+  match n with
+  | 0 => nil
+  | S n => a :: (const_list n a)
+  end.
+
+Lemma const_list_length {A} : forall n (a : A),
+  length (const_list n a) = n.
 Proof with try reflexivity.
-  induction n; intros l Hle.
-  - destruct l; inversion Hle...
-  - destruct l; simpl in Hle...
-    apply IHn.
-    lia.
+intros n a; induction n...
+simpl; rewrite IHn...
 Qed.
 
-(* exists in recent versions of stdlib cf 8.10 *)
-Lemma skipn_length {A} : forall n (l : list A),
-    length (skipn n l) = length l - n.
+Lemma const_list_cons {A} : forall n (a : A),
+  a :: const_list n a = const_list n a ++ (a :: nil).
 Proof with try reflexivity.
-  induction n; intros l.
-  - simpl; lia.
-  - destruct l...
-    simpl; rewrite IHn...
+induction n; intros a...
+simpl; rewrite IHn...
 Qed.
 
+Lemma const_list_to_concat {A} : forall n (a : A),
+  const_list n a = concat (const_list n (a :: nil)).
+Proof with try reflexivity.
+induction n; intros a...
+simpl; rewrite IHn...
+Qed.
 
+Lemma In_const_list {A} : forall n (a : A) b,
+  In b (const_list n a) -> b = a.
+Proof.
+induction n; intros a b Hin; inversion Hin; subst; [ reflexivity | now apply IHn ].
+Qed.
 

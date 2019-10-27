@@ -6,6 +6,6 @@
 [subrepo]
 	remote = git@github.com:olaure01/ollibs.git
 	branch = master
-	commit = e40c0dff7c71cc1b2567e1a7f691cd54a6db79d1
-	parent = 986fc751c039a748fc5621c9189191a6fcec6898
+	commit = f6c3455ed7ff23b554f23596504f3ed364dfde3a
+	parent = 33782b3fc02f5fb9cc6883688ea009739bfd408f
 	cmdver = 0.3.1

@@ -3,7 +3,7 @@
 (** * Add-ons for List library
 Usefull properties apparently missing in the List library with Type-compatible outputs. *)
 
-Require Export List.
+Require Export List_more.
 Require Export List_Type.
 
 (** ** Properties about Forall_Type *)
@@ -633,4 +633,12 @@ Section In_Forall_Type.
   Qed.
 
 End In_Forall_Type.
+
+
+(*Constant list *)
+Lemma In_Type_const_list {A} : forall n (a : A) b,
+  In_Type b (const_list n a) -> b = a.
+Proof.
+induction n; intros a b Hin; inversion Hin; subst; [ reflexivity | now apply IHn ].
+Qed.
 
