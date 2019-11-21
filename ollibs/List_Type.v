@@ -18,6 +18,21 @@ Fixpoint In_Type (a:A) (l:list A) : Type :=
       | b :: m => sum (b = a) (In_Type a m)
     end.
 
+  Lemma in_Type_in : forall (a : A) l, In_Type a l -> In a l.
+  Proof.
+  induction l; intros Hin; inversion Hin; try now constructor.
+  right; intuition.
+  Qed.
+
+  Lemma notin_Type_notin : forall (a : A) l, (In_Type a l -> False) -> ~ In a l.
+  Proof.
+  induction l; intros Hnin Hin; inversion Hin; subst.
+  - apply Hnin; constructor; reflexivity.
+  - apply IHl; [ | assumption ].
+    intros Hin2; apply Hnin.
+    right; assumption.
+  Qed.
+
   (** Characterization of [In] *)
 
   Theorem in_Type_eq : forall (a:A) (l:list A), In_Type a (a :: l).
@@ -108,6 +123,7 @@ End In.
 Hint Resolve in_Type_eq in_Type_cons in_Type_inv in_Type_nil in_Type_app_or
   in_Type_or_app: datatypes.
 
+
   (**************************)
   (** Facts about [app] *)
   (**************************)
@@ -146,6 +162,30 @@ Section App.
 
 End App.
 
+(*******************************************)
+(** * Operations on the elements of a list *)
+(*******************************************)
+
+Section Elts.
+
+  Variable A : Type.
+
+  (*****************)
+  (** ** Remove    *)
+  (*****************)
+
+  Hypothesis eq_dec : forall x y : A, {x = y}+{x <> y}.
+
+  Theorem remove_In_Type : forall (l : list A) (x : A), In_Type x (remove eq_dec x l) -> False.
+  Proof.
+    induction l as [|x l]; auto.
+    intro y; simpl; destruct (eq_dec y x) as [yeqx | yneqx].
+    apply IHl.
+    unfold not; intro HF; simpl in HF; destruct HF; auto.
+    apply (IHl y); assumption.
+  Qed.
+
+End Elts.
 
 
 (*********************************************)
@@ -317,6 +357,98 @@ Hint Resolve incl_Type_refl incl_Type_tl incl_Type_tran incl_Type_appl incl_Type
   incl_Type_cons incl_Type_app: datatypes.
 
 
+(********************************)
+(** ** Lists without redundancy *)
+(********************************)
+
+Section ReDun.
+
+  Variable A : Type.
+
+  Inductive NoDup_Type : list A -> Type :=
+    | NoDup_Type_nil : NoDup_Type nil
+    | NoDup_Type_cons : forall x l, (In_Type x l -> False) -> NoDup_Type l -> NoDup_Type (x::l).
+
+  Lemma NoDup_NoDup_Type : forall l : list A, NoDup l -> NoDup_Type l.
+  Proof.
+  induction l; intros Hnd; constructor.
+  - intros Hnin.
+    apply in_Type_in in Hnin.
+    inversion Hnd; intuition.
+  - apply IHl; now inversion Hnd.
+  Qed.
+
+  Lemma NoDup_Type_NoDup : forall l : list A, NoDup_Type l -> NoDup l.
+  Proof.
+  induction l; intros Hnd; constructor.
+  - apply notin_Type_notin; intros Hnin.
+    inversion Hnd; intuition.
+  - apply IHl; now inversion Hnd.
+  Qed.
+
+  Theorem NoDup_Type_cons_imp a l:
+    NoDup_Type (a::l) -> (In_Type a l -> False) * NoDup_Type l.
+  Proof.
+    intros Hd; inversion Hd; subst; split; assumption.
+  Qed.
+
+End ReDun.
+
+(** NoDup and map *)
+
+(** NB: the reciprocal result holds only for injective functions,
+    see FinFun.v *)
+
+Lemma NoDup_Type_map_inv A B (f:A->B) l : NoDup_Type (map f l) -> NoDup_Type l.
+Proof.
+ induction l; simpl; inversion_clear 1; subst; constructor; auto.
+ intro Hin. now apply (in_Type_map f) in Hin.
+Qed.
+
+(***********************************)
+(** ** Sequence of natural numbers *)
+(***********************************)
+
+Section NatSeq.
+
+  (** [seq] computes the sequence of [len] contiguous integers
+      that starts at [start]. For instance, [seq 2 3] is [2::3::4::nil]. *)
+
+  Lemma in_Type_seq len start n :
+    In_Type n (seq start len) -> start <= n < start+len.
+  Proof.
+   revert start. induction len; simpl; intros.
+   - inversion H.
+   - rewrite <- plus_n_Sm.
+     destruct X; subst.
+     + intuition auto with arith.
+     + apply IHlen in i.
+       intuition auto with arith.
+  Qed.
+
+  Lemma seq_in_Type len start n :
+    start <= n < start+len -> In n (seq start len).
+  Proof.
+   revert start. induction len; simpl; intros.
+   - inversion_clear H.
+     rewrite <- plus_n_O in H1.
+     apply (Lt.lt_irrefl _ (Lt.le_lt_trans _ _ _ H0 H1)).
+   - destruct H.
+     destruct (Lt.le_lt_or_eq _ _ H); intuition.
+     right; apply IHlen.
+     rewrite <- plus_n_Sm in H0.
+     intuition auto with arith.
+  Qed.
+
+  Lemma seq_NoDup_Type len start : NoDup_Type (seq start len).
+  Proof.
+   revert start; induction len; simpl; constructor; trivial.
+   intros Hin; apply in_Type_seq in Hin.
+   destruct Hin as [H _].
+   apply (Lt.lt_irrefl _ H).
+  Qed.
+
+End NatSeq.
 
 Section Exists_Forall.
 

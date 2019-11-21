@@ -1,5 +1,7 @@
 (* List_Type_more Library *)
 
+Require Import Lia.
+
 (** * Add-ons for List library
 Usefull properties apparently missing in the List library with Type-compatible outputs. *)
 
@@ -472,6 +474,57 @@ split.
   apply Hi.
   apply in_Type_cons.
   assumption.
+Qed.
+
+(** ** [remove] *)
+
+Lemma notin_Type_remove {A} : forall Hdec l (x : A), (In_Type x l -> False) ->
+  remove Hdec x l = l.
+Proof.
+induction l; simpl; intuition.
+destruct (Hdec x a); subst; intuition.
+f_equal; intuition.
+Qed.
+
+Lemma remove_Type_length {A} : forall Hdec l (x : A), In_Type x l ->
+  length (remove Hdec x l) < length l.
+Proof.
+induction l; simpl; intros x Hin.
+- inversion Hin.
+- destruct (Hdec x a) as [Heq | Hneq]; subst; simpl.
+  + destruct (in_Type_dec Hdec a l); intuition.
+    rewrite notin_Type_remove; intuition.
+  + destruct Hin as [Hin | Hin].
+    * exfalso; now apply Hneq.
+    * apply IHl in Hin; lia.
+Qed.
+
+Lemma in_Type_remove {A} : forall Hdec l (x y : A),
+  In_Type x (remove Hdec y l) -> prod (In_Type x l) (x <> y).
+Proof.
+induction l; intros x y Hin.
+- inversion Hin.
+- simpl in Hin.
+  destruct (Hdec y a); subst; split.
+  + right; now apply IHl with a.
+  + intros Heq; revert Hin; subst; apply remove_In_Type.
+  + inversion Hin; subst; [left; reflexivity|right].
+    now apply IHl with y.
+  + inversion Hin; subst.
+    * now intros Heq; apply n.
+    * intros Heq; revert X; subst; apply remove_In_Type.
+Qed.
+
+Lemma in_in_remove {A} : forall Hdec l (x y : A), x <> y -> In x l -> In x (remove Hdec y l).
+Proof.
+induction l; simpl; intros x y Hneq Hin.
+- inversion Hin.
+- destruct (Hdec y a); subst.
+  + destruct Hin.
+    * exfalso; now apply Hneq.
+    * now apply IHl.
+  + simpl; destruct Hin; [now left|right].
+    now apply IHl.
 Qed.
 
 

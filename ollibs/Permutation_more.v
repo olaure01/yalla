@@ -3,7 +3,7 @@
 (** * Add-ons for Permutation library
 Usefull properties apparently missing in the Permutation library. *)
 
-Require Import Psatz.
+Require Import Lia.
 Require Import Plus.
 Require Import Morphisms.
 Require Export Permutation.
@@ -505,9 +505,4 @@ unfold list_max.
 intros l1 l2 HP.
 induction HP ; simpl ; intuition ; try lia.
 Qed.
-
-
-
-
-
 

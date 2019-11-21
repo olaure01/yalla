@@ -16,22 +16,11 @@ Definition injective2 {A B C} (f : A -> B -> C) :=
 
 Lemma comp_inj {A B C} : forall (f : B -> C) (g : A -> B),
   injective f -> injective g -> injective (fun x => f (g x)).
-Proof.
-intros f g Hf Hg x y Hc.
-apply Hg.
-apply Hf.
-assumption.
-Qed.
+Proof. unfold injective; intuition. Qed.
 
 Lemma section_inj {A B} : forall (f : A -> B) g,
   (forall x, g (f x) = x) -> injective f.
-Proof.
-intros f g Hsec x y Hf.
-rewrite <- Hsec.
-rewrite <- Hf.
-rewrite Hsec.
-reflexivity.
-Qed.
+Proof. intros f g Hsec x y Hf; rewrite <- Hsec, <- Hf; intuition. Qed.
 
 Lemma map_inj {A B} : forall f : A -> B, injective f -> injective (map f).
 Proof.
@@ -67,6 +56,19 @@ induction l1 ; intros l2 Hi Hmap.
     apply Hi...
     * apply in_cons...
     * apply in_cons...
+Qed.
+
+Lemma inj_NoDup {A B} : forall f : A -> B, injective f -> forall l,
+  NoDup l -> NoDup (map f l).
+Proof.
+induction l; simpl; intros Hnd.
+- constructor.
+- inversion Hnd; constructor; subst.
+  + intros Hin; apply H2.
+    apply in_map_iff in Hin.
+    destruct Hin as [x [Heq Hin]].
+    now apply H in Heq; subst.
+  + now apply IHl.
 Qed.
 
 
