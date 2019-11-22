@@ -30,7 +30,7 @@ Class FinMultiset M A := {
   elts : M -> list A;
   elts_empty : elts empty = @nil A;
   elts_add : forall a m, Permutation (elts (add a m)) (a :: elts m);
-  retract : forall m, fold_right add empty (elts m) = m;
+  elts_retract : forall m, fold_right add empty (elts m) = m;
   perm_eq : forall l1 l2, Permutation l1 l2 ->
                   fold_right add empty l1 = fold_right add empty l2
 }.
@@ -53,14 +53,10 @@ Global Instance list2fm_perm : Proper (@Permutation A ==> eq) list2fm
   := perm_eq.
 
 Lemma list2fm_retract : forall m, list2fm (elts m) = m.
-Proof.
-apply retract.
-Qed.
+Proof. apply elts_retract. Qed.
 
 Lemma list2fm_nil : list2fm nil = empty.
-Proof.
-reflexivity.
-Qed.
+Proof. reflexivity. Qed.
 
 Lemma list2fm_elt : forall l1 l2 a,
   list2fm (l1 ++ a :: l2) = add a (list2fm (l1 ++ l2)).
@@ -100,7 +96,7 @@ Qed.
 Lemma elts_eq_nil : forall m, elts m = nil -> m = empty.
 Proof.
 intros m Heq.
-assert (Hr := retract m) ; rewrite Heq in Hr ; simpl in Hr.
+assert (Hr := elts_retract m) ; rewrite Heq in Hr ; simpl in Hr.
 subst ; reflexivity.
 Qed.
 
@@ -128,7 +124,7 @@ Proof.
 intros m.
 unfold sum.
 rewrite elts_empty.
-apply retract.
+apply elts_retract.
 Qed.
 
 Lemma sum_empty_right : forall m, sum m empty = m.
@@ -137,7 +133,7 @@ intros m.
 unfold sum.
 rewrite elts_empty.
 rewrite app_nil_r.
-apply retract.
+apply elts_retract.
 Qed.
 
 Lemma sum_comm : forall m1 m2, sum m1 m2 = sum m2 m1.
@@ -201,7 +197,7 @@ Qed.
 Lemma elts_fmmap : forall m, Permutation (elts (fmmap m)) (map f (elts m)).
 Proof.
 intros m.
-rewrite <- (retract m).
+rewrite <- (elts_retract m).
 remember (elts m) as l.
 clear m Heql.
 induction l.
@@ -232,7 +228,7 @@ rewrite Heql in HP at 2 ; clear Heql.
 revert m HP ; induction l ; intros m Heql.
 - apply Permutation_nil in Heql.
   apply elts_eq_nil in Heql ; subst ; assumption.
-- assert (Hr := retract m).
+- assert (Hr := elts_retract m).
   symmetry in Heql ; rewrite (perm_eq _ _ Heql) in Hr ; simpl in Hr ; subst.
   apply Ha.
   apply IHl.
