@@ -356,13 +356,13 @@ revert m HP ; induction pi ; intros m HP ; subst ;
     destruct x ; inversion HP1 ; subst.
     destruct x0 ; inversion HP3 ; subst.
     apply (f_equal (fold_right add empty)) in HP.
-    rewrite retract in HP ; subst.
+    rewrite elts_retract in HP ; subst.
     apply ax_r.
   + destruct l1 ; inversion HP4.
     destruct x ; inversion HP1 ; subst.
     destruct x0 ; inversion HP3 ; subst.
     apply (f_equal (fold_right add empty)) in HP.
-    rewrite retract in HP ; subst.
+    rewrite elts_retract in HP ; subst.
     simpl.
     assert (add (var a0) (add (covar a0) empty)
           = add (covar a0) (add (var a0) empty))
@@ -385,7 +385,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   destruct l ; inversion H1.
   destruct f ; inversion H0 ; subst.
   apply (f_equal (fold_right add empty)) in Heql.
-  rewrite retract in Heql ; subst.
+  rewrite elts_retract in Heql ; subst.
   apply one_r.
 - symmetry in HP.
   assert (HP2 := HP).

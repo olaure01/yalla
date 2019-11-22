@@ -1,10 +1,5 @@
 (* fmformulas library for yalla *)
 
-
-
-(* output in Type *)
-
-
 (** * Order structure and finite multiset structure on formulas *)
 
 Require Import Injective.
@@ -54,9 +49,9 @@ match t with
 | _ => one
 end.
 
-Lemma form_nattree_section : forall A, nattree2form (form2nattree A) = A.
+Lemma form_nattree_section : retract nattree2form form2nattree.
 Proof.
-induction A ; simpl ;
+intros A; induction A ; simpl ;
   try rewrite IHA1 ; try rewrite IHA2 ;
   try rewrite IHA ;
   try rewrite a2a_n ; try reflexivity.
@@ -79,5 +74,4 @@ Defined.
 
 Instance fmset_formula : FinMultiset (SortedList _) formula :=
   FMConstr_slist border_formula.
-
 

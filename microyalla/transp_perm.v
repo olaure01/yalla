@@ -35,7 +35,7 @@ rewrite <- transp_app.
 f_equal; lia.
 Qed.
 
-Lemma transp_idem {A} : forall n (l : list A), transp n (transp n l) = l.
+Lemma transp_idem {A} : forall n, retract (@transp A n) (@transp A n).
 Proof with try reflexivity.
 induction n; intros l; (destruct l; [ | destruct l ])...
 - simpl; f_equal; rewrite ? transp_nil...

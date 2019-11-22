@@ -1,6 +1,5 @@
 (* intuitionistic logic example file for yalla library *)
 
-
 (** * Example of a concrete use of the yalla library: the intuitionistic logic with call-by-value translation  *)
 
 
@@ -219,10 +218,9 @@ match A with
 | imap A B   => iformulas.ilmap (iformulas.ioc (lj2ill_cbv A)) (iformulas.ioc (lj2ill_cbv B))
 end.
 
-Lemma ill2lj_lj2ill_cbv_id :
-  forall A, ill2lj (lj2ill_cbv A) = A.
+Lemma ill2lj_lj2ill_cbv_id : retract ill2lj lj2ill_cbv.
 Proof.
-  induction A;
+  intros A; induction A;
     try now simpl;
     try (simpl; rewrite IHA1; now rewrite IHA2).
 Qed.
@@ -335,9 +333,8 @@ Fixpoint lj2ill_cbn A :=
   | ior A B => iformulas.iplus (iformulas.ioc (lj2ill_cbn A)) (iformulas.ioc (lj2ill_cbn B))
   end.
 
-Lemma ill2lj_lj2ill_cbn_id : forall A,
-  ill2lj (lj2ill_cbn A) = A.
-Proof. induction A; try now simpl; try (simpl; rewrite IHA1; now rewrite IHA2). Qed.
+Lemma ill2lj_lj2ill_cbn_id : retract ill2lj lj2ill_cbn.
+Proof. intros A; induction A; try now simpl; try (simpl; rewrite IHA1; now rewrite IHA2). Qed.
 
 Lemma lj2ill_cbn_inj : injective lj2ill_cbn.
 Proof. eapply section_inj, ill2lj_lj2ill_cbn_id. Qed.

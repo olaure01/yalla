@@ -91,31 +91,24 @@ Definition a2i : Atom -> IAtom := fun n => t2i (a2t n). (* nn.v *)
 
 
 (* fmformulas.v *)
-Fact a2a_n : forall X, n2a (a2n X) = X.
-Proof.
-unfold n2a ; unfold a2n ; reflexivity.
-Qed.
+Fact a2a_n : retract n2a a2n.
+Proof. unfold n2a, a2n; intros x; reflexivity. Qed.
 
 (* fmiformulas.v *)
-Fact i2i_n : forall X, n2i (i2n X) = X.
-Proof.
-unfold n2i ; unfold i2n.
-destruct X ; simpl ; reflexivity.
-Qed.
+Fact i2i_n : retract n2i i2n.
+Proof. unfold n2i, i2n; intros X; destruct X; simpl; reflexivity. Qed.
 
 (* lambek.v & nn.v & tl.v *)
 Fact i2ac_inj : injective i2ac.
 Proof.
 intros x y Heq.
 unfold i2a in Heq.
-destruct x ; destruct y ; inversion Heq ; subst ; try reflexivity.
+destruct x; destruct y; inversion Heq; subst; reflexivity.
 Qed.
 
 (* nn.v *)
-Fact a2a_i : forall x, i2a (a2i x) = x.
-Proof.
-destruct x ; simpl ; reflexivity.
-Qed.
+Fact a2a_i : retract i2a a2i.
+Proof. intros x; destruct x; simpl; reflexivity. Qed.
 
 (* nn.v *)
 Fact ateq_a2i : forall x y, ateq x y = true <-> iateq (a2i x) (a2i y) = true.
@@ -133,64 +126,41 @@ Qed.
 
 (* nn.v *)
 Lemma i2i_not_atN : forall x, x <> atN -> a2i (i2a x) = x.
-Proof.
-intros x HatN.
-destruct x ; [ | contradiction HatN ] ; reflexivity.
-Qed.
+Proof. intros x HatN; destruct x; [ | contradiction HatN ]; reflexivity. Qed.
 
 (* nn.v *)
-Fact n2n_a : forall n, a2n (n2a n) = n.
-Proof.
-reflexivity.
-Qed.
+Fact n2n_a : retract a2n n2a.
+Proof. intros x; reflexivity. Qed.
 
 (* tl.v *)
 Fact t2i_inj : injective t2i.
 Proof.
 intros x y Heq.
 unfold t2i in Heq.
-destruct x ; destruct y ; inversion Heq ; subst ; try reflexivity.
+destruct x ; destruct y ; inversion Heq ; subst ; reflexivity.
 Qed.
 
 (* tl.v *)
 Fact notatN : forall x, ~ atN = t2i x.
-Proof.
-intros x Heq ; inversion Heq.
-Qed.
+Proof. intros x Heq; inversion Heq. Qed.
 
 (* tl.v *)
 Fact atN_or_t2i : forall x, (atN = x) + { y | x = t2i y }.
-Proof.
-destruct x ; [ right | left ].
-- exists n ; reflexivity.
-- reflexivity.
-Qed.
+Proof. destruct x; [ right; exists n | left ]; reflexivity. Qed.
 
 (* tl.v *)
 Fact a2t_inj : injective a2t.
-Proof.
-intros x y Heq.
-unfold a2t in Heq.
-unfold id in Heq.
-assumption.
-Qed.
+Proof. intros x y Heq; unfold a2t, id in Heq; assumption. Qed.
 
 (* tl.v *)
-Fact a2a_t : forall x, t2a (a2t x) = x.
-Proof.
-intros x.
-unfold t2a ; unfold a2t ; reflexivity.
-Qed.
+Fact a2a_t : retract t2a a2t.
+Proof. unfold t2a, a2t; intros x; reflexivity. Qed.
 
 (* tl.v *)
 Fact a2i_a2i : forall x, t2i (a2t x) = a2i x.
-Proof.
-intros x.
-unfold a2i ; unfold t2i ; unfold a2t ; reflexivity.
-Qed.
+Proof. intros x; unfold a2i, t2i, a2t; reflexivity. Qed.
 
 
 (** Make definitions opaque, so that only properties can be used *)
 Global Opaque Atom IAtom atN TAtom ateq iateq a2n n2a i2n n2i i2a i2ac t2i a2t t2a a2i.
-
 

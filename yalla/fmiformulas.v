@@ -1,7 +1,5 @@
 (* fmformulas library for yalla *)
 
-(* output in Type *)
-
 
 (** * Order structure and finite multiset structure on intuitionistic formulas *)
 
@@ -53,9 +51,9 @@ match t with
 | _ => ione
 end.
 
-Lemma iform_nattree_section : forall A, nattree2iform (iform2nattree A) = A.
+Lemma iform_nattree_section : retract nattree2iform iform2nattree.
 Proof.
-induction A ; simpl ;
+intros A; induction A ; simpl ;
   try rewrite IHA1 ; try rewrite IHA2 ;
   try rewrite IHA ;
   try rewrite i2i_n ; try reflexivity.
@@ -79,5 +77,4 @@ Defined.
 Instance fmset_iformula :
   FinMultiset (SortedList border_iformula) iformula
   := FMConstr_slist border_iformula.
-
 
