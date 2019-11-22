@@ -1,12 +1,15 @@
-$(OLLIBSDIR)/AFC.vo: $(OLLIBSDIR)/Vector_more.vo $(OLLIBSDIR)/AFC.v
+$(OLLIBSDIR)/AFC.vo: $(OLLIBSDIR)/AFC.v $(OLLIBSDIR)/Vector_more.vo
+$(OLLIBSDIR)/Bijective.vo: $(OLLIBSDIR)/Bijective.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Surjective.vo
 $(OLLIBSDIR)/Bool_more.vo: $(OLLIBSDIR)/Bool_more.v $(OLLIBSDIR)/List_Type.vo
 $(OLLIBSDIR)/CPermutation_solve.vo: $(OLLIBSDIR)/CPermutation_solve.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/CyclicPerm.vo
 $(OLLIBSDIR)/CyclicPerm.vo: $(OLLIBSDIR)/CyclicPerm.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo
+$(OLLIBSDIR)/dectype.vo: $(OLLIBSDIR)/dectype.v
 $(OLLIBSDIR)/fmsetlist.vo : $(OLLIBSDIR)/fmsetlist.v $(OLLIBSDIR)/Bool_more.vo $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/Permutation_more.vo
 $(OLLIBSDIR)/fmsetoidlist.vo : $(OLLIBSDIR)/fmsetoidlist.v
 $(OLLIBSDIR)/genperm.vo: $(OLLIBSDIR)/genperm.v $(OLLIBSDIR)/Permutation_more.vo $(OLLIBSDIR)/Permutation_solve.vo $(OLLIBSDIR)/CyclicPerm.vo $(OLLIBSDIR)/CPermutation_solve.vo $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Injective.vo
+$(OLLIBSDIR)/infinite.vo: $(OLLIBSDIR)/infinite.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/List_Type.vo $(OLLIBSDIR)/Injective.vo  $(OLLIBSDIR)/Bijective.vo $(OLLIBSDIR)/dectype.vo
 $(OLLIBSDIR)/Injective.vo: $(OLLIBSDIR)/Injective.v $(OLLIBSDIR)/List_more.vo
-$(OLLIBSDIR)/Surjective.vo: $(OLLIBSDIR)/Surjective.v
+$(OLLIBSDIR)/Surjective.vo: $(OLLIBSDIR)/Surjective.v $(OLLIBSDIR)/Injective.vo
 $(OLLIBSDIR)/List_more.vo: $(OLLIBSDIR)/List_more.v
 $(OLLIBSDIR)/Permutation_more.vo: $(OLLIBSDIR)/Permutation_more.v $(OLLIBSDIR)/Injective.vo $(OLLIBSDIR)/List_more.vo
 $(OLLIBSDIR)/Permutation_solve.vo: $(OLLIBSDIR)/Permutation_solve.v $(OLLIBSDIR)/List_more.vo $(OLLIBSDIR)/Permutation_more.vo

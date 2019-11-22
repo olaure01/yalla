@@ -87,21 +87,19 @@ induction n ; intros m n' m' Hc ; unfold cpair in Hc ; simpl in Hc.
     split ; [ f_equal | ] ; assumption.
 Qed.
 
-Lemma cpair_surj : forall k , 0 < k -> exists n m, k = cpair n m.
+Lemma cpair_surj : forall k , 0 < k -> { '(n,m) | k = cpair n m }.
 Proof.
 induction k using (well_founded_induction lt_wf).
 intros Hpos.
-destruct (even_or_odd k) as [ He | Ho ].
+destruct (even_odd_dec k) as [ He | Ho ].
 - assert (0 < div2 k) as Hpos2.
-  {
-    destruct k.
+  {destruct k.
     - inversion Hpos.
     - apply even_div2 in He.
       rewrite He.
-      apply lt_0_Sn.
-  }
-  destruct (H (div2 k) (lt_div2 _ Hpos) Hpos2) as (n & m & Heq).
-  exists (S n) ; exists m.
+      apply lt_0_Sn. }
+  destruct (H (div2 k) (lt_div2 _ Hpos) Hpos2) as [(n, m) Heq].
+  exists (S n, m).
   unfold cpair in Heq ; simpl.
   unfold cpair ; simpl.
   apply even_double in He.
@@ -109,7 +107,7 @@ destruct (even_or_odd k) as [ He | Ho ].
   lia.
 - apply odd_S2n in Ho.
   destruct Ho as [p Hp] ; subst.
-  exists 0 ; exists p.
+  exists (0, p).
   unfold double ; unfold cpair ; simpl ; lia.
 Qed.
 
@@ -207,8 +205,8 @@ Qed.
 Lemma pcpair_surj : surjective2 pcpair.
 Proof.
 intros k.
-destruct (cpair_surj (S k) (lt_0_Sn _)) as (n & m & Heq).
-exists n ; exists m ; unfold pcpair ; rewrite <- Heq.
+destruct (cpair_surj (S k) (lt_0_Sn _)) as [(n, m) Heq].
+exists (n, m) ; unfold pcpair ; rewrite <- Heq.
 apply pred_Sn.
 Qed.
 
@@ -253,8 +251,8 @@ intros y.
 induction y using (well_founded_induction lt_wf).
 destruct y.
 - exists Lnt ; reflexivity.
-- destruct (cpair_surj _ (lt_O_Sn y)) as (n & m & Heq).
-  destruct (pcpair_surj m) as (n' & m' & Heq').
+- destruct (cpair_surj _ (lt_O_Sn y)) as [(n, m) Heq].
+  destruct (pcpair_surj m) as [(n', m') Heq'].
   assert (m < S y) as Hm by (rewrite Heq ; apply cpair_lt_r).
   assert (n' <= pcpair n' m') as Hl by apply pcpair_le_l.
   assert (n' < S y) as Hn' by lia.

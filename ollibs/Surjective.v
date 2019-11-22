@@ -2,11 +2,11 @@
 
 (** * Some properties of surjective functions *)
 
-Require Import List.
+Require Import Injective List.
 
-Definition surjective {A B} (f : A -> B) := forall y, exists x, y = f x.
+Definition surjective {A B} (f : A -> B) := forall y, { x & y = f x }.
 
-Definition surjective2 {A B C} (f : A -> B -> C) := forall z, exists x y, z = f x y.
+Definition surjective2 {A B C} (f : A -> B -> C) := forall z, { '(x,y) : _ & z = f x y }.
 
 (** * Basic properties of surjective functions *)
 
@@ -20,7 +20,7 @@ exists x ; reflexivity.
 Qed.
 
 Lemma retract_surj {A B} : forall (f : A -> B) g,
-  (forall x, f (g x) = x) -> surjective f.
+  retract f g -> surjective f.
 Proof.
 intros f g Hret y.
 exists (g y).

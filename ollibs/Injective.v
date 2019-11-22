@@ -12,6 +12,10 @@ Definition injective {A B} (f : A -> B) := forall x y, f x = f y -> x = y.
 Definition injective2 {A B C} (f : A -> B -> C) :=
   forall x y x' y', f x y = f x' y' -> x = x' /\ y = y'.
 
+(* retraction pair *)
+Definition retract {A B} (s : B -> A) (i : A -> B) := (forall x, s (i x) = x).
+
+
 (** * Basic properties of injective functions *)
 
 Lemma comp_inj {A B C} : forall (f : B -> C) (g : A -> B),
@@ -19,8 +23,8 @@ Lemma comp_inj {A B C} : forall (f : B -> C) (g : A -> B),
 Proof. unfold injective; intuition. Qed.
 
 Lemma section_inj {A B} : forall (f : A -> B) g,
-  (forall x, g (f x) = x) -> injective f.
-Proof. intros f g Hsec x y Hf; rewrite <- Hsec, <- Hf; intuition. Qed.
+  retract g f -> injective f.
+Proof. intros f g Hsec x y Hf; rewrite <- Hsec, Hf; intuition. Qed.
 
 Lemma map_inj {A B} : forall f : A -> B, injective f -> injective (map f).
 Proof.
