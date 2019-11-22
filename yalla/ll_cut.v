@@ -176,26 +176,24 @@ Qed.
 
 Lemma substitution_oc : pcut P = false -> forall A lw,
   ll P (dual A :: map wn lw) -> (forall l1 l2, ll P (dual A :: map wn lw) -> ll P (l1 ++ A :: l2) ->
-  ll P (l1 ++ map wn lw ++ l2)) -> forall l' L, ll P (l' ++ flat_map (fun p => wn_n (fst p) (wn A) :: (snd p)) L) ->
-    ll P (l' ++ flat_map (fun p => app (map wn lw) (snd p)) L).
+  ll P (l1 ++ map wn lw ++ l2)) -> forall l' L, ll P (l' ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L) ->
+    ll P (l' ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L).
 Proof with myeasy_perm_Type; try assumption.
   intros P_cutfree A lw pi1 IHcut l' L pi2.
-  remember (l' ++ flat_map (fun p => wn_n (fst p) (wn A) :: (snd p)) L) as l.
+  remember (l' ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L) as l.
   revert l' L Heql.
 induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; subst.
 - destruct L ; list_simpl in Heq ; subst.
   + list_simpl ; apply ax_r.
   + exfalso.
-    destruct l' ; inversion Heq; try now (destruct (fst p); simpl in H0; inversion H0). 
-    destruct l' ; inversion H1; try now (destruct (fst p); simpl in H2; inversion H0). 
-    destruct l' ; inversion H3.
+    destruct p; destruct l'; inversion Heq; destruct n; simpl in H0 ; inversion H0;
+      destruct l'; inversion H1; destruct l'; inversion H4.
 - case_eq (pperm P) ; intros Hperm ; rewrite Hperm in p ; simpl in p ; subst.
   + destruct (@perm_Type_app_flat_map _ _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')];
       simpl in Hnil' ; simpl in HeqL' ; simpl in HPL' ; subst.
     eapply ex_r ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     apply IHpi2...
-  + change (fun p => wn (wn_n (fst p) A) :: snd p) with (fun p => wn_n (S (fst p)) A :: (snd p)) in p.
-    destruct (@cperm_Type_app_flat_map _ _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
+  + destruct (@cperm_Type_app_flat_map _ _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p) as [[L' l''] (Hnil' & HeqL' & HPL')] ;
       simpl in Hnil' ; simpl in HeqL' ; simpl in HPL' ; subst.
     eapply ex_r ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     apply IHpi2...
@@ -204,17 +202,18 @@ induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; s
     as [(((((lw1' & lw2') & l1') & l2') & l'') & L') HH] ; simpl in HH ; destruct HH as (H1 & H2 & H3 & H4).
   rewrite <- H4 ; apply (ex_wn_r _ _ lw1')...
   rewrite H3 ; apply IHpi2...
-- assert ({L0 & prod (concat L0 = l' ++ flat_map (fun p => app (map wn lw) (snd p)) L')
+- assert ({L0 & prod (concat L0 = l' ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L')
                (prod (length L0 = length L)
-                     (Forall_Type (fun l => {' (l0 , L0) : _ & prod (l = l0 ++ flat_map (fun p => app (map wn lw) (snd p)) L0)
-                       (In_Type (l0 ++ flat_map (fun p => wn_n (fst p) (wn A) :: (snd p)) L0) L)}) L0))})
+                     (Forall_Type (fun l =>
+                       {'(l0, L0) : _ & prod (l = l0 ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L0)
+                       (In_Type (l0 ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L0) L)}) L0))})
     as (L0 & (Heq' & (Heql & FL))).
   { clear - Heq.
     revert lw L' l' Heq; induction L; intros lw L' l' Heq.
     - split with nil; nsplit 3...
       + simpl in Heq.
         destruct l'; inversion Heq.
-        destruct L'; inversion H0...
+        destruct L'; try destruct p; inversion H0...
       + apply Forall_Type_nil.
     - simpl in Heq.
       dichot_Type_app_exec Heq; subst.
@@ -233,11 +232,11 @@ induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; s
              destruct (Forall_Type_forall FL l0 Hin) as ((l0' & L0') & (Heq' & Hin')).
              split with (l0', L0'); split...
              right...
-      + change (fun p => (wn_n (fst p) (wn A) :: snd p))
-          with (fun p => (fun k => wn_n k (wn A)) (fst p) :: snd p) in Heq1.
+      + change (fun '(p1,p2) => (wn_n p1 (wn A) :: p2))
+          with (fun '(p1,p2) => (fun k => wn_n k (wn A)) p1 :: p2) in Heq1.
         app_vs_flat_map_inv Heq1.
         * destruct (IHL lw _ _ Heq3) as (L2 & (Heq & (Heql & FL))).
-          split with ((l' ++ (flat_map (fun p => app (map wn lw) (snd p)) (L0 ++ (n , l) :: nil))) :: L2);
+          split with ((l' ++ (flat_map (fun '(p1,p2) => app (map wn lw) p2) (L0 ++ (n, l) :: nil))) :: L2);
             nsplit 3.
           -- simpl; rewrite Heq.
              rewrite ? flat_map_app; simpl.
@@ -251,10 +250,10 @@ induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; s
                 destruct (Forall_Type_forall FL l0 Hin) as ((l0' & L0') & (Heq' & Hin')).
                 split with (l0', L0'); split...
                 right...
-        * change (flat_map (fun p => wn_n (fst p) (wn A) :: (snd p)) L1)
-            with (nil ++ (flat_map (fun p => wn_n (fst p) (wn A) :: (snd p)) L1)) in Heq3.
+        * change (flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L1)
+            with (nil ++ (flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L1)) in Heq3.
           destruct (IHL lw _ _ Heq3) as (L2 & (Heq & (Heql & FL))).
-          split with ((l' ++ (flat_map (fun p => app (map wn lw) (snd p)) L0)) :: L2);
+          split with ((l' ++ (flat_map (fun '(p1,p2) => app (map wn lw) p2) L0)) :: L2);
             nsplit 3.
           -- simpl; rewrite Heq.
              rewrite ? flat_map_app; simpl; rewrite ? app_assoc...
@@ -279,13 +278,14 @@ induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; s
 - destruct L ; list_simpl in Heq ; subst.
   + list_simpl ; apply one_r.
   + exfalso.
-    destruct l' ; inversion Heq; try now (destruct (fst p); inversion H0).
+    destruct p; destruct l' ; inversion Heq; try now inversion H0; destruct n; inversion H0.
     destruct l' ; inversion H1.
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1) | ]; subst.
+- destruct l'; inversion Heq ;
+    [ destruct L; try destruct p; inversion H0; try now (destruct n; inversion H1) | ]; subst.
   simpl ; apply bot_r.
   apply IHpi2...
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0; try now (destruct (fst p); inversion H1) | ] ; subst.
-  change (fun p => wn_n (fst p) (wn A) :: snd p) with (fun p => (fun k => wn_n k (wn A)) (fst p) :: snd p) in H1.
+- destruct l' ; inversion Heq ; [ destruct L; try destruct p; inversion H0; try now (destruct n; inversion H1) | ] ; subst.
+  change (fun '(p1,p2) => wn_n p1 (wn A) :: p2) with (fun '(p1,p2) => (fun k => wn_n k (wn A)) p1 :: p2) in H1.
   app_vs_app_flat_map_inv H1.
   + list_simpl ; apply tens_r...
     rewrite app_comm_cons in IHpi2_1 ; rewrite app_comm_cons ; apply IHpi2_1...
@@ -293,67 +293,68 @@ induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; s
     rewrite 3 app_assoc ; apply tens_r...
     * rewrite app_comm_cons in IHpi2_1 ; rewrite app_comm_cons ; apply IHpi2_1...
     * list_simpl.
-      replace (flat_map (fun p  => app (map wn lw) (snd p)) L0 ++ map wn lw ++ l0)
-         with (flat_map (fun p => app (map wn lw) (snd p)) (L0 ++ (n , l0) :: nil))
+      replace (flat_map (fun '(p1,p2) => app (map wn lw) p2) L0 ++ map wn lw ++ l0)
+         with (flat_map (fun '(p1,p2) => app (map wn lw) p2) (L0 ++ (n , l0) :: nil))
         by (rewrite flat_map_app ; list_simpl ; reflexivity).
       rewrite app_comm_cons in IHpi2_2; rewrite app_comm_cons; apply IHpi2_2...
   + rewrite flat_map_app ; rewrite app_assoc ; simpl ; apply tens_r...
     * rewrite <- (app_nil_l (flat_map _ _)) ; rewrite app_comm_cons.
       apply IHpi2_1...
     * rewrite app_comm_cons in IHpi2_2 ; rewrite app_comm_cons ; apply IHpi2_2...
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1) | ] ; subst.
+- destruct l' ; inversion Heq ; [ destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1) | ] ; subst.
   simpl ; apply parr_r.
   rewrite 2 app_comm_cons ; apply IHpi2...
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1) | ] ; subst.
+- destruct l' ; inversion Heq ; [ destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1) | ] ; subst.
   apply top_r.
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1) | ] ; subst.
+- destruct l' ; inversion Heq ; [ destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1) | ] ; subst.
   simpl ; apply plus_r1.
   rewrite app_comm_cons ; apply IHpi2...
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1)| ] ; subst.
+- destruct l' ; inversion Heq ; [ destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1)| ] ; subst.
   simpl ; apply plus_r2.
   rewrite app_comm_cons ; apply IHpi2...
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1) | ] ; subst.
+- destruct l' ; inversion Heq ; [ destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1) | ] ; subst.
   simpl ; apply with_r.
   + rewrite app_comm_cons ; apply IHpi2_1...
   + rewrite app_comm_cons ; apply IHpi2_2...
-- destruct l' ; inversion Heq ; [ destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1)| ] ; subst.
-  assert ({ Lw | flat_map (fun p => app (map wn lw) (snd p)) L = map wn Lw }) as [Lw HeqLw].
+- destruct l' ; inversion Heq ; [ destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1)| ] ; subst.
+  assert ({ Lw | flat_map (fun '(p1,p2) => app (map wn lw) p2) L = map wn Lw }) as [Lw HeqLw].
   { clear Heq pi2 IHpi2 ; revert l' H1 ; clear ; induction L ; intros l' Heq.
     - exists nil...
     - simpl in Heq ; symmetry in Heq ; decomp_map_Type Heq ; subst.
-      inversion Heq3 ; subst ; simpl.
-      rewrite Heq5 in IHL ; list_simpl in IHL.
-      rewrite app_comm_cons in IHL ; rewrite app_assoc in IHL.
+      destruct a; simpl.
+      destruct l3; inversion_clear Heq3.
+      rewrite Heq4 in IHL ; list_simpl in IHL.
+      rewrite app_comm_cons, app_assoc in IHL.
       destruct (IHL _ eq_refl) as [Lw Heq'].
-      exists (lw ++ l4 ++ Lw) ; list_simpl ; rewrite <- Heq'; rewrite Heq2... }
+      exists (lw ++ l3 ++ Lw) ; list_simpl ; rewrite <- Heq'... }
   symmetry in H1 ; decomp_map_Type H1 ; subst.
   list_simpl ; rewrite HeqLw ; rewrite <- map_app ; apply oc_r.
   list_simpl in IHpi2 ; simpl in H3 ; rewrite <- H3 in IHpi2.
   list_simpl ; rewrite <- HeqLw ;rewrite app_comm_cons ; apply IHpi2...
 - destruct l' ; inversion Heq; subst ; list_simpl.
-  + destruct L ; inversion H0 ; destruct (fst p); inversion H1 ; subst.
+  + destruct L; try destruct p; inversion H0; destruct n; inversion H1; subst.
     * list_simpl.
-      assert (pi2' := IHpi2 (A :: (snd p)) L eq_refl) ; simpl in pi2'.
+      assert (pi2' := IHpi2 (A :: l1) L eq_refl) ; simpl in pi2'.
       rewrite <- (app_nil_l _) in pi2'.
       change A with (wn_n 0 A) in pi2'.
       refine (IHcut _ _ _ pi2').
       simpl...
     * clear H0.
       rewrite<- (app_nil_l _).
-      apply (IHpi2 _ ((n , snd p) :: L))...
+      apply (IHpi2 _ ((n , l1) :: L))...
   + apply de_r.
     rewrite app_comm_cons in IHpi2 ; rewrite app_comm_cons ; apply IHpi2...
 - destruct l' ; inversion Heq ; subst ; list_simpl.
-  + destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1) ; subst.
+  + destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1) ; subst.
     list_simpl; apply wk_list_r.
     apply IHpi2...
   + apply wk_r.
     apply IHpi2...
 - destruct l' ; inversion Heq ; subst ; list_simpl.
-  + destruct L ; inversion H0 ; try now (destruct (fst p); inversion H1) ; subst.
+  + destruct L; try destruct p; inversion H0 ; try now (destruct n; inversion H1) ; subst.
     list_simpl; apply co_list_r.
-    replace (map wn lw ++ map wn lw ++ (snd p) ++ flat_map (fun p0 => app (map wn lw) (snd p0)) L)
-       with (nil ++ flat_map (fun p0 => app (map wn lw) (snd p0)) (((fst p, nil) :: nil) ++ (p :: nil) ++ L))
+    replace (map wn lw ++ map wn lw ++ l1 ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L)
+       with (nil ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) (((n, nil) :: nil) ++ ((n, l1) :: nil) ++ L))
      by (rewrite flat_map_app ; list_simpl ; reflexivity).
     apply IHpi2...
     list_simpl.
@@ -368,7 +369,7 @@ induction pi2 using ll_nested_ind ; intros l' L' Heq; try (rename L' into L) ; s
     specialize P_gax_at with a ; rewrite Heq in P_gax_at.
     apply Forall_Type_app_inv in P_gax_at.
     destruct P_gax_at as [_ Hat].
-    inversion Hat ; inversion H0; destruct (fst p); inversion H3.
+    destruct p; inversion Hat ; inversion H0; destruct n; inversion H3.
 Qed.
 
 
@@ -1125,7 +1126,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
         by (list_simpl ; reflexivity).
       rewrite <- (bidual A0) in Hl.
       replace (flat_map (app (map wn l)) (nil :: nil ++ l0 :: nil)) with
-          (flat_map (fun p => app (map wn l) (snd p)) ((0 , nil) :: nil ++ (0 , l0) :: nil))...
+          (flat_map (fun '(p1,p2) => app (map wn l) p2) ((0 , nil) :: nil ++ (0 , l0) :: nil))...
       refine (substitution_oc _ (dual A0) _ _ _ _ _ _) ; list_simpl...
       intros l1 l2 pi1 pi2.
       eapply (IHcut (dual A0))...
@@ -1362,7 +1363,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
       clear IHsize ; subst.
       apply co_list_r.
       replace (map wn l ++ map wn l ++ l2)
-         with (nil ++ flat_map (fun p => app (map wn l) (snd p)) ((0 , nil) :: nil ++ (0 , l2) :: nil))
+         with (nil ++ flat_map (fun '(p1,p2) => app (map wn l) p2) ((0 , nil) :: nil ++ (0 , l2) :: nil))
         by (list_simpl ; reflexivity).
       refine (substitution_oc _ A0 _ _ _ _ _ _) ; list_simpl...
       intros l1' l2' pi1 pi2 ; eapply (IHcut A0)...
