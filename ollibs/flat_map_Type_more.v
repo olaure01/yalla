@@ -3,11 +3,8 @@
 (** * Add-ons for List library
 Properties of flat_map. *)
 
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import CyclicPerm_Type.
+Require Import List_more List_Type_more Permutation_Type_more funtheory CyclicPerm_Type.
+
 
 Lemma flat_map_elt {A B} {f : A -> list B} : forall a L l1 l2,
      flat_map f L = l1 ++ a :: l2 ->

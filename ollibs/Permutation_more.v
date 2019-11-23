@@ -3,13 +3,10 @@
 (** * Add-ons for Permutation library
 Usefull properties apparently missing in the Permutation library. *)
 
-Require Import Lia.
-Require Import Plus.
-Require Import Morphisms.
+Require Import Plus Lia Morphisms.
 Require Export Permutation.
 
-Require Import Injective.
-Require Import List_more.
+Require Import List_more funtheory.
 
 
 Instance Permutation_refl' {A} : Proper (Logic.eq ==> @Permutation A) id.

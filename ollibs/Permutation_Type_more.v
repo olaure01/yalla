@@ -3,16 +3,10 @@
 (** * Add-ons for Permutation_Type library
 Usefull properties apparently missing in the Permutation_Type library. *)
 
-Require Import Plus.
-Require Import CMorphisms.
-Require Import Lia.
+Require Import Plus Lia CMorphisms.
 
-Require Import Injective.
-Require Import List_more.
-Require Import Permutation_more.
+Require Import List_more Permutation_more List_Type List_Type_more funtheory.
 Require Export Permutation_Type.
-Require Import List_Type.
-Require Import List_Type_more.
 
 
 Instance Permutation_Type_refl' {A} : Proper (Logic.eq ==> @Permutation_Type A) id.

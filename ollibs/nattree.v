@@ -1,13 +1,10 @@
 (* natree Library *)
 
-(** * [nat]-labelled binary trees and embedding into nat *)
+(** * [nat]-labelled binary trees and embedding into [nat] *)
 
-Require Import Lt Plus Mult Even Div2 Wf_nat.
-Require Import NPeano.
-Require Import Psatz.
+Require Import Arith_base Nat Even Div2 Lia.
+Require Import funtheory.
 
-Require Import Injective.
-Require Import Surjective.
 
 (* begin hide *)
 Lemma pow_inc : forall n m m', 1 < n -> m < m' -> pow n m < pow n m'.

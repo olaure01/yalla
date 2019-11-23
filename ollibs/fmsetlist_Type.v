@@ -1,26 +1,14 @@
-(* fmsetlist Library *)
-
-
-
-(* Permutation in Type *)
-
+(* fmsetlist_Type Library *)
 
 (** * Finite Multiset over Lists
    We define an axiomatization of finite multisets through their relation with lists.
    Equality is required to be Coq equality.
+   Permutation are with output in [Type].
    An implementation of the axioms is provided by sorted lists
    for every type equiped with a Boolean-valued total order relation *)
 
-Require Import Le.
-Require Import Compare_dec.
-Require Import Wf_nat.
-Require Import List.
-Require Import CMorphisms.
-
-Require Import Bool_more.
-Require Import Injective.
-Require Import Permutation_Type_more.
-Require Import COrders.
+Require Import Le Compare_dec Wf_nat List CMorphisms.
+Require Import Bool_more Permutation_Type_more COrders funtheory.
 
 
 (** * Axiomatization *)
@@ -664,5 +652,4 @@ split with (@fmslist_empty A) (@fmslist_add A) (fun m => proj1_sig m) ; intros.
     apply insert_insert.
   + rewrite IHX1 ; assumption.
 Defined.
-
 

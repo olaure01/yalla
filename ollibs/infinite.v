@@ -1,9 +1,10 @@
 (* Infinite Types *)
 
 Require Import Bool Lia.
-Require Import List_more List_Type Injective Bijective dectype.
+Require Import List_more List_Type funtheory dectype.
 
 Set Implicit Arguments.
+
 
 (* a pigeonhole principle *)
 Definition pigeon X := forall (l1 l2 : list X),
@@ -25,17 +26,17 @@ Section Infinite.
 Variable X : Type.
 
 (* bijection with nat *)
-Definition nat_biject := { f : nat -> X & bijective f }.
+Definition nat_bijective := { f : nat -> X & bijective f }.
 (* section with nat *)
 Definition nat_section := {'(i,s) : (nat -> X) * (X -> nat) | retract s i }.
 (* non-surjective self injection *)
-Definition self_inject := { f : X -> X & injective f & { x | forall y, x <> f y } }.
+Definition self_injective := { f : X -> X & injective f & { x | forall y, x <> f y } }.
 (* injection from nat *)
-Definition nat_inject := { f : nat -> X | injective f }.
+Definition nat_injective := { f : nat -> X | injective f }.
 (* choice out of finite subsets *)
 Definition choice_out_finite := { f : list X -> X | forall l, ~ In (f l) l }.
 
-Lemma nat_biject_section : nat_biject -> nat_section.
+Lemma nat_bijective_section : nat_bijective -> nat_section.
 Proof.
 intros [i Hbij].
 destruct (bijective_inverse _ Hbij) as [s _ Hsec].
@@ -59,7 +60,7 @@ induction l; simpl; intuition; constructor.
   subst; rewrite Hsec; lia.
 Qed.
 
-Lemma choice_nat_inject : choice_out_finite -> nat_inject.
+Lemma choice_nat_injective : choice_out_finite -> nat_injective.
 Proof.
 intros [c Hc].
 remember (fix h n := (* a non-empty list of iterated choices *)
@@ -86,17 +87,17 @@ replace y with (S (pred y)) in HC at 1 by lia.
 now apply (Hc (ih (pred y))); subst.
 Qed.
 
-Lemma nat_biject_self : nat_biject -> self_inject.
+Lemma nat_bijective_self : nat_bijective -> self_injective.
 Proof.
 intros [i Hbij].
 destruct (bijective_inverse _ Hbij) as [s Hsec1 Hsec2].
 exists (fun x => i (S (s x))).
-- apply comp_inj; [ | apply comp_inj ].
-  + now apply section_inj with s.
+- apply compose_injective; [ apply compose_injective | ].
+  + now apply section_injective with i.
   + intros x y; lia.
-  + now apply section_inj with i.
+  + now apply section_injective with s.
 - exists (i 0); intros x Heq.
-  apply section_inj in Hsec2.
+  apply section_injective in Hsec2.
   apply Hsec2 in Heq; inversion Heq.
 Qed.
 
@@ -111,10 +112,10 @@ Section InfiniteDec.
 
 Context { X : DecType }.
 
-Lemma section_self_inject : nat_section X -> self_inject X.
+Lemma section_self_injective : nat_section X -> self_injective X.
 Proof.
 intros [(i, s) Hs].
-assert (Hinj := section_inj _ _ Hs).
+assert (Hinj := section_injective _ _ Hs).
 assert (forall x z, x = i z -> x = i (s x)) as Hsi
   by (now intros x z Heq; rewrite Heq at 2; rewrite Hs); clear Hs.
 exists (fun x => if eqb x (i (s x)) then i (S (s x)) else x).
@@ -160,7 +161,7 @@ Lemma injective_enum : forall (f : nat -> X), injective f ->
 Proof.
 intros f Hinj l.
 destruct pigeon_dectype with (map f (seq 0 (S (length l)))) l as [x Hin Hnin].
-- now apply inj_NoDup, seq_NoDup.
+- now apply injective_NoDup, seq_NoDup.
 - rewrite map_length, seq_length; lia.
 - remember (S (length l)) as k; clear Heqk.
   remember 0 as s; clear Heqs.
@@ -171,15 +172,15 @@ destruct pigeon_dectype with (map f (seq 0 (S (length l)))) l as [x Hin Hnin].
     now destruct Hin.
 Qed.
 
-Lemma nat_inject_choice : nat_inject X -> choice_out_finite X.
+Lemma nat_injective_choice : nat_injective X -> choice_out_finite X.
 Proof.
 intros [i Hi].
 exists (fun l => i (proj1_sig (injective_enum Hi l))).
 intros l Hin; destruct (injective_enum Hi l) ; intuition.
 Qed.
 
-Lemma self_inject_minus : forall (pi : self_inject X),
-  self_inject (minus (proj1_sig (projT3 pi))).
+Lemma self_injective_minus : forall (pi : self_injective X),
+  self_injective (minus (proj1_sig (projT3 pi))).
 Proof.
 intros [f Hinj [i Hi]]; simpl.
 assert (forall x, eqb i x = false -> eqb i (f x) = false) as Hif
@@ -198,25 +199,25 @@ Qed.
 
 End InfiniteDec.
 
-Definition nat_of_self (X : DecType) (pi : self_inject X) (n : nat) :
+Definition nat_of_self (X : DecType) (pi : self_injective X) (n : nat) :
    { x : X | x = Nat.iter n (projT1 (sigT_of_sigT2 pi)) (proj1_sig (projT3 pi)) }
- * { Y : DecType & self_inject Y }.
+ * { Y : DecType & self_injective Y }.
 Proof.
 remember pi as HX; destruct pi as [f Hinj [i Hi]].
 induction n.
 - split.
   + exists i; simpl; now subst.
   + exists (minus (proj1_sig (projT3 HX))).
-    apply (self_inject_minus HX).
+    apply (self_injective_minus HX).
 - destruct IHn as [y Y]; split.
   + destruct y as [y Hy].
     exists (f y); simpl; now subst.
   + destruct Y as [Y HY].
     exists (minus (proj1_sig (projT3 HY))).
-    apply (self_inject_minus HY).
+    apply (self_injective_minus HY).
 Defined.
 
-Lemma self_inject_nat (X : DecType) : self_inject X -> nat_inject X.
+Lemma self_injective_nat (X : DecType) : self_injective X -> nat_injective X.
 Proof.
 intros HX.
 exists (fun n => proj1_sig (fst (nat_of_self X HX n))).
@@ -255,8 +256,8 @@ Arguments fresh_prop {_}.
 (* [nat] instance of [InfDecType] *)
 Definition nat_infdectype := {|
   infcar := nat_dectype;
-  fresh := (proj1_sig (section_choice (nat_biject_section (existT _ id (id_bijective)))));
-  fresh_prop := (proj2_sig (section_choice (nat_biject_section (existT _ id (id_bijective)))));
+  fresh := (proj1_sig (section_choice (nat_bijective_section (existT _ id (id_bijective)))));
+  fresh_prop := (proj2_sig (section_choice (nat_bijective_section (existT _ id (id_bijective)))));
 |}.
 (* alternative direct construction *)
 Definition nat_fresh l := S (fold_right max 0 l).
@@ -284,9 +285,9 @@ Section InfDecTypes.
 
 Context { X : InfDecType }.
 
-Lemma infinite_nat_inject : nat_inject X.
+Lemma infinite_nat_injective : nat_injective X.
 Proof.
-apply choice_nat_inject.
+apply choice_nat_injective.
 exists fresh.
 apply fresh_prop.
 Qed.

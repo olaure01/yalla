@@ -2,16 +2,8 @@
 
 (** * Factorized statements for different notions of permutation *)
 
-Require Import Morphisms.
-Require Import List.
-
-Require Import Injective.
-Require Import List_more.
-Require Import Permutation_more.
-Require Import Permutation_solve.
-Require Import CyclicPerm.
-Require Import CPermutation_solve.
-
+Require Import List Morphisms.
+Require Import List_more Permutation_more funtheory Permutation_solve CyclicPerm CPermutation_solve.
 
 
 (** ** Definitions
@@ -480,7 +472,7 @@ Lemma PEperm_map_inv_inj {A B} b : forall f : A -> B, injective f ->
 Proof with try assumption.
 destruct b ; intros f Hi l1 l2 HP.
 - apply Permutation_map_inv_inj in HP...
-- apply map_inj in HP...
+- apply map_injective in HP...
 Qed.
 
 Lemma PEperm_image {A B} b : forall (f : A -> B) a l l',
@@ -518,5 +510,4 @@ rewrite HPhd.
 rewrite HPtl.
 reflexivity.
 Qed.
-
 
