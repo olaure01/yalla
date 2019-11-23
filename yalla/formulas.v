@@ -1,18 +1,11 @@
 (* formulas library for yalla *)
 
+Require Import EqNat List Equalities RelationClasses Lia.
+Require Import funtheory Bool_more.
+Require yalla_ax.
+
 
 (** * Linear Logic formulas *)
-
-Require Import RelationClasses.
-Require Import List.
-Require Import Lia.
-Require Import EqNat.
-Require Import Equalities.
-
-Require Import Injective.
-Require Import Bool_more.
-
-Require yalla_ax.
 
 (** ** Definition and main properties of formulas *)
 

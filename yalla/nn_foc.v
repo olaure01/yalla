@@ -3,18 +3,9 @@
 (** * Focusing by Polarized Translation *)
 
 Require Import CMorphisms.
-
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
-Require Import genperm_Type.
-
-Require Import ll_fragments.
-Require Import llfoc.
-Require Import tl.
-Require Import nn_prop.
+Require Import List_more List_Type_more Permutation_Type_more Permutation_Type_solve genperm_Type
+               funtheory.
+Require Import ll_fragments llfoc tl nn_prop.
 
 
 (** ** Polarized Translation *)

@@ -1,17 +1,9 @@
 (* nn_def library for yalla *)
 
-
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type.
-Require Import genperm_Type.
-Require Import Dependent_Forall_Type.
-
-Require Import subs.
-Require Import isubs.
+Require Import List_more List_Type_more Permutation_Type genperm_Type funtheory Dependent_Forall_Type.
+Require Import subs isubs.
 Require Export ill_vs_ll.
 
 

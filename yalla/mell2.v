@@ -1,15 +1,9 @@
 (* mell2 example file for yalla library *)
 
-
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
 Require Import CMorphisms.
-
-Require Import Injective.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
-Require Import Dependent_Forall_Type.
+Require Import List_Type_more Permutation_Type_more Permutation_Type_solve funtheory Dependent_Forall_Type.
 
 
 (** ** 0. load the [yalla] library *)

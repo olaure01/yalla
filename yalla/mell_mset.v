@@ -2,14 +2,8 @@
 
 (** * Example of a concrete use of the yalla library: multi-set based MELL *)
 
-Require Import Injective.
-Require Import nattree.
-Require Import fmsetlist_Type.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_more.
-Require Import Permutation_Type_more.
-
+Require Import List_more List_Type_more Permutation_more Permutation_Type_more
+               funtheory nattree fmsetlist_Type.
 Import FMSetNotations.
 
 
@@ -71,11 +65,11 @@ Qed.
 Instance border_formula : BOrder.
 Proof.
 eapply (@border_inj _ border_nat).
-eapply comp_inj ; [ eapply comp_inj | ].
-- apply nattree2nat_inj.
-- eapply section_inj.
-  apply fmformulas.form_nattree_section.
+eapply compose_injective ; [ | eapply compose_injective ].
 - apply mell2ll_inj.
+- eapply section_injective.
+  apply fmformulas.form_nattree_section.
+- apply nattree2nat_inj.
 Defined.
 
 Lemma mell2ll_dual : forall A,
@@ -209,6 +203,7 @@ induction pi ; simpl ; rewrite ? map_app ;
 - apply (ll_def.ex_r _ (map mell2ll (covar X :: var X :: nil))).
   + apply ll_def.ax_r.
   + symmetry.
+    unfold Basics.compose; simpl.
     destruct (Compare_dec.leb
            (cpair 2 (pcpair (cpair (fmformulas.a2n X) (pcpair 0 0)) 0))
            (cpair 1 (pcpair (cpair (fmformulas.a2n X) (pcpair 0 0)) 0)))...

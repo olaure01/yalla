@@ -1,15 +1,10 @@
 (* lambek example file for yalla library *)
 
-(* output in Type *)
-
-
 (** * Example of a concrete use of the yalla library: a variant of the Lambek calculus
   tensor-free Lambek calculus with additive conjunction and its unit *)
 
+Require Import List_more List_Type_more funtheory.
 
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
 
 (** ** 0. load the [ill] library *)
 
@@ -166,5 +161,4 @@ rewrite 2 map_app.
 eapply ill_cut.cut_ir_axfree...
 intros a ; destruct a.
 Qed.
-
 

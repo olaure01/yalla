@@ -3,16 +3,8 @@
 (** * Cut admissibility for [ll] *)
 
 Require Import Lia.
-
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import genperm_Type.
-Require Import flat_map_Type_more.
-Require Import Dependent_Forall_Type.
-Require Import Wf_nat_more.
-
+Require Import List_more List_Type_more Permutation_Type_more genperm_Type flat_map_Type_more
+               Dependent_Forall_Type Wf_nat_more funtheory.
 Require Import ll_cut_at.
 Require Export ll_def.
 

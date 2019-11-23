@@ -1,12 +1,8 @@
 (* fmformulas library for yalla *)
 
-
 (** * Order structure and finite multiset structure on intuitionistic formulas *)
 
-Require Import Injective.
-Require Import nattree.
-Require Import fmsetlist_Type.
-
+Require Import funtheory nattree fmsetlist_Type.
 Require Export iformulas.
 
 
@@ -65,10 +61,10 @@ Qed.
 Instance border_iformula : BOrder.
 Proof.
 eapply border_inj.
-eapply comp_inj.
-- apply nattree2nat_inj.
-- eapply section_inj.
+eapply compose_injective.
+- eapply section_injective.
   apply iform_nattree_section.
+- apply nattree2nat_inj.
 Defined.
 
 

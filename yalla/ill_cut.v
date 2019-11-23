@@ -1,20 +1,11 @@
 (* ill library for yalla *)
 
-
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
-Require Import List.
-Require Import Arith_base.
-
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import genperm_Type.
-Require Import flat_map_Type_more.
-Require Import Wf_nat_more.
-
+Require Import Arith_base List.
+Require Import List_more List_Type_more Permutation_Type_more genperm_Type flat_map_Type_more
+               funtheory Wf_nat_more.
 Require Export ill_def.
 
 

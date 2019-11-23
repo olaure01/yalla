@@ -2,11 +2,8 @@
 
 (** * Example of a concrete use of the yalla library: the intuitionistic logic with call-by-value translation  *)
 
+Require Import List_more Permutation_Type_more Permutation_Type_solve funtheory.
 
-Require Import Injective.
-Require Import List_more.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
 
 (** ** 0. load the [ill] library *)
 
@@ -226,7 +223,7 @@ Proof.
 Qed.
 
 Lemma lj2ill_cbv_inj : injective lj2ill_cbv.
-Proof. eapply section_inj, ill2lj_lj2ill_cbv_id. Qed.
+Proof. eapply section_injective, ill2lj_lj2ill_cbv_id. Qed.
 
 Definition oc_lj2ill_cbv A := (iformulas.ioc (lj2ill_cbv A)).
 
@@ -337,7 +334,7 @@ Lemma ill2lj_lj2ill_cbn_id : retract ill2lj lj2ill_cbn.
 Proof. intros A; induction A; try now simpl; try (simpl; rewrite IHA1; now rewrite IHA2). Qed.
 
 Lemma lj2ill_cbn_inj : injective lj2ill_cbn.
-Proof. eapply section_inj, ill2lj_lj2ill_cbn_id. Qed.
+Proof. eapply section_injective, ill2lj_lj2ill_cbn_id. Qed.
 
 Definition oc_lj2ill_cbn A := (iformulas.ioc (lj2ill_cbn A)).
 

@@ -1,16 +1,9 @@
 (* tl example file for yalla library *)
 
-
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
 Require Import CMorphisms.
-
-Require Import Injective.
-Require Import Bool_more.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import genperm_Type.
+Require Import Bool_more List_more List_Type_more Permutation_Type_more genperm_Type funtheory.
 
 
 (** ** 0. load the [ill] library *)
@@ -597,7 +590,7 @@ induction pi ;
     rewrite_all Heq.
     apply tl2ill_inj in HeqA ; subst.
     rewrite <- Heq.
-    apply map_inj in Heql ; [ | apply tl2ill_inj ] ; subst.
+    apply map_injective in Heql ; [ | apply tl2ill_inj ] ; subst.
     apply gax_tr.
   + intros Heq ; exfalso.
     rewrite_all Heq.
@@ -610,7 +603,7 @@ induction pi ;
   + intros Heq.
     rewrite_all Heq.
     rewrite <- Heq.
-    apply map_inj in Heql ; [ | apply tl2ill_inj ] ; subst.
+    apply map_injective in Heql ; [ | apply tl2ill_inj ] ; subst.
     apply gax_tr.
 Qed.
 

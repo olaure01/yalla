@@ -2,16 +2,10 @@
 
 (** * Comparison between Intuitionistic Linear Logic and Linear Logic *)
 
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
-Require Import genperm_Type.
-
+Require Import List_more List_Type_more Permutation_Type_more Permutation_Type_solve genperm_Type
+               funtheory.
 Require Import ll_fragments.
 Require Export ill_prop.
-
 
 
 (** ** Characterization of [ill] as a fragment of [ll] *)

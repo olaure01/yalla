@@ -1,20 +1,10 @@
 (* llpol example file for yalla library *)
 
-
-(* output in Type *)
-
-
-
 (** * Example of a concrete use of the yalla library: polarized linear logic LLpol *)
 
 Require Import CMorphisms.
-
-Require Import Injective.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
+Require Import List_more List_Type_more Permutation_Type Permutation_Type_more Permutation_Type_solve
+               funtheory.
 
 
 (** ** 0. load the [ll] library *)
@@ -1428,6 +1418,4 @@ induction pi ; split ;
 - eapply polsequent_neg_add...
 - eapply polsequent_neg_rem...
 Qed.
-
-
 

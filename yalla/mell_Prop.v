@@ -1,16 +1,10 @@
 (* mell_prop example file for yalla library *)
 
-
 (** * Example of a concrete use of the yalla library: unit-free MELL *)
 
 Require Import Morphisms.
-
-Require Import Injective.
-Require Import List_more.
-Require Import Permutation_more.
-Require Import Permutation_solve.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
+Require Import List_more Permutation_more Permutation_solve Permutation_Type_more Permutation_Type_solve
+               funtheory.
 
 
 (** ** 0. load the [ll] library *)
@@ -279,7 +273,4 @@ eapply ll_cut.cut_r_axfree...
 - intros a ; destruct a.
 - rewrite mell2ll_dual...
 Qed.
-
-
-
 

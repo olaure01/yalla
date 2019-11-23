@@ -1,9 +1,8 @@
 (* Parameter definitions for yalla library *)
 
-Require Import Arith_base.
-Require Import Equalities.
+Require Import Arith_base Equalities.
+Require Import funtheory.
 
-Require Import Injective.
 
 (* We provide a possible value for parameters of the library
 as a consistency guarantee *)
@@ -119,7 +118,7 @@ intros x y ; split ; intros Heq.
   f_equal ; assumption.
 - apply iateq_eq in Heq.
   apply ateq_eq.
-  eapply (section_inj a2i i2a) in Heq.
+  eapply (section_injective a2i i2a) in Heq.
   + assumption.
   + apply a2a_i.
 Qed.

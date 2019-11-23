@@ -1,14 +1,9 @@
 (* ll example file for yalla library *)
 
-
 (** * Example of a concrete use of the yalla library: LL *)
 
 Require Import CMorphisms.
-
-Require Import Injective.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
+Require Import List_Type_more Permutation_Type_more Permutation_Type_solve funtheory.
 
 
 (** ** 0. load the [yalla] library *)

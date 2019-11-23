@@ -1,14 +1,9 @@
 (* mell_msetoid example file for yalla library *)
 
-
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 
 Require Import CMorphisms.
-
-Require Import Injective.
-Require Import fmsetoidlist_Type.
-Require Import List_more.
-Require Import Permutation_Type_more.
+Require Import fmsetoidlist_Type List_more Permutation_Type_more funtheory.
 
 
 (** ** 0. load the [ll] library *)

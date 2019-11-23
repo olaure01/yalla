@@ -2,10 +2,7 @@
 
 (** * Order structure and finite multiset structure on formulas *)
 
-Require Import Injective.
-Require Import nattree.
-Require Import fmsetlist_Type.
-
+Require Import funtheory nattree fmsetlist_Type.
 Require Export formulas.
 
 (** ** Encoding of [formula] into [nat]-labelled trees for ordering *)
@@ -63,10 +60,10 @@ Qed.
 Instance border_formula : BOrder.
 Proof.
 eapply border_inj.
-eapply comp_inj.
-- apply nattree2nat_inj.
-- eapply section_inj.
+eapply compose_injective.
+- eapply section_injective.
   apply form_nattree_section.
+- apply nattree2nat_inj.
 Defined.
 
 
