@@ -44,6 +44,7 @@ Working with `Coq 8.10.0`
 * `Permutation_Type_more`   : `Permutation_more` with output in `Type`
 * `Permutation_Type_solve`  : `Permutation_solve` with output in `Type`
 * `Permutation_Type`        : `Permutation` with output in `Type`
+* `transp_perm`             : transpositions
 
 ## Misc with output in `Type`
 

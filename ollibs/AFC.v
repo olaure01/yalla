@@ -1,12 +1,8 @@
 (* AFC Library *)
-(* v0   Olivier Laurent *)
 
 (** * Axiom(s) of Finite Choice *)
 
-Require Import Le Lt Max.
-Require Import Compare_dec.
-Require Import List.
-
+Require Import Le Lt Max Compare_dec List.
 Require Vector_more.
 
 (** * Functional Axiom of Choice for finite functions *)
@@ -161,9 +157,4 @@ induction m ; intros P Hext Hinc HI.
   + intros ; eapply Hext...
   + intros ; apply (Hinc _ _ i)...
 Qed.
-
-
-
-
-
 

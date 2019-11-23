@@ -219,6 +219,7 @@ exists x; [ reflexivity | ].
 intros x' Heq; apply Hinjg, Hinjf; assumption.
 Qed.
 
+
 (** * Additional definitions *)
 
 (* Binary functions *)

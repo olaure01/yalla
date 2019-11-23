@@ -1,11 +1,11 @@
 (* Bool_more Library *)
 
-
 (** * Add-ons for Bool library
 Usefull properties apparently missing in the Bool library. *)
 
 Require Export Bool.
 Require Import RelationClasses.
+
 
 (** * Some basic properties of [leb] *)
 
@@ -133,8 +133,4 @@ induction l ; split ; intros H ; try (now inversion H).
     rewrite orb_true_r.
     reflexivity.
 Qed.
-
-
-
-
 
