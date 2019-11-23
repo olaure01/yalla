@@ -22,5 +22,3 @@ To be used as a kernel library for certifying proofs in linear logic, typically 
     definition of ILL based on a transposition exchange rule
 * nano_macro_ill.v:
     emdedding of nanoill into yalla
-* transp_perm.v:
-    properties of the transposition function

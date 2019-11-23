@@ -51,6 +51,3 @@ nano_macro_ill.vo: nano_macro_ill.v nanoill.vo
 micro_macro_ll.vo: micro_macro_ll.v microll.vo
 
 micro_macro_ill.vo: micro_macro_ill.v microill.vo
-
-transp_perm.vo : transp_perm.v
-
