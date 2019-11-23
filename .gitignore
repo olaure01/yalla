@@ -16,6 +16,10 @@
 *.mllib.d
 *.mlpack.d
 *.native
+
+.coqdeps.d
+Makefile.conf
+
 *.o
 *.v.crashcoqide
 *.v.d

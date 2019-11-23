@@ -10,14 +10,17 @@ ollibs/CPermutation_solve.v
 ollibs/CPermutation_Type_solve.v
 ollibs/CyclicPerm_Type.v
 ollibs/CyclicPerm.v
+ollibs/dectype.v
+ollibs/Dependent_Forall_Type.v
 ollibs/flat_map_Type_more.v
 ollibs/fmsetlist_Type.v
 ollibs/fmsetlist.v
 ollibs/fmsetoidlist_Type.v
 ollibs/fmsetoidlist.v
+ollibs/funtheory.v
 ollibs/genperm_Type.v
 ollibs/genperm.v
-ollibs/Injective.v
+ollibs/infinite.v
 ollibs/List_more.v
 ollibs/List_Type_more.v
 ollibs/List_Type.v
@@ -27,20 +30,18 @@ ollibs/Permutation_solve.v
 ollibs/Permutation_Type_more.v
 ollibs/Permutation_Type_solve.v
 ollibs/Permutation_Type.v
-ollibs/Surjective.v
 ollibs/Vector_more.v
-ollibs/wf_nat_more.v
+ollibs/Wf_nat_more.v
 ollibs/wf_prod.v
 
-microyalla/nanoll.v
-microyalla/nanoill.v
-microyalla/nano_macro_ll.v
-microyalla/nano_macro_ill.v
-microyalla/microll.v
 microyalla/microill.v
-microyalla/micro_macro_ll.v
+microyalla/microll.v
 microyalla/micro_macro_ill.v
-microyalla/transp_perm.v
+microyalla/micro_macro_ll.v
+microyalla/nanoill.v
+microyalla/nanoll.v
+microyalla/nano_macro_ill.v
+microyalla/nano_macro_ll.v
 
 yalla/basic_misc.v
 yalla/bbb.v
@@ -56,8 +57,8 @@ yalla/ill_vs_ll.v
 yalla/isubs.v
 yalla/lambek.v
 yalla/lj.v
-yalla/ll_cut.v
 yalla/ll_cut_at.v
+yalla/ll_cut.v
 yalla/ll_def.v
 yalla/llfoc.v
 yalla/ll_fragments.v
