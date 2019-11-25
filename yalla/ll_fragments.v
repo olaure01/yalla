@@ -45,17 +45,16 @@ apply cut_r with (wn (tens_n n bot))...
   rewrite dual_tens_n; simpl.
   apply parr_n_r.
   rewrite app_nil_r.
-  replace (const_list n one) with (concat (const_list n (one :: nil))).
-  + apply mix_r.
-    * simpl; rewrite const_list_length.
-      rewrite <- beq_nat_refl with n...
-    * remember (cutupd_pfrag (pmixupd_point_pfrag P n true) true) as P'.
-      clear ; induction n.
-      -- apply Forall_Type_nil.
-      -- apply Forall_Type_cons...
-         apply one_r.
-  + clear; induction n...
-    simpl; rewrite IHn...
+  replace (repeat one n) with (concat (repeat (one :: nil) n))
+    by (symmetry; apply repeat_to_concat).
+  apply mix_r.
+  + simpl; rewrite repeat_length.
+    rewrite <- beq_nat_refl with n...
+  + remember (cutupd_pfrag (pmixupd_point_pfrag P n true) true) as P'.
+    clear ; induction n.
+    * apply Forall_Type_nil.
+    * apply Forall_Type_cons...
+      apply one_r.
 - apply stronger_pfrag with P...
   nsplit 4; simpl...
   + apply leb_true.
@@ -84,8 +83,8 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
     apply ex_r with (map wn (tens_n n bot :: nil) ++ concat L)...
     simpl.
     apply co_const_list_r with (S nL)...
-    change (const_list (S nL) (wn (tens_n n bot)))
-      with ((wn (tens_n n bot) :: nil) ++ const_list nL (wn (tens_n n bot))).
+    change (repeat (wn (tens_n n bot)) (S nL))
+      with ((wn (tens_n n bot) :: nil) ++ repeat (wn (tens_n n bot)) nL).
     rewrite HeqnL.
     refine (ex_concat_r _ _ ((wn (tens_n n bot)) :: nil) (wn (tens_n n bot)) L _)...
     replace n with nL by (apply beq_nat_true; apply Heq).
@@ -147,13 +146,13 @@ induction pi using ll_nested_ind ; try now constructor.
   + destruct u.
     apply parr_n_r.
     rewrite app_nil_r.
-    rewrite const_list_to_concat.
+    rewrite repeat_to_concat.
     apply mix_r.
-    * simpl; rewrite const_list_length.
+    * simpl; rewrite repeat_length.
       rewrite <- beq_nat_refl with n...
     * apply forall_Forall_Type.
       intros l' Hin.
-      apply In_Type_const_list in Hin; subst.
+      apply In_Type_repeat in Hin; subst.
       apply one_r.
 Qed.
 

@@ -623,7 +623,7 @@ eapply ex_wn_r ; [ eassumption | perm_Type_solve ].
 Qed.
 
 Lemma co_const_list_r P : forall n A l,
-      ll P (const_list n (wn A) ++ l) -> ll P ((wn A) :: l).
+      ll P (repeat (wn A) n ++ l) -> ll P ((wn A) :: l).
 Proof with try assumption.
   intros n.
   induction n; intros A l pi.
@@ -631,8 +631,8 @@ Proof with try assumption.
   - apply co_r.
     apply IHn.
     simpl in pi.
-    change (wn A :: const_list n (wn A) ++ l) with ((wn A :: const_list n (wn A)) ++ l) in pi.
-    rewrite const_list_cons in pi.
+    change (wn A :: repeat (wn A) n ++ l) with ((wn A :: repeat (wn A) n) ++ l) in pi.
+    rewrite repeat_cons in pi.
     rewrite<- app_assoc in pi...
 Qed.
 
@@ -655,12 +655,12 @@ Proof with try assumption.
 Qed.
 
 Lemma ex_concat_r P : pperm P = true -> forall l A L,
-      ll P (l ++ flat_map (cons A) L) -> ll P (l ++ const_list (length L) A ++ concat L).
+      ll P (l ++ flat_map (cons A) L) -> ll P (l ++ repeat A (length L) ++ concat L).
 Proof with try assumption.
   intros f l A L. revert f l A.
   induction L; intros f l A pi...
   simpl.
-  apply ex_r with ((A :: l ++ a) ++ const_list (length L) A ++ concat L) ; [ | rewrite f; simpl; perm_Type_solve]...
+  apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L) ; [ | rewrite f; simpl; perm_Type_solve]...
   apply IHL...
   eapply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L) ; [ | rewrite f; simpl; perm_Type_solve]...
 Qed.
@@ -678,7 +678,7 @@ induction L; intros A FL.
   apply IHL...
 Qed.
 
-Lemma parr_n_r P : forall l n A, ll P (const_list n A ++ l) ->
+Lemma parr_n_r P : forall l n A, ll P (repeat A n ++ l) ->
   ll P (parr_n n A :: l).
 Proof with try assumption.
   intros l n; revert l.
