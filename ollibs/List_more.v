@@ -984,90 +984,6 @@ Lemma fold_right_app_assoc {A} f (e : A) l1 l2 :
   fold_right f e (l1 ++ l2) = f (fold_right f e l1) (fold_right f e l2).
 Proof. intros Hassoc Hunit; apply fold_right_app_assoc2; [ assumption | apply Hunit ]. Qed.
 
-(* fold_left max *)
-Lemma fold_left_max_r : forall f a, a <= fold_left max f a.
-Proof with try reflexivity.
-  induction f; intros k...
-  simpl.
-  transitivity (max k a).
-  - apply Nat.le_max_l.
-  - apply IHf.
-Qed.
-
-Lemma fold_left_max_le_r : forall l i j, i <= j -> fold_left max l i <= fold_left max l j.
-Proof with try reflexivity; try assumption.
-  clear; induction l; intros i j Hle...
-  simpl.
-  apply IHl.
-  lia.
-Qed.
-
-Lemma fold_left_max_indep : forall i l, i < fold_left max l i ->
-  forall j, fold_left max l i <= fold_left max l j.
-Proof with try assumption; try reflexivity.
-  intros i l; revert i; induction l; intros i Hlt j.
-  - simpl in Hlt.
-    exfalso; lia.
-  - simpl in *.
-    case_eq (max i a <? fold_left max l (max i a)); intros Hcase.
-    + apply Nat.ltb_lt in Hcase.
-      apply IHl...
-    + apply Nat.ltb_nlt in Hcase.
-      assert (i < a) by lia.
-      replace (max i a) with a in * by lia.
-      apply fold_left_max_le_r.
-      lia.
-Qed.
-
-Lemma fold_left_max_le : forall l i j, fold_left max l i <= j -> fold_left max l j <= j.
-Proof with try assumption;try reflexivity.
-  induction l; intros i j Hle...
-  simpl.
-  simpl in Hle.
-  replace j with (max j a) at 2.
-  2:{ apply Nat.max_l.
-      transitivity (max i a) ; [lia | ].
-      transitivity (fold_left max l (max i a)).
-      - apply fold_left_max_r.
-      - apply Hle. }
-  apply IHl with (max i a).
-  transitivity j; lia.
-Qed.
-
-Lemma fold_left_max_app : forall k l1 l2,
-  fold_left max (l1 ++ l2) k = max (fold_left max l1 k) (fold_left max l2 k).
-Proof with try assumption; try reflexivity.
-  intros k l1; revert k; induction l1; intros k l2.
-  - simpl.
-    symmetry.
-    apply Nat.max_r.
-    apply fold_left_max_r.
-  - simpl.
-    rewrite IHl1.
-    case_eq (fold_left max l2 k <=? max k a); intros Hcase.
-    + transitivity (fold_left max l1 (max k a)).
-      * apply Nat.max_l.
-        apply Nat.leb_le in Hcase.
-        transitivity (max k a).
-        -- apply fold_left_max_le with k...
-        -- apply fold_left_max_r.
-      * symmetry.
-        apply Nat.max_l.
-        apply Nat.leb_le in Hcase.
-        transitivity (max k a)...
-        apply fold_left_max_r.
-    + replace (fold_left max l2 k) with (fold_left max l2 (max k a))...
-      apply Nat.le_antisymm.
-      * apply fold_left_max_indep.
-        apply Nat.leb_nle in Hcase.
-        apply Nat.lt_le_trans with (fold_left max l2 k).
-        -- lia.
-        -- apply fold_left_max_le_r.
-           lia.
-      * apply fold_left_max_le_r.
-        lia.
-Qed.
-
 
 (* NoDup *)
 
@@ -1102,37 +1018,21 @@ apply in_seq in H; lia.
 Qed.
 
 
-(** ** Definition and properties of the constant list *)
-Fixpoint const_list {A} n (a : A) :=
-  match n with
-  | 0 => nil
-  | S n => a :: (const_list n a)
-  end.
+(* repeat *)
 
-Lemma const_list_length {A} : forall n (a : A),
-  length (const_list n a) = n.
-Proof with try reflexivity.
-intros n a; induction n...
-simpl; rewrite IHn...
-Qed.
-
-Lemma const_list_cons {A} : forall n (a : A),
-  a :: const_list n a = const_list n a ++ (a :: nil).
-Proof with try reflexivity.
-induction n; intros a...
-simpl; rewrite IHn...
-Qed.
-
-Lemma const_list_to_concat {A} : forall n (a : A),
-  const_list n a = concat (const_list n (a :: nil)).
-Proof with try reflexivity.
-induction n; intros a...
-simpl; rewrite IHn...
-Qed.
-
-Lemma In_const_list {A} : forall n (a : A) b,
-  In b (const_list n a) -> b = a.
+Lemma repeat_cons A n (a:A) :
+  a :: repeat a n = repeat a n ++ (a :: nil).
 Proof.
-induction n; intros a b Hin; inversion Hin; subst; [ reflexivity | now apply IHn ].
+induction n; simpl.
+- reflexivity.
+- f_equal; apply IHn.
+Qed.
+
+Lemma repeat_to_concat A n (a:A) :
+  repeat a n = concat (repeat (a :: nil) n).
+Proof.
+induction n; simpl.
+- reflexivity.
+- f_equal; apply IHn.
 Qed.
 

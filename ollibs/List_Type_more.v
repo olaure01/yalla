@@ -689,8 +689,8 @@ End In_Forall_Type.
 
 
 (*Constant list *)
-Lemma In_Type_const_list {A} : forall n (a : A) b,
-  In_Type b (const_list n a) -> b = a.
+Lemma In_Type_repeat {A} : forall n (a : A) b,
+  In_Type b (repeat a n) -> b = a.
 Proof.
 induction n; intros a b Hin; inversion Hin; subst; [ reflexivity | now apply IHn ].
 Qed.
