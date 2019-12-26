@@ -1,6 +1,6 @@
 (* Parameter definitions for yalla library *)
 
-Require Import Arith_base Equalities.
+Require Import PeanoNat Equalities.
 Require Import funtheory.
 
 
@@ -13,32 +13,26 @@ Definition atN : IAtom := None. (* iformulas.v *)
 Definition TAtom : Set := nat. (* tl.v *)
 
 
-Definition ateq : Atom -> Atom -> bool := beq_nat. (* subs.v *)
+Definition ateq : Atom -> Atom -> bool := Nat.eqb. (* subs.v *)
 Definition iateq : IAtom -> IAtom -> bool := fun x y => (* isubs.v & tl.v *)
   match x , y with
   | None, None => true
-  | Some n, Some m => beq_nat n m
+  | Some n, Some m => Nat.eqb n m
   | _, _ => false
   end.
 
 (* subs.v *)
 Fact ateq_eq : forall x y, ateq x y = true <-> x = y.
-Proof.
-split ; simpl ; intros H.
-- apply beq_nat_true in H ; subst ; reflexivity.
-- symmetry ; subst.
-  apply beq_nat_refl.
-Qed.
+Proof. apply Nat.eqb_eq. Qed.
 
 (* isubs.v & tl.v *)
 Fact iateq_eq : forall x y, iateq x y = true <-> x = y.
 Proof.
 destruct x ; destruct y ; split ; simpl ;
   intros H ; try (now inversion H).
-- apply beq_nat_true in H ; subst ; reflexivity.
-- inversion H ; subst.
-  symmetry.
-  apply beq_nat_refl.
+- now f_equal; apply Nat.eqb_eq.
+- inversion_clear H.
+  now apply Nat.eqb_eq.
 Qed.
 
 Module Atom_beq <: UsualBoolEq.

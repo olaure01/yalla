@@ -3,18 +3,9 @@
 
 (** * Definitions of various Linear Logic fragments *)
 
-Require Import Arith_base.
-Require Import Lia.
-
-Require Import Bool_more.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import CyclicPerm_Type.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
-Require Import genperm_Type.
-Require Import Dependent_Forall_Type.
-
+Require Import PeanoNat Lia.
+Require Import Bool_more List_more List_Type_more Dependent_Forall_Type
+               CyclicPerm_Type Permutation_Type_more Permutation_Type_solve genperm_Type.
 Require Export ll_prop.
 Require Import subs.
 
@@ -49,7 +40,7 @@ apply cut_r with (wn (tens_n n bot))...
     by (symmetry; apply repeat_to_concat).
   apply mix_r.
   + simpl; rewrite repeat_length.
-    rewrite <- beq_nat_refl with n...
+    rewrite Nat.eqb_refl...
   + remember (cutupd_pfrag (pmixupd_point_pfrag P n true) true) as P'.
     clear ; induction n.
     * apply Forall_Type_nil.
@@ -87,7 +78,7 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
       with ((wn (tens_n n bot) :: nil) ++ repeat (wn (tens_n n bot)) nL).
     rewrite HeqnL.
     refine (ex_concat_r _ _ ((wn (tens_n n bot)) :: nil) (wn (tens_n n bot)) L _)...
-    replace n with nL by (apply beq_nat_true; apply Heq).
+    replace n with nL by (apply Nat.eqb_eq, Heq).
     rewrite HeqnL.
     rewrite flat_map_concat_map.
     replace ((wn (tens_n (length L) bot)) :: nil )
@@ -100,7 +91,7 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
     destruct (in_Type_map_inv _ _ _ Hin) as (l'' & (Heql'' & Hin'')); subst; clear Hin.
     apply bot_r.
     destruct (in_Type_map_inv _ _ _ Hin'') as (l' & (Heql' & Hin')); subst; clear Hin''.
-    replace (length L) with n by (symmetry; apply beq_nat_true; apply Heq).
+    replace (length L) with n by (symmetry; apply Nat.eqb_eq, Heq).
     apply ex_r with (l' ++ map wn (tens_n n bot :: nil)).
     * apply Forall_Type_forall with (map (fun l => l ++ map wn (tens_n n bot :: nil)) L)...
       change (l' ++ map wn (tens_n n bot :: nil)) with ((fun l0 => l0 ++ map wn (tens_n n bot :: nil)) l').
@@ -149,7 +140,7 @@ induction pi using ll_nested_ind ; try now constructor.
     rewrite repeat_to_concat.
     apply mix_r.
     * simpl; rewrite repeat_length.
-      rewrite <- beq_nat_refl with n...
+      now rewrite Nat.eqb_refl.
     * apply forall_Forall_Type.
       intros l' Hin.
       apply In_Type_repeat in Hin; subst.
@@ -185,7 +176,7 @@ induction pi using ll_nested_ind ; try now constructor...
                                    | inl x => projT2 (pgax P) x
                                    | inr tt => parr_n n one :: nil
                                    end))) true)) (inr tt))
-        by (replace n with (length L) by (apply beq_nat_true; apply Heq); reflexivity).
+        by (replace n with (length L) by (apply Nat.eqb_eq, Heq); reflexivity).
       rewrite HeqP'.
       apply gax_r.
     * apply mix_by_tens_n.
@@ -266,7 +257,7 @@ Proof with try assumption; try reflexivity.
 intros n m Hpmixn Hpmixm L Heq FL; destruct n ; [ destruct m | ].
 - destruct L; inversion Heq.
   apply mix_r...
-- simpl in Heq; rewrite <- minus_n_O in Heq.
+- simpl in Heq; rewrite Nat.sub_0_r in Heq.
   change (concat L) with (concat (nil :: L)).
   apply mix_r...
   + simpl; rewrite Heq...
@@ -274,7 +265,7 @@ intros n m Hpmixn Hpmixm L Heq FL; destruct n ; [ destruct m | ].
     change nil with (concat (@nil (list formula))).
     apply mix_r...
     apply Forall_Type_nil.
-- simpl in Heq; rewrite <- minus_n_O in Heq.
+- simpl in Heq; rewrite Nat.sub_0_r in Heq.
   destruct (decomp_length_plus L n m Heq) as ((l1 & l2) & (Heql1 & (Heql2 & HeqL))).
   rewrite HeqL.
   rewrite concat_app.
@@ -282,7 +273,7 @@ intros n m Hpmixn Hpmixm L Heq FL; destruct n ; [ destruct m | ].
     by (rewrite concat_app; simpl; rewrite app_nil_r; reflexivity).
   apply mix_r.
   + rewrite app_length.
-    rewrite plus_comm.
+    rewrite Nat.add_comm.
     rewrite Heql1...
   + rewrite HeqL in FL.
     apply Forall_Type_app_inv in FL as (FL1 & FL2).
@@ -351,7 +342,7 @@ eapply mix_conservativity_updl; [ | apply pi].
 simpl; intros k Hpmixk L Hl HF.
 case_eq (length L =? (n + m - 1)); intro Heq.
 - apply mix_n_m_r with n m...
-  apply beq_nat_true...
+  apply Nat.eqb_eq...
 - rewrite <- Hl in Hpmixk.
   rewrite Heq in Hpmixk.
   apply mix_r...
@@ -432,20 +423,25 @@ Lemma mix_0_n_admissible {P} : forall n, P.(pmix) 0 = true -> P.(pmix) n = true 
   forall l, ll P l ->
   ll (pmixupd_pfrag P (fun k => if k =? 0  then P.(pmix) 0
                           else (if n <=? k then P.(pmix) k else false))) l.
-Proof with try assumption; try reflexivity.
+Proof.
 intros n Hpmix0 Hpmixn l pi.
 eapply mix_conservativity_updr; [ | apply pi].
 simpl; intros k Hpmixk L Hl HF.
-destruct L ; [ apply mix_r | ]...
+destruct L ; [ apply mix_r | ]; intuition.
 rewrite <- Hl in Hpmixk.
 case_eq (n <=? length (l0 :: L)); intros Heq.
-- apply mix_r...
-  simpl; simpl in Heq; rewrite Heq...
-- apply mix_0_n_r with n; simpl...
-  + destruct n...
-    simpl; rewrite Nat.leb_refl...
-  + apply le_trans with (S (S (length L))); try lia.
-    apply leb_iff_conv...
+- apply mix_r; intuition.
+  now simpl; simpl in Heq; rewrite Heq.
+- apply mix_0_n_r with n; simpl; intuition.
+  + destruct n; intuition.
+    now simpl; rewrite Nat.leb_refl.
+  + transitivity (S (S (length L))); try lia.
+    case (Nat.compare_spec n (S (length L))); intros Ho; try lia.
+    -- exfalso.
+       subst; rewrite Nat.leb_refl in Heq; inversion Heq.
+    -- exfalso.
+       eapply or_introl, Nat.le_lteq, Nat.leb_le in Ho.
+       simpl in Heq; rewrite Ho in Heq; inversion Heq.
 Qed.
 
 (** provability in [P + mix_0 + mix_2] is equivalent to provability in [P + mix_k] for all k *)

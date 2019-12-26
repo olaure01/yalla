@@ -4,22 +4,11 @@
 (** * Linear Logic with explicit permutations *)
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
-Require Import CMorphisms.
-Require Import Arith_base.
-Require Import Lia.
-
-Require Import Bool_more.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import CyclicPerm_Type.
-Require Import Permutation_Type_solve.
-Require Import CPermutation_Type_solve.
-Require Import genperm_Type.
-Require Import Dependent_Forall_Type.
-
-Require Export basic_misc.
-Require Export formulas.
+Require Import PeanoNat CMorphisms Lia.
+Require Import Bool_more List_more List_Type_more Dependent_Forall_Type
+               Permutation_Type_more CyclicPerm_Type Permutation_Type_solve
+               CPermutation_Type_solve genperm_Type.
+Require Export basic_misc formulas.
 
 Notation Dependent_Forall_Type_forall_formula :=
   (Dependent_Forall_Type_forall (list_eq_dec Formula_dec.eq_dec)).

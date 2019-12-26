@@ -3,7 +3,7 @@
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
-Require Import Arith_base List.
+Require Import PeanoNat List.
 Require Import List_more List_Type_more Permutation_Type_more genperm_Type flat_map_Type_more
                funtheory Wf_nat_more.
 Require Export ill_def.
@@ -1217,12 +1217,12 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
   remember (gax_ir _ a) as Hgax ; apply (f_equal ipsize) in HeqHgax ; simpl in HeqHgax.
   destruct_ill pi1 f X l Hl2 Hr2 HP b ; try (exfalso ; inversion Hiq ; fail);
     list_simpl; try rewrite app_assoc ;
-    try now (constructor; list_simpl ; rewrite ? app_comm_cons ; rewrite (app_assoc l1);
-             revert Hgax HeqHgax ; rewrite Heql ; list_simpl ;
-             rewrite ? app_comm_cons ; rewrite (app_assoc l0) ;
+    try now (constructor; list_simpl; rewrite ? app_comm_cons; rewrite (app_assoc l1);
+             revert Hgax HeqHgax; rewrite Heql; list_simpl;
+             rewrite ? app_comm_cons; rewrite (app_assoc l0);
              intros Hgax HeqHgax;
              refine (IHsize _ _ _ _ _ _ Hgax _ _);
-             [ rewrite HeqHgax; do 2 (rewrite plus_comm; simpl); apply lt_n_Sn
+             [ rewrite HeqHgax; do 2 (rewrite Nat.add_comm; simpl); apply Nat.lt_succ_diag_r
              | assumption ]).
   + rewrite <- Heql ; apply (gax_ir _ a).
   + apply (ex_ir _ (l1 ++ l ++ l2)).

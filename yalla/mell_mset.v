@@ -204,7 +204,7 @@ induction pi ; simpl ; rewrite ? map_app ;
   + apply ll_def.ax_r.
   + symmetry.
     unfold Basics.compose; simpl.
-    destruct (Compare_dec.leb
+    destruct (Nat.leb
            (cpair 2 (pcpair (cpair (fmformulas.a2n X) (pcpair 0 0)) 0))
            (cpair 1 (pcpair (cpair (fmformulas.a2n X) (pcpair 0 0)) 0)))...
     apply Permutation_Type_swap.
