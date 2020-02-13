@@ -3,28 +3,15 @@
 (** * Add-ons for Vector library
 Usefull properties apparently missing in the Vector library. *)
 
-
-Require Import Peano_dec Lt.
 Require Export Vector.
-
-
-(* Decidability over nat for decomposing vectors with inj_pairT2 *)
-Require Import Eqdep_dec.
-
+Require Import PeanoNat Eqdep_dec.
 
 Lemma inj_pairT2_nat : forall (P:nat -> Type) p x y,
   existT P p x = existT P p y -> x = y.
-Proof.
-apply inj_pair2_eq_dec.
-apply eq_nat_dec.
-Qed.
+Proof. apply inj_pair2_eq_dec, Nat.eq_dec. Qed.
 
 Lemma case0_nil {A} : forall (v : t A 0) P, P (nil A) -> P v.
-Proof.
-intros.
-apply case0.
-assumption.
-Qed.
+Proof. intros; now apply case0. Qed.
 
 Lemma nth_order_ext {A n} : forall k (H1 H2 : k < n) (v : t A n),
   nth_order v H1 = nth_order v H2.
@@ -37,11 +24,7 @@ Qed.
 
 Lemma hd_nth_order {A n} : forall (H : 0 < S n) (v : t A (S n)),
   hd v = nth_order v H.
-Proof.
-intros.
-rewrite (eta v).
-reflexivity.
-Qed.
+Proof. intros; now rewrite (eta v). Qed.
 
 Lemma nth_order_tl {A n} : forall k (H : k < n) (HS : S k < S n)(v : t A (S n)),
   nth_order (tl v) H = nth_order v HS.
@@ -61,7 +44,7 @@ Proof.
 intros k ; revert n ; induction k ; intros ; (destruct n ; [ inversion H1 | subst ]).
 - rewrite <- hd_nth_order.
   rewrite (eta v) ; reflexivity.
-- rewrite <- (nth_order_tl _ (lt_S_n _ _ H1)).
+- rewrite <- (nth_order_tl _ (proj2 (Nat.succ_lt_mono _ _) H1)).
   rewrite (eta v).
   apply IHk.
 Qed.
@@ -75,7 +58,7 @@ intros k1 ; revert n ; induction k1 ; intros ; (destruct n ; [ inversion H1 | su
   destruct k2.
   + exfalso ; apply H ; reflexivity.
   + rewrite 2 (eta v) ; reflexivity.
-- rewrite <- 2 (nth_order_tl _ (lt_S_n _ _ H1)).
+- rewrite <- 2 (nth_order_tl _ (proj2 (Nat.succ_lt_mono _ _) H1)).
   rewrite 2 (eta v).
   destruct k2.
   + reflexivity.
@@ -88,7 +71,7 @@ Lemma replace_replace_eq {A n} : forall p (v : t A n) a b,
   replace (replace v p a) p b = replace v p b.
 Proof.
 intros.
-induction p ; rewrite 2 (eta v) ; simpl.
+induction p; rewrite 2 (eta v); simpl.
 - reflexivity.
 - f_equal.
   apply IHp.
@@ -157,9 +140,9 @@ Lemma inc_Forall {A n} : forall (P : nat -> A -> Prop) (v : t A n) i j,
     Forall (P i) v -> i <= j -> Forall (P j) v.
 Proof with try eassumption.
 intros P v i j Hinc.
-induction v ; intros H Hv ; constructor ; inversion H.
+induction v; intros H Hv; constructor; inversion H.
 - eapply Hinc...
-- apply inj_pairT2_nat in H2 ; subst.
+- apply inj_pairT2_nat in H2; subst.
   apply IHv...
 Qed.
 
@@ -174,7 +157,7 @@ induction n ; intros.
   apply inj_pairT2_nat in H2 ; subst.
   destruct i.
   + rewrite <- hd_nth_order...
-  + rewrite <- (nth_order_tl _ (lt_S_n _ _ Hi) Hi).
+  + rewrite <- (nth_order_tl _ (proj2 (Nat.succ_lt_mono _ _) Hi) Hi).
     apply IHn...
 Qed.
 
@@ -187,10 +170,10 @@ induction n ; intros.
 - rewrite (eta v).
   rewrite (eta v) in H.
   constructor.
-  + specialize H with 0 (lt_0_Sn n).
+  + specialize H with 0 (Nat.lt_0_succ n).
     rewrite <- hd_nth_order in H...
   + apply IHn ; intros.
-    specialize H with (S i) (lt_n_S _ _ Hi).
+    specialize H with (S i) (proj1 (Nat.succ_lt_mono _ _) Hi).
     rewrite <- (nth_order_tl _ Hi) in H...
 Qed.
 
@@ -208,7 +191,7 @@ induction n ; intros.
   apply inj_pairT2_nat in H5 ; subst.
   destruct i.
   + rewrite <- hd_nth_order...
-  + rewrite <- 2 (nth_order_tl _ (lt_S_n _ _ Hi) Hi).
+  + rewrite <- 2 (nth_order_tl _ (proj2 (Nat.succ_lt_mono _ _) Hi) Hi).
     apply IHn...
 Qed.
 
@@ -224,11 +207,10 @@ induction n ; intros.
   rewrite (eta v2).
   rewrite (eta v2) in H.
   constructor.
-  + specialize H with 0 (lt_0_Sn _).
+  + specialize H with 0 (Nat.lt_0_succ _).
     rewrite <- hd_nth_order in H...
   + apply IHn ; intros.
-    specialize H with (S i) (lt_n_S _ _ Hi).
+    specialize H with (S i) (proj1 (Nat.succ_lt_mono _ _) Hi).
     rewrite <- 2 (nth_order_tl _ Hi) in H...
 Qed.
-
 

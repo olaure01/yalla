@@ -19,27 +19,13 @@ Qed.
 Lemma Permutation_morph_transp {A} : forall P : list A -> Prop,
   (forall a b l1 l2, P (l1 ++ a :: b :: l2) -> P (l1 ++ b :: a :: l2)) ->
     Proper ((@Permutation A) ==> Basics.impl) P.
-Proof with try eassumption.
-assert (forall P : list A -> Prop,
-         (forall a b l1 l2, P (l1 ++ a :: b :: l2) ->
-                            P (l1 ++ b :: a :: l2)) ->
-         forall l1 l2, Permutation l1 l2 ->
-         forall l0, P (l0 ++ l1) -> P (l0 ++ l2))
-  as Himp.
-{ intros P HP l1 l2 H.
-  induction H ; intros...
-  - rewrite <- (app_nil_l l').
-    rewrite app_comm_cons.
-    rewrite app_assoc.
-    apply IHPermutation.
-    list_simpl...
-  - apply HP...
-  - apply IHPermutation2.
-    apply IHPermutation1... }
-intros P HP l1 l2 H H'.
-rewrite <- (app_nil_l l2).
-rewrite <- (app_nil_l l1) in H'.
-eapply Himp...
+Proof.
+intros P HT l1 l2 HP.
+enough (forall l0, P (l0 ++ l1) -> P (l0 ++ l2)) as IH
+  by (intro; rewrite <- (app_nil_l l2); now apply (IH nil)).
+induction HP; intuition.
+rewrite <- (app_nil_l l'), app_comm_cons, app_assoc.
+now apply IHHP; rewrite <- app_assoc.
 Qed.
 
 Lemma Permutation_elt {A} : forall (a : A) l1 l2 l1' l2',
@@ -47,7 +33,7 @@ Lemma Permutation_elt {A} : forall (a : A) l1 l2 l1' l2',
     Permutation (l1 ++ a :: l2) (l1' ++ a :: l2').
 Proof.
 intros a l1 l2 l1' l2' HP.
-etransitivity.
+transitivity (a :: l1 ++ l2).
 - symmetry.
   apply Permutation_middle.
 - apply Permutation_cons_app.

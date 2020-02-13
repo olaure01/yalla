@@ -603,6 +603,36 @@ induction l ; intros HP.
   constructor.
 Qed.
 
+Lemma existsb_Exists_Type {A} : forall P (l : list A),
+  existsb P l = true -> Exists_Type (fun x => is_true (P x)) l.
+Proof.
+induction l; intros H; try (now inversion H).
+simpl in H.
+case_eq (P a); intros Ha.
+- now constructor.
+- rewrite Ha in H; simpl in H.
+  apply Exists_Type_cons_tl; intuition.
+Qed.
+
+Lemma Exists_Type_existsb {A} : forall P (l : list A),
+  Exists_Type (fun x => is_true (P x)) l -> existsb P l = true.
+Proof with try assumption.
+induction l; intros H; try (now inversion H).
+inversion_clear H.
+- simpl; rewrite H0; reflexivity.
+- apply IHl in X.
+  simpl; rewrite X.
+  now rewrite Bool.orb_true_r.
+Qed.
+
+Lemma forallb_Forall_Type {A} : forall P (l : list A),
+  forallb P l = true -> Forall_Type (fun x => is_true (P x)) l.
+Proof.
+intros P l Hf.
+now apply forall_Forall_Type, forallb_forall_Type.
+Qed.
+
+
 Section In_Forall_Type.
   Context {A : Type}.
   Variable P : A -> Type.

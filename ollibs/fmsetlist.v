@@ -6,7 +6,7 @@
    An implementation of the axioms is provided by sorted lists
    for every type equiped with a Boolean-valued total order relation *)
 
-Require Import Le Compare_dec Wf_nat List Morphisms Orders.
+Require Import PeanoNat Wf_nat Lia List Morphisms Orders.
 Require Import Bool_more Permutation_more funtheory.
 
 
@@ -428,18 +428,17 @@ End UsualOrderedTypeFull_to_BOrder.
 
 (** * [BOrder] structure over [nat]. *)
 Instance border_nat : BOrder.
-Proof with try eassumption.
-split with nat Compare_dec.leb ; intros.
-- apply leb_complete_conv in H.
-  apply leb_correct.
-  apply le_Sn_le...
-- apply leb_complete in H.
-  apply leb_complete in H0.
-  apply le_antisym...
-- apply leb_complete in H.
-  apply leb_complete in H0.
-  apply leb_correct.
-  eapply le_trans...
+Proof.
+split with nat Nat.leb; intros.
+- case (Nat.compare_spec a b); intros Ho; apply Nat.leb_le; try lia.
+  exfalso.
+  eapply or_introl, Nat.le_lteq, Nat.leb_le in Ho.
+  rewrite Ho in H; inversion H.
+- apply Nat.leb_le in H.
+  apply Nat.leb_le in H0; lia.
+- apply Nat.leb_le in H.
+  apply Nat.leb_le in H0.
+  apply Nat.leb_le; lia.
 Defined.
 
 Lemma border_inj {A B} (f : A -> @carrier B) (Hi : injective f) : BOrder.

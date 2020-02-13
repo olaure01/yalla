@@ -286,6 +286,57 @@ Proof. induction l; intros [=] ? []; subst; auto. Qed.
 Arguments ext_in_Type_map [A B f g l].
 
 
+  (*************************************)
+  (** ** Boolean operations over lists *)
+  (*************************************)
+
+  Section Bool.
+    Variable A : Type.
+    Variable f : A -> bool.
+
+  (** find whether a boolean function can be satisfied by an
+       elements of the list. *)
+
+    Lemma existsb_exists_Type :
+      forall l, existsb f l = true -> { x : _ & In_Type x l & f x = true }.
+    Proof.
+      induction l; simpl; intuition.
+      - inversion H.
+      - case_eq (f a); intros Ha.
+        + exists a; intuition.
+        + rewrite Ha in H; simpl in H.
+          apply IHl in H.
+          destruct H as [x Hin Ht].
+          exists x; intuition.
+    Qed.
+
+    Lemma exists_Type_existsb :
+      forall l, { x : _ & In_Type x l & f x = true } -> existsb f l = true.
+    Proof.
+      induction l; simpl; intuition; destruct X as [x Hin Ht]; intuition; subst.
+      - rewrite Ht; reflexivity.
+      - rewrite IHl.
+        + now destruct (f a).
+        + exists x; intuition.
+    Qed.
+
+  (** find whether a boolean function is satisfied by
+    all the elements of a list. *)
+
+    Lemma forallb_forall_Type :
+      forall l, forallb f l = true <-> (forall x, In_Type x l -> f x = true).
+    Proof.
+      induction l; simpl; intuition.
+      destruct (andb_prop _ _ H1).
+      congruence.
+      destruct (andb_prop _ _ H1); auto.
+      assert (forallb f l = true).
+      apply H0; intuition.
+      rewrite H1; auto.
+    Qed.
+
+  End Bool.
+
 (******************************)
 (** ** Set inclusion on list  *)
 (******************************)

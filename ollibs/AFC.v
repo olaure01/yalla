@@ -2,159 +2,118 @@
 
 (** * Axiom(s) of Finite Choice *)
 
-Require Import Le Lt Max Compare_dec List.
+Require Import PeanoNat Lia List.
 Require Vector_more.
 
 (** * Functional Axiom of Choice for finite functions *)
-Lemma AFC : forall k (R : nat -> nat -> Prop),
+Lemma AFC {A} : forall (a : A) k (R : nat -> A -> Prop),
   (forall x, x < k -> exists y, R x y) ->
-     exists f, forall x,  x < k -> R x (f x).
-Proof with try reflexivity ; try assumption.
-induction k ; intros R He.
-- exists (fun _ => 0).
-  intros x Hx ; inversion Hx.
+     exists f, forall x, x < k -> R x (f x).
+Proof.
+induction k; intros R He.
+- exists (fun _ => a).
+  intros x Hx; inversion Hx.
 - destruct (IHk R) as [g Hg].
   + intros x Hk.
-    apply He.
-    transitivity k...
-    apply lt_n_Sn.
-  + destruct (He k (lt_n_Sn _)) as [y Hy].
-    exists (fun x => if leb (S x) k then g x else y).
+    apply He; lia.
+  + destruct (He k (Lt.lt_n_Sn _)) as [y Hy].
+    exists (fun x => if S x <=? k then g x else y).
     intros x Hl.
-    case_eq (leb (S x) k) ; intros Heqb.
-    * apply leb_complete in Heqb.
-      apply Hg.
-      apply lt_S_n.
-      apply le_lt_n_Sm...
-    * apply leb_complete_conv in Heqb.
-      replace x with k...
-      inversion Hl...
-      exfalso.
-      apply lt_le_S in Heqb.
-      apply (le_trans _ _ _ Heqb) in H0.
-      apply lt_not_le in H0.
-      apply H0...
+    case_eq (S x <=? k); intros Heqb.
+    * apply Nat.leb_le in Heqb.
+      now apply Hg; lia.
+    * enough (x = k) by (subst; intuition).
+      case (Nat.compare_spec (S x) k); intros Ho; try lia.
+      -- exfalso.
+         rewrite <- Ho, Nat.leb_refl in Heqb; inversion Heqb.
+      -- eapply or_introl, Nat.le_lteq, Nat.leb_le in Ho.
+         rewrite Ho in Heqb; inversion Heqb.
 Qed.
 
 (** * Axiom of Finite Choices over lists *)
-Lemma AFClist : forall {A} (P : nat -> A -> Prop) l,
-  (forall a i j, In a l -> P i a -> i <= j -> P j a) ->
-    (Forall (fun x => exists k, P k x) l) -> exists k, Forall (P k) l.
-Proof with try eassumption ; try reflexivity.
-induction l ; intros.
-- exists 0 ; constructor.
-- inversion H0 ; subst.
-  apply IHl in H4.
-  + destruct H3 as [k1 Hk1].
-    destruct H4 as [k2 Hk2].
-    exists (max k1 k2) ; constructor.
-    * eapply H...
-      -- left...
-      -- apply le_max_l.
-    * revert Hk2.
-      clear - H.
-      induction l ; intro Hl ; constructor ; inversion Hl ; subst.
-      -- eapply H...
-         ++ right ; left...
-         ++ apply le_max_r.
-      -- apply IHl...
-         intros.
-         eapply H...
-         inversion H0 ; subst.
-         ++ left...
-         ++ right ; right...
-  + intros.
-    eapply H...
-    right...
+Lemma AFClist : forall {A} (R : nat -> A -> Prop) l,
+  (forall a i j, In a l -> R i a -> i < j -> R j a) ->
+    (Forall (fun x => exists k, R k x) l) -> exists k, Forall (R k) l.
+Proof.
+induction l; intros Hinc HF.
+- exists 0; constructor.
+- inversion_clear HF as [ | ? ? HF1 HF2 ].
+  apply IHl in HF2.
+  + destruct HF1 as [k1 Hk1].
+    destruct HF2 as [k2 Hk2].
+    exists (S (max k1 k2)); constructor.
+    * apply (Hinc _ k1); intuition.
+    * apply Forall_forall; intros x Hx.
+      apply (Forall_forall _) with (x0:=x) in Hk2; intuition.
+      apply Hinc with k2; intuition.
+  + intros ? i; intros; apply Hinc with i; intuition.
 Qed.
 
-Lemma AFCinc : forall P : nat -> nat -> Prop,
-  (forall n i j, P i n -> i <= j -> P j n) ->
-    forall m, (forall n, n < m -> exists k, P k n) ->
-    exists k, forall n, n < m -> P k n.
+Lemma AFCinc : forall R : nat -> nat -> Prop,
+  (forall n i j, R i n -> i < j -> R j n) ->
+    forall m, (forall n, n < m -> exists k, R k n) ->
+    exists k, forall n, n < m -> R k n.
 Proof.
-induction m ; intros.
-- exists 0 ; intros n Hn.
-  inversion Hn.
-- assert (exists k, P k m) as HS by (apply H0 ; apply lt_n_Sn).
-  assert (forall n, n < m -> exists k, P k n) as Hm
-    by (intros ;
-        apply H0 ;
-        etransitivity ;
-        [ apply H1 | apply lt_n_Sn ]).
+intros R Hinc; induction m; intros HF.
+- exists 0; intros n Hn; inversion Hn.
+- assert (exists k, R k m) as HS by (apply HF; lia).
+  assert (forall n, n < m -> exists k, R k n) as Hm
+    by (intros; apply HF; lia).
   apply IHm in Hm.
   destruct Hm as [k Hk].
   destruct HS as [k' Hk'].
-  exists (max (S k) (S k')).
-  intros.
-  inversion H1 ; subst ; eapply H.
-  + apply Hk'.
-  + etransitivity ; [ | apply le_max_r ].
-    apply le_n_Sn.
-  + apply Hk.
-    apply lt_S_n.
-    apply le_lt_n_Sm ; assumption.
-  + etransitivity ; [ | apply le_max_l ].
-    apply le_n_Sn.
+  exists (S (S (max k k'))).
+  intros n Hlt.
+  inversion_clear Hlt; intuition.
+  + apply Hinc with k'; intuition.
+  + apply Hinc with k; intuition.
 Qed.
 
 
 (** * Axioms of Finite Choices over vectors *)
-Lemma AFCvec : forall {A} (P : nat -> A -> Prop) n (l : Vector.t _ n),
-  (forall a i j, Vector.In a l -> P i a -> i <= j -> P j a) ->
-    (Vector.Forall (fun x => exists k, P k x) l) -> exists k, Vector.Forall (P k) l.
-Proof with try eassumption ; try reflexivity.
-induction l ; intros.
-- exists 0 ; constructor.
-- inversion H0 ; subst.
-  apply Vector_more.inj_pairT2_nat in H3 ; subst.
-  apply IHl in H5.
-  + destruct H4 as [k1 Hk1].
-    destruct H5 as [k2 Hk2].
-    exists (max k1 k2) ; constructor.
-    * eapply H...
-      -- left.
-      -- apply le_max_l.
-    * revert Hk2 ; clear - H.
-      induction l ; intro Hl ; constructor ; inversion Hl ; subst.
-      -- eapply H...
-         ++ right ; left.
-         ++ apply le_max_r.
-      -- apply Vector_more.inj_pairT2_nat in H2 ; subst.
-         apply IHl...
-         intros.
-         eapply H...
-         inversion H0 ; subst.
-         ++ left.
-         ++ apply Vector_more.inj_pairT2_nat in H8 ; subst.
-            right ; right...
-  + intros.
-    eapply H...
-    right...
+Lemma AFCvec : forall {A} (R : nat -> A -> Prop) n (l : Vector.t _ n),
+  (forall a i j, Vector.In a l -> R i a -> i < j -> R j a) ->
+    (Vector.Forall (fun x => exists k, R k x) l) -> exists k, Vector.Forall (R k) l.
+Proof.
+induction l; intros Hinc HF.
+- exists 0; constructor.
+- inversion HF as [ | ? ? v HF1 HF2 Heq0 [Heq1 Heq] ]; subst.
+  apply Vector_more.inj_pairT2_nat in Heq; subst.
+  apply IHl in HF2.
+  + destruct HF1 as [k1 Hk1].
+    destruct HF2 as [k2 Hk2].
+    exists (S (max k1 k2)); constructor.
+    * apply (Hinc h k1); intuition; constructor.
+    * revert Hk2; clear - Hinc; induction l; intros HF;
+        inversion HF as [ | ? ? v HF1 HF2 Heq0 [Heq1 Heq] ]; 
+        (try apply Vector_more.inj_pairT2_nat in Heq); subst; constructor.
+      -- apply Hinc with k2; intuition; constructor; constructor.
+      -- apply IHl; intuition.
+         inversion H as [ ? v Heq0 [Heq1 Heq] | ? ? v Hin Heq0 [t Heq]]; subst;
+           apply Vector_more.inj_pairT2_nat in Heq; subst;
+           apply Hinc with i; intuition; constructor; constructor; assumption.
+  + intros ? i; intros; apply Hinc with i; intuition; now constructor.
 Qed.
 
-Lemma AFCvec_incdep : forall m (P : nat -> forall n, n < m -> Prop),
-  (forall i n H1 H2, P i n H1 -> P i n H2) ->
-  (forall n H i j, P i n H -> i <= j -> P j n H) ->
-    (forall n H, exists k, P k n H) -> exists k, forall n H, P k n H.
-Proof with try eassumption.
-induction m ; intros P Hext Hinc HI.
-- exists 0 ; intros n Hn ; inversion Hn.
-- assert (forall n H, exists k, P k n (lt_S _ _ H)) as Hm
-    by (intros ; apply HI).
+Lemma AFCvec_incdep : forall m (R : nat -> forall n, n < m -> Prop),
+  (forall i n H1 H2, R i n H1 -> R i n H2) ->
+  (forall n H i j, R i n H -> i < j -> R j n H) ->
+    (forall n H, exists k, R k n H) -> exists k, forall n H, R k n H.
+Proof.
+induction m; intros R Hext Hinc HI.
+- exists 0; intros n Hn; inversion Hn.
+- assert (forall n H, exists k, R k n (Lt.lt_S _ _ H)) as Hm
+    by (intros; apply HI).
   apply IHm in Hm.
   + destruct Hm as [k Hk].
-    assert (exists k, P k m (lt_n_Sn _)) as [k' Hk'] by (apply HI).
-    exists (max (S k) (S k')).
-    intros n Hn.
-    inversion Hn ; subst.
-    * apply (Hinc _ _ k').
-      -- eapply Hext ; apply Hk'.
-      -- etransitivity ; [ apply le_n_Sn | apply le_max_r ].
-    * apply (Hinc _ _ k)...
-      -- eapply Hext ; apply (Hk _ H0).
-      -- etransitivity ; [ apply le_n_Sn | apply le_max_l ].
-  + intros ; eapply Hext...
-  + intros ; apply (Hinc _ _ i)...
+    assert (exists k, R k m (Lt.lt_n_Sn _)) as [k' Hk'] by (apply HI).
+    exists (S (max k k')).
+    intros n Hn; inversion Hn; subst.
+    * apply (Hinc _ _ k'); [ | lia ].
+      eapply Hext; apply Hk'.
+    * apply (Hinc _ _ k); [ | lia ].
+      eapply Hext; refine (Hk _ _); lia.
+  + intros; eapply Hext; eassumption.
+  + intros; now apply (Hinc _ _ i).
 Qed.
 

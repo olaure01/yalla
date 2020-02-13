@@ -17,10 +17,8 @@
 (** TODO target in Type by Oliver Laurent 2018 *)
 
 
-Require Import List Compare_dec CMorphisms FinFun.
-
+Require Import List CMorphisms FinFun.
 Require Permutation.
-
 Require Import List_Type.
 
 Import ListNotations. (* For notations [] and [a;b;c] *)

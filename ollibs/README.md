@@ -1,21 +1,19 @@
 # ollibs
 Add-ons for the Coq Standard Library
 
-Working with `Coq 8.10.0`
+Working with `Coq 8.10.2`
 
 ## Misc
 
 * `AFC`          : proofs of finite versions of the axiom of choice
-* `Bijective`    : properties of bijective functions
 * `Bool_more`    : add-ons for standard library Bool
-* `dectype`      : types with Boolean equality
+* `dectype`      : types with decidable/Boolean equality (using records rather than modules)
 * `fmsetlist`    : finite multisets with Coq equality
 * `fmsetoidlist` : finite multisets as setoid
+* `funtheory`    : properties of functions
 * `infinite`     : infinite types
-* `Injective`    : properties of injective functions (more basic than using Image library)
 * `List_more`    : add-ons for standard library List
 * `nattree`      : nat-labelled trees and coding into nat
-* `Surjective`   : properties of surjective functions
 * `Vector_more`  : add-ons for standard library Vector
 * `Wf_nat_more`  : add-ons for standard library Wf_nat
 * `wf_prod`      : well-founded order on product (application to `nat`)

@@ -2,111 +2,73 @@
 
 (** * [nat]-labelled binary trees and embedding into [nat] *)
 
-Require Import Arith_base Nat Even Div2 Lia.
+Require Import PeanoNat Lia.
 Require Import funtheory.
-
-
-(* begin hide *)
-Lemma pow_inc : forall n m m', 1 < n -> m < m' -> pow n m < pow n m'.
-Proof.
-intros n m m' Hn Hlt.
-induction Hlt.
-- simpl.
-  destruct n ; try (now inversion Hn).
-  destruct n ; try (now inversion Hn).
-  simpl.
-  rewrite <- (plus_0_r (S (S n) ^ m)).
-  rewrite <- plus_assoc.
-  apply plus_lt_compat_l.
-  simpl.
-  induction m ; simpl ; lia.
-- simpl.
-  etransitivity ; [ apply IHHlt | ].
-  clear - Hn.
-  induction m0 ; simpl ; try lia.
-  apply mult_lt_compat_l ; lia.
-Qed.
-(* end hide *)
 
 (** * Coding of pairs of [nat] *)
 
 (** Simple coding **)
 Definition cpair n m := 2 ^ n * (2 * m + 1).
 
-Lemma cpair_not_0 : forall n m, cpair n m <> 0.
+Lemma cpair_pos : forall n m, 0 < cpair n m.
 Proof.
-induction n ; unfold cpair ; simpl ; intros m H.
-- destruct m ; inversion H.
-- specialize IHn with m.
-  unfold cpair in IHn.
-  lia.
+intros n m; unfold cpair.
+enough (2 ^ n <> 0) by nia.
+now apply Nat.pow_nonzero.
 Qed.
 
 Lemma cpair_inc_l : forall n n' m, n < n' -> cpair n m < cpair n' m.
 Proof.
-intros n n' m Hlt.
-unfold cpair.
-apply mult_lt_compat_r ; try lia.
-apply (pow_inc 2) ; [ lia | assumption ].
+intros n n' m Hlt; unfold cpair.
+apply Nat.pow_lt_mono_r with (a:=2) in Hlt; simpl; nia.
 Qed.
 
 Lemma cpair_inc_r : forall n m m', m < m' -> cpair n m < cpair n m'.
 Proof.
-intros n m m' Hlt.
-unfold cpair.
-apply mult_lt_compat_l ; try lia.
-clear ; induction n ; simpl ; lia.
+intros n m m' Hlt; unfold cpair.
+enough (2 ^ n <> 0) by nia.
+now apply Nat.pow_nonzero.
 Qed.
 
 Lemma cpair_lt_l : forall n m, n < cpair n m.
-Proof.
-intros n m.
-unfold cpair.
-induction n ; simpl ; lia.
-Qed.
+Proof. intros n m; unfold cpair; induction n; simpl; lia. Qed.
 
 Lemma cpair_lt_r : forall n m, m < cpair n m.
-Proof.
-intros n m.
-unfold cpair.
-induction n ; simpl ; lia.
-Qed.
+Proof. intros n m; unfold cpair; induction n; simpl; lia. Qed.
 
 Lemma cpair_inj : injective2 cpair.
 Proof.
-intros n.
-induction n ; intros m n' m' Hc ; unfold cpair in Hc ; simpl in Hc.
-- assert (0 = n') by (destruct n' ; simpl in Hc ; lia) ; subst.
-  simpl in Hc ; split ; lia.
-- destruct n' ; simpl in Hc.
-  + exfalso ; lia.
-  + assert (n = n' /\ m = m') as [Hn Hm] by (apply IHn ; unfold cpair ; lia).
-    split ; [ f_equal | ] ; assumption.
+intros n; induction n; unfold cpair; simpl; intros m n' m' Hc.
+- assert (0 = n') by (destruct n'; simpl in Hc; lia) ; subst.
+  simpl in Hc; split; lia.
+- destruct n'; simpl in Hc.
+  + exfalso; lia.
+  + assert (n = n' /\ m = m') as [Hn Hm] by (apply IHn; unfold cpair; lia); intuition.
+Qed.
+
+(* No easy non-deprecated way to do this found in Standard Library *)
+Lemma even_odd_decomp k : { n | k = 2 * n } + { n | k = 2 * n + 1}.
+Proof.
+induction k.
+- left; exists 0; reflexivity.
+- destruct IHk as [ [ n Hn ] | [ n Hn ] ]; subst.
+  + right; exists n; lia.
+  + left; exists (S n); lia.
 Qed.
 
 Lemma cpair_surj : forall k , 0 < k -> { '(n,m) | k = cpair n m }.
 Proof.
-induction k using (well_founded_induction lt_wf).
-intros Hpos.
-destruct (even_odd_dec k) as [ He | Ho ].
-- assert (0 < div2 k) as Hpos2.
-  {destruct k.
-    - inversion Hpos.
-    - apply even_div2 in He.
-      rewrite He.
-      apply lt_0_Sn. }
-  destruct (H (div2 k) (lt_div2 _ Hpos) Hpos2) as [(n, m) Heq].
+induction k using (well_founded_induction Wf_nat.lt_wf); intros Hpos.
+destruct (even_odd_decomp k) as [ [k' Hk] | [ k' Hk ] ]; subst.
+- assert (0 < k') as Hpos2 by lia.
+  assert (k' < 2 * k') as Hdec by lia.
+  destruct (H k' Hdec Hpos2) as [(n, m) Heq].
   exists (S n, m).
-  unfold cpair in Heq ; simpl.
-  unfold cpair ; simpl.
-  apply even_double in He.
-  rewrite He ; unfold double.
-  lia.
-- apply odd_S2n in Ho.
-  destruct Ho as [p Hp] ; subst.
-  exists (0, p).
-  unfold double ; unfold cpair ; simpl ; lia.
+  unfold cpair in *; rewrite Heq; simpl; lia.
+- exists (0, k').
+  unfold cpair; simpl; lia.
 Qed.
+
 
 (** Refined surjective coding **)
 Definition pcpair n m := pred (cpair n m).
@@ -114,97 +76,40 @@ Definition pcpair n m := pred (cpair n m).
 Lemma pcpair_inc_l : forall n n' m, n < n' -> pcpair n m < pcpair n' m.
 Proof.
 intros n n' m Hlt.
-unfold pcpair.
-case_eq (cpair n m).
-- intros Heq.
-  apply cpair_not_0 in Heq.
-  inversion Heq.
-- intros n0 Heq.
-  simpl.
-  case_eq (cpair n' m).
-  + intros Heq'.
-    apply cpair_not_0 in Heq'.
-    inversion Heq'.
-  + intros m0 Heq'.
-    simpl.
-    apply (cpair_inc_l _ _ m) in Hlt.
-    rewrite Heq in Hlt.
-    rewrite Heq' in Hlt.
-    lia.
+assert (Hpos := cpair_pos n m).
+assert (Hinc := cpair_inc_l n n' m).
+unfold pcpair; case_eq (cpair n m); intros; lia.
 Qed.
 
 Lemma pcpair_inc_r : forall n m m', m < m' -> pcpair n m < pcpair n m'.
 Proof.
 intros n m m' Hlt.
-unfold pcpair.
-case_eq (cpair n m).
-- intros Heq.
-  apply cpair_not_0 in Heq.
-  inversion Heq.
-- intros n0 Heq.
-  simpl.
-  case_eq (cpair n m').
-  + intros Heq'.
-    apply cpair_not_0 in Heq'.
-    inversion Heq'.
-  + intros m0 Heq'.
-    simpl.
-    apply (cpair_inc_r n) in Hlt.
-    rewrite Heq in Hlt.
-    rewrite Heq' in Hlt.
-    lia.
+assert (Hpos := cpair_pos n m).
+assert (Hinc := cpair_inc_r n m m').
+unfold pcpair; case_eq (cpair n m); intros; lia.
 Qed.
 
 Lemma pcpair_le_l : forall n m, n <= pcpair n m.
-Proof.
-intros n m.
-unfold pcpair ; unfold cpair.
-assert (n <= pred (2 ^ n)) as Hp.
-{
-  induction n ; simpl.
-  - reflexivity.
-  - apply (plus_le_compat_l _ _ 1) in IHn.
-    etransitivity ; [ apply IHn | ].
-    assert (forall n, 0 < 2 ^ n) as Hpos
-      by (clear ; intros n ; induction n ; simpl ; lia).
-    specialize Hpos with n.
-    lia.
-}
-etransitivity ; [ apply Hp | ].
-clear Hp.
-induction m ; simpl ; try lia.
-Qed.
+Proof. intros n m; assert (Hlt := cpair_lt_l n m); unfold pcpair; lia. Qed.
 
 Lemma pcpair_le_r : forall n m, m <= pcpair n m.
 Proof.
-intros n m.
-unfold pcpair ; unfold cpair.
-induction n ; simpl ; try lia.
-Qed.
+Proof. intros n m; assert (Hlt := cpair_lt_r n m); unfold pcpair; lia. Qed.
 
 Lemma pcpair_inj : injective2 pcpair.
 Proof.
 intros n m n' m' Heq.
-apply cpair_inj.
-unfold pcpair in Heq.
-case_eq (cpair n m).
-- intros Hc ; exfalso ; apply cpair_not_0 in Hc ; assumption.
-- intros n0 Hc.
-  case_eq (cpair n' m').
-  + intros Hc' ; exfalso ; apply cpair_not_0 in Hc' ; assumption.
-  + intros n1 Hc'.
-    rewrite Hc in Heq.
-    rewrite Hc' in Heq.
-    rewrite <- 2 pred_Sn in Heq.
-    subst ; reflexivity.
+assert (Hpos := cpair_pos n m).
+assert (Hpos' := cpair_pos n' m').
+unfold pcpair in *; apply cpair_inj; lia.
 Qed.
 
 Lemma pcpair_surj : surjective2 pcpair.
 Proof.
 intros k.
-destruct (cpair_surj (S k) (lt_0_Sn _)) as [(n, m) Heq].
-exists (n, m) ; unfold pcpair ; rewrite <- Heq.
-apply pred_Sn.
+assert (0 < S k) as Hlt by lia.
+destruct (cpair_surj _ Hlt) as [(n, m) Heq].
+exists (n, m); unfold pcpair; lia.
 Qed.
 
 
@@ -212,8 +117,7 @@ Qed.
 
 Inductive nattree : Set :=
 | Lnt : nattree
-| Bnt : nat -> nattree -> nattree -> nattree
-.
+| Bnt : nat -> nattree -> nattree -> nattree.
 
 Fixpoint nattree2nat t :=
 match t with
@@ -223,32 +127,29 @@ end.
 
 Lemma nattree2nat_inj : injective nattree2nat.
 Proof.
-intros t1.
-induction t1 ; intros t2 Heq ; destruct t2 ; simpl in Heq.
-- reflexivity.
+intros t1; induction t1; simpl; intros t2 Heq; destruct t2; intuition.
 - exfalso.
-  symmetry in Heq.
-  apply cpair_not_0 in Heq.
-  assumption.
+  assert (Hpos := cpair_pos n (pcpair (nattree2nat t2_1) (nattree2nat t2_2))).
+  simpl in Heq; lia.
 - exfalso.
-  apply cpair_not_0 in Heq.
-  assumption.
-- apply cpair_inj in Heq.
-  destruct Heq as [Heq1 Heq].
+  assert (Hpos := cpair_pos n (pcpair (nattree2nat t1_1) (nattree2nat t1_2))).
+  simpl in Heq; lia.
+- simpl in Heq; apply cpair_inj in Heq.
+  destruct Heq as [Heq1 Heq]; subst.
   apply pcpair_inj in Heq.
   destruct Heq as [Heq2 Heq3].
   apply IHt1_1 in Heq2.
-  apply IHt1_2 in Heq3.
-  f_equal ; assumption.
+  apply IHt1_2 in Heq3; subst; reflexivity.
 Qed.
 
 Lemma nattree2nat_surj : surjective nattree2nat.
 Proof.
 intros y.
-induction y using (well_founded_induction lt_wf).
+induction y using (well_founded_induction Wf_nat.lt_wf).
 destruct y.
-- exists Lnt ; reflexivity.
-- destruct (cpair_surj _ (lt_O_Sn y)) as [(n, m) Heq].
+- exists Lnt; reflexivity.
+- assert (0 < S y) as Hlt by lia.
+  destruct (cpair_surj _ Hlt) as [(n, m) Heq].
   destruct (pcpair_surj m) as [(n', m') Heq'].
   assert (m < S y) as Hm by (rewrite Heq ; apply cpair_lt_r).
   assert (n' <= pcpair n' m') as Hl by apply pcpair_le_l.
@@ -259,7 +160,6 @@ destruct y.
   apply H in Hm'.
   destruct Hn' as [t1 H1].
   destruct Hm' as [t2 H2] ; subst.
-  exists (Bnt n t1 t2).
-  assumption.
+  exists (Bnt n t1 t2); assumption.
 Qed.
 

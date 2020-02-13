@@ -4,9 +4,7 @@
 Usefull properties apparently missing in the List library. *)
 
 Require Export List.
-Require Import PeanoNat.
-Require Import Lt Le Plus Max.
-Require Import Lia.
+Require Import PeanoNat Lia.
 
 
 
@@ -430,7 +428,7 @@ Qed.
 Lemma last_length {A} : forall l (a:A), length (l ++ a :: nil) = S (length l).
 Proof.
 intros ; rewrite app_length ; simpl.
-rewrite plus_comm; reflexivity.
+rewrite Nat.add_comm; reflexivity.
 Qed.
 
 
@@ -540,6 +538,13 @@ induction l...
 simpl.
 rewrite Hext.
 rewrite IHl...
+Qed.
+
+Lemma flat_map_map : forall (A B C : Type) (f : A -> B) (g : B -> list C) l,
+  flat_map g (map f l) = flat_map (fun x => g (f x)) l.
+Proof.
+intros.
+rewrite flat_map_concat_map, map_map, <- flat_map_concat_map; reflexivity.
 Qed.
 
 
@@ -680,7 +685,7 @@ induction l ; intros.
 - destruct i ; inversion H...
   simpl in H0.
   apply IHl...
-  apply lt_S_n...
+  apply Nat.succ_lt_mono...
 Qed.
 
 Lemma Forall_incl {A} : forall P (l1 l2 : list A),
@@ -804,6 +809,33 @@ induction l; intros [H|H]; inversion H; subst; try now repeat constructor.
 - eapply or_intror in H1; apply IHl in H1; now constructor.
 Qed.
 
+Lemma existsb_Exists {A} : forall P (l : list A),
+  existsb P l = true <-> Exists (fun x => is_true (P x)) l.
+Proof with try assumption.
+induction l ; split ; intros H ; try (now inversion H).
+- inversion H.
+  apply Bool.orb_true_iff in H1.
+  destruct H1 as [H1 | H1].
+  + constructor...
+  + apply Exists_cons_tl.
+    apply IHl...
+- inversion H ; subst.
+  + simpl ; rewrite H1.
+    reflexivity.
+  + apply IHl in H1.
+    simpl ; rewrite H1.
+    rewrite Bool.orb_true_r.
+    reflexivity.
+Qed.
+
+Lemma forallb_Forall {A} : forall P (l : list A),
+  forallb P l = true <-> Forall (fun x => is_true (P x)) l.
+Proof.
+intros P l; split; intros Hf.
+- now apply Forall_forall, forallb_forall.
+- now apply forallb_forall, Forall_forall.
+Qed.
+
 
 (** ** Map for functions with two arguments : [map2] *)
 
@@ -850,7 +882,7 @@ induction l1 ; intros.
     simpl.
     apply IHl1.
     simpl in H.
-    apply lt_S_n...
+    apply Nat.succ_lt_mono...
 Qed.
 
 
@@ -863,7 +895,7 @@ Lemma list_sum_app : forall l1 l2,
 Proof with try reflexivity.
 induction l1 ; intros l2...
 simpl ; rewrite IHl1.
-rewrite plus_assoc...
+rewrite Nat.add_assoc...
 Qed.
 
 (** ** Max of elements of a list of [nat] : [list_max] *)
@@ -875,7 +907,7 @@ Lemma list_max_app : forall l1 l2,
 Proof with try reflexivity.
 induction l1 ; intros l2...
 simpl ; rewrite IHl1.
-rewrite max_assoc...
+rewrite Nat.max_assoc...
 Qed.
 
 Lemma list_max_le : forall l n,
@@ -1035,4 +1067,20 @@ induction n; simpl.
 - reflexivity.
 - f_equal; apply IHn.
 Qed.
+
+
+(* TODO add filterpair :
+    Fixpoint filterpair {A B : Type} (f:A->bool) (l:list (prod A B)) : list (prod A B) :=
+      match l with
+        | nil => nil
+        | (x,v) as p :: l => if f x then p::(filterpair f l) else filterpair f l
+      end.
+
+with lemmas copied from [filter]
+define remove_snd using filterpair (rename as remove_key?)
+take lemmas remove_snd_remove remove_snd_notin snd_remove_snd NoDup_remove_snd
+   (from quantifiers work: foformulas.v)
+have a look on OCaml standard library about filter and association pairs *)
+
+
 

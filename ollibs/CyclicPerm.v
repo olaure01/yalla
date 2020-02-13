@@ -1,19 +1,10 @@
 (* CyclicPerm library *)
-(* v 0.2  2017/07/24   Olivier Laurent *)
-
-
-(* Release Notes
-     v0.2: strengthening of cperm_map_inv
-*)
-
 
 (** * Cyclic Permutations
 Definition and basic properties of cyclic permutations. *)
 
 Require Import Morphisms.
-
-Require Import List_more.
-Require Import Permutation_more.
+Require Import List_more Permutation_more.
 
 (** Definition *)
 Inductive CPermutation {A} : list A -> list A -> Prop :=
@@ -336,5 +327,4 @@ intros f a l l' HP.
 eapply Permutation_image.
 apply cperm_perm ; eassumption.
 Qed.
-
 

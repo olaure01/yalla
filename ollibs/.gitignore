@@ -15,6 +15,7 @@
 *.native
 
 .coqdeps.d
+.Makefile.d
 Makefile.conf
 
 *.o
@@ -22,6 +23,8 @@ Makefile.conf
 *.v.d
 *.vio
 *.vo
+*.vok
+*.vos
 .coq-native/
 .csdp.cache
 .lia.cache
