@@ -2,15 +2,9 @@
 
 (** * Properties relying on cut admissibility *)
 
-Require Import Bool_more.
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type_more.
-Require Import CyclicPerm_Type.
-Require Import genperm_Type.
-Require Import Dependent_Forall_Type.
-Require Import flat_map_Type_more.
-
+Require Import Bool_more List_more List_Type_more
+               Permutation_Type_more CyclicPerm_Type genperm_Type
+               Dependent_Forall_Type flat_map_Type_more.
 Require Export ll_cut.
 
 
@@ -292,7 +286,7 @@ Definition fragment FS :=
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
 Lemma conservativity {P} : pcut P = false -> forall FS, fragment FS ->
-  forall l, ll_ps P (fun _ => true) l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
+  forall l, ll_ps P (fun _ => true) l -> is_true (forallb FS l) -> ll_ps P (forallb FS) l.
 Proof with try eassumption ; try reflexivity.
 intros P_cutfree FS HFS l pi.
 induction pi using (ll_ps_nested_ind P (fun _ => true)) ; intros HFrag.
@@ -300,25 +294,25 @@ induction pi using (ll_ps_nested_ind P (fun _ => true)) ; intros HFrag.
 - apply (ex_ps_r _ _ l1)...
   apply IHpi.
   apply PCperm_Type_sym in p.
-  apply Forallb_Forall in HFrag.
-  apply Forallb_Forall.
+  apply forallb_Forall in HFrag.
+  apply forallb_Forall.
   eapply PCperm_Type_Forall...
 - eapply ex_wn_ps_r...
   apply IHpi.
-  apply Forallb_Forall in HFrag.
-  apply Forallb_Forall.
+  apply forallb_Forall in HFrag.
+  apply forallb_Forall.
   apply (Permutation_Type_map wn) in p.
   eapply Permutation_Type_Forall...
   PCperm_Type_solve.
-- apply Forallb_Forall in HFrag.
+- apply forallb_Forall in HFrag.
   apply mix_ps_r...
-  + apply Forallb_Forall...
+  + apply forallb_Forall...
   + apply forall_Forall_Type.
     intros l' Hin.
     apply(In_Forall_Type_in _ _ _ PL) in Hin as (pi & Hin).
     refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin _).
     clear - Hin HFrag.
-    apply Forallb_Forall.
+    apply forallb_Forall.
     apply Forall_forall.
     intros A Hin'.
     apply (Forall_forall (fun x => is_true (FS x)) (concat L))...
@@ -335,11 +329,11 @@ induction pi using (ll_ps_nested_ind P (fun _ => true)) ; intros HFrag.
   simpl in HFrag.
   apply andb_true_iff in HFrag.
   destruct HFrag as [HFragt HFrag].
-  apply Forallb_Forall in HFrag.
+  apply forallb_Forall in HFrag.
   apply Forall_app_inv in HFrag.
   destruct HFrag as [HFragl HFragr].
-  apply Forallb_Forall in HFragl.
-  apply Forallb_Forall in HFragr.
+  apply forallb_Forall in HFragl.
+  apply forallb_Forall in HFragr.
   apply tens_ps_r...
   + apply IHpi1...
     simpl ; apply andb_true_iff ; split...
@@ -435,7 +429,7 @@ Qed.
 (* Cut is admissible in any fragment with no axioms. *)
 Lemma cut_admissible_fragment_axfree {P} : (projT1 (pgax P) -> False) ->
  forall FS, fragment FS -> forall l,
-   ll_ps P (Forallb FS) l -> ll_ps (cutrm_pfrag P) (Forallb FS) l.
+   ll_ps P (forallb FS) l -> ll_ps (cutrm_pfrag P) (forallb FS) l.
 Proof with myeeasy.
 intros P_axfree FS HFS l pi.
 apply conservativity...
@@ -448,13 +442,13 @@ Qed.
 (** Linear logic (with no axioms) is conservative over its fragments. *)
 Lemma conservativity_axfree {P} : (projT1 (pgax P) -> False) ->
   forall FS, fragment FS -> forall l,
-    ll P l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
+    ll P l -> is_true (forallb FS l) -> ll_ps P (forallb FS) l.
 Proof with try eassumption ; try reflexivity.
 intros P_axfree FS Hf l pi HFS.
 apply cut_admissible_axfree in pi...
 apply ll_is_ll_ps in pi.
 eapply conservativity in pi...
-clear - pi ; induction pi using (ll_ps_nested_ind (cutrm_pfrag P) (Forallb FS));
+clear - pi ; induction pi using (ll_ps_nested_ind (cutrm_pfrag P) (forallb FS));
   try (econstructor ; eassumption ; fail).
 - simpl in eqpmix.
   apply mix_ps_r...

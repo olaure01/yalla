@@ -1,7 +1,7 @@
 (* formulas library for yalla *)
 
-Require Import EqNat List Equalities RelationClasses Lia.
-Require Import funtheory Bool_more.
+Require Import EqNat Equalities RelationClasses Lia.
+Require Import funtheory List_more Bool_more.
 Require yalla_ax.
 
 
@@ -533,15 +533,15 @@ etransitivity ; eassumption.
 Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
-Definition subformb_list l1 l2 := Forallb (fun A => Existsb (subformb A) l2) l1.
+Definition subformb_list l1 l2 := forallb (fun A => existsb (subformb A) l2) l1.
 
 Lemma subb_sub_list : forall l1 l2, is_true (subformb_list l1 l2) <-> subform_list l1 l2.
 Proof with try assumption.
 intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constructor)).
 - unfold subformb_list in H.
-  apply Forallb_Forall in H.
+  apply forallb_Forall in H.
   inversion H ; subst.
-  apply Existsb_Exists in H2.
+  apply existsb_Exists in H2.
   constructor.
   + clear - H2 ; induction l2 ; inversion H2 ; subst.
     * constructor.
@@ -549,11 +549,11 @@ intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constru
     * apply Exists_cons_tl.
       apply IHl2...
   + apply IHl1.
-    apply Forallb_Forall...
+    apply forallb_Forall...
 - inversion H ; subst.
   unfold subformb_list ; simpl.
   apply andb_true_iff ; split.
-  + apply Existsb_Exists.
+  + apply existsb_Exists.
     clear - H2 ; induction l2 ; inversion H2 ; subst.
     * constructor.
       apply subb_sub...
