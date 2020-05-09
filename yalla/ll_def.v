@@ -588,14 +588,14 @@ Lemma co_list_r {P} : forall l l',
 Proof with myeeasy.
 induction l ; intros l' pi...
 rewrite <- app_nil_l.
-apply (ex_wn_r _ _ (l ++ a :: nil)) ; [ | perm_Type_solve ].
+apply (ex_wn_r _ _ (l ++ a :: nil)); [ | symmetry; apply Permutation_Type_cons_append ].
 list_simpl ; apply IHl.
 cons2app ; rewrite 2 app_assoc.
 replace ((map wn l ++ map wn l) ++ wn a :: nil)
   with (nil ++ map wn (l ++ l ++ a :: nil))
   by (list_simpl ; reflexivity).
 rewrite <- app_assoc.
-apply (ex_wn_r _ _ (a :: l ++ l)) ; [ | perm_Type_solve ].
+apply (ex_wn_r _ _ (a :: l ++ l)); [ | rewrite app_assoc; apply Permutation_Type_cons_append ].
 list_simpl.
 apply co_r.
 rewrite 2 app_comm_cons ; rewrite app_assoc.
@@ -608,7 +608,8 @@ replace (map wn (a :: l) ++ (map wn (a :: l)))
   with (map wn (a :: l ++ a :: l))
   in pi by (list_simpl ; reflexivity).
 rewrite <- app_nil_l in pi.
-eapply ex_wn_r ; [ eassumption | perm_Type_solve ].
+apply ex_wn_r with ((a :: l) ++ a :: l); [ assumption | ].
+now rewrite (app_comm_cons _ l); symmetry; apply Permutation_Type_cons_app.
 Qed.
 
 Lemma co_const_list_r P : forall n A l,
@@ -629,18 +630,25 @@ Qed.
 Lemma co_list_gen_perm_r {P} (P_perm : pperm P = true) : forall L l0 l,
     ll P (l ++ flat_map (app (map wn l0)) L) ->
     ll P (l ++ (map wn l0) ++ concat L).
-Proof with try assumption.
+Proof.
   intros L.
   induction L ; intros l0 l pi.
   - apply ex_r with (map wn l0 ++ l ++ concat nil).
-    + apply wk_list_r...
-    + rewrite P_perm; simpl; perm_Type_solve.
-  - apply ex_r with (map wn l0 ++ l ++ concat (a :: L)) ; [ | rewrite P_perm; simpl; try perm_Type_solve].
+    + now apply wk_list_r.
+    + rewrite P_perm; simpl; rewrite 2 app_nil_r; apply Permutation_Type_app_swap.
+  - apply ex_r with (map wn l0 ++ l ++ concat (a :: L));
+      [ | rewrite P_perm; simpl;
+          rewrite 2 (app_assoc _ _ (a ++ _));
+          apply Permutation_Type_app_tail, Permutation_Type_app_swap ].
     apply co_list_r.
-    apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L) ; [ | rewrite P_perm; simpl; try perm_Type_solve].
+    apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L);
+      [ | rewrite P_perm; simpl; perm_Type_solve ].
+(* TODO Propify?
+    rewrite ? app_assoc.
+    apply Permutation_Type_app_tail; list_simpl. *)
     apply IHL.
     rewrite<- app_assoc.
-    simpl in pi...
+    now simpl in pi.
 Qed.
 
 Lemma ex_concat_r P : pperm P = true -> forall l A L,
@@ -649,9 +657,10 @@ Proof with try assumption.
   intros f l A L. revert f l A.
   induction L; intros f l A pi...
   simpl.
-  apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L) ; [ | rewrite f; simpl; perm_Type_solve]...
+  apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L); [ | rewrite f; simpl; perm_Type_solve]...
   apply IHL...
-  eapply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L) ; [ | rewrite f; simpl; perm_Type_solve]...
+  now apply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L);
+    [ | rewrite f; simpl; symmetry; apply Permutation_Type_cons_app; rewrite app_assoc ].
 Qed.
 
 
@@ -675,9 +684,11 @@ Proof with try assumption.
   - apply bot_r...
   - destruct n...
     apply parr_r.
-    apply ex_r with (parr_n (S n) A :: (l ++ (A :: nil))); [ | PCperm_Type_solve].
+    apply ex_r with (parr_n (S n) A :: (l ++ (A :: nil)));
+     [ | now symmetry; rewrite PCperm_Type_last ].
     apply IHn.
-    eapply ex_r ; [apply pi | PCperm_Type_solve].
+    eapply ex_r; [ apply pi | ].
+    now rewrite app_assoc, <- PCperm_Type_last.
 Qed.
 
 (** Permutation on mix *)
@@ -858,9 +869,10 @@ induction pi using ll_nested_ind ; intros A' B' l1' l2' Heq ; subst.
   + apply Permutation_Type_sym.
     eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
     eapply Permutation_Type_trans ; [ | apply Permutation_Type_app_comm ].
-    perm_Type_solve.
+    rewrite <- ? app_comm_cons.
+    do 2 (apply Permutation_Type_cons; try easy).
   + eapply cperm_Type_trans ; [ apply cperm_Type | ].
-    list_simpl ; rewrite <- HP' ; cperm_Type_solve.
+    list_simpl; rewrite <- HP', 2 app_comm_cons; constructor.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite 2 app_comm_cons ; rewrite app_assoc.
     eapply ex_wn_r...
@@ -959,11 +971,11 @@ induction pi using ll_nested_ind ; intros l1' l2' Heq ; subst.
   eapply ex_r...
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
-    eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
-    eapply Permutation_Type_trans ; [ | apply Permutation_Type_app_comm ].
-    perm_Type_solve.
-  + eapply cperm_Type_trans ; [ apply cperm_Type | ].
-    list_simpl ; rewrite <- HP' ; cperm_Type_solve.
+    eapply Permutation_Type_trans; [ apply Permutation_Type_app_comm | ].
+    eapply Permutation_Type_trans; [ | apply Permutation_Type_app_comm ].
+    now rewrite <- ? app_assoc; apply Permutation_Type_app_head.
+  + eapply cperm_Type_trans; [ apply cperm_Type | ].
+    list_simpl; rewrite <- HP'; symmetry; apply cperm_Type_app_rot.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite 2 app_assoc.
     eapply ex_wn_r...
@@ -1061,11 +1073,11 @@ induction pi using ll_nested_ind ; intros A' l1' l2' Heq ; subst.
   simpl in Heq ; eapply ex_r...
   destruct (pperm P) ; simpl in HP' ; simpl.
   + apply Permutation_Type_sym.
-    eapply Permutation_Type_trans ; [ apply Permutation_Type_app_comm | ].
-    eapply Permutation_Type_trans ; [ | apply Permutation_Type_app_comm ].
-    perm_Type_solve.
-  + eapply cperm_Type_trans ; [ apply cperm_Type | ].
-    list_simpl ; rewrite <- HP' ; cperm_Type_solve.
+    eapply Permutation_Type_trans; [ apply Permutation_Type_app_comm | ].
+    eapply Permutation_Type_trans; [ | apply Permutation_Type_app_comm ].
+    now rewrite <- 2 app_comm_cons; apply Permutation_Type_cons.
+  + eapply cperm_Type_trans; [ apply cperm_Type | ].
+    now list_simpl; rewrite <- HP', app_comm_cons.
 - dichot_Type_elt_app_exec Heq ; subst.
   + rewrite app_comm_cons ; rewrite app_assoc.
     eapply ex_wn_r...
@@ -1558,7 +1570,7 @@ induction pi using ll_nested_ind ; try (now constructor).
   eapply ex_wn_r...
   rewrite app_assoc in IHpi ; rewrite 2 app_assoc...
 - case_eq (pmix Q (length L)); intro Q_mix.
-  + apply ex_r with (map wn l0 ++ concat L) ; [ | PCperm_Type_solve].
+  + apply ex_r with (map wn l0 ++ concat L); [ | apply PCperm_Type_app_comm ].
     rewrite<- (app_nil_l _); apply co_list_gen_perm_r...
     rewrite app_nil_l.
     rewrite flat_map_concat_map.
@@ -1570,8 +1582,7 @@ induction pi using ll_nested_ind ; try (now constructor).
       apply (In_Forall_Type_in _ _ _ PL) in Hin as (pil1 & Hin).
       apply (Dependent_Forall_Type_forall_formula _ _ _ _ _ X) in Hin as pi.
       rewrite <- eq.
-      apply ex_r with (l1 ++ map wn l0)...
-      PCperm_Type_solve.
+      apply ex_r with (l1 ++ map wn l0); [ | apply PCperm_Type_app_comm ]...
   + apply Hpmix...
     apply forall_Forall_Type.
     intros l' Hin.
@@ -1584,18 +1595,19 @@ induction pi using ll_nested_ind ; try (now constructor).
   apply one_r.
 - eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
   apply co_list_r.
-  apply (ex_r _ (tens A B :: (l2 ++ map wn l0) ++ l1 ++ map wn l0)) ;
-    [ | rewrite Q_perm ; PCperm_Type_solve ].
+  apply ex_r with (tens A B :: (l2 ++ map wn l0) ++ l1 ++ map wn l0) ;
+    [ | rewrite Q_perm; PCperm_Type_solve ].
   apply tens_r...
 - rewrite <- app_comm_cons in IHpi.
   rewrite <- map_app in IHpi.
   rewrite <- app_comm_cons.
   rewrite <- map_app.
   apply oc_r...
-- eapply ex_r ; [ | apply PCperm_Type_app_comm ]...
+- eapply ex_r; [ | apply PCperm_Type_app_comm ]...
   apply co_list_r.
   apply (ex_r _ ((l2 ++ map wn l0) ++ l1 ++ map wn l0)) ;
-    [ | rewrite Q_perm ; PCperm_Type_solve ].
+    [ | rewrite Q_perm, <- app_assoc;
+        symmetry; apply Permutation_Type_app_middle, Permutation_Type_app_rot ].
   eapply cut_r...
   intuition.
 - apply Hpgax...
@@ -1626,4 +1638,3 @@ eapply (ext_wn_param P Q) in pi...
   rewrite P_mix in Q_mix.
   inversion Q_mix.
 Qed.
-
