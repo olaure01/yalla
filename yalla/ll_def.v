@@ -36,10 +36,6 @@ Definition pmix02 n :=
   | _ => false
   end.
 
-Definition pmix_ge_k k n := if (k <=? n) then true else false.
-
-Definition pmix_le_k k n := if (n <=? k) then true else false.
-
 
 (** Parameters for [ll] provability:
  - [pcut], [pmix0] and [pmix2] determine whether the corresponding rule is in the system or not;
