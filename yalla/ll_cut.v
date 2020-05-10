@@ -168,8 +168,8 @@ Qed.
 
 Lemma substitution_oc : pcut P = false -> forall A lw,
   ll P (dual A :: map wn lw) -> (forall l1 l2, ll P (dual A :: map wn lw) -> ll P (l1 ++ A :: l2) ->
-  ll P (l1 ++ map wn lw ++ l2)) -> forall l' L, ll P (l' ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L) ->
-    ll P (l' ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L).
+  ll P (l1 ++ map wn lw ++ l2)) -> forall l' L, ll P (l' ++ flat_map (fun '(p1, p2) => wn_n p1 (wn A) :: p2) L) ->
+    ll P (l' ++ flat_map (fun '(_, p2) => app (map wn lw) p2) L).
 Proof with myeasy_perm_Type; try assumption.
   intros P_cutfree A lw pi1 IHcut l' L pi2.
   remember (l' ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L) as l.
