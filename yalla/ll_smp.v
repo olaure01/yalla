@@ -3,7 +3,7 @@
 (** * Example of a concrete use of the yalla library: LL *)
 
 Require Import CMorphisms.
-Require Import List_Type_more Permutation_Type_more Permutation_Type_solve funtheory.
+Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve.
 
 
 (** ** 0. load the [yalla] library *)
@@ -141,7 +141,7 @@ induction pi ; try (now constructor) ; try rewrite map_app.
   apply Permutation_Type_map...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
-  + simpl ; perm_Type_solve.
+  + simpl ; Permutation_Type_solve.
 - simpl ; rewrite ll2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- ll2ll_map_wn...
@@ -153,7 +153,7 @@ intros l pi.
 remember (map ll2ll l) as l0.
 revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   try (inversion f ; fail).
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct l1 ; inversion Heql4.
   destruct x ; inversion Heql2.
   destruct x0 ; inversion Heql0.
@@ -165,7 +165,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_sym in HP.
   eapply ex_r...
   apply IHpi...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst; symmetry in Heql0.
   simpl in Heql0 ; apply ll2ll_map_wn_inv in Heql0 ;
     destruct Heql0 as (l & ? & ?) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
@@ -181,13 +181,13 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
 - destruct l' ; inversion Heql0 ; destruct f ; inversion H0.
   apply bot_r.
   apply IHpi...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.
   apply tens_r.
   + apply IHpi1...
   + apply IHpi2...
-  + perm_Type_solve.
+  + Permutation_Type_solve.
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply parr_r.
@@ -254,4 +254,3 @@ eapply ll_cut.cut_r_axfree.
   simpl in pi2 ; rewrite <- ll2ll_dual in pi2...
 - apply ll2llfrag in pi1...
 Qed.
-

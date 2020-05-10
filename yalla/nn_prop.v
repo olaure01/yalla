@@ -5,9 +5,9 @@
 (** Properties relying on cut admissibility *)
 
 Require Import List_more.
-Require Import List_Type_more.
+Require Import List_more.
 Require Import Permutation_Type.
-Require Import genperm_Type.
+Require Import GPermutation_Type.
 Require Import Dependent_Forall_Type.
 
 Require Import subs.
@@ -27,7 +27,7 @@ Variable R : iformula.
   [A] is implied by the dual of its translation. *)
 Lemma back_to_llR : forall A,
   llR (unill R) (unill (trans R A) :: A :: nil).
-Proof with myeeasy ; try ((try rewrite a2a_i) ; PCperm_Type_solve).
+Proof with myeeasy ; try ((try rewrite a2a_i) ; GPermutation_Type_solve).
 induction A ; simpl ; rewrite ? bidual.
 - apply parr_r.
   apply (ex_r _ ((covar a :: var a :: nil) ++ unill R :: nil))...
@@ -129,7 +129,7 @@ Lemma ll_to_llR : forall R l, ll_ll l -> llR R l.
 
 (** A sequent whose translation is provable in [ill] was provable in [llR]. *)
 Lemma ill_trans_to_llR : forall l,  ill_ll (map (trans R) l) R -> llR (unill R) l.
-Proof with myeeasy ; try PCperm_Type_solve.
+Proof with myeeasy ; try GPermutation_Type_solve.
 intros l Hill.
 apply (ill_to_ll i2a) in Hill.
 apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true))
@@ -140,7 +140,7 @@ apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true))
       llR (unill R) (l' ++ map dual (map unill (map (trans R) (rev l))))
         -> llR (unill R) (l' ++ rev l)) as Hll.
     { clear.
-      induction l using rev_ind_Type ; intros...
+      induction l using rev_rect ; intros...
       assert (Hb := back_to_llR x).
       rewrite rev_unit in X.
       apply (ex_r _ _ (dual (unill (trans R x))
@@ -259,7 +259,7 @@ Qed.
 
 Proposition llR_ie_to_ill_trans : forall R l, ielem R ->
   llR (unill R) l -> ill_ll (map (trans R) l) R.
-Proof with myeeasy ; try PEperm_Type_solve.
+Proof with myeeasy ; try GPermutation_Type_solve.
 intros R l Hie Hll.
 assert (Hax := @ax_exp_ill ipfrag_ill R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
@@ -272,7 +272,7 @@ induction Hll ;
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | apply Hax ].
     eapply (ax_ir _ (a2i X)).
-  + PEperm_Type_solve.
+  + GPermutation_Type_solve.
 - eapply ex_ir...
   apply Permutation_Type_map...
 - list_simpl in IHHll ; rewrite trans_wn in IHHll.
@@ -347,7 +347,7 @@ induction Hll ;
     * apply one_irr.
     * eapply ex_ir.
       -- apply ie_ie_diag...
-      -- PEperm_Type_solve.
+      -- GPermutation_Type_solve.
 Unshelve. all : reflexivity.
 Qed.
 
@@ -368,7 +368,7 @@ Definition n2n_a := yalla_ax.n2n_a.
 
 Theorem ill_trans_to_llR_bot : forall l,
   (forall R, ill_ll (map (trans R) l) R) -> llR bot l.
-Proof with myeeasy ; try PCperm_Type_solve.
+Proof with myeeasy ; try GPermutation_Type_solve.
 intros l Hill.
 remember (fresh_of_list a2n n2a l) as z.
 specialize Hill with (ivar (a2i z)).
@@ -402,8 +402,7 @@ apply (ll_to_ill_trans R) in Hll ; myeasy.
 - eapply stronger_ipfrag ; [ | apply Hll ].
   nsplit 3 ; myeasy.
   intros a ; destruct a.
-- intros L eqpmix.
-  inversion eqpmix.
+- intros L eqpmix; inversion eqpmix.
 Qed.
 
 
@@ -432,11 +431,11 @@ induction pi ; try now constructor.
   + apply bot_r.
     change nil with (concat (@nil (list formula))).
     apply mix_r...
-    apply Forall_Type_nil.
+    apply Forall_inf_nil.
   + change (one :: one :: nil) with (concat ((one :: nil) :: (one :: nil) :: nil)).
     apply mix_r...
-    repeat (apply Forall_Type_cons; try apply one_r)...
-    apply Forall_Type_nil.
+    repeat (apply Forall_inf_cons; try apply one_r)...
+    apply Forall_inf_nil.
 Qed.
 
 Theorem ll_mix02_to_ill_trans : forall l,
@@ -456,15 +455,15 @@ apply (ll_to_ill_trans ione) in Hll ; myeasy.
   { simpl.
     rewrite app_nil_r.
     assert (ill (p2ipfrag ione pfrag_mix02) (map (trans ione) l0) ione).
-    { assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
+    { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin.
       { left... }
-      apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+      refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
     assert (ill (p2ipfrag ione pfrag_mix02) (map (trans ione) l1) ione).
-    { assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
+    { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin.
       { right; left... }
-      apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-      refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+      refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
     rewrite map_app.
     rewrite <- (app_nil_l (map _ l0 ++ map _ l1)).
     rewrite <- (app_nil_r (map _ l0 ++ map _ l1)).
@@ -522,7 +521,7 @@ Qed.
 
 Theorem ill_trans_to_llR_wn_one : forall l,
   (forall R, ill_ll nil R -> ill_ll (map (trans R) l) R) -> llR (wn one) l.
-Proof with myeeasy ; try PCperm_Type_solve.
+Proof with myeeasy ; try GPermutation_Type_solve.
 intros l Hill.
 remember (fresh_of_list a2n n2a l) as z.
 assert (ill_ll nil (ilpam (ioc (ivar (a2i z))) (ivar (a2i z))))
@@ -569,7 +568,7 @@ induction pi ; try now constructor.
     apply bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r...
-    apply Forall_Type_nil.
+    apply Forall_inf_nil.
   + apply wk_r.
     apply one_r.
 Qed.
@@ -606,7 +605,7 @@ Qed.
 Theorem ill_trans_to_llR_oc_bot : forall l,
   (forall R, ill_ll (map (trans (ioc R)) l) (ioc R)) ->
   llR (oc bot) l.
-Proof with myeeasy ; try PCperm_Type_solve.
+Proof with myeeasy ; try GPermutation_Type_solve.
 intros l Hill.
 remember (fresh_of_list a2n n2a l) as z.
 specialize Hill with (ivar (a2i z)).
@@ -643,16 +642,16 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
     destruct L.
     { assert (ill (p2ipfrag (ioc R) (cutupd_pfrag pfrag_mix02 true))
                (map ioc (R :: nil) ++ map (trans (ioc R)) l0) (ioc R)).
-      { assert (In_Type l0 (l0 :: l1 :: nil)) as Hin.
+      { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin.
         { left... }
-        apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+        apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+        refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
     assert (ill (p2ipfrag (ioc R) (cutupd_pfrag pfrag_mix02 true))
                (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
-      { assert (In_Type l1 (l0 :: l1 :: nil)) as Hin.
+      { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin.
         { right; left... }
-        apply (In_Forall_Type_in _ _ _ FL) in Hin as (pi & Hin).
-        refine (Dependent_Forall_Type_forall_formula _ _ _ _ FL FLind Hin). }
+        apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+        refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
       simpl.
       rewrite app_nil_r.
       rewrite map_app.
@@ -667,7 +666,7 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
         apply co_ilr.
         eapply ex_ir.
         + apply tens_irr ; [ apply X | apply X0 ].
-        + PEperm_Type_solve.
+        + GPermutation_Type_solve.
       - apply tens_ilr.
         apply wk_ilr.
         apply ax_exp_ill. }
@@ -679,14 +678,14 @@ Qed.
 
 Theorem ll_bbb_to_ill_trans : forall R l,
   ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
-Proof with myeeasy ; try PEperm_Type_solve ; try now (apply ax_exp_ill).
+Proof with myeeasy ; try GPermutation_Type_solve ; try now (apply ax_exp_ill).
 intros R l Hll.
 induction Hll ; (try now (inversion f)) ; simpl.
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | ].
     * eapply (ax_ir _ (a2i X)).
     * rewrite app_nil_l...
-  + PEperm_Type_solve.
+  + GPermutation_Type_solve.
 - eapply ex_ir...
   apply Permutation_Type_map...
 - apply (ll_mix02_to_ill_trans_gen R) in l.
@@ -704,9 +703,9 @@ induction Hll ; (try now (inversion f)) ; simpl.
   eapply ex_ir ; [ | apply Permutation_Type_app_comm ].
   apply tens_irr ; apply negR_irr ; eapply ex_ir.
   + apply IHHll1.
-  + PEperm_Type_solve.
+  + GPermutation_Type_solve.
   + apply IHHll2.
-  + PEperm_Type_solve.
+  + GPermutation_Type_solve.
 - rewrite <- (app_nil_l (itens _ _ :: _)).
   apply tens_ilr.
   eapply ex_ir...
@@ -749,4 +748,3 @@ apply ill_trans_to_llR_oc_bot.
 intros R.
 apply ll_bbb_to_ill_trans ; eassumption.
 Qed.
-

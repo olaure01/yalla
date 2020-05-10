@@ -112,9 +112,7 @@ intros x y ; split ; intros Heq.
   f_equal ; assumption.
 - apply iateq_eq in Heq.
   apply ateq_eq.
-  eapply (section_injective a2i i2a) in Heq.
-  + assumption.
-  + apply a2a_i.
+  now apply (section_injective a2a_i).
 Qed.
 
 (* nn.v *)
@@ -156,4 +154,3 @@ Proof. intros x; unfold a2i, t2i, a2t; reflexivity. Qed.
 
 (** Make definitions opaque, so that only properties can be used *)
 Global Opaque Atom IAtom atN TAtom ateq iateq a2n n2a i2n n2i i2a i2ac t2i a2t t2a a2i.
-

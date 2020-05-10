@@ -3,8 +3,8 @@
 
 (** * Intuitionistic Linear Logic formulas *)
 
-Require Import RelationClasses Lia.
-Require Import List_more Bool_more.
+From Coq Require Import Bool RelationClasses Lia.
+Require Import List_more.
 Require yalla_ax.
 
 (** ** Definition and main properties of formulas *)
@@ -163,18 +163,18 @@ Qed.
 
 (* unused
 
-Require Import genperm_Type.
+Require Import GPermutation_Type.
 
 Lemma isub_perm_list :
   forall b l l1 l2,
-    isubform_list l l1 -> PCperm_Type b l1 l2 ->
+    isubform_list l l1 -> PCPermutation_Type b l1 l2 ->
     isubform_list l l2.
 Proof with try eassumption.
 intros b l l1 l2 H1 HP ; revert H1 ; induction l ; intro H1.
 - constructor.
 - inversion H1 ; subst.
   constructor.
-  + eapply PCperm_Type_Exists...
+  + eapply PCPermutation_Type_Exists...
   + apply IHl...
 Qed.
 *)
@@ -469,9 +469,9 @@ Lemma isubb_isub_list : forall l1 l2, is_true (isubformb_list l1 l2) <-> isubfor
 Proof with try assumption.
 intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constructor)).
 - unfold isubformb_list in H.
-  apply forallb_Forall in H.
+  unfold is_true in H; rewrite forallb_forall in H; apply Forall_forall in H.
   inversion H ; subst.
-  apply existsb_Exists in H2.
+  apply existsb_exists in H2; apply Exists_exists in H2.
   constructor.
   + clear - H2 ; induction l2 ; inversion H2 ; subst.
     * constructor.
@@ -479,11 +479,11 @@ intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constru
     * apply Exists_cons_tl.
       apply IHl2...
   + apply IHl1.
-    apply forallb_Forall...
+    apply forallb_forall, Forall_forall...
 - inversion H ; subst.
   unfold isubformb_list ; simpl.
   apply andb_true_iff ; split.
-  + apply existsb_Exists.
+  + apply existsb_exists, Exists_exists.
     clear - H2 ; induction l2 ; inversion H2 ; subst.
     * constructor.
       apply isubb_isub...

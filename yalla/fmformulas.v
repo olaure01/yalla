@@ -2,7 +2,7 @@
 
 (** * Order structure and finite multiset structure on formulas *)
 
-Require Import funtheory nattree fmsetlist_Type.
+Require Import funtheory nattree fmsetlist_Type BOrders.
 Require Export formulas.
 
 (** ** Encoding of [formula] into [nat]-labelled trees for ordering *)
@@ -48,10 +48,9 @@ end.
 
 Lemma form_nattree_section : retract nattree2form form2nattree.
 Proof.
-intros A; induction A ; simpl ;
-  try rewrite IHA1 ; try rewrite IHA2 ;
-  try rewrite IHA ;
-  try rewrite a2a_n ; try reflexivity.
+intros A; induction A; simpl;
+  try rewrite IHA1; try rewrite IHA2; try rewrite IHA;
+  try rewrite a2a_n; reflexivity.
 Qed.
 
 
@@ -62,7 +61,7 @@ Proof.
 eapply border_inj.
 eapply compose_injective.
 - eapply section_injective.
-  apply form_nattree_section.
+  intros A; apply form_nattree_section.
 - apply nattree2nat_inj.
 Defined.
 
@@ -71,4 +70,3 @@ Defined.
 
 Instance fmset_formula : FinMultiset (SortedList _) formula :=
   FMConstr_slist border_formula.
-

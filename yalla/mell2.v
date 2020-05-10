@@ -3,7 +3,7 @@
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
 Require Import CMorphisms.
-Require Import List_Type_more Permutation_Type_more Permutation_Type_solve funtheory Dependent_Forall_Type.
+Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve Dependent_Forall_Type.
 
 
 (** ** 0. load the [yalla] library *)
@@ -135,12 +135,12 @@ induction pi ; try (now constructor) ; try rewrite map_app.
   apply Permutation_Type_map...
 - replace (map mell2ll l1 ++ map mell2ll l2) with (concat (map mell2ll l1 :: map mell2ll l2 :: nil)) by (simpl; rewrite app_nil_r; reflexivity).
   apply ll_def.mix_r...
-  apply Forall_Type_cons...
-  apply Forall_Type_cons...
-  apply Forall_Type_nil...
+  apply Forall_inf_cons...
+  apply Forall_inf_cons...
+  apply Forall_inf_nil...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
-  + simpl ; perm_Type_solve.
+  + simpl ; Permutation_Type_solve.
 - simpl ; rewrite mell2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- mell2ll_map_wn...
@@ -153,7 +153,7 @@ remember (map mell2ll l) as l0.
 revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; subst ;
   try (destruct l' ; inversion Heql0 ;
        destruct f ; inversion H0 ; fail).
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0; subst.
   destruct l2 ; inversion Heql4.
   destruct x ; inversion Heql2.
   destruct x0 ; inversion Heql0.
@@ -165,7 +165,7 @@ revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; sub
   apply Permutation_Type_sym in HP.
   eapply ex_r...
   apply IHpi...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst; symmetry in Heql0.
   simpl in Heql0 ; apply mell2ll_map_wn_inv in Heql0 ;
     destruct Heql0 as (l & ? & ?) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
@@ -182,21 +182,21 @@ revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; sub
   destruct L; inversion Heqn.
   destruct L; inversion Heqn.
   simpl in Heql0.
-  decomp_map_Type Heql0; subst.
+  symmetry in Heql0; decomp_map_inf Heql0; subst.
   simpl in *; clear H0 H1 H2 H3 Heqn eqpmix.
   destruct l6; inversion Heql4; rewrite app_nil_r; clear Heql4.
   apply mix_r.
-  + destruct (In_Forall_Type_in _ _ (map mell2ll l3) PL); [ left; reflexivity | ].
-    refine (ll_def.Dependent_Forall_Type_forall_formula _ _ _ _ PL X i _ eq_refl).
-  + destruct (In_Forall_Type_in _ _ (map mell2ll l5) PL); [ right; left; reflexivity | ].
-    refine (ll_def.Dependent_Forall_Type_forall_formula _ _ _ _ PL X i _ eq_refl).
-- decomp_map_Type Heql0 ; subst.
+  + destruct (In_Forall_inf_in (map mell2ll l3) PL); [ left; reflexivity | ].
+    refine (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
+  + destruct (In_Forall_inf_in (map mell2ll l5) PL); [ right; left; reflexivity | ].
+    refine (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
+- symmetry in Heql0; decomp_map_inf Heql0; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.
   apply tens_r.
   + apply IHpi1...
   + apply IHpi2...
-  + perm_Type_solve.
+  + Permutation_Type_solve.
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply parr_r.
@@ -251,4 +251,3 @@ simpl in pi2 ; rewrite <- mell2ll_dual in pi2.
 eapply ll_cut.cut_r_axfree...
 intros a ; destruct a.
 Qed.
-

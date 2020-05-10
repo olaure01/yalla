@@ -3,8 +3,7 @@
 (** * Example of a concrete use of the yalla library: unit-free MELL *)
 
 Require Import Morphisms.
-Require Import List_more Permutation_more Permutation_solve Permutation_Type_more Permutation_Type_solve
-               funtheory.
+Require Import funtheory List_more Permutation_more Permutation_solve Permutation_Type_more Permutation_Type_solve.
 
 
 (** ** 0. load the [ll] library *)
@@ -148,21 +147,21 @@ Proof with try eassumption ; try reflexivity.
 intros l pi.
 induction pi ; try (now ((try inversion IHpi) ; constructor ; constructor)) ;
   try rewrite map_app.
-- apply perm_perm_t in H.
+- apply Permutation_Permutation_transp in H.
   induction H.
   + inversion IHpi ; constructor...
   + inversion IHpi ; constructor.
     eapply ll_def.ex_r...
     apply Permutation_Type_map...
-    perm_Type_solve.
+    Permutation_Type_solve.
   + apply IHPermutation_transp2.
-    * apply perm_perm_t in H.
+    * apply Permutation_Permutation_transp in H.
       eapply ex_r...
     * apply IHPermutation_transp1...
 - inversion IHpi1 ; inversion IHpi2 ; constructor.
   eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ X X0).
-  + simpl ; perm_Type_solve.
+  + simpl ; Permutation_Type_solve.
 - inversion IHpi ; constructor.
   simpl ; rewrite mell2ll_map_wn.
   apply ll_def.oc_r.
@@ -176,7 +175,7 @@ remember (map mell2ll l) as l0.
 revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   try (destruct l' ; inversion Heql0 ;
        destruct f ; inversion H0 ; fail).
-- decomp_map Heql0 ; subst.
+- symmetry in Heql0; decomp_map Heql0; subst.
   destruct l1 ; inversion Heql4.
   destruct x ; inversion Heql2.
   destruct x0 ; inversion Heql0.
@@ -190,22 +189,22 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_Permutation in HP.
   eapply ex_r...
   apply IHpi...
-- decomp_map Heql0 ; subst.
+- symmetry in Heql0; decomp_map Heql0; subst; symmetry in Heql0.
   destruct (mell2ll_map_wn_inv _ _ Heql0) as (l' & ? & ?) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l'' ?] ; subst.
   apply (Permutation_Type_map wn) in p.
   apply Permutation_Type_Permutation in p.
-  eapply (ex_r (l0 ++ map wn l'' ++ l5)) ; [ | perm_solve ]...
+  eapply (ex_r (l0 ++ map wn l'' ++ l5)) ; [ | Permutation_solve ]...
   apply IHpi...
   list_simpl ; rewrite mell2ll_map_wn...
 - inversion i.
-- decomp_map Heql0 ; subst.
+- symmetry in Heql0; decomp_map Heql0; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.
   apply tens_r.
   + apply IHpi1...
   + apply IHpi2...
-  + perm_solve.
+  + Permutation_solve.
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply parr_r.
@@ -225,7 +224,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   destruct f ; inversion H0 ; subst.
   apply wk_r.
   apply IHpi...
-- decomp_map Heql0 ; subst.
+- symmetry in Heql0; decomp_map Heql0; subst.
   destruct x ; inversion Heql2 ; subst.
   apply co_r ; intuition.
 - inversion f.
@@ -273,4 +272,3 @@ eapply ll_cut.cut_r_axfree...
 - intros a ; destruct a.
 - rewrite mell2ll_dual...
 Qed.
-

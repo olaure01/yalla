@@ -2,8 +2,7 @@
 
 (** * Comparison between Intuitionistic Linear Logic and Linear Logic *)
 
-Require Import List_more List_Type_more Permutation_Type_more Permutation_Type_solve genperm_Type
-               funtheory.
+Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve GPermutation_Type.
 Require Import ll_fragments.
 Require Export ill_prop.
 
@@ -81,9 +80,9 @@ induction Hill ;
   try list_simpl in IHHill2.
 - eapply ex_r.
   apply ax_r.
-  apply PCperm_Type_swap.
+  apply PCPermutation_Type_swap.
 - eapply ex_r...
-  hyps_PEperm_Type_unfold ; unfold PCperm_Type ; simpl ; destruct ipperm.
+  hyps_GPermutation_Type_unfold ; unfold PCPermutation_Type ; simpl ; destruct ipperm.
   * apply Permutation_Type_cons...
     apply Permutation_Type_map.
     apply Permutation_Type_map.
@@ -96,34 +95,34 @@ induction Hill ;
   eapply ex_wn_r...
 - apply one_r.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply bot_r.
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - apply tens_r...
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply parr_r.
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - apply parr_r...
 - rewrite app_comm_cons.
   rewrite app_assoc.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite bidual.
   rewrite ? app_assoc.
   rewrite <- ? app_comm_cons.
   apply tens_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - apply parr_r...
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   list_simpl.
   change (var (i2a atN) :: map dual (map ill2ll (rev l)))
     with ((var (i2a atN) :: nil) ++ map dual (map ill2ll (rev l))).
@@ -134,23 +133,23 @@ induction Hill ;
   eapply ex_r...
   symmetry.
   rewrite (app_comm_cons _ _ (ill2ll B)).
-  apply PCperm_Type_last.
+  apply PCPermutation_Type_cons_append.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   rewrite <- ? app_assoc.
   rewrite bidual.
   apply tens_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - apply parr_r...
   eapply ex_r...
   symmetry.
   rewrite (app_comm_cons _ _ (ill2ll N)).
-  apply PCperm_Type_last.
+  apply PCPermutation_Type_cons_append.
 - cons2app.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   rewrite <- ? app_assoc.
   rewrite bidual.
@@ -160,66 +159,66 @@ induction Hill ;
 - apply top_r.
 - apply with_r...
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply plus_r1...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply plus_r2...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply top_r...
 - apply plus_r1...
 - apply plus_r2...
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply with_r...
   + eapply ex_r ; [ apply IHHill1 | ].
     rewrite ? app_comm_cons.
-    apply PCperm_Type_app_comm.
+    apply PCPermutation_Type_app_comm.
   + eapply ex_r ; [ apply IHHill2 | ].
     rewrite ? app_comm_cons.
-    apply PCperm_Type_app_comm.
+    apply PCPermutation_Type_app_comm.
 - rewrite_all ill2ll_map_ioc.
   apply oc_r...
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply de_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply wk_r.
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- app_comm_cons.
   apply co_r...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCperm_Type_app_comm ].
+  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- app_assoc.
   assert (pcut (i2pfrag P) = true) as fc by (now simpl).
   eapply (@cut_r _ fc)...
   eapply ex_r...
   rewrite ? app_comm_cons.
-  apply PCperm_Type_app_comm.
+  apply PCPermutation_Type_app_comm.
 - replace (ill2ll (snd (projT2 (ipgax P) a))
    :: map dual (map ill2ll (rev (fst (projT2 (ipgax P) a)))))
   with (projT2 (pgax (i2pfrag P)) a) by (simpl ; rewrite 2 map_rev ; reflexivity).
@@ -268,7 +267,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     transitivity l2...
   + apply IHpi2.
     apply (Permutation_Type_map wn) in p.
-    perm_Type_solve.
+    Permutation_Type_solve.
   + destruct L; try inversion i.
     apply Permutation_Type_sym in HP2.
     apply Permutation_Type_nil_cons in HP2...
@@ -285,10 +284,10 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
       try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
       try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
     - apply IHpi2.
-      simpl in p ; perm_Type_solve.
+      simpl in p ; Permutation_Type_solve.
     - apply IHpi2.
       apply (Permutation_Type_map wn) in p.
-      perm_Type_solve.
+      Permutation_Type_solve.
     - destruct L; inversion i.
       apply Permutation_Type_sym in HP2.
       apply Permutation_Type_nil_cons in HP2.
@@ -298,10 +297,10 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
       destruct l2 ; inversion H2 ; subst.
       + destruct l1 ; inversion H2 ; subst.
         left ; split...
-        eapply ex_r ; [ apply pi2_1 | PCperm_Type_solve ]...
+        eapply ex_r ; [ apply pi2_1 | GPermutation_Type_solve ]...
       + apply app_eq_nil in H1 ; destruct H1 ; subst.
         right ; split...
-        eapply ex_r ; [ apply pi2_2 | PCperm_Type_solve ]...
+        eapply ex_r ; [ apply pi2_2 | GPermutation_Type_solve ]...
     - apply Permutation_Type_length_2_inv in HP2.
       destruct HP2 ; inversion e.
       destruct l ; inversion H1. }
@@ -319,14 +318,14 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
   destruct pi1 as [pi1' pi1''].
   rewrite bidual in pi1'.
   eapply (cut_mix0_r _ (l' ++ ill2ll i2a A2 :: l'')) in pi1' ;
-    [ | eapply ex_r ; [ apply pi2 | PCperm_Type_solve ]].
+    [ | eapply ex_r ; [ apply pi2 | GPermutation_Type_solve ]].
   eapply IHA2.
   + eassumption.
   + apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
     etransitivity ; [ apply Permutation_Type_swap | ].
     apply Permutation_Type_cons ; [ reflexivity | ]...
   + eapply ex_r ; [ apply pi1' | ].
-    PCperm_Type_solve. 
+    GPermutation_Type_solve. 
 - eapply tens_rev in pi1 ; [ | intros a ; inversion a | ]...
   destruct pi1 as [_ pi1'].
   clear - pi1'.
@@ -337,10 +336,10 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     try (now (apply Permutation_Type_length in HP ; inversion HP)) ;
     try (now (apply Permutation_Type_length_1_inv in HP ; inversion HP)).
   + apply IHpi1'.
-    simpl in p ; perm_Type_solve.
+    simpl in p ; Permutation_Type_solve.
   + apply IHpi1'.
     apply (Permutation_Type_map wn) in p.
-    perm_Type_solve.
+    Permutation_Type_solve.
   + destruct L; inversion i.
     apply Permutation_Type_sym in HP.
     apply Permutation_Type_nil_cons in HP...
@@ -353,14 +352,14 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
   destruct pi1 as [pi1' pi1''].
   rewrite bidual in pi1''.
   eapply (cut_mix0_r _ (l' ++ ill2ll i2a A2 :: l'')) in pi1'' ;
-    [ | eapply ex_r ; [ apply pi2 | PCperm_Type_solve ]].
+    [ | eapply ex_r ; [ apply pi2 | GPermutation_Type_solve ]].
   eapply IHA2.
   + eassumption.
   + apply Permutation_Type_app_inv in HP2 ; simpl in HP2.
     etransitivity ; [ apply Permutation_Type_swap | ].
     apply Permutation_Type_cons ; [ reflexivity | ]...
   + eapply ex_r ; [ apply pi1'' | ].
-    PCperm_Type_solve.
+    GPermutation_Type_solve.
 - eapply tens_rev in pi1 ; [ | intros a ; inversion a | ]...
   destruct pi1 as [pi1' _].
   clear - pi1'.
@@ -371,10 +370,10 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     try (now (apply Permutation_Type_length in HP ; inversion HP)) ;
     try (now (apply Permutation_Type_length_1_inv in HP ; inversion HP)).
   + apply IHpi1'.
-    simpl in p ; perm_Type_solve.
+    simpl in p ; Permutation_Type_solve.
   + apply IHpi1'.
     apply (Permutation_Type_map wn) in p.
-    perm_Type_solve.
+    Permutation_Type_solve.
   + destruct L; inversion i.
     apply Permutation_Type_sym in HP.
     apply Permutation_Type_nil_cons in HP...
@@ -401,7 +400,7 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
       etransitivity ; [ apply Permutation_Type_swap | ].
       apply Permutation_Type_cons ; [ reflexivity | ]...
     * eapply ex_r ; [ apply pi2 | ].
-      PCperm_Type_solve.
+      GPermutation_Type_solve.
   + cons2app in HP2.
     assert (Heq2 := HP2).
     symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
@@ -413,14 +412,14 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
       etransitivity ; [ apply Permutation_Type_swap | ].
       apply Permutation_Type_cons ; [ reflexivity | ]...
     * eapply ex_r ; [ apply pi2 | ].
-      PCperm_Type_solve.
+      GPermutation_Type_solve.
 - revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
     try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
     try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
   + apply IHpi2.
-    simpl in p ; perm_Type_solve.
+    simpl in p ; Permutation_Type_solve.
   + apply IHpi2.
-    apply (Permutation_Type_map wn) in p ; perm_Type_solve.
+    apply (Permutation_Type_map wn) in p ; Permutation_Type_solve.
   + destruct L; inversion i.
     apply Permutation_Type_sym in HP2.
     apply Permutation_Type_nil_cons in HP2...
@@ -437,9 +436,9 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
       try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
       try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
     - apply IHpi2.
-      simpl in p ; perm_Type_solve.
+      simpl in p ; Permutation_Type_solve.
     - apply IHpi2.
-      apply (Permutation_Type_map wn) in p ; perm_Type_solve.
+      apply (Permutation_Type_map wn) in p ; Permutation_Type_solve.
     - destruct L; inversion i.
       apply Permutation_Type_sym in HP2.
       apply Permutation_Type_nil_cons in HP2.
@@ -447,11 +446,11 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     - apply Permutation_Type_length_2_inv in HP2.
       destruct HP2 ; inversion e ; subst.
       left.
-      eapply ex_r ; [ apply pi2 | PCperm_Type_solve ].
+      eapply ex_r ; [ apply pi2 | GPermutation_Type_solve ].
     - apply Permutation_Type_length_2_inv in HP2.
       destruct HP2 ; inversion e ; subst.
       right.
-      eapply ex_r ; [ apply pi2 | PCperm_Type_solve ].
+      eapply ex_r ; [ apply pi2 | GPermutation_Type_solve ].
     - apply Permutation_Type_length_2_inv in HP2.
       destruct HP2 ; inversion e.
       destruct l ; inversion H1. }
@@ -461,9 +460,9 @@ induction A ; intros F l2 pi1 HP2 pi2 ; simpl in pi1 ; simpl in HP2.
     try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
     try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
   + apply IHpi2.
-    simpl in p ; perm_Type_solve.
+    simpl in p ; Permutation_Type_solve.
   + apply IHpi2.
-    apply (Permutation_Type_map wn) in p ; perm_Type_solve.
+    apply (Permutation_Type_map wn) in p ; Permutation_Type_solve.
   + destruct L; inversion i.
     apply Permutation_Type_sym in HP2.
     apply Permutation_Type_nil_cons in HP2...
@@ -499,7 +498,7 @@ eapply cut_mix0_r in pi1.
   apply bot_r.
   change (map wn nil) with (concat (@nil (list formula))).
   apply mix_r...
-  apply Forall_Type_nil.  
+  apply Forall_inf_nil.  
 Qed.
 
 Lemma oc_bot_not_idefin : forall A,
@@ -507,7 +506,7 @@ Lemma oc_bot_not_idefin : forall A,
   ll_mix0 (wn one :: ill2ll i2a A :: nil) -> False.
 Proof with myeeasy.
 enough (forall l, ll_ll (map dual (map (ill2ll i2a) l)) ->
-          (Forall_Type (fun F => ll_mix0 (ill2ll i2a F :: nil)) l) -> False)
+          (Forall_inf (fun F => ll_mix0 (ill2ll i2a F :: nil)) l) -> False)
   as Hgen.
 { intros A pi1 pi2.
   eapply cut_ll_r in pi1.
@@ -523,7 +522,7 @@ enough (forall l, ll_ll (map dual (map (ill2ll i2a) l)) ->
     apply bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r...
-    apply Forall_Type_nil.  
+    apply Forall_inf_nil.  
   - apply de_r.
     apply one_r. }
 intros l pi.
@@ -533,17 +532,18 @@ induction pi ; intros l' Heq HF ; subst ;
 - destruct l' ; inversion Heq.
   destruct l' ; inversion Heq.
   destruct i0 ; inversion H3.
-- apply PCperm_Type_map_inv in p.
+- apply PCPermutation_Type_map_inv in p.
   destruct p as [ l1' Heq HP ] ; subst.
   symmetry in HP.
-  apply PCperm_Type_map_inv in HP.
+  apply PCPermutation_Type_map_inv in HP.
   destruct HP as [ l1'' Heq HP ] ; subst.
   eapply IHpi.
   + reflexivity.
-  + eapply Permutation_Type_Forall_Type...
+  + eapply Permutation_Type_Forall_inf...
     apply HP.
-- decomp_map Heq ; subst.
-  decomp_map Heq ; subst.
+- symmetry in Heq; decomp_map Heq; subst.
+  symmetry in Heq; decomp_map Heq; subst.
+  symmetry in Heq3.
   destruct (ill2ll_map_ioc_inv _ _ _ Heq3) as [l' ? ?] ; subst.
   rewrite map_map in p.
   apply Permutation_Type_map_inv in p ; destruct p as [l'' ? p] ; subst.
@@ -551,31 +551,34 @@ induction pi ; intros l' Heq HF ; subst ;
   rewrite <- ill2ll_map_ioc in IHpi.
   rewrite <- ? map_app in IHpi.
   eapply IHpi ; [ reflexivity | ].
-  apply Forall_Type_app_inv in HF ; destruct HF as [HF HF2].
-  apply Forall_Type_app_inv in HF2 ; destruct HF2 as [HF2 HF3].
-  apply Forall_Type_app...
-  apply Forall_Type_app...
+  assert (HF1 := Forall_inf_app_l _ _ HF).
+  assert (HF2 := Forall_inf_app_r _ _ HF).
+  assert (HF3 := Forall_inf_app_l _ _ HF2).
+  assert (HF4 := Forall_inf_app_r _ _ HF2).
+  apply Forall_inf_app...
+  apply Forall_inf_app...
   apply (Permutation_Type_map ioc) in p.
-  eapply Permutation_Type_Forall_Type...
+  eapply Permutation_Type_Forall_inf...
 - destruct l' ; inversion Heq.
   destruct i ; inversion H0.
 - destruct l' ; inversion Heq ; subst.
   inversion HF.
   eapply IHpi...
 - destruct l' ; inversion Heq.
-  decomp_map H1 ; decomp_map H1 ; subst.
+  symmetry in H1; decomp_map H1; symmetry in H1; decomp_map H1 ; subst.
   destruct i ; inversion H0 ; subst.
   + inversion HF ; subst.
     simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
-    apply Forall_Type_app_inv in X0 ; destruct X0.
+    assert (X1 := Forall_inf_app_l _ _ X0).
+    assert (X2 := Forall_inf_app_r _ _ X0).
     rewrite bidual in pi1.
     assert (ll_mix0 (ill2ll i2a i1 :: nil)) as pi0.
     { eapply (stronger_pfrag _ pfrag_mix0) in pi1 ;
         [ | nsplit 4 ; myeasy ; intros a ; inversion a ].
-      revert pi1 f0 ; clear ; induction l5 ; intros pi HF.
+      revert pi1 X2; clear; induction l5; intros pi HF.
       - assumption.
-      - inversion HF ; subst.
+      - inversion HF; subst.
         simpl in pi ; eapply ex_r in pi ; [ | apply Permutation_Type_swap ].
         apply (cut_mix0_r _ _ _ pi) in X.
         eapply IHl5... }
@@ -586,12 +589,13 @@ induction pi ; intros l' Heq HF ; subst ;
   + inversion HF ; subst.
     simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
-    apply Forall_Type_app_inv in X0 ; destruct X0.
+    assert (X1 := Forall_inf_app_l _ _ X0).
+    assert (X2 := Forall_inf_app_r _ _ X0).
     rewrite bidual in pi1.
     assert (ll_mix0 (ill2ll i2a i :: nil)) as pi0.
     { eapply (stronger_pfrag _ pfrag_mix0) in pi1 ;
         [ | nsplit 4 ; myeasy ; intros a ; inversion a ].
-      revert pi1 f0 ; clear ; induction l5 ; intros pi HF.
+      revert pi1 X2; clear; induction l5; intros pi HF.
       - assumption.
       - inversion HF ; subst.
         simpl in pi ; eapply ex_r in pi ; [ | apply Permutation_Type_swap ].
@@ -604,12 +608,13 @@ induction pi ; intros l' Heq HF ; subst ;
   + inversion HF ; subst.
     simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
-    apply Forall_Type_app_inv in X0 ; destruct X0.
+    assert (X1 := Forall_inf_app_l _ _ X0).
+    assert (X2 := Forall_inf_app_r _ _ X0).
     rewrite bidual in pi2.
     assert (ll_mix0 (ill2ll i2a i1 :: nil)) as pi0.
     { eapply (stronger_pfrag _ pfrag_mix0) in pi2 ;
         [ | nsplit 4 ; myeasy ; intros a ; inversion a ].
-      revert pi2 f ; clear ; induction l4 ; intros pi HF.
+      revert pi2 X1; clear; induction l4; intros pi HF.
       - assumption.
       - inversion HF ; subst.
         simpl in pi ; eapply ex_r in pi ; [ | apply Permutation_Type_swap ].
@@ -621,12 +626,13 @@ induction pi ; intros l' Heq HF ; subst ;
   + inversion HF ; subst.
     simpl in X ; rewrite <- (app_nil_l _) in X ; eapply parr_rev in X ; [ | intros a ; inversion a ].
     list_simpl in X.
-    apply Forall_Type_app_inv in X0 ; destruct X0.
+    assert (X1 := Forall_inf_app_l _ _ X0).
+    assert (X2 := Forall_inf_app_r _ _ X0).
     rewrite bidual in pi2.
     assert (ll_mix0 (ill2ll i2a i :: nil)) as pi0.
     { eapply (stronger_pfrag _ pfrag_mix0) in pi2 ;
         [ | nsplit 4 ; myeasy ; intros a ; inversion a ].
-      revert pi2 f ; clear ; induction l4 ; intros pi HF.
+      revert pi2 X1; clear; induction l4; intros pi HF.
       - assumption.
       - inversion HF ; subst.
         simpl in pi ; eapply ex_r in pi ; [ | apply Permutation_Type_swap ].
@@ -655,9 +661,9 @@ induction pi ; intros l' Heq HF ; subst ;
     try (now (apply Permutation_Type_length in HP ; inversion HP)) ;
     try (now (apply Permutation_Type_length_1_inv in HP ; inversion HP)).
   + apply IHX.
-    simpl in p ; perm_Type_solve.
+    simpl in p ; Permutation_Type_solve.
   + apply IHX.
-    apply (Permutation_Type_map wn) in p ; perm_Type_solve.
+    apply (Permutation_Type_map wn) in p ; Permutation_Type_solve.
   + destruct L; inversion i.
     apply Permutation_Type_sym in HP.
     apply Permutation_Type_nil_cons in HP...
@@ -764,19 +770,19 @@ Inductive nonzerospos : iformula -> Type :=
 
 Definition easyipgax_nzeropos P := forall a,
   (forall D, ill2ll i2a (snd (projT2 (ipgax P) a)) = dual (ill2ll i2a D) ->
-     {'(Z, Zl1, Zl2) : _ & zeropos Z
-                         & D :: (fst (projT2 (ipgax P) a)) = Zl1 ++ Z :: Zl2 })
+     {'(Z, Zl1, Zl2) & zeropos Z
+                     & D :: (fst (projT2 (ipgax P) a)) = Zl1 ++ Z :: Zl2 })
 * (forall l C,
-     PCperm_Type (ipperm P) (ill2ll i2a (snd (projT2 (ipgax P) a))
+     PCPermutation_Type (ipperm P) (ill2ll i2a (snd (projT2 (ipgax P) a))
                             :: rev (map dual (map (ill2ll i2a) (fst (projT2 (ipgax P) a)))))
                        (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l)))
        -> ill P l C)
 (*     -> { b | fst (projT2 (ipgax P) b) = l & snd (projT2 (ipgax P) b) = C })    *)
-* (In_Type N (fst (projT2 (ipgax P) a)) -> False).
+* (In_inf N (fst (projT2 (ipgax P) a)) -> False).
 
 Lemma dual_jfragment_zeropos {P} : ipcut P = false -> easyipgax_nzeropos P -> forall l0,
-  Forall_Type nonzerospos l0 -> ll (i2pfrag i2a P) (map dual (map (ill2ll i2a) l0)) ->
-  {'(C, Cl1, Cl2) : _ & zeropos C & l0 = Cl1 ++ C :: Cl2 }.
+  Forall_inf nonzerospos l0 -> ll (i2pfrag i2a P) (map dual (map (ill2ll i2a) l0)) ->
+  {'(C, Cl1, Cl2) & zeropos C & l0 = Cl1 ++ C :: Cl2 }.
 Proof with myeeasy.
 intros Hcut Hgax.
 intros l0 Hnzsp Hll.
@@ -789,33 +795,36 @@ induction Hll ; intros l0 Hnzsp HP.
   destruct i0 ; inversion H3.
 - subst.
   rewrite map_map in p.
-  apply PCperm_Type_map_inv in p.
+  apply PCPermutation_Type_map_inv in p.
   destruct p as [l' Heq HP] ; subst.
-  apply PCperm_perm_Type in HP.
-  apply (Permutation_Type_Forall_Type _ _ _ HP) in Hnzsp.
+  apply PCPermutation_Permutation_Type in HP.
+  apply (Permutation_Type_Forall_inf HP) in Hnzsp.
   apply IHHll in Hnzsp ; [ | rewrite <- map_map ]...
   destruct Hnzsp as [[[C l1] l2] Hz Heq] ; unfold id in Heq ; subst.
   unfold id in HP ; apply Permutation_Type_vs_elt_inv in HP.
   destruct HP as ((l' & l'') & HP) ; subst.
   exists (C, l', l'')...
-- decomp_map_Type HP ; subst ; simpl in HP ; simpl in HP3.
-  decomp_map_Type HP ; subst ; simpl in HP3.
+- symmetry in HP; decomp_map_inf HP; subst; simpl in HP, HP3.
+  symmetry in HP; decomp_map_inf HP; subst; simpl in HP3.
+  symmetry in HP3.
   apply ill2ll_map_ioc_inv in HP3 ; destruct HP3 as [lw'' ? HP3] ; subst.
   rewrite map_map in p.
   apply Permutation_Type_map_inv in p ; destruct p as [lw''' ? p] ; subst.
-  assert (Forall_Type nonzerospos (l1 ++ map ioc lw''' ++ l8)) as HF.
-  { apply Forall_Type_app_inv in Hnzsp ; destruct Hnzsp as [HF HF2].
-    apply Forall_Type_app_inv in HF2 ; destruct HF2 as [HF2 HF3].
-    apply Forall_Type_app...
-    apply Forall_Type_app...
+  assert (Forall_inf nonzerospos (l1 ++ map ioc lw''' ++ l8)) as HF.
+  { assert (HF1 := Forall_inf_app_l _ _ Hnzsp).
+    assert (HF2 := Forall_inf_app_r _ _ Hnzsp).
+    assert (HF3 := Forall_inf_app_l _ _ HF2).
+    assert (HF4 := Forall_inf_app_r _ _ HF2).
+    apply Forall_inf_app...
+    apply Forall_inf_app...
     apply (Permutation_Type_map ioc) in p.
-    eapply Permutation_Type_Forall_Type... }
+    eapply Permutation_Type_Forall_inf... }
   apply IHHll in HF ;
     [ | list_simpl ; rewrite ill2ll_map_ioc ; rewrite <- (map_map _ _ lw''')  ]...
   destruct HF as [[[C l1'] l2'] Hz Heq] ; simpl in Heq.
-  dichot_Type_elt_app_exec Heq ; subst ; simpl.
+  dichot_elt_app_inf_exec Heq ; subst ; simpl.
   + exists (C, l1', l ++ map ioc lw'' ++ l8) ; list_simpl...
-  + dichot_Type_elt_app_exec Heq1 ; subst ; simpl.
+  + dichot_elt_app_inf_exec Heq1 ; subst ; simpl.
     * apply (Permutation_Type_map ioc) in p.
       rewrite <- Heq0 in p.
       apply Permutation_Type_vs_elt_inv in p ; destruct p as [(llw1, llw2) Heq].
@@ -827,20 +836,19 @@ induction Hll ; intros l0 Hnzsp HP.
 - destruct l0 ; inversion HP.
   destruct i ; inversion H0.
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   rewrite <- map_map in IHHll.
   inversion Hnzsp ; subst.
   apply IHHll in X...
   destruct X as [[[C l1'] l2'] Hzp Heq2] ; subst.
   exists (C, x :: l1', l2')...
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   destruct x ; inversion HP1 ; subst.
   + rewrite <- map_map in IHHll2.
-    assert (Forall_Type nonzerospos (x2 :: l4)) as Hnzsp'.
+    assert (Forall_inf nonzerospos (x2 :: l4)) as Hnzsp'.
     { inversion Hnzsp ; subst.
-      apply Forall_Type_app_inv in X.
-      destruct X as [X _].
+      apply Forall_inf_app_l in X.
       inversion H0.
       constructor... }
     apply IHHll2 in Hnzsp'...
@@ -852,10 +860,9 @@ induction Hll ; intros l0 Hnzsp HP.
       apply H4...
     * exists (C, ilpam x1 i :: l1', l2' ++ l5)...
       list_simpl...
-  + assert (Forall_Type nonzerospos (N :: l4)) as Hnzsp'.
+  + assert (Forall_inf nonzerospos (N :: l4)) as Hnzsp'.
     { inversion Hnzsp ; subst.
-      apply Forall_Type_app_inv in X.
-      destruct X as [X _].
+      apply Forall_inf_app_l in X.
       inversion H0.
       constructor...
       constructor. }
@@ -867,10 +874,9 @@ induction Hll ; intros l0 Hnzsp HP.
       inversion Hzp.
     * exists (C, igen x :: l1', l2' ++ l5)...
       list_simpl...
-  + assert (Forall_Type nonzerospos (x2 :: l5)) as Hnzsp'.
+  + assert (Forall_inf nonzerospos (x2 :: l5)) as Hnzsp'.
     { inversion Hnzsp ; subst.
-      apply Forall_Type_app_inv in X.
-      destruct X as [_ X].
+      apply Forall_inf_app_r in X.
       inversion H0.
       constructor... }
     rewrite <- map_map in IHHll1.
@@ -883,10 +889,9 @@ induction Hll ; intros l0 Hnzsp HP.
       apply H4...
     * exists (C, ilmap x1 i :: l4 ++ l1', l2')...
       list_simpl...
-  + assert (Forall_Type nonzerospos (N :: l5)) as Hnzsp'.
+  + assert (Forall_inf nonzerospos (N :: l5)) as Hnzsp'.
     { inversion Hnzsp ; subst.
-      apply Forall_Type_app_inv in X.
-      destruct X as [_ X].
+      apply Forall_inf_app_r in X.
       inversion H0.
       constructor...
       constructor. }
@@ -899,10 +904,10 @@ induction Hll ; intros l0 Hnzsp HP.
     * exists (C, ineg x :: l4 ++ l1', l2')...
       list_simpl...
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   destruct x ; inversion HP1 ; subst.
   rewrite <- map_map in IHHll.
-  assert (Forall_Type nonzerospos (x2 :: x1 :: l2)) as Hnzsp'.
+  assert (Forall_inf nonzerospos (x2 :: x1 :: l2)) as Hnzsp'.
   { inversion Hnzsp ; subst.
     inversion H0 ; subst.
     constructor...
@@ -915,15 +920,15 @@ induction Hll ; intros l0 Hnzsp HP.
   + exists (itens C i, nil, l2')...
     apply zp_itens_l...
   + exists (C, itens i0 i :: l1', l2')...
-- decomp_map_Type HP ; decomp_map_Type HP ; simpl in HP3 ; subst.
+- symmetry in HP; decomp_map_inf HP ; symmetry in HP; decomp_map_inf HP ; simpl in HP3 ; subst.
   destruct x0 ; inversion HP1.
   exists (izero, nil, l3) ; simpl...
   constructor.
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   destruct x ; inversion HP1 ; subst.
   rewrite <- map_map in IHHll.
-  assert (Forall_Type nonzerospos (x1 :: l2)) as Hnzsp'.
+  assert (Forall_inf nonzerospos (x1 :: l2)) as Hnzsp'.
   { inversion Hnzsp ; subst.
     inversion H0 ; subst.
     constructor... }
@@ -934,10 +939,10 @@ induction Hll ; intros l0 Hnzsp HP.
     apply zp_iwith_l...
   + exists (C, iwith i x2 :: l1', l2')...
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   destruct x ; inversion HP1 ; subst.
   rewrite <- map_map in IHHll.
-  assert (Forall_Type nonzerospos (x2 :: l2)) as Hnzsp'.
+  assert (Forall_inf nonzerospos (x2 :: l2)) as Hnzsp'.
   { inversion Hnzsp ; subst.
     inversion H0 ; subst.
     constructor... }
@@ -948,17 +953,17 @@ induction Hll ; intros l0 Hnzsp HP.
     apply zp_iwith_r...
   + exists (C, iwith x1 i :: l1', l2')...
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   destruct x ; inversion HP1 ; subst.
   rewrite <- map_map in IHHll2.
-  assert (Forall_Type nonzerospos (x2 :: l2)) as Hnzsp'.
+  assert (Forall_inf nonzerospos (x2 :: l2)) as Hnzsp'.
   { inversion Hnzsp ; subst.
     inversion H0 ; subst.
     constructor... }
   apply IHHll2 in Hnzsp'...
   destruct Hnzsp' as [[[C l1'] l2'] Hzp Heq2] ; subst.
   destruct l1' ; inversion Heq2 ; subst.
-  + assert (Forall_Type nonzerospos (x1 :: l2')) as Hnzsp''.
+  + assert (Forall_inf nonzerospos (x1 :: l2')) as Hnzsp''.
     { inversion Hnzsp ; subst.
       inversion H0 ; subst.
       constructor... }
@@ -974,10 +979,10 @@ induction Hll ; intros l0 Hnzsp HP.
   destruct l0 ; inversion HP.
   destruct i ; inversion H0.
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   destruct x ; inversion HP1 ; subst.
   rewrite <- map_map in IHHll.
-  assert (Forall_Type nonzerospos (x :: l2)) as Hnzsp'.
+  assert (Forall_inf nonzerospos (x :: l2)) as Hnzsp'.
   { inversion Hnzsp ; subst.
     inversion H0 ; subst.
     constructor... }
@@ -988,16 +993,16 @@ induction Hll ; intros l0 Hnzsp HP.
     constructor...
   + exists (C, ioc i :: l1', l2')...
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   rewrite <- map_map in IHHll.
   inversion Hnzsp.
   apply IHHll in X...
   destruct X as [[[C l1'] l2'] Hzp Heq2] ; subst.
   exists (C, x :: l1', l2')...
 - rewrite map_map in HP.
-  decomp_map_Type HP ; subst.
+  symmetry in HP; decomp_map_inf HP ; subst.
   destruct x ; inversion HP1 ; subst.
-  assert (Forall_Type nonzerospos (ioc x :: ioc x :: l2)) as Hnzsp'.
+  assert (Forall_inf nonzerospos (ioc x :: ioc x :: l2)) as Hnzsp'.
   { inversion Hnzsp ; subst ; constructor... }
   rewrite <- (map_map _ _ l2) in IHHll.
   apply IHHll in Hnzsp'...
@@ -1018,9 +1023,10 @@ induction Hll ; intros l0 Hnzsp HP.
   + exists (Z, nil, l0)...
   + list_simpl in H1.
     rewrite H2 in H1 ; list_simpl in H1.
-    decomp_map_Type H1.
+    symmetry in H1; decomp_map_inf H1.
     apply dual_inj in H1 ; subst.
-    simpl in H4 ; decomp_map_Type H4 ; subst.
+    simpl in H4 ; symmetry in H4; decomp_map_inf H4 ; subst.
+    symmetry in H4.
     apply ill2ll_zeropos in H4...
     rewrite app_comm_cons.
     exists (x, i0 :: l4, l6)...
@@ -1028,31 +1034,32 @@ Qed.
 
 (** Cut-free conservativity *)
 Theorem ll_to_ill_nzeropos_cutfree {P} : ipcut P = false -> easyipgax_nzeropos P ->
-  forall l, ll (i2pfrag i2a P) l -> forall l0 C, Forall_Type nonzerospos (C :: l0) ->
-    PCperm_Type (pperm (i2pfrag i2a P))
+  forall l, ll (i2pfrag i2a P) l -> forall l0 C, Forall_inf nonzerospos (C :: l0) ->
+    PCPermutation_Type (pperm (i2pfrag i2a P))
                 l (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l0))) ->
       ill P l0 C.
 Proof with myeeasy.
 intros Hcut Hgax.
 intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
-- apply PCperm_Type_length_2_inv in HP.
+- apply PCPermutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP] ; inversion HP ; destruct C ; inversion H0.
-  destruct l0 using rev_ind_Type ; inversion H1.
+  destruct l0 using rev_rect ; inversion H1.
   list_simpl in H3 ; inversion H3.
-  destruct l0 using rev_ind_Type ; list_simpl in H5 ; inversion H5.
+  destruct l0 using rev_rect ; list_simpl in H5 ; inversion H5.
   destruct x ; inversion H4.
   rewrite <- H2 in H6.
   apply i2a_inj in H6 ; subst.
   apply ax_ir.
 - apply IHHll...
   etransitivity...
-- apply PCperm_Type_vs_cons_inv in HP ; destruct HP as [[l1' l2'] Heq HP].
-  simpl in HP ; simpl in Heq ; dichot_Type_elt_app_exec Heq ; subst.
-  + apply PEperm_Type_rev in HP ; rewrite rev_involutive in HP ; list_simpl in HP.
+- apply PCPermutation_Type_vs_cons_inv in HP ; destruct HP as [[l1' l2'] HP Heq].
+  simpl in HP, Heq ; dichot_elt_app_inf_exec Heq ; subst.
+  + apply PEPermutation_Type_rev in HP ; rewrite rev_involutive in HP ; list_simpl in HP.
     rewrite map_map in HP.
-    symmetry in HP ; apply PEperm_Type_map_inv in HP ; destruct HP as [l' Heq HP].
-    decomp_map_Type Heq ; subst.
+    symmetry in HP ; apply PEPermutation_Type_map_inv in HP ; destruct HP as [l' Heq HP].
+    symmetry in Heq; decomp_map_inf Heq ; subst.
     simpl in Heq2 ; rewrite <- (map_map _ _ l7) in Heq2.
+    symmetry in Heq2.
     apply ill2ll_map_ioc_inv in Heq2 ; destruct Heq2 as [l' Heq2 Heq] ; subst.
     symmetry in HP ; eapply ex_ir ; [ | apply HP ] ; simpl.
     rewrite app_assoc.
@@ -1063,14 +1070,17 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     apply IHHll...
     * inversion Hnzsp ; subst.
       simpl in HP ; symmetry in HP.
-      apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X.
-      apply Forall_Type_app_inv in X ; destruct X as [HF HF2].
-      apply Forall_Type_app_inv in HF2 ; destruct HF2 as [HF2 HF3].
-      apply Forall_Type_app_inv in HF3 ; destruct HF3 as [HF3 HF4].
+      apply (PEPermutation_Type_Forall_inf _ _ HP) in X.
+      assert (HF1:= Forall_inf_app_l _ _ X).
+      assert (HF2:= Forall_inf_app_r _ _ X).
+      assert (HF3:= Forall_inf_app_l _ _ HF2).
+      assert (HF4:= Forall_inf_app_r _ _ HF2).
+      assert (HF5:= Forall_inf_app_l _ _ HF4).
+      assert (HF6:= Forall_inf_app_r _ _ HF4).
       constructor...
-      apply Forall_Type_app ; apply Forall_Type_app...
+      apply Forall_inf_app ; apply Forall_inf_app...
       symmetry in p ; apply (Permutation_Type_map ioc) in p.
-      eapply Permutation_Type_Forall_Type...
+      eapply Permutation_Type_Forall_inf...
     * list_simpl. simpl in HP.
       apply (f_equal (@rev _)) in Heq1 ; rewrite rev_involutive in Heq1 ; subst.
       apply (f_equal (@rev _)) in Heq3 ; rewrite rev_involutive in Heq3 ; subst.
@@ -1082,14 +1092,15 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
       rewrite <- (map_map _ _ (rev l8)).
       rewrite <- (map_map _ _ (rev lw'')).
       rewrite ill2ll_map_ioc.
-      PCperm_Type_solve.
-  + dichot_Type_elt_app_exec Heq1 ; subst ;
-      [ exfalso ; decomp_map Heq0 ; destruct C ; inversion Heq0 | ].
-    apply PEperm_Type_rev in HP ; rewrite rev_involutive in HP ; list_simpl in HP.
+      GPermutation_Type_solve.
+  + dichot_elt_app_inf_exec Heq1 ; subst ;
+      [ exfalso; symmetry in Heq0; decomp_map Heq0; destruct C; inversion Heq0 | ].
+    apply PEPermutation_Type_rev in HP ; rewrite rev_involutive in HP ; list_simpl in HP.
     rewrite map_map in HP.
-    symmetry in HP ; apply PEperm_Type_map_inv in HP ; destruct HP as [l' Heq HP].
-    decomp_map_Type Heq ; subst.
+    symmetry in HP ; apply PEPermutation_Type_map_inv in HP ; destruct HP as [l' Heq HP].
+    symmetry in Heq; decomp_map_inf Heq ; subst.
     simpl in Heq3 ; rewrite <- (map_map _ _ l5) in Heq3.
+    symmetry in Heq3.
     apply ill2ll_map_ioc_inv in Heq3 ; destruct Heq3 as [l' Heq3 Heq] ; subst.
     symmetry in HP ; eapply ex_ir ; [ | apply HP ] ; simpl.
     rewrite app_assoc.
@@ -1100,14 +1111,17 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     apply IHHll...
     * inversion Hnzsp ; subst.
       simpl in HP ; symmetry in HP.
-      apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X.
-      apply Forall_Type_app_inv in X ; destruct X as [HF HF2].
-      apply Forall_Type_app_inv in HF2 ; destruct HF2 as [HF2 HF3].
-      apply Forall_Type_app_inv in HF3 ; destruct HF3 as [HF3 HF4].
+      apply (PEPermutation_Type_Forall_inf _ _ HP) in X.
+      assert (HF1:= Forall_inf_app_l _ _ X).
+      assert (HF2:= Forall_inf_app_r _ _ X).
+      assert (HF3:= Forall_inf_app_l _ _ HF2).
+      assert (HF4:= Forall_inf_app_r _ _ HF2).
+      assert (HF5:= Forall_inf_app_l _ _ HF4).
+      assert (HF6:= Forall_inf_app_r _ _ HF4).
       constructor...
-      rewrite app_assoc ; apply Forall_Type_app ; apply Forall_Type_app...
+      rewrite app_assoc ; apply Forall_inf_app ; apply Forall_inf_app...
       symmetry in p ; apply (Permutation_Type_map ioc) in p.
-      eapply Permutation_Type_Forall_Type...
+      eapply Permutation_Type_Forall_inf...
     * list_simpl. simpl in HP.
       apply (f_equal (@rev _)) in Heq1 ; rewrite rev_involutive in Heq1 ; subst.
       apply (f_equal (@rev _)) in Heq2 ; rewrite rev_involutive in Heq2 ; subst.
@@ -1119,21 +1133,19 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
       rewrite <- (map_map _ _ (rev l8)).
       rewrite <- (map_map _ _ (rev lw'')).
       rewrite ill2ll_map_ioc.
-      PCperm_Type_solve.
+      GPermutation_Type_solve.
 - inversion i.
-- apply PCperm_Type_length_1_inv in HP.
+- apply PCPermutation_Type_length_1_inv in HP.
   inversion HP.
   destruct C ; inversion H0.
-  destruct l0 using rev_ind_Type ; list_simpl in H1 ; inversion H1.
+  destruct l0 using rev_rect ; list_simpl in H1 ; inversion H1.
   apply one_irr.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l', l'') Heq HP].
-  destruct l' ; inversion Heq.
+  apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
+  destruct l'; inversion Heq.
   + destruct C ; inversion H0.
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H4 ; subst.
+  + decomp_map_inf H1; symmetry in H4; decomp_map_inf H4; subst.
     apply (f_equal (@rev _)) in H7.
     rewrite rev_involutive in H7; subst.
     destruct x0 ; inversion H1.
@@ -1143,78 +1155,75 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     * inversion Hnzsp.
       constructor...
       list_simpl in X.
-      apply Forall_Type_app_inv in X.
-      destruct X as [H3l H3r].
+      assert (H3l := Forall_inf_app_l _ _ X).
+      assert (H3r := Forall_inf_app_r _ _ X).
       inversion H3r.
-      apply Forall_Type_app...
+      apply Forall_inf_app...
     * list_simpl.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP ; simpl in HP.
-      PCperm_Type_solve.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP ; simpl in HP.
+      GPermutation_Type_solve.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP.
+  destruct HP as [(l' & l'') HP Heq].
   destruct l' ; inversion Heq.
   + destruct C ; inversion H0 ; subst.
     list_simpl in HP.
     rewrite map_map in HP.
-    apply PEperm_Type_map_inv in HP.
+    apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l3 Heq' HP].
-    rewrite <- map_map in Heq'.
-    decomp_map_Type Heq' ; decomp_map_Type Heq' ; simpl in Heq'3 ; simpl in Heq'4 ; subst.
+    rewrite <- map_map in Heq'; symmetry in Heq'.
+    decomp_map_inf Heq'; symmetry in Heq'; decomp_map_inf Heq'; simpl in Heq'3, Heq'4; subst.
     inversion Hnzsp ; inversion H1 ; subst.
-    apply Forall_Type_rev in X.
-    apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X ; simpl in X.
-    apply Forall_Type_app_inv in X.
-    destruct X as [H3l H3r].
-    apply PEperm_Type_rev in HP ; list_simpl in HP ; symmetry in HP.
+    apply Forall_inf_rev in X.
+    apply (PEPermutation_Type_Forall_inf _ _ HP) in X ; simpl in X.
+    assert (H3l := Forall_inf_app_l _ _ X).
+    assert (H3r := Forall_inf_app_r _ _ X).
+    apply PEPermutation_Type_rev in HP ; list_simpl in HP ; symmetry in HP.
     eapply ex_ir ; [ | exact HP ].
     apply tens_irr.
     * apply IHHll1.
       -- constructor...
-         apply Forall_Type_rev...
+         apply Forall_inf_rev...
       -- list_simpl...
     * apply IHHll2.
       -- constructor...
-         apply Forall_Type_rev...
+         apply Forall_inf_rev...
       -- list_simpl...
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H4 ; simpl in H4 ; simpl in H6 ; simpl in H8 ; subst.
+  + decomp_map_inf H1; symmetry in H4; decomp_map_inf H4; simpl in H4, H6, H8; subst.
     inversion Hnzsp ; subst.
-    apply Forall_Type_rev in X.
+    apply Forall_inf_rev in X.
     rewrite <- H7 in X.
-    apply Forall_Type_app_inv in X.
-    destruct X as [H3l H3r].
-    inversion H3r ; subst.
-    apply (Forall_Type_app _ _ _ X) in H3l.
-    assert ({'(l1', l2') : _ & 
-       PEperm_Type (ipperm P) (l8 ++ l6) (l1' ++ l2') &
-       l2 ++ l1 = map dual (map (ill2ll i2a) l1')
-                         ++ ill2ll i2a C :: map dual (map (ill2ll i2a) l2') /\
-       (ipperm P = false -> l8 = l1' /\ l6 = l2') }) as  HP0.
+    assert (H3l := Forall_inf_app_l _ _ X).
+    assert (H3r := Forall_inf_app_r _ _ X).
+    inversion H3r; subst.
+    apply (Forall_inf_app X0) in H3l.
+    assert ({'(ll, lr) & 
+       PEPermutation_Type (ipperm P) (l8 ++ l6) (ll ++ lr) &
+       l2 ++ l1 = map dual (map (ill2ll i2a) ll)
+                         ++ ill2ll i2a C :: map dual (map (ill2ll i2a) lr) /\
+       (ipperm P = false -> l8 = ll /\ l6 = lr) }) as [(ll & lr) HP0 (Heq' & HPeq)].
     { clear - HP.
       case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
-      - apply PEperm_Type_vs_elt_inv in HP.
-        destruct HP as [(ll & lr) Heq HP0] ; simpl in HP0.
+      - apply PEPermutation_Type_vs_elt_inv in HP.
+        destruct HP as [(ll & lr) HP0 Heq] ; simpl in HP0.
         rewrite <- 2 map_app in HP0.
         rewrite map_map in HP0.
         symmetry in HP0.
         apply Permutation_Type_map_inv in HP0.
         destruct HP0 as [l3 Heq1 HP].
         rewrite <- map_map in Heq1.
-        decomp_map_Type Heq1 ; decomp_map_Type Heq1 ;
+        symmetry in Heq1; decomp_map_inf Heq1 ; symmetry in Heq1; decomp_map_inf Heq1 ;
           simpl in Heq4 ; simpl in Heq5 ; subst.
         exists (l5, l7); [ | split ]...
         intros Hb ; inversion Hb.
       - simpl in HP.
         exists (l8, l6) ; simpl ; [ | split ]...
         intros ; split ; reflexivity. }
-    destruct HP0 as [(ll & lr) HP0 (Heq' & HPeq)].
-    dichot_Type_elt_app_exec Heq' ; subst.
-    * symmetry in Heq'1.
-      decomp_map_Type Heq'1 ; decomp_map_Type Heq'1 ;
+    dichot_elt_app_inf_exec Heq' ; subst.
+    * decomp_map_inf Heq'1 ; symmetry in Heq'1; decomp_map_inf Heq'1 ;
         simpl in Heq'1 ; simpl in Heq'4 ; simpl in Heq'5 ; subst.
-      apply (PEperm_Type_Forall_Type _ _ _ _ HP0) in H3l ; simpl in H3l.
+      apply (PEPermutation_Type_Forall_inf _ _ HP0) in H3l ; simpl in H3l.
       destruct x0 ; inversion H2 ; inversion H1 ; subst.
       -- simpl in H7.
          apply (f_equal (@rev _)) in H7.
@@ -1225,25 +1234,22 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
          ++ apply lpam_ilr.
             ** apply IHHll1.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [_ H3l].
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [_ H3l].
-                   apply Forall_Type_rev...
+                   apply Forall_inf_app_r in H3l.
+                   apply Forall_inf_app_r in H3l.
+                   apply Forall_inf_rev...
                --- rewrite bidual.
                    list_simpl...
             ** apply IHHll2.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l' H3l].
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l _].
-                   apply Forall_Type_rev in H3l'.
-                   apply Forall_Type_rev in H3l.
-                   apply Forall_Type_app...
+                   assert (H3l' := Forall_inf_app_l _ _ H3l).
+                   assert (H3l'' := Forall_inf_app_r _ _ H3l).
+                   apply Forall_inf_app_l in H3l''.
+                   apply Forall_inf_rev in H3l'.
+                   apply Forall_inf_rev in H3l''.
+                   apply Forall_inf_app...
                    constructor...
                --- list_simpl.
-                   PCperm_Type_solve.
+                   GPermutation_Type_solve.
          ++ case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
@@ -1252,7 +1258,7 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
                apply Permutation_Type_elt.
                symmetry.
                etransitivity ; [ apply Permutation_Type_app_comm | ].
-               perm_Type_solve.
+               Permutation_Type_solve.
             ** destruct (HPeq eq_refl) ; subst.
                list_simpl...
       -- simpl in H7.
@@ -1266,26 +1272,23 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
                apply Hgax.
             ** apply IHHll1.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [_ H3l].
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [_ H3l].
-                   apply Forall_Type_rev...
+                   apply Forall_inf_app_r in H3l.
+                   apply Forall_inf_app_r in H3l.
+                   apply Forall_inf_rev...
                --- rewrite bidual.
                    list_simpl...
             ** apply IHHll2.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l' H3l].
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l _].
-                   apply Forall_Type_rev in H3l'.
-                   apply Forall_Type_rev in H3l.
-                   apply Forall_Type_app...
+                   assert (H3l' := Forall_inf_app_l _ _ H3l).
+                   assert (H3l'' := Forall_inf_app_r _ _ H3l).
+                   apply Forall_inf_app_l in H3l''.
+                   apply Forall_inf_rev in H3l'.
+                   apply Forall_inf_rev in H3l''.
+                   apply Forall_inf_app...
                    constructor...
                    constructor.
                --- list_simpl.
-                   PCperm_Type_solve.
+                   GPermutation_Type_solve.
          ++ case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
@@ -1294,7 +1297,7 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
                apply Permutation_Type_elt.
                symmetry.
                etransitivity ; [ apply Permutation_Type_app_comm | ].
-               perm_Type_solve.
+               Permutation_Type_solve.
             ** destruct (HPeq eq_refl) ; subst.
                list_simpl...
       -- simpl in Hll1.
@@ -1307,18 +1310,15 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
             ** apply (f_equal (@rev _)) in H7.
                rewrite rev_involutive in H7 ; subst.
                simpl in HP0 ; rewrite ? app_assoc in HP0.
-               apply PEperm_Type_vs_elt_inv in HP0.
-               destruct HP0 as [(ll1, lr1) HP0 _] ; simpl in HP0.
-               dichot_Type_elt_app_exec HP0 ; subst ; list_simpl.
+               apply PEPermutation_Type_vs_elt_inv in HP0 as [(ll1, lr1) _ HP0]; simpl in HP0.
+               dichot_elt_app_inf_exec HP0 ; subst ; list_simpl.
                --- apply zeropos_ilr...
                --- rewrite ? app_comm_cons.
                    rewrite ? app_assoc.
                    apply zeropos_ilr...
          ++ constructor...
-            apply Forall_Type_app_inv in H3l.
-            destruct H3l as [_ H3l].
-            apply Forall_Type_app_inv in H3l.
-            destruct H3l as [_ H3l]...
+            apply Forall_inf_app_r in H3l.
+            apply Forall_inf_app_r in H3l...
       -- simpl in Hll1.
          change (covar (i2a atN) :: map dual (map (ill2ll i2a) l10))
            with (map dual (map (ill2ll i2a) (N :: l10))) in Hll1.
@@ -1329,24 +1329,20 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
             ** apply (f_equal (@rev _)) in H7.
                rewrite rev_involutive in H7 ; subst.
                simpl in HP0 ; rewrite ? app_assoc in HP0.
-               apply PEperm_Type_vs_elt_inv in HP0.
-               destruct HP0 as [(ll1, lr1) HP0 _ ].
-               dichot_Type_elt_app_exec HP0 ; subst ; list_simpl.
+               apply PEPermutation_Type_vs_elt_inv in HP0 as [(ll1, lr1) _ Heq0].
+               dichot_elt_app_inf_exec Heq0 ; subst ; list_simpl.
                --- apply zeropos_ilr...
                --- rewrite ? app_comm_cons.
                    rewrite ? app_assoc.
                    apply zeropos_ilr...
          ++ constructor...
             --- constructor.
-            --- apply Forall_Type_app_inv in H3l.
-                destruct H3l as [_ H3l].
-                apply Forall_Type_app_inv in H3l.
-                destruct H3l as [_ H3l]...
-    * symmetry in Heq'0.
-      decomp_map_Type Heq'0 ; decomp_map_Type Heq'0 ;
-        simpl in Heq'0 ; simpl in Heq'4 ; simpl in Heq'5 ; subst.
-      simpl in HP0 ; simpl in H3l ; simpl in H3r.
-      apply (PEperm_Type_Forall_Type _ _ _ _ HP0) in H3l.
+            --- apply Forall_inf_app_r in H3l.
+                apply Forall_inf_app_r in H3l...
+    * decomp_map_inf Heq'0; symmetry in Heq'0; decomp_map_inf Heq'0;
+        simpl in Heq'0, Heq'4, Heq'5; subst.
+      simpl in HP0, H3l, H3r.
+      apply (PEPermutation_Type_Forall_inf _ _ HP0) in H3l.
       destruct x0 ; inversion H1 ; inversion H2 ; subst.
       -- simpl in Hll2.
          change (dual (ill2ll i2a x0_2) :: map dual (map (ill2ll i2a) l9))
@@ -1358,18 +1354,15 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
             ** apply (f_equal (@rev _)) in H7.
                rewrite rev_involutive in H7 ; subst.
                list_simpl in HP0.
-               apply PEperm_Type_vs_elt_inv in HP0.
-               destruct HP0 as [(ll1, lr1) HP0 _ ].
-               dichot_Type_elt_app_exec HP0 ; subst ; list_simpl.
+               apply PEPermutation_Type_vs_elt_inv in HP0 as [(ll1, lr1) _ Heq0].
+               dichot_elt_app_inf_exec Heq0; subst; list_simpl.
                --- apply zeropos_ilr...
                --- rewrite ? app_comm_cons.
                    rewrite ? app_assoc.
                    apply zeropos_ilr...
          ++ constructor...
-            apply Forall_Type_app_inv in H3l.
-            destruct H3l as [H3l _].
-            apply Forall_Type_app_inv in H3l.
-            destruct H3l as [H3l _]...
+            apply Forall_inf_app_l in H3l.
+            apply Forall_inf_app_l in H3l...
       -- simpl in Hll2.
          change (covar (i2a atN) :: map dual (map (ill2ll i2a) l9))
            with (map dual (map (ill2ll i2a) (N :: l9))) in Hll2.
@@ -1380,18 +1373,15 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
             ** apply (f_equal (@rev _)) in H7.
                rewrite rev_involutive in H7 ; subst.
                list_simpl in HP0.
-               apply PEperm_Type_vs_elt_inv in HP0.
-               destruct HP0 as [(ll1, lr1) HP0 _ ].
-               dichot_Type_elt_app_exec HP0 ; subst ; list_simpl.
+               apply PEPermutation_Type_vs_elt_inv in HP0 as [(ll1 & lr1) _ Heq0].
+               dichot_elt_app_inf_exec Heq0; subst; list_simpl.
                --- apply zeropos_ilr...
                --- rewrite ? app_comm_cons.
                    rewrite ? app_assoc.
                    apply zeropos_ilr...
          ++ constructor ; [ constructor | ]...
-            apply Forall_Type_app_inv in H3l.
-            destruct H3l as [H3l _].
-            apply Forall_Type_app_inv in H3l.
-            destruct H3l as [H3l _]...
+            apply Forall_inf_app_l in H3l.
+            apply Forall_inf_app_l in H3l...
       -- simpl in H7.
          apply (f_equal (@rev _)) in H7.
          rewrite rev_involutive in H7 ; subst.
@@ -1401,25 +1391,22 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
          ++ apply lmap_ilr.
             ** apply IHHll2.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l _].
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l _].
-                   apply Forall_Type_rev...
+                   apply Forall_inf_app_l in H3l.
+                   apply Forall_inf_app_l in H3l.
+                   apply Forall_inf_rev...
                --- rewrite bidual.
                    list_simpl...
             ** apply IHHll1.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l' H3l].
-                   apply Forall_Type_app_inv in H3l'.
-                   destruct H3l' as [_ H3l'].
-                   apply Forall_Type_rev in H3l'.
-                   apply Forall_Type_rev in H3l.
-                   apply Forall_Type_app...
+                   assert (H3l' := Forall_inf_app_l _ _ H3l).
+                   assert (H3l'' := Forall_inf_app_r _ _ H3l).
+                   apply Forall_inf_app_r in H3l'.
+                   apply Forall_inf_rev in H3l'.
+                   apply Forall_inf_rev in H3l''.
+                   apply Forall_inf_app...
                    constructor...
                --- list_simpl.
-                   PCperm_Type_solve.
+                   GPermutation_Type_solve.
          ++ case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
@@ -1428,7 +1415,7 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
                rewrite app_assoc.
                apply Permutation_Type_elt.
                etransitivity ; [ apply Permutation_Type_app_comm | ].
-               perm_Type_solve.
+               Permutation_Type_solve.
             ** destruct (HPeq eq_refl) ; subst.
                list_simpl...
       -- simpl in H7.
@@ -1442,26 +1429,23 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
                apply Hgax.
             ** apply IHHll2.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l _].
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l _].
-                   apply Forall_Type_rev...
+                   apply Forall_inf_app_l in H3l.
+                   apply Forall_inf_app_l in H3l.
+                   apply Forall_inf_rev...
                --- rewrite bidual.
                    list_simpl...
             ** apply IHHll1.
                --- constructor...
-                   apply Forall_Type_app_inv in H3l.
-                   destruct H3l as [H3l' H3l].
-                   apply Forall_Type_app_inv in H3l'.
-                   destruct H3l' as [_ H3l'].
-                   apply Forall_Type_rev in H3l'.
-                   apply Forall_Type_rev in H3l.
-                   apply Forall_Type_app...
+                   assert (H3l' := Forall_inf_app_l _ _ H3l).
+                   assert (H3l'' := Forall_inf_app_r _ _ H3l).
+                   apply Forall_inf_app_r in H3l'.
+                   apply Forall_inf_rev in H3l'.
+                   apply Forall_inf_rev in H3l''.
+                   apply Forall_inf_app...
                    constructor...
                    constructor.
                --- list_simpl.
-                   PCperm_Type_solve.
+                   GPermutation_Type_solve.
          ++ case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
@@ -1470,66 +1454,64 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
                rewrite app_assoc.
                apply Permutation_Type_elt.
                etransitivity ; [ apply Permutation_Type_app_comm | ].
-               perm_Type_solve.
+               Permutation_Type_solve.
             ** destruct (HPeq eq_refl) ; subst.
                list_simpl...
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP.
+  destruct HP as [(l' & l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + list_simpl in HP.
     rewrite map_map in HP.
-    apply PEperm_Type_map_inv in HP.
+    apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l3 Heq' HP].
     rewrite <- map_map in Heq' ; subst.
     inversion Hnzsp ; subst.
-    apply Forall_Type_rev in X.
-    apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X.
+    apply Forall_inf_rev in X.
+    apply (PEPermutation_Type_Forall_inf _ _ HP) in X.
     destruct C ; inversion H1 ; inversion H0 ; subst.
     * apply lpam_irr.
       symmetry in HP.
-      apply PEperm_Type_rev in HP.
+      apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (rev l3 ++ C1 :: nil)) ; [ | apply PEperm_Type_add_inside ]...
+      apply (ex_ir _ (rev l3 ++ C1 :: nil)) ; [ | apply PEPermutation_Type_add_inside ]...
       apply IHHll.
       -- constructor...
-         apply Forall_Type_app ; [ | constructor ] ; try constructor...
-         apply Forall_Type_rev...
+         apply Forall_inf_app ; [ | constructor ] ; try constructor...
+         apply Forall_inf_rev...
       -- list_simpl...
     * apply gen_irr.
       symmetry in HP.
-      apply PEperm_Type_rev in HP.
+      apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (rev l3 ++ C :: nil)) ; [ | apply PEperm_Type_app ]...
+      apply (ex_ir _ (rev l3 ++ C :: nil)) ; [ | apply PEPermutation_Type_app ]...
       apply IHHll.
       -- constructor ; [ constructor | ]...
-         apply Forall_Type_app ; [ | constructor ; [ | constructor ] ]...
-         apply Forall_Type_rev...
-      -- list_simpl ; PCperm_Type_solve.
+         apply Forall_inf_app ; [ | constructor ; [ | constructor ] ]...
+         apply Forall_inf_rev...
+      -- list_simpl ; GPermutation_Type_solve.
     * apply lmap_irr.
       symmetry in HP.
-      apply PEperm_Type_rev in HP.
+      apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (C1 :: rev l3)) ; [ | apply PEperm_Type_cons ]...
+      apply (ex_ir _ (C1 :: rev l3)) ; [ | apply PEPermutation_Type_cons ]...
       apply IHHll.
       -- constructor...
          constructor...
-         apply Forall_Type_rev...
-      -- list_simpl ; PCperm_Type_solve.
+         apply Forall_inf_rev...
+      -- list_simpl ; GPermutation_Type_solve.
     * apply neg_irr.
       symmetry in HP.
-      apply PEperm_Type_rev in HP.
+      apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (C :: rev l3)) ; [ | apply PEperm_Type_cons ]...
+      apply (ex_ir _ (C :: rev l3)) ; [ | apply PEPermutation_Type_cons ]...
       apply IHHll.
       -- constructor ; [ constructor | ]...
          constructor...
-         apply Forall_Type_rev...
-      -- list_simpl ; PCperm_Type_solve.
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+         apply Forall_inf_rev...
+      -- list_simpl ; GPermutation_Type_solve.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7 ; subst.
     simpl in H6 ; apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
@@ -1539,25 +1521,23 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     * inversion Hnzsp.
       constructor...
       list_simpl in X.
-      apply Forall_Type_app_inv in X.
-      destruct X as [H3l H3r].
+      assert (H3l := Forall_inf_app_l _ _ X).
+      assert (H3r := Forall_inf_app_r _ _ X).
       inversion H3r.
       inversion H4 ; subst.
-      apply Forall_Type_app...
+      apply Forall_inf_app...
       constructor...
       constructor...
     * list_simpl.
-      rewrite HP ; PCperm_Type_solve.
+      rewrite HP ; GPermutation_Type_solve.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP.
+  destruct HP as [(l' & l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + destruct C ; inversion H0 ; subst.
     apply top_irr.
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
@@ -1565,31 +1545,29 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     apply zero_ilr.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP.
+  destruct HP as [(l' & l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + list_simpl in HP.
     rewrite map_map in HP.
-    apply PEperm_Type_map_inv in HP.
+    apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l3 Heq' HP].
     rewrite <- map_map in Heq' ; subst.
     inversion Hnzsp ; subst.
-    apply Forall_Type_rev in X.
-    apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X.
+    apply Forall_inf_rev in X.
+    apply (PEPermutation_Type_Forall_inf _ _ HP) in X.
     destruct C ; inversion H0 ; subst.
     inversion H1 ; subst.
     symmetry in HP.
-    apply PEperm_Type_rev in HP.
+    apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
     apply (ex_ir _ (rev l3)) ; [ | apply HP ].
     apply plus_irr1.
     apply IHHll.
     * constructor...
-      apply Forall_Type_rev...
+      apply Forall_inf_rev...
     * list_simpl...
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
@@ -1599,41 +1577,39 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     * inversion Hnzsp.
       constructor...
       list_simpl in X.
-      apply Forall_Type_app_inv in X.
-      destruct X as [H3l H3r].
+      assert (H3l := Forall_inf_app_l _ _ X).
+      assert (H3r := Forall_inf_app_r _ _ X).
       inversion H3r.
       inversion H4 ; subst.
-      apply Forall_Type_app...
+      apply Forall_inf_app...
       constructor...
     * list_simpl.
-      rewrite HP ; PCperm_Type_solve.
+      rewrite HP ; GPermutation_Type_solve.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP.
+  destruct HP as [(l' & l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + list_simpl in HP.
     rewrite map_map in HP.
-    apply PEperm_Type_map_inv in HP.
+    apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l3 Heq' HP].
     rewrite <- map_map in Heq' ; subst.
     inversion Hnzsp ; subst.
-    apply Forall_Type_rev in X.
-    apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X.
+    apply Forall_inf_rev in X.
+    apply (PEPermutation_Type_Forall_inf _ _ HP) in X.
     destruct C ; inversion H0 ; subst.
     inversion H1 ; subst.
     symmetry in HP.
-    apply PEperm_Type_rev in HP.
+    apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
     apply (ex_ir _ (rev l3)) ; [ | apply HP ].
     apply plus_irr2.
     apply IHHll.
     * constructor...
-      apply Forall_Type_rev...
+      apply Forall_inf_rev...
     * list_simpl...
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
@@ -1643,45 +1619,42 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     * inversion Hnzsp.
       constructor...
       list_simpl in X.
-      apply Forall_Type_app_inv in X.
-      destruct X as [H3l H3r].
+      assert (H3l := Forall_inf_app_l _ _ X).
+      assert (H3r := Forall_inf_app_r _ _ X).
       inversion H3r.
       inversion H4 ; subst.
-      apply Forall_Type_app...
+      apply Forall_inf_app...
       constructor...
     * list_simpl.
-      rewrite HP ; PCperm_Type_solve.
+      rewrite HP ; GPermutation_Type_solve.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + list_simpl in HP.
     rewrite map_map in HP.
-    apply PEperm_Type_map_inv in HP.
+    apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l3 Heq' HP].
     rewrite <- map_map in Heq' ; subst.
     inversion Hnzsp ; subst.
-    apply Forall_Type_rev in X.
-    apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X.
+    apply Forall_inf_rev in X.
+    apply (PEPermutation_Type_Forall_inf _ _ HP) in X.
     destruct C ; inversion H0 ; subst.
     inversion H1 ; subst.
     symmetry in HP.
-    apply PEperm_Type_rev in HP.
+    apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
     apply (ex_ir _ (rev l3)) ; [ | apply HP ].
     apply with_irr.
     * apply IHHll1.
       -- constructor...
-         apply Forall_Type_rev...
+         apply Forall_inf_rev...
       -- list_simpl...
     * apply IHHll2.
       -- constructor...
-         apply Forall_Type_rev...
+         apply Forall_inf_rev...
       -- list_simpl...
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
@@ -1691,66 +1664,60 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
       -- inversion Hnzsp.
          constructor...
          list_simpl in X.
-         apply Forall_Type_app_inv in X.
-         destruct X as [H3l H3r].
+         assert (H3l := Forall_inf_app_l _ _ X).
+         assert (H3r := Forall_inf_app_r _ _ X).
          inversion H3r.
          inversion H4 ; subst.
-         apply Forall_Type_app...
+         apply Forall_inf_app...
          constructor...
       -- list_simpl.
-         rewrite HP ; PCperm_Type_solve.
+         rewrite HP ; GPermutation_Type_solve.
     * apply IHHll2.
       -- inversion Hnzsp.
          constructor...
          list_simpl in X.
-         apply Forall_Type_app_inv in X.
-         destruct X as [H3l H3r].
+         assert (H3l := Forall_inf_app_l _ _ X).
+         assert (H3r := Forall_inf_app_r _ _ X).
          inversion H3r.
          inversion H4 ; subst.
-         apply Forall_Type_app...
+         apply Forall_inf_app...
          constructor...
       -- list_simpl.
-         rewrite HP ; PCperm_Type_solve.
+         rewrite HP ; GPermutation_Type_solve.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + list_simpl in HP.
     rewrite map_map in HP.
-    apply PEperm_Type_map_inv in HP.
+    apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l3 Heq' HP].
     rewrite <- (map_map _ _ l3) in Heq'.
     destruct (ill2ll_map_ioc_inv _ _ _ Heq') as [l0' Heq'' _] ; subst.
     inversion Hnzsp ; subst.
-    apply Forall_Type_rev in X.
-    apply (PEperm_Type_Forall_Type _ _ _ _ HP) in X.
+    apply Forall_inf_rev in X.
+    apply (PEPermutation_Type_Forall_inf _ _ HP) in X.
     destruct C ; inversion H0 ; subst.
     inversion H1 ; subst.
     symmetry in HP.
-    apply PEperm_Type_rev in HP.
+    apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
     apply (ex_ir _ (rev (map ioc l0'))) ; [ | apply HP ].
     list_simpl.
     apply oc_irr.
     apply IHHll.
     * constructor...
-      apply Forall_Type_rev in X ; list_simpl in X...
+      apply Forall_inf_rev in X ; list_simpl in X...
     * rewrite Heq'.
       list_simpl...
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7; subst.
     destruct x0 ; inversion H1.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + destruct C ; inversion H0.
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
@@ -1760,23 +1727,20 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     * inversion Hnzsp.
       constructor...
       list_simpl in X.
-      apply Forall_Type_app_inv in X.
-      destruct X as [H3l H3r].
+      assert (H3l := Forall_inf_app_l _ _ X).
+      assert (H3r := Forall_inf_app_r _ _ X).
       inversion H3r.
       inversion H4 ; subst.
-      apply Forall_Type_app...
+      apply Forall_inf_app...
       constructor...
     * list_simpl.
-      rewrite HP ; PCperm_Type_solve.
+      rewrite HP ; GPermutation_Type_solve.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + destruct C ; inversion H0.
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7 ; subst.
     apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
@@ -1786,39 +1750,38 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
     * inversion Hnzsp.
       constructor...
       list_simpl in X.
-      apply Forall_Type_app_inv in X.
-      destruct X as [H3l H3r].
+      assert (H3l := Forall_inf_app_l _ _ X).
+      assert (H3r := Forall_inf_app_r _ _ X).
       inversion H3r.
       inversion H4 ; subst.
-      apply Forall_Type_app...
+      apply Forall_inf_app...
     * list_simpl.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP.
-      PCperm_Type_solve.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
+      GPermutation_Type_solve.
 - list_simpl in HP.
   symmetry in HP.
-  apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+  apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; subst.
   + destruct C ; inversion H0.
-  + symmetry in H1.
-    decomp_map_Type H1 ; decomp_map_Type H3 ;
-      simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; simpl in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
     rewrite rev_involutive in H6 ; subst.
     destruct x0 ; inversion H1 ; subst.
     list_simpl ; apply co_ilr.
     apply IHHll.
     * inversion Hnzsp ; subst.
-      list_simpl in X ; apply Forall_Type_app_inv in X ; destruct X as [HF HF2].
+      list_simpl in X.
+      assert (HF1 := Forall_inf_app_l _ _ X).
+      assert (HF2 := Forall_inf_app_r _ _ X).
       inversion HF2 ; subst.
       constructor...
-      apply Forall_Type_app...
+      apply Forall_inf_app...
       constructor...
-    * apply (PEperm_Type_cons _ (wn (dual (ill2ll i2a x0))) _ eq_refl) in HP.
-      apply (PEperm_Type_cons _ (wn (dual (ill2ll i2a x0))) _ eq_refl) in HP.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP ; list_simpl in HP.
+    * apply (@PEPermutation_Type_cons _ _ _ (wn (dual (ill2ll i2a x0))) eq_refl) in HP.
+      apply (@PEPermutation_Type_cons _ _ _ (wn (dual (ill2ll i2a x0))) eq_refl) in HP.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP ; list_simpl in HP.
       etransitivity...
-      PCperm_Type_solve.
+      GPermutation_Type_solve.
 - simpl in f.
   rewrite Hcut in f.
   inversion f.
@@ -1828,8 +1791,8 @@ Qed.
 
 (** Axiom-free conservativity *)
 Proposition ll_to_ill_nzeropos_axfree {P} : (projT1 (ipgax P) -> False) -> forall l,
-ll (i2pfrag i2a P) l -> forall l0 C, Forall_Type nonzerospos (C :: l0) ->
-  PCperm_Type (pperm (i2pfrag i2a P))
+ll (i2pfrag i2a P) l -> forall l0 C, Forall_inf nonzerospos (C :: l0) ->
+  PCPermutation_Type (pperm (i2pfrag i2a P))
     l (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l0))) ->
   ill P l0 C.
 Proof with myeeasy.
@@ -1876,22 +1839,22 @@ Inductive oclpam : iformula -> Type :=
 
 Definition easyipgax_oclmap P := forall a,
   (forall A,
-     In_Type (dual (ill2ll i2a A)) (map (ill2ll i2a) (fst (projT2 (ipgax P) a))) ->
+     In_inf (dual (ill2ll i2a A)) (map (ill2ll i2a) (fst (projT2 (ipgax P) a))) ->
      oclike A -> False)
 * (forall A, ill2ll i2a A = ill2ll i2a (snd (projT2 (ipgax P) a)) -> oclike A -> False)
 * (forall l C,
-     PCperm_Type (ipperm P) (ill2ll i2a (snd (projT2 (ipgax P) a))
+     PCPermutation_Type (ipperm P) (ill2ll i2a (snd (projT2 (ipgax P) a))
                          :: rev (map dual (map (ill2ll i2a) (fst (projT2 (ipgax P) a)))))
                        (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l)))
        -> ill P l C)
-* (In_Type N (fst (projT2 (ipgax P) a)) -> False).
+* (In_inf N (fst (projT2 (ipgax P) a)) -> False).
 
 (** Cut-free conservativity *)
 Theorem ll_to_ill_oclpam_cutfree {P} :
   ipperm P = true -> ipcut P = false -> easyipgax_oclmap P ->
-  forall l, ll (i2pfrag i2a P) l -> forall l0 l1 C, Forall_Type oclpam (C :: l0) ->
-    Forall_Type oclike l1 ->
-    PCperm_Type (pperm (i2pfrag i2a P)) l
+  forall l, ll (i2pfrag i2a P) l -> forall l0 l1 C, Forall_inf oclpam (C :: l0) ->
+    Forall_inf oclike l1 ->
+    PCPermutation_Type (pperm (i2pfrag i2a P)) l
                 (ill2ll i2a C :: map (ill2ll i2a) l1
                   ++ rev (map dual (map (ill2ll i2a) l0))) ->
       ill P l0 C
@@ -1900,11 +1863,11 @@ Proof with myeeasy.
 intros Hperm Hcut Hgax.
 intros l Hll ; induction Hll ;
   intros l0 lo C Hoclm Hocl HP ; try (now inversion f).
-- apply PCperm_Type_length_2_inv in HP.
+- apply PCPermutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP] ; inversion HP ; destruct C ; inversion H0 ; subst.
   destruct lo ; list_simpl in H1 ; inversion H1.
-  + induction l0 using rev_ind_Type ; list_simpl in H2 ; inversion H2.
-    induction l0 using rev_ind_Type ; list_simpl in H4 ; inversion H4.
+  + induction l0 using rev_rect ; list_simpl in H2 ; inversion H2.
+    induction l0 using rev_rect ; list_simpl in H4 ; inversion H4.
     destruct x ; inversion H3.
     apply i2a_inj in H5 ; subst.
     split.
@@ -1915,34 +1878,33 @@ intros l Hll ; induction Hll ;
   + destruct i0 ; inversion H2.
 - rewrite HP in p.
   apply IHHll in p...
-- assert (PCperm_Type (pperm (i2pfrag i2a P)) (l1 ++ map wn lw ++ l2)
+- assert (PCPermutation_Type (pperm (i2pfrag i2a P)) (l1 ++ map wn lw ++ l2)
        (ill2ll i2a C :: map (ill2ll i2a) lo ++ rev (map dual (map (ill2ll i2a) l0))))
     as HP'.
   { simpl in HP ; rewrite Hperm in HP ; simpl in HP.
     etransitivity...
     apply (Permutation_Type_map wn) in p.
-    simpl ; rewrite Hperm ; simpl ; perm_Type_solve. }
+    simpl ; rewrite Hperm ; simpl ; Permutation_Type_solve. }
   apply IHHll in HP'...
-- apply PCperm_Type_length_1_inv in HP.
+- apply PCPermutation_Type_length_1_inv in HP.
   inversion HP ; destruct C ; inversion H0 ; subst.
   destruct lo ; inversion H1.
-  induction l0 using rev_ind_Type ; list_simpl in H1 ; inversion H1.
+  induction l0 using rev_rect ; list_simpl in H1 ; inversion H1.
   split.
   + apply one_irr.
   + intros Hnil.
     exfalso.
     apply Hnil...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP ; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
-        destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
-    simpl in H3 ; simpl in H5 ; simpl in H7 ; subst.
+  symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst.
+  { symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0. }
+  list_simpl in H2; symmetry in H2; decomp_map_inf H2.
+  symmetry in H3; decomp_map_inf H3;
+    destruct x; inversion H2; destruct x0; inversion H3; simpl in H3, H5, H7; subst.
   apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-  apply PEperm_PCperm_Type in HP ; unfold id in HP.
-  assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+  apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
+  assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
   specialize IHHll with (rev l8 ++ rev l6) lo C.
   list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
   + destruct HP' as [IH1 IH2] ; split.
@@ -1953,14 +1915,13 @@ intros l Hll ; induction Hll ;
       rewrite app_assoc.
       apply IH2...
   + inversion Hoclm ; constructor...
-    apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ;
-      apply Forall_Type_app...
+    assert (Hl := Forall_inf_app_l _ _ X).
+    assert (Hr := Forall_inf_app_r _ _ X).
+    apply Forall_inf_app...
     inversion Hr...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   simpl in HP ; rewrite Hperm in HP ; simpl in HP.
-  apply Permutation_Type_app_app_inv in HP.
-  destruct HP as [[[[l3' l3''] l4'] l4''] [[HP1 HP2] [HP3 HP4]]] ;
+  apply Permutation_Type_app_app_inv in HP as [[[[l3' l3''] l4'] l4''] [[HP1 HP2] [HP3 HP4]]];
     simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
   + apply Permutation_Type_nil in HP4 ; apply app_eq_nil in HP4 ; destruct HP4 ; subst.
@@ -1974,7 +1935,7 @@ intros l Hll ; induction Hll ;
       simpl in HP1 ; simpl in HP2 ; simpl in HP3 ; simpl in HP4.
     symmetry in HP1 ; apply Permutation_Type_map_inv in HP1.
     destruct HP1 as [l3 Heq1 HP1].
-    decomp_map_Type Heq1 ; subst.
+    symmetry in Heq1; decomp_map_inf Heq1 ; subst.
     list_simpl in HP2.
     rewrite map_map in HP2.
     symmetry in HP2 ; apply Permutation_Type_map_inv in HP2.
@@ -1982,52 +1943,54 @@ intros l Hll ; induction Hll ;
     apply Permutation_Type_rev' in HP2.
     rewrite rev_involutive in HP2.
     rewrite <- map_map in Heq2.
-    decomp_map_Type Heq2 ; decomp_map_Type Heq2 ; simpl in Heq4 ; simpl in Heq5 ; subst.
+    symmetry in Heq2; decomp_map_inf Heq2;
+      symmetry in Heq2; decomp_map_inf Heq2 ; simpl in Heq4 ; simpl in Heq5 ; subst.
     specialize IHHll1 with (rev l9) l5 C1.
     specialize IHHll2 with (rev l8) l4 C2.
     simpl in HP1.
-    apply (Permutation_Type_Forall_Type _ _ _ HP1) in Hocl.
-    apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl2 Hocl1].
+    apply (Permutation_Type_Forall_inf HP1) in Hocl.
+    assert (Hocl2 := Forall_inf_app_l _ _ Hocl).
+    assert (Hocl1 := Forall_inf_app_r _ _ Hocl).
     apply IHHll1 in Hocl1 ; [ apply IHHll2 in Hocl2 | | ].
     * destruct Hocl1 as [IH1 IH2].
       destruct Hocl2 as [IH3 IH4].
       split.
       -- eapply ex_ir ; [ apply tens_irr | ]...
          list_simpl in HP2.
-         rewrite Hperm ; simpl ; perm_Type_solve.
+         rewrite Hperm ; simpl ; Permutation_Type_solve.
       -- intros Hnil lw.
          destruct lo ; [ exfalso ; apply Hnil ; reflexivity | ].
          symmetry in HP1 ; apply Permutation_Type_vs_cons_inv in HP1.
          destruct HP1 as [(ll & lr) Heq3].
-         dichot_Type_elt_app_exec Heq3 ; subst.
+         dichot_elt_app_inf_exec Heq3 ; subst.
          ++ assert (ll ++ i :: l <> nil) as Hnil2
               by (clear ; intros H ; destruct ll ; inversion H).
             assert (IH := IH4 Hnil2 lw).
             eapply ex_ir ; [apply tens_irr | ]...
             list_simpl in HP2.
-            rewrite Hperm ; simpl ; perm_Type_solve.
+            rewrite Hperm ; simpl ; Permutation_Type_solve.
          ++ assert (l3 ++ i :: lr <> nil) as Hnil2
               by (clear ; intros H ; destruct l3 ; inversion H).
             assert (IH := IH2 Hnil2 lw).
             eapply ex_ir ; [apply tens_irr | ]...
             list_simpl in HP2.
-            rewrite Hperm ; simpl ; perm_Type_solve.
+            rewrite Hperm ; simpl ; Permutation_Type_solve.
     * inversion Hoclm ; subst.
       inversion H1 ; subst.
       constructor...
       list_simpl in HP2.
-      apply (Permutation_Type_Forall_Type _ _ _ HP2) in X.
-      apply Forall_Type_app_inv in X ; destruct X as [_ X]...
-    * simpl ; rewrite Hperm ; simpl ; perm_Type_solve.
+      apply (Permutation_Type_Forall_inf HP2) in X.
+      apply Forall_inf_app_r in X...
+    * simpl ; rewrite Hperm ; simpl ; Permutation_Type_solve.
     * inversion Hoclm.
       inversion H1.
       constructor...
       list_simpl in HP2.
-      apply (Permutation_Type_Forall_Type _ _ _ HP2) in X.
-      apply Forall_Type_app_inv in X ; destruct X as [X _]...
-    * simpl ; rewrite Hperm ; simpl ; perm_Type_solve.
-  + dichot_Type_elt_app_exec H1 ; subst.
-    * decomp_map_Type H0 ; subst.
+      apply (Permutation_Type_Forall_inf HP2) in X.
+      apply Forall_inf_app_l in X...
+    * simpl ; rewrite Hperm ; simpl ; Permutation_Type_solve.
+  + dichot_elt_app_inf_exec H1 ; subst.
+    * symmetry in H0; decomp_map_inf H0 ; subst.
       destruct x ; inversion H0 ; subst.
       assert (HP4' := HP4).
       symmetry in HP4' ; apply Permutation_Type_vs_cons_inv in HP4'.
@@ -2037,37 +2000,41 @@ intros l Hll ; induction Hll ;
         simpl in HP3' ; simpl in HP3'' ; simpl in HP3''' ; simpl in HP3''''.
       symmetry in HP3' ; apply Permutation_Type_map_inv in HP3'.
       destruct HP3' as [l3 Heq'' HP3'].
-      decomp_map_Type Heq'' ; subst.
+      symmetry in Heq''; decomp_map_inf Heq'' ; subst.
       list_simpl in HP3''.
       rewrite map_map in HP3''.
       symmetry in HP3'' ; apply Permutation_Type_map_inv in HP3''.
       destruct HP3'' as [l3 Heq'' HP3''].
       apply Permutation_Type_rev' in HP3'' ; rewrite rev_involutive in HP3''.
       rewrite <- map_map in Heq''.
-      decomp_map_Type Heq'' ; decomp_map_Type Heq'' ;
+      symmetry in Heq''; decomp_map_inf Heq''; symmetry in Heq''; decomp_map_inf Heq'' ;
         simpl in Heq''3 ; simpl in Heq''4 ; subst.
       simpl in HP3''' ; apply (Permutation_Type_app_tail l4') in HP3'''.
       assert (HP1' := Permutation_Type_trans HP1 HP3''').
       simpl in HP3'''' ; apply (Permutation_Type_app_tail l4'') in HP3''''.
       assert (HP2' := Permutation_Type_trans HP2 HP3'''').
-      dichot_Type_elt_app_exec Heq' ; subst.
+      dichot_elt_app_inf_exec Heq' ; subst.
       -- list_simpl in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
          symmetry in HP4 ; apply Permutation_Type_map_inv in HP4.
          destruct HP4 as [l3 Heq' HP].
-         decomp_map_Type Heq' ; subst.
+         symmetry in Heq'; decomp_map_inf Heq' ; subst.
          specialize IHHll2 with (rev l11) (x2 :: l7 ++ l10 ++ l14) C.
-         assert (Forall_Type oclike (x2 :: l7 ++ l10 ++ l14)) as Hocl'.
+         assert (Forall_inf oclike (x2 :: l7 ++ l10 ++ l14)) as Hocl'.
          { simpl in HP ; simpl in Hocl.
-           apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl2 Hocl1].
-           apply (Permutation_Type_Forall_Type _ _ _ HP) in Hocl2.
+           assert (Hocl2 := Forall_inf_app_l _ _ Hocl).
+           assert (Hocl1 := Forall_inf_app_r _ _ Hocl).
+           apply (Permutation_Type_Forall_inf HP) in Hocl2.
            inversion Hocl1.
            inversion H1 ; subst.
            constructor...
            simpl in HP3'.
-           apply (Permutation_Type_Forall_Type _ _ _ HP3') in X.
-           apply Forall_Type_app_inv in X ; destruct X ; apply Forall_Type_app...
+           apply (Permutation_Type_Forall_inf HP3') in X.
+           assert (X1 := Forall_inf_app_l _ _ X).
+           assert (X2 := Forall_inf_app_r _ _ X).
+           apply Forall_inf_app...
            rewrite app_assoc in Hocl2.
-           apply Forall_Type_app_inv in Hocl2 ; destruct Hocl2... }
+           assert (Hocl3 := Forall_inf_app_l _ _ Hocl2).
+           assert (Hocl4 := Forall_inf_app_r _ _ Hocl2)... }
          apply IHHll2 in Hocl'.
          ++ destruct Hocl' as [_ Hocl'].
             assert (x2 :: l7 ++ l10 ++ l14 <> nil) as Hnil
@@ -2092,27 +2059,28 @@ intros l Hll ; induction Hll ;
                apply Permutation_Type_app_head...
          ++ inversion Hoclm ; constructor...
             simpl in HP3''.
-            apply (Permutation_Type_Forall_Type _ _ _ HP3'') in X.
-            list_simpl in X ; apply Forall_Type_app_inv in X ; apply X.
+            apply (Permutation_Type_Forall_inf HP3'') in X.
+            list_simpl in X; apply Forall_inf_app_r in X; apply X.
          ++ list_simpl ; rewrite Hperm ; simpl.
-            perm_Type_solve.
+            Permutation_Type_solve.
       -- list_simpl in HP4 ; rewrite app_assoc in HP4 ;
            apply Permutation_Type_cons_app_inv in HP4.
          symmetry in HP4 ; apply Permutation_Type_map_inv in HP4.
          destruct HP4 as [l' Heq' HP].
-         list_simpl in Heq' ; decomp_map_Type Heq' ; subst.
+         list_simpl in Heq'; symmetry in Heq'; decomp_map_inf Heq' ; subst.
          specialize IHHll1 with (rev l12) (x1 :: l8 ++ l13 ++ l14) C.
-         assert (Forall_Type oclike (x1 :: l8 ++ l13 ++ l14)) as Hocl'.
+         assert (Forall_inf oclike (x1 :: l8 ++ l13 ++ l14)) as Hocl'.
          { simpl in HP ; simpl in Hocl.
-           apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl2 Hocl1].
-           apply (Permutation_Type_Forall_Type _ _ _ HP) in Hocl2.
+           assert (Hocl2 := Forall_inf_app_l _ _ Hocl).
+           assert (Hocl1 := Forall_inf_app_r _ _ Hocl).
+           apply (Permutation_Type_Forall_inf HP) in Hocl2.
            inversion Hocl1.
            inversion H1 ; subst.
            constructor...
            simpl in HP3'.
-           apply (Permutation_Type_Forall_Type _ _ _ HP3') in X.
-           apply Forall_Type_app_inv in X ; destruct X ; apply Forall_Type_app...
-           apply Forall_Type_app_inv in Hocl2 ; destruct Hocl2... }
+           apply (Permutation_Type_Forall_inf HP3') in X.
+           apply Forall_inf_app_r in X; apply Forall_inf_app...
+           apply Forall_inf_app_r in Hocl2... }
          apply IHHll1 in Hocl'.
          ++ destruct Hocl' as [_ Hocl'].
             assert (x1 :: l8 ++ l13 ++ l14 <> nil) as Hnil
@@ -2134,23 +2102,23 @@ intros l Hll ; induction Hll ;
                apply Permutation_Type_app_head...
          ++ inversion Hoclm ; constructor...
             simpl in HP3''.
-            apply (Permutation_Type_Forall_Type _ _ _ HP3'') in X.
-            list_simpl in X ; apply Forall_Type_app_inv in X ; apply X.
+            apply (Permutation_Type_Forall_inf HP3'') in X.
+            list_simpl in X ; apply Forall_inf_app_l in X ; apply X.
          ++ list_simpl ; rewrite Hperm ; simpl.
-            perm_Type_solve.
-    * list_simpl in H2 ; decomp_map_Type H2 ; subst.
-      decomp_map_Type H3 ;
+            Permutation_Type_solve.
+    * list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; subst.
+      symmetry in H3; decomp_map_inf H3 ;
         simpl in H1 ; simpl in H3 ; simpl in H4 ; simpl in H5 ; subst.
       apply (f_equal (@rev _)) in H4 ; list_simpl in H4 ; subst.
       destruct x0 ; inversion H2 ; subst.
       -- assert (HP4' := HP4).
          symmetry in HP4' ; apply Permutation_Type_vs_cons_inv in HP4'.
          destruct HP4' as [(l4a & l4b) Heq'] ; simpl in Heq'.
-         dichot_Type_elt_app_exec Heq' ; subst.
+         dichot_elt_app_inf_exec Heq' ; subst.
          ++ simpl in HP3 ; rewrite map_map in HP3.
             symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
             destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- map_map in HP1.
             rewrite <- map_map in HP2.
             list_simpl in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
@@ -2164,32 +2132,34 @@ intros l Hll ; induction Hll ;
             assert (Permutation_Type l2
                      (map dual (map (ill2ll i2a) l4) ++ (l3a ++ l3b)
                        ++ ill2ll i2a C :: l3e ++ l3g))
-              as HP' by perm_Type_solve.
+              as HP' by Permutation_Type_solve.
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             apply (Permutation_Type_app_head l3b) in HP4d.
             assert (HP'' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP''.
             symmetry in HP'' ; apply Permutation_Type_map_inv in HP''.
             clear HP4'' ; destruct HP'' as [l4' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l11) in HP'.
             rewrite <- (map_map _ _ l13) in HP'.
             symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
             destruct HP4c as [l4' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l14) in HP4b.
             simpl in HP2 ; simpl in HP4b.
             apply (Permutation_Type_app_head (map dual (map (ill2ll i2a) l6))) in HP4b.
             assert (HP'' := Permutation_Type_trans HP2 HP4b).
             specialize IHHll2 with (rev (x0_2 :: l4 ++ l11 ++ l13)) (l9 ++ l15) C.
-            simpl in HP4' ; apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl1 Hocl2].
+            simpl in HP4' ; apply (Permutation_Type_Forall_inf HP4') in Hocl.
+            assert (Hocl1 := Forall_inf_app_l _ _ Hocl).
+            assert (Hocl2 := Forall_inf_app_r _ _ Hocl).
             specialize IHHll1 with (rev (l6 ++ l14)) l16 x0_1.
-            simpl in HP4c ; apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl2.
-            apply Forall_Type_app_inv in Hocl2 ; destruct Hocl2 as [Hocl2 Hocl3].
-            assert (Hocl4 := Forall_Type_app _ _ _ Hocl1 Hocl2).
+            simpl in HP4c ; apply (Permutation_Type_Forall_inf HP4c) in Hocl2.
+            assert (Hocl2' := Forall_inf_app_l _ _ Hocl2).
+            assert (Hocl3 := Forall_inf_app_r _ _ Hocl2).
+            assert (Hocl4 := Forall_inf_app Hocl1 Hocl2').
             apply IHHll2 in Hocl4 ; [ apply IHHll1 in Hocl3 | | ].
             ** split.
                --- destruct Hocl4 as [Hocl4 _].
@@ -2200,14 +2170,14 @@ intros l Hll ; induction Hll ;
                    +++ apply Permutation_Type_rev' in HP3 .
                        apply Permutation_Type_rev' in HP4''.
                        list_simpl in HP3 ; list_simpl in HP4''.
-                       rewrite Hperm ; list_simpl ; perm_Type_solve.
+                       rewrite Hperm ; list_simpl ; Permutation_Type_solve.
                --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
                    apply (Permutation_Type_app_head l9) in HP4c.
                    assert (HP''' := Permutation_Type_trans HP4' HP4c).
                    symmetry in HP''' ; apply Permutation_Type_vs_cons_inv in HP'''.
                    destruct HP''' as [(l4l & l4r) Heq'] ; simpl in Heq'.
                    rewrite app_assoc in Heq'.
-                   dichot_Type_elt_app_exec Heq' ; subst.
+                   dichot_elt_app_inf_exec Heq' ; subst.
                    +++ rewrite <- Heq'0 in Hocl4.
                        assert (l4l ++ i :: l0 <> nil) as Hnil'
                          by (intros Hnil' ; destruct l4l ; inversion Hnil').
@@ -2217,11 +2187,11 @@ intros l Hll ; induction Hll ;
                                          ilpam x0_1 x0_2 :: rev (l6 ++ l14) ++ lw)).
                        *** apply lpam_ilr...
                            eapply ex_ir ; [ apply Hnil' | ].
-                           rewrite Hperm ; simpl ; perm_Type_solve.
+                           rewrite Hperm ; simpl ; Permutation_Type_solve.
                        *** apply Permutation_Type_rev' in HP3 .
                            apply Permutation_Type_rev' in HP4''.
                            list_simpl in HP3 ; list_simpl in HP4''.
-                           rewrite Hperm ; list_simpl ; perm_Type_solve.
+                           rewrite Hperm ; list_simpl ; Permutation_Type_solve.
                    +++ assert (l17 ++ i :: l4r <> nil) as Hnil'
                          by (intros Hnil' ; destruct l17 ; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
@@ -2232,49 +2202,53 @@ intros l Hll ; induction Hll ;
                        *** apply Permutation_Type_rev' in HP3 .
                            apply Permutation_Type_rev' in HP4''.
                            list_simpl in HP3 ; list_simpl in HP4''.
-                           rewrite Hperm ; list_simpl ; perm_Type_solve.
+                           rewrite Hperm ; list_simpl ; Permutation_Type_solve.
             ** inversion Hoclm ; subst.
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                inversion H1 ; constructor...
                simpl in HP3.
                apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
                list_simpl in Hoclm1 ; list_simpl.
-               apply Forall_Type_app_inv in Hoclm1 ; destruct Hoclm1.
+               assert (Hoclm1' := Forall_inf_app_l _ _ Hoclm1).
+               assert (Hoclm2' := Forall_inf_app_r _ _ Hoclm1).
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               list_simpl in X.
-               apply Forall_Type_app_inv in X ; destruct X ; apply Forall_Type_app...
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               list_simpl in X0.
+               apply Forall_inf_app_l in X0; apply Forall_inf_app...
             ** simpl ; rewrite Hperm ; simpl.
                rewrite bidual.
-               perm_Type_solve.
+               Permutation_Type_solve.
             ** inversion Hoclm ; constructor ; subst...
                list_simpl.
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               list_simpl in X.
-               apply Forall_Type_app_inv in X.
-               destruct X as [H4l H4r] ; apply Forall_Type_app_inv in H4r.
-               apply Forall_Type_app ; [ apply H4r | ].
-               apply Forall_Type_app ; [ apply H4r | ].
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               list_simpl in X0.
+               apply Forall_inf_app_r in X0.
+               assert (H4l := Forall_inf_app_l _ _ X0).
+               assert (H4r := Forall_inf_app_r _ _ X0).
+               apply Forall_inf_app ; [ apply H4l | ].
+               apply Forall_inf_app ; [ apply H4r | ].
                simpl in HP3.
                apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
                list_simpl in Hoclm1 ; list_simpl.
-               apply Forall_Type_app_inv in Hoclm1 ; destruct Hoclm1.
+               apply Forall_inf_app_r in Hoclm1.
                inversion H1.
-               apply Forall_Type_app ; [ | constructor ; [assumption | constructor] ]...
+               apply Forall_inf_app ; [ | constructor ; [assumption | constructor] ]...
             ** list_simpl ; rewrite Hperm ; simpl.
-               perm_Type_solve.
+               Permutation_Type_solve.
          ++ simpl in HP3 ; rewrite map_map in HP3.
             symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
             destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- map_map in HP1.
             rewrite <- map_map in HP2.
             rewrite app_assoc in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
@@ -2286,13 +2260,13 @@ intros l Hll ; induction Hll ;
               simpl in HP4a ; simpl in HP4b ; simpl in HP4c ; simpl in HP4d.
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             apply (Permutation_Type_app_head l3b) in HP4d.
             assert (HP' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP'.
             symmetry in HP' ; apply Permutation_Type_map_inv in HP'.
             clear HP4'' ; destruct HP' as [l4'' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             simpl in HP2 ; simpl in HP4a.
             apply (Permutation_Type_app_tail (ill2ll i2a C :: l4b)) in HP4a.
             apply (Permutation_Type_app_head (map dual (map (ill2ll i2a) l6))) in HP4a.
@@ -2300,7 +2274,7 @@ intros l Hll ; induction Hll ;
             rewrite <- (map_map _ _ l13) in HP'. 
             symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
             destruct HP4c as [l4'' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l14) in HP4b.
             simpl in HP4b ; simpl in HP'.
             apply (@Permutation_Type_cons _ (ill2ll i2a C) _ eq_refl) in HP4b.
@@ -2312,15 +2286,16 @@ intros l Hll ; induction Hll ;
             assert (x0_1 :: l15 ++ l16 <> nil) as Hnil
               by (intros Hnil ; inversion Hnil).
             inversion Hoclm ; subst.
-            apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+            assert (Hoclm1 := Forall_inf_app_l _ _ X).
+            assert (Hoclm2 := Forall_inf_app_r _ _ X).
             inversion Hoclm2 ; subst.
             inversion H1 ; subst.
             simpl in HP4' ; simpl in HP4c.
-            apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
+            apply (Permutation_Type_Forall_inf HP4') in Hocl.
             apply (Permutation_Type_app_head l9) in HP4c.
-            apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [_ Hocl].
-            assert (Hocl' := Forall_Type_cons _ H4 Hocl).
+            apply (Permutation_Type_Forall_inf HP4c) in Hocl.
+            apply Forall_inf_app_r in Hocl.
+            assert (Hocl' := Forall_inf_cons _ H4 Hocl).
             apply IHHll1 in Hocl' ; [ split | | ].
             ** apply (snd Hocl') with (ilpam x0_1 x0_2 :: rev l4 ++ rev l11) in Hnil.
                eapply ex_ir ; [ apply Hnil | ].
@@ -2329,7 +2304,7 @@ intros l Hll ; induction Hll ;
                apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-               list_simpl ; perm_Type_solve.
+               list_simpl ; Permutation_Type_solve.
             ** intros Hnil' lw.
                apply (snd Hocl') with (ilpam x0_1 x0_2 :: rev l4 ++ rev l11 ++ lw) in Hnil.
                eapply ex_ir ; [ apply Hnil | ].
@@ -2338,32 +2313,31 @@ intros l Hll ; induction Hll ;
                apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-               list_simpl ; perm_Type_solve.
+               list_simpl ; Permutation_Type_solve.
             ** constructor...
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               rewrite app_assoc in X.
-               apply Forall_Type_app_inv in X ; destruct X as [X _].
-               apply Forall_Type_app_inv in X ; destruct X as [H4l H4r].
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               rewrite app_assoc in X0.
+               apply Forall_inf_app_l in X0.
+               assert (H4l := Forall_inf_app_l _ _ X0).
+               assert (H4r := Forall_inf_app_r _ _ X0).
                simpl in HP3.
                apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
-               list_simpl in Hoclm1 ; apply Forall_Type_app_inv in Hoclm1 ;
-                 destruct Hoclm1 as [Hoclm1 _].
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
+               list_simpl in Hoclm1 ; apply Forall_inf_app_l in Hoclm1.
                list_simpl.
-               apply Forall_Type_app...
-               apply Forall_Type_app...
+               apply Forall_inf_app...
+               apply Forall_inf_app...
             ** list_simpl ; rewrite Hperm ; simpl.
-               rewrite bidual ; perm_Type_solve.
+               rewrite bidual ; Permutation_Type_solve.
       -- assert (HP4' := HP4).
          symmetry in HP4' ; apply Permutation_Type_vs_cons_inv in HP4'.
          destruct HP4' as [(l4a & l4b) Heq'] ; simpl in Heq'.
-         dichot_Type_elt_app_exec Heq' ; subst.
+         dichot_elt_app_inf_exec Heq' ; subst.
          ++ simpl in HP3 ; rewrite map_map in HP3.
-            symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
-            destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP3; apply Permutation_Type_map_inv in HP3 as [l3''' Heq' HP3].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             rewrite <- map_map in HP1.
             rewrite <- map_map in HP2.
             list_simpl in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
@@ -2377,32 +2351,34 @@ intros l Hll ; induction Hll ;
             assert (Permutation_Type l2
                      (map dual (map (ill2ll i2a) l4) ++ (l3a ++ l3b)
                        ++ ill2ll i2a C :: l3e ++ l3g))
-              as HP' by perm_Type_solve.
+              as HP' by Permutation_Type_solve.
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             apply (Permutation_Type_app_head l3b) in HP4d.
             assert (HP'' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP''.
             symmetry in HP'' ; apply Permutation_Type_map_inv in HP''.
             clear HP4'' ; destruct HP'' as [l4' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l11) in HP'.
             rewrite <- (map_map _ _ l13) in HP'.
             symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
             destruct HP4c as [l4' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l14) in HP4b.
             simpl in HP2 ; simpl in HP4b.
             apply (Permutation_Type_app_head (map dual (map (ill2ll i2a) l6))) in HP4b.
             assert (HP'' := Permutation_Type_trans HP2 HP4b).
             specialize IHHll2 with (rev (N :: l4 ++ l11 ++ l13)) (l9 ++ l15) C.
-            simpl in HP4' ; apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl1 Hocl2].
+            simpl in HP4' ; apply (Permutation_Type_Forall_inf HP4') in Hocl.
+            assert (Hocl1 := Forall_inf_app_l _ _ Hocl).
+            assert (Hocl2 := Forall_inf_app_r _ _ Hocl).
             specialize IHHll1 with (rev (l6 ++ l14)) l16 x0.
-            simpl in HP4c ; apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl2.
-            apply Forall_Type_app_inv in Hocl2 ; destruct Hocl2 as [Hocl2 Hocl3].
-            assert (Hocl4 := Forall_Type_app _ _ _ Hocl1 Hocl2).
+            simpl in HP4c ; apply (Permutation_Type_Forall_inf HP4c) in Hocl2.
+            assert (Hocl2' := Forall_inf_app_l _ _ Hocl2).
+            assert (Hocl3 := Forall_inf_app_r _ _ Hocl2).
+            assert (Hocl4 := Forall_inf_app Hocl1 Hocl2').
             apply IHHll2 in Hocl4 ; [ apply IHHll1 in Hocl3 | | ].
             ** split.
                --- destruct Hocl4 as [Hocl4 _].
@@ -2414,14 +2390,14 @@ intros l Hll ; induction Hll ;
                    +++ apply Permutation_Type_rev' in HP3 .
                        apply Permutation_Type_rev' in HP4''.
                        list_simpl in HP3 ; list_simpl in HP4''.
-                       rewrite Hperm ; list_simpl ; perm_Type_solve.
+                       rewrite Hperm ; list_simpl ; Permutation_Type_solve.
                --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
                    apply (Permutation_Type_app_head l9) in HP4c.
                    assert (HP''' := Permutation_Type_trans HP4' HP4c).
                    symmetry in HP''' ; apply Permutation_Type_vs_cons_inv in HP'''.
                    destruct HP''' as [(l4l & l4r) Heq'] ; simpl in Heq'.
                    rewrite app_assoc in Heq'.
-                   dichot_Type_elt_app_exec Heq' ; subst.
+                   dichot_elt_app_inf_exec Heq' ; subst.
                    +++ rewrite <- Heq'0 in Hocl4.
                        assert (l4l ++ i :: l0 <> nil) as Hnil'
                          by (intros Hnil' ; destruct l4l ; inversion Hnil').
@@ -2432,11 +2408,11 @@ intros l Hll ; induction Hll ;
                        *** apply gen_pam_rule...
                            ---- intros a ; apply Hgax.
                            ---- eapply ex_ir ; [ apply Hnil' | ].
-                                rewrite Hperm ; simpl ; perm_Type_solve.
+                                rewrite Hperm ; simpl ; Permutation_Type_solve.
                        *** apply Permutation_Type_rev' in HP3 .
                            apply Permutation_Type_rev' in HP4''.
                            list_simpl in HP3 ; list_simpl in HP4''.
-                           rewrite Hperm ; list_simpl ; perm_Type_solve.
+                           rewrite Hperm ; list_simpl ; Permutation_Type_solve.
                    +++ assert (l17 ++ i :: l4r <> nil) as Hnil'
                          by (intros Hnil' ; destruct l17 ; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
@@ -2448,49 +2424,54 @@ intros l Hll ; induction Hll ;
                        *** apply Permutation_Type_rev' in HP3 .
                            apply Permutation_Type_rev' in HP4''.
                            list_simpl in HP3 ; list_simpl in HP4''.
-                           rewrite Hperm ; list_simpl ; perm_Type_solve.
+                           rewrite Hperm ; list_simpl ; Permutation_Type_solve.
             ** inversion Hoclm ; subst.
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                inversion H1 ; constructor...
                simpl in HP3.
                apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
                list_simpl in Hoclm1 ; list_simpl.
-               apply Forall_Type_app_inv in Hoclm1 ; destruct Hoclm1.
+               assert (Hoclm1' := Forall_inf_app_l _ _ Hoclm1).
+               assert (Hoclm1'' := Forall_inf_app_r _ _ Hoclm1).
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               list_simpl in X.
-               apply Forall_Type_app_inv in X; destruct X ; apply Forall_Type_app...
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               list_simpl in X0.
+               apply Forall_inf_app_l in X0; apply Forall_inf_app...
             ** simpl ; rewrite Hperm ; simpl.
                rewrite bidual.
-               perm_Type_solve.
+               Permutation_Type_solve.
             ** inversion Hoclm ; constructor ; subst...
                list_simpl.
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               list_simpl in X.
-               apply Forall_Type_app_inv in X.
-               destruct X as [H4l H4r] ; apply Forall_Type_app_inv in H4r.
-               apply Forall_Type_app ; [ apply H4r | ].
-               apply Forall_Type_app ; [ apply H4r | ].
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               list_simpl in X0.
+               assert (H4l := Forall_inf_app_l _ _ X0).
+               assert (H4r := Forall_inf_app_r _ _ X0).
+               assert (H4r1 := Forall_inf_app_l _ _ H4r).
+               assert (H4r2 := Forall_inf_app_r _ _ H4r).
+               apply Forall_inf_app ; [ apply H4r1 | ].
+               apply Forall_inf_app ; [ apply H4r2 | ].
                simpl in HP3.
                apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
                list_simpl in Hoclm1 ; list_simpl.
-               apply Forall_Type_app_inv in Hoclm1 ; destruct Hoclm1.
+               apply Forall_inf_app_r in Hoclm1.
                inversion H1.
-               apply Forall_Type_app ; [ | constructor ; [ constructor | constructor] ]...
+               apply Forall_inf_app ; [ | constructor ; [ constructor | constructor] ]...
             ** list_simpl ; rewrite Hperm ; simpl.
-               perm_Type_solve.
+               Permutation_Type_solve.
          ++ simpl in HP3 ; rewrite map_map in HP3.
             symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
             destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- map_map in HP1.
             rewrite <- map_map in HP2.
             rewrite app_assoc in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
@@ -2502,13 +2483,13 @@ intros l Hll ; induction Hll ;
               simpl in HP4a ; simpl in HP4b ; simpl in HP4c ; simpl in HP4d.
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             apply (Permutation_Type_app_head l3b) in HP4d.
             assert (HP' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP'.
             symmetry in HP' ; apply Permutation_Type_map_inv in HP'.
             clear HP4'' ; destruct HP' as [l4'' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             simpl in HP2 ; simpl in HP4a.
             apply (Permutation_Type_app_tail (ill2ll i2a C :: l4b)) in HP4a.
             apply (Permutation_Type_app_head (map dual (map (ill2ll i2a) l6))) in HP4a.
@@ -2516,7 +2497,7 @@ intros l Hll ; induction Hll ;
             rewrite <- (map_map _ _ l13) in HP'. 
             symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
             destruct HP4c as [l4'' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l14) in HP4b.
             simpl in HP4b ; simpl in HP'.
             apply (@Permutation_Type_cons _ (ill2ll i2a C) _ eq_refl) in HP4b.
@@ -2528,15 +2509,16 @@ intros l Hll ; induction Hll ;
             assert (x0 :: l15 ++ l16 <> nil) as Hnil
               by (intros Hnil ; inversion Hnil).
             inversion Hoclm ; subst.
-            apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+            assert (Hoclm1 := Forall_inf_app_l _ _ X).
+            assert (Hoclm2 := Forall_inf_app_r _ _ X).
             inversion Hoclm2 ; subst.
             inversion H1 ; subst.
             simpl in HP4' ; simpl in HP4c.
-            apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
+            apply (Permutation_Type_Forall_inf HP4') in Hocl.
             apply (Permutation_Type_app_head l9) in HP4c.
-            apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [_ Hocl].
-            assert (Hocl' := Forall_Type_cons _ H3 Hocl).
+            apply (Permutation_Type_Forall_inf HP4c) in Hocl.
+            apply Forall_inf_app_r in Hocl.
+            assert (Hocl' := Forall_inf_cons _ H3 Hocl).
             apply IHHll1 in Hocl' ; [ split | | ].
             ** apply (snd Hocl') with (igen x0 :: rev l4 ++ rev l11) in Hnil.
                eapply ex_ir ; [ apply Hnil | ].
@@ -2545,7 +2527,7 @@ intros l Hll ; induction Hll ;
                apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-               list_simpl ; perm_Type_solve.
+               list_simpl ; Permutation_Type_solve.
             ** intros Hnil' lw.
                apply (snd Hocl') with (igen x0 :: rev l4 ++ rev l11 ++ lw) in Hnil.
                eapply ex_ir ; [ apply Hnil | ].
@@ -2554,32 +2536,31 @@ intros l Hll ; induction Hll ;
                apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-               list_simpl ; perm_Type_solve.
+               list_simpl ; Permutation_Type_solve.
             ** constructor...
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               rewrite app_assoc in X.
-               apply Forall_Type_app_inv in X ; destruct X as [X _].
-               apply Forall_Type_app_inv in X ; destruct X as [H4l H4r].
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               rewrite app_assoc in X0.
+               apply Forall_inf_app_l in X0.
+               assert (H4l := Forall_inf_app_l _ _ X0).
+               assert (H4r := Forall_inf_app_r _ _ X0).
                simpl in HP3.
                apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
-               list_simpl in Hoclm1 ; apply Forall_Type_app_inv in Hoclm1 ;
-                 destruct Hoclm1 as [Hoclm1 _].
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
+               list_simpl in Hoclm1 ; apply Forall_inf_app_l in Hoclm1.
                list_simpl.
-               apply Forall_Type_app...
-               apply Forall_Type_app...
+               apply Forall_inf_app...
+               apply Forall_inf_app...
             ** list_simpl ; rewrite Hperm ; simpl.
-               rewrite bidual ; perm_Type_solve.
+               rewrite bidual ; Permutation_Type_solve.
       -- assert (HP4' := HP4).
          symmetry in HP4' ; apply Permutation_Type_vs_cons_inv in HP4'.
          destruct HP4' as [(l4a & l4b) Heq'].
-         dichot_Type_elt_app_exec Heq' ; subst.
+         dichot_elt_app_inf_exec Heq' ; subst.
          ++ simpl in HP3 ; rewrite map_map in HP3.
-            symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
-            destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP3 ; apply Permutation_Type_map_inv in HP3 as [l3''' Heq' HP3].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             rewrite <- map_map in HP1.
             list_simpl in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
             apply Permutation_Type_app_app_inv in HP4.
@@ -2595,29 +2576,29 @@ intros l Hll ; induction Hll ;
             assert (HP' := Permutation_Type_trans HP1 HP4a).
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             apply (Permutation_Type_app_head l3b) in HP4d.
             assert (HP'' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP''.
             symmetry in HP'' ; apply Permutation_Type_map_inv in HP''.
             clear HP4'' ; destruct HP'' as [l4' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l11) in HP'.
             rewrite <- (map_map _ _ l13) in HP'.
             simpl in HP4c. 
-            symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
-            destruct HP4c as [l4' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP4c; apply Permutation_Type_map_inv in HP4c as [l4' Heq' HP4c].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             specialize IHHll2 with (rev (l4 ++ l11 ++ l13)) (x0_1 :: l9 ++ l15) C.
-            simpl in HP4' ; apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl1 Hocl2].
-            simpl in HP4c ; apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl2.
-            apply Forall_Type_app_inv in Hocl2 ; destruct Hocl2 as [Hocl2 _].
-            assert (Hocl3 := Forall_Type_app _ _ _ Hocl1 Hocl2).
+            simpl in HP4' ; apply (Permutation_Type_Forall_inf HP4') in Hocl.
+            assert (Hocl1 := Forall_inf_app_l _ _ Hocl).
+            assert (Hocl2 := Forall_inf_app_r _ _ Hocl).
+            simpl in HP4c ; apply (Permutation_Type_Forall_inf HP4c) in Hocl2.
+            apply Forall_inf_app_l in Hocl2.
+            assert (Hocl3 := Forall_inf_app Hocl1 Hocl2).
             inversion Hoclm ; subst.
-            apply Forall_Type_app_inv in X ; destruct X as [_ X].
+            apply Forall_inf_app_r in X.
             inversion X; inversion H1 ; subst.
-            assert (Hocl4 := Forall_Type_cons _ H6 Hocl3).
+            assert (Hocl4 := Forall_inf_cons _ H6 Hocl3).
             apply IHHll2 in Hocl4.
             ** assert (x0_1 :: l9 ++ l15 <> nil) as Hnil
                  by (intros Hnil ; inversion Hnil).
@@ -2630,7 +2611,7 @@ intros l Hll ; induction Hll ;
                    apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                    simpl in HP4''.
                    apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                   list_simpl ; perm_Type_solve.
+                   list_simpl ; Permutation_Type_solve.
                --- intros Hnil' lw.
                    apply (snd Hocl4) with (ilmap x0_1 x0_2 :: lw ++ rev l6 ++ rev l14)
                      in Hnil.
@@ -2642,29 +2623,28 @@ intros l Hll ; induction Hll ;
                    apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                    simpl in HP4''.
                    apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                   list_simpl ; perm_Type_solve.
+                   list_simpl ; Permutation_Type_solve.
             ** constructor...
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X0.
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
                list_simpl in X0.
-               apply Forall_Type_app_inv in X0 ; destruct X0 as [_ Hoclm1].
+               apply Forall_inf_app_r in X0 as Hoclm1; clear X0.
                inversion Hoclm ; subst.
-               apply Forall_Type_app_inv in X0 ; destruct X0 as [Hoclm2 _].
+               apply Forall_inf_app_l in X0 as Hoclm2; clear X0.
                simpl in HP3.
                apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm2.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm2.
                list_simpl in Hoclm2.
-               apply Forall_Type_app_inv in Hoclm2 ; destruct Hoclm2 as [_ Hoclm2].
+               apply Forall_inf_app_r in Hoclm2.
                rewrite rev_app_distr.
-               apply Forall_Type_app...
+               apply Forall_inf_app...
                list_simpl...
             ** simpl ; rewrite Hperm ; list_simpl.
-               rewrite bidual ; perm_Type_solve.
+               rewrite bidual ; Permutation_Type_solve.
          ++ simpl in HP3 ; rewrite map_map in HP3.
-            symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
-            destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP3 ; apply Permutation_Type_map_inv in HP3 as [l3''' Heq' HP3].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             rewrite <- map_map in HP1.
             rewrite <- map_map in HP2.
             rewrite app_assoc in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
@@ -2679,17 +2659,17 @@ intros l Hll ; induction Hll ;
             assert (HP' := Permutation_Type_trans HP1 HP4a).
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             apply (Permutation_Type_app_tail l3d) in HP4d.
             assert (HP'' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP''.
             symmetry in HP'' ; apply Permutation_Type_map_inv in HP''.
             clear HP4'' ; destruct HP'' as [l4'' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l13) in HP'.
             symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
             destruct HP4c as [l4'' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l14) in HP4b.
             simpl in HP2 ; simpl in HP4'''' ; simpl in HP4b.
             apply (@Permutation_Type_cons _ (ill2ll i2a C) _ eq_refl) in HP4''''.
@@ -2698,14 +2678,16 @@ intros l Hll ; induction Hll ;
             assert (HP'' := Permutation_Type_trans HP2 HP4'''').
             specialize IHHll2 with (rev (l4 ++ l13)) l15 x0_1.
             simpl in HP4'.
-            apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl1 Hocl2].
+            apply (Permutation_Type_Forall_inf HP4') in Hocl.
+            assert (Hocl1 := Forall_inf_app_l _ _ Hocl).
+            assert (Hocl2 := Forall_inf_app_r _ _ Hocl).
             rewrite <- (map_map _ _ l12) in HP''. 
             specialize IHHll1 with (rev (x0_2 :: l6 ++ l14 ++ l12)) (l10 ++ l16) C.
             simpl in HP4c.
-            apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl1.
-            apply Forall_Type_app_inv in Hocl1 ; destruct Hocl1 as [Hocl3 Hocl4].
-            assert (Hocl5 := Forall_Type_app _ _ _ Hocl2 Hocl4).
+            apply (Permutation_Type_Forall_inf HP4c) in Hocl1.
+            assert (Hocl3 := Forall_inf_app_l _ _ Hocl1).
+            assert (Hocl4 := Forall_inf_app_r _ _ Hocl1).
+            assert (Hocl5 := Forall_inf_app Hocl2 Hocl4).
             apply IHHll2 in Hocl3 ; [ apply IHHll1 in Hocl5 | | ].
             ** split.
                --- destruct Hocl5 as [Hocl5 _].
@@ -2714,20 +2696,20 @@ intros l Hll ; induction Hll ;
                                      ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
                    +++ apply lmap_ilr...
                        eapply ex_ir ; [ apply Hocl5 | ].
-                       rewrite Hperm ; simpl ; perm_Type_solve.
+                       rewrite Hperm ; simpl ; Permutation_Type_solve.
                    +++ rewrite Hperm ; simpl.
                        simpl in HP3.
                        apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                        simpl in HP4''.
                        apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                       list_simpl ; perm_Type_solve.
+                       list_simpl ; Permutation_Type_solve.
                --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
                    apply (Permutation_Type_app_tail l10) in HP4c.
                    assert (HP''' := Permutation_Type_trans HP4' HP4c).
                    symmetry in HP''' ; apply Permutation_Type_vs_cons_inv in HP'''.
                    destruct HP''' as [(l4l & l4r) Heq'].
                    rewrite <- app_assoc in Heq'.
-                   dichot_Type_elt_app_exec Heq' ; subst.
+                   dichot_elt_app_inf_exec Heq' ; subst.
                    +++ assert (l4l ++ i :: l <> nil) as Hnil'
                          by (intros Hnil' ; destruct l4l ; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
@@ -2736,16 +2718,16 @@ intros l Hll ; induction Hll ;
                                      ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
                        *** apply lmap_ilr...
                            eapply ex_ir ; [ apply Hocl5 | ].
-                           rewrite Hperm ; simpl ; perm_Type_solve.
+                           rewrite Hperm ; simpl ; Permutation_Type_solve.
                        *** rewrite Hperm ; simpl.
                            simpl in HP3.
                            apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                            simpl in HP4''.
                            apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                           list_simpl ; perm_Type_solve.
+                           list_simpl ; Permutation_Type_solve.
                    +++ assert (l17 ++ i :: l4r <> nil) as Hnil'
-                         by (intros Hnil' ; destruct l17 ; inversion Hnil').
-                      rewrite Heq'1 in Hnil'.
+                         by (intros Hnil'; destruct l17; inversion Hnil').
+                       rewrite Heq'1 in Hnil'.
                        assert (l10 ++ l16 <> nil) as Hnil''.
                        { intros Hnil''.
                          apply Hnil'.
@@ -2758,67 +2740,70 @@ intros l Hll ; induction Hll ;
                                      ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
                        *** apply lmap_ilr...
                            eapply ex_ir ; [ apply Hnil'' | ].
-                           rewrite Hperm ; simpl ; perm_Type_solve.
+                           rewrite Hperm ; simpl ; Permutation_Type_solve.
                        *** rewrite Hperm ; simpl.
                            simpl in HP3.
                            apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                            simpl in HP4''.
                            apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                           list_simpl ; perm_Type_solve.
+                           list_simpl ; Permutation_Type_solve.
             ** inversion Hoclm ; subst.
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                inversion H1 ; constructor...
                simpl in HP3.
                apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
-               apply Forall_Type_rev.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
+               apply Forall_inf_rev.
                constructor...
-               apply Forall_Type_app.
-               --- list_simpl in Hoclm1 ; apply Forall_Type_app_inv in Hoclm1.
+               apply Forall_inf_app.
+               --- list_simpl in Hoclm1 ; apply Forall_inf_app_l in Hoclm1.
                    rewrite <- rev_involutive.
-                   apply Forall_Type_rev.
+                   apply Forall_inf_rev.
                    apply Hoclm1.
                --- simpl in HP4''.
                    apply Permutation_Type_rev' in HP4''.
-                   apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-                   list_simpl in X ; apply Forall_Type_app_inv in X ;
-                     destruct X as [H4l H4r].
-                   apply Forall_Type_rev in H4l.
+                   apply (Permutation_Type_Forall_inf HP4'') in X0.
+                   list_simpl in X0.
+                   assert (H4l := Forall_inf_app_l _ _ X0).
+                   assert (H4r := Forall_inf_app_r _ _ X0).
+                   apply Forall_inf_rev in H4l.
                    rewrite rev_involutive in H4l.
-                   apply Forall_Type_app...
-                   apply Forall_Type_app_inv in H4r ; destruct H4r as [H4r _].
-                   apply Forall_Type_rev in H4r.
+                   apply Forall_inf_app...
+                   apply Forall_inf_app_l in H4r.
+                   apply Forall_inf_rev in H4r.
                    rewrite rev_involutive in H4r...
             ** simpl ; rewrite Hperm ; simpl.
-               list_simpl ; perm_Type_solve.
+               list_simpl ; Permutation_Type_solve.
             ** inversion Hoclm ; subst...
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               list_simpl in X.
-               apply Forall_Type_app_inv in X.
-               destruct X as [H4l H4r] ; apply Forall_Type_app_inv in H4r.
-               destruct H4r as [_ H4r].
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               list_simpl in X0.
+               assert (H4l := Forall_inf_app_l _ _ X0).
+               assert (H4r := Forall_inf_app_r _ _ X0).
+               apply Forall_inf_app_r in H4r.
                inversion H1 ; subst ; constructor...
-               list_simpl ; apply Forall_Type_app...
+               list_simpl ; apply Forall_inf_app...
                simpl in HP3.
                apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
-               list_simpl in Hoclm1 ; apply Forall_Type_app_inv in Hoclm1.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
+               list_simpl in Hoclm1 ; apply Forall_inf_app_r in Hoclm1.
                apply Hoclm1.
             ** list_simpl ; rewrite Hperm ; simpl.
-               rewrite bidual ; perm_Type_solve.
+               rewrite bidual ; Permutation_Type_solve.
       -- assert (HP4' := HP4).
          symmetry in HP4' ; apply Permutation_Type_vs_cons_inv in HP4'.
          destruct HP4' as [(l4a & l4b) Heq'].
-         simpl in Heq' ; dichot_Type_elt_app_exec Heq' ; subst.
+         simpl in Heq' ; dichot_elt_app_inf_exec Heq' ; subst.
          ++ simpl in HP3 ; rewrite map_map in HP3.
             symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
             destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- map_map in HP1.
             list_simpl in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
             apply Permutation_Type_app_app_inv in HP4.
@@ -2834,28 +2819,28 @@ intros l Hll ; induction Hll ;
             assert (HP' := Permutation_Type_trans HP1 HP4a).
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             apply (Permutation_Type_app_head l3b) in HP4d.
             assert (HP'' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP''.
             symmetry in HP'' ; apply Permutation_Type_map_inv in HP''.
-            clear HP4'' ; destruct HP'' as [l4' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            clear HP4''; destruct HP'' as [l4' Heq' HP4''].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             rewrite <- (map_map _ _ l11) in HP'.
             rewrite <- (map_map _ _ l13) in HP'. 
-            symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
-            destruct HP4c as [l4' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP4c; apply Permutation_Type_map_inv in HP4c as [l4' Heq' HP4c].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             specialize IHHll2 with (rev (l4 ++ l11 ++ l13)) (x0 :: l9 ++ l15) C.
-            simpl in HP4' ; apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl1 Hocl2].
-            simpl in HP4c ; apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl2.
-            apply Forall_Type_app_inv in Hocl2 ; destruct Hocl2 as [Hocl2 _].
-            assert (Hocl3 := Forall_Type_app _ _ _ Hocl1 Hocl2).
+            simpl in HP4' ; apply (Permutation_Type_Forall_inf HP4') in Hocl.
+            assert (Hocl1 := Forall_inf_app_l _ _ Hocl).
+            assert (Hocl2 := Forall_inf_app_r _ _ Hocl).
+            simpl in HP4c ; apply (Permutation_Type_Forall_inf HP4c) in Hocl2.
+            apply Forall_inf_app_l in Hocl2.
+            assert (Hocl3 := Forall_inf_app Hocl1 Hocl2).
             inversion Hoclm ; subst.
-            apply Forall_Type_app_inv in X ; destruct X as [_ X].
+            apply Forall_inf_app_r in X.
             inversion X; inversion H1 ; subst.
-            assert (Hocl4 := Forall_Type_cons _ H5 Hocl3).
+            assert (Hocl4 := Forall_inf_cons _ H5 Hocl3).
             apply IHHll2 in Hocl4.
             ** assert (x0 :: l9 ++ l15 <> nil) as Hnil
                  by (intros Hnil ; inversion Hnil).
@@ -2868,7 +2853,7 @@ intros l Hll ; induction Hll ;
                    apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                    simpl in HP4''.
                    apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                   list_simpl ; perm_Type_solve.
+                   list_simpl ; Permutation_Type_solve.
                --- intros Hnil' lw.
                    apply (snd Hocl4) with (ineg x0 :: lw ++ rev l6 ++ rev l14) in Hnil.
                    eapply ex_ir ; [ apply Hnil | ].
@@ -2879,28 +2864,27 @@ intros l Hll ; induction Hll ;
                    apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                    simpl in HP4''.
                    apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                   list_simpl ; perm_Type_solve.
+                   list_simpl ; Permutation_Type_solve.
             ** constructor...
                simpl in HP4''.
                apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X0.
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
                list_simpl in X0.
-               apply Forall_Type_app_inv in X0 ; destruct X0 as [_ Hoclm1].
+               apply Forall_inf_app_r in X0 as Hoclm1; clear X0.
                inversion Hoclm ; subst.
-               apply Forall_Type_app_inv in X0 ; destruct X0 as [Hoclm2 _].
+               apply Forall_inf_app_l in X0 as Hoclm2; clear X0.
                simpl in HP3 ; apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm2.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm2.
                list_simpl in Hoclm2.
-               apply Forall_Type_app_inv in Hoclm2 ; destruct Hoclm2 as [_ Hoclm2].
+               apply Forall_inf_app_r in Hoclm2.
                rewrite rev_app_distr.
-               apply Forall_Type_app...
+               apply Forall_inf_app...
                list_simpl...
             ** simpl ; rewrite Hperm ; list_simpl.
-               rewrite bidual ; perm_Type_solve.
+               rewrite bidual ; Permutation_Type_solve.
          ++ simpl in HP3 ; rewrite map_map in HP3.
-            symmetry in HP3 ; apply Permutation_Type_map_inv in HP3.
-            destruct HP3 as [l3''' Heq' HP3].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP3; apply Permutation_Type_map_inv in HP3 as [l3''' Heq' HP3].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             rewrite <- map_map in HP1.
             rewrite <- map_map in HP2.
             rewrite app_assoc in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
@@ -2913,19 +2897,18 @@ intros l Hll ; induction Hll ;
             simpl in HP1 ; simpl in HP4a.
             apply (Permutation_Type_app_head (map dual (map (ill2ll i2a) l4))) in HP4a.
             assert (HP' := Permutation_Type_trans HP1 HP4a).
-            symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
-            destruct HP4' as [l3' Heq' HP4'].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP4'; apply Permutation_Type_map_inv in HP4' as [l3' Heq' HP4'].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             apply (Permutation_Type_app_tail l3d) in HP4d.
             assert (HP'' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP''.
-            symmetry in HP'' ; apply Permutation_Type_map_inv in HP''.
-            clear HP4'' ; destruct HP'' as [l4'' Heq' HP4''].
-            decomp_map_Type Heq' ; subst.
+            symmetry in HP''; apply Permutation_Type_map_inv in HP''.
+            clear HP4''; destruct HP'' as [l4'' Heq' HP4''].
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             rewrite <- (map_map _ _ l13) in HP'.
             symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
             destruct HP4c as [l4'' Heq' HP4c].
-            decomp_map_Type Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq' ; subst.
             rewrite <- (map_map _ _ l14) in HP4b.
             simpl in HP2 ; simpl in HP4'''' ; simpl in HP4b.
             apply (@Permutation_Type_cons _ (ill2ll i2a C) _ eq_refl) in HP4''''.
@@ -2933,13 +2916,15 @@ intros l Hll ; induction Hll ;
             apply (Permutation_Type_app_head (map dual (map (ill2ll i2a) l6))) in HP4''''.
             assert (HP'' := Permutation_Type_trans HP2 HP4'''').
             specialize IHHll2 with (rev (l4 ++ l13)) l15 x0.
-            simpl in HP4' ; apply (Permutation_Type_Forall_Type _ _ _ HP4') in Hocl.
-            apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocl1 Hocl2].
+            simpl in HP4' ; apply (Permutation_Type_Forall_inf HP4') in Hocl.
+            assert (Hocl1 := Forall_inf_app_l _ _ Hocl).
+            assert (Hocl2 := Forall_inf_app_r _ _ Hocl).
             rewrite <- (map_map _ _ l12) in HP''. 
             specialize IHHll1 with (rev (ivar atN :: l6 ++ l14 ++ l12)) (l10 ++ l16) C.
-            simpl in HP4c ; apply (Permutation_Type_Forall_Type _ _ _ HP4c) in Hocl1.
-            apply Forall_Type_app_inv in Hocl1 ; destruct Hocl1 as [Hocl3 Hocl4].
-            assert (Hocl5 := Forall_Type_app _ _ _ Hocl2 Hocl4).
+            simpl in HP4c ; apply (Permutation_Type_Forall_inf HP4c) in Hocl1.
+            assert (Hocl3 := Forall_inf_app_l _ _ Hocl1).
+            assert (Hocl4 := Forall_inf_app_r _ _ Hocl1).
+            assert (Hocl5 := Forall_inf_app Hocl2 Hocl4).
             apply IHHll2 in Hocl3 ; [ apply IHHll1 in Hocl5 | | ].
             ** split.
                --- destruct Hocl5 as [Hocl5 _].
@@ -2953,17 +2938,17 @@ intros l Hll ; induction Hll ;
                        apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                        simpl in HP4''.
                        apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                       list_simpl ; perm_Type_solve.
+                       list_simpl ; Permutation_Type_solve.
                    +++ intros a Ha ; apply (snd (Hgax a) Ha).
                    +++ eapply ex_ir ; [ apply Hocl5 | ].
-                       rewrite Hperm ; simpl ; perm_Type_solve.
+                       rewrite Hperm ; simpl ; Permutation_Type_solve.
                --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
                    apply (Permutation_Type_app_tail l10) in HP4c.
                    assert (HP''' := Permutation_Type_trans HP4' HP4c).
                    symmetry in HP''' ; apply Permutation_Type_vs_cons_inv in HP'''.
                    destruct HP''' as [(l4l & l4r) Heq'].
                    rewrite <- app_assoc in Heq'.
-                   simpl in Heq' ; dichot_Type_elt_app_exec Heq' ; subst.
+                   simpl in Heq' ; dichot_elt_app_inf_exec Heq' ; subst.
                    +++ assert (l4l ++ i :: l <> nil) as Hnil'
                          by (intros Hnil' ; destruct l4l ; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
@@ -2977,10 +2962,10 @@ intros l Hll ; induction Hll ;
                            apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                            simpl in HP4''.
                            apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                           list_simpl ; perm_Type_solve.
+                           list_simpl ; Permutation_Type_solve.
                        *** intros a Ha ; apply (snd (Hgax a) Ha).
                        *** eapply ex_ir ; [ apply Hocl5 | ].
-                           rewrite Hperm ; simpl ; perm_Type_solve.
+                           rewrite Hperm ; simpl ; Permutation_Type_solve.
                    +++ assert (l17 ++ i :: l4r <> nil) as Hnil'
                          by (intros Hnil' ; destruct l17 ; inversion Hnil').
                        rewrite Heq'1 in Hnil'.
@@ -3002,51 +2987,55 @@ intros l Hll ; induction Hll ;
                            apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
                            simpl in HP4''.
                            apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                           list_simpl ; perm_Type_solve.
+                           list_simpl ; Permutation_Type_solve.
                        *** intros a Ha ; apply (snd (Hgax a) Ha).
                        *** eapply ex_ir ; [ apply Hnil'' | ].
-                           rewrite Hperm ; simpl ; perm_Type_solve.
+                           rewrite Hperm ; simpl ; Permutation_Type_solve.
             ** inversion Hoclm ; subst.
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                inversion H1 ; constructor...
                simpl in HP3 ; apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
-               apply Forall_Type_rev.
-               constructor ; [ | apply Forall_Type_app ].
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
+               apply Forall_inf_rev.
+               constructor ; [ | apply Forall_inf_app ].
                --- constructor.
-               --- list_simpl in Hoclm1 ; apply Forall_Type_app_inv in Hoclm1.
+               --- list_simpl in Hoclm1 ; apply Forall_inf_app_l in Hoclm1.
                    rewrite <- rev_involutive.
-                   apply Forall_Type_rev.
+                   apply Forall_inf_rev.
                    apply Hoclm1.
                --- simpl in HP4'' ; apply Permutation_Type_rev' in HP4''.
-                   apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-                   list_simpl in X ; apply Forall_Type_app_inv in X ;
-                     destruct X as [H4l H4r].
-                   apply Forall_Type_rev in H4l.
+                   apply (Permutation_Type_Forall_inf HP4'') in X0.
+                   list_simpl in X0.
+                   assert (H4l := Forall_inf_app_l _ _ X0).
+                   assert (H4r := Forall_inf_app_r _ _ X0).
+                   apply Forall_inf_rev in H4l.
                    rewrite rev_involutive in H4l.
-                   apply Forall_Type_app...
-                   apply Forall_Type_app_inv in H4r ; destruct H4r as [H4r _].
-                   apply Forall_Type_rev in H4r.
+                   apply Forall_inf_app...
+                   apply Forall_inf_app_l in H4r.
+                   apply Forall_inf_rev in H4r.
                    rewrite rev_involutive in H4r...
-            ** simpl ; rewrite Hperm ; list_simpl ; perm_Type_solve.
+            ** simpl ; rewrite Hperm ; list_simpl ; Permutation_Type_solve.
             ** inversion Hoclm ; subst...
-               apply Forall_Type_app_inv in X ; destruct X as [Hoclm1 Hoclm2].
+               assert (Hoclm1 := Forall_inf_app_l _ _ X).
+               assert (Hoclm2 := Forall_inf_app_r _ _ X).
                inversion Hoclm2 ; subst.
                simpl in HP4'' ; apply Permutation_Type_rev' in HP4''.
-               apply (Permutation_Type_Forall_Type _ _ _ HP4'') in X.
-               list_simpl in X ; apply Forall_Type_app_inv in X ; destruct X as [H4l H4r].
-               apply Forall_Type_app_inv in H4r ; destruct H4r as [_ H4r].
+               apply (Permutation_Type_Forall_inf HP4'') in X0.
+               list_simpl in X0.
+               assert (H4l := Forall_inf_app_l _ _ X0).
+               assert (H4r := Forall_inf_app_r _ _ X0).
+               apply Forall_inf_app_r in H4r.
                inversion H1 ; subst ; constructor...
-               list_simpl ; apply Forall_Type_app...
+               list_simpl ; apply Forall_inf_app...
                simpl in HP3 ; apply Permutation_Type_rev' in HP3.
-               apply (Permutation_Type_Forall_Type _ _ _ HP3) in Hoclm1.
-               list_simpl in Hoclm1 ; apply Forall_Type_app_inv in Hoclm1.
+               apply (Permutation_Type_Forall_inf HP3) in Hoclm1.
+               list_simpl in Hoclm1 ; apply Forall_inf_app_r in Hoclm1.
                apply Hoclm1.
             ** list_simpl ; rewrite Hperm ; simpl.
-               rewrite bidual ; perm_Type_solve.
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP] ; simpl in Heq ; simpl in HP.
+               rewrite bidual ; Permutation_Type_solve.
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq]; simpl in Heq, HP.
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
   + specialize IHHll with (l0 ++ C1 :: nil) lo C2.
     apply IHHll in Hocl.
@@ -3058,16 +3047,16 @@ intros l Hll ; induction Hll ;
          list_simpl in IH.
          list_simpl ; apply lpam_irr.
          eapply ex_ir...
-         rewrite Hperm ; simpl ; perm_Type_solve.
+         rewrite Hperm ; simpl ; Permutation_Type_solve.
     * inversion Hoclm ; subst.
       inversion H1 ; subst.
       constructor...
-      apply Forall_Type_app...
+      apply Forall_inf_app...
       constructor...
       constructor.
     * simpl in HP ; rewrite Hperm in HP ; simpl in HP.
       simpl ; rewrite Hperm ; simpl.
-      perm_Type_solve.
+      Permutation_Type_solve.
   + specialize IHHll with (l0 ++ C :: nil) lo N.
     apply IHHll in Hocl.
     * destruct Hocl as [IH1 IH2].
@@ -3080,15 +3069,15 @@ intros l Hll ; induction Hll ;
          eapply ex_ir...
          rewrite Hperm ; list_simpl.
          apply Permutation_Type_app...
-         PEperm_Type_solve.
+         GPermutation_Type_solve.
     * inversion Hoclm ; subst.
       inversion H1 ; subst.
       constructor...
       -- constructor.
-      -- apply Forall_Type_app...
+      -- apply Forall_inf_app...
          constructor ; [ | constructor ]...
     * simpl in HP ; rewrite Hperm in HP ; simpl in HP.
-      simpl ; rewrite Hperm ; simpl ; perm_Type_solve.
+      simpl ; rewrite Hperm ; simpl ; Permutation_Type_solve.
   + specialize IHHll with (C1 :: l0) lo C2.
     apply IHHll in Hocl.
     * destruct Hocl as [IH1 IH2].
@@ -3104,7 +3093,7 @@ intros l Hll ; induction Hll ;
       constructor...
       constructor...
     * simpl in HP ; rewrite Hperm in HP ; simpl in HP.
-      simpl ; rewrite Hperm ; simpl ; perm_Type_solve.
+      simpl ; rewrite Hperm ; simpl ; Permutation_Type_solve.
   + specialize IHHll with (C :: l0) lo N.
     apply IHHll in Hocl.
     * destruct Hocl as [IH1 IH2].
@@ -3121,38 +3110,34 @@ intros l Hll ; induction Hll ;
       -- constructor.
       -- constructor...
     * simpl in HP ; rewrite Hperm in HP ; simpl in HP.
-      simpl ; rewrite Hperm ; simpl ; perm_Type_solve.
-  + symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+      simpl ; rewrite Hperm ; simpl ; Permutation_Type_solve.
+  + symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
       simpl in H3 ; simpl in H5 ; subst.
     * exfalso.
-      apply Forall_Type_app_inv in Hocl.
-      destruct Hocl as [_ Hocl].
+      apply Forall_inf_app_r in Hocl.
       inversion Hocl.
       inversion H1.
     * exfalso.
-      apply Forall_Type_app_inv in Hocl.
-      destruct Hocl as [_ Hocl].
+      apply Forall_inf_app_r in Hocl.
       inversion Hocl.
       inversion H1.
     * exfalso.
-      apply Forall_Type_app_inv in Hocl.
-      destruct Hocl as [_ Hocl].
+      apply Forall_inf_app_r in Hocl.
       inversion Hocl.
       inversion H1.
     * exfalso.
-      apply Forall_Type_app_inv in Hocl.
-      destruct Hocl as [_ Hocl].
+      apply Forall_inf_app_r in Hocl.
       inversion Hocl.
       inversion H1.
     * apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-      apply (@PEperm_Type_cons _ _ _ (dual (ill2ll i2a x0_1)) eq_refl) in HP.
-      apply (@PEperm_Type_cons _ _ _ (dual (ill2ll i2a x0_2)) eq_refl) in HP.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP.
+      apply (@PEPermutation_Type_cons _ _ _ (dual (ill2ll i2a x0_1)) eq_refl) in HP.
+      apply (@PEPermutation_Type_cons _ _ _ (dual (ill2ll i2a x0_2)) eq_refl) in HP.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
       rewrite 2 app_comm_cons in HP.
-      assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+      assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
       specialize IHHll with (rev (x0_2 :: x0_1 :: l8) ++ rev l6) lo C.
       list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
       -- destruct HP' as [IH1 IH2].
@@ -3163,31 +3148,31 @@ intros l Hll ; induction Hll ;
             list_simpl in IH.
             list_simpl ; apply tens_ilr...
       -- inversion Hoclm ; constructor...
-         apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ; apply Forall_Type_app...
+         assert (Hl := Forall_inf_app_l _ _ X).
+         assert (Hr := Forall_inf_app_r _ _ X).
+         apply Forall_inf_app...
          inversion Hr.
          inversion H5.
          constructor...
          constructor...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
   + split ; intros ; apply top_irr.
-  + symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-      [ decomp_map_Type H0 ; destruct x ; inversion H0
-      | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+  + symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+      [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+      | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                            destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ; subst.
     * exfalso.
-      apply Forall_Type_app_inv in Hocl ; destruct Hocl as [_ Hocl] ; inversion Hocl.
+      apply Forall_inf_app_r in Hocl; inversion Hocl.
       inversion H1.
     * apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
       split ; intros ; list_simpl ; apply zero_ilr.
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  + apply (@PEperm_Type_cons _ _ _ (ill2ll i2a C1) eq_refl) in HP.
-    apply PEperm_PCperm_Type in HP ; unfold id in HP.
+  + apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a C1) eq_refl) in HP.
+    apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
     rewrite app_comm_cons in HP.
-    assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+    assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
     specialize IHHll with l0 lo C1.
     list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
     * destruct HP' as [IH1 IH2].
@@ -3200,15 +3185,15 @@ intros l Hll ; induction Hll ;
     * inversion Hoclm ; subst.
       inversion H1 ; subst.
       constructor...
-  + symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+  + symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
       simpl in H3 ; simpl in H5 ; subst.
-    * apply (@PEperm_Type_cons _ _ _ (ill2ll i2a x1) eq_refl) in HP.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP.
+    * apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a x1) eq_refl) in HP.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
       rewrite app_comm_cons in HP.
-      assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+      assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
       specialize IHHll with l0 (l3 ++ x1 :: l5) C.
       list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
       -- destruct HP' as [IH1 IH2].
@@ -3216,16 +3201,17 @@ intros l Hll ; induction Hll ;
          intros _ l2.
          apply IH2.
          intros Hnil ; destruct l3 ; inversion Hnil.
-      -- apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocll Hoclr] ;
-           apply Forall_Type_app...
+      -- assert (Hocll := Forall_inf_app_l _ _ Hocl).
+         assert (Hoclr := Forall_inf_app_r _ _ Hocl).
+         apply Forall_inf_app...
          inversion Hoclr.
          inversion H1.
          constructor...
     * apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-      apply (@PEperm_Type_cons _ _ _ (dual (ill2ll i2a x0_1)) eq_refl) in HP.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP.
+      apply (@PEPermutation_Type_cons _ _ _ (dual (ill2ll i2a x0_1)) eq_refl) in HP.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
       rewrite app_comm_cons in HP.
-      assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+      assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
       specialize IHHll with (rev (x0_1 :: l8) ++ rev l6) lo C.
       list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
       -- destruct HP' as [IH1 IH2].
@@ -3236,18 +3222,18 @@ intros l Hll ; induction Hll ;
             list_simpl in IH.
             list_simpl ; apply with_ilr1...
       -- inversion Hoclm ; constructor...
-         apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ;
-           apply Forall_Type_app...
+         assert (Hl := Forall_inf_app_l _ _ X).
+         assert (Hr := Forall_inf_app_r _ _ X).
+         apply Forall_inf_app...
          inversion Hr.
          inversion H5.
          constructor...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  + apply (@PEperm_Type_cons _ _ _ (ill2ll i2a C2) eq_refl) in HP.
-    apply PEperm_PCperm_Type in HP ; unfold id in HP.
+  + apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a C2) eq_refl) in HP.
+    apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
     rewrite app_comm_cons in HP.
-    assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+    assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
     specialize IHHll with l0 lo C2.
     list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
     * destruct HP' as [IH1 IH2].
@@ -3260,15 +3246,15 @@ intros l Hll ; induction Hll ;
     * inversion Hoclm ; subst.
       inversion H1 ; subst.
       constructor...
-  + symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+  + symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
       simpl in H3 ; simpl in H5 ; subst.
-    * apply (@PEperm_Type_cons _ _ _ (ill2ll i2a x2) eq_refl) in HP.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP.
+    * apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a x2) eq_refl) in HP.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
       rewrite app_comm_cons in HP.
-      assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+      assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
       specialize IHHll with l0 (l3 ++ x2 :: l5) C.
       list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
       -- destruct HP' as [IH1 IH2].
@@ -3276,16 +3262,17 @@ intros l Hll ; induction Hll ;
          intros _ l2.
          apply IH2.
          intros Hnil ; destruct l3 ; inversion Hnil.
-      -- apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocll Hoclr] ;
-           apply Forall_Type_app...
+      -- assert (Hocll := Forall_inf_app_l _ _ Hocl).
+         assert (Hoclr := Forall_inf_app_r _ _ Hocl).
+         apply Forall_inf_app...
          inversion Hoclr.
          inversion H1.
          constructor...
     * apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-      apply (@PEperm_Type_cons _ _ _ (dual (ill2ll i2a x0_2)) eq_refl) in HP.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP.
+      apply (@PEPermutation_Type_cons _ _ _ (dual (ill2ll i2a x0_2)) eq_refl) in HP.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
       rewrite app_comm_cons in HP.
-      assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+      assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
       specialize IHHll with (rev (x0_2 :: l8) ++ rev l6) lo C.
       list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
       -- destruct HP' as [IH1 IH2].
@@ -3296,25 +3283,26 @@ intros l Hll ; induction Hll ;
             list_simpl in IH.
             list_simpl ; apply with_ilr2...
       -- inversion Hoclm ; constructor...
-         apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ; apply Forall_Type_app...
+         assert (Hl := Forall_inf_app_l _ _ X).
+         assert (Hr := Forall_inf_app_r _ _ X).
+         apply Forall_inf_app...
          inversion Hr.
          inversion H5.
          constructor...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
   + assert (HP1 := HP).
-    apply (@PEperm_Type_cons _ _ _ (ill2ll i2a C1) eq_refl) in HP1.
-    apply PEperm_PCperm_Type in HP1 ; unfold id in HP1.
+    apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a C1) eq_refl) in HP1.
+    apply PEPermutation_PCPermutation_Type in HP1 ; unfold id in HP1.
     rewrite app_comm_cons in HP1.
-    assert (HP1' := PCperm_Type_trans _ _ _ _ HP1 (PCperm_Type_app_comm _ _ _)).
+    assert (HP1' := PCPermutation_Type_trans _ _ _ _ HP1 (PCPermutation_Type_app_comm _ _ _)).
     specialize IHHll1 with l0 lo C1.
     list_simpl in IHHll1 ; list_simpl in HP1' ; apply IHHll1 in HP1'...
     * destruct HP1' as [IH1 IH2].
-      apply (@PEperm_Type_cons _ _ _ (ill2ll i2a C2) eq_refl) in HP.
-      apply PEperm_PCperm_Type in HP ; unfold id in HP.
+      apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a C2) eq_refl) in HP.
+      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
       rewrite app_comm_cons in HP.
-      assert (HP2' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+      assert (HP2' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
       specialize IHHll2 with l0 lo C2.
       list_simpl in IHHll2 ; list_simpl in HP2' ; apply IHHll2 in HP2'...
       -- destruct HP2' as [IH3 IH4].
@@ -3331,18 +3319,19 @@ intros l Hll ; induction Hll ;
     * inversion Hoclm ; subst.
       inversion H1 ; subst.
       constructor...
-  + symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+  + symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
       simpl in H3 ; simpl in H5 ; subst.
-    * apply Forall_Type_app_inv in Hocl ; destruct Hocl as [Hocll Hoclr].
+    * assert (Hocll := Forall_inf_app_l _ _ Hocl).
+      assert (Hoclr := Forall_inf_app_r _ _ Hocl).
       inversion Hoclr.
       inversion H1.
-      -- apply (@PEperm_Type_cons _ _ _ (ill2ll i2a x1) eq_refl) in HP.
-         apply PEperm_PCperm_Type in HP ; unfold id in HP.
+      -- apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a x1) eq_refl) in HP.
+         apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
          rewrite app_comm_cons in HP.
-         assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+         assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
          specialize IHHll1 with l0 (l3 ++ x1 :: l5) C.
          list_simpl in IHHll1 ; list_simpl in HP' ; apply IHHll1 in HP'...
          ++ destruct HP' as [IH1 IH2].
@@ -3350,12 +3339,12 @@ intros l Hll ; induction Hll ;
             intros _ l2.
             apply IH2.
             intros Hnil ; destruct l3 ; inversion Hnil.
-         ++ apply Forall_Type_app...
+         ++ apply Forall_inf_app...
             constructor...
-      -- apply (@PEperm_Type_cons _ _ _ (ill2ll i2a x2) eq_refl) in HP.
-         apply PEperm_PCperm_Type in HP ; unfold id in HP.
+      -- apply (@PEPermutation_Type_cons _ _ _ (ill2ll i2a x2) eq_refl) in HP.
+         apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
          rewrite app_comm_cons in HP.
-         assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+         assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
          specialize IHHll2 with l0 (l3 ++ x2 :: l5) C.
          list_simpl in IHHll2 ; list_simpl in HP' ; apply IHHll2 in HP'...
          ++ destruct HP' as [IH1 IH2].
@@ -3363,21 +3352,21 @@ intros l Hll ; induction Hll ;
             intros _ l2.
             apply IH2.
             intros Hnil ; destruct l3 ; inversion Hnil.
-         ++ apply Forall_Type_app...
+         ++ apply Forall_inf_app...
             constructor...
     * apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
       assert (HP1 := HP).
-      apply (@PEperm_Type_cons _ _ _ (dual (ill2ll i2a x0_1)) eq_refl) in HP1.
-      apply PEperm_PCperm_Type in HP1 ; unfold id in HP1.
+      apply (@PEPermutation_Type_cons _ _ _ (dual (ill2ll i2a x0_1)) eq_refl) in HP1.
+      apply PEPermutation_PCPermutation_Type in HP1 ; unfold id in HP1.
       rewrite app_comm_cons in HP1.
-      assert (HP1' := PCperm_Type_trans _ _ _ _ HP1 (PCperm_Type_app_comm _ _ _)).
+      assert (HP1' := PCPermutation_Type_trans _ _ _ _ HP1 (PCPermutation_Type_app_comm _ _ _)).
       specialize IHHll1 with (rev (x0_1 :: l8) ++ rev l6) lo C.
       list_simpl in IHHll1 ; list_simpl in HP1' ; apply IHHll1 in HP1'...
       -- destruct HP1' as [IH1 IH2].
-         apply (@PEperm_Type_cons _ _ _ (dual (ill2ll i2a x0_2)) eq_refl) in HP.
-         apply PEperm_PCperm_Type in HP ; unfold id in HP.
+         apply (@PEPermutation_Type_cons _ _ _ (dual (ill2ll i2a x0_2)) eq_refl) in HP.
+         apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
          rewrite app_comm_cons in HP.
-         assert (HP2' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+         assert (HP2' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
          specialize IHHll2 with (rev (x0_2 :: l8) ++ rev l6) lo C.
          list_simpl in IHHll2 ; list_simpl in HP2' ; apply IHHll2 in HP2'...
          ++ destruct HP2' as [IH3 IH4].
@@ -3390,25 +3379,27 @@ intros l Hll ; induction Hll ;
                list_simpl in IH6.
                list_simpl ; apply plus_ilr...
          ++ inversion Hoclm ; constructor...
-            apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ; apply Forall_Type_app...
+            assert (Hl := Forall_inf_app_l _ _ X).
+            assert (Hr := Forall_inf_app_r _ _ X).
+            apply Forall_inf_app...
             inversion Hr.
             inversion H5.
             constructor...
       -- inversion Hoclm ; constructor...
-         apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ; apply Forall_Type_app...
+         assert (Hl := Forall_inf_app_l _ _ X).
+         assert (Hr := Forall_inf_app_r _ _ X).
+         apply Forall_inf_app...
          inversion Hr.
          inversion H5.
          constructor...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  + symmetry in HP ; apply PEperm_Type_map_inv in HP.
+  + symmetry in HP ; apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l'' Heq' HPE] ; simpl in Heq'.
-    decomp_map_Type Heq'.
+    symmetry in Heq'; decomp_map_inf Heq'.
     destruct lo ; destruct l4 ; inversion Heq'3 ; subst.
     * split.
       -- list_simpl in Heq'4.
-         symmetry in Heq'4.
          apply ill2ll_map_ioc_inv in Heq'4.
          destruct Heq'4 as [l2' Heq' Heq''] ; subst.
          apply (f_equal (@rev _)) in Heq' ; list_simpl in Heq' ; subst.
@@ -3421,35 +3412,34 @@ intros l Hll ; induction Hll ;
             inversion H1 ; subst.
             list_simpl ; constructor...
          ++ etransitivity.
-            ** apply PEperm_PCperm_Type.
+            ** apply PEPermutation_PCPermutation_Type.
                list_simpl in HPE.
-               apply (PEperm_Type_map wn) in HPE.
-               apply PEperm_Type_cons ; [reflexivity | eassumption].
+               apply (PEPermutation_Type_map _ wn) in HPE.
+               apply PEPermutation_Type_cons ; [reflexivity | eassumption].
             ** list_simpl ; rewrite ill2ll_map_ioc...
       -- intros Hnil ; contradiction Hnil...
     * exfalso ; destruct i ; inversion H1.
   + exfalso.
-    symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+    symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ; subst.
-    symmetry in HP ; apply PEperm_Type_map_inv in HP.
+    symmetry in HP ; apply PEPermutation_Type_map_inv in HP.
     destruct HP as [l'' Heq' _] ; simpl in Heq'.
-    decomp_map_Type Heq'.
+    symmetry in Heq'; decomp_map_inf Heq'.
     destruct C ; inversion Heq'1.
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+  symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
       simpl in H3 ; simpl in H5 ; subst.
   apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-  apply (@PEperm_Type_cons _ _ _ (dual (ill2ll i2a x0)) eq_refl) in HP.
-  apply PEperm_PCperm_Type in HP ; unfold id in HP.
+  apply (@PEPermutation_Type_cons _ _ _ (dual (ill2ll i2a x0)) eq_refl) in HP.
+  apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
   rewrite app_comm_cons in HP.
-  assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+  assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
   specialize IHHll with (rev (x0 :: l8) ++ rev l6) lo C.
   list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
   + destruct HP' as [IH1 IH2].
@@ -3460,22 +3450,23 @@ intros l Hll ; induction Hll ;
       list_simpl in IH.
       list_simpl ; apply de_ilr...
   + inversion Hoclm ; constructor...
-    apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ; apply Forall_Type_app...
+    assert (Hl := Forall_inf_app_l _ _ X).
+    assert (Hr := Forall_inf_app_r _ _ X).
+    apply Forall_inf_app...
     inversion Hr.
     inversion H5.
     constructor...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+  symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
       simpl in H3 ; simpl in H5 ; subst.
   apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-  apply PEperm_PCperm_Type in HP ; unfold id in HP.
+  apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
   rewrite app_comm_cons in HP.
-  assert (HP' := PCperm_Type_trans _ _ _ _ HP (PCperm_Type_app_comm _ _ _)).
+  assert (HP' := PCPermutation_Type_trans _ _ _ _ HP (PCPermutation_Type_app_comm _ _ _)).
   specialize IHHll with (rev l8 ++ rev l6) lo C.
   list_simpl in IHHll ; list_simpl in HP' ; apply IHHll in HP'...
   + destruct HP' as [IH1 IH2].
@@ -3486,26 +3477,27 @@ intros l Hll ; induction Hll ;
       list_simpl in IH.
       list_simpl ; apply wk_ilr...
   + inversion Hoclm ; constructor...
-    apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ; apply Forall_Type_app...
+    assert (Hl := Forall_inf_app_l _ _ X).
+    assert (Hr := Forall_inf_app_r _ _ X).
+    apply Forall_inf_app...
     inversion Hr...
-- symmetry in HP ; apply PCperm_Type_vs_cons_inv in HP.
-  destruct HP as [(l' & l'') Heq HP].
+- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  symmetry in H1 ; dichot_Type_elt_app_exec H1 ; subst ;
-    [ decomp_map_Type H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; decomp_map_Type H2 ; decomp_map_Type H3 ;
+  symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
+    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
+    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
                          destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
       simpl in H3 ; simpl in H5 ; subst.
   apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
-  assert (PCperm_Type (ipperm P) (wn (dual (ill2ll i2a x0)) :: wn (dual (ill2ll i2a x0)) :: l)
+  assert (PCPermutation_Type (ipperm P) (wn (dual (ill2ll i2a x0)) :: wn (dual (ill2ll i2a x0)) :: l)
          (ill2ll i2a C :: map (ill2ll i2a) lo
           ++ map dual (map (ill2ll i2a) (l6 ++ ioc x0 :: ioc x0 :: l8)))) as HP'.
-  { apply (PEperm_Type_cons _ (wn (dual (ill2ll i2a x0))) _ eq_refl) in HP.
-    apply (PEperm_Type_cons _ (wn (dual (ill2ll i2a x0))) _ eq_refl) in HP.
-    apply PEperm_PCperm_Type in HP.
+  { apply (@PEPermutation_Type_cons _ _ _ (wn (dual (ill2ll i2a x0))) eq_refl) in HP.
+    apply (@PEPermutation_Type_cons _ _ _ (wn (dual (ill2ll i2a x0))) eq_refl) in HP.
+    apply PEPermutation_PCPermutation_Type in HP.
     unfold id in HP ; simpl in HP.
     etransitivity...
-    PCperm_Type_solve. }
+    GPermutation_Type_solve. }
   specialize IHHll with (rev (ioc x0 :: ioc x0 :: l8) ++ rev l6) lo C.
   list_simpl in IHHll ; list_simpl in HP' ;  apply IHHll in HP'...
   + destruct HP' as [IH1 IH2].
@@ -3517,7 +3509,7 @@ intros l Hll ; induction Hll ;
          symmetry ; apply Permutation_Type_cons_app.
          apply Permutation_Type_cons_app.
          reflexivity.
-      -- rewrite Hperm ; simpl ; perm_Type_solve.
+      -- rewrite Hperm ; simpl ; Permutation_Type_solve.
     * intros Hnil l2.
       assert (IH := IH2 Hnil l2).
       list_simpl in IH.
@@ -3528,9 +3520,11 @@ intros l Hll ; induction Hll ;
          symmetry ; apply Permutation_Type_cons_app.
          apply Permutation_Type_cons_app.
          reflexivity.
-      -- rewrite Hperm ; simpl ; perm_Type_solve.
+      -- rewrite Hperm ; simpl ; Permutation_Type_solve.
   + inversion Hoclm ; constructor...
-    apply Forall_Type_app_inv in X ; destruct X as [Hl Hr] ; apply Forall_Type_app...
+    assert (Hl := Forall_inf_app_l _ _ X).
+    assert (Hr := Forall_inf_app_r _ _ X).
+    apply Forall_inf_app...
     inversion Hr.
     inversion H5.
     constructor...
@@ -3543,24 +3537,24 @@ intros l Hll ; induction Hll ;
     inversion Hocl.
     simpl in HP ; rewrite <- (app_nil_l (ill2ll i2a i :: _)) in HP.
     rewrite app_comm_cons in HP.
-    apply PCperm_Type_vs_elt_inv in HP ; destruct HP as [(l1,l2) Heq _] ; simpl in Heq.
+    apply PCPermutation_Type_vs_elt_inv in HP; destruct HP as [(l1,l2) _ Heq]; simpl in Heq.
     destruct l1 ; inversion Heq.
     * symmetry in H3 ; apply (snd (fst (fst (Hgax a))) i)...
     * apply (f_equal (@rev _)) in H4.
       rewrite rev_involutive in H4; list_simpl in H4.
       rewrite map_map in H4.
-      symmetry in H4 ; decomp_map H4.
+      decomp_map H4.
       apply (f_equal dual) in H4.
       rewrite bidual in H4.
       apply (f_equal (map (ill2ll i2a))) in H6 ; list_simpl in H6.
       apply (fst (fst (fst (Hgax a))) i)...
       rewrite <- H6 ; rewrite H4.
-      apply in_Type_elt.
+      apply in_inf_elt.
 Qed.
 
 Proposition ll_to_ill_oclpam_axfree {P} : ipperm P = true ->
   (projT1 (ipgax P) -> False) -> forall l,
-  ll (i2pfrag i2a P) l -> forall l0 C, Forall_Type oclpam (C :: l0) ->
+  ll (i2pfrag i2a P) l -> forall l0 C, Forall_inf oclpam (C :: l0) ->
     Permutation_Type l (ill2ll i2a C :: rev (map dual (map (ill2ll i2a) l0))) ->
       ill P l0 C.
 Proof with try eassumption ; try reflexivity.
@@ -3610,14 +3604,14 @@ Lemma counter_ll_prove :
 Proof.
 simpl.
 apply parr_r.
-eapply ex_r ; [ | apply PCperm_Type_swap ].
+eapply ex_r ; [ | apply PCPermutation_Type_swap ].
 rewrite <- (app_nil_l (tens (var _) _ :: _)).
 apply tens_r.
 - apply parr_r.
   eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
   eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
   apply tens_r.
-  + eapply ex_r ; [ apply ax_r | PCperm_Type_solve ].
+  + eapply ex_r ; [ apply ax_r | GPermutation_Type_solve ].
   + apply parr_r.
     eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
     apply top_r.
@@ -3635,7 +3629,7 @@ induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion HeqC)) ;
   try now (destruct l1 ; inversion Heql).
 - symmetry in p.
-  apply PEperm_Type_nil in p ; subst.
+  apply PEPermutation_Type_nil in p ; subst.
   intuition.
 - apply app_eq_nil in Heql ; destruct Heql as [? Heql] ; subst.
   apply app_eq_nil in Heql ; destruct Heql as [Heql ?] ; subst.
@@ -3659,7 +3653,7 @@ induction pi ; intros Heql HeqC ; subst ;
   try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
 - inversion HeqC ; inversion Heql ; subst ; intuition.
 - symmetry in p.
-  apply PEperm_Type_length_1_inv in p ; subst ; intuition.
+  apply PEPermutation_Type_length_1_inv in p ; subst ; intuition.
 - destruct l1 ; inversion Heql ; subst.
   + destruct lw' ; inversion H0.
     simpl in H ; subst.
@@ -3680,7 +3674,7 @@ Fact no_biat_map_prove_ill : forall i j, i <> j ->
   ill_ll nil (ilpam (ivar i) (ivar j)) -> False.
 Proof.
 intros i j Ha pi.
-apply ilpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
 eapply no_biat_prove_ill ; eassumption.
 Qed.
 
@@ -3699,7 +3693,7 @@ induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion HeqC)) ;
   try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
 - symmetry in p.
-  apply PEperm_Type_length_1_inv in p ; subst ; intuition.
+  apply PEPermutation_Type_length_1_inv in p ; subst ; intuition.
 - destruct l1 ; inversion Heql ; subst.
   + destruct lw' ; inversion H0.
     simpl in H ; subst.
@@ -3734,7 +3728,7 @@ induction pi ; intros Heql HeqC ; subst ;
   (try now (inversion HeqC)) ;
   try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
 - symmetry in p.
-  apply PEperm_Type_length_1_inv in p ; intuition.
+  apply PEPermutation_Type_length_1_inv in p ; intuition.
 - destruct l1 ; inversion Heql ; subst.
   + destruct lw' ; inversion H0.
     simpl in H ; subst.
@@ -3762,7 +3756,7 @@ Qed.
 Fact counter_ex_ill : ill_ll nil cons_counter_ex -> False.
 Proof.
 intros pi.
-apply ilpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
 apply pre_counter_ex_ill in pi ; assumption.
 Qed.
 
@@ -3806,7 +3800,7 @@ Qed.
 Fact counter_ex_atfree_ill : ill_ll nil cons_counter_ex_atfree -> False.
 Proof with myeasy.
 intros pi.
-apply ilpam_rev_noax in pi ; [ | intros Hax ; inversion Hax ].
+apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
 remember (nil ++ ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero :: nil) as l.
 remember ione as C.
 revert Heql HeqC.
@@ -3831,7 +3825,7 @@ induction pi ; intros Heql HeqC ; subst ;
 - destruct l1 ; inversion Heql ; subst.
   + apply app_eq_nil in H2 ; destruct H2 ; subst.
     clear - pi1.
-    apply ilpam_rev_noax in pi1 ; [ | intros Hax ; inversion Hax ].
+    apply ilpam_rev_noax in pi1; [ | intros Hax; inversion Hax ].
     remember (nil ++ ilpam (ilpam izero ione) ione :: nil) as l.
     remember izero as C.
     revert Heql HeqC.
@@ -3915,4 +3909,3 @@ induction pi ; intros Heql HeqC ; subst ;
 Qed.
 
 End Non_Conservativity_Atom_Free.
-

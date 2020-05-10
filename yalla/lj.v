@@ -44,9 +44,9 @@ Lemma co_list_lr : forall l l0 A,
 Proof with try eassumption.
   induction l ; intros l0 A p...
   simpl ; apply co_lr.
-  apply ex_r with (l ++ a :: a :: l0) ; [ | perm_Type_solve ].
+  apply ex_r with (l ++ a :: a :: l0) ; [ | Permutation_Type_solve ].
   apply IHl.
-  eapply ex_r; [ eassumption | perm_Type_solve ].
+  eapply ex_r; [ eassumption | Permutation_Type_solve ].
 Qed.
 
 Lemma wk_list_lr : forall l0 l A,
@@ -77,9 +77,9 @@ Lemma mco_list_lr : forall l l0 A,
 Proof with try eassumption.
   induction l ; intros l0 A p...
   simpl ; apply mco_lr.
-  apply mex_r with (l ++ a :: a :: l0) ; [ | perm_Type_solve ].
+  apply mex_r with (l ++ a :: a :: l0) ; [ | Permutation_Type_solve ].
   apply IHl.
-  eapply mex_r; [ eassumption | perm_Type_solve ].
+  eapply mex_r; [ eassumption | Permutation_Type_solve ].
 Qed.
 
 Lemma mwk_list_lr : forall l l0 A,
@@ -92,7 +92,7 @@ Qed.
 (** *** Equivalence of the two presentations *)
 Lemma lj_mul2lj : forall l A,
     lj_mul l A -> lj l A.
-Proof with try eassumption; try perm_Type_solve.
+Proof with try eassumption; try Permutation_Type_solve.
   intros l A p; induction p; try now constructor.
   - eapply ex_r...
   - apply and_rr.
@@ -112,7 +112,7 @@ Qed.
 
 Lemma lj2lj_mul : forall l A,
     lj l A -> lj_mul l A.
-Proof with try eassumption; try perm_Type_solve.
+Proof with try eassumption; try Permutation_Type_solve.
   intros l A p; induction p; try now constructor...
   - apply mex_r with (l ++ ivar X :: nil)...
     apply mwk_list_lr.
@@ -155,12 +155,12 @@ Fixpoint ill2lj A :=
 Lemma skeleton : forall l A,
   ill_cut.ill_ll l A -> lj (map ill2lj l) (ill2lj A).
 Proof with try eassumption ; try reflexivity ;
-           try (apply Permutation_Type_map; perm_Type_solve); try perm_Type_solve.
+           try (apply Permutation_Type_map; Permutation_Type_solve); try Permutation_Type_solve.
   intros l A pi; induction pi ; simpl;
     try (eapply ex_r with (map ill2lj (_ :: l1 ++ l2));
-          [ simpl | apply Permutation_Type_map; perm_Type_solve]);
+          [ simpl | apply Permutation_Type_map; Permutation_Type_solve]);
     try (now constructor);
-    try now (constructor; eapply ex_r; [eassumption | perm_Type_solve ])...
+    try now (constructor; eapply ex_r; [eassumption | Permutation_Type_solve ])...
   - apply ex_r with (map ill2lj l1)...
     apply Permutation_Type_map...
   - eapply ex_r...
@@ -258,7 +258,7 @@ unfold oc_lj2ill_cbv ; intros l A pi; induction pi ; simpl.
   apply ill_def.ex_ir
     with (nil ++ map oc_lj2ill_cbv l1 ++ lj2ill_cbv (imap A B) :: (map oc_lj2ill_cbv l2)).
   + apply ill_def.lmap_ilr...
-  + simpl ; rewrite map_map ; perm_Type_solve.
+  + simpl ; rewrite map_map ; Permutation_Type_solve.
 - rewrite <- (app_nil_l _) ; apply ill_def.wk_ilr...
 - rewrite <- (app_nil_l _) ; apply ill_def.co_ilr...
 Qed.
@@ -343,7 +343,7 @@ Definition oc_lj2ill_cbn A := (iformulas.ioc (lj2ill_cbn A)).
 Lemma lj2illfrag_cbn : forall l A,
   lj l A -> ill_cut.ill_ll (map oc_lj2ill_cbn l) (lj2ill_cbn A).
 Proof with try reflexivity ; try eassumption ;
-           try (simpl; apply Permutation_Type_map; perm_Type_solve); try (simpl; perm_Type_solve).
+           try (simpl; apply Permutation_Type_map; Permutation_Type_solve); try (simpl; Permutation_Type_solve).
   unfold oc_lj2ill_cbn ; intros l A pi; induction pi; try now constructor.
   - rewrite <- map_map.
     apply ill_def.ex_ir with (map iformulas.ioc (map lj2ill_cbn (l ++ ivar X :: nil)))...

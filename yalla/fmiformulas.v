@@ -2,7 +2,7 @@
 
 (** * Order structure and finite multiset structure on intuitionistic formulas *)
 
-Require Import funtheory nattree fmsetlist_Type.
+Require Import funtheory nattree fmsetlist_Type BOrders.
 Require Export iformulas.
 
 
@@ -49,10 +49,9 @@ end.
 
 Lemma iform_nattree_section : retract nattree2iform iform2nattree.
 Proof.
-intros A; induction A ; simpl ;
-  try rewrite IHA1 ; try rewrite IHA2 ;
-  try rewrite IHA ;
-  try rewrite i2i_n ; try reflexivity.
+intros A; induction A; simpl;
+  try rewrite IHA1; try rewrite IHA2; try rewrite IHA;
+  try rewrite i2i_n; reflexivity.
 Qed.
 
 
@@ -63,7 +62,7 @@ Proof.
 eapply border_inj.
 eapply compose_injective.
 - eapply section_injective.
-  apply iform_nattree_section.
+  intros A; apply iform_nattree_section.
 - apply nattree2nat_inj.
 Defined.
 
@@ -73,4 +72,3 @@ Defined.
 Instance fmset_iformula :
   FinMultiset (SortedList border_iformula) iformula
   := FMConstr_slist border_iformula.
-

@@ -3,10 +3,8 @@
 
 (** * A few basic ingredients used in [yalla] *)
 
-Require Import Lia.
-
-Require Import Permutation_Type_solve.
-Require Import genperm_Type.
+From Coq Require Import Lia.
+Require Import GPermutation_Type Permutation_Type_solve.
 
 
 (** ** Definitions *)
@@ -48,6 +46,6 @@ Ltac myeeasy := myeasy_pattern eassumption.
 
 Ltac myeasy_perm_Type :=
   myeeasy ;
-  try PCperm_Type_solve ;
-  try (simpl_hyp_perm_all_Type ; PCperm_Type_solve).
+  try GPermutation_Type_solve ;
+  try (simpl_hyp_perm_all_Type ; GPermutation_Type_solve).
 

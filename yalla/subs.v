@@ -3,11 +3,8 @@
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-Require Import List_more.
-Require Import List_Type_more.
-Require Import Permutation_Type.
-Require Import genperm_Type.
-Require Import Dependent_Forall_Type.
+Require Import List_more Permutation_Type GPermutation_Type
+               Dependent_Forall_Type.
 
 Require Export ll_def.
 
@@ -81,8 +78,8 @@ assert
   induction l...
   simpl ; rewrite IHl... }
 induction pi using ll_nested_ind ; list_simpl ; try (now constructor).
-- eapply ex_r ; [ apply ax_exp | apply PCperm_Type_swap ].
-- eapply PCperm_Type_map in p.
+- eapply ex_r ; [ apply ax_exp | apply PCPermutation_Type_swap ].
+- eapply PCPermutation_Type_map in p.
   eapply ex_r...
 - rewrite ? map_app in IHpi ; rewrite Hmapwn in IHpi ; rewrite Hmapwn.
   eapply Permutation_Type_map in p.
@@ -91,12 +88,11 @@ induction pi using ll_nested_ind ; list_simpl ; try (now constructor).
   apply mix_r.
   + simpl.
     rewrite map_length...
-  + apply forall_Forall_Type.
+  + apply forall_Forall_inf.
     intros l' Hin.
-    destruct (map_in_Type (map (subs A x)) l' L Hin) as (l0 & (Hin' & Heq)).
-    rewrite Heq.
-    apply (In_Forall_Type_in _ _ _ PL) in Hin' as (pi' & Hin').
-    refine (Dependent_Forall_Type_forall_formula _ _ _ _ PL X Hin').
+    destruct (in_inf_map_inv (map (subs A x)) L l' Hin) as [l0 <- Hin'].
+    apply (In_Forall_inf_in _ PL) in Hin' as [pi' Hin'].
+    refine (Dependent_Forall_inf_forall_formula _ _ X Hin').
 - specialize Hmapwn with l0.
   rewrite Hmapwn.
   apply oc_r.
@@ -214,5 +210,3 @@ reflexivity.
 Qed.
 
 End Fresh.
-
-

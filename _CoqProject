@@ -1,37 +1,36 @@
--R ollibs ""
--R microyalla ""
--R yalla ""
+-R ollibs Yalla.OLlibs
+-R microyalla Yalla.MicroYalla
+-R yalla Yalla
 
 ollibs/AFC.v
-ollibs/Bool_more.v
-ollibs/CEqualities.v
-ollibs/COrders.v
+ollibs/BOrders.v
+ollibs/ComparisonOrder.v
+ollibs/CPermutation_more.v
 ollibs/CPermutation_solve.v
 ollibs/CPermutation_Type_solve.v
-ollibs/CyclicPerm_Type.v
-ollibs/CyclicPerm.v
+ollibs/CPermutation_Type.v
 ollibs/dectype.v
 ollibs/Dependent_Forall_Type.v
-ollibs/flat_map_Type_more.v
+ollibs/flat_map_more.v
 ollibs/fmsetlist_Type.v
 ollibs/fmsetlist.v
 ollibs/fmsetoidlist_Type.v
 ollibs/fmsetoidlist.v
 ollibs/funtheory.v
-ollibs/genperm_Type.v
-ollibs/genperm.v
+ollibs/GPermutation_Type.v
+ollibs/GPermutation.v
 ollibs/infinite.v
+ollibs/List_assoc.v
 ollibs/List_more.v
-ollibs/List_Type_more.v
 ollibs/List_Type.v
 ollibs/nattree.v
 ollibs/Permutation_more.v
+ollibs/PermutationPropify.v
 ollibs/Permutation_solve.v
 ollibs/Permutation_Type_more.v
 ollibs/Permutation_Type_solve.v
 ollibs/Permutation_Type.v
-ollibs/Vector_more.v
-ollibs/Wf_nat_more.v
+ollibs/transp_perm.v
 ollibs/wf_prod.v
 
 microyalla/microill.v

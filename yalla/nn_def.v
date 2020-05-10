@@ -2,7 +2,7 @@
 
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-Require Import List_more List_Type_more Permutation_Type genperm_Type funtheory Dependent_Forall_Type.
+Require Import funtheory List_more Permutation_Type GPermutation_Type Dependent_Forall_Type.
 Require Import subs isubs.
 Require Export ill_vs_ll.
 
@@ -346,12 +346,12 @@ Hypothesis P_perm : pperm P = true.
 
 Lemma ll_to_ill_trans_gen : forall l l0,
   (forall L, pmix P (length L) = true ->
-             forall (FL : Forall_Type (ll P) L),
+             forall (FL : Forall_inf (ll P) L),
                Forall_Proofs (fun l pi => ill (p2ipfrag P) (map ioc l0 ++ map trans l) R) FL ->
                ill (p2ipfrag P) (map ioc l0 ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map ioc l0 ++ map trans l) R.
 Proof with myeeasy ; (try now (apply ax_exp_ill)) ;
-                     try (simpl ; rewrite P_perm ; PEperm_Type_solve).
+                     try (simpl ; rewrite P_perm ; GPermutation_Type_solve).
 intros l l0 Hmix Hll.
 assert (Hax := @ax_exp_ill (p2ipfrag P) R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
@@ -362,12 +362,12 @@ induction Hll using ll_nested_ind.
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | apply Hax' ].
     eapply (ax_ir _ (a2i X)).
-  + PEperm_Type_solve.
+  + GPermutation_Type_solve.
 - simpl in p.
   rewrite P_perm in p.
   eapply ex_ir...
-  apply PEperm_Type_app_head...
-  apply PEperm_Type_map.
+  apply PEPermutation_Type_app_head...
+  apply PEPermutation_Type_map.
   simpl ; rewrite P_perm...
 - list_simpl in IHHll ; rewrite map_map in IHHll ; simpl in IHHll ;
     rewrite <- (map_map _ _ lw) in IHHll.
@@ -455,7 +455,7 @@ Qed.
 Theorem ll_to_ill_trans : forall l,
   (forall L : list (list formula),
       pmix P (length L) = true ->
-      forall FL : Forall_Type (ll P) L,
+      forall FL : Forall_inf (ll P) L,
         Forall_Proofs (fun (l0 : list formula) (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
         ill (p2ipfrag P) (map ioc nil ++ map trans (concat L)) R) ->
       ll P l -> ill (p2ipfrag P) (map trans l) R.
@@ -525,4 +525,3 @@ induction A ; intros n Hf ; simpl...
   apply IHA.
   simpl in Hf...
 Qed.
-
