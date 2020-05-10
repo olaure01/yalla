@@ -6,8 +6,8 @@
 
 Require Import CMorphisms.
 
-Require Import Injective.
-Require Import List_Type_more.
+Require Import funtheory.
+Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 
@@ -142,7 +142,7 @@ induction pi ; try (now constructor) ; try rewrite map_app.
 - apply ll_def.mix2_r...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
-  + simpl ; perm_Type_solve.
+  + simpl ; Permutation_Type_solve.
 - simpl ; rewrite mell2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- mell2ll_map_wn...
@@ -155,7 +155,7 @@ remember (map mell2ll l) as l0.
 revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   try (destruct l' ; inversion Heql0 ;
        destruct f ; inversion H0 ; fail).
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct l1 ; inversion Heql4.
   destruct x ; inversion Heql2.
   destruct x0 ; inversion Heql0.
@@ -167,7 +167,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_sym in HP.
   eapply ex_r...
   apply IHpi...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst; symmetry in Heql0.
   simpl in Heql0 ; apply mell2ll_map_wn_inv in Heql0 ;
     destruct Heql0 as (l & ? & ?) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
@@ -177,17 +177,17 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply Permutation_Type_app_tail.
   symmetry in HP ; apply Permutation_Type_map...
 - inversion f.
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   apply mix_r.
   + apply IHpi2...
   + apply IHpi1...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct x ; inversion Heql2 ; subst.
   eapply ex_r.
   apply tens_r.
   + apply IHpi1...
   + apply IHpi2...
-  + perm_Type_solve.
+  + Permutation_Type_solve.
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply parr_r.
@@ -242,8 +242,3 @@ simpl in pi2 ; rewrite <- mell2ll_dual in pi2.
 eapply ll_cut.cut_r_axfree...
 intros a ; destruct a.
 Qed.
-
-
-
-
-

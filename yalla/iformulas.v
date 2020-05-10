@@ -7,7 +7,7 @@ Require Import RelationClasses.
 Require Import List.
 Require Import Lia.
 
-Require Import Bool_more.
+Require Import Bool.
 
 Require yalla_ax.
 
@@ -157,18 +157,18 @@ Qed.
 
 (* unused
 
-Require Import genperm_Type.
+Require Import GPermutation_Type.
 
 Lemma isub_perm_list :
   forall b l l1 l2,
-    isubform_list l l1 -> PCperm_Type b l1 l2 ->
+    isubform_list l l1 -> PCPermutation_Type b l1 l2 ->
     isubform_list l l2.
 Proof with try eassumption.
 intros b l l1 l2 H1 HP ; revert H1 ; induction l ; intro H1.
 - constructor.
 - inversion H1 ; subst.
   constructor.
-  + eapply PCperm_Type_Exists...
+  + eapply PCPermutation_Type_Exists...
   + apply IHl...
 Qed.
 *)
@@ -457,15 +457,15 @@ etransitivity ; eassumption.
 Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
-Definition isubformb_list l1 l2 := Forallb (fun A => Existsb (isubformb A) l2) l1.
+Definition isubformb_list l1 l2 := forallb (fun A => existsb (isubformb A) l2) l1.
 
 Lemma isubb_isub_list : forall l1 l2, is_true (isubformb_list l1 l2) <-> isubform_list l1 l2.
 Proof with try assumption.
 intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constructor)).
 - unfold isubformb_list in H.
-  apply Forallb_Forall in H.
+  unfold is_true in H; rewrite forallb_forall in H; apply Forall_forall in H.
   inversion H ; subst.
-  apply Existsb_Exists in H2.
+  apply existsb_exists in H2; apply Exists_exists in H2.
   constructor.
   + clear - H2 ; induction l2 ; inversion H2 ; subst.
     * constructor.
@@ -473,11 +473,11 @@ intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constru
     * apply Exists_cons_tl.
       apply IHl2...
   + apply IHl1.
-    apply Forallb_Forall...
+    apply forallb_forall, Forall_forall...
 - inversion H ; subst.
   unfold isubformb_list ; simpl.
   apply andb_true_iff ; split.
-  + apply Existsb_Exists.
+  + apply existsb_exists, Exists_exists.
     clear - H2 ; induction l2 ; inversion H2 ; subst.
     * constructor.
       apply isubb_isub...
@@ -502,7 +502,3 @@ apply isubb_isub_list in Hr.
 apply isubb_isub_list.
 etransitivity ; eassumption.
 Qed.
-
-
-
-

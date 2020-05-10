@@ -3,10 +3,10 @@
 
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-Require Import Injective.
+Require Import funtheory.
 Require Import List_more.
 Require Import Permutation_Type.
-Require Import genperm_Type.
+Require Import GPermutation_Type.
 
 Require Import subs.
 Require Import isubs.
@@ -359,7 +359,7 @@ Lemma ll_to_ill_trans_gen : forall l l0,
       ill (p2ipfrag P) (map ioc l0 ++ map trans l2 ++ map trans l1) R) ->
   ll P l -> ill (p2ipfrag P) (map ioc l0 ++ map trans l) R.
 Proof with myeeasy ; (try now (apply ax_exp_ill)) ;
-                     try (simpl ; rewrite P_perm ; PEperm_Type_solve).
+                     try (simpl ; rewrite P_perm ; GPermutation_Type_solve).
 intros l l0 Hmix0 Hmix2 Hll.
 assert (Hax := @ax_exp_ill (p2ipfrag P) R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
@@ -376,12 +376,12 @@ induction Hll ;
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | apply Hax' ].
     eapply (ax_ir _ (a2i X)).
-  + PEperm_Type_solve.
+  + GPermutation_Type_solve.
 - simpl in p.
   rewrite P_perm in p.
   eapply ex_ir...
-  apply PEperm_Type_app_head...
-  apply PEperm_Type_map.
+  apply PEPermutation_Type_app_head...
+  apply PEPermutation_Type_map.
   simpl ; rewrite P_perm...
 - list_simpl in IHHll ; rewrite map_map in IHHll ; simpl in IHHll ;
     rewrite <- (map_map _ _ lw) in IHHll.
@@ -539,5 +539,3 @@ induction A ; intros n Hf ; simpl...
   apply IHA.
   simpl in Hf...
 Qed.
-
-

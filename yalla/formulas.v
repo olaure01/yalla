@@ -7,9 +7,9 @@
 Require Import RelationClasses.
 Require Import List.
 Require Import Lia.
+Require Import Bool.
 
-Require Import Injective.
-Require Import Bool_more.
+Require Import funtheory.
 
 Require yalla_ax.
 
@@ -490,27 +490,27 @@ etransitivity ; eassumption.
 Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
-Definition subformb_list l1 l2 := Forallb (fun A => Existsb (subformb A) l2) l1.
+Definition subformb_list l1 l2 := forallb (fun A => existsb (subformb A) l2) l1.
 
 Lemma subb_sub_list : forall l1 l2, is_true (subformb_list l1 l2) <-> subform_list l1 l2.
 Proof with try assumption.
 intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constructor)).
 - unfold subformb_list in H.
-  apply Forallb_Forall in H.
+  unfold is_true in H; rewrite forallb_forall, <- Forall_forall in H.
   inversion H ; subst.
-  apply Existsb_Exists in H2.
+  apply existsb_exists, Exists_exists in H2.
   constructor.
-  + clear - H2 ; induction l2 ; inversion H2 ; subst.
+  + clear - H2; induction l2; inversion H2; subst.
     * constructor.
       apply subb_sub...
     * apply Exists_cons_tl.
       apply IHl2...
   + apply IHl1.
-    apply Forallb_Forall...
+    apply forallb_forall, Forall_forall...
 - inversion H ; subst.
   unfold subformb_list ; simpl.
   apply andb_true_iff ; split.
-  + apply Existsb_Exists.
+  + apply existsb_exists, Exists_exists.
     clear - H2 ; induction l2 ; inversion H2 ; subst.
     * constructor.
       apply subb_sub...
@@ -535,7 +535,3 @@ apply subb_sub_list in Hr.
 apply subb_sub_list.
 etransitivity ; eassumption.
 Qed.
-
-
-
-

@@ -8,7 +8,7 @@
 
 Require Import CMorphisms.
 
-Require Import Injective.
+Require Import funtheory.
 Require Import fmsetoidlist_Type.
 Require Import List_more.
 Require Import Permutation_Type_more.
@@ -230,7 +230,7 @@ revert m Heql ; induction pi ; intros m Heql ;
   eapply ex_r.
   + apply IHpi...
   + symmetry...
-- decomp_map Heql ; subst.
+- symmetry in Heql; decomp_map Heql ; subst; symmetry in Heql3.
   apply mell2ll_map_wn_inv in Heql3 ; destruct Heql3 as (l & Heq1 & Heq2) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
   simpl in Heql ; unfold id in Heql ; subst.
@@ -250,7 +250,7 @@ revert m Heql ; induction pi ; intros m Heql ;
 - destruct m ; inversion Heql.
   destruct f ; inversion H0 ; subst.
   assert (Heq := H1).
-  decomp_map H1 ; subst.
+  symmetry in H1; decomp_map H1 ; subst.
   apply (ex_r (add (tens f1 f2) (sum l3 l0))).
   + apply tens_r.
     * apply IHpi1...
@@ -336,7 +336,3 @@ eapply ll_cut.cut_r_axfree...
   rewrite <- mell2ll_dual in pi2.
   eapply ll_def.ex_r ; [ | apply Helt2 ]...
 Qed.
-
-
-
-

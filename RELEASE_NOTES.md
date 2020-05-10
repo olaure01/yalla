@@ -2,7 +2,7 @@
 
 ### v 2.0.1
 
-Tested with Coq v 8.11.0.
+Tested with Coq v 8.12.0.
 
 ## v 2.0 (2019/01/23)
 

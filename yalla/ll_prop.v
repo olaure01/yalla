@@ -2,11 +2,11 @@
 
 (** * Properties relying on cut admissibility *)
 
-Require Import Bool_more.
+Require Import Bool.
 Require Import List_more.
 Require Import Permutation_Type_more.
-Require Import CyclicPerm_Type.
-Require Import genperm_Type.
+Require Import CPermutation_Type.
+Require Import GPermutation_Type.
 
 Require Export ll_cut.
 
@@ -18,11 +18,11 @@ Proof with myeeasy.
 intros Hgax A B l1 l2 pi.
 assert (ll P (dual (awith A B) :: A :: nil)) as pi'.
 { apply plus_r1.
-  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
+eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
 eapply cut_r_axfree ; try eassumption.
-eapply ex_r ; [ apply pi | PCperm_Type_solve ].
+eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 Qed.
 
 Lemma with_rev2_noax {P} : (projT1 (pgax P) -> False) ->
@@ -31,11 +31,11 @@ Proof with myeeasy.
 intros Hgax A B l1 l2 pi.
 assert (ll P (dual (awith B A) :: A :: nil)) as pi'.
 { apply plus_r2.
-  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
+eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
 eapply cut_r_axfree ; try eassumption.
-eapply ex_r ; [ apply pi | PCperm_Type_solve ].
+eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 Qed.
 
 Lemma oc_rev_noax {P} : (projT1 (pgax P) -> False) ->
@@ -44,11 +44,11 @@ Proof with myeeasy.
 intros Hgax A l1 l2 pi.
 assert (ll P (dual (oc A) :: A :: nil)) as pi'.
 { apply de_r.
-  eapply ex_r ; [ | apply PCperm_Type_swap ].
+  eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
+eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
 eapply cut_r_axfree ; try eassumption.
-eapply ex_r ; [ apply pi | PCperm_Type_solve ].
+eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 Qed.
 
 
@@ -58,7 +58,7 @@ Qed.
 (** version of ll with predicate parameter for constraining sequents *)
 Inductive ll_ps P PS : list formula -> Type :=
 | ax_ps_r : forall X, is_true (PS (covar X :: var X :: nil)) -> ll_ps P PS (covar X :: var X :: nil)
-| ex_ps_r : forall l1 l2, is_true (PS l2) -> ll_ps P PS l1 -> PCperm_Type (pperm P) l1 l2 -> ll_ps P PS l2
+| ex_ps_r : forall l1 l2, is_true (PS l2) -> ll_ps P PS l1 -> PCPermutation_Type (pperm P) l1 l2 -> ll_ps P PS l2
 | ex_wn_ps_r : forall l1 lw lw' l2, is_true (PS (l1 ++ map wn lw' ++ l2)) ->
                  ll_ps P PS (l1 ++ map wn lw ++ l2) ->
                  Permutation_Type lw lw' -> ll_ps P PS (l1 ++ map wn lw' ++ l2)
@@ -98,11 +98,11 @@ intros Hle PS l H.
 induction H ; try (econstructor ; myeeasy ; fail).
 - apply (ex_ps_r _ _ l1)...
   destruct Hle as (_ & _ & _ & _ & Hp).
-  unfold PCperm_Type in p.
-  unfold PCperm_Type.
+  unfold PCPermutation_Type in p.
+  unfold PCPermutation_Type.
   destruct (pperm P) ; destruct (pperm Q) ;
     simpl in Hp ; try inversion Hp...
-  apply cperm_perm_Type...
+  apply CPermutation_Permutation_Type...
 - unfold le_pfrag in Hle.
   rewrite f in Hle.
   destruct Hle as (_ & _ & Hmix0 & _).
@@ -154,32 +154,32 @@ Definition fragment FS :=
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
 Lemma conservativity {P} : pcut P = false -> forall FS, fragment FS ->
-  forall l, ll_ps P (fun _ => true) l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
+  forall l, ll_ps P (fun _ => true) l -> is_true (forallb FS l) -> ll_ps P (forallb FS) l.
 Proof with try eassumption ; try reflexivity.
 intros P_cutfree FS HFS l pi.
 induction pi ; intros HFrag.
 - apply ax_ps_r...
 - apply (ex_ps_r _ _ l1)...
   apply IHpi.
-  apply PCperm_Type_sym in p.
-  apply Forallb_Forall in HFrag.
-  apply Forallb_Forall.
-  eapply PCperm_Type_Forall...
+  apply PCPermutation_Type_sym in p.
+  unfold is_true in HFrag; rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+  apply forallb_forall, Forall_forall.
+  eapply PCPermutation_Type_Forall...
 - eapply ex_wn_ps_r...
   apply IHpi.
-  apply Forallb_Forall in HFrag.
-  apply Forallb_Forall.
+  unfold is_true in HFrag; rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+  apply forallb_forall, Forall_forall.
   apply (Permutation_Type_map wn) in p.
   eapply Permutation_Type_Forall...
-  PCperm_Type_solve.
+  GPermutation_Type_solve.
 - apply (@mix0_ps_r _ _ f)...
-- apply Forallb_Forall in HFrag.
-  assert (HFrag2 := Forall_app_inv _ _ _ HFrag).
+- unfold is_true in HFrag; rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+  assert (HFrag2 := (proj1 (Forall_app _ _ _) HFrag)).
   destruct HFrag2 as [HFragl HFragr].
-  apply Forallb_Forall in HFragl.
-  apply Forallb_Forall in HFragr.
+  rewrite Forall_forall, <- forallb_forall in HFragl.
+  rewrite Forall_forall, <- forallb_forall in HFragr.
   apply (@mix2_ps_r _ _ f)...
-  + apply Forallb_Forall...
+  + apply forallb_forall, Forall_forall...
   + apply IHpi1...
   + apply IHpi2...
 - apply one_ps_r...
@@ -192,11 +192,10 @@ induction pi ; intros HFrag.
   simpl in HFrag.
   apply andb_true_iff in HFrag.
   destruct HFrag as [HFragt HFrag].
-  apply Forallb_Forall in HFrag.
-  apply Forall_app_inv in HFrag.
-  destruct HFrag as [HFragl HFragr].
-  apply Forallb_Forall in HFragl.
-  apply Forallb_Forall in HFragr.
+  rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+  apply Forall_app in HFrag as [HFragl HFragr].
+  rewrite Forall_forall, <- forallb_forall in HFragl.
+  rewrite Forall_forall, <- forallb_forall in HFragr.
   apply tens_ps_r...
   + apply IHpi1...
     simpl ; apply andb_true_iff ; split...
@@ -294,7 +293,7 @@ Qed.
 (* Cut is admissible in any fragment with no axioms. *)
 Lemma cut_admissible_fragment_axfree {P} : (projT1 (pgax P) -> False) ->
  forall FS, fragment FS -> forall l,
-   ll_ps P (Forallb FS) l -> ll_ps (cutrm_pfrag P) (Forallb FS) l.
+   ll_ps P (forallb FS) l -> ll_ps (cutrm_pfrag P) (forallb FS) l.
 Proof with myeeasy.
 intros P_axfree FS HFS l pi.
 apply conservativity...
@@ -307,7 +306,7 @@ Qed.
 (** Linear logic (with no axioms) is conservative over its fragments. *)
 Lemma conservativity_axfree {P} : (projT1 (pgax P) -> False) ->
   forall FS, fragment FS -> forall l,
-    ll P l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
+    ll P l -> is_true (forallb FS l) -> ll_ps P (forallb FS) l.
 Proof with try eassumption ; try reflexivity.
 intros P_axfree FS Hf l pi HFS.
 apply cut_admissible_axfree in pi...
@@ -359,7 +358,7 @@ induction lax ; intros l pi.
   eapply ax_gen ; [ | | | | | apply pi ] ; try (now rewrite HeqQ).
   simpl in pi ; simpl ; intros a0.
   destruct a0.
-  + eapply ex_r ; [ | apply PCperm_Type_last ].
+  + eapply ex_r ; [ | apply PCPermutation_Type_cons_append ].
     apply wk_r.
     assert ({ b | projT2 (pgax P) p = projT2 (pgax Q) b}) as [b Hgax]
       by (subst ; simpl ; exists (inl p) ; reflexivity).
@@ -367,11 +366,11 @@ induction lax ; intros l pi.
     apply gax_r.
   + destruct s as [k Hlen].
     destruct k ; simpl.
-    * eapply ex_r ; [ | apply PCperm_Type_swap ].
+    * eapply ex_r ; [ | apply PCPermutation_Type_swap ].
       apply de_r.
-      eapply ex_r ; [ | apply PCperm_Type_swap ].
+      eapply ex_r ; [ | apply PCPermutation_Type_swap ].
       apply ax_exp.
-    * eapply ex_r ; [ | apply PCperm_Type_swap ].
+    * eapply ex_r ; [ | apply PCPermutation_Type_swap ].
       apply wk_r.
       assert ({ b | nth k lax one :: nil = projT2 (pgax Q) b}) as [b Hgax].
       { subst ; simpl ; clear - Hlen.
@@ -418,7 +417,7 @@ induction lax ; intros l pi.
       by (clear ; simpl ; exists (inr (exist _ 0 (le_n_S _ _ (le_0_n _)))) ; reflexivity).
     rewrite Hgax.
     apply gax_r.
-  + eapply ex_r ; [ | apply PCperm_Type_sym ; apply PCperm_Type_last ].
+  + eapply ex_r ; [ | apply PCPermutation_Type_sym ; apply PCPermutation_Type_cons_append ].
     eapply stronger_pfrag...
     nsplit 5...
     simpl ; intros a'.
@@ -463,6 +462,3 @@ destruct a.
 - contradiction P_axfree.
 - exists s...
 Qed.
-
-
-

@@ -7,9 +7,9 @@
   tensor-free Lambek calculus with additive conjunction and its unit *)
 
 
-Require Import Injective.
+Require Import funtheory.
 Require Import List_more.
-Require Import List_Type_more.
+Require Import List_more.
 
 (** ** 0. load the [ill] library *)
 
@@ -94,15 +94,15 @@ remember (l2ill A) as A0.
 revert l A Heql0 HeqA0 ; induction pi ;
   intros l' A' Heql0 HeqA0 ; subst ;
   (try now (destruct A' ; inversion HeqA0)) ;
-  (try now (decomp_map_Type Heql0 ; destruct x ; inversion Heql0)) ;
-  (try now (decomp_map_Type Heql0 ; destruct x ; inversion Heql3)).
+  (try now (symmetry in Heql0; decomp_map_inf Heql0 ; destruct x ; inversion Heql0)) ;
+  (try now (symmetry in Heql0; decomp_map_inf Heql0 ; destruct x ; inversion Heql3)).
 - destruct A' ; inversion HeqA0.
   destruct l' ; inversion Heql0 ;
     destruct l' ; inversion Heql0.
   destruct l ; inversion H3 ; subst ; subst.
   apply ax_lr.
 - apply IHpi...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct l4 ; inversion Heql0 ; destruct lw' ; inversion H0.
   + symmetry in p ; apply Permutation_Type.Permutation_Type_nil in p ; subst.
     apply IHpi...
@@ -112,7 +112,7 @@ revert l A Heql0 HeqA0 ; induction pi ;
   apply lpam_lrr.
   apply IHpi...
   rewrite map_last...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct x ; inversion Heql0 ; subst.
   apply lpam_llr.
   + apply IHpi1...
@@ -124,12 +124,12 @@ revert l A Heql0 HeqA0 ; induction pi ;
   apply with_lrr.
   + apply IHpi1...
   + apply IHpi2...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct x ; inversion Heql0 ; subst.
   apply with_llr1.
   apply IHpi...
   list_simpl...
-- decomp_map_Type Heql0 ; subst.
+- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
   destruct x ; inversion Heql0 ; subst.
   apply with_llr2.
   apply IHpi...
@@ -166,5 +166,3 @@ rewrite 2 map_app.
 eapply ill_cut.cut_ir_axfree...
 intros a ; destruct a.
 Qed.
-
-

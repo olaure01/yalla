@@ -7,7 +7,7 @@
 
 Require Import List_more.
 Require Import Permutation_Type.
-Require Import genperm_Type.
+Require Import GPermutation_Type.
 
 Require Export ll_def.
 
@@ -82,8 +82,8 @@ assert
   induction l...
   simpl ; rewrite IHl... }
 induction pi ; list_simpl ; try (now constructor).
-- eapply ex_r ; [ apply ax_exp | apply PCperm_Type_swap ].
-- eapply PCperm_Type_map in p.
+- eapply ex_r ; [ apply ax_exp | apply PCPermutation_Type_swap ].
+- eapply PCPermutation_Type_map in p.
   eapply ex_r...
 - rewrite ? map_app in IHpi ; rewrite Hmapwn in IHpi ; rewrite Hmapwn.
   eapply Permutation_Type_map in p.

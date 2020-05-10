@@ -1,7 +1,7 @@
 (* Parameter definitions for yalla library *)
 (* v 1.1   Olivier Laurent *)
 
-Require Import Injective.
+Require Import funtheory.
 Require Import NPeano.
 Require Import EqNat.
 
@@ -108,9 +108,9 @@ intros x y ; split ; intros Heq.
   f_equal ; assumption.
 - apply iateq_eq in Heq.
   apply ateq_eq.
-  eapply (section_inj a2i i2a) in Heq.
+  eapply (@section_injective _ _ a2i i2a) in Heq.
   + assumption.
-  + apply a2a_i.
+  + intros z; apply a2a_i.
 Qed.
 
 (* nn.v *)

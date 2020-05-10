@@ -7,7 +7,7 @@
 
 Require Import List_more.
 Require Import Permutation_Type.
-Require Import genperm_Type.
+Require Import GPermutation_Type.
 
 Require Export ill_def.
 
@@ -79,7 +79,7 @@ induction pi ; list_simpl ;
   try (list_simpl in IHpi2) ;
   try now (constructor ; myeeasy).
 - apply ax_exp_ill.
-- eapply PEperm_Type_map in p.
+- eapply PEPermutation_Type_map in p.
   eapply ex_ir...
 - rewrite ? map_app in IHpi ; rewrite Hmapioc in IHpi ; rewrite Hmapioc.
   eapply Permutation_Type_map in p.

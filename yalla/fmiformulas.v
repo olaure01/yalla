@@ -5,9 +5,10 @@
 
 (** * Order structure and finite multiset structure on intuitionistic formulas *)
 
-Require Import Injective.
+Require Import funtheory.
 Require Import nattree.
 Require Import fmsetlist_Type.
+Require Import BOrders.
 
 Require Export iformulas.
 
@@ -67,10 +68,10 @@ Qed.
 Instance border_iformula : BOrder.
 Proof.
 eapply border_inj.
-eapply comp_inj.
+eapply compose_injective.
+- eapply section_injective.
+  intros A; apply iform_nattree_section.
 - apply nattree2nat_inj.
-- eapply section_inj.
-  apply iform_nattree_section.
 Defined.
 
 
@@ -79,5 +80,3 @@ Defined.
 Instance fmset_iformula :
   FinMultiset (SortedList border_iformula) iformula
   := FMConstr_slist border_iformula.
-
-
