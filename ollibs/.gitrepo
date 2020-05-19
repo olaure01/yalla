@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:olaure01/ollibs.git
+	branch = master
+	commit = 5d843a0c8c49b47cebfd10f06a2ed9ffa7fdad93
+	parent = 5322bf1e85ab706e21da9896576cf20858cbf715
+	cmdver = 0.3.1
