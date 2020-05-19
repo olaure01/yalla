@@ -1,14 +1,8 @@
 (* isubs library for yalla *)
 
-(* output in Type *)
-
-
 (** * Substitutions in Intuitionistic Linear Logic formulas and proofs *)
 
-Require Import List_more.
-Require Import Permutation_Type.
-Require Import GPermutation_Type.
-
+From OLlibs Require Import List_more Permutation_Type GPermutation_Type.
 Require Export ill_def.
 
 

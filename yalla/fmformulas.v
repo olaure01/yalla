@@ -2,7 +2,7 @@
 
 (** * Order structure and finite multiset structure on formulas *)
 
-Require Import funtheory nattree fmsetlist_Type BOrders.
+From OLlibs Require Import funtheory nattree fmsetlist_Type BOrders.
 Require Export formulas.
 
 (** ** Encoding of [formula] into [nat]-labelled trees for ordering *)

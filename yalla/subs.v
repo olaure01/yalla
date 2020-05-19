@@ -3,9 +3,8 @@
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-Require Import List_more Permutation_Type GPermutation_Type
-               Dependent_Forall_Type.
-
+From OLlibs Require Import List_more Permutation_Type GPermutation_Type
+                           Dependent_Forall_Type.
 Require Export ll_def.
 
 (** ** Decidable equality on [Atom], through value into [bool] *)

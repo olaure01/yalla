@@ -2,7 +2,8 @@
 
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-Require Import funtheory List_more Permutation_Type GPermutation_Type Dependent_Forall_Type.
+From OLlibs Require Import funtheory List_more Dependent_Forall_Type
+                           Permutation_Type GPermutation_Type.
 Require Import subs isubs.
 Require Export ill_vs_ll.
 

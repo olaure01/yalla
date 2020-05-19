@@ -2,8 +2,8 @@
 
 (** * Example of a concrete use of the yalla library: multi-set based MELL *)
 
-Require Import funtheory List_more Permutation_more Permutation_Type_more
-               BOrders nattree fmsetlist_Type.
+From OLlibs Require Import funtheory List_more Permutation_more Permutation_Type_more
+                           BOrders nattree fmsetlist_Type.
 Import FMSetNotations.
 
 

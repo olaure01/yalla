@@ -3,7 +3,7 @@
 (** * Properties relying on cut admissibility *)
 
 From Coq Require Import Bool.
-Require Import List_more
+From OLlibs Require Import List_more
                Permutation_Type_more CPermutation_Type GPermutation_Type
                Dependent_Forall_Type flat_map_more.
 Require Export ll_cut.

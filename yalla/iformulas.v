@@ -4,7 +4,7 @@
 (** * Intuitionistic Linear Logic formulas *)
 
 From Coq Require Import Bool RelationClasses Lia.
-Require Import List_more.
+From OLlibs Require Import List_more.
 Require yalla_ax.
 
 (** ** Definition and main properties of formulas *)

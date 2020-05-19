@@ -2,14 +2,9 @@
 
 (** * Focusing in Linear Logic *)
 
-Require Import Wf_nat CMorphisms.
-
-Require Import List_more.
-Require Import List_more.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
-Require Import GPermutation_Type.
-
+From Coq Require Import CMorphisms Wf_nat.
+From OLlibs Require Import List_more
+                           Permutation_Type_more Permutation_Type_solve GPermutation_Type.
 Require Import ll_fragments.
 
 

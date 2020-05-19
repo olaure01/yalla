@@ -2,7 +2,7 @@
 
 Open Scope list_scope.
 
-Require List.
+From Coq Require List.
 (* only List.map from module List is used:
 Fixpoint map {A B : Type} (f: A -> B) l :=
     match l with

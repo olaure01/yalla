@@ -2,8 +2,9 @@
 
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
-Require Import CMorphisms.
-Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve Dependent_Forall_Type.
+From Coq Require Import CMorphisms.
+From OLlibs Require Import funtheory List_more
+                           Permutation_Type_more Permutation_Type_solve Dependent_Forall_Type.
 
 
 (** ** 0. load the [yalla] library *)

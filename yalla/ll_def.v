@@ -4,8 +4,8 @@
 (** * Linear Logic with explicit permutations *)
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
-From Coq Require Import BoolOrder PeanoNat CMorphisms Lia.
-Require Import List_more Dependent_Forall_Type
+From Coq Require Import CMorphisms BoolOrder PeanoNat Lia.
+From OLlibs Require Import List_more Dependent_Forall_Type
                Permutation_Type_more CPermutation_Type Permutation_Type_solve
                CPermutation_Type_solve GPermutation_Type.
 Require Export basic_misc formulas.

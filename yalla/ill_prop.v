@@ -5,7 +5,7 @@
 (* Properties depending on cut admissibility *)
 
 From Coq Require Import Bool.
-Require Import List_more Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import List_more Permutation_Type_more GPermutation_Type.
 Require Export ill_cut.
 
 

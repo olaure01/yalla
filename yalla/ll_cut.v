@@ -3,7 +3,7 @@
 (** * Cut admissibility for [ll] *)
 
 From Coq Require Import Wf_nat Lia.
-Require Import funtheory List_more Permutation_Type_more GPermutation_Type
+From OLlibs Require Import funtheory List_more Permutation_Type_more GPermutation_Type
                flat_map_more Dependent_Forall_Type.
 Require Import ll_cut_at.
 Require Export ll_def.

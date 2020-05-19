@@ -4,16 +4,9 @@
 (** * Intuitionistic Linear Logic *)
 (* not cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 
-Require Import CMorphisms.
-
-Require Import BoolOrder.
-Require Import List_more.
-Require Import List_more.
-Require Import Permutation_Type_more.
-Require Import GPermutation_Type.
-
-Require Export basic_misc.
-Require Export iformulas.
+From Coq Require Import CMorphisms BoolOrder.
+From OLlibs Require Import List_more Permutation_Type_more GPermutation_Type.
+Require Export basic_misc iformulas.
 
 
 (** ** Intuitionistic fragments for proofs *)

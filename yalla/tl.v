@@ -2,8 +2,8 @@
 
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
-Require Import BoolOrder CMorphisms.
-Require Import funtheory List_more Permutation_Type_more GPermutation_Type.
+From Coq Require Import CMorphisms BoolOrder.
+From OLlibs Require Import funtheory List_more Permutation_Type_more GPermutation_Type.
 
 
 (** ** 0. load the [ill] library *)

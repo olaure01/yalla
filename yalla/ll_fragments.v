@@ -4,7 +4,7 @@
 (** * Definitions of various Linear Logic fragments *)
 
 From Coq Require Import BoolOrder PeanoNat Lia.
-Require Import List_more Dependent_Forall_Type
+From OLlibs Require Import List_more Dependent_Forall_Type
                CPermutation_Type Permutation_Type_more Permutation_Type_solve GPermutation_Type.
 Require Export ll_prop.
 Require Import subs.

@@ -1,7 +1,7 @@
 (* Parameter definitions for yalla library *)
 
-Require Import PeanoNat Equalities.
-Require Import funtheory.
+From Coq Require Import Equalities PeanoNat.
+From OLlibs Require Import funtheory.
 
 
 (* We provide a possible value for parameters of the library

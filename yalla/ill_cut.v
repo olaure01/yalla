@@ -3,9 +3,9 @@
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
-Require Import PeanoNat Wf_nat List.
-Require Import List_more List_more Permutation_Type_more GPermutation_Type flat_map_more
-               funtheory.
+From Coq Require Import PeanoNat Wf_nat List.
+From OLlibs Require Import funtheory List_more flat_map_more
+                           Permutation_Type_more GPermutation_Type.
 Require Export ill_def.
 
 

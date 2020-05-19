@@ -1,7 +1,7 @@
 (* formulas library for yalla *)
 
 From Coq Require Import Bool EqNat Equalities RelationClasses Lia.
-Require Import funtheory List_more.
+From OLlibs Require Import funtheory List_more.
 Require yalla_ax.
 
 

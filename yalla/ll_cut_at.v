@@ -3,7 +3,7 @@
 (** * Cut admissibility for atomic cut-formula for [ll] *)
 
 From Coq Require Import Wf_nat Lia.
-Require Import List_more Dependent_Forall_Type GPermutation_Type.
+From OLlibs Require Import List_more Dependent_Forall_Type GPermutation_Type.
 Require Export ll_def.
 
 Lemma cut_gax_l {P} :

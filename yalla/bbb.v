@@ -4,13 +4,9 @@
 (** * Study of Linear Logic enriched with [bot = oc bot] *)
 
 From Coq Require Import BoolOrder.
-
-Require Import List_more.
-Require Import Permutation_Type_more.
-Require Import Permutation_Type_solve.
-Require Import GPermutation_Type.
-Require Import Dependent_Forall_Type.
-
+From OLlibs Require Import List_more
+                           Permutation_Type_more Permutation_Type_solve GPermutation_Type
+                           Dependent_Forall_Type.
 Require Import ll_fragments.
 
 

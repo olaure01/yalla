@@ -4,7 +4,7 @@
 (** * A few basic ingredients used in [yalla] *)
 
 From Coq Require Import Lia.
-Require Import GPermutation_Type Permutation_Type_solve.
+From OLlibs Require Import GPermutation_Type Permutation_Type_solve.
 
 
 (** ** Definitions *)

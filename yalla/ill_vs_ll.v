@@ -2,7 +2,8 @@
 
 (** * Comparison between Intuitionistic Linear Logic and Linear Logic *)
 
-Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve GPermutation_Type.
+From OLlibs Require Import funtheory List_more
+                           Permutation_Type_more Permutation_Type_solve GPermutation_Type.
 Require Import ll_fragments.
 Require Export ill_prop.
 

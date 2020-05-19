@@ -3,7 +3,8 @@
 (** * Focusing by Polarized Translation *)
 
 From Coq Require Import CMorphisms.
-Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve GPermutation_Type.
+From OLlibs Require Import funtheory List_more
+                           Permutation_Type_more Permutation_Type_solve GPermutation_Type.
 Require Import ll_fragments llfoc tl nn_prop.
 
 

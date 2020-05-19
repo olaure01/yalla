@@ -2,8 +2,8 @@
 
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 
-Require Import CMorphisms.
-Require Import funtheory fmsetoidlist_Type List_more Permutation_Type_more.
+From Coq Require Import CMorphisms.
+From OLlibs Require Import funtheory fmsetoidlist_Type List_more Permutation_Type_more.
 
 
 (** ** 0. load the [ll] library *)

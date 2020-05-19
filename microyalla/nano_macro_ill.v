@@ -1,7 +1,5 @@
-Require Import List.
-
-Require Import Permutation_Type.
-
+From Coq Require Import List.
+From OLlibs Require Import Permutation_Type.
 Require Import ill_def nanoill.
 
 Fixpoint ill2ill A :=

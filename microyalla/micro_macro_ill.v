@@ -1,10 +1,8 @@
-Require Import List Lia.
-
+From Coq Require Import List Lia.
 (*
-Require Import Injective.
+From OLlibs Require Import funtheory.
 *)
-Require Import Permutation_Type.
-
+From OLlibs Require Import Permutation_Type.
 Require Import ill_def microill.
 
 Fixpoint ill2ill A :=

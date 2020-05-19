@@ -4,7 +4,8 @@
 (** * Example of a concrete use of the yalla library: ILL *)
 
 From Coq Require Import CMorphisms.
-Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve.
+From OLlibs Require Import funtheory List_more
+                           Permutation_Type_more Permutation_Type_solve.
 
 
 (** ** 0. load the [yalla] library *)

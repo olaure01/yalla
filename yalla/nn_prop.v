@@ -4,17 +4,10 @@
 (** * Parametric negative translation from [ll] into [ill]. *)
 (** Properties relying on cut admissibility *)
 
-Require Import List_more.
-Require Import List_more.
-Require Import Permutation_Type.
-Require Import GPermutation_Type.
-Require Import Dependent_Forall_Type.
-
-Require Import subs.
-Require Import ll_fragments.
+From OLlibs Require Import List_more Dependent_Forall_Type
+                           Permutation_Type GPermutation_Type.
+Require Import subs ll_fragments bbb.
 Require Export nn_def.
-
-Require Import bbb.
 
 
 Section RTranslation.
