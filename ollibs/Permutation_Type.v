@@ -1,8 +1,8 @@
 (* This file is directly inspired by the corresponding Coq file
    Sorting/Permutation.v *)
 
-From Coq Require Import List Compare_dec CMorphisms FinFun Permutation.
-From OLlibs Require Import List_Type.
+Require Import List Compare_dec CMorphisms FinFun Permutation.
+Require Import List_Type.
 Import ListNotations. (* For notations [] and [a;b;c] *)
 
 Set Implicit Arguments.

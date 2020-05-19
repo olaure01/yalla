@@ -1,9 +1,9 @@
 (** Add-ons for List library
 Usefull tactics and properties apparently missing in the List library. *)
 
-From Coq Require Import PeanoNat.
-From Coq Require Export List.
-From OLlibs Require Export List_Type.
+Require Import PeanoNat.
+Require Export List.
+Require Export List_Type.
 Import EqNotations.
 
 Set Implicit Arguments.

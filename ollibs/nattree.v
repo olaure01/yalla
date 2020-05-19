@@ -1,7 +1,7 @@
 (** [nat]-labelled binary trees and embedding into [nat] *)
 
-From Coq Require Import PeanoNat Lia.
-From OLlibs Require Import funtheory.
+Require Import PeanoNat Lia.
+Require Import funtheory.
 
 Set Implicit Arguments.
 

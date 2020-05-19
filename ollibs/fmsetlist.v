@@ -5,8 +5,8 @@ Equality is required to be Coq equality.
 An implementation of the axioms is provided by sorted lists
 for every type equiped with a Boolean-valued total order relation. *)
 
-From Coq Require Import Bool List Permutation Morphisms.
-From OLlibs Require Import BOrders.
+Require Import Bool List Permutation Morphisms.
+Require Import BOrders.
 
 Set Implicit Arguments.
 

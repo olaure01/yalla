@@ -1,7 +1,7 @@
 (** Transposition function on elements of a list *)
 
-From Coq Require Import List Lia.
-From OLlibs Require Import funtheory Permutation_Type.
+Require Import List Lia.
+Require Import funtheory Permutation_Type.
 
 Set Implicit Arguments.
 

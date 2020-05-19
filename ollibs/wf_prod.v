@@ -1,6 +1,6 @@
 (** Well-founded order on product and applications to products of nat *)
 
-From Coq Require Import Relation_Definitions Wf_nat Lia.
+Require Import Relation_Definitions Wf_nat Lia.
 
 Set Implicit Arguments.
 

@@ -6,8 +6,8 @@ Permutation are with output in [Type].
 An implementation of the axioms is provided by sorted lists
 for every type equiped with a Boolean-valued total order relation. *)
 
-From Coq Require Import Bool List CMorphisms.
-From OLlibs Require Import BOrders Permutation_Type_more.
+Require Import Bool List CMorphisms.
+Require Import BOrders Permutation_Type_more.
 
 Set Implicit Arguments.
 

@@ -1,10 +1,10 @@
 (** Factorized statements for different notions of permutation *)
 
-From Coq Require Import List CMorphisms.
-From OLlibs Require Import funtheory ComparisonOrder List_more
+Require Import List CMorphisms.
+Require Import funtheory ComparisonOrder List_more
                            Permutation_Type_more Permutation_Type_solve
                            CPermutation_Type CPermutation_Type_solve.
-From OLlibs Require GPermutation.
+Require GPermutation.
 
 Set Implicit Arguments.
 

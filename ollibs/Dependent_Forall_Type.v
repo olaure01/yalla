@@ -1,8 +1,8 @@
 (** Generalization of [Forall_inf] to dependent product *)
 
-From Coq Require Export Eqdep_dec.
-From Coq Require Import PeanoNat List.
-From OLlibs Require Import List_Type.
+Require Export Eqdep_dec.
+Require Import PeanoNat List.
+Require Import List_Type.
 
 Set Implicit Arguments.
 

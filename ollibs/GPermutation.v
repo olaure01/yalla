@@ -1,7 +1,7 @@
 (** Factorized statements for different notions of permutation *)
 
-From Coq Require Import List Morphisms Permutation.
-From OLlibs Require Import funtheory ComparisonOrder
+Require Import List Morphisms Permutation.
+Require Import funtheory ComparisonOrder
                            Permutation_more Permutation_solve
                            CPermutation_more CPermutation_solve.
 

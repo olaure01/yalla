@@ -1,6 +1,6 @@
 (** Axiom(s) of Finite Choice *)
 
-From Coq Require Import PeanoNat Lia List.
+Require Import PeanoNat Lia List.
 
 Set Implicit Arguments.
 

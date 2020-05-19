@@ -10,10 +10,10 @@ this allows to solve the goal through the use of rewrite *)
 (* and then  with PEPermutation_Type and PEPermutation *)
 
 
-From Coq Require Import List PeanoNat Compare_dec.
-From Coq Require Export Permutation CPermutation.
-From OLlibs Require Import List_Type.
-From OLlibs Require Export Permutation_Type CPermutation_Type GPermutation GPermutation_Type.
+Require Import List PeanoNat Compare_dec.
+Require Export Permutation CPermutation.
+Require Import List_Type.
+Require Export Permutation_Type CPermutation_Type GPermutation GPermutation_Type.
 
 Set Implicit Arguments.
 

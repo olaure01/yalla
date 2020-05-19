@@ -1,7 +1,7 @@
 (** Order structure on [comparison]
 [Lt] < [Eq] < [Gt] *)
 
-From Coq Require Import Orders.
+Require Import Orders.
 
 Set Implicit Arguments.
 

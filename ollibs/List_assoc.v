@@ -4,9 +4,9 @@
    and https://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html#1_Associationlists
    for more global approaches *)
 
-From Coq Require Import Bool.
-From Coq Require Export List.
-From OLlibs Require Export dectype.
+Require Import Bool.
+Require Export List.
+Require Export dectype.
 
 Set Implicit Arguments.
 
