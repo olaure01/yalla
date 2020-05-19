@@ -35,23 +35,23 @@ destruct x ; destruct y ; split ; simpl ;
   now apply Nat.eqb_eq.
 Qed.
 
-Module Atom_beq <: UsualBoolEq.
+Module Atom_beq : UsualBoolEq.
   Definition t := Atom.
   Definition eq := @eq Atom.
   Definition eqb := ateq.
   Definition eqb_eq := ateq_eq.
 End Atom_beq.
 
-Module Atom_dec <: UsualDecidableTypeFull := Make_UDTF Atom_beq.
+Module Atom_dec : UsualDecidableTypeFull := Make_UDTF Atom_beq.
 
-Module IAtom_beq <: UsualBoolEq.
+Module IAtom_beq : UsualBoolEq.
   Definition t := IAtom.
   Definition eq := @eq IAtom.
   Definition eqb := iateq.
   Definition eqb_eq := iateq_eq.
 End IAtom_beq.
 
-Module IAtom_dec <: UsualDecidableTypeFull := Make_UDTF IAtom_beq.
+Module IAtom_dec : UsualDecidableTypeFull := Make_UDTF IAtom_beq.
 
 
 Definition a2n : Atom -> nat := id. (* fmformulas.v & nn.v *)
