@@ -17,7 +17,7 @@ New results added, including:
 * decidability of equality on formulas
 * Girard's translations into intuitionistic logic
 
-Tested with Coq version 8.11.0.
+Tested with Coq version 8.12.0.
 
 ## v 2.0 (2019/01/23)
 
