@@ -2,23 +2,29 @@
 
 (** * Example of a concrete use of the yalla library: the intuitionistic logic with call-by-value translation  *)
 
-From OLlibs Require Import funtheory List_more Permutation_Type_more Permutation_Type_solve.
+From OLlibs Require Import funtheory infinite List_more Permutation_Type_more Permutation_Type_solve.
 
 
 (** ** 0. load the [ill] library *)
 
-Require ill_cut ill_vs_ll.
+From Yalla Require Import atoms.
+From Yalla Require ill_cut ill_vs_ll.
 
+
+Section Atoms.
+
+Context { atom : DecType }.
+Context { preiatom : DecType }.
 
 (** ** 1. define formulas *)
 
-Inductive iformula  : Set :=
-| ivar  : iformulas.IAtom -> iformula
+Inductive iformula :=
+| ivar   : @iformulas.iatom preiatom -> iformula
 | itrue  : iformula
 | ifalse : iformula
-| iand : iformula -> iformula -> iformula
-| ior : iformula -> iformula -> iformula
-| imap  : iformula -> iformula -> iformula.
+| iand   : iformula -> iformula -> iformula
+| ior    : iformula -> iformula -> iformula
+| imap   : iformula -> iformula -> iformula.
 
 (** ** 2. define proofs *)
 
@@ -147,8 +153,8 @@ Fixpoint ill2lj A :=
   | iformulas.ioc A => ill2lj A
   | iformulas.iwith A B => iand (ill2lj A) (ill2lj B)
   | iformulas.ilpam A B => imap (ill2lj A) (ill2lj B)
-  | iformulas.ineg A => imap (ill2lj A) (ivar yalla_ax.atN)
-  | iformulas.igen A => imap (ill2lj A) (ivar yalla_ax.atN)
+  | iformulas.ineg A => imap (ill2lj A) (ivar iformulas.atN)
+  | iformulas.igen A => imap (ill2lj A) (ivar iformulas.atN)
   | iformulas.itop => itrue
   end.
 
@@ -239,7 +245,7 @@ unfold oc_lj2ill_cbv ; intros l A pi; induction pi ; simpl.
   apply ill_def.ax_ir.
 - apply ill_def.ex_ir with (map oc_lj2ill_cbv l1)...
   apply Permutation_Type_map...
-- change nil with (map iformulas.ioc nil).
+- change nil with (map (@iformulas.ioc preiatom) nil).
   apply ill_def.oc_irr ; apply ill_def.one_irr.
 - rewrite <- (app_nil_l _) ; apply ill_def.de_ilr; apply ill_def.zero_ilr.
 - rewrite <- map_map ; rewrite <- map_map in IHpi1 ; rewrite <- map_map in IHpi2.
@@ -278,9 +284,19 @@ Proof.
   apply map_ext ; intros ; apply ill2lj_lj2ill_cbv_id.
 Qed.
 
-Notation ill2ll := (ill_vs_ll.ill2ll yalla_ax.i2ac).
+End Atoms.
 
-Lemma lj2ill_cbv_oclpam : forall A, ill_vs_ll.oclpam (lj2ill_cbv A).
+Section Atoms_inj.
+
+Context { atom : InfDecType }.
+Context { preiatom : DecType }.
+Context { Atoms : IAtom2AtomType_inj atom preiatom }.
+
+Notation iformula := (@iformula preiatom).
+Notation i2ac := IAtom2Atom.
+Notation ill2ll := (@ill_vs_ll.ill2ll _ _ IAtom2Atom_inj_base).
+
+Lemma lj2ill_cbv_oclpam : forall A : iformula, ill_vs_ll.oclpam (lj2ill_cbv A).
 Proof.
 induction A; (try now constructor); simpl.
 - constructor; constructor; assumption.
@@ -292,7 +308,7 @@ Lemma lj2llfrag_cbv : forall l A,
   lj l A -> ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
 Proof.
 intros l A pi.
-apply lj2illfrag_cbv in pi.
+apply (@lj2illfrag_cbv atom) in pi.
 eapply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
 split; [ | split ; [ | split ] ]; try (intros; simpl; constructor).
@@ -303,10 +319,9 @@ Lemma llfrag2lj_cbv : forall l A,
   ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))) -> lj l A.
 Proof.
 intros l A pi.
-apply illfrag2lj_cbv.
+apply (@illfrag2lj_cbv atom).
 apply ill_vs_ll.ll_to_ill_oclpam_axfree
-  with yalla_ax.i2ac (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
-- apply yalla_ax.i2ac_inj.
+  with (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
 - reflexivity.
 - intros H; inversion H.
 - eapply ll_def.stronger_pfrag; [ | apply pi ].
@@ -320,7 +335,7 @@ apply ill_vs_ll.ll_to_ill_oclpam_axfree
 Qed.
 
 (** ** 5 define embedding into [iformulas.iformula] by call-by-name Girard's translation with top and with *)
-Fixpoint lj2ill_cbn A :=
+Fixpoint lj2ill_cbn A : (@iformulas.iformula preiatom) :=
   match A with
   | ivar X => iformulas.ivar X
   | itrue => iformulas.itop
@@ -367,7 +382,7 @@ Proof with try reflexivity ; try eassumption ;
     change (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: map iformulas.ioc (map lj2ill_cbn l))
       with (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil ++ (map iformulas.ioc (map lj2ill_cbn l))).
     rewrite<- map_map in IHpi.
-    apply (@ill_cut.cut_ll_ir (iformulas.ioc (lj2ill_cbn B))
+    apply (@ill_cut.cut_ll_ir _ (iformulas.ioc (lj2ill_cbn B))
           (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil))...
     change (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil)
       with (map iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B) :: nil)).
@@ -408,7 +423,7 @@ Lemma illfrag2lj_cbn : forall l A,
   ill_cut.ill_ll (map oc_lj2ill_cbn l) (lj2ill_cbn A) -> lj l A.
 Proof.
   intros l A H.
-  apply skeleton in H.
+  apply (@skeleton atom) in H.
   simpl in H ; rewrite ill2lj_lj2ill_cbn_id in H.
   replace l with (map ill2lj (map oc_lj2ill_cbn l)) ; try assumption.
   rewrite map_map ; rewrite <- (map_id l) at 2.
@@ -439,8 +454,7 @@ Proof.
 intros l A pi.
 apply illfrag2lj_cbn.
 apply ill_vs_ll.ll_to_ill_oclpam_axfree
-  with yalla_ax.i2ac (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
-- apply yalla_ax.i2ac_inj.
+  with (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
 - reflexivity.
 - intros H; inversion H.
 - eapply ll_def.stronger_pfrag; [ | apply pi ].
@@ -456,24 +470,25 @@ Qed.
 
 (** ** 6 Import properties *)
 
-Lemma ax_gen_r : forall A, lj (A :: nil) A.
-Proof. intros A; apply illfrag2lj_cbv, ill_def.ax_exp_ill. Qed.
+Lemma ax_gen_r : forall A : iformula, lj (A :: nil) A.
+Proof. intros A; apply (@illfrag2lj_cbv atom), ill_def.ax_exp_ill. Qed.
 
-Lemma cut_ir : forall A l1 l2 C,
+Lemma cut_ir : forall (A : iformula) l1 l2 C,
   lj l1 A -> lj (A :: l2) C -> lj (l1 ++ l2) C.
 Proof with try assumption.
   intros A l1 l2 C pi1 pi2.
-  apply lj2illfrag_cbv in pi1.
-  apply lj2illfrag_cbv in pi2; list_simpl in pi2.
-  apply illfrag2lj_cbv; list_simpl.
+  apply (@lj2illfrag_cbv atom) in pi1.
+  apply (@lj2illfrag_cbv atom) in pi2; list_simpl in pi2.
+  apply (@illfrag2lj_cbv atom); list_simpl.
   rewrite <- (app_nil_l _) in pi2.
   rewrite <- (app_nil_l _).
   apply ill_cut.cut_ll_ir with (oc_lj2ill_cbv A)...
 Qed.
 
+
 (** ** 7 Specific developments *)
 
-Lemma disjunction_property : forall A B,
+Lemma disjunction_property : forall A B : iformula,
   lj nil (ior A B) -> lj nil A + lj nil B.
 Proof with try assumption.
   intros A B pi.
@@ -485,3 +500,5 @@ Proof with try assumption.
   - left...
   - right...
 Qed.
+
+End Atoms_inj.

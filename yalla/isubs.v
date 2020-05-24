@@ -1,15 +1,19 @@
 (* isubs library for yalla *)
 
+
 (** * Substitutions in Intuitionistic Linear Logic formulas and proofs *)
 
-From OLlibs Require Import List_more Permutation_Type GPermutation_Type.
-Require Export ill_def.
+From OLlibs Require Import infinite List_more Permutation_Type GPermutation_Type.
+From Yalla Require Export ill_def.
 
 
-(** ** Decidable equality on [IAtom], through value into [bool] *)
-Definition iateq := yalla_ax.iateq.
-Definition iateq_eq := yalla_ax.iateq_eq.
+Section Atoms.
 
+Context { preiatom : InfDecType }.
+
+Notation atN := (@atN preiatom).
+Definition iateq := @eqb (option_dectype preiatom).
+Definition iateq_eq := @eqb_eq (option_dectype preiatom).
 
 (** ** Substitutions *)
 
@@ -116,7 +120,7 @@ Qed.
 Lemma subs_ill_axioms {P} :
  forall (gax : { iptypgax : Type & iptypgax -> list iformula * iformula }) l C,
   (forall a, ill P (fst (projT2 gax a)) (snd (projT2 gax a))) ->
-  ill (axupd_ipfrag P gax) l C -> ill P l C.
+  ill (axupd_ipfrag P gax) l C -> @ill preiatom P l C.
 Proof with myeeasy.
 intros gax l C Hgax pi.
 induction pi ; try now constructor.
@@ -124,89 +128,68 @@ induction pi ; try now constructor.
   eapply ex_ir ; [ apply IHpi | ]...
 - eapply ex_oc_ir...
 - simpl in f.
-  eapply (@cut_ir _ f)...
+  eapply (@cut_ir _ _ f)...
 - apply Hgax...
 Qed.
 
 
-(** ** Fresh variables and associated properties *)
-Section Fresh.
+(** ** Fresh atoms and associated properties *)
 
-(** Embedding of [nat] into [Atom] *)
-Variable i2n : IAtom -> nat.
-Variable n2i : nat -> IAtom.
-Hypothesis n2n : forall n, i2n (n2i n) = n.
-
-Lemma i2n_is_n2i : forall a n, a = n2i n -> n = i2n a.
-Proof.
-intros a n Ha.
-rewrite Ha.
-rewrite n2n.
-reflexivity.
-Qed.
-
-(** [nat] bigger than all [nat] associated with [IAtom] in [A] *)
-Fixpoint inat_fresh_of A :=
+Fixpoint iatom_list A : list iatom :=
 match A with
-| ivar x    => S (i2n x)
-| ione      => 0
-| itens B C => inat_fresh_of B + inat_fresh_of C
-| ilpam B C => inat_fresh_of B + inat_fresh_of C
-| igen B => inat_fresh_of B + S (i2n atN)
-| ilmap B C => inat_fresh_of B + inat_fresh_of C
-| ineg B => inat_fresh_of B + S (i2n atN)
-| izero     => 0
-| itop      => 0
-| iplus B C => inat_fresh_of B + inat_fresh_of C
-| iwith B C => inat_fresh_of B + inat_fresh_of C
-| ioc B     => inat_fresh_of B
+| ivar x    => x :: nil
+| ione      => nil
+| itens B C => iatom_list B ++ iatom_list C
+| ilpam B C => iatom_list B ++ iatom_list C
+| igen B => atN :: iatom_list B
+| ilmap B C => iatom_list B ++ iatom_list C
+| ineg B => atN :: iatom_list B
+| izero     => nil
+| itop      => nil
+| iplus B C => iatom_list B ++ iatom_list C
+| iwith B C => iatom_list B ++ iatom_list C
+| ioc B     => iatom_list B
 end.
 
-(** Provide an [IAtom] which is fresh for [A] *)
-Definition ifresh_of A := n2i (inat_fresh_of A).
+(** Provide an [Atom] which is fresh for [A] *)
+Definition ifresh_of A := @fresh (option_infdectype preiatom) (iatom_list A).
 
-Lemma subs_ifresh_le : forall C A n, inat_fresh_of A <= n -> isubs C (n2i n) A = A.
-Proof with myeasy.
-intros C A n Hle.
-induction A ; simpl in Hle ; simpl ;
-  try rewrite IHA ;
-  try (rewrite IHA2 ; [ rewrite IHA1 | ]) ;
-  simpl...
-rewrite repl_iat_neq...
-intro Heq.
-apply i2n_is_n2i in Heq ; subst.
-inversion Hle...
+Lemma subs_ifresh_incl : forall C lat A,
+  incl (iatom_list A) lat -> isubs C (@fresh (option_infdectype preiatom) lat) A = A.
+Proof.
+intros C lat A; induction A; simpl; intros Hincl;
+  change (proj1_sig (nat_injective_choice (option_dectype preiatom)
+            (nat_injective_option infinite_nat_injective)) lat)
+  with (@fresh (option_infdectype preiatom) lat);
+  try rewrite IHA;
+  try (rewrite IHA2 ; [ rewrite IHA1 | ]);
+  simpl; intuition;
+  (try now apply incl_app_inv in Hincl);
+  try now apply incl_cons_inv in Hincl.
+rewrite repl_iat_neq; auto.
+intros ->.
+apply (@fresh_prop (option_infdectype preiatom) lat),
+      (Hincl (@fresh (option_infdectype preiatom) lat)); intuition.
 Qed.
 
 Lemma subs_ifresh : forall C A, isubs C (ifresh_of A) A = A.
+Proof. now intros; apply subs_ifresh_incl. Qed.
+
+(** Provide an [Atom] which is fresh for all elements of [l] *)
+Definition ifresh_of_list l := @fresh (option_infdectype preiatom) (flat_map iatom_list l).
+
+Lemma subs_ifresh_list_incl : forall C lat l,
+  incl (flat_map iatom_list l) lat -> map (isubs C (@fresh (option_infdectype preiatom) lat)) l = l.
 Proof.
-intros.
-apply subs_ifresh_le.
-reflexivity.
-Qed.
-
-Definition inat_fresh_of_list l := list_max (map inat_fresh_of l).
-
-(** Provide an [IAtom] which is fresh for all elements of [l] *)
-Definition ifresh_of_list l := n2i (inat_fresh_of_list l).
-
-Lemma subs_ifresh_list_le : forall C l n,
-  inat_fresh_of_list l <= n -> map (isubs C (n2i n)) l = l.
-Proof with myeasy.
-unfold inat_fresh_of_list.
-intros C l n Hle.
-induction l...
-simpl in Hle ; simpl.
-rewrite subs_ifresh_le ; [ rewrite IHl | ]...
+intros C lat l; induction l; simpl; intros Hincl; auto.
+apply incl_app_inv in Hincl.
+change (proj1_sig (nat_injective_choice (option_dectype preiatom)
+            (nat_injective_option infinite_nat_injective)) lat)
+  with (@fresh (option_infdectype preiatom) lat).
+rewrite subs_ifresh_incl; [ rewrite IHl | ]; intuition.
 Qed.
 
 Lemma subs_ifresh_list : forall C l, map (isubs C (ifresh_of_list l)) l = l.
-Proof.
-intros.
-apply subs_ifresh_list_le.
-reflexivity.
-Qed.
+Proof. now intros; apply subs_ifresh_list_incl. Qed.
 
-End Fresh.
-
-
+End Atoms.

@@ -4,11 +4,17 @@
 (** * Definitions of various Linear Logic fragments *)
 
 From Coq Require Import BoolOrder PeanoNat Lia.
-From OLlibs Require Import List_more Dependent_Forall_Type
-               CPermutation_Type Permutation_Type_more Permutation_Type_solve GPermutation_Type.
-Require Export ll_prop.
-Require Import subs.
+From OLlibs Require Import infinite List_more Dependent_Forall_Type
+                           CPermutation_Type Permutation_Type_more Permutation_Type_solve GPermutation_Type.
+From Yalla Require Export ll_prop.
+From Yalla Require Import subs.
 
+
+Section Atoms.
+
+Context { atom : InfDecType }.
+Notation formula := (@formula atom).
+Notation ll := (@ll atom).
 
 (** ** Property on mix_n *)
 
@@ -32,11 +38,11 @@ Proof with try assumption; try reflexivity; try GPermutation_Type_solve.
 intros n l pi.
 rewrite <- (app_nil_r _).
 apply cut_r with (wn (tens_n n bot))...
-- simpl; change nil with (map wn nil); apply oc_r.
+- simpl; change nil with (map (@wn atom) nil); apply oc_r.
   rewrite dual_tens_n; simpl.
   apply parr_n_r.
   rewrite app_nil_r.
-  replace (repeat one n) with (concat (repeat (one :: nil) n))
+  replace (repeat one n) with (concat (repeat (@one atom :: nil) n))
     by (symmetry; apply repeat_to_concat).
   apply mix_r.
   + simpl; rewrite repeat_length.
@@ -75,14 +81,14 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
     simpl.
     apply co_const_list_r with (S nL)...
     change (repeat (wn (tens_n n bot)) (S nL))
-      with ((wn (tens_n n bot) :: nil) ++ repeat (wn (tens_n n bot)) nL).
+      with ((@wn atom (tens_n n bot) :: nil) ++ repeat (wn (tens_n n bot)) nL).
     rewrite HeqnL.
     refine (ex_concat_r _ _ ((wn (tens_n n bot)) :: nil) (wn (tens_n n bot)) L _)...
     replace n with nL by (apply Nat.eqb_eq, Heq).
     rewrite HeqnL.
     rewrite flat_map_concat_map.
     replace ((wn (tens_n (length L) bot)) :: nil )
-       with (wn (tens_n (length (map (cons (wn (tens_n (length L) bot))) L)) bot) :: nil)
+       with (@wn atom (tens_n (length (map (cons (wn (tens_n (length L) bot))) L)) bot) :: nil)
        by (rewrite map_length; reflexivity).
     apply de_r.
     apply tens_n_r.
@@ -168,7 +174,7 @@ induction pi using ll_nested_ind ; try now constructor...
   + rewrite <- (app_nil_r _).
     apply cut_r with (tens_n (length L) bot).
     * rewrite HeqP'...
-    * rewrite dual_tens_n; change (dual bot) with one.
+    * rewrite dual_tens_n; change (dual bot) with (@one atom).
       replace (parr_n (length L) one :: nil)
          with (projT2 (pgax (cutupd_pfrag (axupd_pfrag P
                  (existT (fun x => x -> list formula) _
@@ -217,11 +223,11 @@ intros l n pi.
 rewrite <- (app_nil_r l).
 apply cut_r with (wn (tens_n n bot))...
 - simpl.
-  change nil with (map wn nil).
+  change nil with (map (@wn atom) nil).
   apply oc_r; simpl.
   rewrite dual_tens_n.
-  change (dual bot) with one.
-  pattern (parr_n n one :: nil) at 2.
+  change (dual bot) with (@one atom).
+  pattern (@parr_n atom n one :: nil) at 2.
   change (parr_n n one :: nil)
     with (projT2 (pgax (cutupd_pfrag (axupd_pfrag P
                      (existT (fun x => x -> list formula) _
@@ -471,8 +477,8 @@ Qed.
 (** ** Standard linear logic: [ll_ll] (no mix, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_ll :=  mk_pfrag false NoAxioms pmix_none true.
-(*                               cut   axioms   mix       perm  *)
+Definition pfrag_ll :=  @mk_pfrag atom  false NoAxioms pmix_none true.
+(*                                atoms cut   axioms   mix       perm  *)
 
 Definition ll_ll := ll pfrag_ll.
 
@@ -499,8 +505,8 @@ Qed.
 (** ** Linear logic with mix0: [ll_mix0] (no mix2, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mix0 := mk_pfrag false NoAxioms pmix0 true.
-(*                                cut   axioms   mix   perm  *)
+Definition pfrag_mix0 := @mk_pfrag atom  false NoAxioms pmix0 true.
+(*                                 atoms cut   axioms   mix   perm  *)
 
 Definition ll_mix0 := ll pfrag_mix0.
 
@@ -532,7 +538,7 @@ Lemma mix0_to_ll {P} : pperm P = true -> forall b0 l,
   ll (pmixupd_point_pfrag P 0 b0) l -> ll P (wn one :: l).
 Proof with myeeasy ; try GPermutation_Type_solve.
   intros fp b0 l pi.
-  change one with (tens_n 0 bot).
+  change one with (@tens_n atom 0 bot).
   apply mix_to_ll with b0...
 Qed.
 
@@ -540,7 +546,7 @@ Lemma ll_to_mix0_cut {P} : forall l,
   ll P (wn one :: l) -> ll (cutupd_pfrag (pmixupd_point_pfrag P 0 true) true) l.
 Proof.
   intros l pi.
-  change one with (tens_n 0 bot) in pi.
+  change one with (@tens_n atom 0 bot) in pi.
   apply ll_to_mix_cut.
   apply pi.
 Qed.
@@ -581,8 +587,8 @@ eapply stronger_pfrag in pi.
   assert (pcut P' = true) as fc' by (rewrite HeqP' ; simpl ; assumption).
   apply (stronger_pfrag _ P') in pi.
   + assert (ll P' (bot :: map wn nil)) as pi'.
-    { change (bot :: map wn nil) with ((bot :: nil) ++ nil).
-      eapply (@cut_r _ fc' bot).
+    { change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
+      eapply (@cut_r _ _ fc' bot).
       - apply one_r.
       - assert ({ b | bot :: bot :: nil = projT2 (pgax P') b })
           as [b Hgax] by (rewrite HeqP' ; now (exists (inr tt))).
@@ -590,7 +596,7 @@ eapply stronger_pfrag in pi.
         apply gax_r. }
     apply oc_r in pi'.
     rewrite <- (app_nil_l l).
-    eapply (@cut_r _ fc' (oc bot)) ; [ simpl ; apply pi | apply pi' ].
+    eapply (@cut_r _ _ fc' (oc bot)) ; [ simpl ; apply pi | apply pi' ].
   + nsplit 4 ; rewrite HeqP'...
     simpl ; intros a ; exists (inl a)...
 - nsplit 4 ; intros ; simpl...
@@ -664,8 +670,8 @@ Qed.
 (** ** Linear logic with mix2: [ll_mix2] (no mix0, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mix2 := mk_pfrag false NoAxioms pmix2 true.
-(*                                cut   axioms   mix   perm  *)
+Definition pfrag_mix2 := @mk_pfrag atom  false NoAxioms pmix2 true.
+(*                                 atoms cut   axioms   mix   perm  *)
 
 Definition ll_mix2 := ll pfrag_mix2.
 
@@ -697,7 +703,7 @@ Lemma mix2_to_ll {P} : pperm P = true -> forall b2 l,
   ll (pmixupd_point_pfrag P 2 b2) l -> ll P (wn (tens bot bot) :: l).
 Proof with myeeasy ; try GPermutation_Type_solve.
 intros fp b2 l pi.
-change (tens bot bot) with (tens_n 2 bot).
+change (tens bot bot) with (@tens_n atom 2 bot).
 apply mix_to_ll with b2...
 Qed.
 
@@ -733,8 +739,8 @@ eapply stronger_pfrag in pi.
   assert (pcut P' = true) as fc' by (rewrite HeqP' ; simpl ; assumption).
   apply (stronger_pfrag _ P') in pi.
   + assert (ll P' (parr one one :: map wn nil)) as pi'.
-    { change (parr one one :: map wn nil) with ((parr one one :: nil) ++ nil).
-      eapply (@cut_r _ fc' bot).
+    { change (parr one one :: map wn nil) with ((@parr atom one one :: nil) ++ nil).
+      eapply (@cut_r _ _ fc' bot).
       - apply one_r.
       - apply bot_r.
         apply parr_r.
@@ -744,7 +750,7 @@ eapply stronger_pfrag in pi.
         apply gax_r. }
     apply oc_r in pi'.
     rewrite <- (app_nil_l l).
-    eapply (@cut_r _ fc' (oc (parr one one))) ; [ simpl ; apply pi | apply pi' ].
+    eapply (@cut_r _ _ fc' (oc (parr one one))) ; [ simpl ; apply pi | apply pi' ].
   + nsplit 4 ; rewrite HeqP'...
     simpl ; intros a ; exists (inl a)...
 - nsplit 4 ; intros ; simpl...
@@ -765,7 +771,7 @@ assert (ll P (dual (parr (parr one one) (parr bot bot)) :: one :: one :: nil)) a
     apply tens_r ; apply one_r.
   - rewrite <- (app_nil_l (one :: nil)).
     rewrite (app_comm_cons _ _ one).
-    apply tens_r ; apply ax_exp. }
+    apply tens_r; change one with (dual (@bot atom)); apply ax_exp. }
 rewrite <- (app_nil_l _).
 eapply cut_r ; [ assumption | apply pi' | ].
 apply parr_r ; apply pi.
@@ -883,9 +889,9 @@ apply (stronger_pfrag _
     rewrite Hgax.
     apply gax_r.
   + destruct u.
-    change (one :: one :: nil) with ((one :: nil) ++ one :: nil).
+    change (one :: one :: nil) with ((@one atom :: nil) ++ one :: nil).
     rewrite HeqP'.
-    change ((one :: nil) ++ one :: nil) with (concat ((one :: nil) :: (one :: nil) :: nil)).
+    change ((one :: nil) ++ one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r...
     repeat (apply Forall_inf_cons; try apply one_r).
     apply Forall_inf_nil.
@@ -925,8 +931,8 @@ Qed.
 (** ** Linear logic with both mix0 and mix2: [ll_mix02] (no axiom, commutative) *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mix02 := mk_pfrag false NoAxioms pmix02 true.
-(*                                 cut   axioms   mix    perm  *)
+Definition pfrag_mix02 := @mk_pfrag atom  false NoAxioms pmix02 true.
+(*                                  atoms cut   axioms   mix    perm  *)
 
 Definition ll_mix02 := ll pfrag_mix02.
 
@@ -1013,11 +1019,11 @@ intros l pi.
 eapply stronger_pfrag in pi.
 - rewrite <- (app_nil_r l).
   eapply cut_r ; [ | | apply pi]...
-  change nil with (map wn nil).
+  change nil with (map (@wn atom) nil).
   apply oc_r.
   apply parr_r.
   change (oc bot :: oc bot :: map wn nil)
-    with (concat ((oc bot :: map wn nil) :: (oc bot :: map wn nil) :: nil)).
+    with (concat ((@oc atom bot :: map wn nil) :: (oc bot :: map wn nil) :: nil)).
   apply mix_r...
   apply forall_Forall_inf.
   intros l' Hin.
@@ -1126,24 +1132,24 @@ eapply stronger_pfrag in pi.
   + assert (ll P' (parr (oc bot) (oc bot) :: map wn nil)) as pi'.
     { apply parr_r.
       change (oc bot :: oc bot :: map wn nil)
-        with ((oc bot :: nil) ++ oc bot :: map wn nil).
-      eapply (@cut_r _ fc' one).
+        with ((@oc atom bot :: nil) ++ oc bot :: map wn nil).
+      eapply (@cut_r _ _ fc' one).
       - apply bot_r.
         apply oc_r.
-        change (bot :: map wn nil) with ((bot :: nil) ++ nil).
-        eapply (@cut_r _ fc' bot).
+        change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
+        eapply (@cut_r _ _ fc' bot).
         + apply one_r.
         + assert ({ b | bot :: bot :: nil = projT2 (pgax P') b })
             as [b Hgax] by (rewrite HeqP' ; now (exists (inr false))).
           rewrite Hgax.
           apply gax_r.
       - change (one :: oc bot :: nil)
-          with ((one :: nil) ++ oc bot :: map wn nil).
-        eapply (@cut_r _ fc' one).
+          with ((@one atom :: nil) ++ oc bot :: map wn nil).
+        eapply (@cut_r _ _ fc' one).
         + apply bot_r.
           apply oc_r.
-          change (bot :: map wn nil) with ((bot :: nil) ++ nil).
-          eapply (@cut_r _ fc' bot).
+          change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
+          eapply (@cut_r _ _ fc' bot).
           * apply one_r.
           * assert ({ b | bot :: bot :: nil = projT2 (pgax P') b })
               as [b Hgax] by (rewrite HeqP' ; now (exists (inr false))).
@@ -1155,7 +1161,7 @@ eapply stronger_pfrag in pi.
           apply gax_r. }
     apply oc_r in pi'.
     rewrite <- (app_nil_l l).
-    eapply (@cut_r _ fc' (oc (parr (oc bot) (oc bot)))) ; [ simpl ; apply pi | apply pi' ].
+    eapply (@cut_r _ _ fc' (oc (parr (oc bot) (oc bot)))) ; [ simpl ; apply pi | apply pi' ].
   + nsplit 4 ; rewrite HeqP'...
     simpl ; intros a ; exists (inl a)...
 - nsplit 4 ; intros ; simpl...
@@ -1192,9 +1198,9 @@ apply (stronger_pfrag _
     rewrite Hgax.
     apply gax_r.
   + destruct b.
-    * change (one :: one :: nil) with ((one :: nil) ++ one :: nil).
+    * change (one :: one :: nil) with ((@one atom :: nil) ++ one :: nil).
       rewrite HeqP'.
-      change ((one :: nil) ++ one :: nil) with (concat ((one :: nil) :: (one :: nil) :: nil)).
+      change ((one :: nil) ++ one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
       apply mix_r...
       repeat (apply Forall_inf_cons; try apply one_r).
       apply Forall_inf_nil.
@@ -1232,23 +1238,23 @@ eapply cut_admissible...
 eapply stronger_pfrag in pi.  
 - rewrite <- (app_nil_r l).
   eapply (cut_r _ (wn (tens bot bot))) ; simpl.
-  + change nil with (map wn nil).
+  + change nil with (map (@wn atom) nil).
     apply oc_r.
     apply parr_r.
-    change (one :: one :: map wn nil) with (concat ((one :: nil) :: (one :: nil) :: nil)).
+    change (one :: one :: map wn nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r...
     apply Forall_inf_cons ; [ apply one_r | ].
     apply Forall_inf_cons ; [ apply one_r | ].
     apply Forall_inf_nil.
   + rewrite <- app_nil_r.
     eapply cut_r ; [ | | apply pi ] ; simpl...
-    change nil with (map wn nil).
+    change nil with (map (@wn atom) nil).
     apply oc_r.
     apply bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r...
     apply Forall_inf_nil.
-- etransitivity ; [ apply cutupd_pfrag_true| ].
+- eapply le_pfrag_po ; [ apply cutupd_pfrag_true| ].
   nsplit 4...
   + intros a ; exists a...
   + intros n.
@@ -1276,11 +1282,11 @@ eapply cut_admissible...
 eapply stronger_pfrag in pi.
 - rewrite <- (app_nil_r l).
   eapply (cut_r _ (wn (tens (wn one) bot))) ; simpl.
-  + change nil with (map wn nil).
+  + change nil with (map (@wn atom) nil).
     apply oc_r.
     apply parr_r.
     change (one :: oc bot :: map wn nil)
-      with (concat ((one :: nil) :: (oc bot :: map wn nil) :: nil)).
+      with (concat ((@one atom :: nil) :: (oc bot :: map wn nil) :: nil)).
     apply mix_r...
     apply Forall_inf_cons ; [ apply one_r | ].
     apply Forall_inf_cons.
@@ -1292,13 +1298,13 @@ eapply stronger_pfrag in pi.
     apply Forall_inf_nil.
   + rewrite <- app_nil_r.
     eapply cut_r ; [ | | apply pi ] ; simpl...
-    change nil with (map wn nil).
+    change nil with (map (@wn atom) nil).
     apply oc_r.
     apply bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r...
     apply Forall_inf_nil.
-- etransitivity ; [ apply cutupd_pfrag_true| ].
+- eapply le_pfrag_po ; [ apply cutupd_pfrag_true| ].
   nsplit 4...
   + intros a ; exists a...
   + intros n.
@@ -1361,7 +1367,7 @@ induction Hll ; try (now constructor).
 - eapply cut_r...
 - destruct a.
   + rewrite <- (app_nil_l _).
-    apply (@cut_r (pfrag_llR R2) eq_refl (dual R2)).
+    apply (@cut_r _ (pfrag_llR R2) eq_refl (dual R2)).
     * rewrite bidual.
       eapply ex_r.
       apply HR1.
@@ -1370,7 +1376,7 @@ induction Hll ; try (now constructor).
         as [b Hgax] by (now exists true).
       rewrite Hgax.
       apply gax_r.
-  + eapply (@cut_r (pfrag_llR R2) eq_refl R2) in HR2.
+  + eapply (@cut_r _ (pfrag_llR R2) eq_refl R2) in HR2.
     * eapply ex_r ; [ apply HR2 | ].
       unfold PCPermutation_Type.
       simpl.
@@ -1484,7 +1490,7 @@ eapply (cut_ll_r _ nil) in pi.
     apply ax_exp.
   + eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 - simpl ; rewrite bidual.
-  change nil with (map wn nil).
+  change nil with (map (@wn atom) nil).
   apply oc_r.
   apply parr_r.
   eapply ex_r ; [ apply wk_r ; apply one_r | GPermutation_Type_solve ].
@@ -1499,7 +1505,7 @@ eapply (cut_r _ (oc (dual R))).
 - rewrite <- (app_nil_l (dual _ :: l)).
   eapply (cut_r _ (oc (parr one R))).
   + simpl ; rewrite bidual ; eapply ex_r ; [apply pi | GPermutation_Type_solve ].
-  + change nil with (map wn nil).
+  + change nil with (map (@wn atom) nil).
     apply oc_r.
     apply parr_r.
     apply (ex_r _ (R :: one :: nil)).
@@ -1508,7 +1514,7 @@ eapply (cut_r _ (oc (dual R))).
       rewrite Hgax.
       apply gax_r.
     * GPermutation_Type_solve.
-- change nil with (map wn nil).
+- change nil with (map (@wn atom) nil).
   apply oc_r.
   assert ({ b | dual R :: map wn nil = projT2 (pgax (pfrag_llR R)) b })
     as [b Hgax] by (now exists true).
@@ -1527,3 +1533,5 @@ apply wk_r.
 apply de_r.
 eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 Qed.
+
+End Atoms.

@@ -2,16 +2,26 @@
 
 (** * Order structure and finite multiset structure on intuitionistic formulas *)
 
-From OLlibs Require Import funtheory nattree fmsetlist_Type BOrders.
-Require Export iformulas.
+From OLlibs Require Import funtheory dectype nattree fmsetlist_Type BOrders.
+From Yalla Require Export iformulas.
 
+
+Section Atoms.
+
+Context { preiatom : DecType }.
+Context { IAtoms : IAtomType_into_nat preiatom }.
 
 (** ** Encoding of [iformula] into [nat]-labelled trees for ordering *)
 
 (** Embedding of [IAtom] into [nat] *)
-Definition i2n := yalla_ax.i2n.
-Definition n2i := yalla_ax.n2i.
-Definition i2i_n := yalla_ax.i2i_n.
+Definition i2n := snd (proj1_sig IAtom_into_nat).
+Definition n2i := fst (proj1_sig IAtom_into_nat).
+Definition i2i_n : retract n2i i2n.
+Proof.
+unfold n2i, i2n.
+destruct IAtom_into_nat as [(s, i) Hr].
+apply Hr.
+Defined.
 
 (** Embedding of [iformula] into [nattree] *)
 Fixpoint iform2nattree A :=
@@ -57,7 +67,7 @@ Qed.
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
 
-Instance border_iformula : BOrder.
+Global Instance border_iformula : BOrder | 50.
 Proof.
 eapply border_inj.
 eapply compose_injective.
@@ -69,6 +79,8 @@ Defined.
 
 (** ** Finite multi-sets over [iformula] *)
 
-Instance fmset_iformula :
-  FinMultiset (SortedList border_iformula) iformula
+Global Instance fmset_iformula :
+  FinMultiset (SortedList border_iformula) iformula | 50
   := FMConstr_slist border_iformula.
+
+End Atoms.

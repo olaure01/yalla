@@ -2,23 +2,77 @@
 
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-From OLlibs Require Import funtheory List_more Dependent_Forall_Type
+From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type
                            Permutation_Type GPermutation_Type.
-Require Import subs isubs.
-Require Export ill_vs_ll.
+From Yalla Require Import subs isubs.
+From Yalla Require Export ill_vs_ll.
 
+
+Section Atoms.
+
+Context { atom : DecType }.
+Context { preiatom : InfDecType }.
+Context { Atoms : Atom2IAtomType_self atom preiatom }.
 
 (** ** Basic ingredients for links with [ill] *)
 
-Definition i2a := yalla_ax.i2a.
-Definition a2i := yalla_ax.a2i.
-Definition a2a_i := yalla_ax.a2a_i.
-Definition i2i_not_atN := yalla_ax.i2i_not_atN.
-Definition i2ac := yalla_ax.i2ac.
-Definition i2ac_inj := yalla_ax.i2ac_inj.
-Definition ateq_a2i := yalla_ax.ateq_a2i.
+Notation Na := (proj1_sig (projT3 Atom_self_inj)).
+Notation atom2atom := (projT1 (sigT_of_sigT2 Atom_self_inj)).
+Notation atom2atom_inj := (projT2 (sigT_of_sigT2 Atom_self_inj)).
 
-Definition unill := ill2ll i2a.
+Definition atom_inf := AtomType_self_InfDecType atom (@Atom2IAtom_Atom_self atom preiatom _).
+
+Notation formula := (@formula atom_inf).
+Notation iformula := (@iformula preiatom).
+
+Lemma Atom2PreIAtom_inj : injective Atom2PreIAtom.
+Proof. apply bijective_injective, Atom2PreIAtom_bij. Qed.
+Notation p2a := (proj1_sig (sig_of_sig2 (bijective_inverse Atom2PreIAtom_bij))).
+Definition i2a a :=
+  match a with
+  | None => Na
+  | Some x => p2a x
+  end.
+Definition a2i := fun a => Some (Atom2PreIAtom a).
+Lemma a2a_i : retract i2a a2i.
+Proof. intros a; unfold i2a, a2i; apply (proj3_sig (bijective_inverse Atom2PreIAtom_bij)). Qed.
+Lemma i2i_not_atN : forall a, a <> atN -> a2i (i2a a) = a.
+Proof.
+intros a Heq; unfold i2a, a2i.
+destruct a; [ | now contradiction Heq ].
+now f_equal; destruct (bijective_inverse Atom2PreIAtom_bij).
+Qed.
+Lemma ateq_a2i : forall a b : atom_inf, ateq a b = true <-> iateq (a2i a) (a2i b) = true.
+Proof.
+intros a b; unfold ateq, iateq; rewrite ? eqb_eq; split; intros Heq.
+- now subst.
+- apply section_injective with (g := i2a) in Heq; auto.
+  apply a2a_i.
+Qed.
+
+Definition i2ac a :=
+  match a with
+  | None => Na
+  | Some x => atom2atom (p2a x)
+  end.
+Lemma i2ac_inj : injective i2ac.
+Proof.
+intros a b; destruct a, b; intros Heq; inversion Heq as [Heq']; subst.
+- f_equal.
+  apply atom2atom_inj in Heq'.
+  now apply (section_injective (proj2_sig (sig_of_sig2
+                                 ((bijective_inverse Atom2PreIAtom_bij))))).
+- exfalso.
+  symmetry in Heq'.
+  now apply (proj2_sig (projT3 Atom_self_inj)) in Heq'.
+- exfalso.
+  now apply (proj2_sig (projT3 Atom_self_inj)) in Heq'.
+- reflexivity.
+Qed.
+
+Definition iatom2atom : IAtom2AtomType atom_inf preiatom := i2a.
+Definition unill := @ill2ll _ _ iatom2atom.
+
 
 (** ** The translation *)
 
@@ -67,16 +121,16 @@ end.
 
 Lemma trans_inj : injective trans.
 Proof.
-intros a.
-induction a ; intros b Heq ; destruct b ; inversion Heq ;
+intros a; induction a; intros b Heq; destruct b; inversion Heq;
   (try apply IHa in H0) ;
   (try apply IHa1 in H0) ;
-  (try apply IHa2 in H1) ; subst ;
+  (try apply IHa2 in H1) ; subst;
   intuition.
-apply IHa1 in H1.
-apply IHa2 in H0.
-subst.
-reflexivity.
+- now f_equal; apply Atom2PreIAtom_inj.
+- now f_equal; apply Atom2PreIAtom_inj.
+- apply IHa1 in H1.
+  apply IHa2 in H0.
+  now subst.
 Qed.
 
 Lemma trans_wn : forall l,
@@ -94,7 +148,7 @@ Proof with myeeasy.
 intros Hperm Hcut A1 A2 B1 B2 pi1 pi2.
 cons2app.
 rewrite <- (app_nil_l _).
-eapply (@cut_ir _ Hcut (itens (negR (negR A2)) (negR (negR B2))))...
+eapply (@cut_ir _ _ Hcut (itens (negR (negR A2)) (negR (negR B2))))...
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl ; cons2app.
@@ -133,7 +187,7 @@ Proof with myeeasy.
 intros Hperm Hcut A1 A2 B1 B2 pi1 pi2.
 cons2app.
 rewrite <- (app_nil_l _).
-eapply (@cut_ir _ Hcut (iplus (negR (negR A2)) (negR (negR B2))))...
+eapply (@cut_ir _ _ Hcut (iplus (negR (negR A2)) (negR (negR B2))))...
 - rewrite <- (app_nil_l _).
   apply plus_ilr.
   + list_simpl.
@@ -235,39 +289,37 @@ induction A ; simpl.
   apply negR_irr...
 Qed.
 
-Lemma trans_subs {P} : ipperm P = true -> ipcut P = true -> forall A B x,
+Lemma trans_subs {P} : ipperm P = true -> ipcut P = true -> forall (A B : formula) x,
   (isubs (negR (trans B)) (a2i x) R = R) ->
   ill P (isubs (negR (trans B)) (a2i x) (trans A)
              :: negR (trans (subs B x A)):: nil) R.
 Proof with myeeasy ; try now (apply ax_exp_ill).
 intros Hperm Hcut A B x HR.
 induction A ; simpl ; try rewrite HR.
-- case_eq (ateq a x) ; intros Hateq.
+- case_eq (ateq c x) ; intros Hateq.
   + unfold repl_at ; rewrite Hateq ; simpl.
-    assert (iateq (a2i a) (a2i x) = true) as Hiateq
+    assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i ; assumption).
     unfold repl_iat ; rewrite Hiateq ; simpl.
     apply negR_ilr...
-  + case_eq (iateq (a2i a) (a2i x)) ; intros Hiateq.
+  + case_eq (iateq (a2i c) (a2i x)) ; intros Hiateq.
     * exfalso.
       rewrite <- ateq_a2i in Hiateq.
-      unfold ateq in Hateq.
       rewrite Hiateq in Hateq.
       inversion Hateq.
     * unfold repl_at ; rewrite Hateq ; simpl.
       unfold repl_iat ; rewrite Hiateq ; simpl.
       eapply ex_ir ; [ | rewrite Hperm ; apply Permutation_Type_swap ].
       apply negR_ilr...
-- case_eq (ateq a x) ; intros Hateq.
+- case_eq (ateq c x) ; intros Hateq.
   + unfold repl_at ; rewrite Hateq ; simpl.
-    assert (iateq (a2i a) (a2i x) = true) as Hiateq
+    assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i ; assumption).
     unfold repl_iat ; rewrite Hiateq ; simpl.
     apply trans_dual...
-  + case_eq (iateq (a2i a) (a2i x)) ; intros Hiateq.
+  + case_eq (iateq (a2i c) (a2i x)) ; intros Hiateq.
     * exfalso.
       rewrite <- ateq_a2i in Hiateq.
-      unfold ateq in Hateq.
       rewrite Hiateq in Hateq.
       inversion Hateq.
     * unfold repl_at ; rewrite Hateq ; simpl.
@@ -338,7 +390,7 @@ Definition p2ipfrag P := {|
              (fun a => (map trans (projT2 (pgax P) a), R)) ;
   ipperm := pperm P |}.
 
-Context {P : pfrag}.
+Context { P : @pfrag atom }.
 Hypothesis P_perm : pperm P = true.
 
 
@@ -354,7 +406,7 @@ Lemma ll_to_ill_trans_gen : forall l l0,
 Proof with myeeasy ; (try now (apply ax_exp_ill)) ;
                      try (simpl ; rewrite P_perm ; GPermutation_Type_solve).
 intros l l0 Hmix Hll.
-assert (Hax := @ax_exp_ill (p2ipfrag P) R).
+assert (Hax := @ax_exp_ill _ (p2ipfrag P) R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
 assert (ill (p2ipfrag P) (nil ++ map ioc l0 ++ R :: nil) R) as Hax'.
 { apply wk_list_ilr.
@@ -441,9 +493,9 @@ induction Hll using ll_nested_ind.
   assert (ipcut (p2ipfrag P) = true) as Hcut by (simpl ; assumption).
   assert (pi0 := trans_dual Hperm f A).
   rewrite <- (app_nil_l _) in pi0.
-  eapply (@cut_ir _ Hcut _ _ _ _ _ IHHll2) in pi0.
+  eapply (@cut_ir _ _ Hcut _ _ _ _ _ IHHll2) in pi0.
   list_simpl in pi0 ; rewrite app_assoc in pi0.
-  eapply (@cut_ir _ Hcut _ _ _ _ _ IHHll1) in pi0.
+  eapply (@cut_ir _ _ Hcut _ _ _ _ _ IHHll1) in pi0.
   rewrite <- (app_nil_l (map ioc _ ++ _)).
   eapply co_list_ilr.
   eapply ex_ir...
@@ -457,72 +509,68 @@ Theorem ll_to_ill_trans : forall l,
   (forall L : list (list formula),
       pmix P (length L) = true ->
       forall FL : Forall_inf (ll P) L,
-        Forall_Proofs (fun (l0 : list formula) (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
+        Forall_Proofs (fun l0 (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
         ill (p2ipfrag P) (map ioc nil ++ map trans (concat L)) R) ->
       ll P l -> ill (p2ipfrag P) (map trans l) R.
 Proof with myeeasy.
 intros l Hmix Hll.
 rewrite <- (app_nil_l (map _ _)).
-change nil with (map ioc nil).
+change nil with (map (@ioc preiatom) nil).
 eapply ll_to_ill_trans_gen...
 Qed.
 
 End RTranslation.
 
-(** Ingredients for generating fresh variables *)
-Definition a2n := yalla_ax.a2n.
-Definition n2a := yalla_ax.n2a.
-Definition n2n_a := yalla_ax.n2n_a.
-
-Lemma munit_trans : forall A n, nat_fresh_of a2n A <= n ->
-  munit_smp (subs bot (n2a n) (dual (unill (trans (ivar (a2i (n2a n))) A)))) A.
+Lemma munit_trans : forall A (x : atom_inf), ~ In x (atom_list A) ->
+  munit_smp (subs bot x (dual (unill (trans (ivar (a2i x)) A)))) A.
 Proof with (try now (apply munit_smp_id)) ; myeasy.
-induction A ; intros n Hf ; simpl...
-- rewrite a2a_i.
-  rewrite repl_at_eq ; try reflexivity.
+induction A; simpl; intros x Hnin; rewrite ? a2a_i...
+- rewrite repl_at_eq; [ | reflexivity ].
   apply musmp_to.
-  apply (subs_fresh_le _ n2a n2n_a bot) in Hf.
-  simpl in Hf.
-  rewrite a2a_i.
-  rewrite Hf...
-- apply (subs_fresh_le _ n2a n2n_a bot) in Hf.
-  simpl in Hf.
-  rewrite a2a_i.
-  rewrite Hf...
-- rewrite a2a_i.
-  rewrite repl_at_eq ; try reflexivity.
+  rewrite repl_at_neq...
+  intros Heq; intuition.
+- rewrite repl_at_neq...
+  intros Heq; intuition.
+- rewrite repl_at_eq; [ | reflexivity ].
   apply musmp_to...
-- rewrite a2a_i.
-  rewrite repl_at_eq ; try reflexivity.
+- rewrite repl_at_eq; [ | reflexivity ].
   rewrite ? bidual.
   apply musmp_to.
-  simpl in Hf.
   apply musmp_tens ; apply musmp_pb ; [ apply IHA1 | apply IHA2 ]...
-- simpl in Hf.
-  apply musmp_parr ; [ apply IHA1 | apply IHA2 ]...
-- rewrite a2a_i.
-  rewrite repl_at_eq ; try reflexivity.
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+- apply musmp_parr ; [ apply IHA1 | apply IHA2 ]...
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+- rewrite repl_at_eq; [ | reflexivity ].
   apply musmp_to...
-- rewrite a2a_i.
-  rewrite repl_at_eq ; try reflexivity.
+- rewrite repl_at_eq; [ | reflexivity ].
   rewrite ? bidual.
   apply musmp_to.
-  simpl in Hf.
   apply musmp_plus ; apply musmp_pb ; [ apply IHA1 | apply IHA2 ]...
-- simpl in Hf.
-  apply musmp_with ; [ apply IHA1 | apply IHA2 ]...
-- rewrite a2a_i.
-  rewrite repl_at_eq ; try reflexivity.
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+- apply musmp_with ; [ apply IHA1 | apply IHA2 ]...
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+  + intros Hin; apply Hnin.
+    apply in_or_app; intuition.
+- rewrite repl_at_eq; [ | reflexivity ].
   rewrite ? bidual.
   apply musmp_to.
-  simpl in Hf.
   apply musmp_oc ; apply musmp_pb ; apply IHA...
-- rewrite a2a_i.
-  rewrite repl_at_eq ; try reflexivity.
+- rewrite repl_at_eq; [ | reflexivity ].
   rewrite ? bidual.
   apply musmp_wn.
   apply musmp_to.
   apply musmp_pb.
-  apply IHA.
-  simpl in Hf...
+  apply IHA...
 Qed.
+
+End Atoms.

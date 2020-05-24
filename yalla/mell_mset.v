@@ -2,22 +2,27 @@
 
 (** * Example of a concrete use of the yalla library: multi-set based MELL *)
 
-From OLlibs Require Import funtheory List_more Permutation_more Permutation_Type_more
+From OLlibs Require Import funtheory dectype List_more Permutation_more Permutation_Type_more
                            BOrders nattree fmsetlist_Type.
 Import FMSetNotations.
 
 
 (** ** 0. load the [ll] library *)
 
-Require ll_cut.
-Require fmformulas.
+From Yalla Require Import atoms.
+From Yalla Require ll_cut fmformulas.
 
+
+Section Atoms.
+
+Context { atom : DecType }.
+Context { Atoms : AtomType_into_nat atom }.
 
 (** ** 1. define formulas *)
 
-Inductive formula : Set :=
-| var : formulas.Atom -> formula
-| covar : formulas.Atom -> formula
+Inductive formula :=
+| var : atom -> formula
+| covar : atom -> formula
 | one : formula
 | bot : formula
 | tens : formula -> formula -> formula
@@ -184,8 +189,8 @@ Qed.
 *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms (fun n => false) true.
-(*                                       cut   axioms                           perm  *)
+Definition pfrag_mell := @ll_def.mk_pfrag atom  false ll_def.NoAxioms (fun n => false) true.
+(*                                        atoms cut   axioms                           perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -203,8 +208,8 @@ induction pi ; simpl ; rewrite ? map_app ;
   + apply ll_def.ax_r.
   + symmetry.
     destruct (Nat.leb
-         (compose (compose nattree2nat (fun A => fmformulas.form2nattree A)) mell2ll (covar X))
-         (compose (compose nattree2nat (fun A => fmformulas.form2nattree A)) mell2ll (var X))).
+         (compose (compose nattree2nat (fun A : formulas.formula => fmformulas.form2nattree A)) mell2ll (covar X))
+         (compose (compose nattree2nat (fun A : formulas.formula => fmformulas.form2nattree A)) mell2ll (var X))).
     * reflexivity.
     * apply Permutation_Type_swap.
 - apply ll_def.one_r.
@@ -638,3 +643,5 @@ eapply ll_cut.cut_r_axfree...
   as Helt by (apply Permutation_Type_map ; apply elts_add).
   eapply ll_def.ex_r ; [ | apply Helt ]...
 Qed.
+
+End Atoms.

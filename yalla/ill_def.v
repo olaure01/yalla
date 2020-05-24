@@ -5,9 +5,14 @@
 (* not cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 
 From Coq Require Import CMorphisms BoolOrder.
-From OLlibs Require Import List_more Permutation_Type_more GPermutation_Type.
-Require Export basic_misc iformulas.
+From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
+From Yalla Require Export basic_misc iformulas.
 
+
+Section Atoms.
+
+Context { preiatom : DecType }.
+Notation iformula := (@iformula preiatom).
 
 (** ** Intuitionistic fragments for proofs *)
 
@@ -984,3 +989,37 @@ eapply (@cut_ir _ Hcut) ; try eassumption.
 apply zero_ilr.
 Qed.
 
+End Atoms.
+
+Ltac destruct_ill H f X l Hl Hr HP a :=
+  match type of H with
+  | ill _ _ _ => destruct H as [ X
+                               | l ? ? Hl HP
+                               | l ? ? ? ? Hl HP
+                               | 
+                               | ? ? ? Hl
+                               | ? ? ? ? Hl Hr
+                               | ? ? ? ? ? Hl
+                               | ? ? ? Hl
+                               | ? ? ? ? ? ? Hl Hr
+                               | ? ? Hl
+                               | ? ? Hl
+                               | ? ? ? Hl
+                               | ? ? ? ? ? ? Hl Hr
+                               | ? ? Hl
+                               | ? ? Hl
+                               | l
+                               | ? ? ? Hl Hr
+                               | ? ? ? ? ? Hl
+                               | ? ? ? ? ? Hl
+                               | ? ? ?
+                               | ? ? ? Hl
+                               | ? ? ? Hl
+                               | ? ? ? ? ? Hl Hr
+                               | ? ? Hl
+                               | ? ? ? ? Hl
+                               | ? ? ? ? Hl
+                               | ? ? ? ? Hl
+                               | f ? ? ? ? ? Hl Hr
+                               | a ] ; subst
+  end.

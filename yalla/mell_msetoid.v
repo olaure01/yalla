@@ -3,19 +3,23 @@
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory fmsetoidlist_Type List_more Permutation_Type_more.
+From OLlibs Require Import funtheory dectype fmsetoidlist_Type List_more Permutation_Type_more.
 
 
 (** ** 0. load the [ll] library *)
 
-Require ll_cut.
+From Yalla Require ll_cut.
 
+
+Section Atoms.
+
+Context { atom : DecType }.
 
 (** ** 1. define formulas *)
 
-Inductive formula : Set :=
-| var : formulas.Atom -> formula
-| covar : formulas.Atom -> formula
+Inductive formula :=
+| var : atom -> formula
+| covar : atom -> formula
 | one : formula
 | bot : formula
 | tens : formula -> formula -> formula
@@ -150,8 +154,8 @@ Qed.
 *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms ll_def.pmix_none true.
-(*                                       cut   axioms          mix              perm  *)
+Definition pfrag_mell :=  @ll_def.mk_pfrag atom  false ll_def.NoAxioms ll_def.pmix_none true.
+(*                                         atoms cut   axioms          mix              perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -328,3 +332,5 @@ eapply ll_cut.cut_r_axfree...
   rewrite <- mell2ll_dual in pi2.
   eapply ll_def.ex_r ; [ | apply Helt2 ]...
 Qed.
+
+End Atoms.

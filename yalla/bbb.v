@@ -4,11 +4,17 @@
 (** * Study of Linear Logic enriched with [bot = oc bot] *)
 
 From Coq Require Import BoolOrder.
-From OLlibs Require Import List_more
+From OLlibs Require Import infinite List_more
                            Permutation_Type_more Permutation_Type_solve GPermutation_Type
                            Dependent_Forall_Type.
-Require Import ll_fragments.
+From Yalla Require Import ll_fragments.
 
+
+Section Atoms.
+
+Context { atom : InfDecType }.
+Notation formula := (@formula atom).
+Notation llR := (@llR atom).
 
 (** ** The system [ll_bbb] *)
 (** It contains [ll_mix2] but allows [mix0] as well above one side of each [mix2] rule. *)
@@ -583,7 +589,7 @@ induction pi ; try now econstructor.
     rewrite app_comm_cons.
     apply mix2_bbb_r.
     * apply one_bbb_r.
-    * change nil with (map wn nil).
+    * change nil with (map (@wn atom) nil).
       apply oc_r.
       eapply bot_r.
       change (map wn nil) with (concat (@nil (list formula))).
@@ -629,18 +635,18 @@ Example bbb_ex :
   ll_bbb (one :: oc (tens (parr one one) bot) :: nil).
 Proof with myeeasy ; try Permutation_Type_solve.
 change (one :: oc (tens (parr one one) bot) :: nil)
-  with ((one :: nil) ++ (oc (tens (parr one one) bot) :: nil)).
+  with ((@one atom :: nil) ++ (oc (tens (parr one one) bot) :: nil)).
 apply (ex_bbb_r ((oc (tens (parr one one) bot) :: nil) ++ one :: nil))...
 eapply mix2_bbb_r.
 - apply one_bbb_r.
 - change (oc (tens (parr one one) bot) :: nil)
-    with (oc (tens (parr one one) bot) :: map wn (nil ++ nil)).
+    with (@oc atom (tens (parr one one) bot) :: map wn (nil ++ nil)).
   eapply oc_r.
   rewrite map_app.
   eapply tens_r.
   + eapply parr_r.
     simpl.
-    change (one :: one :: nil) with (concat ((one :: nil) :: (one :: nil) :: nil)).
+    change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r...
     repeat (apply Forall_inf_cons; try apply one_r).
     apply Forall_inf_nil.
@@ -653,14 +659,14 @@ Qed.
 Example bb_ex :
   llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
 Proof with myeeasy ; try Permutation_Type_solve.
-assert (Hax :=  gax_r (pfrag_llR (oc bot)) false) ; simpl in Hax.
+assert (Hax :=  gax_r (@pfrag_llR atom (oc bot)) false) ; simpl in Hax.
 assert (llR (oc bot) ((one :: nil) ++ one :: nil))
   as Hr by (eapply mix2_bb_r ; apply one_r).
-eapply (@cut_r (pfrag_llR _) eq_refl) in Hax...
+eapply (@cut_r _ (pfrag_llR _) eq_refl) in Hax...
 - apply Hax.
 - eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   simpl.
-  change (wn one :: nil) with (map wn (one :: nil)).
+  change (wn one :: nil) with (map (@wn atom) (one :: nil)).
   apply oc_r.
   simpl.
   rewrite <- (app_nil_l nil).
@@ -668,7 +674,6 @@ eapply (@cut_r (pfrag_llR _) eq_refl) in Hax...
   apply tens_r.
   + apply parr_r...
   + apply bot_r.
-    change wn with wn.
     apply de_r.
     apply one_r.
 Qed.
@@ -710,7 +715,7 @@ Qed.
 
 Lemma ex_implies_mix2_mix02 : forall l,
   ll_bbb0 l -> Permutation_Type l (one :: oc (tens (parr one one) bot) :: nil) ->
-    ll_mix0 (one :: one :: nil).
+    @ll_mix0 atom (one :: one :: nil).
 Proof with myeeasy ; try Permutation_Type_solve.
 intros l H; induction H; intro HP;
   try now (apply Permutation_Type_sym in HP ;
@@ -850,7 +855,7 @@ Lemma ex_not_bbb0 :
   ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil) -> False.
 Proof.
 intros H.
-apply mix0_not_mix2.
+apply (@mix0_not_mix2 atom).
 eapply ex_implies_mix2_mix02 ; [ eassumption | reflexivity ].
 Qed.
 
@@ -883,7 +888,7 @@ induction pi ; (try now inversion f) ; try now constructor.
     rewrite app_comm_cons.
     apply mix2_bbb0_r.
     * apply one_bbb0_r.
-    * change nil with (map wn nil).
+    * change nil with (map (@wn atom) nil).
       apply oc_r.
       eapply bot_r.
       change (map wn nil) with (concat (@nil (list formula))).
@@ -910,3 +915,5 @@ apply ex_not_bbb0.
 apply bbb0_cut_ex.
 assumption.
 Qed.
+
+End Atoms.

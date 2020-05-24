@@ -2,13 +2,13 @@ From Coq Require Import List Lia.
 (*
 From OLlibs Require Import funtheory.
 *)
-From OLlibs Require Import Permutation_Type.
+From OLlibs Require Import dectype Permutation_Type.
 Require Import ll_def microll.
 
 Fixpoint ll2ll A :=
 match A with
-| var x     => formulas.var x
-| covar x   => formulas.covar x
+| var x     => @formulas.var nat_dectype x
+| covar x   => @formulas.covar nat_dectype x
 | tens A B  => formulas.tens (ll2ll A) (ll2ll B)
 | parr A B  => formulas.parr (ll2ll A) (ll2ll B)
 | one       => formulas.one
@@ -75,8 +75,8 @@ induction n; destruct l...
   apply IHn.
 Qed.
 
-Definition pfrag_ll := mk_pfrag false NoAxioms pmix_none true.
-(*                              cut   axioms   mix       perm  *)
+Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
+(*                               atomes      cut   axioms   mix       perm  *)
 
 Theorem ll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.
@@ -93,4 +93,3 @@ intros l pi; induction pi ; simpl; try (now constructor).
   apply ll_def.oc_r.
   rewrite <- ll2ll_map_wn; assumption.
 Qed.
-

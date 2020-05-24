@@ -1,21 +1,23 @@
 (* formulas library for yalla *)
 
 From Coq Require Import Bool EqNat Equalities RelationClasses Lia.
-From OLlibs Require Import funtheory List_more.
-Require yalla_ax.
+From OLlibs Require Import funtheory dectype List_more.
+From Yalla Require Export atoms.
 
 
 (** * Linear Logic formulas *)
 
-(** ** Definition and main properties of formulas *)
+Section Atoms.
 
 (** A set of atoms for building formulas *)
-Definition Atom := yalla_ax.Atom.
+Context { atom : DecType }.
+
+(** ** Definition and main properties of formulas *)
 
 (** Formulas *)
-Inductive formula : Set :=
-| var : Atom -> formula
-| covar : Atom -> formula
+Inductive formula :=
+| var : atom -> formula
+| covar : atom -> formula
 | one : formula
 | bot : formula
 | tens : formula -> formula -> formula
@@ -236,7 +238,7 @@ intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   try (constructor ; apply IHHr)...
 Qed.
 
-Instance sub_po : PreOrder subform.
+Global Instance sub_po : PreOrder subform | 50.
 Proof.
 split.
 - intros l.
@@ -293,7 +295,7 @@ split.
 Qed.
 
 (* Unused
-Require Import GPermutation_Type.
+From OLlibs Require Import GPermutation_Type.
 
 Lemma sub_perm_list :
   forall b l l1 l2, subform_list l l1 ->
@@ -313,8 +315,8 @@ Qed.
 
 Fixpoint eqb_form A B :=
 match A, B with
-| var X, var Y => yalla_ax.ateq X Y
-| covar X, covar Y => yalla_ax.ateq X Y
+| var X, var Y => eqb X Y
+| covar X, covar Y => eqb X Y
 | one, one => true
 | bot, bot => true
 | tens A1 A2, tens B1 B2 => eqb_form A1 B1 && eqb_form A2 B2
@@ -332,12 +334,12 @@ Lemma eqb_eq_form : forall A B, eqb_form A B = true <-> A = B.
 Proof with reflexivity.
 induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
   try inversion Heqb ; try inversion Heq ; try reflexivity.
-- apply yalla_ax.ateq_eq in H0 ; subst...
+- apply eqb_eq in H0 ; subst...
 - subst ; simpl.
-  apply yalla_ax.ateq_eq...
-- apply yalla_ax.ateq_eq in H0 ; subst...
+  apply eqb_eq...
+- apply eqb_eq in H0 ; subst...
 - subst ; simpl.
-  apply yalla_ax.ateq_eq...
+  apply eqb_eq...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
@@ -364,14 +366,11 @@ induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
 - subst ; simpl ; apply IHA...
 Qed.
 
-Module Formula_beq <: UsualBoolEq.
-  Definition t := formula.
-  Definition eq := @eq formula.
-  Definition eqb := eqb_form.
-  Definition eqb_eq := eqb_eq_form.
-End Formula_beq.
-
-Module Formula_dec <: UsualDecidableTypeFull := Make_UDTF Formula_beq.
+Definition formulas_dectype := {|
+  car := formula;
+  eqb := eqb_form;
+  eqb_eq := eqb_eq_form
+|}.
 
 (* Unused
 Fixpoint eqb_formlist l1 l2 :=
@@ -448,10 +447,10 @@ intros A B ; split ; intros H ; induction B ;
        (try (apply eqb_eq_form in H ; subst)) ; now constructor; auto).
 - destruct A ; simpl in H ; try (now inversion H).
   rewrite orb_false_r in H.
-  apply yalla_ax.ateq_eq in H ; subst ; constructor.
+  apply eqb_eq in H ; subst ; constructor.
 - destruct A ; simpl in H ; try (now inversion H).
   rewrite orb_false_r in H.
-  apply yalla_ax.ateq_eq in H ; subst ; constructor.
+  apply eqb_eq in H ; subst ; constructor.
 - simpl in H.
   apply orb_true_elim in H ; destruct H as [ H | H ].
   + apply eqb_eq_form in H ; subst ; constructor.
@@ -461,10 +460,10 @@ intros A B ; split ; intros H ; induction B ;
   + apply eqb_eq_form in H ; subst ; constructor.
   + now constructor; auto.
 - inversion H ; subst.
-  simpl ; rewrite (proj2 (yalla_ax.ateq_eq _ _) eq_refl).
+  simpl ; rewrite (proj2 (eqb_eq _ _) eq_refl).
   constructor.
 - inversion H ; subst.
-  simpl ; rewrite (proj2 (yalla_ax.ateq_eq _ _) eq_refl).
+  simpl ; rewrite (proj2 (eqb_eq _ _) eq_refl).
   constructor.
 - inversion H ; subst.
   + unfold subformb.
@@ -579,3 +578,4 @@ apply subb_sub_list.
 etransitivity ; eassumption.
 Qed.
 
+End Atoms.

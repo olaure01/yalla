@@ -3,27 +3,31 @@
 (** * Example of a concrete use of the yalla library: polarized linear logic LLpol *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory List_more
+From OLlibs Require Import funtheory dectype List_more
                            Permutation_Type Permutation_Type_more Permutation_Type_solve.
 
 
 (** ** 0. load the [ll] library *)
 
-Require ll_cut.
+From Yalla Require ll_cut.
 
+
+Section Atoms.
+
+Context { atom : DecType }.
 
 (** ** 1. define formulas *)
 
 (** Positive and negative formulas *)
-Inductive pformula : Set :=
-| var : formulas.Atom -> pformula
+Inductive pformula :=
+| var : atom -> pformula
 | one : pformula
 | tens : pformula -> pformula -> pformula
 | zero : pformula
 | aplus : pformula -> pformula -> pformula
 | oc : nformula -> pformula
-with nformula : Set :=
-| covar : formulas.Atom -> nformula
+with nformula :=
+| covar : atom -> nformula
 | bot : nformula
 | parr : nformula -> nformula -> nformula
 | top : nformula
@@ -34,7 +38,7 @@ Scheme pform_ind := Induction for pformula Sort Prop
   with nform_ind := Induction for nformula Sort Prop.
 Combined Scheme polform_ind from pform_ind, nform_ind.
 
-Inductive formula : Set :=
+Inductive formula :=
 | pos : pformula -> formula
 | neg : nformula -> formula.
 
@@ -400,8 +404,8 @@ Qed.
 *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms (fun x => false) true.
-(*                                       cut   axioms               pmix        perm  *)
+Definition pfrag_mell := @ll_def.mk_pfrag atom  false ll_def.NoAxioms (fun x => false) true.
+(*                                        atoms cut   axioms               pmix        perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -808,26 +812,26 @@ Inductive top_surf : nformula -> Type :=
 Lemma top_imp_top_surf_ps : forall N l,
   top_surf N -> polsequent l -> llpol_ps polsequent_bool (neg N :: l).
 Proof with try eassumption.
-induction N ; intros l Ht Hp ; inversion Ht ; subst.
-- eapply IHN1 in H0.
+induction N; intros l Ht Hp; inversion_clear Ht as [ | ? ? Ht' | ? ? Ht' | ? ? Ht' Ht'' ].
+- eapply IHN1 in Ht'.
   + apply parr_ps_r...
-    apply llpol_ps_is_ps in H0.
-    apply true_polsequent in H0.
+    apply llpol_ps_is_ps in Ht'.
+    apply true_polsequent in Ht'.
     apply polsequent_true.
     apply polsequent_neg_add.
     eapply polsequent_neg_rem.
     eapply polsequent_neg_rem...
   + apply polsequent_neg_add...
-- eapply IHN2 in H0.
+- eapply IHN2 in Ht'.
   apply parr_ps_r ; [ | eapply ex_ps_r ; [ | | now apply Permutation_Type_swap ]]...
-  + apply llpol_ps_is_ps in H0.
-    apply true_polsequent in H0.
+  + apply llpol_ps_is_ps in Ht'.
+    apply true_polsequent in Ht'.
     apply polsequent_true.
     apply polsequent_neg_add.
     eapply polsequent_neg_rem.
     eapply polsequent_neg_rem...
-  + apply llpol_ps_is_ps in H0.
-    apply true_polsequent in H0.
+  + apply llpol_ps_is_ps in Ht'.
+    apply true_polsequent in Ht'.
     apply polsequent_true.
     apply polsequent_neg_add.
     apply polsequent_neg_add.
@@ -840,8 +844,8 @@ induction N ; intros l Ht Hp ; inversion Ht ; subst.
 - apply with_ps_r.
   + apply polsequent_true.
     apply polsequent_neg_add...
-  + eapply IHN1 in H1...
-  + eapply IHN2 in H2...
+  + eapply IHN1 in Ht'...
+  + eapply IHN2 in Ht''...
 Qed.
 
 Lemma bipos_top_surf : forall l,
@@ -1409,3 +1413,5 @@ induction pi ; split ;
 - eapply polsequent_neg_add...
 - eapply polsequent_neg_rem...
 Qed.
+
+End Atoms.

@@ -5,16 +5,25 @@
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
 From Coq Require Import CMorphisms BoolOrder PeanoNat Lia.
-From OLlibs Require Import List_more Dependent_Forall_Type
+From OLlibs Require Import dectype List_more Dependent_Forall_Type
                Permutation_Type_more CPermutation_Type Permutation_Type_solve
                CPermutation_Type_solve GPermutation_Type.
-Require Export basic_misc formulas.
+From Yalla Require Export basic_misc formulas.
+From Yalla Require issue12394. (* TODO remove when issue #12394 solved *)
+
 
 Import EqNotations.
 
 
+Section Atoms.
+
+Context { atom : DecType }.
+Notation formula := (@formula atom).
+
 Notation Dependent_Forall_inf_forall_formula :=
-  (Dependent_Forall_inf_forall (list_eq_dec Formula_dec.eq_dec)).
+  (Dependent_Forall_inf_forall
+    (@list_eq_dec _ (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y)) (fun x y => proj2 (eqb_eq x y)))).
+
 
 (** ** Fragments for proofs *)
 
@@ -78,7 +87,7 @@ Proof with myeeasy; try assumption.
     apply BoolOrder.le_trans with (pmix Q n); [ apply Hm1 | apply Hm2 ].
 Qed.
 
-Instance le_pfrag_po : PreOrder le_pfrag.
+Global Instance le_pfrag_po : PreOrder le_pfrag | 50.
 Proof.
 split.
 - nsplit 4 ; try reflexivity.
@@ -380,7 +389,7 @@ Section ll_ind.
 
 End ll_ind.
 
-Instance ll_perm {P} : Proper ((@PCPermutation_Type _ (pperm P)) ==> Basics.arrow) (ll P).
+Global Instance ll_perm {P} : Proper ((@PCPermutation_Type _ (pperm P)) ==> Basics.arrow) (ll P) | 100.
 Proof.
 intros l1 l2 HP pi ; eapply ex_r ; eassumption.
 Qed.
@@ -418,23 +427,23 @@ Qed.
 
 Lemma psize_mix P : forall L eq FL,
     psize (mix_r P L eq FL) = S (Forall_inf_sum (fun _ pi => psize pi) FL).
-Proof with try assumption; try reflexivity.
+Proof.
   intros L eq FL.
   simpl.
   destruct eq.
-  induction FL...
+  induction FL; try reflexivity.
   simpl; rewrite 2 plus_n_Sm.
-  rewrite IHFL...
+  rewrite IHFL; reflexivity.
 Qed.
 
 Lemma psize_inf_mix P : forall L eq FL l (pi : ll P l),
   In_Forall_inf _ pi FL -> psize pi < psize (mix_r P L eq FL).
-Proof with try lia.
+Proof.
   intros L eq FL l pi Hin ; simpl ; clear eq.
   induction FL ; inversion Hin.
   - inversion H; subst.
-    apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec, Formula_dec.eq_dec]...
-  - specialize (IHFL X)...
+    apply inj_pair2_eq_dec in H2; [ lia | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ].
+  - specialize (IHFL X); lia.
 Qed.
 
 (** List of the elements of [pgax P] used in [pi] *)
@@ -466,18 +475,18 @@ end.
 
 Lemma gax_elts_mix {P} : forall L eq FL l (pi : ll P l), In_Forall_inf _ pi FL ->
   forall ax, In_inf ax (gax_elts pi) -> In_inf ax (gax_elts (mix_r P L eq FL)).
-Proof with try assumption;try reflexivity.
+Proof.
   intros L eq FL; simpl; clear eq.
   induction FL; intros l' pi Hin; inversion Hin.
   - inversion H; subst.
-    apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec, Formula_dec.eq_dec]; subst.
+    apply inj_pair2_eq_dec in H2; [ | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ]; subst.
     intros ax Hin_ax.
     apply in_inf_or_app.
-    left...
+    left; assumption.
   - intros ax Hin_ax.
     apply in_inf_or_app.
     right.
-    apply IHFL with l' pi...
+    apply IHFL with l' pi; assumption.
 Qed.
 
 (* Unused
@@ -641,11 +650,8 @@ Proof.
     apply co_list_r.
     apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L);
       [ | rewrite P_perm; simpl; Permutation_Type_solve ].
-(* TODO Propify?
-    rewrite ? app_assoc.
-    apply Permutation_Type_app_tail; list_simpl. *)
     apply IHL.
-    rewrite<- app_assoc.
+    rewrite <- app_assoc.
     now simpl in pi.
 Qed.
 
@@ -1248,20 +1254,20 @@ Lemma munit_smp_map_wn : forall l1 l2, Forall2_inf munit_smp (map wn l1) l2 ->
 Proof.
 induction l1 ; intros l2 HF ; inversion HF ; subst.
 - exists nil ; constructor.
-- inversion H2; subst.
-  apply IHl1 in X.
-  destruct X as [ l'' Heq HF' ] ; subst.
+- inversion X; subst.
+  apply IHl1 in X0.
+  destruct X0 as [ l'' Heq HF' ] ; subst.
   exists (B :: l'') ; constructor ; assumption.
 Qed.
 
 Lemma munit_elim {P} : (forall a, Forall_inf atomic (projT2 (pgax P) a)) ->
   forall l1, ll P l1 -> forall l2, Forall2_inf munit_smp l1 l2 -> ll P l2.
 Proof with try eassumption.
-intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
-  try now (inversion HF ; subst ;
-           inversion H2 ; subst ;
-           constructor ; apply IHpi ; try eassumption ;
-           constructor ; eassumption).
+intros Hgax l1 pi; induction pi using ll_nested_ind; intros l2' HF;
+  try now (inversion HF as [ | ? ? ? ? Hm HF' ];
+           inversion Hm; subst;
+           constructor; apply IHpi; try eassumption;
+           constructor; eassumption).
 - inversion HF as [ | C D lc ld Hc' HF'] ; subst.
   inversion HF' as [ | C' D' lc' ld' Hc'' HF''] ; subst.
   inversion HF'' ; subst.
@@ -1297,14 +1303,14 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
     destruct HF' as (l & Hinl & Rll').
     apply (In_Forall_inf_in _ PL) in Hinl as (pi' & Hinl).
     refine (Dependent_Forall_inf_forall_formula _ _ X Hinl _ Rll').
-- inversion HF ; subst.
-  inversion H2 ; inversion X ; subst.
+- inversion_clear HF as [ | ? ? ? ? Hm HF' ].
+  inversion_clear Hm; inversion_clear HF'.
   constructor.
-- inversion HF ; subst.
-  apply Forall2_inf_app_inv_l in X as [(l2', l1') [HF2 HF1] Heq]; subst.
-  inversion H2 ; subst.
-  + constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
-  + apply (Forall2_inf_cons one one) in HF1 ; [ | constructor ].
+- inversion_clear HF as [ | ? ? ? ? Hm HF' ].
+  apply Forall2_inf_app_inv_l in HF' as [(l2'', l1'') [HF2 HF1] Heq]; subst.
+  inversion Hm; subst.
+  + constructor; [ apply IHpi1 | apply IHpi2 ]; constructor...
+  + apply (Forall2_inf_cons one one) in HF1; [ | constructor ].
     apply IHpi1 in HF1.
     apply (Forall2_inf_cons B y) in HF2...
     apply IHpi2 in HF2.
@@ -1313,25 +1319,24 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
       eapply Forall_inf_forall in Hone; [ | apply Hgax].
       inversion Hone. }
     rewrite <- (app_nil_l _) in HF1 ; eapply (one_rev Hgax1 _ HF2) in HF1...
-- inversion HF ; subst.
-  inversion H2 ; subst.
+- inversion_clear HF as [ | ? ? ? ? Hm HF' ].
+  inversion Hm; subst.
   + constructor ; apply IHpi ; constructor ; try constructor...
-  + apply (Forall2_inf_cons bot bot) in X ; [ | constructor ].
-    apply (Forall2_inf_cons A y) in X...
-    apply IHpi in X.
+  + apply (Forall2_inf_cons bot bot) in HF' ; [ | constructor ].
+    apply (Forall2_inf_cons A y) in HF'...
+    apply IHpi in HF'.
     rewrite <- (app_nil_l l') ; rewrite app_comm_cons.
     eapply bot_rev...
     intros a Hbot.
     eapply Forall_inf_forall in Hbot; [ | apply Hgax].
     inversion Hbot.
-- inversion HF ; subst.
-  inversion H2 ; subst.
-  constructor ; [ apply IHpi1 | apply IHpi2 ] ; constructor...
-- inversion HF ; subst.
-  inversion H2 ; subst.
-  assert (HF' := X).
-  apply munit_smp_map_wn in X as [ l'' Heq HF'' ] ; subst.
-  constructor ; apply IHpi ; constructor...
+- inversion_clear HF as [ | ? ? ? ? Hm HF' ].
+  inversion_clear Hm.
+  constructor; [ apply IHpi1 | apply IHpi2 ]; constructor...
+- inversion_clear HF as [ | ? ? ? ? Hm HF' ].
+  inversion_clear Hm.
+  destruct (munit_smp_map_wn _ _ HF') as [ l'' Heq HF'' ]; subst.
+  constructor; apply IHpi; constructor...
 - apply Forall2_inf_app_inv_l in HF as [(l', l'') [HF2 HF1] Heq]; subst.
   eapply cut_r ; [ assumption | apply IHpi1 | apply IHpi2 ] ;
     (apply Forall2_inf_cons ; [ apply munit_smp_id | ])...
@@ -1339,9 +1344,9 @@ intros Hgax l1 pi ; induction pi using ll_nested_ind ; intros l2' HF ;
   assert (projT2 (pgax P) a = l2') as Heq ; subst.
   { remember (projT2 (pgax P) a) as l.
     revert l2' Hgax HF ; clear.
-    induction l ; intros l2 Hgax HF ; inversion HF ; subst ; f_equal.
-    - inversion Hgax ; subst.
-      destruct a ; inversion H0 ; inversion H2 ; subst ; reflexivity.
+    induction l ; intros l2 Hgax HF ; inversion_clear HF as [ | ? ? ? ? Hm ]; f_equal.
+    - inversion_clear Hgax as [ | ? ? Hat ].
+      destruct a; inversion_clear Hat; inversion_clear Hm; reflexivity.
     - inversion Hgax ; subst.
       apply IHl... }
   constructor.
@@ -1431,15 +1436,32 @@ induction pi using ll_nested_ind ; simpl ; intros Hgax ;
     * inversion Hin.
       -- subst.
          inversion X.
-         apply inj_pair2_eq_dec in H; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
-         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec ; apply list_eq_dec; apply Formula_dec.eq_dec].
+(* TODO old code
+         apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
+         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec ; apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
          subst.
+   new code should be simplified or old code back once coq/coq#12394 solved *)
+         apply inj_pair2_eq_dec in H2;
+           [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
+         assert (Pa = p) as Heq; subst.
+         { apply issue12394.injection_list in H2; intuition.
+           apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq. }
+(* once cleaned give explicit names to generated hypotheses *)
+(* end TODO *)
          apply X0.
          now apply Forall_inf_app_l in Hgax.
       -- inversion X.
+(* TODO idem
          apply inj_pair2_eq_dec in H; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
          apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec ; apply list_eq_dec; apply Formula_dec.eq_dec].
          subst.
+*)
+         apply inj_pair2_eq_dec in H2;
+           [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
+         assert (Pa = p /\ Fl = PL) as [-> ->].
+         { apply issue12394.injection_list in H2; intuition.
+           apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq. }
+(* end TODO *)
          apply IHPL...
          now apply Forall_inf_app_r in Hgax.
 - eapply cut_r...
@@ -1606,3 +1628,31 @@ eapply (ext_wn_param P Q) in pi...
   rewrite P_mix in Q_mix.
   inversion Q_mix.
 Qed.
+
+End Atoms.
+
+Notation Dependent_Forall_inf_forall_formula :=
+  (Dependent_Forall_inf_forall
+    (@list_eq_dec _ (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y)) (fun x y => proj2 (eqb_eq x y)))).
+
+Ltac destruct_ll H f X l Hl Hr HP FL a :=
+  match type of H with
+  | ll _ _ => destruct H as [ X
+                            | l ? Hl HP
+                            | l ? ? ? Hl HP
+                            | ? f FL
+                            | 
+                            | ? Hl
+                            | ? ? ? ? Hl Hr
+                            | ? ? ? Hl
+                            | l
+                            | ? ? ? Hl
+                            | ? ? ? Hl
+                            | ? ? ? Hl Hr
+                            | ? ? Hl
+                            | ? ? Hl
+                            | ? ? Hl
+                            | ? ? Hl
+                            | f ? ? ? Hl Hr
+                            | a ] ; subst
+  end.

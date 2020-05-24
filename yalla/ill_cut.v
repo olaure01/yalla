@@ -4,15 +4,18 @@
 (* Cut admissibility, see ill_prop.v for other properties *)
 
 From Coq Require Import PeanoNat Wf_nat List.
-From OLlibs Require Import funtheory List_more flat_map_more
+From OLlibs Require Import funtheory dectype List_more flat_map_more
                            Permutation_Type_more GPermutation_Type.
-Require Export ill_def.
+From Yalla Require Export ill_def.
 
+
+Section Atoms.
+
+Context { preiatom : DecType }.
 
 Section Cut_Elim_Proof.
 
-Context {P : ipfrag}.
-
+Context { P : @ipfrag preiatom }.
 Hypothesis P_gax_noN_l : forall a, In_inf N (fst (projT2 (ipgax P) a)) -> False.
 Hypothesis P_gax_at_l : forall a, Forall_inf iatomic (fst (projT2 (ipgax P) a)).
 Hypothesis P_gax_at_r : forall a, iatomic (snd (projT2 (ipgax P) a)).
@@ -104,7 +107,7 @@ induction pi2 ; intros l' L Heq.
     eapply ex_ir ; [ | rewrite Hperm ; simpl ; apply HPL' ].
     refine (IHpi2 _ _ _)...
   + refine (IHpi2 _ _ _)...
-- assert (injective ioc) as Hinj by (intros x y Hxy ; inversion Hxy ; reflexivity).
+- assert (injective (@ioc preiatom)) as Hinj by (intros x y Hxy ; inversion Hxy ; reflexivity).
   destruct (Permutation_Type_flat_map_cons_flat_map_app_cst _ Hinj lw _ _ _ _ p Heq)
     as [(((((lw1',lw2'),l1'),l2'),l''),L') HH] ; simpl in HH ; destruct HH as (H1 & H2 & H3 & H4).
   rewrite <- H4 ; apply (ex_oc_ir _ _ lw1')...
@@ -461,8 +464,8 @@ induction pi2 ; intros l' L Heq.
   { specialize P_gax_at_l with a.
     rewrite Heq in P_gax_at_l.
     apply Forall_inf_app_r in P_gax_at_l.
-    destruct L ; inversion P_gax_at_l...
-    inversion H0. }
+    destruct L; inversion P_gax_at_l as [ | ? ? Hat]...
+    inversion Hat. }
   list_simpl in Heq ; list_simpl ; subst ; apply gax_ir.
 Qed.
 
@@ -1274,7 +1277,7 @@ Lemma cut_admissible_ill {P} :
   (forall a b l1 l2, fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 -> 
                   { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
                         /\ snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }) ->
-  forall l C, ill P l C -> ill (cutrm_ipfrag P) l C.
+  forall l C, ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
 Proof with myeeasy.
 intros HatNl Hatl Hatr Hcut l C pi.
 induction pi ; try (econstructor ; myeeasy ; fail).
@@ -1285,7 +1288,7 @@ Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is valid. *)
 Lemma cut_ir_axfree {P} : (projT1 (ipgax P) -> False) -> forall A l0 l1 l2 C, 
-  ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
+  ill P l0 A -> ill P (l1 ++ A :: l2) C -> @ill preiatom P (l1 ++ l0 ++ l2) C.
 Proof.
 intros P_axfree A l0 l1 l2 C pi1 pi2.
 eapply cut_ir_gaxat ; try eassumption.
@@ -1295,7 +1298,7 @@ Qed.
 (** If there are no axioms (except the identity rule), then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible_ill_axfree {P} : (projT1 (ipgax P) -> False) -> forall l C,
-  ill P l C -> ill (cutrm_ipfrag P) l C.
+  ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
 Proof.
 intros P_axfree l C pi.
 eapply cut_admissible_ill ; try eassumption.
@@ -1306,24 +1309,25 @@ Qed.
 (** ** Standard intuitionistic linear logic: [ill_ll] (no axiom, commutative) *)
 
 (** cut / axioms / permutation *)
-Definition ipfrag_ill := mk_ipfrag false NoIAxioms true.
-(*                                 cut   axioms    perm  *)
-Definition ill_ll := ill ipfrag_ill.
+Definition ipfrag_ill := @mk_ipfrag preiatom  false NoIAxioms true.
+(*                                  atoms     cut   axioms    perm  *)
+Definition ill_ll := @ill preiatom ipfrag_ill.
 
 Lemma cut_ll_ir : forall A l0 l1 l2 C, 
   ill_ll l0 A -> ill_ll (l1 ++ A :: l2) C -> ill_ll (l1 ++ l0 ++ l2) C.
-Proof with myeeasy.
-intros A l1 l2 pi1 pi2.
-eapply cut_ir_axfree...
-intros a ; destruct a.
+Proof.
+intros A l0 l1 l2 C pi1 pi2.
+now apply cut_ir_axfree with A.
 Qed.
 
 Lemma cut_ll_admissible :
   forall l C, ill (cutupd_ipfrag ipfrag_ill true) l C -> ill_ll l C.
-Proof with myeeasy.
+Proof.
 intros l C pi.
-induction pi ; try (now econstructor).
-- eapply ex_ir...
-- eapply ex_oc_ir...
-- eapply cut_ll_ir...
+induction pi; try (now econstructor).
+- eapply ex_ir; eassumption.
+- eapply ex_oc_ir; eassumption.
+- eapply cut_ll_ir; eassumption.
 Qed.
+
+End Atoms.

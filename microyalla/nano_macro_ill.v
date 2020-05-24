@@ -1,10 +1,10 @@
 From Coq Require Import List.
-From OLlibs Require Import Permutation_Type.
+From OLlibs Require Import dectype Permutation_Type.
 Require Import ill_def nanoill.
 
 Fixpoint ill2ill A :=
 match A with
-| ivar x    => iformulas.ivar (Some x)
+| ivar x    => @iformulas.ivar nat_dectype (Some x)
 | itens A B => iformulas.itens (ill2ill A) (ill2ill B)
 | ilmap A B => iformulas.ilmap (ill2ill A) (ill2ill B)
 | ione      => iformulas.ione
@@ -22,8 +22,8 @@ induction l...
 simpl ; rewrite IHl...
 Qed.
 
-Definition ipfrag_ill := ill_def.mk_ipfrag false ill_def.NoIAxioms true.
-(*                                         cut   axioms            perm  *)
+Definition ipfrag_ill := @ill_def.mk_ipfrag nat_dectype false ill_def.NoIAxioms true.
+(*                                          atoms       cut   axioms            perm  *)
 
 Theorem ill2ill_proof : forall l A, ill l A -> ill_def.ill ipfrag_ill (map ill2ill l) (ill2ill A).
 Proof.
@@ -44,4 +44,3 @@ induction pi; rewrite <- (app_nil_l _) ; try (now constructor).
   constructor.
   rewrite <- ill2ill_map_ioc; assumption.
 Qed.
-

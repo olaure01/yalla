@@ -3,18 +3,22 @@
 (** * Example of a concrete use of the yalla library: a variant of the Lambek calculus
   tensor-free Lambek calculus with additive conjunction and its unit *)
 
-From OLlibs Require Import funtheory List_more.
+From OLlibs Require Import dectype funtheory List_more.
 
 
 (** ** 0. load the [ill] library *)
 
-Require ill_cut.
+From Yalla Require ill_cut.
 
+
+Section Atoms.
+
+Context { preiatom : DecType }.
 
 (** ** 1. define formulas *)
 
-Inductive lform  : Set :=
-| lvar  : iformulas.IAtom -> lform
+Inductive lform :=
+| lvar  : @iformulas.iatom preiatom -> lform
 | ltop  : lform
 | lwith : lform -> lform -> lform
 | lpam  : lform -> lform -> lform.
@@ -61,8 +65,8 @@ Inductive lprove : list lform -> lform -> Type :=
 (** ** 4. characterize corresponding [ill] fragment *)
 
 (** cut / axioms / permutation *)
-Definition ipfrag_lambek := ill_def.mk_ipfrag false ill_def.NoIAxioms false.
-(*                                            cut   axioms            perm  *)
+Definition ipfrag_lambek := @ill_def.mk_ipfrag preiatom false ill_def.NoIAxioms false.
+(*                                             atoms    cut   axioms            perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -135,9 +139,6 @@ Qed.
 
 (** ** 6. import properties *)
 
-Definition i2ac := yalla_ax.i2ac.
-Definition i2ac_inj := yalla_ax.i2ac_inj.
-
 (** *** axiom expansion *)
 
 Lemma ax_gen_r : forall A, lprove (A :: nil) A.
@@ -161,3 +162,5 @@ rewrite 2 map_app.
 eapply ill_cut.cut_ir_axfree...
 intros a ; destruct a.
 Qed.
+
+End Atoms.

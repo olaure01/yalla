@@ -4,14 +4,14 @@
 
 From Coq Require Import Wf_nat Lia.
 From OLlibs Require Import List_more Dependent_Forall_Type GPermutation_Type.
-Require Export ll_def.
+From Yalla Require Export ll_def.
 
-Lemma cut_gax_l {P} :
+Lemma cut_gax_l {At} {P} :
   (forall a b x l1 l2 l3 l4,
     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
 forall A a l1 l2 l3 l4, atomic A -> projT2 (pgax P) a = l1 ++ dual A :: l2 ->
-  ll P (l3 ++ A :: l4) -> ll P (l1 ++ l4 ++ l3 ++ l2).
+  ll P (l3 ++ A :: l4) -> @ll At P (l1 ++ l4 ++ l3 ++ l2).
 Proof with try eassumption; try reflexivity.
 intros Hcut A a l1 l2 l3 l4 Hat Hgax pi.
 remember (l3 ++ A :: l4) as l.
@@ -155,12 +155,12 @@ revert l3 l4 Heql; induction pi using ll_nested_ind ; intros l4 l5 Heq ; subst.
     apply PCPermutation_Type_app_comm.
 Qed.
 
-Theorem cut_at {P} :
+Theorem cut_at {At} {P} :
   (forall a b x l1 l2 l3 l4,
     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
 forall X l1 l2 l3 l4,
-    ll P (l1 ++ var X :: l2) -> ll P (l3 ++ covar X :: l4) -> ll P (l1 ++ l4 ++ l3 ++ l2).
+    ll P (l1 ++ var X :: l2) -> ll P (l3 ++ covar X :: l4) -> @ll At P (l1 ++ l4 ++ l3 ++ l2).
 Proof with try assumption; try reflexivity.
 intros P_gax_cut.
 enough (forall s A l0 l1 l2 (pi1: ll P (A :: l0)) (pi2 : ll P (l1 ++ dual A :: l2)),

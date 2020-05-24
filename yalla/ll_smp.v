@@ -3,20 +3,25 @@
 (** * Example of a concrete use of the yalla library: LL *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory List_more
+From OLlibs Require Import funtheory infinite List_more
                            Permutation_Type_more Permutation_Type_solve.
 
 
 (** ** 0. load the [yalla] library *)
 
-Require ll_fragments.
+From Yalla Require Import atoms.
+From Yalla Require ll_fragments.
 
+
+Section Atoms.
+
+Context { atom : InfDecType }.
 
 (** ** 1. define formulas *)
 
-Inductive formula : Set :=
-| var : formulas.Atom -> formula
-| covar : formulas.Atom -> formula
+Inductive formula :=
+| var : atom -> formula
+| covar : atom -> formula
 | one : formula
 | bot : formula
 | tens : formula -> formula -> formula
@@ -255,3 +260,5 @@ eapply ll_cut.cut_r_axfree.
   simpl in pi2 ; rewrite <- ll2ll_dual in pi2...
 - apply ll2llfrag in pi1...
 Qed.
+
+End Atoms.

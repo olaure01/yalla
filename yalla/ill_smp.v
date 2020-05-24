@@ -4,18 +4,22 @@
 (** * Example of a concrete use of the yalla library: ILL *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory List_more
+From OLlibs Require Import funtheory dectype List_more
                            Permutation_Type_more Permutation_Type_solve.
 
 
 (** ** 0. load the [yalla] library *)
 
-Require ill_cut.
+From Yalla Require ill_cut.
 
+
+Section Atoms.
+
+Context { preiatom : DecType }.
 
 (** ** 1. define formulas *)
-Inductive iformula : Set :=
-| ivar  : iformulas.IAtom -> iformula
+Inductive iformula :=
+| ivar  : @iformulas.iatom preiatom -> iformula
 | ione  : iformula
 | itens : iformula -> iformula -> iformula
 | ilmap : iformula -> iformula -> iformula
@@ -105,8 +109,8 @@ Qed.
 
 (** ** 4. characterize corresponding [ill] fragment *)
 
-Definition ipfrag_ill := ill_def.mk_ipfrag false ill_def.NoIAxioms true.
-(*                                         cut           axioms    perm  *)
+Definition ipfrag_ill := @ill_def.mk_ipfrag preiatom false ill_def.NoIAxioms true.
+(*                                          atoms    cut           axioms    perm  *)
 Definition ill_ll := ill_def.ill ipfrag_ill.
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -289,3 +293,5 @@ apply ill2illfrag in pi2.
 eapply ill_cut.cut_ir_axfree...
 intros a ; destruct a.
 Qed.
+
+End Atoms.

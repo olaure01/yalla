@@ -3,14 +3,17 @@
 
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-From OLlibs Require Import List_more Permutation_Type GPermutation_Type
+From OLlibs Require Import infinite List_more Permutation_Type GPermutation_Type
                            Dependent_Forall_Type.
-Require Export ll_def.
+From Yalla Require Export ll_def.
 
-(** ** Decidable equality on [Atom], through value into [bool] *)
-Definition ateq := yalla_ax.ateq.
-Definition ateq_eq := yalla_ax.ateq_eq.
 
+Section Atoms.
+
+Context { atom : InfDecType }.
+
+Definition ateq := @eqb atom.
+Definition ateq_eq := @eqb_eq atom.
 
 (** ** Substitutions *)
 
@@ -115,97 +118,58 @@ contradiction P_axfree.
 Qed.
 
 
-(** ** Fresh variables and associated properties *)
-Section Fresh.
+(** ** Fresh atoms and associated properties *)
 
-(** Embedding of [nat] into [Atom] *)
-Variable a2n : Atom -> nat.
-Variable n2a : nat -> Atom.
-Hypothesis n2n : forall n, a2n (n2a n) = n.
-
-Lemma a2n_is_n2a : forall a n, a = n2a n -> n = a2n a.
-Proof.
-intros a n Ha.
-rewrite Ha.
-rewrite n2n.
-reflexivity.
-Qed.
-
-(** [nat] bigger than all [nat] associated with [Atom] in [A] *)
-Fixpoint nat_fresh_of A :=
+Fixpoint atom_list A : list atom :=
 match A with
-| var x     => S (a2n x)
-| covar x   => S (a2n x)
-| one       => 0
-| bot       => 0
-| tens B C  => nat_fresh_of B + nat_fresh_of C
-| parr B C  => nat_fresh_of B + nat_fresh_of C
-| zero      => 0
-| top       => 0
-| aplus B C => nat_fresh_of B + nat_fresh_of C
-| awith B C => nat_fresh_of B + nat_fresh_of C
-| oc B      => nat_fresh_of B
-| wn B      => nat_fresh_of B
+| var x     => x :: nil
+| covar x   => x :: nil
+| one       => nil
+| bot       => nil
+| tens B C  => atom_list B ++ atom_list C
+| parr B C  => atom_list B ++ atom_list C
+| zero      => nil
+| top       => nil
+| aplus B C => atom_list B ++ atom_list C
+| awith B C => atom_list B ++ atom_list C
+| oc B      => atom_list B
+| wn B      => atom_list B
 end.
 
 (** Provide an [Atom] which is fresh for [A] *)
-Definition fresh_of A := n2a (nat_fresh_of A).
+Definition fresh_of A := fresh (atom_list A).
 
-Lemma subs_fresh_le : forall C A n, nat_fresh_of A <= n -> subs C (n2a n) A = A.
-Proof with myeasy.
-intros C A n Hle.
-induction A ; simpl in Hle ; simpl ;
-  try rewrite IHA ;
-  try (rewrite IHA2 ; [ rewrite IHA1 | ]) ;
-  simpl...
-- rewrite repl_at_neq...
-  intro Heq.
-  apply a2n_is_n2a in Heq ; subst.
-  inversion Hle...
-- rewrite repl_at_neq...
-  intro Heq.
-  apply a2n_is_n2a in Heq ; subst.
-  inversion Hle...
+Lemma subs_fresh_incl : forall C lat A,
+  incl (atom_list A) lat -> subs C (fresh lat) A = A.
+Proof.
+intros C lat A; induction A; simpl; intros Hincl;
+  try rewrite IHA;
+  try (rewrite IHA2 ; [ rewrite IHA1 | ]);
+  simpl; intuition;
+  try now apply incl_app_inv in Hincl.
+- rewrite repl_at_neq; auto.
+  intros ->.
+  apply (fresh_prop lat), (Hincl (fresh lat)); intuition.
+- rewrite repl_at_neq; auto.
+  intros ->.
+  apply (fresh_prop lat), (Hincl (fresh lat)); intuition.
 Qed.
 
 Lemma subs_fresh : forall C A, subs C (fresh_of A) A = A.
-Proof.
-intros.
-apply subs_fresh_le.
-reflexivity.
-Qed.
-
-Definition nat_fresh_of_list l := list_max (map nat_fresh_of l).
-
-Lemma nat_fresh_of_list_fresh : forall l,
-  Forall (fun x => nat_fresh_of x <= nat_fresh_of_list l) l.
-Proof with myeasy.
-unfold nat_fresh_of_list.
-induction l ; constructor ; simpl...
-remember (map nat_fresh_of l) as k.
-revert IHl ; clear ; induction l ;
-  intros IHl' ; inversion IHl' ; subst ; constructor...
-intuition.
-Qed.
+Proof. now intros; apply subs_fresh_incl. Qed.
 
 (** Provide an [Atom] which is fresh for all elements of [l] *)
-Definition fresh_of_list l := n2a (nat_fresh_of_list l).
+Definition fresh_of_list l := fresh (flat_map atom_list l).
 
-Lemma subs_fresh_list_le : forall C l n,
-  nat_fresh_of_list l <= n -> map (subs C (n2a n)) l = l.
-Proof with myeasy.
-unfold nat_fresh_of_list.
-intros C l n Hle.
-induction l...
-simpl in Hle ; simpl.
-rewrite subs_fresh_le ; [ rewrite IHl | ]...
+Lemma subs_fresh_list_incl : forall C lat l,
+  incl (flat_map atom_list l) lat -> map (subs C (fresh lat)) l = l.
+Proof.
+intros C lat l; induction l; simpl; intros Hincl; auto.
+apply incl_app_inv in Hincl.
+rewrite subs_fresh_incl; [ rewrite IHl | ]; intuition.
 Qed.
 
 Lemma subs_fresh_list : forall C l, map (subs C (fresh_of_list l)) l = l.
-Proof.
-intros.
-apply subs_fresh_list_le.
-reflexivity.
-Qed.
+Proof. now intros; apply subs_fresh_list_incl. Qed.
 
-End Fresh.
+End Atoms.

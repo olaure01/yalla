@@ -3,20 +3,25 @@
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory List_more
+From OLlibs Require Import funtheory dectype List_more
                            Permutation_Type_more Permutation_Type_solve Dependent_Forall_Type.
 
 
 (** ** 0. load the [yalla] library *)
 
-Require ll_cut.
+From Yalla Require Import atoms.
+From Yalla Require ll_cut.
 
+
+Section Atoms.
+
+Context { atom : DecType }.
 
 (** ** 1. define formulas *)
 
-Inductive formula : Set :=
-| var : formulas.Atom -> formula
-| covar : formulas.Atom -> formula
+Inductive formula :=
+| var : atom -> formula
+| covar : atom -> formula
 | tens : formula -> formula -> formula
 | parr : formula -> formula -> formula
 | oc : formula -> formula
@@ -122,8 +127,8 @@ Qed.
 (** ** 4. characterize corresponding [ll] fragment *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms ll_def.pmix2 true.
-(*                                       cut   axioms          mix          perm  *)
+Definition pfrag_mell := @ll_def.mk_pfrag atom  false ll_def.NoAxioms ll_def.pmix2 true.
+(*                                        atoms cut   axioms          mix          perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
@@ -252,3 +257,5 @@ simpl in pi2 ; rewrite <- mell2ll_dual in pi2.
 eapply ll_cut.cut_r_axfree...
 intros a ; destruct a.
 Qed.
+
+End Atoms.

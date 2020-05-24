@@ -1,11 +1,11 @@
 From Coq Require Import List.
-From OLlibs Require Import Permutation_Type.
+From OLlibs Require Import dectype Permutation_Type.
 Require Import ll_def nanoll.
 
 Fixpoint ll2ll A :=
 match A with
-| var x     => formulas.var x
-| covar x   => formulas.covar x
+| var x     => @formulas.var nat_dectype x
+| covar x   => @formulas.covar nat_dectype x
 | tens A B  => formulas.tens (ll2ll A) (ll2ll B)
 | parr A B  => formulas.parr (ll2ll A) (ll2ll B)
 | one       => formulas.one
@@ -25,8 +25,8 @@ induction l...
 simpl ; rewrite IHl...
 Qed.
 
-Definition pfrag_ll := mk_pfrag false NoAxioms pmix_none true.
-(*                              cut   axioms   mix       perm  *)
+Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
+(*                               atoms       cut   axioms   mix       perm  *)
 
 Theorem ll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.
@@ -44,4 +44,3 @@ intros l pi; induction pi ; simpl; try (now constructor).
   constructor.
   rewrite <- ll2ll_map_wn; assumption.
 Qed.
-

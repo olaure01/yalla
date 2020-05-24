@@ -1,6 +1,8 @@
 -R microyalla Yalla.MicroYalla
 -R yalla Yalla
 
+yalla/issue12394.v
+
 microyalla/microill.v
 microyalla/microll.v
 microyalla/micro_macro_ill.v
@@ -10,6 +12,7 @@ microyalla/nanoll.v
 microyalla/nano_macro_ill.v
 microyalla/nano_macro_ll.v
 
+yalla/atoms.v
 yalla/basic_misc.v
 yalla/bbb.v
 yalla/fmformulas.v
@@ -41,4 +44,3 @@ yalla/nn_foc.v
 yalla/nn_prop.v
 yalla/subs.v
 yalla/tl.v
-yalla/yalla_ax.v

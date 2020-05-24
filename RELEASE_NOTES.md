@@ -7,6 +7,7 @@ Modifications in definitions leading to possible incompatibilities with version 
 * generalized mix rules
     (no real impact if mix rules are not used except that the `mix0` and `mix2` rules are replaced by a single rule)
 * output of `atomic` is now in `Type` (only requires simple updates if `atomic` is used, it is also possible to use the previous version under the name `atomic_Prop`)
+* results are now parametrized over atom sets (this increases the number of implicit parameters of objects)
 
 New results added, including:
 

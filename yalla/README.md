@@ -101,11 +101,11 @@ Example files for interfaces:
 
 Other files:
 
-* bbb.v:
+*  bbb.v:
     study of LL extended with the equation: bot = oc bot
-* yalla_ax.v:
-    specific instances of axioms on atoms used in the library
-    (this guarantees consistency of this set of axioms)
+* atoms.v:
+    classes describing constraints on atoms used in the library
+    with a specific instance proving the consistency of all hypotheses
 * basic_misc.v:
     basic definitions and tactics
 

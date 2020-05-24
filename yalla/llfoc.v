@@ -3,10 +3,15 @@
 (** * Focusing in Linear Logic *)
 
 From Coq Require Import CMorphisms Wf_nat.
-From OLlibs Require Import List_more
+From OLlibs Require Import infinite List_more
                            Permutation_Type_more Permutation_Type_solve GPermutation_Type.
-Require Import ll_fragments.
+From Yalla Require Import ll_fragments.
 
+
+Section Atoms.
+
+Context { atom : InfDecType }.
+Notation formula := (@formula atom).
 
 (** ** Synchronous and asynchronous formulas *)
 Inductive sformula : formula -> Prop :=
@@ -1823,3 +1828,5 @@ intros l Pi pi ; induction pi ;
       apply pi'.
     * GPermutation_Type_solve.
 Qed.
+
+End Atoms.

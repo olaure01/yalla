@@ -5,9 +5,15 @@
 (* Properties depending on cut admissibility *)
 
 From Coq Require Import Bool.
-From OLlibs Require Import List_more Permutation_Type_more GPermutation_Type.
-Require Export ill_cut.
+From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
+From Yalla Require Export ill_cut.
 
+
+Section Atoms.
+
+Context { preiatom : DecType }.
+Notation iformula := (@iformula preiatom).
+Notation ill := (@ill preiatom).
 
 (** Consistency *)
 
@@ -284,7 +290,7 @@ intros l A PS pi.
 induction pi ; try now constructor.
 - eapply ex_ir...
 - eapply ex_oc_ir...
-- eapply (@cut_ir _ f)...
+- eapply (@cut_ir _ _ f)...
 Qed.
 
 Lemma ill_is_ill_ps {P} : forall l A, ill P l A -> ill_ps P (fun _ _ => true) l A.
@@ -298,7 +304,7 @@ Qed.
 
 (** A fragment is a subset stable under sub-formula *)
 Definition ifragment FS :=
-  forall A, is_true (FS A) -> forall B, isubform B A -> is_true (FS B).
+  forall A : iformula, is_true (FS A) -> forall B, isubform B A -> is_true (FS B).
 
 (** Conservativity over fragments *)
 Lemma iconservativity {P} : ipcut P = false -> forall FS, ifragment FS ->
@@ -617,3 +623,5 @@ clear - P_axfree pi ; induction pi ; try now econstructor.
 Qed.
 
 End Fragments.
+
+End Atoms.

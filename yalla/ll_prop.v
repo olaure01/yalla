@@ -3,11 +3,16 @@
 (** * Properties relying on cut admissibility *)
 
 From Coq Require Import Bool.
-From OLlibs Require Import List_more
-               Permutation_Type_more CPermutation_Type GPermutation_Type
-               Dependent_Forall_Type flat_map_more.
-Require Export ll_cut.
+From OLlibs Require Import dectype List_more
+                           Permutation_Type_more CPermutation_Type GPermutation_Type
+                           Dependent_Forall_Type flat_map_more.
+From Yalla Require Export ll_cut.
 
+Section Atoms.
+
+Context { atom : DecType }.
+Notation formula := (@formula atom).
+Notation ll := (@ll atom).
 
 (** Consistency statements *)
 
@@ -15,20 +20,20 @@ Lemma weak_consistency_axfree {P} : (projT1 (pgax P) -> False) -> pmix P 0 = fal
   ll P nil -> False.
 Proof.
 intros Hgax Hmix0 pi.
-apply cut_admissible_axfree in pi ; try assumption.
-remember nil as l ; revert Heql ; induction pi using ll_nested_ind ; intros Heql ; inversion Heql ; subst.
+apply cut_admissible_axfree in pi; try assumption.
+remember nil as l; revert Heql; induction pi using ll_nested_ind; intros Heql; inversion Heql; subst.
 - apply IHpi.
   symmetry in p.
   apply (PCPermutation_Type_nil _ _ p).
 - apply IHpi.
-  destruct l1 ; destruct lw' ; destruct l2 ; inversion Heql ; subst.
-  symmetry in p ; apply Permutation_Type_nil in p ; subst.
-  list_simpl ; reflexivity.
-- destruct L; inversion Heql.
-  + simpl in eqpmix ; rewrite Hmix0 in eqpmix ; inversion eqpmix.
-  + inversion X; subst.
-    apply H2.
-    destruct l0; [ reflexivity | inversion H1 ].
+  destruct l1; destruct lw'; destruct l2; inversion Heql; subst.
+  symmetry in p; apply Permutation_Type_nil in p; subst.
+  list_simpl; reflexivity.
+- destruct L; [ | inversion Heql as [ HeqL ] ].
+  + simpl in eqpmix; rewrite Hmix0 in eqpmix; inversion eqpmix.
+  + inversion_clear X as [ | ? ? ? ? Hnil ].
+    apply Hnil.
+    destruct l0; [ reflexivity | inversion HeqL ].
 - inversion f.
 - apply (Hgax a).
 Qed.
@@ -53,11 +58,11 @@ remember (zero :: nil) as l ; revert Heql ; induction pi using ll_nested_ind ;
     destruct lw' ; inversion Heql.
     symmetry in p ; apply Permutation_Type_nil in p ; subst ; reflexivity.
 - revert PL X Heql; clear; induction L; intros PL HPL Heql; inversion Heql.
-  inversion HPL; destruct a; subst.
+  inversion HPL as [ | ? ? ? ? Heq ]; destruct a; subst.
   + apply IHL with Fl; assumption.
-  + inversion H0; subst.
-    destruct a ; inversion H4.
-    apply H1; reflexivity.
+  + inversion H0 as [ [Heq1 Heq2] ]; subst.
+    destruct a; inversion Heq2.
+    apply Heq; reflexivity.
 - inversion f.
 - apply (Hgax a).
 Qed.
@@ -144,7 +149,7 @@ Inductive ll_ps P PS : list formula -> Type :=
 | gax_ps_r : forall a, is_true (PS (projT2 (pgax P) a)) -> ll_ps P PS (projT2 (pgax P) a).
 
 Section ll_ps_ind.
-  Variable P : pfrag.
+  Variable P : @pfrag atom.
   Variable PS : list formula -> bool.
 
   Definition Forall_Proofs_ps (Pred : forall l, ll_ps P PS l -> Type) {L} (piL : Forall_inf (ll_ps P PS) L) :=
@@ -283,7 +288,7 @@ Qed.
 
 (** A fragment is a subset of formulas closed under subformula. *)
 Definition fragment FS :=
-  forall A, is_true (FS A) -> forall B, subform B A -> is_true (FS B).
+  forall A : formula, is_true (FS A) -> forall B, subform B A -> is_true (FS B).
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
 Lemma conservativity {P} : pcut P = false -> forall FS, fragment FS ->
@@ -493,7 +498,7 @@ induction lax ; intros l pi.
     as Q.
   simpl; cons2app; rewrite app_assoc.
   apply IHlax.
-  eapply (@ext_wn _ _ _ (dual a :: nil)) in pi.
+  eapply (ext_wn _ (dual a :: nil)) in pi.
   eapply ax_gen ; [ | | | | apply pi ] ; try (now rewrite HeqQ).
   simpl in pi ; simpl ; intros a0.
   destruct a0.
@@ -542,7 +547,7 @@ induction lax ; intros l pi.
   rewrite <- (app_nil_r l).
   eapply (cut_r _ (wn (dual a)))...
   + simpl ; rewrite bidual.
-    change nil with (map wn nil).
+    change nil with (map (@wn atom) nil).
     apply oc_r ; simpl.
     assert ({ b | a :: nil = projT2 (pgax (axupd_pfrag P
      (existT (fun x => x -> list formula) (sum _ {k | k < S (length lax)})
@@ -601,3 +606,5 @@ destruct a.
 - contradiction P_axfree.
 - exists s...
 Qed.
+
+End Atoms.

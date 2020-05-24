@@ -4,21 +4,25 @@
 (** * Intuitionistic Linear Logic formulas *)
 
 From Coq Require Import Bool RelationClasses Lia.
-From OLlibs Require Import List_more.
-Require yalla_ax.
+From OLlibs Require Import dectype List_more.
+From Yalla Require Export atoms.
+
+
+Section Atoms.
+
+Context { preiatom : DecType }.
 
 (** ** Definition and main properties of formulas *)
 
 (** A set of atoms for building formulas *)
-Definition IAtom := yalla_ax.IAtom.
-Definition atN := yalla_ax.atN.
-
+Global Definition iatom := option preiatom.
+Global Definition atN : iatom := None.
 
 (** Intuitionistic formulas
 
 (with implication in both directions for non-commutative systems) *)
-Inductive iformula : Set :=
-| ivar  : IAtom -> iformula
+Inductive iformula :=
+| ivar  : iatom -> iformula
 | ione  : iformula
 | itens : iformula -> iformula -> iformula
 | ilpam : iformula -> iformula -> iformula
@@ -31,7 +35,7 @@ Inductive iformula : Set :=
 | iplus : iformula -> iformula -> iformula
 | ioc   : iformula -> iformula.
 
-Definition N := ivar atN.
+Global Definition N := ivar atN.
 
 (** Size of a [iformula] as its number of symbols *)
 Fixpoint ifsize A :=
@@ -105,7 +109,7 @@ intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   apply isub_neg_N.
 Qed.
 
-Instance isub_po : PreOrder isubform.
+Global Instance isub_po : PreOrder isubform | 50.
 Proof.
 split.
 - intros l.
@@ -151,7 +155,7 @@ induction l1 ; intros l2 l3 Hl Hr ; constructor.
   eapply IHl1...
 Qed.
 
-Instance isub_list_po : PreOrder isubform_list.
+Global Instance isub_list_po : PreOrder isubform_list | 50.
 Proof.
 split.
 - intros l.
@@ -162,8 +166,7 @@ split.
 Qed.
 
 (* unused
-
-Require Import GPermutation_Type.
+From OLlibs Require Import GPermutation_Type.
 
 Lemma isub_perm_list :
   forall b l l1 l2,
@@ -184,7 +187,7 @@ Qed.
 
 Fixpoint eqb_iform A B :=
 match A, B with
-| ivar X, ivar Y => yalla_ax.iateq X Y
+| ivar X, ivar Y => @eqb (option_dectype _) X Y
 | ione, ione => true
 | itens A1 A2, itens B1 B2 => (eqb_iform A1 B1) && (eqb_iform A2 B2)
 | ilpam A1 A2, ilpam B1 B2 => (eqb_iform A1 B1) && (eqb_iform A2 B2)
@@ -203,9 +206,9 @@ Lemma eqb_eq_iform : forall A B, eqb_iform A B = true <-> A = B.
 Proof with reflexivity.
 induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
   try inversion Heqb ; try inversion Heq ; try reflexivity.
-- apply yalla_ax.iateq_eq in H0 ; subst...
+- apply (@eqb_eq (option_dectype _)) in H0; subst...
 - subst ; simpl.
-  apply yalla_ax.iateq_eq...
+  apply (@eqb_eq (option_dectype _))...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
@@ -307,7 +310,7 @@ Proof with try assumption ; try reflexivity.
 intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructor)).
 - destruct A ; simpl in H ; try (now inversion H).
   rewrite orb_false_r in H.
-  apply yalla_ax.iateq_eq in H ; subst ; constructor.
+  apply (@eqb_eq (option_dectype _)) in H ; subst ; constructor.
 - destruct A ; simpl in H ; try (now inversion H).
 - simpl in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
@@ -373,8 +376,8 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
   + apply isub_oc.
     apply IHB...
 - inversion H ; subst.
-  simpl ; rewrite (proj2 (yalla_ax.iateq_eq _ _) eq_refl).
-  constructor.
+  simpl; rewrite orb_false_r.
+  apply (@eqb_refl (option_dectype _ )).
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (itens B1 B2) (itens B1 B2)) with true...
@@ -509,3 +512,4 @@ apply isubb_isub_list.
 etransitivity ; eassumption.
 Qed.
 
+End Atoms.

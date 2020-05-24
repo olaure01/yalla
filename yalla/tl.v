@@ -3,20 +3,27 @@
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
 From Coq Require Import CMorphisms BoolOrder.
-From OLlibs Require Import funtheory List_more Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GPermutation_Type.
 
 
 (** ** 0. load the [ill] library *)
 
-Require Import ill_vs_ll.
+From Yalla Require Import ll_def ill_vs_ll.
+
+
+Section Atoms.
+
+Context { atom : InfDecType }.
+Context { preiatom : DecType }.
+Context { tatom : DecType }.
+Context { Atoms : TLAtomType atom preiatom tatom }.
+
 
 (** ** 1. define formulas *)
 
-Definition TAtom := yalla_ax.TAtom.
-
 (** Tensor formulas *)
-Inductive tformula : Set :=
-| tvar : TAtom -> tformula
+Inductive tformula :=
+| tvar : tatom -> tformula
 | tone : tformula
 | ttens : tformula -> tformula -> tformula
 | tneg : tformula -> tformula
@@ -43,7 +50,7 @@ intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   try (constructor ; apply IHHr)...
 Qed.
 
-Instance tsub_po : PreOrder tsubform.
+Global Instance tsub_po : PreOrder tsubform | 50.
 Proof.
 split.
 - intros l.
@@ -54,14 +61,31 @@ Qed.
 
 (** ** 2. define embedding into [iformula] *)
 
-Definition i2ac := yalla_ax.i2ac.
-Definition i2ac_inj := yalla_ax.i2ac_inj.
-Definition t2i := yalla_ax.t2i.
-Definition t2i_inj := yalla_ax.t2i_inj.
-Definition atN_or_t2i := yalla_ax.atN_or_t2i.
-Definition notatN := yalla_ax.notatN.
-Definition iateq := yalla_ax.iateq.
-Definition iateq_eq := yalla_ax.iateq_eq.
+Lemma TAtom2PreIAtom_inj : injective TAtom2PreIAtom.
+Proof. apply bijective_injective, TAtom2PreIAtom_bij. Qed.
+Definition i2ac := IAtom2Atom.
+Notation ill2ll := (@ill2ll _ _ IAtom2Atom_inj_base).
+Notation i2pfrag := (@i2pfrag _ _ IAtom2Atom_inj_base).
+Definition i2ac_inj : injective i2ac := IAtom2Atom_inj.
+Definition t2i := fun x => Some (TAtom2PreIAtom x).
+Lemma t2i_inj : injective t2i.
+Proof.
+unfold t2i; intros x y Heq; apply TAtom2PreIAtom_inj.
+now injection Heq.
+Qed.
+Lemma atN_or_t2i : forall x, (atN = x) + { y | x = t2i y }.
+Proof.
+intros x; destruct x; [ right | left ]; auto.
+unfold t2i.
+destruct (bijective_surjective TAtom2PreIAtom_bij c) as [y ->].
+now exists y.
+Qed.
+Lemma notatN : forall x, ~ atN = t2i x.
+Proof.
+unfold t2i; intros x Heq; inversion Heq.
+Qed.
+Definition iateq := @eqb (option_dectype preiatom).
+Definition iateq_eq := @eqb_eq (option_dectype preiatom).
 
 Fixpoint tl2ill P :=
 match P with
@@ -83,9 +107,10 @@ induction A ; intros B Heq ;
   try apply IHA1 in H0 ;
   try apply IHA2 in H1 ; subst...
 intuition.
+now apply TAtom2PreIAtom_inj in H0; subst.
 Qed.
 
-Lemma tl2ll_inj : injective (fun x => ill2ll i2ac (tl2ill x)).
+Lemma tl2ll_inj : injective (fun x => ill2ll (tl2ill x)).
 Proof with try reflexivity.
 intros A.
 induction A ; intros B Heq ; destruct B ;
@@ -98,9 +123,8 @@ induction A ; intros B Heq ; destruct B ;
   apply t2i_inj.
   apply i2ac_inj.
   unfold t2i in Heq ; unfold i2ac in Heq.
-  remember (yalla_ax.i2ac (yalla_ax.t2i t)) as t1.
-  remember (yalla_ax.i2ac (yalla_ax.t2i t0)) as t2.
-  inversion Heq...
+  inversion Heq.
+  now apply i2ac_inj, t2i_inj in H0; subst.
 - inversion Heq.
   apply formulas.dual_inj in H0.
   apply IHA in H0 ; subst...
@@ -217,8 +241,8 @@ Inductive tl P : list tformula -> option tformula -> Type :=
 | gax_tr : forall a,
            tl P (fst (projT2 (tpgax P) a)) (snd (projT2 (tpgax P) a)).
 
-Instance tl_perm {P} {Pi} :
-  Proper ((PEPermutation_Type (tpperm P)) ==> Basics.arrow) (fun l => tl P l Pi).
+Global Instance tl_perm {P} {Pi} :
+  Proper ((PEPermutation_Type (tpperm P)) ==> Basics.arrow) (fun l => tl P l Pi) | 100.
 Proof.
 intros l1 l2 HP pi.
 eapply ex_tr ; eassumption.
@@ -678,12 +702,10 @@ Qed.
 
 (** *** conservativity with respect to [ll] *)
 
-Require Import ll_def.
-
 Definition easytpgax P := forall a,
-  (forall D, ill2ll i2ac (snd (projT2 (ipgax (t2ipfrag P)) a)) = dual (ill2ll i2ac D) -> False)
-* (forall A C, snd (projT2 (tpgax P) a) = Some A -> ill2ll i2ac C = ill2ll i2ac (tl2ill A) -> C = tl2ill A)
-* (forall A C, In_inf A (fst (projT2 (tpgax P) a)) -> ill2ll i2ac C = ill2ll i2ac (tl2ill A) -> C = tl2ill A).
+  (forall D, ill2ll (snd (projT2 (ipgax (t2ipfrag P)) a)) = dual (ill2ll D) -> False)
+* (forall A C, snd (projT2 (tpgax P) a) = Some A -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A)
+* (forall A C, In_inf A (fst (projT2 (tpgax P) a)) -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A).
 
 Lemma tatomic_easytpgax {P} :
   (forall a, prod (option_Type tatomic (snd (projT2 (tpgax P) a)))
@@ -710,7 +732,7 @@ intros Hgax a ; split ; [ split | ].
   apply i2ac_inj in H0 ; subst ; reflexivity.
 Qed.
 
-Lemma easytpgax_easyipgax {P} : easytpgax P -> easyipgax_nzeropos yalla_ax.i2ac (t2ipfrag P).
+Lemma easytpgax_easyipgax {P} : easytpgax P -> easyipgax_nzeropos (t2ipfrag P).
 Proof with try eassumption ; try reflexivity.
 intros Hgax.
 split ; [ split | ] ; simpl.
@@ -718,8 +740,7 @@ split ; [ split | ] ; simpl.
   case_eq (snd (projT2 (tpgax P) a)) ; [intros t Heqa | intros Heqa] ; rewrite Heqa in Heq ; simpl in Heq.
   + assert (Hgaxa := fst (fst (Hgax a)) D).
     apply Hgaxa ; simpl.
-    unfold i2ac ; rewrite <- Heq.
-    rewrite Heqa...
+    rewrite <- Heq, Heqa...
   + destruct D ; inversion Heq.
 - intros l C HP.
   assert (prod (sum (snd (projT2 (tpgax P) a) = None /\ C = N)
@@ -782,7 +803,7 @@ split ; [ split | ] ; simpl.
       decomp_map Heq' ; subst.
       assert (Hgaxa := fst (fst (Hgax a)) x).
       apply Hgaxa ; simpl.
-      unfold i2ac ; rewrite <- Heq'3... }
+      rewrite <- Heq'3... }
   + eapply ex_ir ; simpl...
     refine (snd (tl2tlfrag _ _ _) _)...
     apply gax_tr.
@@ -797,17 +818,17 @@ Qed.
 
 Theorem ll_is_tl_cutfree {P} : tpcut P = false -> easytpgax P -> forall l,
   (forall A, tl P l (Some A)
-         -> ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
-                          rev (map dual (map (ill2ll i2ac) (map tl2ill l)))))
+         -> ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
+                          rev (map dual (map ill2ll (map tl2ill l)))))
 * (forall A, 
-        ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
-                          rev (map dual (map (ill2ll i2ac) (map tl2ill l))))
+        ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
+                          rev (map dual (map ill2ll (map tl2ill l))))
         -> tl P l (Some A))
 * (tl P l None
-        -> ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac N ::
-                 rev (map dual (map (ill2ll i2ac) (map tl2ill l)))))
-* (ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac N ::
-                 rev (map dual (map (ill2ll i2ac) (map tl2ill l)))) 
+        -> ll (i2pfrag (t2ipfrag P)) (ill2ll N ::
+                 rev (map dual (map ill2ll (map tl2ill l)))))
+* (ll (i2pfrag (t2ipfrag P)) (ill2ll N ::
+                 rev (map dual (map ill2ll (map tl2ill l)))) 
         -> tl P l None).
 Proof with try eassumption.
 intros Hcut Hgax l.
@@ -815,8 +836,10 @@ split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
 - apply tl2tlfrag in pi.
   assert (pi' := fst pi _ (eq_refl _)).
   eapply ill_to_ll...
-- eapply (ll_to_ill_nzeropos_cutfree _ i2ac_inj _ _ (ill2ll i2ac (tl2ill A)
-            :: rev (map dual (map (ill2ll i2ac) (map tl2ill l))))) in pi ;
+- eapply (@ll_to_ill_nzeropos_cutfree _ _ _ (t2ipfrag P) Hcut
+              (easytpgax_easyipgax Hgax)
+            (ill2ll (tl2ill A)
+              :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
     [ | | reflexivity ]...
   + apply tlfrag2tl_cutfree in pi...
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
@@ -827,8 +850,9 @@ split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
 - apply tl2tlfrag in pi.
   assert (pi' := snd pi (eq_refl _)).
   eapply ill_to_ll...
-- eapply (ll_to_ill_nzeropos_cutfree _ i2ac_inj _ _ (ill2ll i2ac N
-            :: rev (map dual (map (ill2ll i2ac) (map tl2ill l))))) in pi ;
+- eapply (@ll_to_ill_nzeropos_cutfree _ _ _ (t2ipfrag P) Hcut
+           (easytpgax_easyipgax Hgax)
+           (ill2ll N :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
     [ | | reflexivity ]...
   + apply tlfrag2tl_cutfree in pi...
   + constructor ; [ constructor | ].
@@ -836,33 +860,28 @@ split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
     intros x Hin.
     apply in_inf_map_inv in Hin as [s0 Heq Hin]; subst.
     apply tl2ill_nz.
-Unshelve.
-* simpl...
-* apply easytpgax_easyipgax...
-* simpl...
-* apply easytpgax_easyipgax...
 Qed.
 
 Theorem ll_is_tl_axfree {P} : (projT1 (tpgax P) -> False) -> forall l,
    (forall A, tl P l (Some A)
-           -> ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
-                           rev (map dual (map (ill2ll i2ac) (map tl2ill l)))))
- * (forall A, ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac (tl2ill A) ::
-                           rev (map dual (map (ill2ll i2ac) (map tl2ill l))))
+           -> ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
+                           rev (map dual (map ill2ll (map tl2ill l)))))
+ * (forall A, ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
+                           rev (map dual (map ill2ll (map tl2ill l))))
            -> tl P l (Some A))
  *           (tl P l None
-           -> ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac N ::
-                           rev (map dual (map (ill2ll i2ac) (map tl2ill l)))))
- *           (ll (i2pfrag i2ac (t2ipfrag P)) (ill2ll i2ac N ::
-                          rev (map dual (map (ill2ll i2ac) (map tl2ill l))))
+           -> ll (i2pfrag (t2ipfrag P)) (ill2ll N ::
+                           rev (map dual (map ill2ll (map tl2ill l)))))
+ *           (ll (i2pfrag (t2ipfrag P)) (ill2ll N ::
+                          rev (map dual (map ill2ll (map tl2ill l))))
            -> tl P l None).
 Proof with try eassumption.
 intros Hgax l.
 split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
 - apply tl2tlfrag in pi.
   eapply ill_to_ll ; intuition.
-- eapply (ll_to_ill_nzeropos_axfree _ i2ac_inj _ (ill2ll i2ac (tl2ill A)
-            :: rev (map dual (map (ill2ll i2ac) (map tl2ill l))))) in pi ;
+- eapply (@ll_to_ill_nzeropos_axfree _ _ _ (t2ipfrag P) Hgax (ill2ll (tl2ill A)
+            :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
     [ | | reflexivity ]...
   + apply tlfrag2tl_axfree...
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
@@ -871,12 +890,13 @@ split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
     apply tl2ill_nz.
 - apply tl2tlfrag in pi.
   eapply ill_to_ll ; intuition.
-- eapply (ll_to_ill_nzeropos_axfree _ i2ac_inj _ (ill2ll i2ac N
-            :: rev (map dual (map (ill2ll i2ac) (map tl2ill l))))) in pi ;
+- eapply (@ll_to_ill_nzeropos_axfree _ _ _ (t2ipfrag P) Hgax (ill2ll N
+            :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
     [ | | reflexivity ]...
   + apply tlfrag2tl_axfree...
   + constructor ; [ constructor | ].
     clear ; induction l ; simpl ; constructor ; intuition.
     apply tl2ill_nz.
-Unshelve. all : intuition.
 Qed.
+
+End Atoms.
