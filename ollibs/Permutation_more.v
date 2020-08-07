@@ -96,3 +96,19 @@ induction l1 ; intros l2 Hi HP.
       destruct Hy' as [ Hy' | Hy' ]; apply in_or_app; [left|right]; auto.
       now apply in_cons.
 Qed.
+
+
+(** ** [repeat] *)
+(* TODO submit PR in Permutation.v *)
+
+Lemma Permutation_repeat A (a : A) n l :
+  Permutation l (repeat a n) -> l = repeat a n.
+Proof.
+revert n; induction l; simpl; intros n HP; auto.
+- now apply Permutation_nil in HP; inversion HP.
+- assert (a0 = a) as Heq by (now apply repeat_spec with n, (Permutation_in _ HP); left); subst.
+  destruct n; simpl; simpl in HP.
+  + symmetry in HP; apply Permutation_nil in HP; inversion HP.
+  + f_equal; apply IHl.
+    now apply Permutation_cons_inv with a.
+Qed.

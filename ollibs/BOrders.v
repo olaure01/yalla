@@ -233,7 +233,7 @@ match l with
 | b :: t => if (leb a b) then a :: b :: t
                          else b :: (insert B a t)
 end.
-Arguments insert [_] _ _.
+Arguments insert {_} _ _.
 
 Lemma insert_insert B : forall (x y : @car B) l,
   insert y (insert x l) = insert x (insert y l).
@@ -269,7 +269,7 @@ match l with
 | a :: nil => true
 | a :: (b :: _) as r => leb a b && is_sorted B r
 end.
-Arguments is_sorted [_] _.
+Arguments is_sorted {_} _.
 
 Lemma is_sorted_tail B : forall a l,
   @is_sorted B (a :: l) = true -> is_sorted l = true.

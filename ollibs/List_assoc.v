@@ -77,4 +77,4 @@ Section RemoveAssoc.
 
 End RemoveAssoc.
 
-Arguments remove_assoc {_} {_} _ _.
+Arguments remove_assoc {_ _} _ _.

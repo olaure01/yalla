@@ -142,22 +142,19 @@ Definition unit_dectype := {|
   eqb := fun _ _ => true;
   eqb_eq := fun a b => match a, b with
                        | tt, tt => conj (fun _ => eq_refl) (fun _ => eq_refl)
-                       end
-|}.
+                       end |}.
 
 (** the [bool] instance *)
 Definition bool_dectype := {|
   car := bool;
   eqb := Bool.eqb;
-  eqb_eq := Bool.eqb_true_iff
-|}.
+  eqb_eq := Bool.eqb_true_iff |}.
 
 (** the [nat] instance *)
 Definition nat_dectype := {|
   car := nat;
   eqb := Nat.eqb;
-  eqb_eq := Nat.eqb_eq
-|}.
+  eqb_eq := Nat.eqb_eq |}.
 
 (** the [option] construction *)
 Scheme Equality for option.
@@ -167,8 +164,7 @@ Definition option_dectype (D : DecType) := {|
   eqb := option_beq D.(@eqb);
   eqb_eq := fun a b => conj
                       (internal_option_dec_bl _ (fun x y => proj1 (D.(@eqb_eq) x y)) a b)
-                      (@internal_option_dec_lb _ _ (fun x y => proj2 (D.(@eqb_eq) x y)) a b)
-|}.
+                      (@internal_option_dec_lb _ _ (fun x y => proj2 (D.(@eqb_eq) x y)) a b) |}.
 
 (** the [sum] construction *)
 Scheme Equality for sum.
@@ -180,8 +176,7 @@ Definition sum_dectype (D1 D2 : DecType) := {|
                        (internal_sum_dec_bl _ _ (fun x y => proj1 (D1.(@eqb_eq) x y))
                                                 (fun x y => proj1 (D2.(@eqb_eq) x y)) a b)
                        (@internal_sum_dec_lb _ _ _ _ (fun x y => proj2 (D1.(@eqb_eq) x y))
-                                                     (fun x y => proj2 (D2.(@eqb_eq) x y)) a b)
-|}.
+                                                     (fun x y => proj2 (D2.(@eqb_eq) x y)) a b) |}.
 
 (** the [prod] construction *)
 Scheme Equality for prod.
@@ -193,8 +188,7 @@ Definition prod_dectype (D1 D2 : DecType) := {|
                        (internal_prod_dec_bl _ _ (fun x y => proj1 (D1.(@eqb_eq) x y))
                                                  (fun x y => proj1 (D2.(@eqb_eq) x y)) a b)
                        (@internal_prod_dec_lb _ _ _ _ (fun x y => proj2 (D1.(@eqb_eq) x y))
-                                                      (fun x y => proj2 (D2.(@eqb_eq) x y)) a b)
-|}.
+                                                      (fun x y => proj2 (D2.(@eqb_eq) x y)) a b) |}.
 
 (** the [list] construction *)
 Scheme Equality for list.
@@ -204,8 +198,7 @@ Definition list_dectype (D : DecType) := {|
   eqb := list_beq D.(@eqb);
   eqb_eq := fun a b => conj
                        (internal_list_dec_bl _ (fun x y => proj1 (D.(@eqb_eq) x y)) a b)
-                       (@internal_list_dec_lb _ _ (fun x y => proj2 (D.(@eqb_eq) x y)) a b)
-|}.
+                       (@internal_list_dec_lb _ _ (fun x y => proj2 (D.(@eqb_eq) x y)) a b) |}.
 
 (** the [minus] construction *)
 (**   remove an element from a DecType *)
@@ -226,12 +219,11 @@ Section Minus.
   Definition minus := {|
     car := { z | eqb d z = false };
     eqb := fun a b => eqb (proj1_sig a) (proj1_sig b);
-    eqb_eq := minus_eqb_eq
-  |}.
+    eqb_eq := minus_eqb_eq |}.
 
 End Minus.
 
-Arguments minus [_] _.
+Arguments minus {_} _.
 
 
 (** * Tactics *)
@@ -258,51 +250,42 @@ end; simpl.
 
 Record InhDecType := {
   inhcar :> DecType;
-  inh_dt : inhabited_inf inhcar
-}.
+  inh_dt : inhabited_inf inhcar }.
 Arguments inh_dt {_}.
 
 Definition unit_inhdectype := {|
   inhcar := unit_dectype;
-  inh_dt := inhabited_inf_unit
-|}.
+  inh_dt := inhabited_inf_unit |}.
 
 Definition bool_inhdectype := {|
   inhcar := bool_dectype;
-  inh_dt := inhabited_inf_bool
-|}.
+  inh_dt := inhabited_inf_bool |}.
 
 Definition nat_inhdectype := {|
   inhcar := nat_dectype;
-  inh_dt := inhabited_inf_nat
-|}.
+  inh_dt := inhabited_inf_nat |}.
 
 Definition option_inhdectype (D : DecType) := {|
   inhcar := option_dectype D;
-  inh_dt := inhabited_inf_option D
-|}.
+  inh_dt := inhabited_inf_option D |}.
 
 Definition suml_inhdectype (D1 : InhDecType) (D2 : DecType) := {|
   inhcar := sum_dectype D1 D2;
-  inh_dt := inhabited_inf_suml inh_dt
-|}.
+  inh_dt := inhabited_inf_suml inh_dt |}.
 
 Definition sumr_inhdectype (D1 : DecType) (D2 : InhDecType) := {|
   inhcar := sum_dectype D1 D2;
-  inh_dt := inhabited_inf_sumr inh_dt
-|}.
+  inh_dt := inhabited_inf_sumr inh_dt |}.
 
 Definition sum_inhdectype (D1 D2 : InhDecType) := suml_inhdectype D1 D2.
 
 Definition prod_inhdectype (D1 D2 : InhDecType) := {|
   inhcar := prod_dectype D1 D2;
-  inh_dt := inhabited_inf_prod inh_dt inh_dt
-|}.
+  inh_dt := inhabited_inf_prod inh_dt inh_dt |}.
 
 Definition list_inhdectype (D : DecType) := {|
   inhcar := list_dectype D;
-  inh_dt := inhabited_inf_list D
-|}.
+  inh_dt := inhabited_inf_list D |}.
 
 
 (** Equivalence between [DecType] and [UsualOrderedTypeFull]. *)
@@ -327,8 +310,7 @@ Module UsualBoolEq_as_DecType (T : UsualBoolEq).
   Definition to_DecType := {|
     car := T.t;
     eqb := T.eqb;
-    eqb_eq := T.eqb_eq
-  |}.
+    eqb_eq := T.eqb_eq |}.
 End UsualBoolEq_as_DecType.
 
 Module UsualBoolEq_as_ModDecType (T : UsualBoolEq).

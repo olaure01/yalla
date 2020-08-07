@@ -147,9 +147,9 @@ Section FMSet2List.
 
 End FMSet2List.
 
-Arguments list2fm {_} {_} {_} _.
-Arguments list2fm_retract {_} {_} {_} _.
-Arguments sum {_} {_} {_} _ _.
+Arguments list2fm {_ _ _} _.
+Arguments list2fm_retract {_ _ _} _.
+Arguments sum {_ _ _} _ _.
 
 
 Section Fmmap.
@@ -188,7 +188,7 @@ Section Fmmap.
 
 End Fmmap.
 
-Arguments fmmap {_} {_} {_} {_} {_} {_} _ _.
+Arguments fmmap {_ _ _ _ _ _} _ _.
 
 
 (** * Lists up to permutation as finite multisets *)

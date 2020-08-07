@@ -17,6 +17,11 @@ Lemma compose_retract A B C : forall (s1 : B -> A) (s2 : C -> B) i1 i2,
   retract s1 i1 -> retract s2 i2 -> retract (compose s1 s2) (compose i2 i1).
 Proof. intros s1 s2 i1 i2 Hr1 Hr2 x; unfold compose; rewrite Hr2, Hr1; reflexivity. Qed.
 
+Definition embedding A B := {'(s,i) : _ * (A -> B) | retract s i }.
+
+Lemma id_embedding A : embedding A A.
+Proof. now exists (id, id). Qed.
+
 
 Section Function.
 

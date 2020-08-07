@@ -502,6 +502,49 @@ induction l ; split ; intro H.
     now exists l0.
 Qed.
 
+(** ** [repeat] *)
+(* TODO submit PR in List.v *)
+
+Lemma repeat_app A (a : A) n m :
+  repeat a (n + m) = repeat a n ++ repeat a m.
+Proof.
+induction n; simpl; auto.
+now rewrite IHn.
+Qed.
+
+Lemma repeat_eq_app A (a : A) n l1 l2 :
+  repeat a n = l1 ++ l2 -> repeat a (length l1) = l1 /\ repeat a (length l2) = l2.
+Proof.
+revert n; induction l1; simpl; intros n Hr; subst.
+- repeat split; now rewrite repeat_length.
+- destruct n; inversion Hr; subst.
+  apply IHl1 in H1 as [Hr1 Hr2]; subst; repeat split; auto.
+  now rewrite Hr1.
+Qed.
+
+Lemma repeat_eq_cons A (a b : A) n l :
+  repeat a n = b :: l -> a = b /\ repeat a (pred n) = l.
+Proof.
+intros Hr.
+destruct n; inversion_clear Hr; auto.
+Qed.
+
+Lemma repeat_eq_elt A (a b : A) n l1 l2 :
+  repeat a n = l1 ++ b :: l2 -> a = b /\ repeat a (length l1) = l1 /\ repeat a (length l2) = l2.
+Proof.
+intros Hr; apply repeat_eq_app in Hr as [Hr1 Hr2]; subst.
+simpl in Hr2; destruct (length l2); inversion Hr2; subst; auto.
+Qed.
+
+Lemma Forall_eq_repeat A (a : A) l :
+  Forall (eq a) l -> l = repeat a (length l).
+Proof.
+induction l; simpl; intros HF; auto.
+inversion HF; subst.
+now rewrite (IHl H2) at 1.
+Qed.
+
+
 (** ** [Forall_inf] *)
 
 (** Translation from [Forall_inf] to a list of dependent pairs *)

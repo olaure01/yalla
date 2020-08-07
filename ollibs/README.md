@@ -1,10 +1,17 @@
 # OLlibs
-Add-ons for the Coq Standard Library
+**Add-ons for the Coq Standard Library**
 
 Working with `Coq 8.12.0`
 
+Manual installation procedure:
+
+    $ ./configure
+    $ make
+    $ make install
+
 ## Extensions of Standard Library
 
+* `List_Type`       : `List` with output in `Type`
 * `List_more`       : add-ons for standard library List
 * `funtheory`       : properties of functions
 * `dectype`         : types with decidable/Boolean equality (using records rather than modules)
