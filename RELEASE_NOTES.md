@@ -16,9 +16,9 @@ New results added, including:
 * additional counter-examples to conservativity of `ill` over `ll`;
 * simplified definition of `micro_ll` and new `nano_ll`;
 * decidability of equality on formulas;
-* Girard's translations into intuitionistic logic.
+* Girard's translations of intuitionistic logic.
 
-Tested with Coq v8.12.0.
+Tested with Coq v8.12.2.
 
 ## Version 2.0.1 (2020/08/07)
 

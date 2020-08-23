@@ -1,7 +1,7 @@
 From OLlibs Require Import funtheory.
 From OLlibs Require Export infinite.
 
-(** * Classes containing constraintes on atom sets *)
+(** * Classes containing constraints on atom sets *)
 
 Class AtomType_self (A : DecType) := Atom_self_inj : self_injective A.
 
