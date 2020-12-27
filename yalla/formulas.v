@@ -92,30 +92,18 @@ match A with
 | wn A      => oc (dual A)
 end.
 
-Lemma bidual : forall A, dual (dual A) = A.
-Proof.
-induction A ; simpl ;
-  try (rewrite IHA1 ; rewrite IHA2) ;
-  try rewrite IHA ;
-  try reflexivity.
-Qed.
+Lemma bidual A : dual (dual A) = A.
+Proof. now induction A; simpl; rewrite ? IHA1, ? IHA2, ? IHA. Qed.
 
-Lemma codual : forall A B, dual A = B <-> A = dual B.
+Lemma codual A B : dual A = B <-> A = dual B.
 Proof.
-intros A B ; split ; intro H.
-- rewrite <- bidual at 1.
-  rewrite H; reflexivity.
-- rewrite <- bidual.
-  rewrite H; reflexivity.
+split; intro H.
+- now rewrite <- (bidual A), H.
+- now rewrite <- (bidual B), H.
 Qed.
 
 Lemma dual_inj : injective dual.
-Proof.
-intros A B H.
-rewrite <- (bidual A).
-rewrite <- (bidual B).
-rewrite H; reflexivity.
-Qed.
+Proof. now intros A B H; rewrite <- (bidual A), <- (bidual B), H. Qed.
 
 Lemma dual_tens_n : forall n A, dual (tens_n n A) = parr_n n (dual A).
 Proof with try reflexivity.
@@ -162,31 +150,17 @@ match A with
 | wn A      => S (fsize A)
 end.
 
-Lemma fsize_pos : forall A, 0 < fsize A.
-Proof.
-induction A ; simpl ; lia.
-Qed.
+Lemma fsize_pos A : 0 < fsize A.
+Proof. induction A; simpl; lia. Qed.
 
-Lemma fsize_dual : forall A, fsize (dual A) = fsize A.
-Proof.
-induction A ; simpl ;
-  try (rewrite IHA1 ; rewrite IHA2) ;
-  try rewrite IHA ;
-  try reflexivity ;
-  try lia.
-Qed.
+Lemma fsize_dual A : fsize (dual A) = fsize A.
+Proof. now induction A; simpl; rewrite ? IHA1, ? IHA2; try lia. Qed.
 
-Lemma fsize_wn_n : forall n A, fsize (wn_n n A) = n + fsize A.
-Proof with try reflexivity.
-induction n; intros A; simpl...
-rewrite <- IHn...
-Qed.
+Lemma fsize_wn_n n A : fsize (wn_n n A) = n + fsize A.
+Proof. now induction n; simpl; rewrite ? IHn. Qed.
 
-Lemma fsize_oc_n : forall n A, fsize (oc_n n A) = n + fsize A.
-Proof with try reflexivity.
-induction n; intros A; simpl...
-rewrite <- IHn...
-Qed.
+Lemma fsize_oc_n n A : fsize (oc_n n A) = n + fsize A.
+Proof. now induction n; simpl; rewrite ? IHn. Qed.
 
 Ltac fsize_auto :=
   simpl ;
@@ -208,11 +182,11 @@ Inductive atomic : formula -> Type :=
 | atomic_var : forall x, atomic (var x)
 | atomic_covar : forall x, atomic (covar x).
 
-Lemma atomic_Prop_atomic : forall A, atomic_Prop A -> atomic A.
+Lemma atomic_Prop_atomic A : atomic_Prop A -> atomic A.
 Proof.
 induction A; intros Hat;
-  try (exfalso; inversion Hat; fail);
-  constructor.
+  try (now exfalso; inversion Hat);
+  now constructor.
 Qed.
 
 
@@ -241,10 +215,8 @@ Qed.
 Global Instance sub_po : PreOrder subform | 50.
 Proof.
 split.
-- intros l.
-  apply sub_id.
-- intros l1 l2 l3.
-  apply sub_trans.
+- intros l; apply sub_id.
+- intros l1 l2 l3; apply sub_trans.
 Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)

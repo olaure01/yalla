@@ -421,9 +421,7 @@ match pi with
 end.
 
 Lemma psize_pos P : forall l (pi : @ll P l), 0 < psize pi.
-Proof.
-  intros l pi ; destruct pi; simpl; myeasy.
-Qed.
+Proof. intros l pi; destruct pi; simpl; lia. Qed.
 
 Lemma psize_mix P : forall L eq FL,
     psize (mix_r P L eq FL) = S (Forall_inf_sum (fun _ pi => psize pi) FL).
