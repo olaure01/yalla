@@ -25,12 +25,12 @@ Section Product.
   Lemma wf_prod : well_founded lt_prod.
   Proof.
   intros [a b]; revert b.
-  induction a using (well_founded_induction WA);
-    induction b using (well_founded_induction WB).
+  induction a as [a IHa] using (well_founded_induction WA);
+    intros b; induction b as [b IHb] using (well_founded_induction WB).
   constructor.
   intros [a' b'] [Ho | [L R]].
-  - now apply H.
-  - now simpl in L; subst; apply H0.
+  - now apply IHa.
+  - now simpl in L; subst; apply IHb.
   Qed.
 
 End Product.

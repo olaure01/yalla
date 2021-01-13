@@ -9,10 +9,8 @@ Set Implicit Arguments.
 Ltac destr_comparison :=
   intros; destruct_all comparison; simpl in *; trivial; try discriminate.
 
-Lemma comparison_dec : forall c1 c2 : comparison, {c1 = c2} + {c1 <> c2}.
-Proof.
-  decide equality.
-Defined.
+Lemma comparison_dec (c1 c2 : comparison) : {c1 = c2} + {c1 <> c2}.
+Proof. decide equality. Defined.
 
 
 (** * [eqb] *)
@@ -25,8 +23,8 @@ Definition eqb (c1 c2 : comparison) :=
   | _, _ => false
   end.
 
-Lemma eqb_eq : forall c1 c2, eqb c1 c2 = true <-> c1 = c2.
-Proof. destr_comparison; intuition; try now inversion H. Qed.
+Lemma eqb_eq c1 c2 : eqb c1 c2 = true <-> c1 = c2.
+Proof. destr_comparison; now intuition. Qed.
 
 (** * [le] *)
 
@@ -72,7 +70,7 @@ Definition lt (c1 c2 : comparison) :=
           end
   end.
 
-Lemma lt_irrefl : forall c, ~ lt c c.
+Lemma lt_irrefl c : ~ lt c c.
 Proof. destr_comparison; auto. Qed.
 
 Lemma lt_trans c1 c2 c3 :
@@ -82,11 +80,11 @@ Proof. destr_comparison. Qed.
 Instance lt_compat : Proper (eq ==> eq ==> iff) lt.
 Proof. intuition. Qed.
 
-Lemma lt_total : forall c1 c2, lt c1 c2 \/ c1 = c2 \/ lt c2 c1.
+Lemma lt_total c1 c2 : lt c1 c2 \/ c1 = c2 \/ lt c2 c1.
 Proof. destr_comparison; auto. Qed.
 
-Lemma le_lteq : forall c1 c2, le c1 c2 <-> lt c1 c2 \/ c1 = c2.
-Proof. destr_comparison; intuition. inversion H0. Qed.
+Lemma le_lteq c1 c2 : le c1 c2 <-> lt c1 c2 \/ c1 = c2.
+Proof. destr_comparison; now intuition. Qed.
 
 
 (** * [compare] *)
@@ -108,7 +106,7 @@ Definition compare (c1 c2 : comparison) :=
           end
   end.
 
-Lemma compare_spec : forall c1 c2,
+Lemma compare_spec c1 c2 :
   CompareSpec (c1 = c2) (lt c1 c2) (lt c2 c1) (compare c1 c2).
 Proof. destr_comparison; intuition. Qed.
 

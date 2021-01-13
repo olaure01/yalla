@@ -36,7 +36,7 @@ Ltac list_simpl_all := list_simpl_hyps; list_simpl.
 
 (** ** Removal of [cons] constructions *)
 
-Lemma cons_is_app A : forall (x:A) l, x :: l = (x :: nil) ++ l.
+Lemma cons_is_app A (x:A) l : x :: l = (x :: nil) ++ l.
 Proof. reflexivity. Qed.
 
 Ltac cons2app :=
@@ -76,14 +76,14 @@ Ltac cons2app_all := cons2app_hyps ; cons2app.
 
 (** ** Decomposition of lists and [list] equalities *)
 
-Lemma decomp_length_plus A : forall (l : list A) n m,
+Lemma decomp_length_plus A (l : list A) n m :
     length l = n + m ->
     {'(l1, l2) | length l1 = n /\ length l2 = m /\ l = l1 ++ l2 }.
 Proof.
-intros l n; revert l; induction n; intros l m Heq.
+revert l m; induction n as [| n IHn]; intros l m Heq.
 - split with (nil, l); auto.
-- destruct l; try inversion Heq.
-  specialize (IHn l m H0) as ((l1, l2) & Heql1 & Heql2 & HeqL).
+- destruct l as [|a l]; inversion Heq as [Heq2].
+  specialize (IHn l m Heq2) as ((l1, l2) & Heql1 & Heql2 & HeqL).
   split with (a :: l1, l2).
   now repeat split; simpl; subst.
 Qed.
@@ -91,23 +91,24 @@ Qed.
 Ltac unit_vs_elt_inv H := 
   match type of H with
   | ?a :: nil = ?l1 ++ ?x :: ?l2 =>
-      let H1 := fresh H in
-      let H2 := fresh H in 
-        destruct l1 ; inversion H as [[H1 H2]] ;
-        [ (try subst x) ; (try subst l2)
-        | destruct l1 ; inversion H2 ]
+      let Hnil1 := fresh in
+      let Hnil2 := fresh in
+      symmetry in H; apply elt_eq_unit in H as [H [Hnil1 Hnil2]];
+      (try subst x); (try subst a); rewrite_all Hnil1; rewrite_all Hnil2;
+      clear Hnil1 Hnil2; (try clear l1); (try clear l2)
   end.
 
-Lemma dichot_app A : forall (l1 : list A) l2 l3 l4,
+Lemma dichot_app A (l1 l2 l3 l4 : list A) :
   l1 ++ l2 = l3 ++ l4 ->
      (exists l2', l1 ++ l2' = l3 /\ l2 = l2' ++ l4)
   \/ (exists l4', l1 = l3 ++ l4' /\ l4' ++ l2 = l4).
 Proof.
-induction l1, l3; intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
+revert l2 l3 l4;induction l1 as [|a l1 IHl1]; intros l2 l3; induction l3 as [|b l3 IHl3];
+  intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
 - now right; exists (@nil A).
-- now left; exists (a :: l3).
+- now left; exists (b :: l3).
 - now right; exists (a :: l1).
-- destruct (IHl1 _ _ _ Heq') as [(l2' & <- & H2'2) | (l4' & -> & H4'2)].
+- destruct (IHl1 _ _ _ Heq') as [[l2' [<- H2'2]] | [l4' [-> H4'2]]].
   + now left; exists l2'.
   + now right; exists l4'.
 Qed.
@@ -119,19 +120,20 @@ Ltac dichot_app_exec H :=
                          let l4 := fresh "l" in
                          let H1 := fresh H in
                          let H2 := fresh H in
-                         destruct H as [(l2 & H1 & H2) | (l4 & H1 & H2)]
+                         destruct H as [[l2 [H1 H2]] | [l4 [H1 H2]]]
   end.
 
-Lemma dichot_elt_app A : forall l1 (a : A) l2 l3 l4,
+Lemma dichot_elt_app A l1 (a : A) l2 l3 l4 :
   l1 ++ a :: l2 = l3 ++ l4 ->
      (exists l2', l1 ++ a :: l2' = l3 /\ l2 = l2' ++ l4)
   \/ (exists l4', l1 = l3 ++ l4' /\ l4' ++ a :: l2 = l4).
 Proof.
-induction l1, l3; intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
+revert l2 l3 l4; induction l1 as [|b l1 IHl1]; intros l2 l3; induction l3 as [|c l3 IHl3];
+  intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
 - now right; exists (@nil A).
 - now left; exists l3.
-- now right; exists (a :: l1).
-- destruct (IHl1 _ _ _ _ Heq') as [(l2' & <- & H2'2) | (l4' & -> & H4'2)].
+- now right; exists (b :: l1).
+- destruct (IHl1 _ _ _ Heq') as [[l2' [<- H2'2]] | [l4' [-> H4'2]]].
   + now left; exists l2'.
   + now right; exists l4'.
 Qed.
@@ -143,33 +145,34 @@ Ltac dichot_elt_app_exec H :=
                               let l4 := fresh "l" in
                               let H1 := fresh H in
                               let H2 := fresh H in
-                              destruct H as [(l2 & H1 & H2) | (l4 & H1 & H2)]
+                              destruct H as [[l2 [H1 H2]] | [l4 [H1 H2]]]
   | _ ++ _ = _ ++ _ :: _ => simple apply eq_sym in H ;
                             apply dichot_elt_app in H ;
                               let l2 := fresh "l" in
                               let l4 := fresh "l" in
                               let H1 := fresh H in
                               let H2 := fresh H in
-                              destruct H as [(l2 & H1 & H2) | (l4 & H1 & H2)]
+                              destruct H as [[l2 [H1 H2]] | [l4 [H1 H2]]]
   end.
 
-Lemma trichot_elt_app A : forall l1 (a : A) l2 l3 l4 l5,
+Lemma trichot_elt_app A l1 (a : A) l2 l3 l4 l5 :
   l1 ++ a :: l2 = l3 ++ l4 ++ l5 ->
       (exists l2', l1 ++ a :: l2' = l3 /\ l2 = l2' ++ l4 ++ l5)
    \/ (exists l2' l2'', l1 = l3 ++ l2' /\ l2' ++ a :: l2'' = l4 /\ l2 = l2'' ++ l5)
    \/ (exists l5', l1 = l3 ++ l4 ++ l5' /\ l5' ++ a :: l2 = l5).
 Proof.
-induction l1, l3; intros ? ? Heq; simpl in Heq; inversion Heq as [[Heq' Heq'']]; subst.
-- destruct l4; inversion Heq'.
+revert l2 l3 l4 l5; induction l1 as [|b l1 IHl1]; intros l2 l3; induction l3 as [|c l3 IHl3];
+  intros l4 l5 Heq; simpl in Heq; inversion Heq as [[Heq' Heq'']]; subst.
+- destruct l4 as [| a' l4]; inversion Heq'.
   + now right; right; exists nil.
   + now right; left; exists nil, l4.
 - now left; exists l3.
-- destruct l4; inversion Heq'.
-  + now right; right; exists (a :: l1).
-  + dichot_elt_app_exec H1; subst.
-    * now right; left; exists (a1 :: l1), l.
+- destruct l4 as [| a' l4]; inversion Heq' as [[Heq1 Heq2]].
+  + now right; right; exists (b :: l1).
+  + dichot_elt_app_exec Heq2; subst.
+    * now right; left; exists (a' :: l1), l.
     * now right; right; exists l0.
-- destruct (IHl1 _ _ _ _ _ Heq'')
+- destruct (IHl1 _ _ _ _ Heq'')
     as [(l' & <- & ->) | [ (l2' & l2'' & -> & <- & ->) | (l' & -> & <-) ]].
   + now left; exists l'.
   + now right; left; exists l2', l2''.
@@ -195,18 +198,17 @@ Ltac trichot_elt_app_exec H :=
                                                  | [ (l2 & l4 & H1 & H2) | (l4 & H1 & H2) ]]
   end.
 
-Lemma trichot_elt_elt A : forall l1 (a : A) l2 l3 b l4,
+Lemma trichot_elt_elt A l1 (a : A) l2 l3 b l4 :
   l1 ++ a :: l2 = l3 ++ b :: l4 ->
       (exists l2', l1 ++ a :: l2' = l3 /\ l2 = l2' ++ b :: l4)
    \/ (l1 = l3 /\ a = b /\ l2 = l4)
    \/ (exists l4', l1 = l3 ++ b :: l4' /\ l4' ++ a :: l2 = l4).
 Proof.
-intros l1 a l2 l3 b l4 Heq.
-change (b :: l4) with ((b :: nil) ++ l4) in Heq.
+intros Heq; change (b :: l4) with ((b :: nil) ++ l4) in Heq.
 apply trichot_elt_app in Heq;
   destruct Heq as [ | [ (l2' & l2'' & H'1 & H'2 & H'3) | ]] ; subst ;
   [ left | right ; left | right ; right ]; auto.
-now destruct l2'; inversion H'2 as [[H1 H2]];
+now destruct l2' as [|a' l2']; inversion H'2 as [[H1 H2]];
   subst; [ | destruct l2'; inversion H2 ]; list_simpl.
 Qed.
 
@@ -224,15 +226,16 @@ Ltac trichot_elt_elt_exec H :=
         | (try subst l2) ; (try subst lh) ]
   end.
 
-Lemma dichot_app_inf A : forall (l1 : list A) l2 l3 l4,
+Lemma dichot_app_inf A (l1 l2 l3 l4 : list A) :
   l1 ++ l2 = l3 ++ l4 ->
      { l2' | l1 ++ l2' = l3 /\ l2 = l2' ++ l4 }
    + { l4' | l1 = l3 ++ l4' /\ l4' ++ l2 = l4 }.
 Proof.
-induction l1, l3; intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
+revert l2 l3 l4; induction l1 as [|b l1 IHl1]; intros l2 l3; induction l3 as [|c l3 IHl3];
+  intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
 - now right; exists (@nil A).
-- now left; exists (a :: l3).
-- now right; exists (a :: l1).
+- now left; exists (c :: l3).
+- now right; exists (b :: l1).
 - destruct (IHl1 _ _ _ Heq') as [(l2' & <- & H2'2) | (l4' & -> & H4'2)].
   + now left; exists l2'.
   + now right; exists l4'.
@@ -248,16 +251,17 @@ Ltac dichot_app_inf_exec H :=
                          destruct H as [(l2 & H1 & H2) | (l4 & H1 & H2)]
   end.
 
-Lemma dichot_elt_app_inf A : forall l1 (a : A) l2 l3 l4,
+Lemma dichot_elt_app_inf A l1 (a : A) l2 l3 l4 :
   l1 ++ a :: l2 = l3 ++ l4 ->
      { l2' | l1 ++ a :: l2' = l3 /\ l2 = l2' ++ l4 }
    + { l4' | l1 = l3 ++ l4' /\ l4' ++ a :: l2 = l4 }.
 Proof.
-induction l1, l3; intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
+revert l2 l3 l4; induction l1 as [|b l1 IHl1]; intros l2 l3; induction l3 as [|c l3 IHl3];
+  intros ? Heq; simpl in Heq; inversion Heq as [[Heq'' Heq']]; subst.
 - now right; exists (@nil A).
 - now left; exists l3.
-- now right; exists (a :: l1).
-- destruct (IHl1 _ _ _ _ Heq') as [(l2' & <- & H2'2) | (l4' & -> & H4'2)].
+- now right; exists (b :: l1).
+- destruct (IHl1 _ _ _ Heq') as [(l2' & <- & H2'2) | (l4' & -> & H4'2)].
   + now left; exists l2'.
   + now right; exists l4'.
 Qed.
@@ -279,23 +283,24 @@ Ltac dichot_elt_app_inf_exec H :=
                               destruct H as [(l2 & H1 & H2) | (l4 & H1 & H2)]
   end.
 
-Lemma trichot_elt_app_inf A : forall l1 (a : A) l2 l3 l4 l5,
+Lemma trichot_elt_app_inf A l1 (a : A) l2 l3 l4 l5 :
   l1 ++ a :: l2 = l3 ++ l4 ++ l5 ->
      { l2' | l1 ++ a :: l2' = l3 /\ l2 = l2' ++ l4 ++ l5 }
    + {'(l3', l4') | l1 = l3 ++ l3' /\ l3' ++ a :: l4' = l4 /\ l2 = l4' ++ l5 }
    + { l5' | l1 = l3 ++ l4 ++ l5' /\ l5' ++ a :: l2 = l5 }.
 Proof.
-induction l1, l3; intros ? ? Heq; simpl in Heq; inversion Heq as [[Heq' Heq'']]; subst.
-- destruct l4; inversion Heq'.
+revert l2 l3 l4 l5; induction l1 as [|b l1 IHl1]; intros l2 l3; induction l3 as [|c l3 IHl3];
+  intros l4 l5 Heq; simpl in Heq; inversion Heq as [[Heq' Heq'']]; subst.
+- destruct l4 as [| a' l4]; inversion Heq'.
   + now right; exists nil.
   + now left; right; exists (nil, l4).
 - now left; left; exists l3.
-- destruct l4; inversion Heq'.
-  + now right; exists (a :: l1).
-  + dichot_elt_app_inf_exec H1; subst.
-    * now left; right; exists (a1 :: l1, l).
+- destruct l4 as [| a' l4]; inversion Heq' as [[Heq1 Heq2]].
+  + now right; exists (b :: l1).
+  + dichot_elt_app_inf_exec Heq2; subst.
+    * now left; right; exists (a' :: l1, l).
     * now right; exists l0.
-- destruct (IHl1 _ _ _ _ _ Heq'')
+- destruct (IHl1 _ _ _ _ Heq'')
     as [ [(l' & <- & ->) | ((l2', l2'') & -> & <- & ->)] | (l' & -> & <-) ].
   + now left; left; exists l'.
   + now left; right; exists (l2', l2'').
@@ -323,18 +328,18 @@ Ltac trichot_elt_app_inf_exec H :=
                                    simpl in H1 ; simpl in H2
   end.
 
-Lemma trichot_elt_elt_inf A : forall l1 (a : A) l2 l3 b l4,
+Lemma trichot_elt_elt_inf A l1 (a : A) l2 l3 b l4 :
   l1 ++ a :: l2 = l3 ++ b :: l4 ->
      { l2' | l1 ++ a :: l2' = l3 /\ l2 = l2' ++ b :: l4 }
    + { l1 = l3 /\ a = b /\ l2 = l4 }
    + { l4' | l1 = l3 ++ b :: l4' /\ l4' ++ a :: l2 = l4 }.
 Proof.
-intros l1 a l2 l3 b l4 Heq.
+intros Heq.
 change (b :: l4) with ((b :: nil) ++ l4) in Heq.
 apply trichot_elt_app_inf in Heq;
   destruct Heq as [[ | ((l2', l2'') & H'1 & H'2 & H'3)] | ]; subst;
   [ left; left | left; right | right ]; auto.
-now destruct l2'; inversion H'2 as [[H1 H2]];
+now destruct l2' as [|a' l2']; inversion H'2 as [[H1 H2]];
   subst; [ | destruct l2'; inversion H2 ]; list_simpl.
 Qed.
 
@@ -434,37 +439,30 @@ end.
 
 (** ** [concat] *)
 
-Lemma concat_vs_elt A : forall (a : A) L l1 l2,
+Lemma concat_vs_elt A (a : A) L l1 l2 :
     concat L = l1 ++ a :: l2 ->
     {'(L1, L2, l1', l2') | l1 = concat L1 ++ l1' /\ l2 = l2' ++ concat L2
                       /\ L = L1 ++ (l1' ++ a :: l2') :: L2 }.
 Proof.
-intros a L.
-induction L; intros l1 l2 eq.
+revert l1 l2; induction L as [|l' L IHL]; simpl; intros l1 l2 eq.
 - destruct l1; inversion eq.
-- simpl in eq.
-  dichot_elt_app_inf_exec eq.
-  + split with (nil,L,l1,l).
-    subst.
-    split; [ | split]; reflexivity.
-  + destruct IHL with l0 l2 as ((((L1,L2),l1'),l2') & (eqb & eqt & eq)) ; [symmetry ; apply eq1 |].
-    split with ((a0 :: L1),L2,l1',l2').
-    subst.
-    split ; [ | split]; try reflexivity.
+- dichot_elt_app_inf_exec eq.
+  + now split with (nil, L, l1, l); subst.
+  + destruct IHL with l0 l2 as ((((L1, L2), l1'), l2') & (eqb & eqt & eq)); [symmetry ; apply eq1 |].
+    split with ((l' :: L1), L2, l1', l2'); subst; intuition.
     apply app_assoc.
 Qed.
 
-Lemma concat_Forall2_inf A B : forall (L : list (list A)) (l : list B) R,
+Lemma concat_Forall2_inf A B (L : list (list A)) (l : list B) R :
     Forall2_inf R (concat L) l ->
     { L' & concat L' = l & Forall2_inf (Forall2_inf R) L L' }.
 Proof.
-induction L; intros l R F2R.
+revert l R; induction L as [|l' L IHL]; simpl; intros l R F2R.
 - inversion F2R; subst.
   split with nil.
   + reflexivity.
   + apply Forall2_inf_nil.
-- simpl in F2R.
-  destruct Forall2_inf_app_inv_l with A B R a (concat L) l; auto.
+- destruct Forall2_inf_app_inv_l with A B R l' (concat L) l; auto.
   destruct x, y; simpl in *.
   destruct IHL with l1 R as [L' p1 p2]; auto.
   split with (l0 :: L').
@@ -474,74 +472,27 @@ Qed.
 
 (** ** [flat_map] *)
 
-Lemma flat_map_map : forall (A B C : Type) (f : A -> B) (g : B -> list C) l,
+Lemma flat_map_map A B C (f : A -> B) (g : B -> list C) l :
   flat_map g (map f l) = flat_map (fun x => g (f x)) l.
-Proof.
-intros.
-rewrite flat_map_concat_map, map_map, <- flat_map_concat_map; reflexivity.
-Qed.
+Proof. now intros; rewrite flat_map_concat_map, map_map, <- flat_map_concat_map. Qed.
 
 (** ** [Forall] and [Exists] *)
 
-Lemma Forall_map A B : forall (f : A -> B) l,
+Lemma Forall_map A B (f : A -> B) l :
   Forall (fun x => exists y, x = f y) l <-> exists l0, l = map f l0.
 Proof.
-induction l ; split ; intro H.
+induction l as [|b l IHl]; split; intro H.
 - now exists (@nil A).
 - constructor.
-- inversion H ; subst.
-  destruct H2 as [y Hy] ; subst.
-  apply IHl in H3.
-  destruct H3 as [l0 Hl0] ; subst.
+- inversion H as [|b' l' [y ->] HF]; subst.
+  apply IHl in HF as [l0 ->].
   now exists (y :: l0).
 - destruct H as [l0 Heq].
-  destruct l0 ; inversion Heq ; subst.
+  destruct l0 as [|a' l0]; inversion Heq; subst.
   constructor.
-  + now exists a0.
+  + now exists a'.
   + apply IHl.
     now exists l0.
-Qed.
-
-(** ** [repeat] *)
-(* TODO submit PR in List.v *)
-
-Lemma repeat_app A (a : A) n m :
-  repeat a (n + m) = repeat a n ++ repeat a m.
-Proof.
-induction n; simpl; auto.
-now rewrite IHn.
-Qed.
-
-Lemma repeat_eq_app A (a : A) n l1 l2 :
-  repeat a n = l1 ++ l2 -> repeat a (length l1) = l1 /\ repeat a (length l2) = l2.
-Proof.
-revert n; induction l1; simpl; intros n Hr; subst.
-- repeat split; now rewrite repeat_length.
-- destruct n; inversion Hr; subst.
-  apply IHl1 in H1 as [Hr1 Hr2]; subst; repeat split; auto.
-  now rewrite Hr1.
-Qed.
-
-Lemma repeat_eq_cons A (a b : A) n l :
-  repeat a n = b :: l -> a = b /\ repeat a (pred n) = l.
-Proof.
-intros Hr.
-destruct n; inversion_clear Hr; auto.
-Qed.
-
-Lemma repeat_eq_elt A (a b : A) n l1 l2 :
-  repeat a n = l1 ++ b :: l2 -> a = b /\ repeat a (length l1) = l1 /\ repeat a (length l2) = l2.
-Proof.
-intros Hr; apply repeat_eq_app in Hr as [Hr1 Hr2]; subst.
-simpl in Hr2; destruct (length l2); inversion Hr2; subst; auto.
-Qed.
-
-Lemma Forall_eq_repeat A (a : A) l :
-  Forall (eq a) l -> l = repeat a (length l).
-Proof.
-induction l; simpl; intros HF; auto.
-inversion HF; subst.
-now rewrite (IHl H2) at 1.
 Qed.
 
 
@@ -590,34 +541,22 @@ Qed.
 
 (** ** [Forall2_inf] *)
 
-Lemma Forall2_inf_in_l A B : forall l1 l2 a (R : A -> B -> Type),
+Lemma Forall2_inf_in_l A B l1 l2 a (R : A -> B -> Type) :
   Forall2_inf R l1 l2 -> In_inf a l1 -> { b & prod (In_inf b l2) (R a b) }.
 Proof.
-intros l1 l2 a R HF.
-induction HF ; intro Hin; inversion Hin.
-- subst.
-  split with y.
-  split; auto.
-  now left.
-- destruct IHHF as (b & Hinb & HRab); auto.
-  split with b.
-  split; auto.
-  now right.
+intros HF; induction HF as [| x y ? ? ? ? IHF]; intro Hin; inversion Hin.
+- subst; split with y; intuition.
+- destruct IHF as (b & Hinb & HRab); auto.
+  split with b; intuition.
 Qed.
 
-Lemma Forall2_inf_in_r A B : forall l1 l2 b (R : A -> B -> Type),
+Lemma Forall2_inf_in_r A B l1 l2 b (R : A -> B -> Type) :
   Forall2_inf R l1 l2 -> In_inf b l2 -> { a & prod (In_inf a l1) (R a b) }.
 Proof.
-intros l1 l2 b R HF.
-induction HF ; intro Hin; inversion Hin.
-- subst.
-  split with x.
-  split; auto.
-  now left.
-- destruct IHHF as (a & Hina & HRab); auto.
-  split with a.
-  split; auto.
-  now right.
+intros HF; induction HF as [| x y ? ? ? ? IHF]; intro Hin; inversion Hin.
+- subst; split with x; intuition.
+- destruct IHF as (a & Hina & HRab); auto.
+  split with a; intuition.
 Qed.
 
 
@@ -630,39 +569,37 @@ Fixpoint map2 A B C (f : A -> B -> C) l1 l2 :=
   | a1::r1 , a2::r2 => (f a1 a2)::(map2 f r1 r2)
   end.
 
-Lemma map2_length A B C : forall (f : A -> B -> C) l1 l2,
+Lemma map2_length A B C (f : A -> B -> C) l1 l2 :
   length l1 = length l2 -> length (map2 f l1 l2) = length l2.
 Proof.
-induction l1; intros; auto.
-destruct l2.
-- inversion H.
-- simpl in H; injection H; intro H'.
-  apply IHl1 in H'; simpl; auto.
+revert l2; induction l1 as [|a l1 IHl1]; intros l2 Heq; auto.
+destruct l2 as [| b l2].
+- inversion Heq.
+- simpl in Heq; injection Heq; intro Heq'.
+  apply IHl1 in Heq'; simpl; auto.
 Qed.
 
-Lemma length_map2 A B C : forall (f : A -> B -> C) l1 l2,
+Lemma length_map2 A B C (f : A -> B -> C) l1 l2 :
   length (map2 f l1 l2) <= length l1 /\ length (map2 f l1 l2) <= length l2.
 Proof.
-induction l1; intros.
+revert l2; induction l1 as [|a l1 IHl1]; intros l2.
 - split; apply le_0_n.
-- destruct l2.
+- destruct l2 as [| b l2].
   + split; apply le_0_n.
-  + destruct (IHl1 l2) as [H1 H2].
+  + destruct (IHl1 l2).
     now split; simpl; apply le_n_S.
 Qed.
 
-Lemma nth_map2 A B C : forall (f : A -> B -> C) l1 l2 i a b c,
+Lemma nth_map2 A B C (f : A -> B -> C) l1 l2 i a b c :
   i < length (map2 f l1 l2) ->
     nth i (map2 f l1 l2) c = f (nth i l1 a) (nth i l2 b).
 Proof.
-induction l1; intros.
-- inversion H.
-- destruct l2.
-  + inversion H.
-  + destruct i; simpl; auto.
-    apply IHl1.
-    simpl in H.
-    now apply Nat.succ_lt_mono.
+revert i l2; induction l1 as [|a' l1 IHl1]; intros i l2 Hlt.
+- inversion Hlt.
+- destruct l2 as [| b' l2].
+  + inversion Hlt.
+  + destruct i; simpl in *; auto.
+    now apply IHl1, Nat.succ_lt_mono.
 Qed.
 
 (** ** [fold_right] *)
@@ -690,7 +627,7 @@ Proof. intros Hassoc Hunit; apply fold_right_app_assoc2; [ assumption | apply Hu
 
 (** misc *)
 
-(* TODO included in PR #11966 submitted, remove once merged *)
+(* TODO included in PR #11966 submitted, remove once merged and released *)
 
     Lemma rev_case A (l : list A) : l = nil \/ exists a tl, l = tl ++ a :: nil.
     Proof.
@@ -698,9 +635,9 @@ Proof. intros Hassoc Hunit; apply fold_right_app_assoc2; [ assumption | apply Hu
       now exists x, l.
     Qed.
 
-  Lemma Forall2_length A B (R : A -> B -> Prop): forall l1 l2,
+  Lemma Forall2_length A B (R : A -> B -> Prop) l1 l2 :
     Forall2 R l1 l2 -> length l1 = length l2.
   Proof.
-    intros l1 l2 HF; induction HF; auto.
-    now simpl; rewrite IHHF.
+    intros HF; induction HF as [|? ? ? ? ? ? IHF]; auto.
+    now simpl; rewrite IHF.
   Qed.

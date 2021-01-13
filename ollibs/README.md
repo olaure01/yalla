@@ -1,7 +1,18 @@
 # OLlibs
 **Add-ons for the Coq Standard Library**
 
-Working with `Coq 8.12.0`
+Working with `Coq 8.13.0`
+
+[Opam](https://coq.inria.fr/opam-using.html)-based installation procedure:
+
+    $ opam repo add coq-released https://coq.inria.fr/opam/released
+    $ opam install coq-ollibs
+
+Manual installation procedure:
+
+    $ ./configure
+    $ make
+    $ make install
 
 Manual installation procedure:
 
@@ -51,5 +62,11 @@ Manual installation procedure:
 ## Misc
 
 * `flat_map_more`           : decomposition properties for `flat_map`
-* `Dependent_Forall_Type`   : generalization of `Forall_Type` to dependent product
+* `Dependent_Forall_Type`   : generalization of `Forall_inf` to dependent product
 
+----
+
+## Main contributors
+
+* Olivier Laurent
+* Christophe Lucas

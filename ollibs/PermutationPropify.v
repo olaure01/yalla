@@ -27,10 +27,10 @@ Section Permutation.
   Lemma notF_Permutation_Type_notF_Permutation (l1 l2 : list A) (F : Prop):
     (Permutation_Type l1 l2 -> F) -> Permutation l1 l2 -> F.
   Proof.
-  intros HnP HP; revert HnP; induction HP; intros HnP; intuition.
+  intros HnP HP; revert HnP; induction HP as [ | | | ? ? ? ? IHP1 ? IHP2]; intros HnP; intuition.
   - apply HnP; constructor.
-  - apply IHHP1; intros IHHP1'.
-    apply IHHP2; intros IHHP2'.
+  - apply IHP1; intros IHP1'.
+    apply IHP2; intros IHP2'.
     apply HnP; etransitivity; eassumption.
   Qed.
 
@@ -45,7 +45,7 @@ Section Permutation.
     Lemma Permutation_Type_dec (l1 l2 : list A):
       Permutation_Type l1 l2 + (Permutation_Type l1 l2 -> False).
     Proof.
-    revert l2; induction l1; intros l2.
+    revert l2; induction l1 as [|a l1 IHl1]; intros l2.
     - destruct l2.
       + left; constructor.
       + right; apply Permutation_Type_nil_cons.
@@ -95,7 +95,7 @@ Section CPermutation.
     Proof.
     assert (forall k, { n | l2 = skipn n l1 ++ firstn n l1 }
                     + (forall n, n < k -> l2 <> skipn n l1 ++ firstn n l1)) as Hk.
-    { induction k.
+    { intros k; induction k as [|k IHk].
       - right; intros n Hn; inversion Hn.
       - destruct IHk as [[n Hn]|Hnn].
         + left; now exists n.

@@ -5,7 +5,7 @@ Require Import List_more funtheory.
 
 Set Implicit Arguments.
 
-Lemma CPermutation_app_app_inv A : forall (l1 : list A) l2 l3 l4,
+Lemma CPermutation_app_app_inv A (l1 l2 l3 l4 : list A) :
   CPermutation (l1 ++ l2) (l3 ++ l4) ->
      (exists l3' l3'' l4' l4'',
         CPermutation l1 (l3' ++ l4')  /\ CPermutation l2 (l3'' ++ l4'')
@@ -24,7 +24,7 @@ Lemma CPermutation_app_app_inv A : forall (l1 : list A) l2 l3 l4,
         CPermutation l2 (l3 ++ l) /\ CPermutation l4 (l1 ++ l')
           /\ CPermutation l l').
 Proof.
-intros l1 l2 l3 l4 HC; inversion HC as [lx ly Hx Hy].
+intros HC; inversion HC as [lx ly Hx Hy].
 dichot_app_exec Hx; dichot_app_exec Hy; subst.
 - right; left.
   exists (l ++ l0), (l0 ++ l).

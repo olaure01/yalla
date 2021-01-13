@@ -38,13 +38,13 @@ Section Function.
 
   Lemma injective_NoDup : injective -> forall l, NoDup l -> NoDup (map f l).
   Proof.
-  induction l; simpl; intros Hnd.
+  intros Hinj l; induction l as [|a l IHl]; simpl; intros Hnd.
   - constructor.
-  - inversion Hnd; constructor; subst.
-    + intros Hin; apply H2.
+  - inversion Hnd as [|a' l' Hnin Hnd']; constructor; subst.
+    + intros Hin; apply Hnin.
       apply in_map_iff in Hin.
       destruct Hin as [x [Heq Hin]].
-      now apply H in Heq; subst.
+      now apply Hinj in Heq; subst.
     + now apply IHl.
   Qed.
 
@@ -109,42 +109,28 @@ End Function.
 Lemma id_injective A : injective (@id A).
 Proof. intros x y Heq; unfold id in Heq; assumption. Qed.
 
-Lemma compose_injective A B C : forall (f : A -> B) (g : B -> C),
+Lemma compose_injective A B C (f : A -> B) (g : B -> C) :
   injective f -> injective g -> injective (compose g f) .
 Proof. unfold injective; intuition. Qed.
 
-Lemma map_injective A B : forall f : A -> B, injective f -> injective (map f).
+Lemma map_injective A B (f : A -> B) : injective f -> injective (map f).
 Proof.
-intros f Hf l1.
-induction l1 ; intros l2 Hmap.
-- destruct l2.
-  + reflexivity.
-  + inversion Hmap.
-- destruct l2.
-  + inversion Hmap.
-  + simpl in Hmap.
-    injection Hmap ; intros Htl Hhd.
-    apply Hf in Hhd.
-    apply IHl1 in Htl.
-    subst.
-    reflexivity.
+intros Hf l1; induction l1 as [|a l1 IHl1]; intros l2 Hmap; destruct l2; auto;
+  inversion Hmap as [ [Hhd Htl] ].
+apply Hf in Hhd.
+apply IHl1 in Htl.
+subst; reflexivity.
 Qed.
 
-Lemma map_injective_in A B : forall f : A -> B, forall l1 l2,
+Lemma map_injective_in A B (f : A -> B) l1 l2 :
   (forall x y, In x l1 -> In y l2 -> f x = f y -> x = y) ->
     map f l1 = map f l2 -> l1 = l2.
 Proof.
-induction l1 ; intros l2 Hi Hmap.
-- destruct l2; auto.
-  inversion Hmap.
-- destruct l2.
-  + inversion Hmap.
-  + simpl in Hmap.
-    injection Hmap; intros Htl Hhd.
-    apply Hi in Hhd; try (apply in_eq ; fail).
-    apply IHl1 in Htl; subst; auto.
-    intros.
-    apply Hi; auto; now apply in_cons.
+revert l2; induction l1 as [|a l1 IHl1]; intros l2 Hi Hmap; destruct l2; auto;
+  inversion Hmap as [ [Hhd Htl] ].
+apply Hi in Hhd; try now apply in_eq.
+apply IHl1 in Htl; subst; auto.
+intros; apply Hi; auto; now apply in_cons.
 Qed.
 
 (** ** Inverse image of a relation by an injective function *)
@@ -201,9 +187,9 @@ destruct (Hf y) as [x Heq]; subst.
 exists x; reflexivity.
 Qed.
 
-Lemma map_surjective A B : forall f : A -> B, surjective f -> surjective (map f).
+Lemma map_surjective A B (f : A -> B) : surjective f -> surjective (map f).
 Proof.
-intros f Hf l1; induction l1.
+intros Hf l1; induction l1 as [| a l1 IHl1].
 - exists nil; reflexivity.
 - destruct (Hf a) as [b Heq] ; subst.
   destruct IHl1 as [l Heq] ; subst.

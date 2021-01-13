@@ -51,87 +51,70 @@ Section FMSet2List.
 
   Global Instance elts_perm' : Proper (meq ==> @Permutation_Type A) elts := meq_perm.
 
-  Lemma list2fm_retract : forall m, meq (list2fm (elts m)) m.
+  Lemma list2fm_retract m : meq (list2fm (elts m)) m.
   Proof. apply retract_meq. Qed.
 
   Lemma list2fm_nil : list2fm nil = empty.
   Proof. reflexivity. Qed.
 
-  Lemma list2fm_elt : forall l1 l2 a,
-    meq (list2fm (l1 ++ a :: l2)) (add a (list2fm (l1 ++ l2))).
+  Lemma list2fm_elt l1 l2 a : meq (list2fm (l1 ++ a :: l2)) (add a (list2fm (l1 ++ l2))).
   Proof.
-  intros l1 l2 a; symmetry.
+  symmetry.
   change (add a (list2fm (l1 ++ l2)))
     with (list2fm (a :: l1 ++ l2)).
   apply perm_meq, Permutation_Type_middle.
   Qed.
 
-  Lemma list2fm_cons : forall l a, meq (list2fm (a :: l)) (add a (list2fm l)).
-  Proof. now intros l a; rewrite <- (app_nil_l (a :: l)), list2fm_elt. Qed.
+  Lemma list2fm_cons l a : meq (list2fm (a :: l)) (add a (list2fm l)).
+  Proof. now rewrite <- (app_nil_l (a :: l)), list2fm_elt. Qed.
 
-  Lemma elts_perm : forall l, Permutation_Type (elts (list2fm l)) l.
+  Lemma elts_perm l : Permutation_Type (elts (list2fm l)) l.
   Proof.
-  induction l.
+  induction l as [|a l IHl].
   - now simpl; rewrite elts_empty.
   - etransitivity ; [ apply elts_add | ].
     apply Permutation_Type_cons ; [ reflexivity | ].
     apply IHl.
   Qed.
 
-  Lemma elts_eq_nil : forall m, elts m = nil -> meq m empty.
+  Lemma elts_eq_nil m : elts m = nil -> meq m empty.
   Proof.
-  intros m Heq.
+  intros Heq.
   now assert (Hr := retract_meq m); rewrite Heq in Hr; simpl in Hr; rewrite Hr.
   Qed.
 
-  Lemma add_swap : forall m a b, meq (add a (add b m)) (add b (add a m)).
+  Lemma add_swap m a b : meq (add a (add b m)) (add b (add a m)).
   Proof.
-  intros m a b.
   now rewrite <- list2fm_retract, ? elts_add, Permutation_Type_swap,
               <- 2 elts_add, list2fm_retract.
   Qed.
 
   Definition sum m1 m2 := list2fm (elts m1 ++ elts m2).
 
-  Lemma elts_sum : forall m1 m2,
-    Permutation_Type (elts (sum m1 m2)) (elts m1 ++ elts m2).
-  Proof. intros; apply elts_perm. Qed.
+  Lemma elts_sum m1 m2 : Permutation_Type (elts (sum m1 m2)) (elts m1 ++ elts m2).
+  Proof. apply elts_perm. Qed.
 
-  Lemma sum_empty_left : forall m, meq (sum empty m) m.
-  Proof.
-  intros m; unfold sum.
-  rewrite elts_empty.
-  apply retract_meq.
-  Qed.
+  Lemma sum_empty_left m : meq (sum empty m) m.
+  Proof. unfold sum; rewrite elts_empty; apply retract_meq. Qed.
 
-  Lemma sum_empty_right : forall m, meq (sum m empty) m.
-  Proof.
-  intros m; unfold sum.
-  rewrite elts_empty, app_nil_r.
-  apply retract_meq.
-  Qed.
+  Lemma sum_empty_right m : meq (sum m empty) m.
+  Proof. unfold sum; rewrite elts_empty, app_nil_r; apply retract_meq. Qed.
 
-  Lemma sum_comm : forall m1 m2, meq (sum m1 m2) (sum m2 m1).
-  Proof.
-  intros m1 m2; unfold sum.
-  now rewrite Permutation_Type_app_comm.
-  Qed.
+  Lemma sum_comm m1 m2 : meq (sum m1 m2) (sum m2 m1).
+  Proof. now unfold sum; rewrite Permutation_Type_app_comm. Qed.
 
-  Lemma sum_ass : forall m1 m2 m3, meq (sum (sum m1 m2) m3) (sum m1 (sum m2 m3)).
+  Lemma sum_ass m1 m2 m3 : meq (sum (sum m1 m2) m3) (sum m1 (sum m2 m3)).
   Proof.
-  intros m1 m2 m3; unfold sum.
-  apply perm_meq.
+  unfold sum; apply perm_meq.
   transitivity ((elts m1 ++ elts m2) ++ elts m3).
   - apply Permutation_Type_app_tail, elts_perm.
   - rewrite <- app_assoc; symmetry.
     apply Permutation_Type_app_head, elts_perm.
   Qed.
 
-  Lemma list2fm_app : forall l1 l2,
-    meq (list2fm (l1 ++ l2)) (sum (list2fm l1) (list2fm l2)).
+  Lemma list2fm_app l1 l2 : meq (list2fm (l1 ++ l2)) (sum (list2fm l1) (list2fm l2)).
   Proof.
-  intros l1 l2; unfold sum.
-  apply perm_meq.
+  unfold sum; apply perm_meq.
   transitivity (elts (list2fm l1) ++ l2); symmetry.
   - apply Permutation_Type_app_tail, elts_perm.
   - apply Permutation_Type_app_head, elts_perm.
@@ -167,18 +150,14 @@ Section Fmmap.
   now apply perm_meq, Permutation_Type_map, meq_perm.
   Qed.
 
-  Lemma list2fm_map : forall l, meq (list2fm (map f l)) (fmmap (list2fm l)).
-  Proof.
-  intros l; symmetry.
-  apply perm_meq, Permutation_Type_map, elts_perm.
-  Qed.
+  Lemma list2fm_map l : meq (list2fm (map f l)) (fmmap (list2fm l)).
+  Proof. symmetry; apply perm_meq, Permutation_Type_map, elts_perm. Qed.
 
-  Lemma elts_fmmap : forall m, Permutation_Type (elts (fmmap m)) (map f (elts m)).
+  Lemma elts_fmmap m : Permutation_Type (elts (fmmap m)) (map f (elts m)).
   Proof.
-  intros m.
   etransitivity ; [ apply meq_perm ; apply fmmap_meq ;
                     symmetry ; apply (list2fm_retract m) | ].
-  remember (elts m) as l; clear m Heql; induction l.
+  remember (elts m) as l eqn:Heql; clear m Heql; induction l as [|a l IHl].
   - simpl; unfold fmmap; rewrite elts_empty; simpl.
     now rewrite elts_empty.
   - transitivity (map f (elts (list2fm (a :: l)))).
@@ -193,11 +172,8 @@ Arguments fmmap {_ _ _ _ _ _} _ _.
 
 (** * Lists up to permutation as finite multisets *)
 
-Lemma fold_id A : forall l, fold_right (@cons A) nil l = l.
-Proof.
-induction l; auto.
-now simpl; f_equal.
-Qed.
+Lemma fold_id A l : fold_right (@cons A) nil l = l.
+Proof. now induction l; simpl; auto; f_equal. Qed.
 
 Fact FMoidConstr_list : FMoidConstructor list id.
 Proof.

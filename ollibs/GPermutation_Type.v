@@ -36,19 +36,19 @@ Section GPermutationType.
   Ltac case_perm_tri := unfold PCEPermutation_Type; destruct c.
   Ltac case_perm := unfold PCPermutation_Type, PEPermutation_Type; destruct b.
 
-  Lemma PCEPermutation_Type_PCEPermutation : forall l1 l2,
+  Lemma PCEPermutation_Type_PCEPermutation l1 l2 :
     PCEPermutation_Type l1 l2 -> GPermutation.PCEPermutation c l1 l2.
   Proof.
   now case_perm_tri; [ apply CPermutation_Type_CPermutation | | apply Permutation_Type_Permutation ].
   Qed.
 
-  Lemma PCPermutation_Type_PCPermutation : forall l1 l2,
+  Lemma PCPermutation_Type_PCPermutation l1 l2 :
     PCPermutation_Type l1 l2 -> GPermutation.PCPermutation b l1 l2.
   Proof.
   case_perm; [ apply Permutation_Type_Permutation | apply CPermutation_Type_CPermutation ].
   Qed.
 
-  Lemma PEPermutation_Type_PEPermutation : forall l1 l2,
+  Lemma PEPermutation_Type_PEPermutation l1 l2 :
     PEPermutation_Type l1 l2 -> GPermutation.PEPermutation b l1 l2.
   Proof. now case_perm; [ apply Permutation_Type_Permutation | ]. Qed.
 
@@ -100,23 +100,22 @@ Section GPermutationType.
   | apply PCEPermutation_Type_trans ].
   Qed.
 
-  Lemma PCEPermutation_Type_nil : forall l, PCEPermutation_Type nil l -> l = nil.
+  Lemma PCEPermutation_Type_nil l : PCEPermutation_Type nil l -> l = nil.
   Proof.
-  now case_perm_tri; [ apply CPermutation_Type_nil | intros; subst | apply Permutation_Type_nil ].
+  now case_perm_tri; [ apply CPermutation_Type_nil | subst | apply Permutation_Type_nil ].
   Qed.
 
-  Lemma PCEPermutation_Type_nil_cons : forall l a, PCEPermutation_Type nil (a :: l) -> False.
+  Lemma PCEPermutation_Type_nil_cons l a : PCEPermutation_Type nil (a :: l) -> False.
   Proof.
   case_perm_tri;
     [ apply CPermutation_Type_nil_cons
-    | intros l a Heq; inversion Heq | apply Permutation_Type_nil_cons ].
+    | intros Heq; inversion Heq | apply Permutation_Type_nil_cons ].
   Qed.
 
-  Lemma PCEPermutation_Type_length_1_inv : forall a l,
-    PCEPermutation_Type (a :: nil) l -> l = a :: nil.
+  Lemma PCEPermutation_Type_length_1_inv a l : PCEPermutation_Type (a :: nil) l -> l = a :: nil.
   Proof.
   now case_perm_tri;
-    [ apply CPermutation_Type_length_1_inv | intros; subst | apply Permutation_Type_length_1_inv ].
+    [ apply CPermutation_Type_length_1_inv | subst | apply Permutation_Type_length_1_inv ].
   Qed.
 
   Global Instance PCEPermutation_Type_in a : Proper (PCEPermutation_Type ==> Basics.impl) (In a).
@@ -172,36 +171,34 @@ Section GPermutationType.
   Qed.
 
 
-  Lemma PCPermutation_Type_swap : forall a1 a2,
+  Lemma PCPermutation_Type_swap a1 a2 :
     PCPermutation_Type (a1 :: a2 :: nil) (a2 :: a1 :: nil).
   Proof. case_perm; [ intros; apply Permutation_Type_swap | apply CPermutation_Type_swap ]. Qed.
 
-  Lemma PCPermutation_Type_cons_append : forall a l, PCPermutation_Type (a :: l) (l ++ a :: nil).
+  Lemma PCPermutation_Type_cons_append a l : PCPermutation_Type (a :: l) (l ++ a :: nil).
   Proof.
   case_perm; intros; rewrite <- (app_nil_l l), app_comm_cons;
     [ apply Permutation_Type_cons_append | apply CPermutation_Type_cons_append ].
   Qed.
 
-  Lemma PCPermutation_Type_app_comm : forall l l', PCPermutation_Type (l ++ l') (l' ++ l).
+  Lemma PCPermutation_Type_app_comm l l' : PCPermutation_Type (l ++ l') (l' ++ l).
   Proof. case_perm; [ apply Permutation_Type_app_comm | apply cperm_Type ]. Qed.
 
-  Lemma PCPermutation_Type_app_rot : forall l1 l2 l3,
-    PCPermutation_Type (l1 ++ l2 ++ l3) (l2 ++ l3 ++ l1).
+  Lemma PCPermutation_Type_app_rot l1 l2 l3 : PCPermutation_Type (l1 ++ l2 ++ l3) (l2 ++ l3 ++ l1).
   Proof. case_perm; [ apply Permutation_Type_app_rot | apply CPermutation_Type_app_rot ]. Qed.
 
-  Lemma PCPermutation_Type_nil : forall l, PCPermutation_Type nil l -> l = nil.
+  Lemma PCPermutation_Type_nil l : PCPermutation_Type nil l -> l = nil.
   Proof. now case_perm; [ apply Permutation_Type_nil | apply CPermutation_Type_nil ]. Qed.
 
-  Lemma PCPermutation_Type_nil_cons : forall l a, PCPermutation_Type nil (a :: l) -> False.
+  Lemma PCPermutation_Type_nil_cons l a : PCPermutation_Type nil (a :: l) -> False.
   Proof. now case_perm; [ apply Permutation_Type_nil_cons | apply CPermutation_Type_nil_cons ]. Qed.
 
-  Lemma PCPermutation_Type_length_1_inv : forall a l,
-    PCPermutation_Type (a :: nil) l -> l = a :: nil.
+  Lemma PCPermutation_Type_length_1_inv a l : PCPermutation_Type (a :: nil) l -> l = a :: nil.
   Proof.
   now case_perm; [ apply Permutation_Type_length_1_inv | apply CPermutation_Type_length_1_inv ].
   Qed.
 
-  Lemma PCPermutation_Type_length_2_inv : forall a1 a2 l,
+  Lemma PCPermutation_Type_length_2_inv a1 a2 l :
     PCPermutation_Type (a1 :: a2 :: nil) l -> {l = a1 :: a2 :: nil} + {l = a2 :: a1 :: nil}.
   Proof.
   now case_perm; [ apply Permutation_Type_length_2_inv | apply CPermutation_Type_length_2_inv ].
@@ -257,52 +254,48 @@ Section GPermutationType.
     Proper (PEPermutation_Type ==> PEPermutation_Type ==> PEPermutation_Type) (@app A).
   Proof. now case_perm; simpl; intros l m HP1 l' m' HP2; [ apply Permutation_Type_app | subst ]. Qed.
 
-  Lemma PEPermutation_Type_app_tail : forall l l' tl,
+  Lemma PEPermutation_Type_app_tail l l' tl :
     PEPermutation_Type l l' -> PEPermutation_Type (l ++ tl) (l' ++ tl).
-  Proof. now case_perm; simpl; intros l l' tl HP; [ apply Permutation_Type_app_tail | subst ]. Qed.
+  Proof. now case_perm; simpl; intros HP; [ apply Permutation_Type_app_tail | subst ]. Qed.
 
-  Lemma PEPermutation_Type_app_head : forall l tl tl',
+  Lemma PEPermutation_Type_app_head l tl tl' :
     PEPermutation_Type tl tl' -> PEPermutation_Type (l ++ tl) (l ++ tl').
-  Proof. now case_perm; simpl; intros l l' tl HP; [ apply Permutation_Type_app_head | subst ]. Qed.
+  Proof. now case_perm; simpl; intros HP; [ apply Permutation_Type_app_head | subst ]. Qed.
 
-  Lemma PEPermutation_Type_add_inside : forall a l l' tl tl',
+  Lemma PEPermutation_Type_add_inside a l l' tl tl' :
     PEPermutation_Type l l' -> PEPermutation_Type tl tl' ->
     PEPermutation_Type (l ++ a :: tl) (l' ++ a :: tl').
-  Proof.
-  now case_perm; simpl; intros a l l' tl tl' HP1 HP2; [ apply Permutation_Type_add_inside | subst ].
-  Qed.
+  Proof. now case_perm; simpl; intros HP1 HP2; [ apply Permutation_Type_add_inside | subst ]. Qed.
 
-  Lemma PEPermutation_Type_nil : forall l, PEPermutation_Type nil l -> l = nil.
-  Proof. now case_perm; intros; [ apply Permutation_Type_nil | symmetry ]. Qed.
+  Lemma PEPermutation_Type_nil l : PEPermutation_Type nil l -> l = nil.
+  Proof. now case_perm; [ apply Permutation_Type_nil | symmetry ]. Qed.
 
-  Lemma PEPermutation_Type_nil_cons : forall l a, PEPermutation_Type nil (a :: l) -> False.
-  Proof. case_perm; intros l a HP; [ apply (Permutation_Type_nil_cons HP) | inversion HP ]. Qed.
+  Lemma PEPermutation_Type_nil_cons l a : PEPermutation_Type nil (a :: l) -> False.
+  Proof. case_perm; intro HP; [ apply (Permutation_Type_nil_cons HP) | inversion HP ]. Qed.
 
-  Lemma PEPermutation_Type_length_1_inv : forall a l,
-    PEPermutation_Type (a :: nil) l -> l = a :: nil.
-  Proof. now case_perm; intros; [ apply Permutation_Type_length_1_inv | symmetry ]. Qed.
+  Lemma PEPermutation_Type_length_1_inv a l : PEPermutation_Type (a :: nil) l -> l = a :: nil.
+  Proof. now case_perm; [ apply Permutation_Type_length_1_inv | symmetry ]. Qed.
 
-  Lemma PEPermutation_Type_length_2_inv : forall a1 a2 l,
+  Lemma PEPermutation_Type_length_2_inv a1 a2 l :
     PEPermutation_Type (a1 :: a2 :: nil) l -> {l = a1 :: a2 :: nil} + {l = a2 :: a1 :: nil}.
-  Proof. now case_perm; intros; [ apply Permutation_Type_length_2_inv | left; symmetry ]. Qed.
+  Proof. now case_perm; [ apply Permutation_Type_length_2_inv | left; symmetry ]. Qed.
 
-  Lemma PEPermutation_Type_vs_elt_inv : forall a l l1 l2,
+  Lemma PEPermutation_Type_vs_elt_inv a l l1 l2 :
     PEPermutation_Type l (l1 ++ a :: l2) ->
       {'(l3, l4) & PEPermutation_Type (l1 ++ l2) (l3 ++ l4) & l = l3 ++ a :: l4 }.
   Proof.
-  case_perm; intros a l l1 l2 HP.
+  case_perm; intros HP.
   - destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as ((l', l'') & ->).
     apply Permutation_Type_app_inv in HP; symmetry in HP.
     exists (l', l''); auto.
   - exists (l1, l2); intuition.
   Qed.
 
-  Lemma PEPermutation_Type_vs_cons_inv : forall a l l1,
+  Lemma PEPermutation_Type_vs_cons_inv a l l1 :
     PEPermutation_Type l (a :: l1) ->
       {'(l2, l3) & PEPermutation_Type l1 (l2 ++ l3) & l = l2 ++ a :: l3 }.
   Proof.
-  intros a l l1 HP.
-  rewrite <- (app_nil_l l1).
+  intros HP; rewrite <- (app_nil_l l1).
   now apply PEPermutation_Type_vs_elt_inv.
   Qed.
 
@@ -358,11 +351,11 @@ Section GPermutationType.
   now rewrite HPhd, HPtl.
   Qed.
 
-  Lemma PCPermutation_Type_vs_elt_inv : forall a l l1 l2,
+  Lemma PCPermutation_Type_vs_elt_inv a l l1 l2 :
     PCPermutation_Type l (l1 ++ a :: l2) ->
       {'(l', l'') & PEPermutation_Type (l2 ++ l1) (l'' ++ l') & l = l' ++ a :: l'' }.
   Proof.
-  case_perm; intros a l l1 l2 HP.
+  case_perm; intros HP.
   - destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as ((l',l'') & ->).
     exists (l', l''); auto.
     apply Permutation_Type_app_inv in HP.
@@ -373,35 +366,34 @@ Section GPermutationType.
     exists (l', l''); auto.
   Qed.
 
-  Lemma PCPermutation_Type_vs_cons_inv : forall a l l1,
+  Lemma PCPermutation_Type_vs_cons_inv a l l1 :
     PCPermutation_Type l (a :: l1) ->
       {'(l', l'') & PEPermutation_Type l1 (l'' ++ l') & l = l' ++ a :: l'' }.
   Proof.
-  intros a l l1 HP.
-  rewrite <- app_nil_l in HP.
+  intros HP; rewrite <- app_nil_l in HP.
   apply PCPermutation_Type_vs_elt_inv in HP as [(l', l'') HP ->].
   exists (l', l''); auto.
   now rewrite app_nil_r in HP.
   Qed.
 
-  Lemma PCPermutation_Type_cons_cons_inv : forall a1 a2 l1 l2,
+  Lemma PCPermutation_Type_cons_cons_inv a1 a2 l1 l2 :
     PCPermutation_Type (a1 :: l1) (a2 :: l2) ->
       (a1 = a2) * PEPermutation_Type l1 l2
     + {'(l3, l4) & PEPermutation_Type l1 (l4 ++ a2 :: l3) & l2 = l3 ++ a1 :: l4 }.
   Proof.
-  intros a1 a2 l1 l2 HP; symmetry in HP.
+  intros HP; symmetry in HP.
   apply PCPermutation_Type_vs_cons_inv in HP.
   destruct HP as [(l1',l2') HP' Heq].
-  destruct l1'; inversion Heq; subst.
+  destruct l1' as [|a' l1']; inversion Heq; subst.
   - left; split; auto.
     now rewrite app_nil_r in HP'.
   - right; exists (l1', l2'); auto.
   Qed.
 
-  Lemma PCPermutation_Type_cons_cons_notin_inv : forall a l l1, ~ In a l ->
-    PCPermutation_Type (a :: l) (a :: l1) -> PEPermutation_Type l l1.
+  Lemma PCPermutation_Type_cons_cons_notin_inv a l l1 :
+    ~ In a l -> PCPermutation_Type (a :: l) (a :: l1) -> PEPermutation_Type l l1.
   Proof.
-  intros a l l1 Hin HP.
+  intros Hin HP.
   apply PCPermutation_Type_cons_cons_inv in HP as [[Heq HP] | [(l3, l4) HP Heq]]; auto.
   exfalso.
   apply Hin, Permutation_Type_in with (l4 ++ a :: l3), in_elt.
@@ -416,22 +408,22 @@ Section MultiGPermutationType.
   Variable c : comparison.
   Variable b : bool.
 
-  Lemma PCEPermutation_Type_Forall2_inf (P : A -> B -> Type) : forall l1 l1' l2,
+  Lemma PCEPermutation_Type_Forall2_inf (P : A -> B -> Type) l1 l1' l2 :
     PCEPermutation_Type c l1 l1' -> Forall2_inf P l1 l2 -> 
       { l2' & PCEPermutation_Type c l2 l2' & Forall2_inf P l1' l2' }.
   Proof.
   destruct c; [ apply CPermutation_Type_Forall2_inf | | apply Permutation_Type_Forall2_inf ].
-  now simpl; intros l1 l1' l2 -> HF; exists l2.
+  now simpl; intros -> HF; exists l2.
   Qed.
 
-  Lemma PCPermutation_Type_Forall2_inf (P : A -> B -> Type) : forall l1 l1' l2,
+  Lemma PCPermutation_Type_Forall2_inf (P : A -> B -> Type) l1 l1' l2 :
     PCPermutation_Type b l1 l1' -> Forall2_inf P l1 l2 -> 
       { l2' & PCPermutation_Type b l2 l2' & Forall2_inf P l1' l2' }.
   Proof.
   destruct b; [ apply Permutation_Type_Forall2_inf | apply CPermutation_Type_Forall2_inf ].
   Qed.
 
-  Lemma PEPermutation_Type_Forall2_inf (P : A -> B -> Type) : forall l1 l1' l2,
+  Lemma PEPermutation_Type_Forall2_inf (P : A -> B -> Type) l1 l1' l2 :
     PEPermutation_Type b l1 l1' -> Forall2_inf P l1 l2 ->
       { l2' & PEPermutation_Type b l2 l2' & Forall2_inf P l1' l2' }.
   Proof.
@@ -452,79 +444,73 @@ Section MultiGPermutationType.
     Proper (PEPermutation_Type b ==> PEPermutation_Type b) (map f).
   Proof. now destruct b; simpl; intros l1 l2 HP; [ apply Permutation_Type_map | subst ]. Qed.
 
-  Lemma PCEPermutation_Type_map_inv : forall l1 l2,
+  Lemma PCEPermutation_Type_map_inv l1 l2 :
     PCEPermutation_Type c l1 (map f l2) -> { l3 & l1 = map f l3 & PCEPermutation_Type c l2 l3 }.
   Proof.
   destruct c; [ apply CPermutation_Type_map_inv | | apply Permutation_Type_map_inv ].
-  now simpl; intros l1 l2 ->; exists l2.
+  now simpl; intros ->; exists l2.
   Qed.
 
-  Lemma PCPermutation_Type_map_inv : forall l1 l2,
+  Lemma PCPermutation_Type_map_inv l1 l2 :
     PCPermutation_Type b l1 (map f l2) -> { l3 & l1 = map f l3 & PCPermutation_Type b l2 l3 }.
   Proof. destruct b; [ apply Permutation_Type_map_inv | apply CPermutation_Type_map_inv ]. Qed.
 
-  Lemma PEPermutation_Type_map_inv : forall l1 l2,
+  Lemma PEPermutation_Type_map_inv l1 l2 :
     PEPermutation_Type b l1 (map f l2) -> { l3 & l1 = map f l3 & PEPermutation_Type b l2 l3 }.
-  Proof. now destruct b; [ apply Permutation_Type_map_inv | intros l1 l2; exists l2 ]. Qed.
+  Proof. now destruct b; [ apply Permutation_Type_map_inv | exists l2 ]. Qed.
 
-  Lemma PCEPermutation_Type_map_inv_inj : injective f -> forall l1 l2,
+  Lemma PCEPermutation_Type_map_inv_inj (Hinj : injective f) l1 l2 :
     PCEPermutation_Type c (map f l1) (map f l2) -> PCEPermutation_Type c l1 l2.
   Proof.
-  destruct c;
+  now destruct c;
   [ apply CPermutation_Type_map_inv_inj | apply map_injective | apply Permutation_Type_map_inv_inj ].
   Qed.
 
-  Lemma PCPermutation_Type_map_inv_inj : injective f -> forall l1 l2,
+  Lemma PCPermutation_Type_map_inv_inj (Hinj : injective f) l1 l2 :
     PCPermutation_Type b (map f l1) (map f l2) -> PCPermutation_Type b l1 l2.
   Proof.
   now destruct b; [ apply Permutation_Type_map_inv_inj | apply CPermutation_Type_map_inv_inj ].
   Qed.
 
-  Lemma PEPermutation_Type_map_inv_inj : injective f -> forall l1 l2,
+  Lemma PEPermutation_Type_map_inv_inj (Hinj : injective f) l1 l2 :
     PEPermutation_Type b (map f l1) (map f l2) -> PEPermutation_Type b l1 l2.
   Proof. now destruct b; [ apply Permutation_Type_map_inv_inj | apply map_injective ]. Qed.
 
-  Lemma PCEPermutation_Type_image : forall a l l',
+  Lemma PCEPermutation_Type_image a l l' :
     PCEPermutation_Type c (a :: l) (map f l') -> { a' | a = f a' }.
   Proof.
   destruct c; [ apply CPermutation_Type_image | | apply Permutation_Type_image ].
-  now simpl; intros a l l' Heq; destruct l' as [|a' l']; inversion Heq; subst; exists a'.
+  now simpl; intros Heq; destruct l' as [|a' l']; inversion Heq; subst; exists a'.
   Qed.
 
-  Lemma PCPermutation_Type_image : forall a l l',
+  Lemma PCPermutation_Type_image a l l' :
     PCPermutation_Type b (a :: l) (map f l') -> { a' | a = f a' }.
   Proof. destruct b; [ apply Permutation_Type_image | apply CPermutation_Type_image ]. Qed.
 
-  Lemma PEPermutation_Type_image : forall a l l',
+  Lemma PEPermutation_Type_image a l l' :
     PEPermutation_Type b (a :: l) (map f l') -> { a' | a = f a' }.
   Proof.
   destruct b ; [ apply Permutation_Type_image | ].
-  now simpl; intros a l l' HP; destruct l' as [|a' l']; inversion HP; subst; exists a'.
+  now simpl; intros HP; destruct l' as [|a' l']; inversion HP; subst; exists a'.
   Qed.
 
   Variable c' : comparison.
   Variable b' : bool.
 
-  Lemma PCEPermutation_Type_monot : ComparisonOrder.le c c' ->
-    forall l1 l2 : list A, PCEPermutation_Type c l1 l2 -> PCEPermutation_Type c' l1 l2.
+  Lemma PCEPermutation_Type_monot (Hle : ComparisonOrder.le c c') (l1 l2 : list A) :
+    PCEPermutation_Type c l1 l2 -> PCEPermutation_Type c' l1 l2.
   Proof.
-  intros Hle l1 l2; destruct c, c'; simpl; try (now inversion Hle); try (now intros; subst).
+  destruct c, c'; simpl; try (now inversion Hle); try (now intros; subst).
   apply CPermutation_Permutation_Type.
   Qed.
 
-  Lemma PCPermutation_Type_monot : Bool.le b b' ->
-    forall l1 l2 : list A, PCPermutation_Type b l1 l2 -> PCPermutation_Type b' l1 l2.
-  Proof.
-  intros Hle l1 l2; destruct b, b'; try (now inversion Hle).
-  apply CPermutation_Permutation_Type.
-  Qed.
+  Lemma PCPermutation_Type_monot (Hle : Bool.le b b') (l1 l2 : list A) :
+    PCPermutation_Type b l1 l2 -> PCPermutation_Type b' l1 l2.
+  Proof. destruct b, b'; try (now inversion Hle); apply CPermutation_Permutation_Type. Qed.
 
-  Lemma PEPermutation_Type_monot : Bool.le b b' ->
-    forall l1 l2 : list A, PEPermutation_Type b l1 l2 -> PEPermutation_Type b' l1 l2.
-  Proof.
-  intros Hle l1 l2; destruct b, b'; try (now inversion Hle).
-  now simpl; intros ->.
-  Qed.
+  Lemma PEPermutation_Type_monot (Hle : Bool.le b b') (l1 l2 : list A) :
+    PEPermutation_Type b l1 l2 -> PEPermutation_Type b' l1 l2.
+  Proof. now destruct b, b'; try (now inversion Hle); simpl; intros ->. Qed.
 
 End MultiGPermutationType.
 
