@@ -1206,7 +1206,6 @@ intros l Hll ; induction Hll ; intros l0 C Hnzsp HP.
         symmetry in Heq1; decomp_map_inf Heq1 ; symmetry in Heq1; decomp_map_inf Heq1 ;
           simpl in Heq4 ; simpl in Heq5 ; subst.
         exists (l5, l7); simpl ; [ | split ]...
-        intros Hb ; inversion Hb.
       - simpl in HP.
         exists (l8, l6) ; simpl ; [ | split ]...
         intros ; split ; reflexivity. }

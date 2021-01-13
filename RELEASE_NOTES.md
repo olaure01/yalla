@@ -1,10 +1,16 @@
 # YALLA: an LL library for Coq
 
+## Version 2.0.2 (2021/01/13)
+
+This is mostly an adaptation of v2.0 to Coq v8.13.0 and OLlibs v2.0.1
+
+*Tested with Coq v8.13.0.*
+
 ## Version 2.0.1 (2020/08/07)
 
-Tested with Coq v8.12.0.
-
 This is mostly an adaptation of v2.0 to Coq v8.12.0 and OLlibs v2.0.0
+
+*Tested with Coq v8.12.0.*
 
 ## Version 2.0 (2019/01/23)
 
@@ -19,7 +25,7 @@ Many results have been added, including:
 * example files for additional related systems;
 * definition of the microyalla kernel.
 
-Tested with Coq v8.9.0.
+*Tested with Coq v8.9.0.*
 
 ## Version 1.0 (2017/07/18)
 
