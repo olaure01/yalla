@@ -96,11 +96,7 @@ Lemma bidual A : dual (dual A) = A.
 Proof. now induction A; simpl; rewrite ? IHA1, ? IHA2, ? IHA. Qed.
 
 Lemma codual A B : dual A = B <-> A = dual B.
-Proof.
-split; intro H.
-- now rewrite <- (bidual A), H.
-- now rewrite <- (bidual B), H.
-Qed.
+Proof. now split; intro H; rewrite <- (bidual A), <- (bidual B), H, ? bidual. Qed.
 
 Lemma dual_inj : injective dual.
 Proof. now intros A B H; rewrite <- (bidual A), <- (bidual B), H. Qed.
@@ -154,7 +150,7 @@ Lemma fsize_pos A : 0 < fsize A.
 Proof. induction A; simpl; lia. Qed.
 
 Lemma fsize_dual A : fsize (dual A) = fsize A.
-Proof. now induction A; simpl; rewrite ? IHA1, ? IHA2; try lia. Qed.
+Proof. induction A; simpl; rewrite ? IHA1, ? IHA2; lia. Qed.
 
 Lemma fsize_wn_n n A : fsize (wn_n n A) = n + fsize A.
 Proof. now induction n; simpl; rewrite ? IHn. Qed.
