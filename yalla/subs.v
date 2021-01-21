@@ -58,7 +58,7 @@ end.
 Lemma subs_dual : forall A C x, subs C x (dual A) = dual (subs C x A).
 Proof with myeasy.
 intros A C x.
-induction A ; simpl ; rewrite ?bidual ; simpl ;
+induction A ; cbn ; rewrite ?bidual ; cbn ;
   try (rewrite IHA ; myeasy ; fail) ;
   try (rewrite IHA1 ; rewrite IHA2 ; myeasy ; fail)...
 Qed.
@@ -78,7 +78,7 @@ assert
   as Hmapwn.
 { clear.
   induction l...
-  simpl ; rewrite IHl... }
+  cbn ; rewrite IHl... }
 induction pi using ll_nested_ind ; list_simpl ; try (now constructor).
 - eapply ex_r ; [ apply ax_exp | apply PCPermutation_Type_swap ].
 - eapply PCPermutation_Type_map in p.
@@ -88,7 +88,7 @@ induction pi using ll_nested_ind ; list_simpl ; try (now constructor).
   eapply ex_wn_r...
 - rewrite concat_map.
   apply mix_r.
-  + simpl.
+  + cbn.
     rewrite map_length...
   + apply forall_Forall_inf.
     intros l' Hin.
@@ -103,7 +103,7 @@ induction pi using ll_nested_ind ; list_simpl ; try (now constructor).
   rewrite <- subs_dual...
 - apply (gax_r (axupd_pfrag P (existT (fun x => x -> list formula) _
                       (fun a => map (subs A x) (projT2 (pgax P) a)))) a).
-Unshelve. simpl...
+Unshelve. cbn...
 Qed.
 
 Lemma subs_ll_axfree {P} : (projT1 (pgax P) -> False) -> forall A x l,
@@ -113,7 +113,7 @@ intros P_axfree A x l pi.
 apply (subs_ll A x) in pi.
 eapply stronger_pfrag...
 nsplit 4...
-simpl ; intros a.
+cbn ; intros a.
 contradiction P_axfree.
 Qed.
 
@@ -142,10 +142,10 @@ Definition fresh_of A := fresh (atom_list A).
 Lemma subs_fresh_incl : forall C lat A,
   incl (atom_list A) lat -> subs C (fresh lat) A = A.
 Proof.
-intros C lat A; induction A; simpl; intros Hincl;
+intros C lat A; induction A; cbn; intros Hincl;
   try rewrite IHA;
   try (rewrite IHA2 ; [ rewrite IHA1 | ]);
-  simpl; intuition;
+  cbn; intuition;
   try now apply incl_app_inv in Hincl.
 - rewrite repl_at_neq; auto.
   intros ->.
@@ -164,7 +164,7 @@ Definition fresh_of_list l := fresh (flat_map atom_list l).
 Lemma subs_fresh_list_incl : forall C lat l,
   incl (flat_map atom_list l) lat -> map (subs C (fresh lat)) l = l.
 Proof.
-intros C lat l; induction l; simpl; intros Hincl; auto.
+intros C lat l; induction l; cbn; intros Hincl; auto.
 apply incl_app_inv in Hincl.
 rewrite subs_fresh_incl; [ rewrite IHl | ]; intuition.
 Qed.

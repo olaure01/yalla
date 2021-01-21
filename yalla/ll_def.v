@@ -91,7 +91,7 @@ Global Instance le_pfrag_po : PreOrder le_pfrag | 50.
 Proof.
 split.
 - nsplit 4 ; try reflexivity.
-  simpl ; intros a.
+  cbn ; intros a.
   exists a ; reflexivity.
 - intros P Q R.
   apply le_pfrag_trans.
@@ -192,7 +192,7 @@ Lemma pmixupd_point_comm P : forall n1 n2 b1 b2,
             = pmix (pmixupd_point_pfrag (pmixupd_point_pfrag P n2 b2) n1 b1) k.
 Proof with try reflexivity.
   intros n1 n2 b1 b2 Hneq k.
-  case_eq (k =? n1) ; intros Heq1; case_eq (k =? n2); intros Heq2; simpl; rewrite Heq1; rewrite Heq2...
+  case_eq (k =? n1) ; intros Heq1; case_eq (k =? n2); intros Heq2; cbn; rewrite Heq1; rewrite Heq2...
   exfalso.
   apply Hneq.
   transitivity k.
@@ -370,7 +370,7 @@ Section ll_ind.
                             (list_to_Forall (Forall_to_list f)))) as HL.
     { clear - HL.
       rewrite (flat_map_concat_map (@projT1 _ (ll P)) (Forall_to_list f)) in HL ;
-        unfold eq_rect_r in HL ; simpl in HL.
+        unfold eq_rect_r in HL ; cbn in HL.
       rewrite <- (Forall_to_list_to_Forall f).
       replace e with
           (rew [fun n : nat => pmix P n = true]
@@ -384,7 +384,7 @@ Section ll_ind.
       now rewrite <- (Forall_to_list_support f). }
     apply X2.
     clear e.
-    induction HP; simpl; constructor...
+    induction HP; cbn; constructor...
   Qed.
 
 End ll_ind.
@@ -421,23 +421,23 @@ match pi with
 end.
 
 Lemma psize_pos P : forall l (pi : @ll P l), 0 < psize pi.
-Proof. intros l pi; destruct pi; simpl; lia. Qed.
+Proof. intros l pi; destruct pi; cbn; lia. Qed.
 
 Lemma psize_mix P : forall L eq FL,
     psize (mix_r P L eq FL) = S (Forall_inf_sum (fun _ pi => psize pi) FL).
 Proof.
   intros L eq FL.
-  simpl.
+  cbn.
   destruct eq.
   induction FL; try reflexivity.
-  simpl; rewrite 2 plus_n_Sm.
+  cbn; rewrite 2 plus_n_Sm.
   rewrite IHFL; reflexivity.
 Qed.
 
 Lemma psize_inf_mix P : forall L eq FL l (pi : ll P l),
   In_Forall_inf _ pi FL -> psize pi < psize (mix_r P L eq FL).
 Proof.
-  intros L eq FL l pi Hin ; simpl ; clear eq.
+  intros L eq FL l pi Hin ; cbn ; clear eq.
   induction FL ; inversion Hin.
   - inversion H; subst.
     apply inj_pair2_eq_dec in H2; [ lia | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ].
@@ -474,7 +474,7 @@ end.
 Lemma gax_elts_mix {P} : forall L eq FL l (pi : ll P l), In_Forall_inf _ pi FL ->
   forall ax, In_inf ax (gax_elts pi) -> In_inf ax (gax_elts (mix_r P L eq FL)).
 Proof.
-  intros L eq FL; simpl; clear eq.
+  intros L eq FL; cbn; clear eq.
   induction FL; intros l' pi Hin; inversion Hin.
   - inversion H; subst.
     apply inj_pair2_eq_dec in H2; [ | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ]; subst.
@@ -498,7 +498,7 @@ Proof with myeeasy.
     unfold PCPermutation_Type in p.
     unfold PCPermutation_Type.
     destruct (pperm P) ; destruct (pperm Q) ;
-      simpl in Hp ; try inversion Hp...
+      cbn in Hp ; try inversion Hp...
   - apply (ex_wn_r _ l1 lw)...
   - assert ({L' : list (sigT (ll Q)) & (map (@projT1 _ (ll Q)) L') = (map (@projT1 _ (ll P)) L)}) as (L' & eqL').
     + destruct eqpmix.
@@ -508,7 +508,7 @@ Proof with myeeasy.
       * inversion X; subst.
         destruct IHL as (L' & eq)...
         split with (existT (ll Q) (projT1 a) X0 :: L')...
-        simpl.
+        cbn.
         rewrite eq.
         reflexivity.
     + rewrite flat_map_concat_map; rewrite<- eqL'; rewrite<- flat_map_concat_map.
@@ -542,7 +542,7 @@ induction H using ll_nested_ind' ; try (constructor ; myeasy ; fail).
   unfold PCPermutation_Type in p.
   unfold PCPermutation_Type.
   destruct (pperm P) ; destruct (pperm Q) ;
-    simpl in Hp ; try inversion Hp...
+    cbn in Hp ; try inversion Hp...
   apply CPermutation_Permutation_Type...
 - apply (ex_wn_r _ l1 lw)...
 - assert ({L' : list (sigT (ll Q)) & (map (@projT1 _ (ll Q)) L') = (map (@projT1 _ (ll P)) L)}) as (L' & eqL').
@@ -553,7 +553,7 @@ induction H using ll_nested_ind' ; try (constructor ; myeasy ; fail).
     * inversion X; subst.
       destruct IHL as (L' & eq)...
       split with (existT (ll Q) (projT1 a) X0 :: L')...
-      simpl.
+      cbn.
       rewrite eq.
       reflexivity.
   + rewrite flat_map_concat_map; rewrite<- eqL'; rewrite<- flat_map_concat_map.
@@ -569,7 +569,7 @@ induction H using ll_nested_ind' ; try (constructor ; myeasy ; fail).
 - unfold le_pfrag in Hle.
   destruct Hle as [Hcut _].
   rewrite f in Hcut.
-  simpl in Hcut...
+  cbn in Hcut...
   eapply (@cut_r _ Hcut)...
 - destruct Hle as (_ & Hgax & _).
   destruct (Hgax a) as [b Heq].
@@ -625,7 +625,7 @@ Proof with try assumption.
   - apply wk_r...
   - apply co_r.
     apply IHn.
-    simpl in pi.
+    cbn in pi.
     change (wn A :: repeat (wn A) n ++ l) with ((wn A :: repeat (wn A) n) ++ l) in pi.
     rewrite repeat_cons in pi.
     rewrite<- app_assoc in pi...
@@ -640,17 +640,17 @@ Proof.
   induction L ; intros l0 l pi.
   - apply ex_r with (map wn l0 ++ l ++ concat nil).
     + now apply wk_list_r.
-    + rewrite P_perm; simpl; rewrite 2 app_nil_r; apply Permutation_Type_app_swap.
+    + rewrite P_perm; cbn; rewrite 2 app_nil_r; apply Permutation_Type_app_swap.
   - apply ex_r with (map wn l0 ++ l ++ concat (a :: L));
-      [ | rewrite P_perm; simpl;
+      [ | rewrite P_perm; cbn;
           rewrite 2 (app_assoc _ _ (a ++ _));
           apply Permutation_Type_app_tail, Permutation_Type_app_swap ].
     apply co_list_r.
     apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L);
-      [ | rewrite P_perm; simpl; Permutation_Type_solve ].
+      [ | rewrite P_perm; cbn; Permutation_Type_solve ].
     apply IHL.
     rewrite <- app_assoc.
-    now simpl in pi.
+    now cbn in pi.
 Qed.
 
 Lemma ex_concat_r P : pperm P = true -> forall l A L,
@@ -658,11 +658,11 @@ Lemma ex_concat_r P : pperm P = true -> forall l A L,
 Proof with try assumption.
   intros f l A L. revert f l A.
   induction L; intros f l A pi...
-  simpl.
-  apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L); [ | rewrite f; simpl; Permutation_Type_solve]...
+  cbn.
+  apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L); [ | rewrite f; cbn; Permutation_Type_solve]...
   apply IHL...
   now apply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L);
-    [ | rewrite f; simpl; symmetry; apply Permutation_Type_cons_app; rewrite app_assoc ].
+    [ | rewrite f; cbn; symmetry; apply Permutation_Type_cons_app; rewrite app_assoc ].
 Qed.
 
 
@@ -756,7 +756,7 @@ induction pi using ll_nested_ind ; intros l1' l2' Heq ; subst.
   destruct l1' ; inversion H1.
   destruct l1' ; inversion H3.
 - apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  simpl in HP' ; simpl in Heq.
+  cbn in HP' ; cbn in Heq.
   apply IHpi in Heq...
   eapply ex_r...
   apply PEPermutation_PCPermutation_Type in HP' ; unfold id in HP'.
@@ -777,7 +777,7 @@ induction pi using ll_nested_ind ; intros l1' l2' Heq ; subst.
   apply Dependent_Forall_inf_app_inv in X as ((l1' & Fl1) & (l2' & Fl2)).
   inversion Fl2; subst.
   replace ((concat L1 ++ l1) ++ l2 ++ concat L2) with (concat (L1 ++ (l1 ++ l2) :: L2)) ;
-    [ | rewrite concat_app; simpl; rewrite 3 app_assoc; reflexivity].
+    [ | rewrite concat_app; cbn; rewrite 3 app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
@@ -859,10 +859,10 @@ induction pi using ll_nested_ind ; intros A' B' l1' l2' Heq ; subst.
   destruct l1' ; inversion H1.
   destruct l1' ; inversion H3.
 - apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  simpl in HP'.
+  cbn in HP'.
   apply IHpi in Heq...
   eapply ex_r...
-  destruct (pperm P) ; simpl in HP' ; simpl.
+  destruct (pperm P) ; cbn in HP' ; cbn.
   + symmetry.
     etransitivity; [ apply Permutation_Type_app_comm | ].
     etransitivity; [ | apply Permutation_Type_app_comm ].
@@ -881,7 +881,7 @@ induction pi using ll_nested_ind ; intros A' B' l1' l2' Heq ; subst.
       apply IHpi ; list_simpl...
 - apply concat_vs_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
   replace ((concat L1 ++ l1) ++ A' :: B' :: l2 ++ concat L2) with (concat (L1 ++ (l1 ++ A' :: B' :: l2) :: L2)) ;
-    [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
+    [ |rewrite concat_app; cbn; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
@@ -961,9 +961,9 @@ induction pi using ll_nested_ind ; intros l1' l2' Heq ; subst.
   destruct l1'; inversion H1.
   destruct l1'; inversion H3.
 - apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  simpl in HP'; apply IHpi in Heq...
+  cbn in HP'; apply IHpi in Heq...
   eapply ex_r...
-  destruct (pperm P) ; simpl in HP' ; simpl.
+  destruct (pperm P) ; cbn in HP' ; cbn.
   + symmetry.
     etransitivity; [ apply Permutation_Type_app_comm | ].
     etransitivity; [ | apply Permutation_Type_app_comm ].
@@ -981,7 +981,7 @@ induction pi using ll_nested_ind ; intros l1' l2' Heq ; subst.
       apply IHpi ; list_simpl...
 - apply concat_vs_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
   replace ((concat L1 ++ l1) ++ l0 ++ l2 ++ concat L2) with (concat (L1 ++ (l1 ++ l0 ++ l2) :: L2)) ;
-    [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
+    [ |rewrite concat_app; cbn; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
@@ -1060,9 +1060,9 @@ induction pi using ll_nested_ind ; intros A' l1' l2' Heq ; subst.
   destruct l1' ; inversion H1.
   destruct l1' ; inversion H3.
 - apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  simpl in HP' ; apply IHpi in Heq...
-  simpl in Heq ; eapply ex_r...
-  destruct (pperm P) ; simpl in HP' ; simpl.
+  cbn in HP' ; apply IHpi in Heq...
+  cbn in Heq ; eapply ex_r...
+  destruct (pperm P) ; cbn in HP' ; cbn.
   + symmetry.
     etransitivity; [ apply Permutation_Type_app_comm | ].
     etransitivity; [ | apply Permutation_Type_app_comm ].
@@ -1080,7 +1080,7 @@ induction pi using ll_nested_ind ; intros A' l1' l2' Heq ; subst.
       apply IHpi ; list_simpl...
 - apply concat_vs_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
   replace ((concat L1 ++ l1) ++ A' :: l2 ++ concat L2) with (concat (L1 ++ (l1 ++ A' :: l2) :: L2)) ;
-    [ |rewrite concat_app; simpl; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
+    [ |rewrite concat_app; cbn; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].
   apply mix_r...
   + rewrite app_length.
     rewrite app_length in eqpmix...
@@ -1220,7 +1220,7 @@ remember (aplus A B :: nil) as l ; revert A B Heql ;
 Qed.
 
 
-(** *** Tensor-One Par-Bottom simplifications *)
+(** *** Tensor-One Par-Bottom cbnifications *)
 
 Inductive munit_smp : formula -> formula -> Type :=
 | musmp_var : forall X, munit_smp (var X) (var X)
@@ -1356,7 +1356,7 @@ Qed.
 (** Axiom expansion *)
 Lemma ax_exp {P} : forall A, ll P (A :: dual A :: nil).
 Proof with myeeasy.
-induction A ; simpl.
+induction A ; cbn.
 - ll_swap.
   apply ax_r.
 - apply ax_r.
@@ -1410,7 +1410,7 @@ Lemma ax_gen_loc : forall P Q l, Bool.le (pperm P) (pperm Q) ->
   ll Q l.
 Proof with myeeasy.
 intros P Q l Hperm Hmix Hcut pi.
-induction pi using ll_nested_ind ; simpl ; intros Hgax ;
+induction pi using ll_nested_ind ; cbn ; intros Hgax ;
   try (assert (Hgax1 := Forall_inf_app_l _ _ Hgax));
   try (assert (Hgax2 := Forall_inf_app_r _ _ Hgax));
   try (apply IHpi1 in Hgax1) ;
@@ -1418,7 +1418,7 @@ induction pi using ll_nested_ind ; simpl ; intros Hgax ;
   try (constructor ; intuition ; fail).
 - apply IHpi in Hgax.
   eapply ex_r...
-  destruct (pperm P) ; destruct (pperm Q) ; inversion Hperm ; simpl ; simpl in p...
+  destruct (pperm P) ; destruct (pperm Q) ; inversion Hperm ; cbn ; cbn in p...
   apply CPermutation_Permutation_Type...
 - apply IHpi in Hgax.
   eapply ex_wn_r...
@@ -1438,7 +1438,7 @@ induction pi using ll_nested_ind ; simpl ; intros Hgax ;
          apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
          apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec ; apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
          subst.
-   new code should be simplified or old code back once coq/coq#12394 solved *)
+   new code should be cbnified or old code back once coq/coq#12394 solved *)
          apply inj_pair2_eq_dec in H2;
            [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
          assert (Pa = p) as Heq; subst.
@@ -1463,7 +1463,7 @@ induction pi using ll_nested_ind ; simpl ; intros Hgax ;
          apply IHPL...
          now apply Forall_inf_app_r in Hgax.
 - eapply cut_r...
-  rewrite f in Hcut ; destruct (pcut Q) ; inversion Hcut ; simpl...
+  rewrite f in Hcut ; destruct (pcut Q) ; inversion Hcut ; cbn...
 - inversion Hgax ; subst...
 Qed.
 
@@ -1493,7 +1493,7 @@ eapply (ax_gen (axupd_pfrag P (existT (fun x => x -> list formula) _
                                           | inl x => projT2 (pgax P) x
                                           | inr x => x :: dual x :: nil
                                           end))))...
-- simpl ; intros a.
+- cbn ; intros a.
   destruct a.
   + apply gax_r.
   + apply ax_exp.
@@ -1528,7 +1528,7 @@ induction l0 ; intros l ; constructor...
     replace (projT2 (pgax P) a) with (projT2 (pgax Q) Fin.F1) by reflexivity.
     apply gax_r.
   + eapply stronger_pfrag ; [ | apply IHl ].
-    nsplit 4; simpl...
+    nsplit 4; cbn...
     intros a1; exists (Fin.FS a1)...
 - cons2app; rewrite app_assoc.
   apply IHl0.
@@ -1615,14 +1615,14 @@ remember
 eapply (ext_wn_param P Q) in pi...
 - rewrite HeqQ...
 - intros P_cut.
-  rewrite HeqQ ; simpl...
+  rewrite HeqQ ; cbn...
 - intros a.
   assert ({ b | projT2 (pgax P) a ++ map wn l0 = projT2 (pgax Q) b}) as [b Hgax]
-    by (subst ; simpl ; exists a ; reflexivity).
+    by (subst ; cbn ; exists a ; reflexivity).
   rewrite Hgax.
   apply gax_r.
 - intros L P_mix Q_mix.
-  rewrite HeqQ in Q_mix ; simpl in Q_mix.
+  rewrite HeqQ in Q_mix ; cbn in Q_mix.
   rewrite P_mix in Q_mix.
   inversion Q_mix.
 Qed.

@@ -20,6 +20,7 @@ match o with
 | None => True
 end.
 
+(* TODO remove once introduced in OLlibs *)
 Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
 
 
@@ -42,10 +43,9 @@ Ltac myeasy_pattern assump :=
 Ltac myeasy := myeasy_pattern assumption.
 Ltac myeeasy := myeasy_pattern eassumption.
 
-(** An [easy] tactic with automated permutation solving **)
+(** An [easy] tactic with automated permutation solving *)
 
 Ltac myeasy_perm_Type :=
   myeeasy ;
   try GPermutation_Type_solve ;
   try (simpl_hyp_perm_all_Type ; GPermutation_Type_solve).
-

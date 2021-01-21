@@ -55,11 +55,11 @@ match A with
 end.
 
 Ltac ifsize_auto :=
-  simpl ;
+  cbn ;
   match goal with
-  | H: ifsize _ < _ |- _ => simpl in H
-  | H: ifsize _ <= _ |- _ => simpl in H
-  | H: ifsize _ = _ |- _ => simpl in H
+  | H: ifsize _ < _ |- _ => cbn in H
+  | H: ifsize _ <= _ |- _ => cbn in H
+  | H: ifsize _ = _ |- _ => cbn in H
   end ;
   lia.
 
@@ -207,39 +207,39 @@ Proof with reflexivity.
 induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
   try inversion Heqb ; try inversion Heq ; try reflexivity.
 - apply (@eqb_eq (option_dectype _)) in H0; subst...
-- subst ; simpl.
+- subst ; cbn.
   apply (@eqb_eq (option_dectype _))...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply IHA in H0 ; subst...
-- subst ; simpl ; apply IHA...
+- subst ; cbn ; apply IHA...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply IHA in H0 ; subst...
-- subst ; simpl ; apply IHA...
+- subst ; cbn ; apply IHA...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply IHA in H0 ; subst...
-- subst ; simpl ; apply IHA...
+- subst ; cbn ; apply IHA...
 Qed.
 
 Fixpoint eqb_iformlist l1 l2 :=
@@ -256,7 +256,7 @@ induction l1 ; destruct l2 ; (split ; [ intros Heqb | intros Heq ]) ;
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply eqb_eq_iform in H1 ; apply IHl1 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply eqb_eq_iform | apply IHl1 ]...
 Qed.
 
@@ -280,10 +280,10 @@ induction l ; (split ; [ intros Heqb | intros Heq ]).
   + apply in_cons.
     apply IHl...
 - inversion Heq ; subst.
-  + simpl ; apply orb_true_iff ; left.
+  + cbn ; apply orb_true_iff ; left.
     apply eqb_eq_iform.
     reflexivity.
-  + simpl ; apply orb_true_iff ; right.
+  + cbn ; apply orb_true_iff ; right.
     apply IHl...
 Qed.
 
@@ -308,11 +308,11 @@ end.
 Lemma isubb_isub : forall A B, is_true (isubformb A B) <-> isubform A B.
 Proof with try assumption ; try reflexivity.
 intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructor)).
-- destruct A ; simpl in H ; try (now inversion H).
+- destruct A ; cbn in H ; try (now inversion H).
   rewrite orb_false_r in H.
   apply (@eqb_eq (option_dectype _)) in H ; subst ; constructor.
-- destruct A ; simpl in H ; try (now inversion H).
-- simpl in H.
+- destruct A ; cbn in H ; try (now inversion H).
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
   + apply eqb_eq_iform in H ; subst ; constructor.
@@ -320,7 +320,7 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB1...
   + apply isub_tens_r.
     apply IHB2...
-- simpl in H.
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
   + apply eqb_eq_iform in H ; subst ; constructor.
@@ -328,7 +328,7 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB1...
   + apply isub_lpam_r.
     apply IHB2...
-- simpl in H.
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
   + apply eqb_eq_iform in H ; subst ; constructor.
@@ -336,7 +336,7 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB...
   + apply eqb_eq_iform in H ; subst.
     apply isub_gen_N.
-- simpl in H.
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
   + apply eqb_eq_iform in H ; subst ; constructor.
@@ -344,7 +344,7 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB1...
   + apply isub_lmap_r.
     apply IHB2...
-- simpl in H.
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
   + apply eqb_eq_iform in H ; subst ; constructor.
@@ -352,8 +352,8 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB...
   + apply eqb_eq_iform in H ; subst.
     apply isub_neg_N.
-- destruct A ; simpl in H ; try (now inversion H).
-- simpl in H.
+- destruct A ; cbn in H ; try (now inversion H).
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
   + apply eqb_eq_iform in H ; subst ; constructor.
@@ -361,8 +361,8 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB1...
   + apply isub_with_r.
     apply IHB2...
-- destruct A ; simpl in H ; try (now inversion H).
-- simpl in H.
+- destruct A ; cbn in H ; try (now inversion H).
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ] ;
     [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
   + apply eqb_eq_iform in H ; subst ; constructor.
@@ -370,88 +370,88 @@ intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructo
     apply IHB1...
   + apply isub_plus_r.
     apply IHB2...
-- simpl in H.
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ].
   + apply eqb_eq_iform in H ; subst ; constructor.
   + apply isub_oc.
     apply IHB...
 - inversion H ; subst.
-  simpl; rewrite orb_false_r.
+  cbn; rewrite orb_false_r.
   apply (@eqb_refl (option_dectype _ )).
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (itens B1 B2) (itens B1 B2)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (ilpam B1 B2) (ilpam B1 B2)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (igen B) (igen B)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
-  + simpl.
+  + cbn.
     rewrite orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (ilmap B1 B2) (ilmap B1 B2)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (ineg B) (ineg B)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
-  + simpl.
+  + cbn.
     rewrite orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (iwith B1 B2) (iwith B1 B2)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (iplus B1 B2) (iplus B1 B2)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold isubformb.
     replace (eqb_iform (ioc B) (ioc B)) with true...
     symmetry ; apply eqb_eq_iform...
   + apply IHB in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
 Qed.
 
@@ -484,7 +484,7 @@ intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constru
   + apply IHl1.
     apply forallb_forall, Forall_forall...
 - inversion H ; subst.
-  unfold isubformb_list ; simpl.
+  unfold isubformb_list ; cbn.
   apply andb_true_iff ; split.
   + apply existsb_exists, Exists_exists.
     clear - H2 ; induction l2 ; inversion H2 ; subst.

@@ -70,7 +70,7 @@ assert
   as Hmapioc.
 { clear.
   induction l...
-  simpl ; rewrite IHl... }
+  cbn ; rewrite IHl... }
 induction pi ; list_simpl ;
   try (list_simpl in IHpi) ;
   try (list_simpl in IHpi1) ;
@@ -102,7 +102,7 @@ induction pi ; list_simpl ;
 - apply (gax_ir ((axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
             (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
                        isubs A x (snd (projT2 (ipgax P) a))))))) a).
-Unshelve. simpl...
+Unshelve. cbn...
 Qed.
 
 Lemma subs_ill_axfree {P} : (projT1 (ipgax P) -> False) -> forall A x l C,
@@ -124,10 +124,10 @@ Lemma subs_ill_axioms {P} :
 Proof with myeeasy.
 intros gax l C Hgax pi.
 induction pi ; try now constructor.
-- simpl in p.
+- cbn in p.
   eapply ex_ir ; [ apply IHpi | ]...
 - eapply ex_oc_ir...
-- simpl in f.
+- cbn in f.
   eapply (@cut_ir _ _ f)...
 - apply Hgax...
 Qed.
@@ -157,13 +157,13 @@ Definition ifresh_of A := @fresh (option_infdectype preiatom) (iatom_list A).
 Lemma subs_ifresh_incl : forall C lat A,
   incl (iatom_list A) lat -> isubs C (@fresh (option_infdectype preiatom) lat) A = A.
 Proof.
-intros C lat A; induction A; simpl; intros Hincl;
+intros C lat A; induction A; cbn; intros Hincl;
   change (proj1_sig (nat_injective_choice (option_dectype preiatom)
             (nat_injective_option infinite_nat_injective)) lat)
   with (@fresh (option_infdectype preiatom) lat);
   try rewrite IHA;
   try (rewrite IHA2 ; [ rewrite IHA1 | ]);
-  simpl; intuition;
+  cbn; intuition;
   (try now apply incl_app_inv in Hincl);
   try now apply incl_cons_inv in Hincl.
 rewrite repl_iat_neq; auto.
@@ -181,7 +181,7 @@ Definition ifresh_of_list l := @fresh (option_infdectype preiatom) (flat_map iat
 Lemma subs_ifresh_list_incl : forall C lat l,
   incl (flat_map iatom_list l) lat -> map (isubs C (@fresh (option_infdectype preiatom) lat)) l = l.
 Proof.
-intros C lat l; induction l; simpl; intros Hincl; auto.
+intros C lat l; induction l; cbn; intros Hincl; auto.
 apply incl_app_inv in Hincl.
 change (proj1_sig (nat_injective_choice (option_dectype preiatom)
             (nat_injective_option infinite_nat_injective)) lat)

@@ -76,11 +76,11 @@ Lemma l2illfrag : forall l A, lprove l A ->
 Proof with try reflexivity ; try eassumption.
 intros l A pi.
 induction pi ;
-  try (simpl in IHpi ; rewrite ? map_app in IHpi) ;
-  try (simpl in IHpi1 ; rewrite ? map_app in IHpi1) ;
-  try (simpl in IHpi2; rewrite ? map_app in IHpi2) ;
-  simpl ; rewrite ? map_app ;
-  simpl ; rewrite ? map_app ;
+  try (cbn in IHpi ; rewrite ? map_app in IHpi) ;
+  try (cbn in IHpi1 ; rewrite ? map_app in IHpi1) ;
+  try (cbn in IHpi2; rewrite ? map_app in IHpi2) ;
+  cbn ; rewrite ? map_app ;
+  cbn ; rewrite ? map_app ;
   try now constructor.
 Qed.
 

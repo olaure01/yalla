@@ -63,7 +63,7 @@ Qed.
 
 Lemma mell2ll_dual : forall A, formulas.dual (mell2ll A) = mell2ll (dual A).
 Proof.
-induction A ; simpl ;
+induction A ; cbn ;
   rewrite ? IHA ;
   rewrite ? IHA1 ;
   rewrite ? IHA2 ;
@@ -74,7 +74,7 @@ Lemma mell2ll_map_wn : forall l,
   map mell2ll (map wn l) = map formulas.wn (map mell2ll l).
 Proof with try reflexivity.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 Lemma mell2ll_map_wn_inv : forall l1 l2,
@@ -139,15 +139,15 @@ intros l pi.
 induction pi ; try (now constructor) ; try rewrite map_app.
 - eapply ll_def.ex_r...
   apply Permutation_Type_map...
-- replace (map mell2ll l1 ++ map mell2ll l2) with (concat (map mell2ll l1 :: map mell2ll l2 :: nil)) by (simpl; rewrite app_nil_r; reflexivity).
+- replace (map mell2ll l1 ++ map mell2ll l2) with (concat (map mell2ll l1 :: map mell2ll l2 :: nil)) by (cbn; rewrite app_nil_r; reflexivity).
   apply ll_def.mix_r...
   apply Forall_inf_cons...
   apply Forall_inf_cons...
   apply Forall_inf_nil...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
-  + simpl ; Permutation_Type_solve.
-- simpl ; rewrite mell2ll_map_wn.
+  + cbn ; Permutation_Type_solve.
+- cbn ; rewrite mell2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- mell2ll_map_wn...
 Qed.
@@ -165,14 +165,14 @@ revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; sub
   destruct x0 ; inversion Heql0.
   subst ; subst.
   apply ax_r.
-- simpl in p.
+- cbn in p.
   apply Permutation_Type_map_inv in p.
   destruct p as [l'' Heq HP].
   apply Permutation_Type_sym in HP.
   eapply ex_r...
   apply IHpi...
 - symmetry in Heql0; decomp_map_inf Heql0 ; subst; symmetry in Heql0.
-  simpl in Heql0 ; apply mell2ll_map_wn_inv in Heql0 ;
+  cbn in Heql0 ; apply mell2ll_map_wn_inv in Heql0 ;
     destruct Heql0 as (l & ? & ?) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
   eapply ex_r ;
@@ -187,9 +187,9 @@ revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; sub
   destruct L; inversion Heqn.
   destruct L; inversion Heqn.
   destruct L; inversion Heqn.
-  simpl in Heql0.
+  cbn in Heql0.
   symmetry in Heql0; decomp_map_inf Heql0; subst.
-  simpl in *; clear H0 H1 H2 H3 Heqn eqpmix.
+  cbn in *; clear H0 H1 H2 H3 Heqn eqpmix.
   destruct l6; inversion Heql4; rewrite app_nil_r; clear Heql4.
   apply mix_r.
   + destruct (In_Forall_inf_in (map mell2ll l3) PL); [ left; reflexivity | ].
@@ -213,7 +213,7 @@ revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; sub
   destruct H1 as (l'' & Heq1 & Heq2) ; subst.
   apply oc_r.
   apply IHpi.
-  simpl ; rewrite mell2ll_map_wn...
+  cbn ; rewrite mell2ll_map_wn...
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply de_r.
@@ -239,7 +239,7 @@ Lemma ax_gen_r : forall A, mell (dual A :: A :: nil).
 Proof.
 intro A.
 apply mellfrag2mell.
-simpl ; rewrite <- mell2ll_dual.
+cbn ; rewrite <- mell2ll_dual.
 eapply ll_def.ex_r ; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
 Qed.
 
@@ -253,7 +253,7 @@ apply mellfrag2mell.
 rewrite map_app.
 apply mell2mellfrag in pi1.
 apply mell2mellfrag in pi2.
-simpl in pi2 ; rewrite <- mell2ll_dual in pi2.
+cbn in pi2 ; rewrite <- mell2ll_dual in pi2.
 eapply ll_cut.cut_r_axfree...
 intros a ; destruct a.
 Qed.

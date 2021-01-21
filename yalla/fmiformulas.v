@@ -59,7 +59,7 @@ end.
 
 Lemma iform_nattree_section : retract nattree2iform iform2nattree.
 Proof.
-intros A; induction A; simpl;
+intros A; induction A; cbn;
   try rewrite IHA1; try rewrite IHA2; try rewrite IHA;
   try rewrite i2i_n; reflexivity.
 Qed.

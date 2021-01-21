@@ -138,7 +138,7 @@ Lemma trans_wn : forall l,
 = map ioc (map (fun x => (negR (negR (trans x)))) l).
 Proof with myeasy.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 Lemma neg_tens_propag {P} : ipperm P = true -> ipcut P = true -> forall A1 A2 B1 B2,
@@ -225,7 +225,7 @@ Lemma trans_dual {P} : ipperm P = true -> ipcut P = true -> forall A,
   ill P (negR (trans A) :: negR (trans (dual A)) :: nil) R.
 Proof with myeeasy ; try now (apply ax_exp_ill).
 intros Hperm Hcut.
-induction A ; simpl.
+induction A ; cbn.
 - apply negR_ilr...
 - eapply ex_ir ; [ | rewrite Hperm ; apply Permutation_Type_swap ].
   apply negR_ilr...
@@ -295,35 +295,35 @@ Lemma trans_subs {P} : ipperm P = true -> ipcut P = true -> forall (A B : formul
              :: negR (trans (subs B x A)):: nil) R.
 Proof with myeeasy ; try now (apply ax_exp_ill).
 intros Hperm Hcut A B x HR.
-induction A ; simpl ; try rewrite HR.
+induction A ; cbn ; try rewrite HR.
 - case_eq (ateq c x) ; intros Hateq.
-  + unfold repl_at ; rewrite Hateq ; simpl.
+  + unfold repl_at ; rewrite Hateq ; cbn.
     assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i ; assumption).
-    unfold repl_iat ; rewrite Hiateq ; simpl.
+    unfold repl_iat ; rewrite Hiateq ; cbn.
     apply negR_ilr...
   + case_eq (iateq (a2i c) (a2i x)) ; intros Hiateq.
     * exfalso.
       rewrite <- ateq_a2i in Hiateq.
       rewrite Hiateq in Hateq.
       inversion Hateq.
-    * unfold repl_at ; rewrite Hateq ; simpl.
-      unfold repl_iat ; rewrite Hiateq ; simpl.
+    * unfold repl_at ; rewrite Hateq ; cbn.
+      unfold repl_iat ; rewrite Hiateq ; cbn.
       eapply ex_ir ; [ | rewrite Hperm ; apply Permutation_Type_swap ].
       apply negR_ilr...
 - case_eq (ateq c x) ; intros Hateq.
-  + unfold repl_at ; rewrite Hateq ; simpl.
+  + unfold repl_at ; rewrite Hateq ; cbn.
     assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i ; assumption).
-    unfold repl_iat ; rewrite Hiateq ; simpl.
+    unfold repl_iat ; rewrite Hiateq ; cbn.
     apply trans_dual...
   + case_eq (iateq (a2i c) (a2i x)) ; intros Hiateq.
     * exfalso.
       rewrite <- ateq_a2i in Hiateq.
       rewrite Hiateq in Hateq.
       inversion Hateq.
-    * unfold repl_at ; rewrite Hateq ; simpl.
-      unfold repl_iat ; rewrite Hiateq ; simpl.
+    * unfold repl_at ; rewrite Hateq ; cbn.
+      unfold repl_iat ; rewrite Hiateq ; cbn.
       eapply ex_ir ; [ | rewrite Hperm ; apply Permutation_Type_swap ].
       apply negR_ilr...
 - eapply ex_ir ; [ | rewrite Hperm ; apply Permutation_Type_swap ].
@@ -404,7 +404,7 @@ Lemma ll_to_ill_trans_gen : forall l l0,
                ill (p2ipfrag P) (map ioc l0 ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map ioc l0 ++ map trans l) R.
 Proof with myeeasy ; (try now (apply ax_exp_ill)) ;
-                     try (simpl ; rewrite P_perm ; GPermutation_Type_solve).
+                     try (cbn ; rewrite P_perm ; GPermutation_Type_solve).
 intros l l0 Hmix Hll.
 assert (Hax := @ax_exp_ill _ (p2ipfrag P) R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
@@ -416,20 +416,20 @@ induction Hll using ll_nested_ind.
   + eapply lmap_ilr ; [ | apply Hax' ].
     eapply (ax_ir _ (a2i X)).
   + GPermutation_Type_solve.
-- simpl in p.
+- cbn in p.
   rewrite P_perm in p.
   eapply ex_ir...
   apply PEPermutation_Type_app_head...
   apply PEPermutation_Type_map.
-  simpl ; rewrite P_perm...
-- list_simpl in IHHll ; rewrite map_map in IHHll ; simpl in IHHll ;
+  cbn ; rewrite P_perm...
+- list_simpl in IHHll ; rewrite map_map in IHHll ; cbn in IHHll ;
     rewrite <- (map_map _ _ lw) in IHHll.
-  list_simpl ; rewrite map_map ; simpl ; rewrite <- (map_map _ _ lw').
+  list_simpl ; rewrite map_map ; cbn ; rewrite <- (map_map _ _ lw').
   rewrite app_assoc in IHHll ; rewrite app_assoc.
   eapply Permutation_Type_map in p.
   eapply ex_oc_ir...
 - apply Hmix with PL...
-- eapply ex_ir ; [ | simpl ; rewrite P_perm ; apply Permutation_Type_middle ].
+- eapply ex_ir ; [ | cbn ; rewrite P_perm ; apply Permutation_Type_middle ].
   rewrite <- (app_nil_l _).
   rewrite <- (app_nil_l _).
   apply lmap_ilr...
@@ -463,13 +463,13 @@ induction Hll using ll_nested_ind.
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
   apply (ex_ir _ _ _ _ Hax)...
 - apply plus_ilr...
-- simpl in IHHll ; rewrite map_map in IHHll.
-  simpl in IHHll ; rewrite <- map_map in IHHll.
+- cbn in IHHll ; rewrite map_map in IHHll.
+  cbn in IHHll ; rewrite <- map_map in IHHll.
   apply (ex_ir _ _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l1)))
     in IHHll...
   + apply negR_irr in IHHll.
     apply oc_irr in IHHll.
-    eapply ex_ir ; [ | simpl ; rewrite P_perm ; apply Permutation_Type_middle ].
+    eapply ex_ir ; [ | cbn ; rewrite P_perm ; apply Permutation_Type_middle ].
     apply negR_ilr...
     eapply ex_ir...
     list_simpl...
@@ -477,7 +477,7 @@ induction Hll using ll_nested_ind.
   + list_simpl...
     rewrite ? map_map...
 - apply de_ilr...
-  eapply ex_ir ; [ | simpl ; rewrite P_perm ; apply Permutation_Type_middle ].
+  eapply ex_ir ; [ | cbn ; rewrite P_perm ; apply Permutation_Type_middle ].
   apply negR_ilr...
   apply negR_irr.
   eapply ex_ir...
@@ -489,8 +489,8 @@ induction Hll using ll_nested_ind.
   apply negR_irr in IHHll1.
   apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l2)) in IHHll2...
   apply negR_irr in IHHll2.
-  assert (ipperm (p2ipfrag P) = true) as Hperm by (simpl ; assumption).
-  assert (ipcut (p2ipfrag P) = true) as Hcut by (simpl ; assumption).
+  assert (ipperm (p2ipfrag P) = true) as Hperm by (cbn ; assumption).
+  assert (ipcut (p2ipfrag P) = true) as Hcut by (cbn ; assumption).
   assert (pi0 := trans_dual Hperm f A).
   rewrite <- (app_nil_l _) in pi0.
   eapply (@cut_ir _ _ Hcut _ _ _ _ _ IHHll2) in pi0.

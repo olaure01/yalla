@@ -47,7 +47,7 @@ Instance le_ipfrag_po : PreOrder le_ipfrag.
 Proof.
 split.
 - nsplit 3 ; try reflexivity.
-  simpl ; intros a.
+  cbn ; intros a.
   exists a ; reflexivity.
 - intros P Q R.
   apply le_ipfrag_trans.
@@ -173,7 +173,7 @@ induction H ; try (econstructor ; myeeasy ; fail).
   destruct Hle as (_ & _ & Hp).
   hyps_GPermutation_Type_unfold ; unfold PEPermutation_Type.
   destruct (ipperm P) ; destruct (ipperm Q) ;
-    simpl in Hp ; try inversion Hp ; subst...
+    cbn in Hp ; try inversion Hp ; subst...
 - destruct Hle as [Hcut _].
   rewrite f in Hcut.
   eapply (@cut_ir _ Hcut)...
@@ -198,7 +198,7 @@ Lemma co_list_ilr {P} : forall l l1 l2 C,
   ill P (l1 ++ map ioc l ++ l2) C.
 Proof with myeeasy ; try GPermutation_Type_solve.
 induction l ; intros l1 l2 C pi...
-simpl ; apply co_ilr.
+cbn ; apply co_ilr.
 cons2app ; rewrite 2 app_assoc.
 apply IHl ; list_simpl.
 rewrite app_assoc ; rewrite 2 app_comm_cons.
@@ -287,7 +287,7 @@ induction A.
   + apply plus_irr2...
 - change (ioc A :: nil) with (map ioc (A :: nil)).
   apply oc_irr.
-  simpl ; rewrite <- (app_nil_l (ioc A :: _)).
+  cbn ; rewrite <- (app_nil_l (ioc A :: _)).
   apply de_ilr...
 Qed.
 
@@ -331,7 +331,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
   + destruct l1' ; inversion H1.
 - case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
   + apply PEPermutation_Type_vs_elt_inv in p.
-    destruct p as [(l3 & l4) Heq HP] ; simpl in HP ; subst.
+    destruct p as [(l3 & l4) Heq HP] ; cbn in HP ; subst.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
     assert (PEPermutation_Type (ipperm P) (l3 ++ l0 ++ ineg C :: l4)
                                    (l1' ++ l0 ++ ineg C :: l2')) as HP'.
@@ -340,7 +340,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
       apply Permutation_Type_app_middle.
       apply Permutation_Type_elt... }
     exists (ex_ir _ _ _ _ pi' HP')...
-  + simpl in p ; subst.
+  + cbn in p ; subst.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
     exists pi'...
 - dichot_elt_app_inf_exec Heq ; subst.
@@ -673,7 +673,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
   + destruct l1' ; inversion H1.
 - case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
   + apply PEPermutation_Type_vs_elt_inv in p.
-    destruct p as [(l3 & l4) Heq HP] ; simpl in HP ; subst.
+    destruct p as [(l3 & l4) Heq HP] ; cbn in HP ; subst.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
     assert (PEPermutation_Type (ipperm P) (l3 ++ igen C :: l0 ++ l4)
                                    (l1' ++ igen C :: l0 ++ l2')) as HP'.
@@ -682,7 +682,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
       apply Permutation_Type_elt.
       apply Permutation_Type_app_middle... }
     exists (ex_ir _ _ _ _ pi' HP')...
-  + simpl in p ; subst.
+  + cbn in p ; subst.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
     exists pi'...
 - dichot_elt_app_inf_exec Heq ; subst.

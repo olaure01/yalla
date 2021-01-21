@@ -66,7 +66,7 @@ Qed.
 
 Lemma mell2ll_dual : forall A, formulas.dual (mell2ll A) = mell2ll (dual A).
 Proof.
-induction A ; simpl ;
+induction A ; cbn ;
   rewrite ? IHA ;
   rewrite ? IHA1 ;
   rewrite ? IHA2 ;
@@ -77,7 +77,7 @@ Lemma mell2ll_map_wn : forall l,
   map mell2ll (map wn l) = map formulas.wn (map mell2ll l).
 Proof with try reflexivity.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 Lemma mell2ll_map_wn_inv : forall l1 l2,
@@ -168,7 +168,7 @@ induction pi ;
   try destruct IHpi as [IHpi] ;
   try destruct IHpi1 as [IHpi1] ;
   try destruct IHpi2 as [IHpi2] ;
-  constructor ; simpl ; rewrite ? map_app ;
+  constructor ; cbn ; rewrite ? map_app ;
   try (now (constructor ; eassumption)).
 - apply meq_perm in X.
   eapply ll_def.ex_r...
@@ -177,28 +177,28 @@ induction pi ;
   + apply ll_def.tens_r.
     * assert (Helt := Permutation_Type_map mell2ll (elts_add A l1)).
       apply (ll_def.ex_r _ _ _ IHpi1) in Helt.
-      simpl in Helt...
+      cbn in Helt...
     * assert (Helt := Permutation_Type_map mell2ll (elts_add B l2)).
       apply (ll_def.ex_r _ _ _ IHpi2) in Helt.
-      simpl in Helt...
+      cbn in Helt...
   + apply Permutation_Type_cons...
     rewrite <- map_app.
     apply Permutation_Type_map.
     unfold sum ; unfold list2fm.
-    simpl ; rewrite fold_id.
+    cbn ; rewrite fold_id.
     apply Permutation_Type_app_comm.
 - unfold fmmap.
   unfold list2fm.
   unfold add.
   unfold empty.
-  simpl.
+  cbn.
   rewrite fold_id.
   rewrite mell2ll_map_wn.
   unfold elts in IHpi.
   unfold add in IHpi.
   unfold fmmap in IHpi.
   unfold list2fm in IHpi.
-  simpl in IHpi.
+  cbn in IHpi.
   rewrite fold_id in IHpi.
   rewrite mell2ll_map_wn in IHpi.
   apply ll_def.oc_r...
@@ -220,7 +220,7 @@ revert m Heql ; induction pi ; intros m Heql ;
   destruct m ; inversion H3.
   apply ax_r.
 - subst.
-  simpl in p.
+  cbn in p.
   apply Permutation_Type_map_inv in p.
   destruct p as [l' Heq HP] ; subst.
   eapply ex_r.
@@ -229,7 +229,7 @@ revert m Heql ; induction pi ; intros m Heql ;
 - symmetry in Heql; decomp_map Heql ; subst; symmetry in Heql3.
   apply mell2ll_map_wn_inv in Heql3 ; destruct Heql3 as (l & Heq1 & Heq2) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
-  simpl in Heql ; unfold id in Heql ; subst.
+  cbn in Heql ; unfold id in Heql ; subst.
   eapply ex_r ;
     [ apply IHpi ; rewrite <- mell2ll_map_wn ; rewrite <- ? map_app | ]...
   apply Permutation_Type_app_head.
@@ -254,7 +254,7 @@ revert m Heql ; induction pi ; intros m Heql ;
   + unfold sum.
     unfold list2fm.
     unfold add.
-    simpl.
+    cbn.
     apply Permutation_Type_cons...
     rewrite fold_id.
     apply Permutation_Type_app_comm.
@@ -273,13 +273,13 @@ revert m Heql ; induction pi ; intros m Heql ;
     unfold add.
     unfold fmmap.
     unfold list2fm.
-    simpl.
+    cbn.
     rewrite fold_id.
     rewrite mell2ll_map_wn...
   + unfold fmmap.
     unfold list2fm.
     unfold add.
-    simpl.
+    cbn.
     rewrite fold_id...
 - destruct m ; inversion Heql.
   destruct f ; inversion H0 ; subst.
@@ -318,8 +318,8 @@ Lemma cut_r : forall A m1 m2,
   mell (add A m1) -> mell (add (dual A) m2) -> mell (sum m1 m2).
 Proof with try eassumption.
 intros A m1 m2 pi1 pi2.
-apply mell2mellfrag in pi1 ; destruct pi1 as [pi1] ; simpl in pi1.
-apply mell2mellfrag in pi2 ; destruct pi2 as [pi2] ; simpl in pi2.
+apply mell2mellfrag in pi1 ; destruct pi1 as [pi1] ; cbn in pi1.
+apply mell2mellfrag in pi2 ; destruct pi2 as [pi2] ; cbn in pi2.
 apply mellfrag2mell.
 eapply ll_def.ex_r ; [ | apply Permutation_Type_map ; symmetry ; apply elts_sum ].
 rewrite map_app.
@@ -328,7 +328,7 @@ eapply ll_cut.cut_r_axfree...
 - assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
                            (map mell2ll (dual A :: elts m2)))
   as Helt2 by (apply Permutation_Type_map ; apply elts_add).
-  simpl in Helt2 ; rewrite <- mell2ll_dual in Helt2.
+  cbn in Helt2 ; rewrite <- mell2ll_dual in Helt2.
   rewrite <- mell2ll_dual in pi2.
   eapply ll_def.ex_r ; [ | apply Helt2 ]...
 Qed.

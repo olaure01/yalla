@@ -70,7 +70,7 @@ intros l pi; induction pi; intros l1' l2' Heq; subst.
   destruct l1' ; inversion H3.
 - assert (HP := p).
   apply Permutation_Type_vs_elt_inv in p.
-  destruct p as [(l3 & l4) Heq] ; simpl in Heq ; subst.
+  destruct p as [(l3 & l4) Heq] ; cbn in Heq ; subst.
   apply Permutation_Type_app_inv in HP.
   eapply ex_bbb_r ; [ | apply HP ].
   apply IHpi...
@@ -142,7 +142,7 @@ intros l H ; induction H using ll_nested_ind ; try now constructor.
   eapply ex_bbb_r...
   Permutation_Type_solve.
 - repeat (destruct L; try now inversion eqpmix).
-  simpl; rewrite app_nil_r.
+  cbn; rewrite app_nil_r.
   assert (ll_bbb l1) as pi1.
   { destruct (In_Forall_inf_in _ PL (in_inf_elt l1 (l0 :: nil) nil)) as [pi Hin].
     refine (Dependent_Forall_inf_forall_formula _ _ X Hin). }
@@ -223,7 +223,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   apply Permutation_Type_length_1_inv in HP.
@@ -245,7 +245,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     * destruct l' ; inversion H2.
       rewrite H3.
       eapply ex_bbb_r ; [ apply ax_bbb_r | ]...
-- simpl in p.
+- cbn in p.
   eapply IHpi.
   etransitivity...
 - eapply IHpi.
@@ -261,7 +261,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -274,22 +274,22 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
   + rewrite app_assoc in HP.
     remember (l'l ++ l) as l'.
     apply Permutation_Type_app_app_inv in HP as [[[[l1a l2a] l3a] l4a] [[HP1 HP2] [HP3 HP4]]];
-      simpl in HP1, HP2, HP3, HP4.
+      cbn in HP1, HP2, HP3, HP4.
     apply Permutation_Type_app_app_inv in HP4 as [[[[l1b l2b] l3b] l4b] [[HP1b HP2b] [HP3b HP4b]]];
-      simpl in HP1b, HP2b, HP3b, HP4b.
+      cbn in HP1b, HP2b, HP3b, HP4b.
     symmetry in HP1b.
     apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-    symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+    symmetry in Heqa; decomp_map_inf Heqa; cbn in Heqa1, Heqa2; subst.
     symmetry in HP2b.
     apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-    symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+    symmetry in Heqb; decomp_map_inf Heqb; cbn in Heqb1, Heqb2; subst.
     apply (Permutation_Type_app_head l2a) in HP4b.
     assert (IHP1 := Permutation_Type_trans HP2 HP4b).
     apply (@Permutation_Type_cons _ A _ eq_refl) in IHP1.
@@ -309,15 +309,15 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
       rewrite <- map_app in HP.
       remember (l5 ++ l7) as l0 ; clear Heql0.
       apply Permutation_Type_app_app_inv in HP as [[[[l1a l2a] l3a] l4a] [[HP1 HP2] [HP3 HP4]]];
-        simpl in HP1, HP2, HP3, HP4.
+        cbn in HP1, HP2, HP3, HP4.
       apply Permutation_Type_app_app_inv in HP4 as [[[[l1b l2b] l3b] l4b] [[HP1b HP2b] [HP3b HP4b]]];
-        simpl in HP1b, HP2b, HP3b, HP4b.
+        cbn in HP1b, HP2b, HP3b, HP4b.
       symmetry in HP1b.
       apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-      symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+      symmetry in Heqa; decomp_map_inf Heqa; cbn in Heqa1, Heqa2; subst.
       symmetry in HP2b.
       apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-      symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+      symmetry in Heqb; decomp_map_inf Heqb; cbn in Heqb1, Heqb2; subst.
       apply (Permutation_Type_app_head l2a) in HP4b.
       assert (IHP1 := Permutation_Type_trans HP2 HP4b).
       eapply (ex_r _ _ ((l2a ++ map (fun _ : unit => tens (wn one) bot) l8)
@@ -358,7 +358,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -374,7 +374,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -385,7 +385,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -400,7 +400,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -415,7 +415,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -434,13 +434,13 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
   + symmetry in HP.
     apply Permutation_Type_map_inv in HP as [l' Heq HP].
-    symmetry in Heq; decomp_map_inf Heq; simpl in Heq1, Heq2, Heq3, Heq5; subst ; simpl in HP.
+    symmetry in Heq; decomp_map_inf Heq; cbn in Heq1, Heq2, Heq3, Heq5; subst ; cbn in HP.
     apply (Permutation_Type_map wn) in HP.
     list_simpl in HP.
     rewrite app_assoc in HP.
@@ -456,7 +456,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -467,7 +467,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     eapply ex_bbb_r ; [ apply de_bbb_r | ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
+    * symmetry in Heq2; decomp_map_inf Heq2; cbn in Heq1, Heq2, Heq3; subst; cbn in HP.
       inversion Heq2 ; subst.
       list_simpl in HP ; rewrite <- map_app in HP.
       apply (@Permutation_Type_cons _ (tens (wn one) bot) _ eq_refl) in HP.
@@ -479,7 +479,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -488,14 +488,14 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     eapply ex_bbb_r ; [ apply wk_bbb_r | ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2 ; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
+    * symmetry in Heq2; decomp_map_inf Heq2 ; cbn in Heq1, Heq2, Heq3; subst; cbn in HP.
       inversion Heq2 ; subst.
       list_simpl in HP ; rewrite <- map_app in HP.
       apply IHpi in HP...
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
-  destruct HP' as [[l'l l'r] Heq] ; simpl in Heq.
+  destruct HP' as [[l'l l'r] Heq] ; cbn in Heq.
   rewrite Heq in HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
@@ -507,7 +507,7 @@ intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     eapply ex_bbb_r ; [ apply co_bbb_r | ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2 ; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
+    * symmetry in Heq2; decomp_map_inf Heq2 ; cbn in Heq1, Heq2, Heq3; subst; cbn in HP.
       inversion Heq2 ; subst.
       list_simpl in HP ; rewrite <- map_app in HP.
     apply (@Permutation_Type_cons _ (wn (tens (wn one) bot)) _ eq_refl) in HP.
@@ -563,7 +563,7 @@ intros l pi; induction pi using ll_nested_ind ; try now econstructor.
 - eapply ex_r...
 - eapply ex_wn_r...
 - repeat (destruct L; try now inversion eqpmix).
-  simpl; rewrite app_nil_r.
+  cbn; rewrite app_nil_r.
   apply mix2_bb_r...
   + assert (In_inf l1 (l0 :: l1 :: nil)) as Hin.
     { right; left... }
@@ -582,7 +582,7 @@ induction pi ; try now econstructor.
 - eapply ex_bbb_r...
   apply (Permutation_Type_map wn) in p ; Permutation_Type_solve.
 - eapply cut_bbb_r...
-- destruct a ; simpl.
+- destruct a ; cbn.
   + apply de_bbb_r.
     apply one_bbb_r.
   + rewrite <- (app_nil_l (one :: _)).
@@ -609,7 +609,7 @@ eapply mix2_bbb_r.
 - change nil with (map wn nil).
   apply oc_bbb_r.
   apply parr_bbb_r.
-  simpl.
+  cbn.
   change (one :: one :: nil) with ((one :: nil) ++ one :: nil).
   apply mix2_bbb_r.
   + apply one_bbb_r.
@@ -645,7 +645,7 @@ eapply mix2_bbb_r.
   rewrite map_app.
   eapply tens_r.
   + eapply parr_r.
-    simpl.
+    cbn.
     change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r...
     repeat (apply Forall_inf_cons; try apply one_r).
@@ -659,16 +659,16 @@ Qed.
 Example bb_ex :
   llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
 Proof with myeeasy ; try Permutation_Type_solve.
-assert (Hax :=  gax_r (@pfrag_llR atom (oc bot)) false) ; simpl in Hax.
+assert (Hax :=  gax_r (@pfrag_llR atom (oc bot)) false) ; cbn in Hax.
 assert (llR (oc bot) ((one :: nil) ++ one :: nil))
   as Hr by (eapply mix2_bb_r ; apply one_r).
 eapply (@cut_r _ (pfrag_llR _) eq_refl) in Hax...
 - apply Hax.
 - eapply ex_r ; [ | apply PCPermutation_Type_swap ].
-  simpl.
+  cbn.
   change (wn one :: nil) with (map (@wn atom) (one :: nil)).
   apply oc_r.
-  simpl.
+  cbn.
   rewrite <- (app_nil_l nil).
   rewrite app_comm_cons.
   apply tens_r.
@@ -779,15 +779,15 @@ intros l H; induction H; intro HP;
       apply app_eq_unit_inf in HP1.
       destruct HP1 ; destruct p ; subst.
       -- clear - l ; rename l into H.
-         simpl in H.
+         cbn in H.
          remember (oc (tens (parr one one) bot) :: nil) as l.
          revert Heql ; induction H ; intro Heql ; inversion Heql ; subst.
          ++ symmetry in p.
-            simpl in p.
+            cbn in p.
             apply Permutation_Type_length_1_inv in p.
             apply IHll...
          ++ destruct l1 ; inversion Heql.
-            ** destruct lw' ; inversion Heql ; simpl in H0 ; subst.
+            ** destruct lw' ; inversion Heql ; cbn in H0 ; subst.
                symmetry in p ; apply Permutation_Type_nil in p ; subst.
                intuition.
             ** apply app_eq_nil in H3 ; destruct H3 as [Heq1 Heq2] ; subst.
@@ -801,11 +801,11 @@ intros l H; induction H; intro HP;
             remember (tens (parr one one) bot :: nil) as l.
             revert Heql ; induction H ; intro Heql ; inversion Heql ; subst.
             ** symmetry in p.
-               simpl in p.
+               cbn in p.
                apply Permutation_Type_length_1_inv in p.
                apply IHll...
             ** destruct l1 ; inversion Heql.
-               --- destruct lw' ; inversion Heql ; simpl in H0 ; subst.
+               --- destruct lw' ; inversion Heql ; cbn in H0 ; subst.
                    symmetry in p ; apply Permutation_Type_nil in p ; subst.
                    intuition.
                --- apply app_eq_nil in H3 ; destruct H3 as [Heq1 Heq2] ; subst.
@@ -820,11 +820,11 @@ intros l H; induction H; intro HP;
                remember (parr one one :: nil) as l.
                revert Heql ; induction H ; intro Heql ; inversion Heql ; subst...
                --- symmetry in p.
-                   simpl in p.
+                   cbn in p.
                    apply Permutation_Type_length_1_inv in p.
                    apply IHll...
                --- destruct l1 ; inversion Heql.
-                   +++ destruct lw' ; inversion Heql ; simpl in H0 ; subst.
+                   +++ destruct lw' ; inversion Heql ; cbn in H0 ; subst.
                        symmetry in p ; apply Permutation_Type_nil in p ; subst.
                        intuition.
                    +++ apply app_eq_nil in H3 ; destruct H3 as [Heq1 Heq2] ; subst.
@@ -881,7 +881,7 @@ induction pi ; (try now inversion f) ; try now constructor.
 - eapply ex_bbb0_r...
   apply (Permutation_Type_map wn) in p ; Permutation_Type_solve.
 - eapply cut_bbb0_r...
-- destruct a ; simpl.
+- destruct a ; cbn.
   + apply de_bbb0_r.
     apply one_bbb0_r.
   + rewrite <- (app_nil_l (one :: _)).

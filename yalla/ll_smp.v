@@ -81,7 +81,7 @@ Qed.
 
 Lemma ll2ll_dual : forall A, formulas.dual (ll2ll A) = ll2ll (dual A).
 Proof.
-induction A ; simpl ;
+induction A ; cbn ;
   rewrite ? IHA ;
   rewrite ? IHA1 ;
   rewrite ? IHA2 ;
@@ -92,7 +92,7 @@ Lemma ll2ll_map_wn : forall l,
   map ll2ll (map wn l) = map formulas.wn (map ll2ll l).
 Proof with try reflexivity.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 Lemma ll2ll_map_wn_inv : forall l1 l2,
@@ -147,8 +147,8 @@ induction pi ; try (now constructor) ; try rewrite map_app.
   apply Permutation_Type_map...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
-  + simpl ; Permutation_Type_solve.
-- simpl ; rewrite ll2ll_map_wn.
+  + cbn ; Permutation_Type_solve.
+- cbn ; rewrite ll2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- ll2ll_map_wn...
 Qed.
@@ -165,14 +165,14 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   destruct x0 ; inversion Heql0.
   subst ; subst.
   apply ax_r.
-- simpl in p.
+- cbn in p.
   apply Permutation_Type_map_inv in p.
   destruct p as [l'' Heq HP].
   apply Permutation_Type_sym in HP.
   eapply ex_r...
   apply IHpi...
 - symmetry in Heql0; decomp_map_inf Heql0 ; subst; symmetry in Heql0.
-  simpl in Heql0 ; apply ll2ll_map_wn_inv in Heql0 ;
+  cbn in Heql0 ; apply ll2ll_map_wn_inv in Heql0 ;
     destruct Heql0 as (l & ? & ?) ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
   eapply ex_r ;
@@ -216,7 +216,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   destruct H1 as (l'' & Heq1 & Heq2) ; subst.
   apply oc_r.
   apply IHpi.
-  simpl ; rewrite ll2ll_map_wn...
+  cbn ; rewrite ll2ll_map_wn...
 - destruct l' ; inversion Heql0.
   destruct f ; inversion H0 ; subst.
   apply de_r.
@@ -241,7 +241,7 @@ Lemma ax_gen_r : forall A, ll (dual A :: A :: nil).
 Proof.
 intro A.
 apply llfrag2ll.
-simpl ; rewrite <- ll2ll_dual.
+cbn ; rewrite <- ll2ll_dual.
 eapply ll_def.ex_r ; [ apply ll_def.ax_exp
                      | apply Permutation_Type.Permutation_Type_swap ].
 Qed.
@@ -257,7 +257,7 @@ rewrite map_app.
 eapply ll_cut.cut_r_axfree.
 - intros a ; destruct a.
 - apply ll2llfrag in pi2.
-  simpl in pi2 ; rewrite <- ll2ll_dual in pi2...
+  cbn in pi2 ; rewrite <- ll2ll_dual in pi2...
 - apply ll2llfrag in pi1...
 Qed.
 

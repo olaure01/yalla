@@ -257,10 +257,10 @@ induction H ; try now constructor.
   unfold PEPermutation_Type in p.
   unfold PEPermutation_Type.
   destruct (ipperm P) ; destruct (ipperm Q) ;
-    simpl in Hp ; try inversion Hp ; subst...
+    cbn in Hp ; try inversion Hp ; subst...
 - eapply ex_oc_ps_ir...
 - inversion Hle.
-  rewrite f in H1 ; simpl in H1.
+  rewrite f in H1 ; cbn in H1.
   eapply (@cut_ps_ir _ _ H1)...
 - destruct (fst (snd Hle) a) as [b Heq] ; rewrite_all Heq.
   apply gax_ps_ir...
@@ -312,7 +312,7 @@ Lemma iconservativity {P} : ipcut P = false -> forall FS, ifragment FS ->
     ill_ps P (fun l0 A0 => forallb FS (A0 :: l0)) l A.
 Proof with try eassumption ; try reflexivity.
 intros P_cutfree FS HFS l A pi.
-induction pi; simpl; intros HFrag;
+induction pi; cbn; intros HFrag;
   inversion HFrag; apply andb_true_iff in HFrag; destruct HFrag as [Hhd HFrag]; subst.
 - apply ax_ps_ir...
 - apply (ex_ps_ir _ _ l1)...
@@ -584,7 +584,7 @@ apply iconservativity...
 - intros C Hf B Hs.
   remember (A :: l) as l'.
   revert Hf ; clear - Hs ; induction l' ; intro Hf ; inversion Hf ; subst.
-  simpl ; apply orb_true_iff.
+  cbn ; apply orb_true_iff.
   apply orb_true_iff in H0.
   destruct H0.
   + left.

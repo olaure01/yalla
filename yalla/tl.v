@@ -118,7 +118,7 @@ induction A ; intros B Heq ; destruct B ;
       try apply IHA in H0 ;
       try apply IHA1 in H0 ;
       try apply IHA2 in H1 ; subst ; reflexivity ; fail).
-- simpl in Heq.
+- cbn in Heq.
   f_equal.
   apply t2i_inj.
   apply i2ac_inj.
@@ -137,14 +137,14 @@ Qed.
 
 Lemma tl2ill_nz : forall A, nonzerospos (tl2ill A).
 Proof.
-induction A ; simpl ; constructor ; try assumption.
+induction A ; cbn ; constructor ; try assumption.
 Qed.
 
 Lemma tl2ill_map_ioc : forall l,
   map tl2ill (map toc l) = map ioc (map tl2ill l).
 Proof with try reflexivity.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 Lemma tl2ill_map_ioc_inv : forall l1 l2,
@@ -256,7 +256,7 @@ induction H ; try (constructor ; try assumption ; fail).
   destruct Hle as (_ & _ & Hp).
   hyps_GPermutation_Type_unfold ; unfold PEPermutation_Type.
   destruct (tpperm P) ; destruct (tpperm Q) ;
-    simpl in Hp ; try inversion Hp ; subst...
+    cbn in Hp ; try inversion Hp ; subst...
 - eapply ex_oc_tr ; [ apply IHtl | ]...
 - destruct Hle as [Hcut _].
   rewrite f in Hcut.
@@ -440,7 +440,7 @@ induction pi ;
   rewrite <- tl2ill_map_ioc.
   eapply piE...
 - destruct D ; inversion HeqC ; subst.
-  rewrite tl2ill_map_ioc ; simpl.
+  rewrite tl2ill_map_ioc ; cbn.
   apply oc_irr.
   rewrite <- tl2ill_map_ioc ; intuition.
 - eapply ex_ir...
@@ -448,12 +448,12 @@ induction pi ;
 - eapply ex_ir...
   eapply (cut_ir _ _ _ _ _ _ (piS1 _ eq_refl) (piE2 HeqC))...
 - assert (pi := gax_ir (t2ipfrag P) a).
-  simpl in pi.
+  cbn in pi.
   rewrite HeqC in pi...
 - assert (pi := gax_ir (t2ipfrag P) a).
-  simpl in pi.
+  cbn in pi.
   rewrite HeqC in pi...
-Unshelve. all : simpl...
+Unshelve. all : cbn...
 Qed.
 
 Lemma tlfrag2tl_cutfree {P} : tpcut P = false -> forall l,
@@ -492,14 +492,14 @@ induction pi ;
   symmetry in HP.
   eapply ex_tr ; [ apply IHpi | ]...
 - symmetry in Heql; decomp_map_inf Heql; subst; symmetry in Heql3.
-  simpl in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
+  cbn in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' ? HP] ; subst.
   symmetry in HP.
   eapply ex_oc_tr ; [ | eassumption ].
   apply IHpi...
   rewrite <- tl2ill_map_ioc ; rewrite <- ? map_app...
 - symmetry in Heql; decomp_map_inf Heql ; subst; symmetry in Heql3.
-  simpl in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
+  cbn in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' ? HP] ; subst.
   symmetry in HP.
   eapply ex_oc_tr ; [ | eassumption ].
@@ -608,7 +608,7 @@ induction pi ;
   rewrite H0 in Hcut ; inversion Hcut.
 - inversion f.
   rewrite H0 in Hcut ; inversion Hcut.
-- simpl in Heql ; simpl in HeqA.
+- cbn in Heql ; cbn in HeqA.
   case_eq (snd (projT2 (tpgax P) a)).
   + intros A Heq.
     rewrite_all Heq.
@@ -619,7 +619,7 @@ induction pi ;
   + intros Heq ; exfalso.
     rewrite_all Heq.
     destruct A'' ; inversion HeqA.
-- simpl in Heql ; simpl in HeqN.
+- cbn in Heql ; cbn in HeqN.
   case_eq (snd (projT2 (tpgax P) a)).
   + intros A Heq ; exfalso.
     rewrite_all Heq.
@@ -658,7 +658,7 @@ Lemma ax_gen_r {P} : forall A, tl P (A :: nil) (Some A).
 Proof.
 intro A.
 apply (stronger_tpfrag (cutrm_tpfrag P)).
-- split ; [ | split ] ; simpl ; try reflexivity.
+- split ; [ | split ] ; cbn ; try reflexivity.
   intros a ; exists a ; reflexivity.
 - eapply tlfrag2tl_cutfree ; try reflexivity.
   apply ax_exp_ill.
@@ -671,7 +671,7 @@ Lemma cut_tl_r_axfree {P} : (projT1 (tpgax P) -> False) -> forall A l0 l1 l2 C,
 Proof with try reflexivity ; try eassumption.
 intros Hgax.
 intros A l0 l1 l2 C pi1 pi2.
-destruct (tl2tlfrag _ _ pi1) as [pi1' _] ; simpl in pi1'.
+destruct (tl2tlfrag _ _ pi1) as [pi1' _] ; cbn in pi1'.
 assert (pi1'' := pi1' _ eq_refl).
 destruct (tl2tlfrag _ _ pi2) as [pi2' pi2''].
 case_eq (tpcut P) ; intros Hcut.
@@ -713,19 +713,19 @@ Lemma tatomic_easytpgax {P} :
 Proof.
 intros Hgax a ; split ; [ split | ].
 - destruct (Hgax a) as [Hat _].
-  simpl ; intros D Heq.
+  cbn ; intros D Heq.
   destruct (snd (projT2 (tpgax P) a)).
   + destruct t ; inversion Hat ; subst.
     destruct D ; inversion Heq.
   + destruct D ; inversion Heq.
 - destruct (Hgax a) as [Hat _].
-  simpl ; intros A C Heq1 Heq2.
+  cbn ; intros A C Heq1 Heq2.
   destruct (snd (projT2 (tpgax P) a)) ; inversion Heq1 ; subst.
   destruct A ; inversion Hat ; subst.
   destruct C ; inversion Heq2.
   apply i2ac_inj in H0 ; subst ; reflexivity.
 - destruct (Hgax a) as [_ Hat].
-  simpl ; intros A C Hin Heq.
+  cbn ; intros A C Hin Heq.
   eapply Forall_inf_forall in Hat ; try eassumption.
   destruct A ; inversion Hat ; subst.
   destruct C ; inversion Heq.
@@ -735,11 +735,11 @@ Qed.
 Lemma easytpgax_easyipgax {P} : easytpgax P -> easyipgax_nzeropos (t2ipfrag P).
 Proof with try eassumption ; try reflexivity.
 intros Hgax.
-split ; [ split | ] ; simpl.
+split ; [ split | ] ; cbn.
 - intros D Heq ; exfalso.
-  case_eq (snd (projT2 (tpgax P) a)) ; [intros t Heqa | intros Heqa] ; rewrite Heqa in Heq ; simpl in Heq.
+  case_eq (snd (projT2 (tpgax P) a)) ; [intros t Heqa | intros Heqa] ; rewrite Heqa in Heq ; cbn in Heq.
   + assert (Hgaxa := fst (fst (Hgax a)) D).
-    apply Hgaxa ; simpl.
+    apply Hgaxa ; cbn.
     rewrite <- Heq, Heqa...
   + destruct D ; inversion Heq.
 - intros l C HP.
@@ -748,7 +748,7 @@ split ; [ split | ] ; simpl.
                (PEPermutation_Type (tpperm P) (map tl2ill (fst (projT2 (tpgax P) a))) l))
     as [[[HeqNone HeqN] | [C' [Heq1 Heqé]]] HPE] ; subst.
   { apply PCPermutation_Type_vs_cons_inv in HP.
-    destruct HP as [[l1 l2] HP Heq]; simpl in Heq, HP.
+    destruct HP as [[l1 l2] HP Heq]; cbn in Heq, HP.
     destruct l1 ; inversion Heq ; subst.
     - split ; [ clear - Hgax H0 | clear - Hgax HP ].
       + assert (Hgaxa := snd (fst (Hgax a))).
@@ -766,15 +766,15 @@ split ; [ split | ] ; simpl.
         remember (fst (projT2 (tpgax P) a)) as l0.
         assert (forall x, In_inf x l0 -> In_inf x (fst (projT2 (tpgax P) a))) as Hin
           by (intros x H ; rewrite <- Heql0 ; assumption).
-        destruct (tpperm P) ; simpl in HP ; simpl.
-        * clear Heql0 ; revert l0 Hin HP ; induction l ; intros l0 Hin Heq ; simpl in Heq.
+        destruct (tpperm P) ; cbn in HP ; cbn.
+        * clear Heql0 ; revert l0 Hin HP ; induction l ; intros l0 Hin Heq ; cbn in Heq.
           -- apply Permutation_Type_nil in Heq.
              destruct l0 ; inversion Heq...
           -- assert (HP := Heq).
              symmetry in Heq ; apply Permutation_Type_vs_cons_inv in Heq.
-             destruct Heq as [[l1 l2] Heq] ; simpl in Heq.
+             destruct Heq as [[l1 l2] Heq] ; cbn in Heq.
              rewrite map_map in Heq ; decomp_map_inf Heq ; subst ;
-               simpl in Hin, Heq3; symmetry in Heq3; list_simpl.
+               cbn in Hin, Heq3; symmetry in Heq3; list_simpl.
              assert (a0 = tl2ill x) ; subst.
              { apply (snd (Hgax a))...
                apply Hin ; apply in_inf_elt. }
@@ -786,28 +786,28 @@ split ; [ split | ] ; simpl.
                 ** right ; apply in_inf_cons...
              ++ list_simpl in HP ; list_simpl.
                 eapply Permutation_Type_cons_app_inv...
-        * clear Heql0 ; revert l0 Hin HP ; induction l ; intros l0 Hin Heq ; simpl in Heq.
+        * clear Heql0 ; revert l0 Hin HP ; induction l ; intros l0 Hin Heq ; cbn in Heq.
           -- symmetry in Heq ; apply map_eq_nil in Heq...
           -- destruct l0 ; inversion Heq.
              assert (forall x, In_inf x l0 -> In_inf x (fst (projT2 (tpgax P) a))) as Hin'
                by (intros x H ; apply Hin ; apply in_inf_cons ; assumption).
-             simpl ; rewrite (IHl _ Hin' H1) ; f_equal.
+             cbn ; rewrite (IHl _ Hin' H1) ; f_equal.
              symmetry ; eapply (snd (Hgax _))...
              apply Hin ; constructor...
     - exfalso.
       apply PEPermutation_Type_vs_elt_inv in HP as [[l1' l2'] HP Heq'];
-        clear - Hgax Heq' ; simpl in Heq'.
+        clear - Hgax Heq' ; cbn in Heq'.
       apply (f_equal (@rev _)) in Heq'.
       rewrite rev_involutive in Heq' ; list_simpl in Heq'.
       rewrite map_map in Heq'.
       decomp_map Heq' ; subst.
       assert (Hgaxa := fst (fst (Hgax a)) x).
-      apply Hgaxa ; simpl.
+      apply Hgaxa ; cbn.
       rewrite <- Heq'3... }
-  + eapply ex_ir ; simpl...
+  + eapply ex_ir ; cbn...
     refine (snd (tl2tlfrag _ _ _) _)...
     apply gax_tr.
-  + eapply ex_ir ; simpl...
+  + eapply ex_ir ; cbn...
     refine (fst (tl2tlfrag _ _ _) _ _)...
     apply gax_tr.
 - intros Hin.
@@ -886,7 +886,7 @@ split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
   + apply tlfrag2tl_axfree...
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
     remember (A :: l) as l0 ; clear.
-    induction l0 ; simpl ; constructor ; intuition.
+    induction l0 ; cbn ; constructor ; intuition.
     apply tl2ill_nz.
 - apply tl2tlfrag in pi.
   eapply ill_to_ll ; intuition.
@@ -895,7 +895,7 @@ split ; [ split ; [ split | ] | ] ; (try intros A pi) ; try intros pi.
     [ | | reflexivity ]...
   + apply tlfrag2tl_axfree...
   + constructor ; [ constructor | ].
-    clear ; induction l ; simpl ; constructor ; intuition.
+    clear ; induction l ; cbn ; constructor ; intuition.
     apply tl2ill_nz.
 Qed.
 

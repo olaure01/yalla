@@ -56,7 +56,7 @@ Lemma wn_n_wn : forall n A, wn_n n (wn A) = wn_n (S n) A.
 Proof with try reflexivity.
 intros n A.
 induction n...
-simpl in *; rewrite IHn...
+cbn in *; rewrite IHn...
 Qed.
 
 Fixpoint oc_n n A :=
@@ -69,7 +69,7 @@ Lemma oc_n_oc : forall n A, oc_n n (oc A) = oc_n (S n) A.
 Proof with try reflexivity.
 intros n A.
 induction n...
-simpl in *; rewrite IHn...
+cbn in *; rewrite IHn...
 Qed.
 
 
@@ -93,7 +93,7 @@ match A with
 end.
 
 Lemma bidual A : dual (dual A) = A.
-Proof. now induction A; simpl; rewrite ? IHA1, ? IHA2, ? IHA. Qed.
+Proof. now induction A; cbn; rewrite ? IHA1, ? IHA2, ? IHA. Qed.
 
 Lemma codual A B : dual A = B <-> A = dual B.
 Proof. now split; intro H; rewrite <- (bidual A), <- (bidual B), H, ? bidual. Qed.
@@ -105,28 +105,28 @@ Lemma dual_tens_n : forall n A, dual (tens_n n A) = parr_n n (dual A).
 Proof with try reflexivity.
 induction n; intro A...
 destruct n...
-simpl in *; rewrite <- IHn...
+cbn in *; rewrite <- IHn...
 Qed.
 
 Lemma dual_parr_n : forall n A, dual (parr_n n A) = tens_n n (dual A).
 Proof with try reflexivity.
 induction n; intro A...
 destruct n...
-simpl in *; rewrite <- IHn...
+cbn in *; rewrite <- IHn...
 Qed.
 
 Lemma dual_wn_n : forall n A, dual (wn_n n A) = oc_n n (dual A).
 Proof with try reflexivity.
 induction n; intro A...
 destruct n...
-simpl in *; rewrite IHn...
+cbn in *; rewrite IHn...
 Qed.
 
 Lemma dual_oc_n : forall n A, dual (oc_n n A) = wn_n n (dual A).
 Proof with try reflexivity.
 induction n; intro A...
 destruct n...
-simpl in *; rewrite IHn...
+cbn in *; rewrite IHn...
 Qed.
 
 (** Size of a [formula] as its number of symbols *)
@@ -147,25 +147,25 @@ match A with
 end.
 
 Lemma fsize_pos A : 0 < fsize A.
-Proof. induction A; simpl; lia. Qed.
+Proof. induction A; cbn; lia. Qed.
 
 Lemma fsize_dual A : fsize (dual A) = fsize A.
-Proof. induction A; simpl; rewrite ? IHA1, ? IHA2; lia. Qed.
+Proof. induction A; cbn; rewrite ? IHA1, ? IHA2; lia. Qed.
 
 Lemma fsize_wn_n n A : fsize (wn_n n A) = n + fsize A.
-Proof. now induction n; simpl; rewrite ? IHn. Qed.
+Proof. now induction n; cbn; rewrite ? IHn. Qed.
 
 Lemma fsize_oc_n n A : fsize (oc_n n A) = n + fsize A.
-Proof. now induction n; simpl; rewrite ? IHn. Qed.
+Proof. now induction n; cbn; rewrite ? IHn. Qed.
 
 Ltac fsize_auto :=
-  simpl ;
+  cbn ;
   repeat rewrite fsize_dual ;
-  simpl ;
+  cbn ;
   match goal with
-  | H: fsize _ < _ |- _ => simpl in H
-  | H: fsize _ <= _ |- _ => simpl in H
-  | H: fsize _ = _ |- _ => simpl in H
+  | H: fsize _ < _ |- _ => cbn in H
+  | H: fsize _ <= _ |- _ => cbn in H
+  | H: fsize _ = _ |- _ => cbn in H
   end ;
   lia.
 
@@ -303,35 +303,35 @@ Proof with reflexivity.
 induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
   try inversion Heqb ; try inversion Heq ; try reflexivity.
 - apply eqb_eq in H0 ; subst...
-- subst ; simpl.
+- subst ; cbn.
   apply eqb_eq...
 - apply eqb_eq in H0 ; subst...
-- subst ; simpl.
+- subst ; cbn.
   apply eqb_eq...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply IHA1 | apply IHA2 ]...
 - apply IHA in H0 ; subst...
-- subst ; simpl ; apply IHA...
+- subst ; cbn ; apply IHA...
 - apply IHA in H0 ; subst...
-- subst ; simpl ; apply IHA...
+- subst ; cbn ; apply IHA...
 Qed.
 
 Definition formulas_dectype := {|
@@ -355,7 +355,7 @@ induction l1 ; destruct l2 ; (split ; [ intros Heqb | intros Heq ]) ;
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   apply eqb_eq_form in H1 ; apply IHl1 in H2 ; subst...
-- subst ; simpl ; apply andb_true_iff.
+- subst ; cbn ; apply andb_true_iff.
   split ; [ apply eqb_eq_form | apply IHl1 ]...
 Qed.
 *)
@@ -381,9 +381,9 @@ induction l ; (split ; [ intros Heqb | intros Heq ]).
   + apply in_cons.
     apply IHl...
 - inversion Heq ; subst.
-  + simpl ; apply orb_true_iff ; left.
+  + cbn ; apply orb_true_iff ; left.
     apply eqb_eq_form; reflexivity.
-  + simpl ; apply orb_true_iff ; right.
+  + cbn ; apply orb_true_iff ; right.
     apply IHl...
 Qed.
 *)
@@ -408,84 +408,84 @@ Lemma subb_sub : forall A B, is_true (subformb A B) <-> subform A B.
 Proof with try assumption; try reflexivity.
 intros A B ; split ; intros H ; induction B ;
   try (now (inversion H ; constructor)) ;
-  try (now (destruct A ; simpl in H ; inversion H));
-  try (simpl in H;
+  try (now (destruct A ; cbn in H ; inversion H));
+  try (cbn in H;
        apply orb_true_elim in H ; destruct H as [ H | H ] ;
        [ | apply orb_true_elim in H ; destruct H as [ H | H ] ]; 
        (try (apply eqb_eq_form in H ; subst)) ; now constructor; auto).
-- destruct A ; simpl in H ; try (now inversion H).
+- destruct A ; cbn in H ; try (now inversion H).
   rewrite orb_false_r in H.
   apply eqb_eq in H ; subst ; constructor.
-- destruct A ; simpl in H ; try (now inversion H).
+- destruct A ; cbn in H ; try (now inversion H).
   rewrite orb_false_r in H.
   apply eqb_eq in H ; subst ; constructor.
-- simpl in H.
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ].
   + apply eqb_eq_form in H ; subst ; constructor.
   + now constructor; auto.
-- simpl in H.
+- cbn in H.
   apply orb_true_elim in H ; destruct H as [ H | H ].
   + apply eqb_eq_form in H ; subst ; constructor.
   + now constructor; auto.
 - inversion H ; subst.
-  simpl ; rewrite (proj2 (eqb_eq _ _) eq_refl).
+  cbn ; rewrite (proj2 (eqb_eq _ _) eq_refl).
   constructor.
 - inversion H ; subst.
-  simpl ; rewrite (proj2 (eqb_eq _ _) eq_refl).
+  cbn ; rewrite (proj2 (eqb_eq _ _) eq_refl).
   constructor.
 - inversion H ; subst.
   + unfold subformb.
     replace (eqb_form (tens B1 B2) (tens B1 B2)) with true
       by (symmetry ; apply eqb_eq_form; reflexivity)...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
     replace (eqb_form (parr B1 B2) (parr B1 B2)) with true
       by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
     replace (eqb_form (aplus B1 B2) (aplus B1 B2)) with true
       by (symmetry ; apply eqb_eq_form; reflexivity)...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
     replace (eqb_form (awith B1 B2) (awith B1 B2)) with true
       by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB1 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
   + apply IHB2 in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite 2 orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
     replace (eqb_form (oc B) (oc B)) with true
       by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
 - inversion H ; subst.
   + unfold subformb.
     replace (eqb_form (wn B) (wn B)) with true
       by (symmetry ; apply eqb_eq_form ; reflexivity)...
   + apply IHB in H2.
-    simpl ; rewrite H2 ; simpl.
+    cbn ; rewrite H2 ; cbn.
     rewrite orb_true_r...
 Qed.
 
@@ -518,7 +518,7 @@ intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constru
   + apply IHl1.
     apply forallb_forall, Forall_forall...
 - inversion H ; subst.
-  unfold subformb_list ; simpl.
+  unfold subformb_list ; cbn.
   apply andb_true_iff ; split.
   + apply existsb_exists, Exists_exists.
     clear - H2 ; induction l2 ; inversion H2 ; subst.

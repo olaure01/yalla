@@ -35,7 +35,7 @@ Lemma ill2ill_map_ioc : forall l,
   map ill2ill (map ioc l) = map iformulas.ioc (map ill2ill l).
 Proof with try reflexivity.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 (*
@@ -56,7 +56,7 @@ Qed.
 Lemma transp_perm {A} : forall n (l : list A),
   Permutation_Type l (transp n l).
 Proof with try reflexivity.
-induction n; intros l; simpl; destruct l...
+induction n; intros l; cbn; destruct l...
 - destruct l...
   apply Permutation_Type_swap.
 - apply Permutation_Type_cons...
@@ -67,8 +67,8 @@ Lemma transp_map {A B} (f : A -> B) : forall n l,
   transp n (map f l) = map f (transp n l).
 Proof with try reflexivity.
 induction n; destruct l...
-- destruct l; simpl...
-- simpl; f_equal.
+- destruct l; cbn...
+- cbn; f_equal.
   apply IHn.
 Qed.
 
@@ -80,12 +80,12 @@ Proof.
 intros l A pi.
 induction pi; rewrite <- (app_nil_l _) ; try (now constructor).
 - apply (ex_ir _ (map ill2ill l)); try assumption.
-  simpl; rewrite <- transp_map.
+  cbn; rewrite <- transp_map.
   apply transp_perm.
 - now rewrite map_app; rewrite app_nil_l ; constructor.
 - apply (ex_ir _ (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
   + now constructor.
-  + simpl; rewrite map_app.
+  + cbn; rewrite map_app.
     etransitivity; [ apply Permutation_Type_app_comm | ].
     apply Permutation_Type_cons; try reflexivity.
     apply Permutation_Type_app_comm.

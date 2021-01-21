@@ -65,7 +65,7 @@ Lemma bipndual :
      (forall P, ndual (pdual P) = P)
   /\ (forall N, pdual (ndual N) = N).
 Proof.
-apply polform_ind ; intros ; simpl ;
+apply polform_ind ; intros ; cbn ;
   try rewrite H ; try rewrite H0 ; try reflexivity.
 Qed.
 
@@ -121,12 +121,12 @@ Lemma llpol2ll_inj : injective llpol2ll.
 Proof with try assumption.
 intros A B Heq.
 destruct A ; destruct B.
-- simpl in Heq.
+- cbn in Heq.
   f_equal.
   apply billpol2ll_inj...
 - destruct p ; destruct n ; inversion Heq.
 - destruct p ; destruct n ; inversion Heq.
-- simpl in Heq.
+- cbn in Heq.
   f_equal.
   apply billpol2ll_inj...
 Qed.
@@ -135,7 +135,7 @@ Lemma billpol2ll_dual :
      (forall P, formulas.dual (pllpol2ll P) = nllpol2ll (pdual P))
   /\ (forall N, formulas.dual (nllpol2ll N) = pllpol2ll (ndual N)).
 Proof.
-apply polform_ind ; intros ; simpl ;
+apply polform_ind ; intros ; cbn ;
   try rewrite H ; try rewrite H0 ; reflexivity.
 Qed.
 
@@ -158,7 +158,7 @@ Lemma llpol2ll_map_wn : forall l,
   = map formulas.wn (map pllpol2ll l).
 Proof with try reflexivity.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 Lemma llpol2ll_map_wn_inv : forall l1 l2,
@@ -418,8 +418,8 @@ intros l pi ; induction pi ; try now (constructor ; intuition).
   apply Permutation_Type_map...
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
-  + simpl ; Permutation_Type_solve.
-- simpl ; rewrite ? map_app.
+  + cbn ; Permutation_Type_solve.
+- cbn ; rewrite ? map_app.
   rewrite llpol2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- llpol2ll_map_wn...
@@ -445,14 +445,14 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
     [destruct p | destruct n ] ; inversion Heql0.
   subst ; subst.
   apply ax_r.
-- simpl in p.
+- cbn in p.
   apply Permutation_Type_map_inv in p.
   destruct p as [l'' Heq HP] ; subst.
   symmetry in HP.
   eapply ex_r ; [ | eassumption ].
   apply IHpi...
 - symmetry in Heql0; decomp_map_inf Heql0 ; subst; symmetry in Heql0.
-  simpl in Heql0 ; apply llpol2ll_map_wn_inv in Heql0 ;
+  cbn in Heql0 ; apply llpol2ll_map_wn_inv in Heql0 ;
     destruct Heql0 as [l Heq1 Heq2] ; subst.
   apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
   apply (Permutation_Type_map wn) in HP.
@@ -487,7 +487,7 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   destruct H1 as [l'' Heq1 Heq2] ; subst.
   apply oc_r.
   apply IHpi.
-  simpl ; rewrite llpol2ll_map_wn...
+  cbn ; rewrite llpol2ll_map_wn...
 - inversion a.
 Qed.
 
@@ -501,7 +501,7 @@ Proof.
 intro A.
 eapply ex_r ; [ | apply Permutation_Type_swap ].
 apply llpolfrag2llpol.
-simpl ; rewrite <- llpol2ll_dual.
+cbn ; rewrite <- llpol2ll_dual.
 apply ll_def.ax_exp.
 Qed.
 
@@ -511,8 +511,8 @@ Lemma cut_r : forall A l1 l2,
   llpol (A :: l1) -> llpol (dual A :: l2) -> llpol (l1 ++ l2).
 Proof with try eassumption.
 intros A l1 l2 pi1 pi2.
-apply llpol2llpolfrag in pi1 ; simpl in pi1.
-apply llpol2llpolfrag in pi2 ; simpl in pi2.
+apply llpol2llpolfrag in pi1 ; cbn in pi1.
+apply llpol2llpolfrag in pi2 ; cbn in pi2.
 eapply ll_cut.cut_r_axfree in pi1 ;
   [ | | rewrite llpol2ll_dual ]...
 - rewrite <- map_app in pi1.
@@ -539,7 +539,7 @@ eapply cut_r.
     apply ax_gen_r.
   + change (pos (ndual N)) with (dual (neg N)).
     apply ax_gen_r.
-- simpl ; rewrite 2 (proj2 bipndual)...
+- cbn ; rewrite 2 (proj2 bipndual)...
 Qed.
 
 Lemma with_inv_1 : forall N M l,
@@ -552,7 +552,7 @@ eapply cut_r.
 - apply (plus_r1 (ndual N) (ndual M)).
   change (pos (ndual N)) with (dual (neg N)).
   apply ax_gen_r.
-- simpl ; rewrite 2 (proj2 bipndual)...
+- cbn ; rewrite 2 (proj2 bipndual)...
 Qed.
 
 Lemma with_inv_2 : forall N M l,
@@ -565,7 +565,7 @@ eapply cut_r.
 - apply (plus_r2 (ndual N) (ndual M)).
   change (pos (ndual N)) with (dual (neg N)).
   apply ax_gen_r.
-- simpl ; rewrite 2 (proj2 bipndual)...
+- cbn ; rewrite 2 (proj2 bipndual)...
 Qed.
 
 (** Polarized sequents are those with at most one positive formula. *)
@@ -581,7 +581,7 @@ intros l1 l2 P1 P2 HP.
 assert (HP' := HP).
 symmetry in HP'.
 apply Permutation_Type_vs_cons_inv in HP'.
-destruct HP' as ((l' & l'') & Heq) ; simpl in Heq.
+destruct HP' as ((l' & l'') & Heq) ; cbn in Heq.
 destruct l' ; inversion Heq ; subst.
 - apply Permutation_Type_cons_inv in HP.
   apply Permutation_Type_map_inv in HP.
@@ -707,7 +707,7 @@ induction l.
          ++ destruct s as [[l1 Q] HP'].
             apply uniq_polsequent in HP'.
             destruct HP' as [l' Heq [Heq' HP']] ; subst.
-            simpl in HP ; symmetry in HP.
+            cbn in HP ; symmetry in HP.
             apply Permutation_Type_map_inv in HP.
             destruct HP as [l Heq _].
             destruct l ; inversion Heq.
@@ -888,20 +888,20 @@ intros l pi ; induction pi ; intros P' Q' l' HP.
     apply Permutation_Type_cons_app_inv in HP.
     dichot_app_inf_exec Heq' ;
       [ | destruct l0 ; inversion Heq'1 ; list_simpl in Heq'1 ] ;
-        simpl in Heq'0 ; subst.
+        cbn in Heq'0 ; subst.
     * list_simpl in HP.
       assert (Permutation_Type (pos Q :: l ++ pos Q' :: l4)
                                (pos Q :: pos Q' :: l ++ l4))
         as HP' by Permutation_Type_solve.
       apply IHpi2 in HP'.
-      destruct HP' as [(N & l5 & l6) Heq' Htop] ; simpl in Heq'.
+      destruct HP' as [(N & l5 & l6) Heq' Htop] ; cbn in Heq'.
       rewrite Heq' in HP.
       rewrite app_assoc in HP.
       apply Permutation_Type_vs_elt_inv in HP.
       destruct HP as ((l7 & l8) & Heq'').
       exists (N,(l7,l8))...
     * destruct (IHpi2 Q Q' l4 (Permutation_Type_refl _))
-        as [(N & l5 & l6) Heq' Htop] ; subst ; simpl in HP.
+        as [(N & l5 & l6) Heq' Htop] ; subst ; cbn in HP.
       rewrite app_assoc in HP.
       apply Permutation_Type_vs_elt_inv in HP.
       destruct HP as ((l7 & l8) & Heq'').
@@ -911,7 +911,7 @@ intros l pi ; induction pi ; intros P' Q' l' HP.
         as HP' by Permutation_Type_solve.
       apply IHpi1 in HP'.
       destruct HP' as [(N & l5 & l6) Heq' Htop] ;
-        simpl in Heq' ; simpl in HP.
+        cbn in Heq' ; cbn in HP.
       rewrite app_assoc in HP.
       rewrite Heq' in HP.
       list_simpl in HP.
@@ -926,7 +926,7 @@ intros l pi ; induction pi ; intros P' Q' l' HP.
       destruct (Permutation_Type_vs_cons_inv HP) as [(l4, l5) Heq'].
       dichot_app_inf_exec Heq' ;
         [ | destruct l0 ; inversion Heq'1 ; list_simpl in Heq'1 ] ;
-          simpl in Heq'1 ; simpl in HP ; subst.
+          cbn in Heq'1 ; cbn in HP ; subst.
       -- symmetry in HP.
          rewrite app_assoc in HP.
          apply Permutation_Type_cons_app_inv in HP.
@@ -1233,9 +1233,9 @@ induction pi ; intros Hpol.
     symmetry in HP.
     apply Permutation_Type_map_inv in HP.
     destruct HP as [l Heq HP].
-    symmetry in Heq; decomp_map_inf Heq ; simpl in Heq1 ; simpl in Heq2 ;
-      subst ; simpl in p.
-    right ; exists (l5 ++ l6,P) ; simpl ; Permutation_Type_solve.
+    symmetry in Heq; decomp_map_inf Heq ; cbn in Heq1 ; cbn in Heq2 ;
+      subst ; cbn in p.
+    right ; exists (l5 ++ l6,P) ; cbn ; Permutation_Type_solve.
 - constructor.
   apply polsequent_true.
   right ; exists (nil,one)...

@@ -38,7 +38,7 @@ Lemma ll2ll_map_wn : forall l,
   map ll2ll (map wn l) = map formulas.wn (map ll2ll l).
 Proof with try reflexivity.
 induction l...
-simpl ; rewrite IHl...
+cbn ; rewrite IHl...
 Qed.
 
 (*
@@ -59,7 +59,7 @@ Qed.
 Lemma transp_perm {A} : forall n (l : list A),
   Permutation_Type l (transp n l).
 Proof with try reflexivity.
-induction n; intros l; simpl; destruct l...
+induction n; intros l; cbn; destruct l...
 - destruct l...
   apply Permutation_Type_swap.
 - apply Permutation_Type_cons...
@@ -70,8 +70,8 @@ Lemma transp_map {A B} (f : A -> B) : forall n l,
   transp n (map f l) = map f (transp n l).
 Proof with try reflexivity.
 induction n; destruct l...
-- destruct l; simpl...
-- simpl; f_equal.
+- destruct l; cbn...
+- cbn; f_equal.
   apply IHn.
 Qed.
 
@@ -80,14 +80,14 @@ Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
 
 Theorem ll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.
-intros l pi; induction pi ; simpl; try (now constructor).
+intros l pi; induction pi ; cbn; try (now constructor).
 - apply (ex_r _ (map ll2ll l)); try assumption.
-  simpl; rewrite <- transp_map.
+  cbn; rewrite <- transp_map.
   apply transp_perm.
 - rewrite map_app.
   apply (ex_r _ (formulas.tens (ll2ll A) (ll2ll B) :: map ll2ll l2 ++ map ll2ll l1)).
   + now constructor.
-  + simpl; apply Permutation_Type_cons; try reflexivity.
+  + cbn; apply Permutation_Type_cons; try reflexivity.
     apply Permutation_Type_app_comm.
 - rewrite ll2ll_map_wn.
   apply ll_def.oc_r.

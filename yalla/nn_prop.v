@@ -119,12 +119,12 @@ induction A ; simpl ; rewrite ? bidual.
 - apply parr_r.
   apply (ex_r _ ((oc A ::
                   map wn (tens (dual (unill R)) (unill (trans R A)) :: nil))
-                  ++ unill R :: nil)) ; [idtac | simpl]...
+                  ++ unill R :: nil)) ; [idtac | cbn]...
   apply (@cut_r _ (pfrag_llR (unill R)) eq_refl (dual one)).
   + apply (ex_r _ (unill R :: one :: nil))...
     apply (gax_r (pfrag_llR (unill R)) false).
   + apply bot_r.
-    apply oc_r ; simpl.
+    apply oc_r ; cbn.
     apply (ex_r _ ((wn (tens (dual (unill R)) (unill (trans R A))) :: nil)
                      ++ (A :: nil) ++ nil))...
     apply de_r.
@@ -132,7 +132,7 @@ induction A ; simpl ; rewrite ? bidual.
     apply (gax_r (pfrag_llR (unill R)) true).
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
   change (wn A :: nil) with (map wn (A :: nil)).
-  apply oc_r ; simpl.
+  apply oc_r ; cbn.
   apply parr_r.
   apply (ex_r _ (tens (dual (unill R)) (unill (trans R A)) :: (wn A :: nil) ++ unill R :: nil))...
   apply tens_r.
@@ -204,7 +204,7 @@ Lemma ie_ie : forall A, ielem A ->
   ill_ll (A :: nil) (negR R (trans R (unill A))).
 Proof with try now (apply ax_exp_ill).
 induction A ; intros Hgfn ; inversion Hgfn ;
-  simpl ; unfold trans.
+  cbn ; unfold trans.
 - unfold IAtom2Atom; rewrite (i2i_not_atN _ H0).
   apply negR_irr.
   apply negR_ilr...
@@ -237,7 +237,7 @@ Lemma ie_dual : forall A, ielem A ->
   ill_ll (trans R (dual (unill A)) :: nil) A.
 Proof with try now (apply ax_exp_ill).
 induction A ; intros Hgfn ; inversion Hgfn ;
-  simpl ; unfold trans...
+  cbn ; unfold trans...
 - unfold IAtom2Atom; rewrite (i2i_not_atN _ H0)...
 - apply IHA1 in X.
   apply IHA2 in X0.
@@ -288,7 +288,7 @@ induction Hll ;
   (try now (rewrite map_app ; eapply Hmix2)) ;
   (try now (apply P_axfree in H ; inversion H)) ;
   (try now (inversion f)) ;
-  simpl.
+  cbn.
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | apply Hax ].
     eapply (ax_ir _ (a2i X)).
@@ -325,8 +325,8 @@ induction Hll ;
   apply (ex_ir _ _ _ _ Hax)...
 - rewrite <- (app_nil_l (iplus _ _ :: _)).
   apply plus_ilr...
-- simpl in IHHll ; rewrite map_map in IHHll.
-  simpl in IHHll ; rewrite <- map_map in IHHll.
+- cbn in IHHll ; rewrite map_map in IHHll.
+  cbn in IHHll ; rewrite <- map_map in IHHll.
   apply negR_irr in IHHll.
   apply oc_irr in IHHll.
   apply negR_ilr...
@@ -360,7 +360,7 @@ induction Hll ;
   eapply ex_ir...
 - destruct a ; subst.
   + apply ie_dual_diag...
-  + simpl.
+  + cbn.
     eapply ex_ir ; [ | apply Permutation_Type_swap ].
     rewrite <- 2 (app_nil_l (negR _ _ :: _)).
     apply lmap_ilr...
@@ -388,7 +388,7 @@ remember (fresh_of_list l) as z.
 specialize Hill with (ivar (a2i z)).
 apply ill_trans_to_llR in Hill...
 apply (subs_llR _ bot z) in Hill ; subst.
-simpl in Hill.
+cbn in Hill.
 rewrite repl_at_eq in Hill.
 - change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj)) (flat_map atom_list l))
    with  (fresh_of_list l) in Hill.
@@ -444,7 +444,7 @@ induction pi ; try now constructor.
 - eapply ex_r...
 - eapply ex_wn_r...
 - eapply cut_mix02_r...
-- destruct a ; simpl.
+- destruct a ; cbn.
   + apply bot_r.
     change nil with (concat (@nil (list formula))).
     apply mix_r...
@@ -469,7 +469,7 @@ apply (ll_to_ill_trans ione) in Hll ; myeasy.
   destruct L.
   { inversion eqpmix. }
   destruct L.
-  { simpl.
+  { cbn.
     rewrite app_nil_r.
     assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l0) ione).
     { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin.
@@ -520,7 +520,7 @@ Lemma aff_to_ill_trans : forall l A,
   ill_ll (map (trans izero) l) izero -> ill_ll (map (trans izero) (A :: l)) izero.
 Proof with myeeasy.
 intros l A Hll.
-simpl.
+cbn.
 cons2app.
 rewrite <- (app_nil_r (map _ _)).
 eapply cut_ir_axfree ; try (now (intros a ; destruct a))...
@@ -556,16 +556,16 @@ eapply (llR1_R2 _ (wn one)) in Hz2.
 - change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj)) (flat_map atom_list l))
    with  (fresh_of_list l) in Hz2.
   rewrite (@subs_fresh_list atom_inf) in Hz2...
-- simpl.
+- cbn.
   rewrite <- (app_nil_l (wn _ :: _)).
   apply tens_r.
   + change (wn one :: nil) with (map (@wn atom) (one :: nil)).
-    apply oc_r ; simpl.
+    apply oc_r ; cbn.
     apply bot_r.
     apply de_r.
     apply one_r.
   + apply one_r.
-- simpl.
+- cbn.
   apply (ex_r _ (parr bot (wn one) :: oc bot :: nil))...
   apply parr_r.
   apply bot_r.
@@ -580,7 +580,7 @@ induction pi ; try now constructor.
 - eapply ex_r...
 - eapply ex_wn_r...
 - eapply cut_mix0_r...
-- destruct a ; simpl.
+- destruct a ; cbn.
   + change nil with (map (@wn atom) nil).
     apply oc_r.
     apply bot_r.
@@ -604,7 +604,7 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 true)) in Hll.
     intros a ; destruct a.
   + intros L eqpmix FL FLind.
     destruct L; try now inversion eqpmix.
-    simpl.
+    cbn.
     eapply stronger_ipfrag ; [ | apply HR ].
     nsplit 3...
     intros a ; destruct a.
@@ -671,7 +671,7 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
         { right; left... }
         apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
         refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
-      simpl.
+      cbn.
       rewrite app_nil_r.
       rewrite map_app.
       rewrite <- (app_nil_l (ioc R :: _)).
@@ -699,7 +699,7 @@ Theorem ll_bbb_to_ill_trans : forall R (l : list formula),
   ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
 Proof with myeeasy ; try GPermutation_Type_solve ; try now (apply ax_exp_ill).
 intros R l Hll.
-induction Hll ; (try now (inversion f)) ; simpl.
+induction Hll ; (try now (inversion f)) ; cbn.
 - eapply ex_ir.
   + eapply lmap_ilr ; [ | ].
     * eapply (ax_ir _ (a2i X)).
@@ -738,10 +738,10 @@ induction Hll ; (try now (inversion f)) ; simpl.
   rewrite <- (app_nil_l (iplus _ _ :: _)).
   apply plus_ilr ; eapply ex_ir ; [ apply IHHll1 | | apply IHHll2 | ]...
 - apply negR_ilr...
-  rewrite map_map ; simpl.
+  rewrite map_map ; cbn.
   rewrite <- map_map.
-  simpl in IHHll ; rewrite map_map in IHHll.
-  simpl in IHHll ; rewrite <- map_map in IHHll.
+  cbn in IHHll ; rewrite map_map in IHHll.
+  cbn in IHHll ; rewrite <- map_map in IHHll.
   apply oc_irr.
   apply negR_irr.
   eapply ex_ir...
