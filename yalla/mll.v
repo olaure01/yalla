@@ -39,16 +39,16 @@ Lemma eqb_eq_form : forall A B, eqb_form A B = true <-> A = B.
 Proof.
 induction A; destruct B; (split; intros Heq); inversion Heq; auto.
 - now apply eqb_eq in H0; subst.
-- now subst; simpl; apply eqb_eq.
+- now subst; cbn; apply eqb_eq.
 - now apply eqb_eq in H0; subst.
-- now subst; simpl; apply eqb_eq.
+- now subst; cbn; apply eqb_eq.
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
   now apply IHA1 in H1; apply IHA2 in H2; subst.
-- now subst; simpl; apply andb_true_iff; split; [ apply IHA1 | apply IHA2 ].
+- now subst; cbn; apply andb_true_iff; split; [ apply IHA1 | apply IHA2 ].
 - apply andb_true_iff in H0 as [H1 H2].
   now apply IHA1 in H1; apply IHA2 in H2; subst.
-- now subst; simpl; apply andb_true_iff; split; [ apply IHA1 | apply IHA2 ].
+- now subst; cbn; apply andb_true_iff; split; [ apply IHA1 | apply IHA2 ].
 Qed.
 
 Definition formulas_dectype := {|
@@ -67,7 +67,7 @@ end.
 Notation "A ^" := (dual A) (at level 12, format "A ^").
 
 Lemma bidual A : dual (dual A) = A.
-Proof. now induction A; simpl; rewrite ? IHA1, ? IHA2, ? IHA. Qed.
+Proof. now induction A; cbn; rewrite ? IHA1, ? IHA2, ? IHA. Qed.
 
 Lemma codual A B : dual A = B <-> A = dual B.
 Proof. now split; intro H; rewrite <- (bidual A), <- (bidual B), H, ? bidual. Qed.
@@ -85,10 +85,10 @@ match A with
 end.
 
 Lemma fsize_pos A : 0 < fsize A.
-Proof. induction A; simpl; lia. Qed.
+Proof. induction A; cbn; lia. Qed.
 
 Lemma fsize_dual A : fsize (dual A) = fsize A.
-Proof. induction A; simpl; rewrite ? IHA1, ? IHA2; lia. Qed.
+Proof. induction A; cbn; rewrite ? IHA1, ? IHA2; lia. Qed.
 
 
 (** * MLL Proofs *)
@@ -109,7 +109,7 @@ match pi with
 end.
 
 Lemma psize_pos l (pi : ll l) : 0 < psize pi.
-Proof. destruct pi; simpl; lia. Qed.
+Proof. destruct pi; cbn; lia. Qed.
 
 Lemma psize_rew l l' (pi : ll l) (Heq : l = l') : psize (rew Heq in pi) = psize pi.
 Proof. now subst. Qed.
@@ -122,7 +122,7 @@ list_simpl in H;
 match goal with
 | H : ?x = ?x |- _ => assert (H = eq_refl) as ->
                         by apply (Eqdep_dec.UIP_dec (@eq_dt_dec (list_dectype formulas_dectype)));
-                      simpl
+                      cbn
 end.
 
 (** Symmetric induction principle *)
@@ -187,99 +187,99 @@ assert (forall A B l1 l2 l3 l4 pi1 pi2, psize pi1 + psize pi2 < s -> fsize A <= 
           refine (IHp0 _ Hp _ _ _ _ pi1 pi2 _ _ _ _ _ _ _ eq_refl eq_refl)); clear IHp0.
 intros A B s1 s2 pi1 pi2 Heqs HA HB l1 l2 l3 l4 Heq1 Heq2; rewrite_all Heqs; clear s Heqs.
 destruct pi1.
-- destruct l1; inversion Heq1; subst; simpl in Heq1.
+- destruct l1; inversion Heq1; subst; cbn in Heq1.
   + destruct_eqrefl Heq1; apply Hax1.
   + destruct l1; inversion Heq1; subst.
     * destruct_eqrefl Heq1; apply Hax2.
     * exfalso; destruct l1; inversion Heq1.
-- subst; simpl; apply Hex, IHp; simpl; rewrite ? psize_rew; lia.
+- subst; cbn; apply Hex, IHp; cbn; rewrite ? psize_rew; lia.
 - destruct l1; inversion Heq1.
-  + destruct pi2; subst; simpl in HA; destruct_eqrefl Heq1.
+  + destruct pi2; subst; cbn in HA; destruct_eqrefl Heq1.
     * repeat (destruct l3; inversion Heq2); subst; destruct_eqrefl Heq2; apply Hsym;
         [ apply Hax1 | apply Hax2 ].
-    * apply Hsym, Hex, IHp; simpl; rewrite ? psize_rew; lia.
-    * destruct l3; inversion Heq2; subst; simpl in HB.
+    * apply Hsym, Hex, IHp; cbn; rewrite ? psize_rew; lia.
+    * destruct l3; inversion Heq2; subst; cbn in HB.
       -- destruct_eqrefl Heq2.
          apply Htt; intros; apply IHf; lia.
       -- apply Hsym.
          dichot_elt_app_inf_exec H1; subst.
          ++ replace (rew [ll] Heq2 in tens_r pi2_1 pi2_2)
                with (rew <- (app_assoc (tens A1 B1 :: l3) _ _) in tens_r pi2_1 pi2_2).
-            ** apply Htens1, IHp; simpl; try lia.
+            ** apply Htens1, IHp; cbn; try lia.
             ** rewrite <- (rew_opp_l ll (app_assoc (tens A1 B1 :: l3) (B :: l) l1)).
                f_equal; rewrite rew_compose.
                now assert (eq_trans Heq2 (app_assoc (tens A1 B1 :: l3) (B :: l) l1) = eq_refl)
                      as -> by apply (Eqdep_dec.UIP_dec (@eq_dt_dec (list_dectype formulas_dectype)));
-                   simpl.
+                   cbn.
          ++ replace (rew [ll] Heq2 in tens_r pi2_1 pi2_2)
                with (rew (app_assoc (tens A1 B1 :: l6) _ _) in tens_r pi2_1 pi2_2).
-            ** apply Htens2, IHp; simpl; lia.
+            ** apply Htens2, IHp; cbn; lia.
             ** rewrite <- (rew_opp_r ll (app_assoc (tens A1 B1 :: l6) l2 (B :: l4))).
                f_equal; unfold eq_rect_r; rewrite rew_compose.
                now assert (eq_trans Heq2 (eq_sym (app_assoc (tens A1 B1 :: l6) l2 (B :: l4)))
                          = eq_refl)
                      as -> by apply (Eqdep_dec.UIP_dec (@eq_dt_dec (list_dectype formulas_dectype)));
-                   simpl.
-    * destruct l3; inversion Heq2; subst; destruct_eqrefl Heq2; simpl in HB.
+                   cbn.
+    * destruct l3; inversion Heq2; subst; destruct_eqrefl Heq2; cbn in HB.
       -- apply Htp; intros; apply IHf; lia.
-      -- apply Hsym, Hparr, IHp; simpl; lia.
-  + subst; simpl.
+      -- apply Hsym, Hparr, IHp; cbn; lia.
+  + subst; cbn.
     dichot_elt_app_inf_exec H1; subst.
     * change ((tens A0 B0 :: l1) ++ A :: l ++ l0) with (tens A0 B0 :: l1 ++ A :: l ++ l0) in Heq1.
       replace (rew [ll] Heq1 in tens_r pi1_1 pi1_2)
          with (rew <- (app_assoc (tens A0 B0 :: l1) _ _) in tens_r pi1_1 pi1_2).
-      -- apply Htens1, IHp; simpl; lia.
+      -- apply Htens1, IHp; cbn; lia.
       -- rewrite <- (rew_opp_l ll (app_assoc (tens A0 B0 :: l1) (A :: l) l0)).
            f_equal; rewrite rew_compose.
            now assert (eq_trans Heq1 (app_assoc (tens A0 B0 :: l1) (A :: l) l0) = eq_refl)
                  as -> by apply (Eqdep_dec.UIP_dec (@eq_dt_dec (list_dectype formulas_dectype)));
-               simpl.
+               cbn.
     * change ((tens A0 B0 :: l5 ++ l6) ++ A :: l2)
         with (tens A0 B0 :: (l5 ++ l6) ++ A :: l2) in Heq1.
       replace (rew [ll] Heq1 in tens_r pi1_1 pi1_2)
          with (rew (app_assoc (tens A0 B0 :: l5) _ _) in tens_r pi1_1 pi1_2).
-      -- apply Htens2, IHp; simpl; lia.
+      -- apply Htens2, IHp; cbn; lia.
       -- rewrite <- (rew_opp_r ll (app_assoc (tens A0 B0 :: l5) l6 (A :: l2))).
          f_equal; unfold eq_rect_r; rewrite rew_compose.
          now assert (eq_trans Heq1 (eq_sym (app_assoc (tens A0 B0 :: l5) l6 (A :: l2))) = eq_refl)
                as -> by apply (Eqdep_dec.UIP_dec (@eq_dt_dec (list_dectype formulas_dectype)));
-             simpl.
+             cbn.
 - destruct l1; inversion Heq1.
-  + destruct pi2; subst; simpl in HA; destruct_eqrefl Heq1.
+  + destruct pi2; subst; cbn in HA; destruct_eqrefl Heq1.
     * repeat (destruct l3; inversion Heq2); subst; destruct_eqrefl Heq2; apply Hsym;
         [ apply Hax1 | apply Hax2 ].
-    * apply Hsym, Hex, IHp; simpl; rewrite ? psize_rew; lia.
-    * destruct l3; inversion Heq2; subst; simpl in HB.
+    * apply Hsym, Hex, IHp; cbn; rewrite ? psize_rew; lia.
+    * destruct l3; inversion Heq2; subst; cbn in HB.
       -- destruct_eqrefl Heq2.
          apply Hsym, Htp; intros; apply IHf; lia.
-      -- apply Hsym; simpl.
+      -- apply Hsym; cbn.
          dichot_elt_app_inf_exec H1; subst.
          ++ change ((tens A1 B1 :: l3) ++ B :: l ++ l1)
               with (tens A1 B1 :: l3 ++ B :: l ++ l1) in Heq2.
             replace (rew [ll] Heq2 in tens_r pi2_1 pi2_2)
                with (rew <- (app_assoc (tens A1 B1 :: l3) _ _) in tens_r pi2_1 pi2_2).
-            ** apply Htens1, IHp; simpl; lia.
+            ** apply Htens1, IHp; cbn; lia.
             ** rewrite <- (rew_opp_l ll (app_assoc (tens A1 B1 :: l3) (B :: l) l1)).
                f_equal; rewrite rew_compose.
                now assert (eq_trans Heq2 (app_assoc (tens A1 B1 :: l3) (B :: l) l1) = eq_refl)
                      as -> by apply (Eqdep_dec.UIP_dec (@eq_dt_dec (list_dectype formulas_dectype)));
-                   simpl.
+                   cbn.
          ++ change ((tens A1 B1 :: l0 ++ l5) ++ B :: l4)
               with (tens A1 B1 :: (l0 ++ l5) ++ B :: l4) in Heq2.
             replace (rew [ll] Heq2 in tens_r pi2_1 pi2_2)
                with (rew (app_assoc (tens A1 B1 :: l0) _ _) in tens_r pi2_1 pi2_2).
-            ** apply Htens2, IHp; simpl; lia.
+            ** apply Htens2, IHp; cbn; lia.
             ** rewrite <- (rew_opp_r ll (app_assoc (tens A1 B1 :: l0) l5 (B :: l4))).
                f_equal; unfold eq_rect_r; rewrite rew_compose.
                now assert (eq_trans Heq2 (eq_sym (app_assoc (tens A1 B1 :: l0) l5 (B :: l4)))
                          = eq_refl)
                      as -> by apply (Eqdep_dec.UIP_dec (@eq_dt_dec (list_dectype formulas_dectype)));
-                   simpl.
-    * destruct l3; inversion Heq2; subst; simpl in HB; destruct_eqrefl Heq2.
+                   cbn.
+    * destruct l3; inversion Heq2; subst; cbn in HB; destruct_eqrefl Heq2.
       -- apply Hpp; intros; apply IHf; lia.
-      -- apply Hsym, Hparr, IHp; simpl; lia.
-  + subst; simpl; destruct_eqrefl Heq1.
-    apply Hparr, IHp; simpl; lia.
+      -- apply Hsym, Hparr, IHp; cbn; lia.
+  + subst; cbn; destruct_eqrefl Heq1.
+    apply Hparr, IHp; cbn; lia.
 Qed.
 
 Theorem cut A l1 l2 l3 l4 :
@@ -287,12 +287,12 @@ Theorem cut A l1 l2 l3 l4 :
 Proof.
 intros pi1 pi2; assert (Heq := eq_refl (dual A)); revert pi1 pi2 Heq.
 apply (sym_induction_ll (fun A B l1 l2 l3 l4 pi1 pi2 => B = dual A -> ll (l3 ++ l2 ++ l1 ++ l4)));
-  clear A l1 l2 l3 l4; simpl; try now intuition subst.
+  clear A l1 l2 l3 l4; cbn; try now intuition subst.
 - intros A B l1 l2 l3 l4 pi1 pi2 pi ->.
   apply (ex_r (pi (eq_sym (bidual A)))).
   rewrite (app_assoc l1), (app_assoc l3); apply Permutation_Type_app_comm.
 - intros A B l1 l2 l3 l4 l' pi1 pi2 HP.
-  destruct (Permutation_Type_vs_elt_inv A l1 l2 HP) as [(l1', l2') ->]; simpl in pi1, HP; simpl.
+  destruct (Permutation_Type_vs_elt_inv A l1 l2 HP) as [(l1', l2') ->]; cbn in pi1, HP; cbn.
   intros pi0' pi0; apply pi0' in pi0; clear - HP pi0.
   apply (ex_r pi0).
   apply Permutation_Type_app_head; rewrite ? app_assoc; apply Permutation_Type_app_tail.
