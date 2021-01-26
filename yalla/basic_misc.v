@@ -4,7 +4,6 @@
 (** * A few basic ingredients used in [yalla] *)
 
 From Coq Require Import Lia.
-From OLlibs Require Import GPermutation_Type Permutation_Type_solve.
 
 
 (** ** Definitions *)
@@ -42,10 +41,3 @@ Ltac myeasy_pattern assump :=
 
 Ltac myeasy := myeasy_pattern assumption.
 Ltac myeeasy := myeasy_pattern eassumption.
-
-(** An [easy] tactic with automated permutation solving *)
-
-Ltac myeasy_perm_Type :=
-  myeeasy ;
-  try GPermutation_Type_solve ;
-  try (simpl_hyp_perm_all_Type ; GPermutation_Type_solve).

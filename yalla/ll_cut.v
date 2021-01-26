@@ -21,7 +21,7 @@ Hypothesis P_gax_at : forall a, Forall_inf atomic (projT2 (pgax P) a).
 Lemma cut_oc_comm : pcut P = false -> forall n A l1 l2, ll P (l1 ++ wn A :: l2) -> 
   (forall lw (pi0 : ll P (dual A :: map wn lw)), psize pi0 < n -> ll P (l1 ++ map wn lw ++ l2)) ->
   forall l3 l4 (pi1 : ll P (l3 ++ oc (dual A) :: l4)), psize pi1 <= n -> ll P (l1 ++ l4 ++ l3 ++ l2).
-Proof with myeasy_perm_Type.
+Proof with myeeasy.
 intros P_cutfree n A l1 l2 pi2 ; induction n ; intros IH l3 l4 pi1 Hs ;
   remember (l3 ++ oc (dual A) :: l4) as l ; destruct_ll pi1 f X l Hl Hr HP FL a ;
   try (exfalso ; cbn in Hs ; clear -Hs ; myeasy ; fail) ; try inversion Heql ; subst.
@@ -173,7 +173,7 @@ Lemma substitution_oc : pcut P = false -> forall A lw,
   ll P (dual A :: map wn lw) -> (forall l1 l2, ll P (dual A :: map wn lw) -> ll P (l1 ++ A :: l2) ->
   ll P (l1 ++ map wn lw ++ l2)) -> forall l' L, ll P (l' ++ flat_map (fun '(p1, p2) => wn_n p1 (wn A) :: p2) L) ->
     ll P (l' ++ flat_map (fun '(_, p2) => app (map wn lw) p2) L).
-Proof with myeasy_perm_Type; try assumption.
+Proof with myeeasy.
   intros P_cutfree A lw pi1 IHcut l' L pi2.
   remember (l' ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L) as l.
   revert l' L Heql.
@@ -374,30 +374,30 @@ Hypothesis P_gax_cut : forall a b x l1 l2 l3 l4,
 
 Theorem cut_r_gaxat : forall A l1 l2,
   ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
-Proof with myeasy_perm_Type.
+Proof with myeeasy.
 case_eq (pcut P) ; intros P_cutfree.
 { intros A l1 l2 pi1 pi2 ; eapply cut_r... }
 enough (forall c s A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2)),
           s = psize pi1 + psize pi2 -> fsize A <= c -> ll P (l1 ++ l0 ++ l2)) as IH.
 { intros A l1 l2 pi1 pi2.
   rewrite <- (app_nil_l _) in pi2.
-  apply (ex_r _ (nil ++ l1 ++ l2))...
+  apply (ex_r _ (nil ++ l1 ++ l2)); [ | simpl; apply PCPermutation_Type_app_comm ].
   refine (IH _ _ A _ _ _ pi1 pi2 _ _)... }
 induction c as [c IHcut0] using lt_wf_rect.
 assert (forall A, fsize A < c -> forall l0 l1 l2,
           ll P (dual A :: l0) -> ll P (l1 ++ A :: l2) -> ll P (l1 ++ l0 ++ l2)) as IHcut
-  by (intros A Hs l0 l1 l2 pi1 pi2 ; refine (IHcut0 _ _ _ _ _ _ _ pi1 pi2 _ _) ; myeasy_perm_Type) ;
+  by (intros A Hs l0 l1 l2 pi1 pi2 ; refine (IHcut0 _ _ _ _ _ _ _ pi1 pi2 _ _) ; myeasy) ;
   clear IHcut0.
 induction s as [s IHsize0] using lt_wf_rect.
 assert (forall A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2)),
           psize pi1 + psize pi2 < s -> fsize A <= c -> ll P (l1 ++ l0 ++ l2))
-  as IHsize by (intros ; eapply IHsize0 ; myeasy_perm_Type) ; clear IHsize0.
+  as IHsize by (intros ; eapply IHsize0 ; myeeasy) ; clear IHsize0.
 intros A l0 l1 l2 pi1 pi2 Heqs Hc.
 rewrite_all Heqs ; clear s Heqs.
 remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* ax_r *)
   destruct l1 ; inversion Heql ; subst.
-  + eapply ex_r...
+  + eapply ex_r; [ apply pi1 | apply PCPermutation_Type_cons_append ].
   + unit_vs_elt_inv H1 ; list_simpl...
 - (* ex_r *)
   cbn in IHsize.
@@ -405,7 +405,8 @@ remember (l1 ++ A :: l2) as l ; destruct_ll pi2 f X l Hl Hr HP Hax a.
   apply (PEPermutation_Type_app_head _ l0) in HP'.
   eapply ex_r ; [ refine (IHsize _ _ _ _ pi1 Hl _ _) | ]...
   apply PEPermutation_PCPermutation_Type in HP' ; unfold id in HP' ; cbn in HP'.
-  symmetry in HP' ; etransitivity ; [ | etransitivity ; [ apply HP' | ] ]...
+  symmetry in HP' ; etransitivity ; [ | etransitivity ; [ apply HP' | symmetry ] ];
+    apply PCPermutation_Type_app_rot.
 - (* ex_wn_r *)
   symmetry in Heql ; trichot_elt_app_inf_exec Heql ; list_simpl ; subst.
   + rewrite 2 app_assoc ; eapply ex_wn_r ; [ | apply HP ] ; rewrite <- 2 app_assoc.

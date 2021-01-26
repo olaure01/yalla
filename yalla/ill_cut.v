@@ -27,7 +27,7 @@ Hypothesis P_gax_cut : forall a b l1 l2,
 Lemma cut_oc_comm_left : ipcut P = false -> forall n A C l1 l2, ill P (l1 ++ ioc A :: l2) C -> 
   (forall lw (pi0 : ill P (map ioc lw) A), ipsize pi0 < n -> ill P (l1 ++ map ioc lw ++ l2) C) ->
   forall l0 (pi1 : ill P l0 (ioc A)), ipsize pi1 <= n -> ill P (l1 ++ l0 ++ l2) C.
-Proof with myeasy_perm_Type.
+Proof with myeeasy.
 intros P_cutfree n A C l1 l2 pi2 ; induction n ; intros IH l0 pi1 Hs ;
   remember (ioc A) as B ; destruct_ill pi1 f X l Hl Hr HP a ;
   try (exfalso ; cbn in Hs ; clear -Hs ; myeasy ; fail) ; try inversion HeqB.
@@ -93,7 +93,7 @@ Lemma substitution_ioc : ipcut P = false -> forall A,
   (forall l0 l1 l2 C, ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C) ->
   forall lw l C, ill P (map ioc lw) A -> ill P l C -> forall l' L,
   l = l' ++ flat_map (cons (ioc A)) L -> ill P (l' ++ flat_map (app (map ioc lw)) L) C.
-Proof with myeasy_perm_Type.
+Proof with myeeasy.
 intros P_cutfree A IHcut lw l C pi1 pi2.
 induction pi2 ; intros l' L Heq.
 - destruct l' ; inversion Heq.
@@ -471,21 +471,21 @@ Qed.
 
 Theorem cut_ir_gaxat : forall A l0 l1 l2 C,
   ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
-Proof with myeasy_perm_Type.
+Proof with myeeasy.
 case_eq (ipcut P) ; intros P_cutfree.
 { intros A l0 l1 l2 C pi1 pi2 ; eapply cut_ir... }
 enough (forall c s A l0 l1 l2 C (pi1 : ill P l0 A) (pi2 : ill P (l1 ++ A :: l2) C),
           s = ipsize pi1 + ipsize pi2 -> ifsize A <= c -> ill P (l1 ++ l0 ++ l2) C) as IH
-by (intros A l0 l1 l2 C pi1 pi2 ; refine (IH _ _ A _ _ _ _ pi1 pi2 _ _) ; myeasy_perm_Type).
+by (intros A l0 l1 l2 C pi1 pi2 ; refine (IH _ _ A _ _ _ _ pi1 pi2 _ _) ; myeasy).
 induction c as [c IHcut0] using lt_wf_rect.
 assert (forall A, ifsize A < c -> forall l0 l1 l2 C,
           ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C) as IHcut
-  by (intros A Hs l0 l1 l2 C pi1 pi2 ; refine (IHcut0 _ _ _ _ _ _ _ _ pi1 pi2 _ _) ; myeasy_perm_Type) ;
+  by (intros A Hs l0 l1 l2 C pi1 pi2 ; refine (IHcut0 _ _ _ _ _ _ _ _ pi1 pi2 _ _) ; myeasy) ;
   clear IHcut0.
 induction s as [s IHsize0] using lt_wf_rect.
 assert (forall A l0 l1 l2 C (pi1 : ill P l0 A) (pi2 : ill P (l1 ++ A :: l2) C),
           ipsize pi1 + ipsize pi2 < s -> ifsize A <= c -> ill P (l1 ++ l0 ++ l2) C)
-  as IHsize by (intros ; eapply IHsize0 ; myeasy_perm_Type) ; clear IHsize0.
+  as IHsize by (intros ; eapply IHsize0 ; myeeasy) ; clear IHsize0.
 intros A l0 l1 l2 C pi1 pi2 Heqs Hc.
 rewrite_all Heqs ; clear s Heqs.
 remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
@@ -519,12 +519,12 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
       rewrite app_assoc ; eapply (cut_oc_comm_left _ (ipsize pi1))...
       -- list_simpl ; rewrite app_comm_cons ; change (ioc x :: map ioc l7) with (map ioc (x :: l7)) ;
            rewrite (app_assoc (map ioc l4)) ; rewrite <- map_app.
-         apply (ex_oc_ir _ _ (l1' ++ x :: l2'))...
+         apply (ex_oc_ir _ _ (l1' ++ x :: l2')); [ | now apply Permutation_Type_elt ].
          revert Hl IHsize ; list_simpl ; rewrite app_assoc ; intros Hl IHsize...
       -- intros lw pi0 Hs'.
          list_simpl ; rewrite (app_assoc (map ioc l4)) ; rewrite (app_assoc _ (map ioc l7)) ;
            rewrite <- (app_assoc (map ioc l4)) ; rewrite <- 2 map_app ;
-           apply (ex_oc_ir _ _ (l1' ++ lw ++ l2'))...
+           apply (ex_oc_ir _ _ (l1' ++ lw ++ l2')); [ | now apply Permutation_Type_app_middle ].
          list_simpl ; rewrite app_assoc.
          refine (IHsize _ _ _ _ _ (oc_irr _ _ _ pi0) Hl _ _) ; cbn...
     * rewrite <- 2 app_assoc.

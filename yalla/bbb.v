@@ -5,8 +5,7 @@
 
 From Coq Require Import BoolOrder.
 From OLlibs Require Import infinite List_more
-                           Permutation_Type_more Permutation_Type_solve GPermutation_Type
-                           Dependent_Forall_Type.
+                           Permutation_Type_more Permutation_Type_solve Dependent_Forall_Type.
 From Yalla Require Import ll_fragments.
 
 
@@ -41,7 +40,7 @@ Inductive ll_bbb : list formula -> Type :=
 (** Generalized weakening for lists *)
 Lemma wk_list_bbb_r : forall l l', ll_bbb l' ->
   ll_bbb (map wn l ++ l').
-Proof with myeeasy ; try Permutation_Type_solve.
+Proof with myeeasy.
 induction l ; intros...
 apply wk_bbb_r.
 apply IHl...
@@ -50,13 +49,13 @@ Qed.
 (** Generalized contraction for lists *)
 Lemma co_list_bbb_r : forall l l',
 ll_bbb (map wn l ++ map wn l ++ l') -> ll_bbb (map wn l ++ l').
-Proof with myeeasy ; try Permutation_Type_solve.
+Proof with myeeasy.
 induction l ; intros...
-apply (ex_bbb_r (map wn l ++ wn a :: l'))...
+apply (ex_bbb_r (map wn l ++ wn a :: l')); [ | Permutation_Type_solve ].
 apply IHl.
-apply (ex_bbb_r (wn a :: map wn l ++ map wn l ++ l'))...
+apply (ex_bbb_r (wn a :: map wn l ++ map wn l ++ l')); [ | Permutation_Type_solve ].
 apply co_bbb_r.
-eapply ex_bbb_r...
+eapply ex_bbb_r; [ apply X | Permutation_Type_solve ].
 Qed.
 
 (** Reversibility of [bot] in [ll_bbb] *)
@@ -181,11 +180,11 @@ Qed.
 
 Lemma bbb_to_ll : forall l,
   ll_bbb l -> ll_ll (wn (tens (wn one) bot) :: l).
-Proof with myeeasy ; try GPermutation_Type_solve.
+Proof with myeeasy ; try (cbn; Permutation_Type_solve).
 intros l pi; induction pi;
   (try now (apply wk_r ; constructor)) ;
   try now (eapply ex_r ; [ | apply Permutation_Type_swap ] ;
-           constructor ; eapply ex_r ; [ eassumption | GPermutation_Type_solve ]).
+           constructor ; eapply ex_r ; [ eassumption | cbn; Permutation_Type_solve ]).
 - eapply ex_r...
 - apply co_r.
   apply co_r.
@@ -218,7 +217,7 @@ Lemma ll_to_bbb : forall l,
   Permutation_Type l (l' ++ map (fun _ => tens (wn one) bot) l1
                          ++ map (fun _ => wn (tens (wn one) bot)) l0)  ->
   ll_bbb l'.
-Proof with myeeasy ; try GPermutation_Type_solve.
+Proof with myeeasy ; try (cbn; Permutation_Type_solve).
 intros l pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
 - assert (HP' := HP).
   symmetry in HP'.
@@ -536,7 +535,7 @@ eapply ex_r in pi2 ; [ | apply Permutation_Type_swap ].
 apply (cut_ll_r _ _ _ pi1) in pi2.
 apply (ex_r _ _ ((l2 ++ l1) ++ map (fun _ => tens (wn one) bot) (@nil unit)
                             ++ map (fun _ => wn (tens (wn one) bot)) (tt :: tt :: nil))) in pi2 ;
- [ | GPermutation_Type_solve ].
+ [ | cbn; Permutation_Type_solve ].
 eapply ll_to_bbb in pi2 ; [ | reflexivity ].
 assumption.
 Qed.
@@ -575,7 +574,7 @@ intros l pi; induction pi using ll_nested_ind ; try now econstructor.
 Qed.
 
 Theorem bb_to_bbb : forall l, llR (oc bot) l -> ll_bbb l.
-Proof with myeeasy ; try GPermutation_Type_solve.
+Proof with myeeasy ; try (cbn; Permutation_Type_solve).
 intros l pi.
 induction pi ; try now econstructor.
 - eapply ex_bbb_r...
@@ -658,24 +657,19 @@ Qed.
 
 Example bb_ex :
   llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
-Proof with myeeasy ; try Permutation_Type_solve.
+Proof with myeeasy.
 assert (Hax :=  gax_r (@pfrag_llR atom (oc bot)) false) ; cbn in Hax.
 assert (llR (oc bot) ((one :: nil) ++ one :: nil))
   as Hr by (eapply mix2_bb_r ; apply one_r).
 eapply (@cut_r _ (pfrag_llR _) eq_refl) in Hax...
 - apply Hax.
-- eapply ex_r ; [ | apply PCPermutation_Type_swap ].
-  cbn.
-  change (wn one :: nil) with (map (@wn atom) (one :: nil)).
+- eapply ex_r ; [ | apply Permutation_Type_swap ].
+  cbn; change (wn one :: nil) with (map (@wn atom) (one :: nil)).
   apply oc_r.
-  cbn.
-  rewrite <- (app_nil_l nil).
-  rewrite app_comm_cons.
+  cbn; rewrite <- (app_nil_l nil), app_comm_cons.
   apply tens_r.
   + apply parr_r...
-  + apply bot_r.
-    apply de_r.
-    apply one_r.
+  + apply bot_r, de_r, one_r.
 Qed.
 
 
@@ -716,12 +710,13 @@ Qed.
 Lemma ex_implies_mix2_mix02 : forall l,
   ll_bbb0 l -> Permutation_Type l (one :: oc (tens (parr one one) bot) :: nil) ->
     @ll_mix0 atom (one :: one :: nil).
-Proof with myeeasy ; try Permutation_Type_solve.
+Proof with myeeasy.
 intros l H; induction H; intro HP;
   try now (apply Permutation_Type_sym in HP ;
        apply Permutation_Type_length_2_inv in HP as [HP | HP] ;
        inversion HP).
-- apply IHll_bbb0...
+- apply IHll_bbb0.
+  Permutation_Type_solve.
 - apply Permutation_Type_sym in HP.
   apply Permutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP].
@@ -844,7 +839,8 @@ intros l H; induction H; intro HP;
     * symmetry in HP0.
       apply app_eq_nil in HP0.
       destruct HP0 ; subst.
-      apply IHll_bbb0...
+      apply IHll_bbb0.
+      Permutation_Type_solve.
 - symmetry in HP.
   apply Permutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP] ; inversion HP.
@@ -874,7 +870,7 @@ Hypothesis cut_bbb0_r : forall A l1 l2,
 
 Theorem llR_oc_bot_to_bbb0_cut : forall l,
   llR (oc bot) l -> ll_bbb0 l.
-Proof with myeeasy ; try GPermutation_Type_solve.
+Proof with myeeasy.
 intros l pi.
 induction pi ; (try now inversion f) ; try now constructor.
 - eapply ex_bbb0_r...
