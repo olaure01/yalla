@@ -20,10 +20,7 @@ end.
 
 Lemma ll2ll_map_wn : forall l,
   map ll2ll (map wn l) = map formulas.wn (map ll2ll l).
-Proof with try reflexivity.
-induction l...
-cbn ; rewrite IHl...
-Qed.
+Proof. now induction l; [| cbn; rewrite IHl]. Qed.
 
 Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
 (*                               atoms       cut   axioms   mix       perm  *)

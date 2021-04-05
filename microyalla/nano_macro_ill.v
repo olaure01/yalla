@@ -17,10 +17,7 @@ end.
 
 Lemma ill2ill_map_ioc : forall l,
   map ill2ill (map ioc l) = map iformulas.ioc (map ill2ill l).
-Proof with try reflexivity.
-induction l...
-cbn ; rewrite IHl...
-Qed.
+Proof. now induction l; [| cbn; rewrite IHl]. Qed.
 
 Definition ipfrag_ill := @ill_def.mk_ipfrag nat_dectype false ill_def.NoIAxioms true.
 (*                                          atoms       cut   axioms            perm  *)

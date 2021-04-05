@@ -2,14 +2,12 @@
 
 Open Scope list_scope.
 
-From Coq Require List.
-(* only List.map from module List is used:
-Fixpoint map {A B : Type} (f: A -> B) l :=
-    match l with
-      | nil => nil
-      | a :: t => (f a) :: (map f t)
-    end.
-*)
+(* Same definition as [List.map] *)
+Definition map [A B : Type] (f : A -> B) :=
+  fix map l := match l with
+               | nil => nil
+               | a :: t => f a :: map t
+               end.
 
 
 (* Adapted from yalla/iformulas.v *)
@@ -50,8 +48,7 @@ Inductive ill : list iformula -> iformula -> Type :=
 | plus_irr1 : forall A B l, ill l A -> ill l (iplus A B)
 | plus_irr2 : forall A B l, ill l A -> ill l (iplus B A)
 | plus_ilr : forall A B l C, ill (A :: l) C -> ill (B :: l) C -> ill (iplus A B :: l) C
-| oc_irr : forall A l, ill (List.map ioc l) A -> ill (List.map ioc l) (ioc A)
+| oc_irr : forall A l, ill (map ioc l) A -> ill (map ioc l) (ioc A)
 | de_ilr : forall A l C, ill (A :: l) C -> ill (ioc A :: l) C
 | wk_ilr : forall A l C, ill l C -> ill (ioc A :: l) C
 | co_ilr : forall A l C, ill (ioc A :: ioc A :: l) C -> ill (ioc A :: l) C.
-
