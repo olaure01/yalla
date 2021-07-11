@@ -3,7 +3,7 @@ From Coq Require Import List Lia.
 From OLlibs Require Import funtheory.
 *)
 From OLlibs Require Import dectype Permutation_Type.
-Require Import ill_def microill.
+From Yalla Require Import ill_def microill.
 
 Fixpoint ill2ill A :=
 match A with

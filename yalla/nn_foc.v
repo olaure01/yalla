@@ -694,7 +694,7 @@ Ltac splitIHpi H :=
   try (assert (HpiN' := HpiN (eq_refl _)) ; clear HpiN) ;
   try (assert (HpiP' := HpiP _ (eq_refl _)) ; clear HpiP).
 
-Ltac polfoccont_cbn := unfold polfoc ; unfold polcont ; cbn.
+Ltac polfoccont_cbn := unfold polfoc, polcont; cbn.
 
 Theorem otl_to_llfoc : forall l Pi, otl l Pi ->
   forall l0 : list formula, l = map ntrans l0 ->
@@ -908,32 +908,26 @@ induction pi ;
   cons2app; rewrite ? app_assoc; apply Permutation_Type_cons_app...
 Qed.
 
-Theorem tl_to_llfoc : forall l : list formula, tl_ll (map ntrans l) None -> llfoc l None.
-Proof with myeasy.
-intros l pi.
-apply tl_to_otl in pi...
-eapply otl_to_llfoc in pi...
-apply pi...
+Theorem tl_to_llfoc (l : list formula) : tl_ll (map ntrans l) None -> llfoc l None.
+Proof.
+intros pi.
+apply tl_to_otl in pi.
+eapply otl_to_llfoc in pi; [ | reflexivity ].
+now apply pi.
 Qed.
 
 End Focusing.
 
 
-Theorem weak_focusing : forall l, ll_ll l -> @llfoc atom_inf l None.
-Proof.
-intros l pi.
-apply tl_to_llfoc.
-apply ll_to_tl.
-assumption.
-Qed.
+Theorem weak_focusing l : ll_ll l -> @llfoc atom_inf l None.
+Proof. intros pi; apply tl_to_llfoc, ll_to_tl; assumption. Qed.
 
-Theorem focusing : forall l, ll_ll l -> @llFoc atom_inf l None.
+Theorem focusing l : ll_ll l -> @llFoc atom_inf l None.
 Proof.
-intros l pi.
+intros pi.
 apply weak_focusing in pi.
-eapply (fst (fst (llfoc_to_llFoc (S (fpsize pi)) _ _ pi _))).
-reflexivity.
-Unshelve. unfold lt ; reflexivity.
+refine (fst (fst (llfoc_to_llFoc (S (fpsize pi)) _ _ pi _)) eq_refl).
+unfold lt; reflexivity.
 Qed.
 
 End Atoms.

@@ -3,7 +3,7 @@ From Coq Require Import List Lia.
 From OLlibs Require Import funtheory.
 *)
 From OLlibs Require Import dectype Permutation_Type.
-Require Import ll_def microll.
+From Yalla Require Import ll_def microll.
 
 Fixpoint ll2ll A :=
 match A with
@@ -76,7 +76,7 @@ induction n; destruct l...
 Qed.
 
 Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
-(*                               atomes      cut   axioms   mix       perm  *)
+(*                               atoms       cut   axioms   mix       perm  *)
 
 Theorem ll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.

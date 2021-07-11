@@ -1436,7 +1436,7 @@ induction pi using ll_nested_ind ; cbn ; intros Hgax ;
          inversion X.
 (* TODO old code
          apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
-         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec ; apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
+         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec; apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
          subst.
    new code should be cbnified or old code back once coq/coq#12394 solved *)
          apply inj_pair2_eq_dec in H2;
@@ -1451,7 +1451,7 @@ induction pi using ll_nested_ind ; cbn ; intros Hgax ;
       -- inversion X.
 (* TODO idem
          apply inj_pair2_eq_dec in H; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
-         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec ; apply list_eq_dec; apply Formula_dec.eq_dec].
+         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec; apply list_eq_dec; apply Formula_dec.eq_dec].
          subst.
 *)
          apply inj_pair2_eq_dec in H2;

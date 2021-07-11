@@ -1,6 +1,6 @@
 From Coq Require Import List.
 From OLlibs Require Import dectype Permutation_Type.
-Require Import ill_def nanoill.
+From Yalla Require Import ill_def nanoill.
 
 Fixpoint ill2ill A :=
 match A with

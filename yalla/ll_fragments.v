@@ -355,7 +355,7 @@ case_eq (length L =? (n + m - 1)); intro Heq.
   apply mix_r...
 Qed.
 
-(** provability in [P + mix_2] is equivalent to provability in [P + mix 2 + mix k] for all k > 2 *)
+(** provability in [P + mix_2] is equivalent to provability in [P + mix k] for all k >= 2 *)
 
 Lemma mix_2_to_mix_k_r {P} : P.(pmix) 2 = true ->
   forall L, 2 <= length L -> Forall_inf (ll P) L -> ll P (concat L).
@@ -405,7 +405,7 @@ destruct L; [ | destruct L ]; cbn in Hl; subst.
 - apply mix_r...
 Qed.
 
-(** provability in [P + mix_0 + mix_n] is equivalent to provability in [P + mix_0 + mix_n + pmix_k] for all k < n *)
+(** provability in [P + mix_0 + mix_n] is equivalent to provability in [P + mix_k] for all k <= n *)
 
 Lemma mix_0_n_r {P} : forall n, P.(pmix) 0 = true -> P.(pmix) n = true ->
   forall L, length L <= n -> Forall_inf (ll P) L -> ll P (concat L).
