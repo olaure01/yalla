@@ -2,9 +2,8 @@
 
 (** * Focusing in Linear Logic *)
 
-From Coq Require Import CMorphisms Wf_nat.
-From OLlibs Require Import infinite List_more
-                           Permutation_Type_more Permutation_Type_solve GPermutation_Type.
+From Coq Require Import CMorphisms Wf_nat Lia.
+From OLlibs Require Import infinite List_more Permutation_Type_more Permutation_Type_solve.
 From Yalla Require Import ll_fragments.
 
 
@@ -14,7 +13,7 @@ Context { atom : InfDecType }.
 Notation formula := (@formula atom).
 
 (** ** Synchronous and asynchronous formulas *)
-Inductive sformula : formula -> Prop :=
+Inductive sformula : formula -> Type :=
 | pvar : forall x, sformula (var x)
 | pone : sformula one
 | ptens : forall A B, sformula (tens A B)
@@ -22,7 +21,7 @@ Inductive sformula : formula -> Prop :=
 | pplus : forall A B, sformula (aplus A B)
 | poc : forall A, sformula (oc A).
 
-Inductive aformula : formula -> Prop :=
+Inductive aformula : formula -> Type :=
 | ncovar : forall x, aformula (covar x)
 | nbot : aformula bot
 | nparr : forall A B, aformula (parr A B)
@@ -30,33 +29,23 @@ Inductive aformula : formula -> Prop :=
 | nwith : forall A B, aformula (awith A B)
 | nwn : forall A, aformula (wn A).
 
-Lemma polarity : forall A, {sformula A} + {aformula A}.
-Proof.
-induction A ;
-  try (now (left ; constructor)) ;
-  try (now (right ; constructor)).
-Defined.
+Lemma polarity : forall A, sformula A + aformula A.
+Proof. induction A; now (left + right; constructor). Defined.
 
-Lemma disj_polarity : forall A, ~ (sformula A /\ aformula A).
-Proof.
-induction A ; intros [Hp Hn] ; inversion Hp ; inversion Hn.
-Qed.
+Lemma disj_polarity : forall A, sformula A -> aformula A -> False.
+Proof. induction A; intros Hp Hn; inversion Hp; inversion Hn. Qed.
 
 Lemma sformula_dual : forall A, sformula (dual A) -> aformula A.
-Proof.
-intros A Hp ; destruct A ; inversion Hp ; constructor.
-Qed.
+Proof. intros A Hp; destruct A; inversion Hp; constructor. Qed.
 
 Lemma aformula_dual : forall A, aformula (dual A) -> sformula A.
-Proof.
-intros A Hn ; destruct A ; inversion Hn ; constructor.
-Qed.
+Proof. intros A Hn; destruct A; inversion Hn; constructor. Qed.
 
 
 (** ** The weakly focused system [llfoc] *)
 
 Definition tFoc x :=
-  { sformula x } + { exists X, x = covar X } + { exists y, x = wn y } + { x = top }.
+  (sformula x + { X | x = covar X } + { y | x = wn y } + (x = top))%type.
 
 Lemma tFoc_dec : forall x, tFoc x + (tFoc x -> False).
 Proof with myeeasy.
@@ -82,96 +71,69 @@ induction l.
 Qed.
 
 Lemma not_tFoc : forall x, (tFoc x -> False) ->
-  (x = bot) + { y | x = parr (fst y) (snd y) } + { y | x = awith (fst y) (snd y) }.
-Proof with myeasy.
+  (x = bot) + {'(y1, y2) | x = parr y1 y2 } + {'(y1, y2) | x = awith y1 y2 }.
+Proof.
 destruct x ; intros HnF ;
   try (now (exfalso ; apply HnF ; left ; left ; left ; constructor)) ;
   try (now (exfalso ; apply HnF ; left ; left ; right ; eexists ; reflexivity)) ;
   try (now (exfalso ; apply HnF ; left ; right ; eexists ; reflexivity)) ;
   try (now (exfalso ; apply HnF ; right ; reflexivity)).
-- left ; left...
-- left ; right ; exists (x1,x2)...
-- right ; eexists (x1,x2)...
+- left; left; reflexivity.
+- left; right ; exists (x1, x2); reflexivity.
+- right; eexists (x1, x2); reflexivity.
 Qed.
 
-Lemma not_tFocl : forall l, (Forall_inf tFoc l -> False) ->
-  { l' : _ & l = fst (snd l') ++ fst l' :: (snd (snd l'))
-           & sum (sum (fst l' = bot) { B | fst l' = parr (fst B) (snd B) })
-                                     { B | fst l' = awith (fst B) (snd B) } }.
-Proof with myeeasy.
-intros l HnF.
-apply Forall_inf_neg_Exists_inf in HnF.
-- induction l ; inversion HnF ; subst.
-  + exists (a,(nil,l))...
-    cbn ; apply not_tFoc...
-  + apply IHl in X as [l' Heq Hf] ; subst.
-    exists (fst l',(a::fst (snd l'),snd (snd l')))...
+Lemma not_tFocl l : (Forall_inf tFoc l -> False) ->
+  {'(A, l1, l2) & l = l1 ++ A :: l2
+                & ((A = bot) + {'(A1, A2) | A = parr A1 A2 }
+                             + {'(A1, A2) | A = awith A1 A2 })%type }.
+Proof.
+intros HnF%Forall_inf_neg_Exists_inf.
+- induction l; inversion HnF; subst.
+  + exists (a, nil, l); [ reflexivity | ].
+    apply (not_tFoc _ H0).
+  + apply IHl in X as [[[b l1] l2] Heq Hf]; subst.
+    now exists (b, a::l1, l2).
 - intros x.
-  assert (Hd := tFoc_dec x).
-  destruct Hd ; intuition.
+  destruct (tFoc_dec x); auto.
 Qed.
 
 Definition polcont l A :=
 match polarity A with
-| left _ => l
-| right _ => A :: l
+| inl _ => l
+| inr _ => A :: l
 end.
 Definition polfoc A :=
 match polarity A with
-| left _ => Some A
-| right _ => None
+| inl _ => Some A
+| inr _ => None
 end.
-Lemma polconts : forall A l, sformula A -> polcont l A = l.
+Lemma polconts A l : sformula A -> polcont l A = l.
 Proof.
-intros.
-unfold polcont.
-case (polarity A).
-- intros ; reflexivity.
-- intros.
-  exfalso.
-  eapply disj_polarity ; split ; eassumption.
+intros; unfold polcont; destruct (polarity A); auto.
+exfalso; apply (disj_polarity A); assumption.
 Qed.
-Lemma polconta : forall A l, aformula A -> polcont l A = A :: l.
+Lemma polconta A l : aformula A -> polcont l A = A :: l.
 Proof.
-intros.
-unfold polcont.
-case (polarity A).
-- intros.
-  exfalso.
-  eapply disj_polarity ; split ; eassumption.
-- intros ; reflexivity.
+intros; unfold polcont; destruct (polarity A); auto.
+exfalso; apply (disj_polarity A); assumption.
 Qed.
-Lemma polfocs : forall A, sformula A -> polfoc A = Some A.
+Lemma polfocs A : sformula A -> polfoc A = Some A.
 Proof.
-intros.
-unfold polfoc.
-case (polarity A).
-- intros ; reflexivity.
-- intros.
-  exfalso.
-  eapply disj_polarity ; split ; eassumption.
+intros; unfold polfoc; destruct (polarity A); auto.
+exfalso; apply (disj_polarity A); assumption.
 Qed.
-Lemma polfoca : forall A, aformula A -> polfoc A = None.
+Lemma polfoca A : aformula A -> polfoc A = None.
 Proof.
-intros.
-unfold polfoc.
-case (polarity A).
-- intros.
-  exfalso.
-  eapply disj_polarity ; split ; eassumption.
-- intros ; reflexivity.
+intros; unfold polfoc; destruct (polarity A); auto.
+exfalso; apply (disj_polarity A); assumption.
 Qed.
 
-Lemma Permutation_Type_middle_polcont : forall l1 l2 A B,
+Lemma Permutation_Type_middle_polcont l1 l2 A B :
   Permutation_Type (B :: polcont (l1 ++ l2) A) (polcont (l1 ++ B :: l2) A).
 Proof.
-intros l1 l2 A B.
-destruct (polarity A) as [Hs | Ha].
-- rewrite 2 (polconts _ _ Hs).
-  apply Permutation_Type_middle.
-- rewrite 2 (polconta _ _ Ha).
-  rewrite 2 (app_comm_cons _ _ A).
-  apply Permutation_Type_middle.
+unfold polcont; destruct (polarity A) as [Hs | Ha];
+  [ | rewrite 2 (app_comm_cons _ _ A)]; apply Permutation_Type_middle.
 Qed.
 
 Inductive llfoc : list formula -> option formula -> Type :=
@@ -189,7 +151,7 @@ Inductive llfoc : list formula -> option formula -> Type :=
 | parr_fr : forall A B l Pi,
                     llfoc (A :: B :: l) Pi ->
                     llfoc (parr A B :: l) Pi
-| top_fr : forall l Pi, option_Prop sformula Pi -> Forall_inf tFoc l ->
+| top_fr : forall l Pi, option_Type sformula Pi -> Forall_inf tFoc l ->
                     llfoc (top :: l) Pi
 | plus_fr1 : forall A B l, llfoc (polcont l A) (polfoc A) ->
                              llfoc l (Some (aplus A B))
@@ -224,28 +186,37 @@ match pi with
 | co_fr _ _ _ pi0 => S (fpsize pi0)
 end.
 
-Lemma top_gen_fr : forall l Pi, option_Prop sformula Pi -> llfoc (top :: l) Pi.
-Proof with myeeasy.
+Lemma top_gen_fr : forall l Pi, option_Type sformula Pi -> llfoc (top :: l) Pi.
+Proof.
 intros l.
-remember (list_sum (map fsize l)) as n.
-revert l Heqn ; induction n using lt_wf_rect;
-  intros l Heqn Pi Hs ; subst.
+remember (list_sum (map fsize l)) as n; revert l Heqn; induction n using lt_wf_rect;
+  intros l -> Pi Hs; subst.
 destruct (tFocl_dec l).
-- apply top_fr...
+- apply top_fr; assumption.
 - apply not_tFocl in f.
-  destruct f as [(A & l1 & l2) Heq [[Hb | ([B C] & Hp)] | ([B C] & Hw)]] ;
-    subst ; cbn ; cbn in X ; [cbn in Hb | cbn in Hp | cbn in Hw] ; subst.
-  + apply (ex_fr (bot :: l2 ++ top :: l1)) ; [ apply bot_fr | Permutation_Type_solve ].
-    apply (ex_fr (top :: l1 ++ l2)) ; [ eapply X | Permutation_Type_solve ]...
-    rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
-  + apply (ex_fr (parr B C :: l2 ++ top :: l1)) ; [ apply parr_fr | Permutation_Type_solve ].
-    apply (ex_fr (top :: l1 ++ B :: C :: l2)) ; [ eapply X | Permutation_Type_solve ]...
-    rewrite 2 map_app ; rewrite 2 list_sum_app ; cbn...
-  + apply (ex_fr (awith B C :: l2 ++ top :: l1)) ; [ apply with_fr | Permutation_Type_solve ].
-    * apply (ex_fr (top :: l1 ++ B :: l2)) ; [ eapply X | Permutation_Type_solve ]...
-      rewrite 2 map_app ; rewrite 2 list_sum_app ; cbn...
-    * apply (ex_fr (top :: l1 ++ C :: l2)) ; [ eapply X | Permutation_Type_solve ]...
-      rewrite 2 map_app ; rewrite 2 list_sum_app ; cbn...
+  destruct f as [ [[A l1] l2] -> [[-> | [[B C] ->]] | [[B C] ->]] ].
+  + rewrite app_comm_cons.
+    eapply ex_fr ; [ apply bot_fr | apply Permutation_Type_middle ].
+    cbn ; eapply X; [ | reflexivity | assumption ].
+    cbn; rewrite 2 map_app, 2 list_sum_app; simpl; lia.
+  + rewrite app_comm_cons.
+    eapply ex_fr; [ apply parr_fr | apply Permutation_Type_middle ].
+    list_simpl; eapply ex_fr;
+    [ eapply X; trivial
+    | etransitivity ; [ apply Permutation_Type_swap
+                      | apply (Permutation_Type_cons eq_refl) ;
+                        etransitivity ; [ apply Permutation_Type_swap | reflexivity ]]].
+    cbn; rewrite 2 map_app, 2 list_sum_app; simpl; lia.
+  + rewrite app_comm_cons.
+    eapply ex_fr; [ apply with_fr | apply Permutation_Type_middle ].
+    * list_simpl; eapply ex_fr;
+        [ eapply X; trivial
+        | etransitivity; [ apply Permutation_Type_swap | apply Permutation_Type_cons; reflexivity ]].
+      cbn; rewrite 2 map_app, 2 list_sum_app ; simpl; lia.
+    * list_simpl; eapply ex_fr;
+        [ eapply X; trivial
+        | etransitivity; [ apply Permutation_Type_swap | apply Permutation_Type_cons; reflexivity ]].
+    cbn; rewrite 2 map_app, 2 list_sum_app ; simpl; lia.
 Qed.
 
 Lemma sync_focus : forall l A, llfoc l (Some A) -> sformula A.
@@ -346,7 +317,7 @@ induction pi ; intros l1' l2' Heq ; subst.
   destruct l1' ; inversion Heq ; subst.
   apply Forall_inf_app_r in f.
   inversion f ; subst.
-  inversion H0 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
+  inversion X as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ (polconts _ _ Hs)).
     rewrite <- (polconts _ (l1' ++ l2') Hs) in H1.
@@ -480,7 +451,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   destruct l1' ; inversion Heq ; subst.
   apply Forall_inf_app_r in f.
   inversion f ; subst.
-  inversion H0 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
+  inversion X as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
     rewrite <- (polconts _ (l1' ++ A' :: B' :: l2') Hs) in H1.
@@ -628,7 +599,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   destruct l1' ; inversion Heq ; subst.
   apply Forall_inf_app_r in f.
   inversion f ; subst.
-  inversion H0 as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
+  inversion X as [[[Ht | Ht] | Ht] | Ht] ; try now (inversion Ht).
 - destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
     rewrite <- (polconts _ (l1' ++ A' :: l2') Hs) in H1.
@@ -730,10 +701,10 @@ Qed.
 Lemma llfoc_to_ll : forall l Pi, llfoc l Pi ->
    (Pi = None -> ll_ll l)
  * (forall C, Pi = Some C -> ll_ll (C :: l)).
-Proof with (try GPermutation_Type_solve) ; myeeasy.
+Proof with (try (cbn; Permutation_Type_solve)) ; myeeasy.
 intros l Pi pi ; induction pi ;
   (split ; [ intros HN ; inversion HN ; subst
-           | intros D HD ; inversion HD ; subst ]) ;
+           | intros D HD ; inversion HD ; subst ]);
   try (destruct IHpi as [IHpiN IHpiS]) ;
   try (destruct IHpi1 as [IHpi1N IHpi1S]) ;
   try (destruct IHpi2 as [IHpi2N IHpi2S]) ;
@@ -743,7 +714,7 @@ intros l Pi pi ; induction pi ;
   try (assert (pi0' := IHpiN eq_refl)) ;
   try (assert (pi1' := IHpi1N eq_refl)) ;
   try (assert (pi2' := IHpi2N eq_refl)) ;
-  try (now (constructor ; myeeasy)) ;
+  try (now (constructor ; myeeasy));
   try (now (eapply ex_r ;
              [ | apply Permutation_Type_swap ] ; constructor ; myeeasy))...
 - eapply ex_r ; [ eassumption | ]...
@@ -812,11 +783,10 @@ Qed.
 
 (** ** The strongly focused system [llFoc] *)
 
-Definition Foc x :=
-  { sformula x } + { exists X, x = covar X } + { exists y, x = wn y }.
+Definition Foc x := (sformula x + { X | x = covar X } + { y | x = wn y })%type.
 
-Lemma Foc_dec : forall x, Foc x + (Foc x -> False).
-Proof with myeeasy.
+Lemma Foc_dec x : Foc x + (Foc x -> False).
+Proof.
 induction x ;
   try (now (left ; left ; left ; constructor)) ;
   try (now (left ; left ; right ; eexists ; reflexivity)) ;
@@ -825,49 +795,45 @@ induction x ;
   try (now (right ; intros [[ H | [X H] ] | [X H] ] ; inversion H)).
 Qed.
 
-Lemma Focl_dec : forall l, Forall_inf Foc l + (Forall_inf Foc l -> False).
-Proof with myeasy.
+Lemma Focl_dec l : Forall_inf Foc l + (Forall_inf Foc l -> False).
+Proof.
 induction l.
-- left ; constructor.
+- left; constructor.
 - destruct (Foc_dec a).
   + destruct IHl.
-    * left ; constructor...
-    * right ; intros H.
-      inversion H ; subst ; intuition.
-  + right ; intros H.
-    inversion H ; subst ; intuition.
+    * left; constructor; assumption.
+    * now right; intros H; inversion_clear H.
+  + now right; intros H; inversion_clear H.
 Qed.
 
-Lemma not_Foc : forall x, (Foc x -> False) ->
-  (x = bot) + { y | x = parr (fst y) (snd y) } +
-  (x = top) + { y | x = awith (fst y) (snd y) }.
-Proof with myeasy.
-destruct x ; intros HnF ;
-  try (now (exfalso ; apply HnF ; left ; left ; constructor)) ;
-  try (now (exfalso ; apply HnF ; left ; left ; right ; eexists ; reflexivity)) ;
-  try (now (exfalso ; apply HnF ; left ; right ; eexists ; reflexivity)) ;
-  try (now (exfalso ; apply HnF ; right ; eexists ; reflexivity)).
-- left ; left ; left...
-- left ; left ; right ; exists (x1,x2)...
-- left ; right...
-- right ; eexists (x1,x2)...
+Lemma not_Foc x : (Foc x -> False) ->
+  (x = bot) + {'(y1, y2) | x = parr y1 y2 } +
+  (x = top) + {'(y1, y2) | x = awith y1 y2 }.
+Proof.
+destruct x; intros HnF ;
+  try (now (exfalso; apply HnF; left; left; constructor));
+  try (now (exfalso; apply HnF; left; left; right; eexists; reflexivity));
+  try (now (exfalso; apply HnF; left; right; eexists; reflexivity));
+  try (now (exfalso; apply HnF; right; eexists; reflexivity)).
+- left; left; left; reflexivity.
+- left; left; right; exists (x1,x2); reflexivity.
+- left; right; reflexivity.
+- right; exists (x1,x2); reflexivity.
 Qed.
 
-Lemma not_Focl : forall l, (Forall_inf Foc l -> False) ->
-  { l' : _ & l = fst (snd l') ++ fst l' :: (snd (snd l'))
-           & sum (sum (sum (fst l' = bot) { B | fst l' = parr (fst B) (snd B) })
-                           (fst l' = top)) { B | fst l' = awith (fst B) (snd B) } }.
-Proof with myeeasy.
-intros l HnF.
-apply Forall_inf_neg_Exists_inf in HnF.
-- induction l ; inversion HnF ; subst.
-  + exists (a,(nil,l))...
-    cbn ; apply not_Foc...
-  + apply IHl in X as [l' Heq Hf] ; subst.
-    exists (fst l',(a::fst (snd l'),snd (snd l')))...
+Lemma not_Focl l : (Forall_inf Foc l -> False) ->
+  {'(A, l1, l2) & l = l1 ++ A :: l2
+                & ((A = bot) + {'(A1, A2) | A = parr A1 A2 }
+                 + (A = top) + {'(A1, A2) | A = awith A1 A2 })%type }.
+Proof.
+intros HnF%Forall_inf_neg_Exists_inf.
+- induction l; inversion HnF; subst.
+  + exists (a, nil, l); [ reflexivity | ].
+    apply (not_Foc _ H0).
+  + apply IHl in X as [[[b l1] l2] Heq Hf]; subst.
+    now exists (b, a::l1, l2).
 - intros x.
-  assert (Hd := Foc_dec x).
-  destruct Hd ; intuition.
+  destruct (Foc_dec x); auto.
 Qed.
 
 Inductive llFoc : list formula -> option formula -> Type :=
@@ -898,118 +864,330 @@ Inductive llFoc : list formula -> option formula -> Type :=
 | oc_Fr : forall A l, llFoc (A :: map wn l) None ->
                       llFoc (map wn l) (Some (oc A))
 | de_Fr : forall A l, llFoc (polcont l A) (polfoc A) ->
-                      llFoc (wn A :: l) None
-| wk_Fr : forall A l, llFoc l None -> llFoc (wn A :: l) None
+                      Forall_inf Foc l -> llFoc (wn A :: l) None
+| wk_Fr : forall A l, llFoc l None -> Forall_inf Foc l -> llFoc (wn A :: l) None
 | co_Fr : forall A l, llFoc (wn A :: wn A :: l) None ->
-                      llFoc (wn A :: l) None.
+                      Forall_inf Foc l -> llFoc (wn A :: l) None.
 
 Instance llFoc_perm {Pi} :
   Proper ((@Permutation_Type _) ==> Basics.arrow) (fun l => llFoc l Pi).
-Proof.
-intros l1 l2 HP pi.
-eapply ex_Fr ; eassumption.
-Qed.
+Proof. intros l1 l2 HP pi; apply (ex_Fr l1); assumption. Qed.
 
-Lemma top_gen_Fr : forall l, llFoc (top :: l) None.
-Proof with myeeasy.
-intros l.
-remember (list_sum (map fsize l)) as n.
-revert l Heqn ; induction n using lt_wf_rect; intros l Heqn; subst.
+Lemma top_gen_Fr l : llFoc (top :: l) None.
+Proof.
+remember (list_sum (map fsize l)) as n; revert l Heqn ; induction n using lt_wf_rect; intros l ->.
 destruct (tFocl_dec l).
-- apply top_Fr...
+- apply top_Fr; assumption.
 - apply not_tFocl in f.
-  destruct f as [ (A & l1 & l2) Heq [[Hb | [[B C] Hp] ] | [[B C] Hw]]] ;
-    subst ; cbn.
-  + cbn in Hb ; subst ; rewrite app_comm_cons.
-    eapply ex_Fr ; [ apply bot_Fr | apply Permutation_Type_middle ].
-    list_simpl ; eapply X...
-    cbn ; rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
-  + cbn in Hp ; subst ; rewrite app_comm_cons.
-    eapply ex_Fr ; [ apply parr_Fr | apply Permutation_Type_middle ].
-    list_simpl ; eapply ex_Fr ;
-    [ eapply X
+  destruct f as [ [[A l1] l2] -> [[-> | [[B C] ->]] | [[B C] ->]] ].
+  + rewrite app_comm_cons.
+    eapply ex_Fr; [ apply bot_Fr | apply Permutation_Type_middle ].
+    list_simpl; eapply X; [ | reflexivity ].
+    cbn; rewrite 2 map_app, 2 list_sum_app; simpl; lia.
+  + rewrite app_comm_cons.
+    eapply ex_Fr; [ apply parr_Fr | apply Permutation_Type_middle ].
+    list_simpl; eapply ex_Fr;
+    [ eapply X; trivial
     | etransitivity ; [ apply Permutation_Type_swap
                       | apply (Permutation_Type_cons eq_refl) ;
-                        etransitivity ; [ apply Permutation_Type_swap |  ]]]...
-    cbn ; rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
-  + cbn in Hw ; subst ; rewrite app_comm_cons.
-    eapply ex_Fr ; [ apply with_Fr | apply Permutation_Type_middle ].
-    * list_simpl ; eapply ex_Fr ;
-        [ eapply X
-        | etransitivity ; [ apply Permutation_Type_swap | apply Permutation_Type_cons ; reflexivity ]]...
-    cbn ; rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
-    * list_simpl ; eapply ex_Fr ;
-        [ eapply X
-        | etransitivity ; [ apply Permutation_Type_swap | apply Permutation_Type_cons ; reflexivity ]]...
-    cbn ; rewrite 2 map_app ; rewrite 2 list_sum_app ; simpl...
+                        etransitivity ; [ apply Permutation_Type_swap | reflexivity ]]].
+    cbn; rewrite 2 map_app, 2 list_sum_app; simpl; lia.
+  + rewrite app_comm_cons.
+    eapply ex_Fr; [ apply with_Fr | apply Permutation_Type_middle ].
+    * list_simpl; eapply ex_Fr;
+        [ eapply X; trivial
+        | etransitivity; [ apply Permutation_Type_swap | apply Permutation_Type_cons; reflexivity ]].
+      cbn; rewrite 2 map_app, 2 list_sum_app ; simpl; lia.
+    * list_simpl; eapply ex_Fr;
+        [ eapply X; trivial
+        | etransitivity; [ apply Permutation_Type_swap | apply Permutation_Type_cons; reflexivity ]].
+    cbn; rewrite 2 map_app, 2 list_sum_app ; simpl; lia.
 Qed.
 
-Lemma sync_focus_F : forall l A, llFoc l (Some A) -> sformula A.
+Lemma sync_focus_F l A : llFoc l (Some A) -> sformula A.
 Proof.
-intros l A pi.
-remember (Some A) as Pi ; revert HeqPi ; induction pi ;
-  intros HeqPi ; inversion HeqPi ; subst ;
-  try (now constructor) ;
-  try apply IHpi ;
-  try assumption.
+intros pi.
+remember (Some A) as Pi; revert HeqPi; induction pi; intros HeqPi ;inversion HeqPi; subst;
+  try (now constructor); auto.
 Qed.
 
-Lemma Foc_context : forall l A, llFoc l (Some A) -> Forall_inf Foc l.
-Proof with myeeasy.
-intros l A pi.
-remember (Some A) as Pi.
-revert A HeqPi ; induction pi ; intros P HeqPi ; subst ;
+Lemma Foc_context l A : llFoc l (Some A) -> Forall_inf Foc l.
+Proof.
+intros pi.
+remember (Some A) as Pi; revert A HeqPi; induction pi; intros P HeqPi; subst;
   try (now inversion HeqPi).
 - constructor ; [ | constructor ].
-  left ; right.
-  eexists...
-- eapply Permutation_Type_Forall_inf...
-  eapply IHpi...
-- apply Forall_inf_app...
-- clear ; remember (map wn l) as l0.
-  revert l Heql0 ; induction l0 ; intros l Heql0 ;
-    destruct l ; inversion Heql0 ; subst ; constructor.
-  + right ; eexists...
-  + eapply IHl0...
+  left; right; exists X; reflexivity.
+- specialize (IHpi P eq_refl).
+  apply (Permutation_Type_Forall_inf p IHpi).
+- apply Forall_inf_app; assumption.
+- clear; remember (map wn l) as l0; revert l Heql0; induction l0; intros [ | B l ] Heql0 ;
+    inversion Heql0; subst; constructor.
+  + right; exists B; reflexivity.
+  + apply (IHl0 l); reflexivity.
 Qed.
 
-Lemma llFoc_foc_is_llFoc_foc : forall l A, llFoc l (Some A) ->
-  llFoc (polcont l A) (polfoc A).
+Lemma llFoc_foc_is_llFoc_foc l A : llFoc l (Some A) -> llFoc (polcont l A) (polfoc A).
 Proof.
-intros l A pi.
+intros pi.
 assert (Hs := sync_focus_F _ _ pi).
-rewrite (polconts _ _ Hs).
-rewrite (polfocs _ Hs).
-apply pi.
+rewrite (polconts _ _ Hs), (polfocs _ Hs); assumption.
 Qed.
+
+
+(** ** Reversing *)
+
+Lemma bot_rev_F l1 l2 Pi : llFoc (l1 ++ bot :: l2) Pi -> llFoc (l1 ++ l2) Pi.
+Proof.
+intros pi; remember (l1 ++ bot :: l2) as l; revert l1 l2 Heql.
+induction pi; intros l1' l2' Heql; subst.
+- destruct l1'; inversion Heql.
+  destruct l1'; inversion H1.
+- destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1p, l2p) ->].
+  apply Permutation_Type_app_inv in p.
+  apply (ex_Fr (l1p ++ l2p)); auto.
+- destruct l1'; inversion Heql; subst.
+  + exfalso.
+    apply sync_focus_F in pi.
+    inversion pi.
+  + cbn; apply foc_Fr, IHpi; reflexivity.
+- exfalso; destruct l1'; inversion Heql.
+- destruct l1'; inversion Heql; subst; auto.
+  cbn; apply bot_Fr, IHpi; reflexivity.
+- exfalso.
+  dichot_elt_app_inf_exec Heql; subst.
+  + apply Forall_inf_app_r in f.
+    inversion f.
+    destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+  + apply Forall_inf_app_r in f0.
+    inversion f0.
+    destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- destruct l1'; inversion Heql; subst.
+  cbn; apply parr_Fr.
+  rewrite 2 app_comm_cons.
+  apply IHpi; reflexivity.
+- destruct l1'; inversion Heql; subst.
+  cbn; apply top_gen_Fr.
+- exfalso.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- destruct l1'; inversion Heql; subst.
+  cbn; apply with_Fr.
+  + rewrite app_comm_cons; apply IHpi1; reflexivity.
+  + rewrite app_comm_cons; apply IHpi2; reflexivity.
+- exfalso; decomp_map_inf Heql; subst.
+  inversion Heql3.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+Qed.
+
+Lemma parr_rev_F A1 A2 l1 l2 Pi :
+  llFoc (l1 ++ parr A1 A2 :: l2) Pi -> llFoc (l1 ++ A1 :: A2 :: l2) Pi.
+Proof.
+intros pi; remember (l1 ++ parr A1 A2 :: l2) as l; revert A1 A2 l1 l2 Heql.
+induction pi; intros A1 A2 l1' l2' Heql; subst.
+- destruct l1'; inversion Heql.
+  destruct l1'; inversion H1.
+- destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1p, l2p) ->].
+  apply Permutation_Type_app_inv, (Permutation_Type_elt A2), (Permutation_Type_elt A1) in p.
+  apply (ex_Fr (l1p ++ A1 :: A2 :: l2p)); auto.
+- destruct l1'; inversion Heql; subst.
+  + exfalso.
+    apply sync_focus_F in pi.
+    inversion pi.
+  + cbn; apply foc_Fr, IHpi; reflexivity.
+- exfalso; destruct l1'; inversion Heql.
+- destruct l1'; inversion Heql; subst.
+  cbn; apply bot_Fr, IHpi; reflexivity.
+- exfalso.
+  dichot_elt_app_inf_exec Heql; subst.
+  + apply Forall_inf_app_r in f.
+    inversion f.
+    destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+  + apply Forall_inf_app_r in f0.
+    inversion f0.
+    destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- destruct l1'; inversion Heql; subst; auto.
+  cbn; apply parr_Fr.
+  rewrite 2 app_comm_cons.
+  apply IHpi; reflexivity.
+- destruct l1'; inversion Heql; subst.
+  cbn; apply top_gen_Fr.
+- exfalso.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- destruct l1'; inversion Heql; subst.
+  cbn; apply with_Fr.
+  + rewrite app_comm_cons; apply IHpi1; reflexivity.
+  + rewrite app_comm_cons; apply IHpi2; reflexivity.
+- exfalso; decomp_map_inf Heql; subst.
+  inversion Heql3.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+Qed.
+
+Lemma with_rev_F A1 A2 l1 l2 Pi :
+  llFoc (l1 ++ awith A1 A2 :: l2) Pi -> llFoc (l1 ++ A1 :: l2) Pi * llFoc (l1 ++ A2 :: l2) Pi.
+Proof.
+intros pi; remember (l1 ++ awith A1 A2 :: l2) as l; revert A1 A2 l1 l2 Heql.
+induction pi; intros A1 A2 l1' l2' Heql; subst.
+- destruct l1'; inversion Heql.
+  destruct l1'; inversion H1.
+- destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1p, l2p) ->].
+  apply Permutation_Type_app_inv in p.
+  split.
+  + apply (Permutation_Type_elt A1) in p.
+    apply (ex_Fr (l1p ++ A1 :: l2p)); [ apply (IHpi A1 A2) | ]; auto.
+  + apply (Permutation_Type_elt A2) in p.
+    apply (ex_Fr (l1p ++ A2 :: l2p)); [ apply (IHpi A1 A2) | ]; auto.
+- destruct l1'; inversion Heql; subst.
+  + exfalso.
+    apply sync_focus_F in pi.
+    inversion pi.
+  + cbn; split; apply foc_Fr, (IHpi A1 A2); reflexivity.
+- exfalso; destruct l1'; inversion Heql.
+- destruct l1'; inversion Heql; subst.
+  cbn; split; apply bot_Fr, (IHpi A1 A2); reflexivity.
+- exfalso.
+  dichot_elt_app_inf_exec Heql; subst.
+  + apply Forall_inf_app_r in f.
+    inversion f.
+    destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+  + apply Forall_inf_app_r in f0.
+    inversion f0.
+    destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- destruct l1'; inversion Heql; subst.
+  cbn; split; apply parr_Fr; rewrite 2 app_comm_cons; apply (IHpi A1 A2); reflexivity.
+- destruct l1'; inversion Heql; subst.
+  cbn; split; apply top_gen_Fr.
+- exfalso.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- destruct l1'; inversion Heql; subst; auto.
+  cbn; split; apply with_Fr.
+  + rewrite app_comm_cons; apply (IHpi1 A1 A2); reflexivity.
+  + rewrite app_comm_cons; apply (IHpi2 A1 A2); reflexivity.
+  + rewrite app_comm_cons; apply (IHpi1 A1 A2); reflexivity.
+  + rewrite app_comm_cons; apply (IHpi2 A1 A2); reflexivity.
+- exfalso; decomp_map_inf Heql; subst.
+  inversion Heql3.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+- exfalso; destruct l1'; inversion Heql; subst.
+  apply Forall_inf_app_r in f; inversion f.
+  destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
+Qed.
+
+Lemma reversing l1 l2 l0:
+  (forall lf, Forall_inf Foc lf -> llFoc (l1 ++ lf) None -> llFoc (l2 ++ lf) None) ->
+  llFoc (l1 ++ l0) None -> llFoc (l2 ++ l0) None.
+Proof.
+enough (forall l l1 l2 l0 lf,
+  (forall lf, Forall_inf Foc lf -> llFoc (l1 ++ lf) None -> llFoc (l2 ++ lf) None) ->
+  Forall_inf Foc lf -> Permutation_Type l (l1 ++ lf ++ l0) ->
+  llFoc l None -> llFoc (l2 ++ lf ++ l0) None) as Hgen.
+{ intros.
+  rewrite <- (app_nil_l l0).
+  apply Hgen with (l1 ++ l0) l1; auto. }
+clear l1 l2 l0; intros l l1 l2 l0 lf.
+remember (list_sum (map fsize l0)) as n; revert l0 lf l Heqn.
+induction n using lt_wf_rect; intros l0 lf l -> HFoc HF HP pi.
+destruct l0 as [|A l0].
+- apply HFoc; [ now rewrite app_nil_r | ].
+  apply (ex_Fr _ _ _ pi HP).
+- destruct (Foc_dec A).
+  + replace (l2 ++ lf ++ A :: l0) with (l2 ++ (lf ++ A :: nil) ++ l0) by now rewrite <- app_assoc.
+    apply X with (list_sum (map fsize l0)) l; rewrite <- ? app_assoc; auto.
+    * assert (Hs := fsize_pos A); simpl; lia.
+    * apply Forall_inf_app; auto.
+  + apply not_Foc in f as [[[ -> | [(A1, A2) ->]] | ->] | [(A1, A2) ->]]; cbn.
+    * apply (ex_Fr (bot :: l2 ++ lf ++ l0)); [ | Permutation_Type_solve ].
+      apply bot_Fr.
+      apply X with (list_sum (map fsize l0)) (l1 ++ lf ++ l0); auto.
+      rewrite app_assoc; apply bot_rev_F; rewrite <- app_assoc.
+      apply (ex_Fr _ _ _ pi HP).
+    * apply (ex_Fr (parr A1 A2 :: l2 ++ lf ++ l0)); [ | Permutation_Type_solve ].
+      apply parr_Fr.
+      apply (ex_Fr (l2 ++ lf ++ A1 :: A2 :: l0)); [ | Permutation_Type_solve ].
+      apply X with (list_sum (map fsize (A1 :: A2 :: l0))) (l1 ++ lf ++ A1 :: A2 :: l0);
+        simpl; auto; try lia.
+      rewrite app_assoc; apply parr_rev_F; rewrite <- app_assoc.
+      apply (ex_Fr _ _ _ pi HP).
+    * apply (ex_Fr (top :: l2 ++ lf ++ l0)); [ | Permutation_Type_solve ].
+      apply top_gen_Fr.
+    * apply (ex_Fr (awith A1 A2 :: l2 ++ lf ++ l0)); [ | Permutation_Type_solve ].
+      apply with_Fr.
+      -- apply (ex_Fr (l2 ++ lf ++ A1 :: l0)); [ | Permutation_Type_solve ].
+         apply X with (list_sum (map fsize (A1 :: l0))) (l1 ++ lf ++ A1 :: l0);
+           simpl; auto; try lia.
+         rewrite app_assoc; apply (with_rev_F A1 A2); rewrite <- app_assoc.
+         apply (ex_Fr _ _ _ pi HP).
+      -- apply (ex_Fr (l2 ++ lf ++ A2 :: l0)); [ | Permutation_Type_solve ].
+         apply X with (list_sum (map fsize (A2 :: l0))) (l1 ++ lf ++ A2 :: l0);
+           simpl; auto; try lia.
+         rewrite app_assoc; apply (with_rev_F A1 A2); rewrite <- app_assoc.
+         apply (ex_Fr _ _ _ pi HP).
+Qed.
+
+Lemma wk_gen_Fr A l : llFoc l None -> llFoc (wn A :: l) None.
+Proof.
+rewrite <- (app_nil_l l), app_comm_cons; apply reversing.
+clear l; cbn; intros l Hf pi; apply wk_Fr; auto.
+Qed.
+
+Lemma co_gen_Fr A l : llFoc (wn A :: wn A :: l) None -> llFoc (wn A :: l) None.
+Proof.
+rewrite <- (app_nil_l l), ? app_comm_cons; apply reversing.
+clear l; cbn; intros l Hf pi; apply co_Fr; auto.
+Qed.
+
+
+(** ** Strong focusing *)
 
 Lemma incl_Foc : forall l l0 lw lw', llFoc l None ->
   Permutation_Type l (map wn lw ++ l0) -> incl_inf lw lw' ->
     llFoc (map wn lw' ++ l0) None.
-Proof with myeeasy.
-intros l l0 lw ; revert l l0 ; induction lw ; intros l l0 lw' pi HP Hsub.
-- clear Hsub ; induction lw'.
-  + eapply ex_Fr...
-  + apply wk_Fr...
+Proof.
+intros l l0 lw; revert l l0; induction lw; intros l l0 lw' pi HP Hsub.
+- clear Hsub; induction lw'.
+  + apply (ex_Fr _ _ _ pi HP).
+  + cbn; apply wk_gen_Fr; assumption.
 - destruct (incl_inf_cons_inv Hsub) as [Hin Hi].
-  eapply IHlw in pi ; [ | | apply Hi ].
-  + apply in_inf_split in Hin.
-    destruct Hin as ((l1 & l2) & Heq) ; subst.
-    eapply ex_Fr ; [ apply co_Fr | ].
-    * eapply ex_Fr ; [ apply pi | ].
-      rewrite map_app ; cbn.
-      rewrite <- app_assoc.
-      rewrite <- app_comm_cons.
-      symmetry ; apply Permutation_Type_cons_app.
-      rewrite app_assoc.
-      apply Permutation_Type_cons_app.
-      reflexivity.
-    * rewrite <- app_assoc.
-      rewrite map_app ; cbn.
-      rewrite <- app_assoc.
-      rewrite <- app_comm_cons.
-      apply Permutation_Type_cons_app.
-      reflexivity.
+  apply (IHlw l (wn a :: l0) lw') in pi ; [ | | apply Hi ].
+  + apply in_inf_split in Hin as [(l1, l2) ->].
+    apply (ex_Fr ((wn a :: nil) ++ map wn l1 ++ map wn l2 ++ l0));
+      [ | list_simpl; apply Permutation_Type_cons_app; reflexivity ].
+    cbn; apply co_gen_Fr.
+    apply (ex_Fr _ _ _ pi); list_simpl.
+    symmetry ; apply Permutation_Type_cons_app.
+    rewrite 2 app_assoc; apply Permutation_Type_cons_app; reflexivity.
   + etransitivity ; [ apply HP | ].
     cbn ; apply Permutation_Type_middle.
 Qed.
@@ -1069,35 +1247,35 @@ Proof with myeeasy.
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   destruct (polarity A) as [Hs | Ha].
-  + rewrite (polconts _ _ Hs) in H.
-    rewrite (polfocs _ Hs) in H.
+  + rewrite (polconts _ _ Hs), (polfocs _ Hs) in H.
     destruct (Focl_dec l).
     * eapply (snd (fst H)) in f...
       destruct f as (l1 & lw & lw' & HP & Hi & IH).
-      cbn in HP ; cbn in Hi ; cbn in IH.
       apply (Permutation_Type_cons_app _ _ (wn A)) in HP.
       symmetry in HP.
       eapply ex_Fr...
       eapply incl_Foc...
-      rewrite <- (polconts A _ Hs) in IH.
-      rewrite <- (polfocs A Hs) in IH.
-      eapply ex_Fr ; [ apply de_Fr | ]...
-      apply Permutation_Type_cons_app...
+      apply (ex_Fr (wn A :: map wn lw' ++ l1)).
+      apply de_Fr.
+      -- apply (llFoc_foc_is_llFoc_foc _ _ IH).
+      -- apply (Foc_context _ _ IH).
+      -- apply Permutation_Type_cons_app; reflexivity.
     * eapply (snd H) in f...
       apply f.
-  + rewrite (polconta _ _ Ha) in H.
-    rewrite (polfoca _ Ha) in H.
+  + rewrite (polconta _ _ Ha),(polfoca _ Ha) in H.
     apply H in Heq...
-    rewrite <- (polconta A l Ha) in Heq.
-    rewrite <- (polfoca A Ha) in Heq.
-    apply de_Fr...
+    change (wn A :: l) with ((wn A :: nil) ++ l).
+    apply (reversing (A :: nil)); auto.
+    clear - Ha; cbn; intros l Hf pi.
+    apply de_Fr; auto.
+    rewrite (polconta _ _ Ha), (polfoca _ Ha); assumption.
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
-  apply wk_Fr.
+  apply wk_gen_Fr.
   apply H...
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
-  apply co_Fr.
+  apply co_gen_Fr.
   apply H...
 (* second conjunct *)
 - exists (covar X0 :: nil), nil, nil ; nsplit 3...
@@ -1116,8 +1294,8 @@ Proof with myeeasy.
   + apply incl_inf_nil_l.
   + apply one_Fr.
 - exfalso.
-  inversion HF ; subst.
-  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  inversion HF; subst.
+  destruct X0 as [[H' | [X' H']] | [X' H']]; inversion H'.
 - assert (HF1 := Forall_inf_app_l _ _ HF).
   assert (HF2 := Forall_inf_app_r _ _ HF).
   assert (X':=X).
@@ -1170,17 +1348,13 @@ Proof with myeeasy.
     * etransitivity ; [ apply (Permutation_Type_app_tail _ HP1) | ].
       rewrite <- app_assoc...
     * eapply ex_Fr ; [ apply tens_Fr | ].
-      -- rewrite (polconts _ _ HsA).
-         rewrite (polfocs _ HsA)...
-      -- rewrite (polconta _ _ HaB).
-         rewrite (polfoca _ HaB)...
+      -- rewrite (polconts _ _ HsA), (polfocs _ HsA)...
+      -- rewrite (polconta _ _ HaB), (polfoca _ HaB)...
       -- apply Foc_context in pi1...
       -- assumption.
       -- rewrite <- app_assoc...
-  + rewrite (polconta _ _ HaA) in H.
-    rewrite (polfoca _ HaA) in H.
-    rewrite (polconts _ _ HsB) in H'.
-    rewrite (polfocs _ HsB) in H'.
+  + rewrite (polconta _ _ HaA), (polfoca _ HaA) in H.
+    rewrite (polconts _ _ HsB), (polfocs _ HsB) in H'.
     assert (pi1 := fst (fst H) eq_refl).
     eapply (snd (fst H')) in HF2...
     destruct HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2).
@@ -1191,10 +1365,8 @@ Proof with myeeasy.
       apply Permutation_Type_app_tail.
       apply Permutation_Type_app_comm.
     * eapply ex_Fr ; [ apply tens_Fr | ].
-      -- rewrite (polconta _ _ HaA).
-         rewrite (polfoca _ HaA)...
-      -- rewrite (polconts _ _ HsB).
-         rewrite (polfocs _ HsB)...
+      -- rewrite (polconta _ _ HaA), (polfoca _ HaA)...
+      -- rewrite (polconts _ _ HsB), (polfocs _ HsB)...
       -- assumption.
       -- apply Foc_context in pi2...
       -- rewrite 2 app_assoc...
@@ -1208,20 +1380,15 @@ Proof with myeeasy.
     assert (pi2 := fst (fst H') eq_refl).
     exists (l1 ++ l2), nil, nil ; cbn ; nsplit 3...
     * apply incl_inf_nil_l.
-    * eapply ex_Fr ; [ apply tens_Fr | ].
-      -- rewrite (polconta _ _ HaA).
-         rewrite (polfoca _ HaA)...
-      -- rewrite (polconta _ _ HaB).
-         rewrite (polfoca _ HaB)...
-      -- assumption.
-      -- assumption.
-      -- reflexivity.
+    * apply tens_Fr; auto.
+      -- rewrite (polconta _ _ HaA), (polfoca _ HaA)...
+      -- rewrite (polconta _ _ HaB), (polfoca _ HaB)...
 - exfalso.
   inversion HF ; subst.
-  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  destruct X0 as [[H' | [X' H']] | [X' H']] ; inversion H'.
 - exfalso.
   inversion HF ; subst.
-  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  destruct X0 as [[H' | [X' H']] | [X' H']] ; inversion H'.
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   destruct (polarity A) as [HsA | HaA].
@@ -1266,7 +1433,7 @@ Proof with myeeasy.
       rewrite (polfoca _ HaA)...
 - exfalso.
   inversion HF ; subst.
-  destruct H2 as [[H' | [X' H']] | [X' H']] ; inversion H'.
+  destruct X0 as [[H' | [X' H']] | [X' H']] ; inversion H'.
 - specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
   assert (pi := fst (fst H) eq_refl).
@@ -1276,8 +1443,8 @@ Proof with myeeasy.
 - inversion HF ; subst.
   specialize X with (S (fpsize pi0)) _ _ pi0.
   apply X in H...
-  eapply (snd (fst H)) in X0 ; [ | reflexivity ].
-  destruct X0 as (l0 & lw & lw' & HP & Hi & pi).
+  eapply (snd (fst H)) in X1 ; [ | reflexivity ].
+  destruct X1 as (l0 & lw & lw' & HP & Hi & pi).
   cbn in HP ; cbn in Hi ; cbn in pi.
   exists l0, (A :: lw), lw' ; cbn ; nsplit 3...
   + list_simpl ; apply Permutation_Type_cons...
@@ -1393,10 +1560,8 @@ Proof with myeeasy.
          rewrite ? app_assoc.
          apply Permutation_Type_cons_app...
 (* third conjunct *)
-- apply not_Focl in HnF.
-  destruct HnF as [(A & l1 & l2) Heq' [[[Hb | ([B' C'] & Hp)] | Ht ] | ([B' C'] & Hw)]] ;
-    subst ; cbn ; cbn in H ; cbn in pi0 ;
-    [cbn in Hb | cbn in Hp | cbn in Ht | cbn in Hw] ; subst.
+- apply not_Focl in HnF as [[[A l1] l2] -> [[[-> | ([B' C'] & Hp)] | Ht ] | ([B' C'] & Hw)]];
+    subst; cbn; cbn in H; cbn in pi0.
   + destruct (bot_rev_f _ _ pi0 _ _ eq_refl) as [pi Hs].
     specialize X with (S (fpsize pi)) _ _ pi.
     assert (S (fpsize pi) < s) as Hs'...
@@ -1414,15 +1579,18 @@ Proof with myeeasy.
             list_simpl ; symmetry.
             apply Permutation_Type_cons_app...
          ++ apply Permutation_Type_cons_app...
-      -- apply llFoc_foc_is_llFoc_foc in pi'.
+      -- assert (HC := sync_focus_F _ _ pi').
+         apply llFoc_foc_is_llFoc_foc in pi'.
          apply de_Fr in pi'.
-         eapply (incl_Foc _ (wn C :: l0)) in pi'...
-         ++ eapply ex_Fr ; [ apply bot_Fr | ]...
-            rewrite (app_comm_cons _ _ (wn C)).
-            apply Permutation_Type_cons_app.
-            list_simpl ; symmetry.
-            apply Permutation_Type_cons_app...
-         ++ apply Permutation_Type_cons_app...
+         ++ eapply (incl_Foc _ (wn C :: l0)) in pi'...
+            ** eapply ex_Fr ; [ apply bot_Fr | ]...
+               rewrite (app_comm_cons _ _ (wn C)).
+               apply Permutation_Type_cons_app.
+               list_simpl ; symmetry.
+               apply Permutation_Type_cons_app...
+            ** apply Permutation_Type_cons_app...
+         ++ rewrite (polconts _ _ HC), (polfocs _ HC) in pi'.
+            apply (Foc_context _ _ pi').
     * eapply (snd Hs') in HnF...
       destruct HnF as [pi1 pi2] ; split.
       -- eapply ex_Fr ; [ apply bot_Fr ; apply pi1 | ].
@@ -1455,22 +1623,25 @@ Proof with myeeasy.
             ** rewrite (app_comm_cons _ _ C).
                apply Permutation_Type_cons_app...
          ++ apply Permutation_Type_cons_app...
-      -- apply llFoc_foc_is_llFoc_foc in pi'.
+      -- assert (HC := sync_focus_F _ _ pi').
+         apply llFoc_foc_is_llFoc_foc in pi'.
          apply de_Fr in pi'.
-         eapply (incl_Foc _ (wn C :: l0)) in pi'...
-         ++ eapply ex_Fr ; [ apply parr_Fr ; eapply ex_Fr | ]...
-            ** symmetry.
-               etransitivity ; [ | apply Permutation_Type_middle ].
-               symmetry in HP ; symmetry.
-               apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP.
-               etransitivity ; [ apply HP | ].
-               rewrite app_comm_cons.
-               symmetry.
-               apply Permutation_Type_cons_app.
-               apply Permutation_Type_cons_app...
-            ** rewrite (app_comm_cons _ _ (wn C)).
-               apply Permutation_Type_cons_app...
-         ++ apply Permutation_Type_cons_app...
+         ++ eapply (incl_Foc _ (wn C :: l0)) in pi'...
+            ** eapply ex_Fr ; [ apply parr_Fr ; eapply ex_Fr | ]...
+               --- symmetry.
+                   etransitivity ; [ | apply Permutation_Type_middle ].
+                   symmetry in HP ; symmetry.
+                   apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP.
+                   etransitivity ; [ apply HP | ].
+                   rewrite app_comm_cons.
+                   symmetry.
+                   apply Permutation_Type_cons_app.
+                   apply Permutation_Type_cons_app...
+               --- rewrite (app_comm_cons _ _ (wn C)).
+                   apply Permutation_Type_cons_app...
+            ** apply Permutation_Type_cons_app...
+         ++ rewrite (polconts _ _ HC), (polfocs _ HC) in pi'.
+            apply (Foc_context _ _ pi').
     * destruct ((snd Hs') _ eq_refl HnF) as [pi1 pi2] ; split.
       -- eapply ex_Fr ; [ apply parr_Fr ; eapply ex_Fr ; [ apply pi1 | ] | ]...
          ++ rewrite app_comm_cons.
@@ -1479,8 +1650,7 @@ Proof with myeeasy.
             apply Permutation_Type_cons_app...
          ++ rewrite (app_comm_cons _ _ C).
             apply Permutation_Type_cons_app...
-      -- eapply ex_Fr ; [ apply parr_Fr ; eapply ex_Fr ;
-                          [ apply pi2 | ] | ]...
+      -- eapply ex_Fr; [ apply parr_Fr; eapply ex_Fr; [ apply pi2 | ] | ]...
          ++ rewrite app_comm_cons.
             symmetry.
             apply Permutation_Type_cons_app.
@@ -1546,35 +1716,39 @@ Proof with myeeasy.
                        apply Permutation_Type_cons_app...
                --- apply Permutation_Type_cons_app...
                --- apply Permutation_Type_cons_app...
-            ** apply llFoc_foc_is_llFoc_foc in pi1'.
-               apply de_Fr in pi1'.
+            ** assert (HC := sync_focus_F _ _ pi1').
+               apply llFoc_foc_is_llFoc_foc in pi1'.
                apply llFoc_foc_is_llFoc_foc in pi2'.
-               apply de_Fr in pi2'.
-               eapply (incl_Foc _ (wn C :: l01) lw1') in pi1' ; 
-                 [ eapply (incl_Foc _ (wn C :: l02) lw2') in pi2' | | ]...
-               --- eapply ex_Fr ; [ apply with_Fr ; eapply ex_Fr | ].
-                   +++ apply pi1'.
-                   +++ symmetry.
-                       etransitivity ; [ | apply Permutation_Type_middle ].
-                       symmetry in HP1 ; symmetry.
-                       apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP1.
-                       etransitivity ; [ apply HP1 | ].
-                       rewrite app_comm_cons.
-                       symmetry.
-                       apply Permutation_Type_cons_app...
-                   +++ apply pi2'.
-                   +++ symmetry.
-                       etransitivity ; [ | apply Permutation_Type_middle ].
-                       symmetry in HP2 ; symmetry.
-                       apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP2.
-                       etransitivity ; [ apply HP2 | ].
-                       rewrite app_comm_cons.
-                       symmetry.
-                       apply Permutation_Type_cons_app...
-                   +++ rewrite (app_comm_cons _ (awith _ _ :: _) (wn C)).
-                       apply Permutation_Type_cons_app...
-               --- apply Permutation_Type_cons_app...
-               --- apply Permutation_Type_cons_app...
+               apply de_Fr in pi1'; [ apply de_Fr in pi2' | ].
+               --- eapply (incl_Foc _ (wn C :: l01) lw1') in pi1' ; 
+                     [ eapply (incl_Foc _ (wn C :: l02) lw2') in pi2' | | ]...
+                   +++ eapply ex_Fr ; [ apply with_Fr ; eapply ex_Fr | ].
+                       *** apply pi1'.
+                       *** symmetry.
+                           etransitivity ; [ | apply Permutation_Type_middle ].
+                           symmetry in HP1 ; symmetry.
+                           apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP1.
+                           etransitivity ; [ apply HP1 | ].
+                           rewrite app_comm_cons.
+                           symmetry.
+                           apply Permutation_Type_cons_app...
+                       *** apply pi2'.
+                       *** symmetry.
+                           etransitivity ; [ | apply Permutation_Type_middle ].
+                           symmetry in HP2 ; symmetry.
+                           apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP2.
+                           etransitivity ; [ apply HP2 | ].
+                           rewrite app_comm_cons.
+                           symmetry.
+                           apply Permutation_Type_cons_app...
+                       *** rewrite (app_comm_cons _ (awith _ _ :: _) (wn C)).
+                           apply Permutation_Type_cons_app...
+                   +++ apply Permutation_Type_cons_app...
+                   +++ apply Permutation_Type_cons_app...
+               --- rewrite (polconts _ _ HC), (polfocs _ HC) in pi2'.
+                   apply (Foc_context _ _ pi2').
+               --- rewrite (polconts _ _ HC), (polfocs _ HC) in pi1'.
+                   apply (Foc_context _ _ pi1').
          ++ assert (Forall_inf Foc (l1 ++ C' :: l2) -> False) as HF2.
             { intros HF0.
               apply Forall_inf_app_r in HF0.
@@ -1601,19 +1775,21 @@ Proof with myeeasy.
                --- rewrite (app_comm_cons _ _ C).
                    apply Permutation_Type_middle.
             ** eapply ex_Fr ; [ apply with_Fr | ].
-               --- apply llFoc_foc_is_llFoc_foc in pi1'.
+               --- assert (HC := sync_focus_F _ _ pi1').
+                   apply llFoc_foc_is_llFoc_foc in pi1'.
                    apply de_Fr in pi1'.
-                   eapply (incl_Foc _ (wn C :: l01) lw1') in pi1'.
-                   +++ eapply ex_Fr ; [ apply pi1' | ].
-                       etransitivity ; [ symmetry ; apply Permutation_Type_middle | ].
-                       symmetry in HP1.
-                       apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP1.
-                       etransitivity ; [ apply HP1 | ].
-                       rewrite app_comm_cons.
-                       symmetry.
-                       apply Permutation_Type_middle.
-                   +++ apply Permutation_Type_middle.
-                   +++ apply Hi1.
+                   +++ eapply (incl_Foc _ (wn C :: l01) lw1') in pi1'.
+                       *** eapply ex_Fr ; [ apply pi1' | ].
+                           etransitivity ; [ symmetry ; apply Permutation_Type_middle | ].
+                           symmetry in HP1.
+                           apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP1.
+                           etransitivity ; [ apply HP1 | ].
+                           rewrite app_comm_cons.
+                           symmetry; apply Permutation_Type_middle.
+                       *** apply Permutation_Type_middle.
+                       *** apply Hi1.
+                   +++ rewrite (polconts _ _ HC), (polfocs _ HC) in pi1'.
+                       apply (Foc_context _ _ pi1').
                --- eapply ex_Fr ; [ apply pi2'' | ].
                    rewrite app_comm_cons.
                    symmetry ; apply Permutation_Type_middle.
@@ -1651,24 +1827,26 @@ Proof with myeeasy.
                    +++ rewrite (app_comm_cons _ (awith _ _ :: _) C).
                        apply Permutation_Type_cons_app...
                --- apply Permutation_Type_cons_app...
-            ** apply llFoc_foc_is_llFoc_foc in pi2'.
+            ** assert (HC := sync_focus_F _ _ pi2').
+               apply llFoc_foc_is_llFoc_foc in pi2'.
                apply de_Fr in pi2'.
-               eapply (incl_Foc _ (wn C :: l02) lw2') in pi2'...
-               --- eapply ex_Fr ; [ apply with_Fr ; eapply ex_Fr | ].
-                   +++ apply pi1''.
-                   +++ rewrite app_comm_cons.
-                       symmetry ; apply Permutation_Type_middle.
-                   +++ apply pi2'.
-                   +++ etransitivity ; [ symmetry ; apply Permutation_Type_middle | ].
-                       symmetry in HP2.
-                       apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP2.
-                       etransitivity ; [ apply HP2 | ].
-                       rewrite app_comm_cons.
-                       symmetry.
-                       apply Permutation_Type_middle.
-                   +++ rewrite (app_comm_cons _ (awith _ _ :: _) (wn C)).
-                       apply Permutation_Type_cons_app...
-               --- apply Permutation_Type_cons_app...
+               --- eapply (incl_Foc _ (wn C :: l02) lw2') in pi2'...
+                   +++ eapply ex_Fr ; [ apply with_Fr ; eapply ex_Fr | ].
+                       *** apply pi1''.
+                       *** rewrite app_comm_cons.
+                           symmetry ; apply Permutation_Type_middle.
+                       *** apply pi2'.
+                       *** etransitivity ; [ symmetry ; apply Permutation_Type_middle | ].
+                           symmetry in HP2.
+                           apply (@Permutation_Type_cons _ _ (wn C) eq_refl) in HP2.
+                           etransitivity ; [ apply HP2 | ].
+                           rewrite app_comm_cons.
+                           symmetry; apply Permutation_Type_middle.
+                       *** rewrite (app_comm_cons _ (awith _ _ :: _) (wn C)).
+                           apply Permutation_Type_cons_app...
+                   +++ apply Permutation_Type_cons_app...
+               --- rewrite (polconts _ _ HC), (polfocs _ HC) in pi2'.
+                   apply (Foc_context _ _ pi2').
          ++ assert (Forall_inf Foc (l1 ++ C' :: l2) -> False) as HF2.
             { intros HF0.
               apply Forall_inf_app_r in HF0.
@@ -1731,6 +1909,9 @@ Proof with myeeasy.
          apply Permutation_Type_middle.
 Qed.
 
+
+(** ** Unfocusing *)
+
 Lemma llFoc_to_ll : forall l Pi, llFoc l Pi ->
   (Pi = None -> ll_ll l) * (forall C, Pi = Some C -> ll_ll (C :: l)).
 Proof with myeeasy.
@@ -1757,7 +1938,7 @@ intros l Pi pi ; induction pi ;
     eapply ex_r ; [ apply tens_r ; [ apply pi1' | apply pi2' ] | ].
     rewrite (polconts _ _ HsA).
     rewrite (polconts _ _ HsB).
-    GPermutation_Type_solve.
+    cbn; Permutation_Type_solve.
   + rewrite_all (polfocs A HsA).
     rewrite_all (polfoca B HaB).
     assert (pi1' := IHpi1S _ eq_refl).
@@ -1767,7 +1948,7 @@ intros l Pi pi ; induction pi ;
     * rewrite (polconta _ _ HaB) in pi2'.
       apply pi2'.
     * rewrite (polconts _ _ HsA).
-      GPermutation_Type_solve.
+      cbn; Permutation_Type_solve.
   + rewrite_all (polfoca A HaA).
     rewrite_all (polfocs B HsB).
     assert (pi1' := IHpi1N eq_refl).
@@ -1777,7 +1958,7 @@ intros l Pi pi ; induction pi ;
       apply pi1'.
     * apply pi2'.
     * rewrite (polconts _ _ HsB).
-      GPermutation_Type_solve.
+      cbn; Permutation_Type_solve.
   + rewrite_all (polfoca A HaA).
     rewrite_all (polfoca B HaB).
     assert (pi1' := IHpi1N eq_refl).
@@ -1787,46 +1968,225 @@ intros l Pi pi ; induction pi ;
       apply pi1'.
     * rewrite (polconta _ _ HaB) in pi2'.
       apply pi2'.
-    * GPermutation_Type_solve.
+    * cbn; Permutation_Type_solve.
 - destruct (polarity A) as [HsA | HaA].
   + rewrite_all (polfocs A HsA).
     assert (pi' := IHpiS _ eq_refl).
     eapply ex_r ; [ apply plus_r1 | ].
     * apply pi'.
     * rewrite (polconts _ _ HsA).
-      GPermutation_Type_solve.
+      cbn; Permutation_Type_solve.
   + rewrite_all (polfoca A HaA).
     assert (pi' := IHpiN eq_refl).
     eapply ex_r ; [ apply plus_r1 | ].
     * rewrite (polconta _ _ HaA) in pi'.
       apply pi'.
-    * GPermutation_Type_solve.
+    * cbn; Permutation_Type_solve.
 - destruct (polarity A) as [HsA | HaA].
   + rewrite_all (polfocs A HsA).
     assert (pi' := IHpiS _ eq_refl).
     eapply ex_r ; [ apply plus_r2 | ].
     * apply pi'.
     * rewrite (polconts _ _ HsA).
-      GPermutation_Type_solve.
+      cbn; Permutation_Type_solve.
   + rewrite_all (polfoca A HaA).
     assert (pi' := IHpiN eq_refl).
     eapply ex_r ; [ apply plus_r2 | ].
     * rewrite (polconta _ _ HaA) in pi'.
       apply pi'.
-    * GPermutation_Type_solve.
+    * cbn; Permutation_Type_solve.
 - destruct (polarity A) as [HsA | HaA].
   + rewrite_all (polfocs A HsA).
     assert (pi' := IHpiS _ eq_refl).
     eapply ex_r ; [ apply de_r | ].
     * apply pi'.
     * rewrite (polconts _ _ HsA).
-      GPermutation_Type_solve.
+      cbn; Permutation_Type_solve.
   + rewrite_all (polfoca A HaA).
     assert (pi' := IHpiN eq_refl).
     eapply ex_r ; [ apply de_r | ].
     * rewrite (polconta _ _ HaA) in pi'.
       apply pi'.
-    * GPermutation_Type_solve.
+    * cbn; Permutation_Type_solve.
+Qed.
+
+
+(** ** Direct Focusing *)
+
+Lemma unary_focusing A B l0 l1 l2 Pi:
+  sformula A -> Forall_inf Foc (B :: l0) ->
+  (forall l, llFoc l (Some A) -> llFoc (B :: l0 ++ l) None) ->
+  llFoc (l1 ++ A :: l2) Pi -> llFoc (l1 ++ B :: l0 ++ l2) Pi.
+Proof.
+intros Hs HF Hf pi.
+remember (l1 ++ A :: l2) as l; revert A B l0 l1 l2 Hs HF Hf Heql.
+induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  destruct l1'; inversion H1.
+- destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1p, l2p) ->].
+  apply Permutation_Type_app_inv,
+       (Permutation_Type_app_middle l0), (Permutation_Type_elt B0) in p.
+  refine (ex_Fr _ _ _ _ p).
+  apply IHpi with A0; auto.
+- destruct l1'; inversion Heql; subst.
+  + cbn; apply Hf; assumption.
+  + cbn; apply foc_Fr, (IHpi A0); auto.
+- exfalso; destruct l1'; inversion Heql.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  cbn; apply bot_Fr, (IHpi A0); auto.
+- dichot_elt_app_inf_exec Heql; subst.
+  + rewrite app_comm_cons, 2 app_assoc, <- (app_assoc _ _ l); apply tens_Fr; auto.
+    * unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi1 A0);
+        auto; unfold polcont; destruct (polarity A); auto;
+        exfalso; apply (disj_polarity A); auto.
+    * apply Forall_inf_app.
+      -- apply (Forall_inf_app_l _ _ f).
+      -- apply Forall_inf_app; auto.
+         now apply Forall_inf_app_r in f; inversion f.
+  + rewrite <- app_assoc; apply tens_Fr; auto.
+    * unfold polcont; destruct (polarity B); [ | rewrite app_comm_cons ]; apply (IHpi2 A0);
+      auto; unfold polcont; destruct (polarity B); auto;
+      exfalso; apply (disj_polarity B); auto.
+    * apply Forall_inf_app.
+      -- apply (Forall_inf_app_l _ _ f0).
+      -- rewrite app_comm_cons; apply Forall_inf_app; auto.
+         now apply Forall_inf_app_r in f0; inversion f0.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  cbn; apply parr_Fr; rewrite 2 app_comm_cons; apply (IHpi A0); auto.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  cbn; apply top_gen_Fr.
+- apply plus_Fr1.
+  + unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi A0);
+      auto; unfold polcont; destruct (polarity A); auto;
+      exfalso; apply (disj_polarity A); auto.
+  + apply Forall_inf_app.
+    * apply (Forall_inf_app_l _ _ f).
+    * rewrite app_comm_cons; apply Forall_inf_app; auto.
+      now apply Forall_inf_app_r in f; inversion f.
+- apply plus_Fr2.
+  + unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi A0);
+      auto; unfold polcont; destruct (polarity A); auto;
+      exfalso; apply (disj_polarity A); auto.
+  + apply Forall_inf_app.
+    * apply (Forall_inf_app_l _ _ f).
+    * rewrite app_comm_cons; apply Forall_inf_app; auto.
+      now apply Forall_inf_app_r in f; inversion f.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  cbn; apply with_Fr; rewrite app_comm_cons; [apply (IHpi1 A0) | apply (IHpi2 A0)]; auto.
+- exfalso; decomp_map_inf Heql; subst; inversion Hs.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  cbn; apply de_Fr.
+  + unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi A0);
+      auto; unfold polcont; destruct (polarity A); auto;
+      exfalso; apply (disj_polarity A); auto.
+  + apply Forall_inf_app; [ apply Forall_inf_app_l in f | apply Forall_inf_app_r in f ]; auto.
+    inversion f; inversion HF; constructor; [ | apply Forall_inf_app ]; auto.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  cbn; apply wk_gen_Fr, (IHpi A0); auto.
+- destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].
+  cbn; apply co_gen_Fr; rewrite 2 app_comm_cons; apply (IHpi A0); auto.
+Qed.
+
+Lemma focusing l : ll_ll l -> llFoc l None.
+Proof.
+intros pi; induction pi; (try now inversion f); (try now constructor).
+- apply (ex_Fr (var X :: covar X :: nil)); [ | Permutation_Type_solve ].
+  apply foc_Fr, ax_Fr.
+- now apply (ex_Fr l1).
+- apply (ex_Fr (l1 ++ List.map wn lw ++ l2)); auto.
+  now apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map.
+- apply foc_Fr, one_Fr.
+- clear pi1 pi2.
+  destruct (polarity A).
+  + apply (ex_Fr (tens A B :: l1 ++ l2)); [ | Permutation_Type_solve ].
+    rewrite app_comm_cons; apply reversing with (B :: nil); auto.
+    clear l2 IHpi2.
+    intros l2 Hf pi; cbn in pi; cbn.
+    apply (ex_Fr (tens A B :: l2 ++ l1)); [ | Permutation_Type_solve ].
+    rewrite <- (app_nil_l _).
+    apply (unary_focusing A); auto.
+    * now constructor; [ left; left; constructor | ].
+    * clear - Hf pi; intros l pi1.
+      apply (ex_Fr (tens A B :: l ++ l2)); [ | Permutation_Type_solve ].
+      destruct (polarity B).
+      -- rewrite <- (app_nil_l _).
+         apply (unary_focusing B); auto.
+         ++ constructor; [ left; left; constructor | ].
+            apply (Foc_context _ _ pi1).
+         ++ clear l2 Hf pi; intros l2 pi2.
+            apply foc_Fr, tens_Fr.
+            ** apply (llFoc_foc_is_llFoc_foc _ _ pi1).
+            ** apply (llFoc_foc_is_llFoc_foc _ _ pi2).
+            ** apply (Foc_context _ _ pi1).
+            ** apply (Foc_context _ _ pi2).
+      -- apply foc_Fr, tens_Fr; auto.
+         ++ apply (llFoc_foc_is_llFoc_foc _ _ pi1).
+         ++ now rewrite (polconta _ _ a), (polfoca _ a).
+         ++ apply (Foc_context _ _ pi1).
+  + destruct (polarity B).
+    * rewrite app_comm_cons; apply reversing with (A :: nil); auto.
+      clear l1 IHpi1.
+      intros l1 Hf pi; cbn in pi; cbn.
+      apply (ex_Fr (nil ++ tens A B :: l1 ++ l2)); [ | Permutation_Type_solve ].
+      apply (unary_focusing B); auto.
+      -- now constructor; [ left; left; constructor | ].
+      -- intros l pi'.
+         apply foc_Fr, tens_Fr; auto.
+         ++ now rewrite (polconta _ _ a), (polfoca _ a).
+         ++ apply (llFoc_foc_is_llFoc_foc _ _ pi').
+         ++ apply (Foc_context _ _ pi').
+    * rewrite app_comm_cons; apply (reversing (A :: nil)); auto.
+      clear l1 IHpi1; intros l1 HF pi1; cbn in pi1.
+      apply (ex_Fr (tens A B :: l1 ++ l2)); [ | Permutation_Type_solve ].
+      rewrite app_comm_cons; apply (reversing (B :: nil)); auto.
+      clear l2 IHpi2; intros l2 HF2 pi2; cbn in pi2; cbn.
+      apply foc_Fr, tens_Fr; auto.
+      -- now rewrite (polconta _ _ a), (polfoca _ a).
+      -- now rewrite (polconta _ _ a0), (polfoca _ a0).
+- apply top_gen_Fr.
+- clear pi.
+  destruct (polarity A).
+  + rewrite <- (app_nil_l _), <- (app_nil_l l).
+    apply (unary_focusing A); auto.
+    * constructor; try left; try left; constructor.
+    * clear; intros l pi.
+      apply foc_Fr, plus_Fr1.
+      -- apply (llFoc_foc_is_llFoc_foc _ _ pi).
+      -- apply (Foc_context _ _ pi).
+  + change (aplus A B :: l) with ((aplus A B :: nil) ++ l).
+    apply reversing with (A :: nil); auto.
+    intros; apply foc_Fr, plus_Fr1; auto.
+    now rewrite (polconta _ _ a), (polfoca _ a).
+- clear pi.
+  destruct (polarity A).
+  + rewrite <- (app_nil_l _), <- (app_nil_l l).
+    apply (unary_focusing A); auto.
+    * constructor; try left; try left; constructor.
+    * clear; intros l pi.
+      apply foc_Fr, plus_Fr2.
+      -- apply (llFoc_foc_is_llFoc_foc _ _ pi).
+      -- apply (Foc_context _ _ pi).
+  + change (aplus B A :: l) with ((aplus B A :: nil) ++ l).
+    apply reversing with (A :: nil); auto.
+    intros; apply foc_Fr, plus_Fr2; auto.
+    now rewrite (polconta _ _ a), (polfoca _ a).
+- now apply foc_Fr, oc_Fr.
+- clear pi.
+  destruct (polarity A).
+  + rewrite <- (app_nil_l _), <- (app_nil_l l).
+    apply (unary_focusing A); auto.
+    * constructor; [ right; exists A; reflexivity | constructor ].
+    * clear; intros l pi.
+      apply de_Fr; [ apply (llFoc_foc_is_llFoc_foc _ _ pi) | ].
+      apply (Foc_context _ _ pi).
+  + change (wn A :: l) with ((wn A :: nil) ++ l).
+    apply (reversing (A :: nil)); auto.
+    clear l IHpi; intros l Hf pi.
+    apply de_Fr; auto.
+    now rewrite (polconta _ _ a), (polfoca _ a).
+- apply wk_gen_Fr; assumption.
+- apply co_gen_Fr; assumption.
+- destruct a.
 Qed.
 
 End Atoms.
