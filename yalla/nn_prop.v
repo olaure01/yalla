@@ -12,9 +12,7 @@ From Yalla Require Export nn_def.
 
 Section Atoms.
 
-Context { atom : DecType }.
-Context { preiatom : InfDecType }.
-Context { Atoms : Atom2IAtomType_self atom preiatom }.
+Context {atom : DecType} {preiatom : InfDecType} {Atoms : Atom2IAtomType_self atom preiatom}.
 
 Notation atom_inf := (@atom_inf _ _ Atoms).
 Notation formula := (@formula atom_inf).
@@ -40,19 +38,19 @@ Proof with myeeasy ; try ((try rewrite a2a_i) ; GPermutation_Type_solve).
 induction A ; simpl ; rewrite ? bidual.
 - apply parr_r.
   unfold IAtom2Atom, iatom2atom; rewrite a2a_i.
-  apply (ex_r _ ((covar c :: var c :: nil) ++ unill R :: nil))...
+  apply (ex_r ((covar c :: var c :: nil) ++ unill R :: nil))...
   eapply (@cut_r _ (pfrag_llR (unill R)) eq_refl (dual one)).
-  + apply (ex_r _ (unill R :: one :: nil))...
-    apply (gax_r (pfrag_llR (unill R)) false).
+  + apply (ex_r (unill R :: one :: nil))...
+    apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r.
     apply ax_r.
 - unfold IAtom2Atom, iatom2atom; rewrite a2a_i.
-  apply (ex_r _ (covar c :: var c :: nil))...
+  apply (ex_r (covar c :: var c :: nil))...
   apply ax_r...
 - eapply parr_r.
-  apply (bot_r (pfrag_llR (unill R))).
-  apply (gax_r (pfrag_llR (unill R)) false).
-- apply (ex_r _ (bot :: one :: nil))...
+  apply bot_r.
+  apply (@gax_r _ (pfrag_llR (unill R)) false).
+- apply (ex_r (bot :: one :: nil))...
   apply bot_r.
   apply one_r.
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
@@ -63,8 +61,8 @@ induction A ; simpl ; rewrite ? bidual.
     with (tens (dual (unill R)) (unill (trans R A2)) ::  
     (tens (dual (unill R)) (unill (trans R A1)) :: unill R :: tens A1 A2 :: nil) ++ nil).
   apply tens_r.
-  + apply (gax_r (pfrag_llR (unill R)) true).
-  + apply (ex_r _ (tens (dual (unill R)) (unill (trans R A1))
+  + apply (@gax_r _ (pfrag_llR (unill R)) true).
+  + apply (ex_r (tens (dual (unill R)) (unill (trans R A1))
              :: (unill (trans R A2) :: tens A1 A2 :: nil) ++ (unill R :: nil)))...
     2:{ list_simpl.
         transitivity ((tens (dual (unill R)) (unill (trans R A1))
@@ -74,7 +72,7 @@ induction A ; simpl ; rewrite ? bidual.
         - apply Permutation_Type_swap. }
     apply tens_r.
     -- eapply ex_r ; [ | apply Permutation_Type_swap ]...
-    -- apply (ex_r _ (tens A1 A2 ::
+    -- apply (ex_r (tens A1 A2 ::
              (unill (trans R A2) :: nil) ++ unill (trans R A1) :: nil))...
        2:{ list_simpl.
            etransitivity; [ apply Permutation_Type_cons_append | ].
@@ -82,10 +80,10 @@ induction A ; simpl ; rewrite ? bidual.
        apply tens_r.
        ++ eapply ex_r ; [ apply IHA1 | ]...
        ++ eapply ex_r ; [ apply IHA2 | ]...
-- apply (ex_r _ (parr A1 A2 ::
+- apply (ex_r (parr A1 A2 ::
                  tens (unill (trans R A2)) (unill (trans R A1)) :: nil))...
   apply parr_r.
-  apply (ex_r _ (tens (unill (trans R A2)) (unill (trans R A1))
+  apply (ex_r (tens (unill (trans R A2)) (unill (trans R A1))
                   :: (A1 :: nil) ++ (A2 :: nil)))...
   apply tens_r...
 - apply parr_r.
@@ -95,14 +93,14 @@ induction A ; simpl ; rewrite ? bidual.
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
   apply parr_r.
   apply with_r.
-  + apply (ex_r _ (tens (dual (unill R)) (unill (trans R A1)) ::
+  + apply (ex_r (tens (dual (unill R)) (unill (trans R A1)) ::
                     (aplus A1 A2 :: nil) ++ unill R :: nil))...
     apply tens_r.
     * eapply ex_r ; [ | apply Permutation_Type_swap ]...
     * eapply ex_r ; [ | apply Permutation_Type_swap ].
       apply plus_r1.
       eapply ex_r ; [ | apply Permutation_Type_swap ]...
-  + apply (ex_r _ (tens (dual (unill R)) (unill (trans R A2)) ::
+  + apply (ex_r (tens (dual (unill R)) (unill (trans R A2)) ::
                     (aplus A1 A2 :: nil) ++ unill R :: nil))...
     apply tens_r...
     * eapply ex_r ; [ | apply Permutation_Type_swap ]...
@@ -117,29 +115,29 @@ induction A ; simpl ; rewrite ? bidual.
   + eapply ex_r ; [ | apply Permutation_Type_swap ].
     apply plus_r2...
 - apply parr_r.
-  apply (ex_r _ ((oc A ::
+  apply (ex_r ((oc A ::
                   map wn (tens (dual (unill R)) (unill (trans R A)) :: nil))
                   ++ unill R :: nil)) ; [idtac | cbn]...
   apply (@cut_r _ (pfrag_llR (unill R)) eq_refl (dual one)).
-  + apply (ex_r _ (unill R :: one :: nil))...
-    apply (gax_r (pfrag_llR (unill R)) false).
+  + apply (ex_r (unill R :: one :: nil))...
+    apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r.
-    apply oc_r ; cbn.
-    apply (ex_r _ ((wn (tens (dual (unill R)) (unill (trans R A))) :: nil)
+    apply oc_r; cbn.
+    apply (ex_r ((wn (tens (dual (unill R)) (unill (trans R A))) :: nil)
                      ++ (A :: nil) ++ nil))...
     apply de_r.
     apply tens_r...
-    apply (gax_r (pfrag_llR (unill R)) true).
+    apply (@gax_r _ (pfrag_llR (unill R)) true).
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
   change (wn A :: nil) with (map wn (A :: nil)).
   apply oc_r ; cbn.
   apply parr_r.
-  apply (ex_r _ (tens (dual (unill R)) (unill (trans R A)) :: (wn A :: nil) ++ unill R :: nil))...
+  apply (ex_r (tens (dual (unill R)) (unill (trans R A)) :: (wn A :: nil) ++ unill R :: nil))...
   apply tens_r.
   + eapply ex_r...
-  + apply (ex_r _ (wn A :: unill (trans R A) :: nil))...
+  + apply (ex_r (wn A :: unill (trans R A) :: nil))...
     apply de_r...
-    eapply ex_r ; [ | apply Permutation_Type_swap ]...
+    eapply ex_r; [ | apply Permutation_Type_swap ]...
 Qed.
 
 (** The previous lemma comes with the following result from the [ll_fragments] library:
@@ -163,7 +161,7 @@ apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true))
       induction l using rev_rect ; intros...
       assert (Hb := back_to_llR x).
       rewrite rev_unit in X.
-      apply (ex_r _ _ (dual (unill (trans R x))
+      apply (ex_r _ (dual (unill (trans R x))
                :: l' ++ map dual (map unill (map (trans R) (rev l))))) in X...
       apply (@cut_r _ _ (eq_refl (pcut (pfrag_llR (unill R)))) _ _ _ X) in Hb.
       rewrite rev_unit.
@@ -172,7 +170,7 @@ apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true))
       eapply IHl.
       eapply ex_r... }
     assert (llR (unill R) (dual (unill R) :: nil)) as HR
-      by (apply (gax_r (pfrag_llR (unill R)) true)).
+      by (apply (@gax_r _ (pfrag_llR (unill R)) true)).
     apply (@cut_r _ _ (eq_refl (pcut (pfrag_llR (unill R)))) _ _ _ HR) in Hill.
     rewrite app_nil_r in Hill.
     rewrite <- (app_nil_l (rev _)) in Hill.
@@ -566,7 +564,7 @@ eapply (llR1_R2 _ (wn one)) in Hz2.
     apply one_r.
   + apply one_r.
 - cbn.
-  apply (ex_r _ (parr bot (wn one) :: oc bot :: nil))...
+  apply (ex_r (parr bot (wn one) :: oc bot :: nil))...
   apply parr_r.
   apply bot_r.
   change (oc bot) with (@dual atom (wn one)).

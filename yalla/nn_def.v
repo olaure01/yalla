@@ -10,9 +10,7 @@ From Yalla Require Export ill_vs_ll.
 
 Section Atoms.
 
-Context { atom : DecType }.
-Context { preiatom : InfDecType }.
-Context { Atoms : Atom2IAtomType_self atom preiatom }.
+Context {atom : DecType} {preiatom : InfDecType} {Atoms : Atom2IAtomType_self atom preiatom}.
 
 (** ** Basic ingredients for links with [ill] *)
 
@@ -450,13 +448,13 @@ induction Hll using ll_nested_ind.
 - apply tens_ilr.
   eapply ex_ir...
 - apply zero_ilr.
-- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l1))
+- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l))
     in IHHll...
   apply negR_irr in IHHll.
   apply (plus_irr1 _ _ (negR (trans B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
   apply (ex_ir _ _ _ _ Hax)...
-- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l1))
+- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l))
     in IHHll...
   apply negR_irr in IHHll.
   apply (plus_irr2 _ _ (negR (trans B))) in IHHll.
@@ -465,7 +463,7 @@ induction Hll using ll_nested_ind.
 - apply plus_ilr...
 - cbn in IHHll ; rewrite map_map in IHHll.
   cbn in IHHll ; rewrite <- map_map in IHHll.
-  apply (ex_ir _ _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l1)))
+  apply (ex_ir _ _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l)))
     in IHHll...
   + apply negR_irr in IHHll.
     apply oc_irr in IHHll.

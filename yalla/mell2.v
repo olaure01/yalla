@@ -15,7 +15,7 @@ From Yalla Require ll_cut.
 
 Section Atoms.
 
-Context { atom : DecType }.
+Context {atom : DecType}.
 
 (** ** 1. define formulas *)
 
@@ -145,7 +145,7 @@ induction pi ; try (now constructor) ; try rewrite map_app.
   apply Forall_inf_cons...
   apply Forall_inf_nil...
 - eapply ll_def.ex_r.
-  + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
+  + apply (ll_def.tens_r IHpi1 IHpi2).
   + cbn ; Permutation_Type_solve.
 - cbn ; rewrite mell2ll_map_wn.
   apply ll_def.oc_r.
@@ -160,7 +160,7 @@ revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; sub
   try (destruct l' ; inversion Heql0 ;
        destruct f ; inversion H0 ; fail).
 - symmetry in Heql0; decomp_map_inf Heql0; subst.
-  destruct l2 ; inversion Heql4.
+  destruct l1 ; inversion Heql4.
   destruct x ; inversion Heql2.
   destruct x0 ; inversion Heql0.
   subst ; subst.
@@ -190,11 +190,11 @@ revert l Heql0 ; induction pi using ll_def.ll_nested_ind ; intros l' Heql0 ; sub
   cbn in Heql0.
   symmetry in Heql0; decomp_map_inf Heql0; subst.
   cbn in *; clear H0 H1 H2 H3 Heqn eqpmix.
-  destruct l6; inversion Heql4; rewrite app_nil_r; clear Heql4.
+  destruct l5; inversion Heql4; rewrite app_nil_r; clear Heql4.
   apply mix_r.
-  + destruct (In_Forall_inf_in (map mell2ll l3) PL); [ left; reflexivity | ].
+  + destruct (In_Forall_inf_in (map mell2ll l2) PL); [ left; reflexivity | ].
     refine (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
-  + destruct (In_Forall_inf_in (map mell2ll l5) PL); [ right; left; reflexivity | ].
+  + destruct (In_Forall_inf_in (map mell2ll l4) PL); [ right; left; reflexivity | ].
     refine (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
 - symmetry in Heql0; decomp_map_inf Heql0; subst.
   destruct x ; inversion Heql2 ; subst.

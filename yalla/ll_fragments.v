@@ -12,7 +12,7 @@ From Yalla Require Import subs.
 
 Section Atoms.
 
-Context { atom : InfDecType }.
+Context {atom : InfDecType}.
 Notation formula := (@formula atom).
 Notation ll := (@ll atom).
 
@@ -66,7 +66,7 @@ Lemma mix_to_ll {P} : pperm P = true -> forall n bn l,
   ll (pmixupd_point_pfrag P n bn) l -> ll P (wn (tens_n n bot) :: l).
 Proof with myeeasy ; try GPermutation_Type_solve.
 intros fp n bn l pi.
-eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
+eapply (ext_wn_param fp ((tens_n n bot) :: nil)) in pi.
 - eapply ex_r...
 - intros Hcut...
 - cbn ; intros a.
@@ -83,7 +83,7 @@ eapply (ext_wn_param _ P fp _ ((tens_n n bot) :: nil)) in pi.
     change (repeat (wn (tens_n n bot)) (S nL))
       with ((@wn atom (tens_n n bot) :: nil) ++ repeat (wn (tens_n n bot)) nL).
     rewrite HeqnL.
-    refine (ex_concat_r _ _ ((wn (tens_n n bot)) :: nil) (wn (tens_n n bot)) L _)...
+    refine (ex_concat_r _ ((wn (tens_n n bot)) :: nil) (wn (tens_n n bot)) L _)...
     replace n with nL by (apply Nat.eqb_eq, Heq).
     rewrite HeqnL.
     rewrite flat_map_concat_map.
@@ -585,7 +585,7 @@ intros fc fp bc b0 bp l pi.
 eapply stronger_pfrag in pi.
 - eapply mix0_to_ll in pi...
   assert (pcut P' = true) as fc' by (rewrite HeqP' ; cbn ; assumption).
-  apply (stronger_pfrag _ P') in pi.
+  eapply stronger_pfrag in pi.
   + assert (ll P' (bot :: map wn nil)) as pi'.
     { change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
       eapply (@cut_r _ _ fc' bot).
@@ -737,7 +737,7 @@ intros fc fp bc b2 bp l pi.
 eapply stronger_pfrag in pi.
 - eapply mix2_to_ll in pi...
   assert (pcut P' = true) as fc' by (rewrite HeqP' ; cbn ; assumption).
-  apply (stronger_pfrag _ P') in pi.
+  eapply stronger_pfrag in pi.
   + assert (ll P' (parr one one :: map wn nil)) as pi'.
     { change (parr one one :: map wn nil) with ((@parr atom one one :: nil) ++ nil).
       eapply (@cut_r _ _ fc' bot).
@@ -795,7 +795,7 @@ remember (axupd_pfrag P (existT (fun x => x -> list formula) _
                                    | inl x => projT2 (pgax P) x
                                    | inr tt => parr one one :: parr bot bot :: nil
                                    end))) as P'.
-apply (ax_gen P') ; (try now (rewrite HeqP' ; cbn ; reflexivity))...
+apply (@ax_gen _ P') ; (try now (rewrite HeqP' ; cbn ; reflexivity))...
 clear - HeqP' ; cbn ; intros a.
 revert a ; rewrite HeqP' ; intros a ; destruct a ; cbn.
 - assert ({ b | projT2 (pgax P) p =
@@ -844,7 +844,7 @@ apply (stronger_pfrag _
     apply gax_r.
   + destruct p as [A B].
     apply parr_r.
-    apply (ex_r _ (parr A B :: (dual B :: nil) ++ (dual A) :: nil)) ;
+    apply (ex_r (parr A B :: (dual B :: nil) ++ (dual A) :: nil)) ;
       [ |etransitivity ; [ apply PCPermutation_Type_cons_append | reflexivity ] ].
     apply parr_r.
     eapply ex_r ;
@@ -919,7 +919,7 @@ revert Heql ; induction pi using ll_nested_ind ; intros Heql ; subst ; try inver
 - destruct L; try (destruct L); try (destruct L); try (destruct L); inversion eqpmix.
   clear H0.
   cbn in Heql.
-  destruct l0; inversion Heql; destruct l1; inversion Heql.
+  destruct l; inversion Heql; destruct l0; inversion Heql.
   destruct (In_Forall_inf_in nil PL) as [pi Hin].
   + left; reflexivity.
   + refine (Dependent_Forall_inf_forall_formula _ _ X Hin eq_refl).
@@ -967,7 +967,7 @@ Lemma mix02_to_ll {P} : pperm P = true -> forall b1 b2 bp l,
   ll P (wn (tens (wn one) (wn one)) :: l).
 Proof with myeeasy ; try GPermutation_Type_solve.
 intros fp b1 b2 bp l pi.
-eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
+eapply (ext_wn_param fp (tens (wn one) (wn one) :: nil)) in pi.
 - eapply ex_r...
 - intros Hcut...
 - cbn ; intros a.
@@ -996,7 +996,7 @@ eapply (ext_wn_param _ P fp _ (tens (wn one) (wn one) :: nil)) in pi.
       -- apply ex_r with (wn (tens (wn one) (wn one)) :: concat (l0 :: l1 :: l2 :: L));
            [ | rewrite fp; cbn; Permutation_Type_solve].
          apply co_const_list_r with (length (l0 :: l1 :: l2 :: L)).
-         apply (ex_concat_r _ fp nil).
+         apply (ex_concat_r fp nil).
          rewrite app_nil_l; rewrite flat_map_concat_map.
          apply mix_r.
          ++ rewrite map_length...
@@ -1066,7 +1066,7 @@ Lemma mix02_to_ll'' {P} : pperm P = true -> forall b0 b2 bp l,
   ll P (wn one :: wn (tens (wn one) bot) :: l).
 Proof with myeeasy ; try GPermutation_Type_solve.
 intros Hperm b0 b2 bp l pi.
-eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
+eapply (@ext_wn_param _ _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
 - eapply ex_r...
 - intros Hcut...
 - cbn ; intros a.
@@ -1093,11 +1093,11 @@ eapply (ext_wn_param _ _ _ _ (one :: tens (wn one) bot :: nil)) in pi.
   cbn.
   inversion FL; inversion X0; subst; clear FL X0 X2;
     rename X into pi1; rename X1 into pi2; rename l1 into l2; rename l0 into l1.
-  apply (ex_r _ (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)) ; [ | rewrite Hperm ]...
+  apply (ex_r (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)) ; [ | rewrite Hperm ]...
   apply co_r.
   apply co_r.
   apply de_r.
-  apply (ex_r _ (tens (wn one) bot :: (wn (tens (wn one) bot) :: wn one :: l2)
+  apply (ex_r (tens (wn one) bot :: (wn (tens (wn one) bot) :: wn one :: l2)
                                    ++ (wn (tens (wn one) bot) :: l1))) ;
     [ | rewrite Hperm ]...
   apply tens_r.
@@ -1237,7 +1237,7 @@ apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag
 eapply cut_admissible...
 eapply stronger_pfrag in pi.  
 - rewrite <- (app_nil_r l).
-  eapply (cut_r _ (wn (tens bot bot))) ; cbn.
+  eapply (cut_r (wn (tens bot bot))) ; cbn.
   + change nil with (map (@wn atom) nil).
     apply oc_r.
     apply parr_r.
@@ -1281,7 +1281,7 @@ apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag
 eapply cut_admissible...
 eapply stronger_pfrag in pi.
 - rewrite <- (app_nil_r l).
-  eapply (cut_r _ (wn (tens (wn one) bot))) ; cbn.
+  eapply (cut_r (wn (tens (wn one) bot))) ; cbn.
   + change nil with (map (@wn atom) nil).
     apply oc_r.
     apply parr_r.
@@ -1437,7 +1437,7 @@ destruct a ; cbn.
   apply gax_r.
 - rewrite <- (app_nil_r nil).
   rewrite_all app_comm_cons.
-  eapply (cut_r _ (dual (parr one R))).
+  eapply (cut_r (dual (parr one R))).
   + rewrite bidual.
     assert ({ b | parr one R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll true)
       (existT (fun x => x -> list formula) (sum _ {k : nat | k < 2})
@@ -1453,7 +1453,7 @@ destruct a ; cbn.
       as [b Hgax] by (now exists (inr (exist _ 1 (le_n 2)))).
     erewrite Hgax.
     apply gax_r.
-  + apply (ex_r _ (tens (dual R) bot :: (one :: nil) ++ R :: nil)) ; [ | GPermutation_Type_solve ].
+  + apply (ex_r (tens (dual R) bot :: (one :: nil) ++ R :: nil)) ; [ | GPermutation_Type_solve ].
     apply tens_r.
     * eapply ex_r ; [ | apply PCPermutation_Type_swap ].
       eapply stronger_pfrag ; [ | apply ax_exp ].
@@ -1479,7 +1479,7 @@ Lemma llwnR_to_ll : forall R l, llR (wn R) l -> ll_ll (l ++ wn R :: nil).
 Proof with myeeasy.
 intros R l pi.
 apply llR_to_ll in pi.
-eapply (ex_r _ _ (wn (tens (dual (wn R)) bot) :: l ++ wn (wn R) :: nil)) in pi ;
+eapply (ex_r _ (wn (tens (dual (wn R)) bot) :: l ++ wn (wn R) :: nil)) in pi ;
   [ | GPermutation_Type_solve ].
 eapply (cut_ll_r _ nil) in pi.
 - eapply (cut_ll_r (wn (wn R))).
@@ -1501,14 +1501,14 @@ Proof with myeasy.
 intros R l pi.
 apply (ll_to_llR R) in pi.
 rewrite <- (app_nil_l l).
-eapply (cut_r _ (oc (dual R))).
+eapply (cut_r (oc (dual R))).
 - rewrite <- (app_nil_l (dual _ :: l)).
-  eapply (cut_r _ (oc (parr one R))).
+  eapply (cut_r (oc (parr one R))).
   + cbn ; rewrite bidual ; eapply ex_r ; [apply pi | GPermutation_Type_solve ].
   + change nil with (map (@wn atom) nil).
     apply oc_r.
     apply parr_r.
-    apply (ex_r _ (R :: one :: nil)).
+    apply (ex_r (R :: one :: nil)).
     * assert ({ b | R :: one :: nil = projT2 (pgax (pfrag_llR R)) b })
         as [b Hgax] by (now exists false).
       rewrite Hgax.
@@ -1527,7 +1527,7 @@ Lemma ll_wn_to_llwnR : forall R l, ll_ll (l ++ wn R :: nil) -> llR (wn R) l.
 Proof with myeasy.
 intros R l pi.
 eapply ll_wn_wn_to_llR.
-eapply (ex_r _ (wn (tens (dual (wn R)) bot) :: wn (wn R) :: l)) ;
+eapply (ex_r (wn (tens (dual (wn R)) bot) :: wn (wn R) :: l)) ;
   [ | GPermutation_Type_solve ].
 apply wk_r.
 apply de_r.

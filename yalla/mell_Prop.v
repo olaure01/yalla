@@ -16,7 +16,7 @@ From Yalla Require ll_cut.
 
 Section Atoms.
 
-Context { atom : DecType }.
+Context {atom : DecType}.
 
 (** ** 1. define formulas *)
 
@@ -167,7 +167,7 @@ induction pi ; try (now ((try inversion IHpi) ; constructor ; constructor)) ;
     * apply IHPermutation_transp1...
 - inversion IHpi1 ; inversion IHpi2 ; constructor.
   eapply ll_def.ex_r.
-  + apply (ll_def.tens_r _ _ _ _ _ X X0).
+  + apply (ll_def.tens_r X X0).
   + cbn ; Permutation_Type_solve.
 - inversion IHpi ; constructor.
   cbn ; rewrite mell2ll_map_wn.

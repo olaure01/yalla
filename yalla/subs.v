@@ -10,7 +10,7 @@ From Yalla Require Export ll_def.
 
 Section Atoms.
 
-Context { atom : InfDecType }.
+Context {atom : InfDecType}.
 
 Definition ateq := @eqb atom.
 Definition ateq_eq := @eqb_eq atom.
@@ -95,14 +95,14 @@ induction pi using ll_nested_ind ; list_simpl ; try (now constructor).
     destruct (in_inf_map_inv (map (subs A x)) L l' Hin) as [l0 <- Hin'].
     apply (In_Forall_inf_in _ PL) in Hin' as [pi' Hin'].
     refine (Dependent_Forall_inf_forall_formula _ _ X Hin').
-- specialize Hmapwn with l0.
+- specialize Hmapwn with l.
   rewrite Hmapwn.
   apply oc_r.
   rewrite <- Hmapwn...
-- eapply (cut_r _ (subs A x A0))...
+- eapply (cut_r (subs A x A0))...
   rewrite <- subs_dual...
-- apply (gax_r (axupd_pfrag P (existT (fun x => x -> list formula) _
-                      (fun a => map (subs A x) (projT2 (pgax P) a)))) a).
+- apply (@gax_r _ (axupd_pfrag P (existT (fun x => x -> list formula) _
+                               (fun a => map (subs A x) (projT2 (pgax P) a)))) a).
 Unshelve. cbn...
 Qed.
 
@@ -112,7 +112,7 @@ Proof with myeeasy.
 intros P_axfree A x l pi.
 apply (subs_ll A x) in pi.
 eapply stronger_pfrag...
-nsplit 4...
+repeat split...
 cbn ; intros a.
 contradiction P_axfree.
 Qed.

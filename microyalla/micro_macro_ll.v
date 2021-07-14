@@ -1,7 +1,4 @@
 From Coq Require Import List Lia.
-(*
-From OLlibs Require Import funtheory.
-*)
 From OLlibs Require Import dectype Permutation_Type.
 From Yalla Require Import ll_def microll.
 
@@ -21,7 +18,9 @@ match A with
 | wn A      => formulas.wn (ll2ll A)
 end.
 
-(*
+(* Unused
+From OLlibs Require Import funtheory.
+
 Lemma ll2ll_inj : injective ll2ll.
 Proof.
 intros A.
@@ -41,7 +40,7 @@ induction l...
 cbn ; rewrite IHl...
 Qed.
 
-(*
+(* Unused
 Lemma ll2ll_map_wn_inv : forall l1 l2,
   map formulas.wn l1 = map ll2ll l2 ->
     { l2' | l2 = map wn l2' /\ l1 = map ll2ll l2' }.
@@ -81,11 +80,11 @@ Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
 Theorem ll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.
 intros l pi; induction pi ; cbn; try (now constructor).
-- apply (ex_r _ (map ll2ll l)); try assumption.
+- apply (ex_r (map ll2ll l)); try assumption.
   cbn; rewrite <- transp_map.
   apply transp_perm.
 - rewrite map_app.
-  apply (ex_r _ (formulas.tens (ll2ll A) (ll2ll B) :: map ll2ll l2 ++ map ll2ll l1)).
+  apply (ex_r (formulas.tens (ll2ll A) (ll2ll B) :: map ll2ll l2 ++ map ll2ll l1)).
   + now constructor.
   + cbn; apply Permutation_Type_cons; try reflexivity.
     apply Permutation_Type_app_comm.

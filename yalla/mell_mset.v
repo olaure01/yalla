@@ -204,7 +204,7 @@ induction pi ; simpl ; rewrite ? map_app ;
   try (destruct IHpi1 as [IHpi1]) ;
   try (destruct IHpi2 as [IHpi2]) ;
   constructor.
-- apply (ll_def.ex_r _ (map mell2ll (covar X :: var X :: nil))).
+- apply (ll_def.ex_r (map mell2ll (covar X :: var X :: nil))).
   + apply ll_def.ax_r.
   + symmetry.
     destruct (Nat.leb
@@ -226,10 +226,10 @@ induction pi ; simpl ; rewrite ? map_app ;
 - eapply ll_def.ex_r.
   + apply ll_def.tens_r.
     * assert (Helt := Permutation_Type_map mell2ll (elts_add A m1)).
-      apply (ll_def.ex_r _ _ _ IHpi1) in Helt.
+      apply (ll_def.ex_r _ _ IHpi1) in Helt.
       cbn in Helt...
     * assert (Helt := Permutation_Type_map mell2ll (elts_add B m2)).
-      apply (ll_def.ex_r _ _ _ IHpi2) in Helt.
+      apply (ll_def.ex_r _ _ IHpi2) in Helt.
       cbn in Helt...
   + rewrite <- map_app.
     change (formulas.tens (mell2ll A) (mell2ll B)
@@ -254,7 +254,7 @@ induction pi ; simpl ; rewrite ? map_app ;
       apply Permutation_Type_cons...
       apply elts_add. }
     apply (Permutation_Type_map mell2ll) in Helt.
-    apply (ll_def.ex_r _ _ _ IHpi) in Helt.
+    apply (ll_def.ex_r _ _ IHpi) in Helt.
     cbn in Helt...
   + change (formulas.parr (mell2ll A) (mell2ll B) :: map mell2ll (proj1_sig m))
       with (map mell2ll (parr A B :: elts m)).
@@ -272,7 +272,7 @@ induction pi ; simpl ; rewrite ? map_app ;
       apply Permutation_Type_cons...
       apply elts_fmmap. }
     apply (Permutation_Type_map  mell2ll) in Helt.
-    apply (ll_def.ex_r _ _ _ IHpi) in Helt.
+    apply (ll_def.ex_r _ _ IHpi) in Helt.
     eapply ll_def.ex_r ; [ apply Helt | ].
     cbn.
     apply Permutation_Type_cons...
@@ -295,7 +295,7 @@ induction pi ; simpl ; rewrite ? map_app ;
 - eapply ll_def.ex_r.
   + apply ll_def.de_r.
     assert (Helt := Permutation_Type_map mell2ll (elts_add A m)).
-    apply (ll_def.ex_r _ _ _ IHpi) in Helt.
+    apply (ll_def.ex_r _ _ IHpi) in Helt.
     cbn in Helt...
   + change (formulas.wn (mell2ll A) :: map mell2ll (proj1_sig m))
       with (map mell2ll (wn A :: elts m)).
@@ -306,7 +306,7 @@ induction pi ; simpl ; rewrite ? map_app ;
     rewrite Helt.
     symmetry ; apply elts_add.
 - eapply ll_def.ex_r.
-  + apply (ll_def.wk_r _ (mell2ll A))...
+  + apply (ll_def.wk_r (mell2ll A))...
   + change (formulas.wn (mell2ll A) :: map mell2ll (elts m))
       with (map mell2ll (wn A :: elts m)).
     apply Permutation_Type_map.
@@ -316,7 +316,7 @@ induction pi ; simpl ; rewrite ? map_app ;
     rewrite Helt.
     symmetry ; apply elts_add.
 - eapply ll_def.ex_r.
-  + apply (ll_def.co_r _ (mell2ll A)).
+  + apply ll_def.co_r.
     cbn.
     assert (Permutation_Type (elts (add (wn A) (add (wn A) m)))
                              (wn A :: wn A :: elts m))
@@ -325,7 +325,7 @@ induction pi ; simpl ; rewrite ? map_app ;
       apply Permutation_Type_cons...
       apply elts_add. }
     apply (Permutation_Type_map mell2ll) in Helt.
-    apply (ll_def.ex_r _ _ _ IHpi) in Helt.
+    apply (ll_def.ex_r _ _ IHpi) in Helt.
     cbn in Helt...
   + change (formulas.wn (mell2ll A) :: map mell2ll (proj1_sig m))
       with (map mell2ll (wn A :: elts m)).

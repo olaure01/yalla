@@ -13,7 +13,7 @@ From Yalla Require ll_cut.
 
 Section Atoms.
 
-Context { atom : DecType }.
+Context {atom : DecType}.
 
 (** ** 1. define formulas *)
 
@@ -176,10 +176,10 @@ induction pi ;
 - eapply ll_def.ex_r.
   + apply ll_def.tens_r.
     * assert (Helt := Permutation_Type_map mell2ll (elts_add A l1)).
-      apply (ll_def.ex_r _ _ _ IHpi1) in Helt.
+      apply (ll_def.ex_r _ _ IHpi1) in Helt.
       cbn in Helt...
     * assert (Helt := Permutation_Type_map mell2ll (elts_add B l2)).
-      apply (ll_def.ex_r _ _ _ IHpi2) in Helt.
+      apply (ll_def.ex_r _ _ IHpi2) in Helt.
       cbn in Helt...
   + apply Permutation_Type_cons...
     rewrite <- map_app.
@@ -187,20 +187,10 @@ induction pi ;
     unfold sum ; unfold list2fm.
     cbn ; rewrite fold_id.
     apply Permutation_Type_app_comm.
-- unfold fmmap.
-  unfold list2fm.
-  unfold add.
-  unfold empty.
-  cbn.
-  rewrite fold_id.
+- rewrite fold_id.
   rewrite mell2ll_map_wn.
-  unfold elts in IHpi.
-  unfold add in IHpi.
-  unfold fmmap in IHpi.
-  unfold list2fm in IHpi.
-  cbn in IHpi.
-  rewrite fold_id in IHpi.
-  rewrite mell2ll_map_wn in IHpi.
+  unfold elts, add, fmmap, list2fm in IHpi; cbn in IHpi.
+  rewrite fold_id, mell2ll_map_wn in IHpi.
   apply ll_def.oc_r...
 Qed.
 

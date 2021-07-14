@@ -33,7 +33,7 @@ intros l pi; induction pi ; cbn; try (now constructor).
   apply Permutation_Type_app_head.
   apply Permutation_Type_swap.
 - rewrite map_app.
-  apply (ex_r _ (formulas.tens (nll2ll A) (nll2ll B) :: map nll2ll l2 ++ map nll2ll l1)).
+  apply (ex_r (formulas.tens (nll2ll A) (nll2ll B) :: map nll2ll l2 ++ map nll2ll l1)).
   + now constructor.
   + cbn; apply Permutation_Type_cons; try reflexivity.
     apply Permutation_Type_app_comm.

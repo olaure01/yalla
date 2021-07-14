@@ -15,7 +15,7 @@ From Yalla Require ll_fragments.
 
 Section Atoms.
 
-Context { atom : InfDecType }.
+Context {atom : InfDecType}.
 
 (** ** 1. define formulas *)
 
@@ -146,7 +146,7 @@ induction pi ; try (now constructor) ; try rewrite map_app.
 - eapply ll_def.ex_r...
   apply Permutation_Type_map...
 - eapply ll_def.ex_r.
-  + apply (ll_def.tens_r _ _ _ _ _ IHpi1 IHpi2).
+  + apply (ll_def.tens_r IHpi1 IHpi2).
   + cbn ; Permutation_Type_solve.
 - cbn ; rewrite ll2ll_map_wn.
   apply ll_def.oc_r.

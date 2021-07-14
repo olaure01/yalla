@@ -10,7 +10,7 @@ From Yalla Require Export ll_cut.
 
 Section Atoms.
 
-Context { atom : DecType }.
+Context {atom : DecType}.
 Notation formula := (@formula atom).
 Notation ll := (@ll atom).
 
@@ -33,7 +33,7 @@ remember nil as l; revert Heql; induction pi using ll_nested_ind; intros Heql; i
   + cbn in eqpmix; rewrite Hmix0 in eqpmix; inversion eqpmix.
   + inversion_clear X as [ | ? ? ? ? Hnil ].
     apply Hnil.
-    destruct l0; [ reflexivity | inversion HeqL ].
+    destruct l; [ reflexivity | inversion HeqL ].
 - inversion f.
 - apply (Hgax a).
 Qed.
@@ -77,7 +77,7 @@ assert (ll P (dual (awith A B) :: A :: nil)) as pi'.
 { apply plus_r1.
   eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
+eapply (ex_r ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
 eapply cut_r_axfree ; try eassumption.
 eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 Qed.
@@ -90,7 +90,7 @@ assert (ll P (dual (awith B A) :: A :: nil)) as pi'.
 { apply plus_r2.
   eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
+eapply (ex_r ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
 eapply cut_r_axfree ; try eassumption.
 eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 Qed.
@@ -103,7 +103,7 @@ assert (ll P (dual (oc A) :: A :: nil)) as pi'.
 { apply de_r.
   eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
+eapply (ex_r ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
 eapply cut_r_axfree ; try eassumption.
 eapply ex_r ; [ apply pi | GPermutation_Type_solve ].
 Qed.
@@ -498,7 +498,7 @@ induction lax ; intros l pi.
     as Q.
   cbn; cons2app; rewrite app_assoc.
   apply IHlax.
-  eapply (ext_wn _ (dual a :: nil)) in pi.
+  eapply (ext_wn (dual a :: nil)) in pi.
   eapply ax_gen ; [ | | | | apply pi ] ; try (now rewrite HeqQ).
   cbn in pi ; cbn ; intros a0.
   destruct a0.
@@ -545,7 +545,7 @@ induction lax ; intros l pi.
   rewrite app_assoc in pi.
   apply IHlax in pi.
   rewrite <- (app_nil_r l).
-  eapply (cut_r _ (wn (dual a)))...
+  eapply (cut_r (wn (dual a)))...
   + cbn ; rewrite bidual.
     change nil with (map (@wn atom) nil).
     apply oc_r ; cbn.
