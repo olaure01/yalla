@@ -1499,7 +1499,7 @@ Qed.
 End Atoms.
 
 Arguments ll_nested_ind : clear implicits.
-Arguments ll_nested_ind : clear implicits.
+Arguments ll_nested_ind' : clear implicits.
 
 Notation Dependent_Forall_inf_forall_formula :=
   (Dependent_Forall_inf_forall
