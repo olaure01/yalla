@@ -708,7 +708,7 @@ Definition easytpgax P := forall a,
 * (forall A C, In_inf A (fst (projT2 (tpgax P) a)) -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A).
 
 Lemma tatomic_easytpgax {P} :
-  (forall a, prod (option_Type tatomic (snd (projT2 (tpgax P) a)))
+  (forall a, prod (option_test tatomic (snd (projT2 (tpgax P) a)))
                   (Forall_inf tatomic (fst (projT2 (tpgax P) a)))) -> easytpgax P.
 Proof.
 intros Hgax a ; split ; [ split | ].

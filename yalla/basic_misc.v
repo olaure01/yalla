@@ -5,20 +5,17 @@
 
 From Coq Require Import Lia.
 
+Set Implicit Arguments.
 
 (** ** Definitions *)
 (* TODO remove once introduced in OLlibs *)
-Definition option_Prop {A : Type} (P : A -> Prop) o :=
+Definition option_eval_default A B default (f : A -> B) o :=
 match o with
-| Some a => P a
-| None => True
+| Some a => f a
+| None => default
 end.
 
-Definition option_Type {A : Type} (P : A -> Type) o :=
-match o with
-| Some a => P a
-| None => True
-end.
+Definition option_test A := @option_eval_default A Type unit.
 
 Definition Empty_fun {A} : Empty_set -> A := fun o => match o with end.
 (* end TODO *)
