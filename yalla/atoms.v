@@ -59,24 +59,24 @@ Class FullAtoms := {
 
 (** ** Instances for all previous classes from the global one *)
 
-Instance FAtomType_self (C : FullAtoms) : AtomType_self FAtom | 50 := FAtom_self.
-Instance FAtomType_into_nat (C : FullAtoms) : AtomType_into_nat FAtom | 50 := FAtom2nat.
-Instance FIAtomType_into_nat (C : FullAtoms) : IAtomType_into_nat FPreIAtom | 50 := FPreIAtom2nat.
-Instance FIAtom2AtomType (C : FullAtoms) : IAtom2AtomType FAtom FPreIAtom | 50 := FIAtom2Atom.
-Instance FIAtom2AtomType_inj (C : FullAtoms) : IAtom2AtomType_inj FAtom FPreIAtom | 50 := {|
+#[local] Instance FAtomType_self (C : FullAtoms) : AtomType_self FAtom | 50 := FAtom_self.
+#[local] Instance FAtomType_into_nat (C : FullAtoms) : AtomType_into_nat FAtom | 50 := FAtom2nat.
+#[local] Instance FIAtomType_into_nat (C : FullAtoms) : IAtomType_into_nat FPreIAtom | 50 := FPreIAtom2nat.
+#[local] Instance FIAtom2AtomType (C : FullAtoms) : IAtom2AtomType FAtom FPreIAtom | 50 := FIAtom2Atom.
+#[local] Instance FIAtom2AtomType_inj (C : FullAtoms) : IAtom2AtomType_inj FAtom FPreIAtom | 50 := {|
   IAtom2Atom_inj_base := FIAtom2AtomType C;
   IAtom2Atom_inj := FIAtom2Atom_inj |}.
-Instance FAtom2IAtomType_self (C : FullAtoms) : Atom2IAtomType_self FAtom FPreIAtom | 50 := {|
+#[local] Instance FAtom2IAtomType_self (C : FullAtoms) : Atom2IAtomType_self FAtom FPreIAtom | 50 := {|
   Atom2IAtom_Atom_self := FAtomType_self C;
   Atom2PreIAtom := FAtom2PreIAtom;
   Atom2PreIAtom_bij := FAtom2PreIAtom_bij |}.
-Instance FTAtom2IAtomType (C : FullAtoms) : TAtom2IAtomType FPreIAtom FTAtom | 50 := {|
+#[local] Instance FTAtom2IAtomType (C : FullAtoms) : TAtom2IAtomType FPreIAtom FTAtom | 50 := {|
   TAtom2PreIAtom := FTAtom2PreIAtom;
   TAtom2PreIAtom_bij := FTAtom2PreIAtom_bij |}.
-Instance FTLAtomType (C : FullAtoms) : TLAtomType FAtom FPreIAtom FTAtom | 50 := {|
+#[local] Instance FTLAtomType (C : FullAtoms) : TLAtomType FAtom FPreIAtom FTAtom | 50 := {|
   TLAtom_base := FIAtom2AtomType_inj C;
   TLAtom_TAtom := FTAtom2IAtomType C |}.
-Instance FAtomIAtomTAtomType (C : FullAtoms) : AtomIAtomTAtomType FAtom FPreIAtom FTAtom | 50 := {|
+#[local] Instance FAtomIAtomTAtomType (C : FullAtoms) : AtomIAtomTAtomType FAtom FPreIAtom FTAtom | 50 := {|
   AtomIAtomTAtom_IAtom2Atom := FIAtom2AtomType_inj C;
   AtomIAtomTAtom_Atom2IAtom := FAtom2IAtomType_self C;
   AtomIAtomTAtom_TAtom := FTLAtomType C |}.
