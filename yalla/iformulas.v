@@ -70,12 +70,8 @@ Inductive iatomic_Prop : iformula -> Prop :=
 Inductive iatomic : iformula -> Type :=
 | iatomic_var : forall x, iatomic (ivar x).
 
-Lemma iatomic_Prop_iatomic : forall A, iatomic_Prop A -> iatomic A.
-Proof.
-induction A; intros Hat;
-  try (exfalso; inversion Hat; fail);
-  constructor.
-Qed.
+Lemma iatomic_Prop_iatomic A : iatomic_Prop A -> iatomic A.
+Proof. induction A; intros Hat; try (exfalso; inversion Hat; fail); constructor. Qed.
 
 
 (** ** Sub-formulas *)
@@ -99,86 +95,70 @@ Inductive isubform : iformula -> iformula -> Prop :=
 | isub_with_r : forall A B C, isubform A B -> isubform A (iwith C B)
 | isub_oc : forall A B, isubform A B -> isubform A (ioc B).
 
-Lemma isub_trans : forall A B C, isubform A B -> isubform B C -> isubform A C.
-Proof with try assumption.
-intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
-  try (constructor ; apply IHHr)...
-- inversion Hl.
-  apply isub_gen_N.
-- inversion Hl.
-  apply isub_neg_N.
+Lemma isub_trans A B C : isubform A B -> isubform B C -> isubform A C.
+Proof.
+intros Hl Hr; induction Hr in A, Hl |- * ;
+  try (constructor; apply IHHr); try assumption.
+- inversion Hl; apply isub_gen_N.
+- inversion Hl; apply isub_neg_N.
 Qed.
 
 Global Instance isub_po : PreOrder isubform | 50.
-Proof.
-split.
-- intros l.
-  apply isub_id.
-- intros l1 l2 l3.
-  apply isub_trans.
-Qed.
+Proof. split; intros ?; [ apply isub_id | apply isub_trans ]. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
 Definition isubform_list l1 l2 := Forall (fun A => Exists (isubform A) l2) l1.
 
-Lemma isub_id_list : forall l l0, isubform_list l (l0 ++ l).
+Lemma isub_id_list l l0 : isubform_list l (l0 ++ l).
 Proof.
-induction l ; intros l0 ; constructor.
+induction l in l0 |- *; constructor.
 - induction l0.
   + constructor.
     apply isub_id.
-  + apply Exists_cons_tl ; assumption.
+  + apply Exists_cons_tl; assumption.
 - replace (l0 ++ a :: l) with ((l0 ++ a :: nil) ++ l).
   + apply IHl.
-  + rewrite <- app_assoc ; reflexivity.
+  + rewrite <- app_assoc; reflexivity.
 Qed.
 
-Lemma isub_trans_list : forall l1 l2 l3,
+Lemma isub_trans_list l1 l2 l3 :
   isubform_list l1 l2 -> isubform_list l2 l3 -> isubform_list l1 l3.
-Proof with try eassumption.
-induction l1 ; intros l2 l3 Hl Hr ; constructor.
-- inversion Hl ; subst.
-  revert Hr H1 ; clear ; induction l2 ; intros Hr Hl ; inversion Hl ; subst.
-  + inversion Hr ; subst.
-    inversion H2 ; subst.
+Proof.
+induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
+- inversion Hl; subst.
+  clear - Hr H1; induction l2 in Hr, H1 |-*; inversion H1; subst.
+  + inversion Hr; subst.
+    clear - H0 H3; induction l3 in H0, H3 |- *; inversion H3; subst.
     * apply Exists_cons_hd.
-      etransitivity...
+      transitivity a0; assumption.
     * apply Exists_cons_tl.
-      revert H ; clear - H0 ; induction l ; intro H ; inversion H ; subst.
-      apply Exists_cons_hd.
-      etransitivity...
-      apply Exists_cons_tl.
-      apply IHl...
-  + inversion Hr ; subst.
-    apply IHl2...
-- inversion Hl ; subst.
-  eapply IHl1...
+      apply IHl3; assumption.
+  + inversion Hr; subst.
+    apply IHl2; assumption.
+- inversion Hl; subst.
+  eapply IHl1; eassumption.
 Qed.
 
 Global Instance isub_list_po : PreOrder isubform_list | 50.
 Proof.
 split.
-- intros l.
-  rewrite <- app_nil_l.
-  apply isub_id_list.
-- intros l1 l2 l3.
-  apply isub_trans_list.
+- intros l; rewrite <- app_nil_l; apply isub_id_list.
+- intros l1 l2 l3; apply isub_trans_list.
 Qed.
 
 (* unused
 From OLlibs Require Import GPermutation_Type.
 
-Lemma isub_perm_list :
-  forall b l l1 l2,
-    isubform_list l l1 -> PCPermutation_Type b l1 l2 ->
-    isubform_list l l2.
-Proof with try eassumption.
-intros b l l1 l2 H1 HP ; revert H1 ; induction l ; intro H1.
+Lemma isub_perm_list b l l1 l2 :
+  isubform_list l l1 -> PCPermutation_Type b l1 l2 ->
+  isubform_list l l2.
+Proof.
+intros H1 HP; induction l in H1 |- *.
 - constructor.
-- inversion H1 ; subst.
+- inversion H1; subst.
   constructor.
-  + eapply PCPermutation_Type_Exists...
-  + apply IHl...
+  + eapply PCPermutation_Type_Exists; eassumption.
+  + apply IHl; assumption.
 Qed.
 *)
 
@@ -202,44 +182,16 @@ match A, B with
 | _, _ => false
 end.
 
-Lemma eqb_eq_iform : forall A B, eqb_iform A B = true <-> A = B.
-Proof with reflexivity.
-induction A ; destruct B ; (split ; [ intros Heqb | intros Heq ]) ;
-  try inversion Heqb ; try inversion Heq ; try reflexivity.
-- apply (@eqb_eq (option_dectype _)) in H0; subst...
-- subst ; cbn.
-  apply (@eqb_eq (option_dectype _))...
-- apply andb_true_iff in H0.
-  destruct H0 as [H1 H2].
-  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; cbn ; apply andb_true_iff.
-  split ; [ apply IHA1 | apply IHA2 ]...
-- apply andb_true_iff in H0.
-  destruct H0 as [H1 H2].
-  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; cbn ; apply andb_true_iff.
-  split ; [ apply IHA1 | apply IHA2 ]...
-- apply IHA in H0 ; subst...
-- subst ; cbn ; apply IHA...
-- apply andb_true_iff in H0.
-  destruct H0 as [H1 H2].
-  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; cbn ; apply andb_true_iff.
-  split ; [ apply IHA1 | apply IHA2 ]...
-- apply IHA in H0 ; subst...
-- subst ; cbn ; apply IHA...
-- apply andb_true_iff in H0.
-  destruct H0 as [H1 H2].
-  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; cbn ; apply andb_true_iff.
-  split ; [ apply IHA1 | apply IHA2 ]...
-- apply andb_true_iff in H0.
-  destruct H0 as [H1 H2].
-  apply IHA1 in H1 ; apply IHA2 in H2 ; subst...
-- subst ; cbn ; apply andb_true_iff.
-  split ; [ apply IHA1 | apply IHA2 ]...
-- apply IHA in H0 ; subst...
-- subst ; cbn ; apply IHA...
+Lemma eqb_eq_iform A B : eqb_iform A B = true <-> A = B.
+Proof.
+induction A in B |- *; destruct B; (split; [ intros Heqb | intros Heq ]);
+  try inversion Heqb; try inversion Heq; try reflexivity;
+  try (subst; cbn; apply IHA; reflexivity);
+  try (apply IHA in H0; subst; reflexivity);
+  try (subst; cbn; apply andb_true_iff; split; [ apply IHA1 | apply IHA2 ]; reflexivity);
+  try (apply andb_true_iff in H0; destruct H0 as [H1%IHA1 H2%IHA2]; subst; reflexivity).
+- apply (@eqb_eq (option_dectype _)) in H0; subst; reflexivity.
+- subst; cbn; apply (@eqb_eq (option_dectype _)); reflexivity.
 Qed.
 
 Fixpoint eqb_iformlist l1 l2 :=
@@ -249,15 +201,15 @@ match l1, l2 with
 | _, _ => false
 end.
 
-Lemma eqb_eq_iformlist : forall l1 l2, eqb_iformlist l1 l2 = true <-> l1 = l2.
-Proof with reflexivity.
-induction l1 ; destruct l2 ; (split ; [ intros Heqb | intros Heq ]) ;
+Lemma eqb_eq_iformlist l1 l2 : eqb_iformlist l1 l2 = true <-> l1 = l2.
+Proof.
+induction l1 in l2 |- *; destruct l2; (split; [ intros Heqb | intros Heq ]);
   try inversion Heqb ; try inversion Heq ; try reflexivity.
 - apply andb_true_iff in H0.
   destruct H0 as [H1 H2].
-  apply eqb_eq_iform in H1 ; apply IHl1 in H2 ; subst...
-- subst ; cbn ; apply andb_true_iff.
-  split ; [ apply eqb_eq_iform | apply IHl1 ]...
+  apply eqb_eq_iform in H1; apply IHl1 in H2; subst; reflexivity.
+- subst; cbn; apply andb_true_iff.
+  split; [ apply eqb_eq_iform | apply IHl1 ]; reflexivity.
 Qed.
 
 (** * In with [bool] output for formula list *)
@@ -267,24 +219,22 @@ match l with
 | cons hd tl => eqb_iform A hd || inb_iform A tl
 end.
 
-Lemma inb_in_iform : forall A l, inb_iform A l = true <-> In A l.
-Proof with assumption.
-induction l ; (split ; [ intros Heqb | intros Heq ]).
+Lemma inb_in_iform A l : inb_iform A l = true <-> In A l.
+Proof.
+induction l; (split; [ intros Heqb | intros Heq ]).
 - inversion Heqb.
 - inversion Heq.
-- inversion Heqb ; subst.
+- inversion Heqb; subst.
   apply orb_true_iff in H0.
   destruct H0.
   + constructor.
-    symmetry ; apply eqb_eq_iform...
-  + apply in_cons.
-    apply IHl...
-- inversion Heq ; subst.
-  + cbn ; apply orb_true_iff ; left.
-    apply eqb_eq_iform.
-    reflexivity.
-  + cbn ; apply orb_true_iff ; right.
-    apply IHl...
+    symmetry; apply eqb_eq_iform; assumption.
+  + apply in_cons, IHl, H.
+- inversion Heq; subst.
+  + cbn; apply orb_true_iff; left.
+    apply eqb_eq_iform; reflexivity.
+  + cbn; apply orb_true_iff; right.
+    apply IHl, H.
 Qed.
 
 
@@ -305,211 +255,177 @@ match B with
 | _ => false
 end.
 
-Lemma isubb_isub : forall A B, is_true (isubformb A B) <-> isubform A B.
-Proof with try assumption ; try reflexivity.
-intros A B ; split ; intros H ; induction B ; try (now (inversion H ; constructor)).
-- destruct A ; cbn in H ; try (now inversion H).
+Lemma isubb_isub A B : is_true (isubformb A B) <-> isubform A B.
+Proof.
+split; intros H; induction B; try (now (inversion H; constructor)).
+- destruct A; cbn in H; try (now inversion H).
   rewrite orb_false_r in H.
-  apply (@eqb_eq (option_dectype _)) in H ; subst ; constructor.
-- destruct A ; cbn in H ; try (now inversion H).
+  apply (@eqb_eq (option_dectype _)) in H; subst; constructor.
+- now destruct A; inversion H.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_tens_l.
-    apply IHB1...
-  + apply isub_tens_r.
-    apply IHB2...
+  apply orb_true_elim in H; destruct H as [ H | H ];
+    [ | apply orb_true_elim in H; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_tens_l, IHB1.
+  + now apply isub_tens_r, IHB2.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_lpam_l.
-    apply IHB1...
-  + apply isub_lpam_r.
-    apply IHB2...
+  apply orb_true_elim in H; destruct H as [ H | H ];
+    [ | apply orb_true_elim in H; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_lpam_l, IHB1.
+  + now apply isub_lpam_r, IHB2.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_gen.
-    apply IHB...
-  + apply eqb_eq_iform in H ; subst.
+  apply orb_true_elim in H; destruct H as [ H | H ];
+    [ | apply orb_true_elim in H; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_gen, IHB.
+  + apply eqb_eq_iform in H; subst.
     apply isub_gen_N.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_lmap_l.
-    apply IHB1...
-  + apply isub_lmap_r.
-    apply IHB2...
+  apply orb_true_elim in H; destruct H as [ H | H ];
+    [ | apply orb_true_elim in H; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_lmap_l, IHB1.
+  + now apply isub_lmap_r, IHB2.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_neg.
-    apply IHB...
-  + apply eqb_eq_iform in H ; subst.
+  apply orb_true_elim in H; destruct H as [ H | H ];
+    [ | apply orb_true_elim in H; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_neg, IHB.
+  + apply eqb_eq_iform in H; subst.
     apply isub_neg_N.
-- destruct A ; cbn in H ; try (now inversion H).
+- now destruct A; inversion H.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_with_l.
-    apply IHB1...
-  + apply isub_with_r.
-    apply IHB2...
-- destruct A ; cbn in H ; try (now inversion H).
+  apply orb_true_elim in H; destruct H as [ H | H ];
+    [ | apply orb_true_elim in H; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_with_l, IHB1.
+  + now apply isub_with_r, IHB2.
+- now destruct A; inversion H.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ] ;
-    [ | apply orb_true_elim in H ; destruct H as [ H | H ] ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_plus_l.
-    apply IHB1...
-  + apply isub_plus_r.
-    apply IHB2...
+  apply orb_true_elim in H; destruct H as [ H | H ];
+    [ | apply orb_true_elim in H; destruct H as [ H | H ] ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_plus_l, IHB1.
+  + now apply isub_plus_r, IHB2.
 - cbn in H.
-  apply orb_true_elim in H ; destruct H as [ H | H ].
-  + apply eqb_eq_iform in H ; subst ; constructor.
-  + apply isub_oc.
-    apply IHB...
-- inversion H ; subst.
+  apply orb_true_elim in H; destruct H as [ H | H ].
+  + apply eqb_eq_iform in H; subst; constructor.
+  + now apply isub_oc, IHB.
+- inversion H; subst.
   cbn; rewrite orb_false_r.
   apply (@eqb_refl (option_dectype _ )).
-- inversion H ; subst.
+- inversion H; subst.
   + unfold isubformb.
-    replace (eqb_iform (itens B1 B2) (itens B1 B2)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (itens B1 B2) (itens B1 B2)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB1 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
   + apply IHB2 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite 2 orb_true_r...
-- inversion H ; subst.
+    cbn; rewrite H2; cbn; rewrite 2 orb_true_r; reflexivity.
+- inversion H; subst.
   + unfold isubformb.
-    replace (eqb_iform (ilpam B1 B2) (ilpam B1 B2)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (ilpam B1 B2) (ilpam B1 B2)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB1 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
   + apply IHB2 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite 2 orb_true_r...
-- inversion H ; subst.
+    cbn; rewrite H2; cbn; rewrite 2 orb_true_r; reflexivity.
+- inversion H; subst.
   + unfold isubformb.
-    replace (eqb_iform (igen B) (igen B)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (igen B) (igen B)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
-  + cbn.
-    rewrite orb_true_r...
-- inversion H ; subst.
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
+  + cbn; rewrite orb_true_r; reflexivity.
+- inversion H; subst.
   + unfold isubformb.
-    replace (eqb_iform (ilmap B1 B2) (ilmap B1 B2)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (ilmap B1 B2) (ilmap B1 B2)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB1 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
   + apply IHB2 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite 2 orb_true_r...
-- inversion H ; subst.
+    cbn; rewrite H2; cbn; rewrite 2 orb_true_r; reflexivity.
+- inversion H; subst.
   + unfold isubformb.
-    replace (eqb_iform (ineg B) (ineg B)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (ineg B) (ineg B)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
-  + cbn.
-    rewrite orb_true_r...
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
+  + cbn; rewrite orb_true_r; reflexivity.
 - inversion H ; subst.
   + unfold isubformb.
-    replace (eqb_iform (iwith B1 B2) (iwith B1 B2)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (iwith B1 B2) (iwith B1 B2)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB1 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
   + apply IHB2 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite 2 orb_true_r...
-- inversion H ; subst.
+    cbn; rewrite H2; cbn; rewrite 2 orb_true_r; reflexivity.
+- inversion H; subst.
   + unfold isubformb.
-    replace (eqb_iform (iplus B1 B2) (iplus B1 B2)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (iplus B1 B2) (iplus B1 B2)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB1 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
   + apply IHB2 in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite 2 orb_true_r...
-- inversion H ; subst.
+    cbn; rewrite H2; cbn; rewrite 2 orb_true_r; reflexivity.
+- inversion H; subst.
   + unfold isubformb.
-    replace (eqb_iform (ioc B) (ioc B)) with true...
-    symmetry ; apply eqb_eq_iform...
+    replace (eqb_iform (ioc B) (ioc B)) with true; [ reflexivity | ].
+    symmetry; apply eqb_eq_iform; reflexivity.
   + apply IHB in H2.
-    cbn ; rewrite H2 ; cbn.
-    rewrite orb_true_r...
+    cbn; rewrite H2; cbn; rewrite orb_true_r; reflexivity.
 Qed.
 
-Lemma isubb_trans : forall A B C,
+Lemma isubb_trans A B C :
   is_true (isubformb A B) -> is_true (isubformb B C) -> is_true (isubformb A C).
 Proof.
-intros A B C Hl Hr.
+intros Hl Hr.
 apply isubb_isub in Hl.
 apply isubb_isub in Hr.
 apply isubb_isub.
-etransitivity ; eassumption.
+transitivity B; assumption.
 Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
 Definition isubformb_list l1 l2 := forallb (fun A => existsb (isubformb A) l2) l1.
 
-Lemma isubb_isub_list : forall l1 l2, is_true (isubformb_list l1 l2) <-> isubform_list l1 l2.
-Proof with try assumption.
-intros l1 l2 ; split ; intros H ; induction l1 ; try (now (inversion H ; constructor)).
+Lemma isubb_isub_list l1 l2 : is_true (isubformb_list l1 l2) <-> isubform_list l1 l2.
+Proof.
+split; intros H; induction l1; try (now (inversion H; constructor)).
 - unfold isubformb_list in H.
   unfold is_true in H; rewrite forallb_forall in H; apply Forall_forall in H.
-  inversion H ; subst.
-  apply existsb_exists in H2; apply Exists_exists in H2.
+  inversion H; subst.
+  apply existsb_exists, Exists_exists in H2.
   constructor.
-  + clear - H2 ; induction l2 ; inversion H2 ; subst.
+  + clear - H2; induction l2; inversion H2; subst.
     * constructor.
-      apply isubb_isub...
+      apply isubb_isub; assumption.
     * apply Exists_cons_tl.
-      apply IHl2...
-  + apply IHl1.
-    apply forallb_forall, Forall_forall...
-- inversion H ; subst.
-  unfold isubformb_list ; cbn.
-  apply andb_true_iff ; split.
+      apply IHl2; assumption.
+  + apply IHl1, forallb_forall, Forall_forall; assumption.
+- inversion H; subst.
+  unfold isubformb_list; cbn.
+  apply andb_true_iff; split.
   + apply existsb_exists, Exists_exists.
-    clear - H2 ; induction l2 ; inversion H2 ; subst.
+    clear - H2; induction l2; inversion H2; subst.
     * constructor.
-      apply isubb_isub...
-    * apply Exists_cons_tl.
-      apply IHl2...
-  + apply IHl1...
+      apply isubb_isub; assumption.
+    * apply Exists_cons_tl, IHl2; assumption.
+  + apply IHl1; assumption.
 Qed.
 
-Lemma isubb_id_list : forall l l0, is_true (isubformb_list l (l0 ++ l)).
-Proof.
-intros l l0.
-apply isubb_isub_list.
-apply isub_id_list.
-Qed.
+Lemma isubb_id_list l l0 : is_true (isubformb_list l (l0 ++ l)).
+Proof. apply isubb_isub_list, isub_id_list. Qed.
 
-Lemma isubb_trans_list : forall l1 l2 l3,
+Lemma isubb_trans_list l1 l2 l3 :
   is_true (isubformb_list l1 l2) -> is_true (isubformb_list l2 l3) -> is_true (isubformb_list l1 l3).
 Proof.
-intros l1 l2 l3 Hl Hr.
+intros Hl Hr.
 apply isubb_isub_list in Hl.
 apply isubb_isub_list in Hr.
 apply isubb_isub_list.
-etransitivity ; eassumption.
+transitivity l2; assumption.
 Qed.
 
 End Atoms.

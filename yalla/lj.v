@@ -45,22 +45,17 @@ Inductive lj : list iformula -> iformula -> Type :=
 | co_lr : forall A C l, lj (A :: A :: l) C -> lj (A :: l) C
 | wk_lr : forall A C l, lj l C -> lj (A :: l) C.
 
-Lemma co_list_lr : forall l l0 A,
-  lj (l ++ l ++ l0) A -> lj (l ++ l0) A.
+Lemma co_list_lr l l0 A : lj (l ++ l ++ l0) A -> lj (l ++ l0) A.
 Proof.
-  induction l ; intros l0 A p; auto.
-  cbn ; apply co_lr.
-  apply ex_r with (l ++ a :: a :: l0) ; [ | Permutation_Type_solve ].
+  induction l in l0, A |- *; intro p; auto.
+  cbn; apply co_lr.
+  apply ex_r with (l ++ a :: a :: l0); [ | Permutation_Type_solve ].
   apply IHl.
   eapply ex_r; [ eassumption | Permutation_Type_solve ].
 Qed.
 
-Lemma wk_list_lr : forall l0 l A,
-  lj l A -> lj (l0 ++ l) A.
-Proof.
-  induction l0; intros l A p; auto.
-  now apply wk_lr, IHl0.
-Qed.
+Lemma wk_list_lr l0 l A : lj l A -> lj (l0 ++ l) A.
+Proof. now induction l0 in l, A |- *; intro p; auto; apply wk_lr, IHl0. Qed.
 
 (** *** Multiplicative presentation *)
 Inductive lj_mul : list iformula -> iformula -> Type :=
@@ -78,28 +73,22 @@ Inductive lj_mul : list iformula -> iformula -> Type :=
 | mwk_lr : forall A C l , lj_mul l C -> lj_mul (A :: l) C
 | mco_lr : forall A C l , lj_mul (A :: A :: l) C -> lj_mul (A :: l) C.
 
-Lemma mco_list_lr : forall l l0 A,
-  lj_mul (l ++ l ++ l0) A -> lj_mul (l ++ l0) A.
+Lemma mco_list_lr l l0 A : lj_mul (l ++ l ++ l0) A -> lj_mul (l ++ l0) A.
 Proof.
-  induction l; cbn; intros l0 A p; auto.
+  induction l in l0, A |- *; cbn; intro p; auto.
   apply mco_lr.
   apply mex_r with (l ++ a :: a :: l0); [ | Permutation_Type_solve ].
   apply IHl.
   eapply mex_r; [ eassumption | Permutation_Type_solve ].
 Qed.
 
-Lemma mwk_list_lr : forall l l0 A,
-  lj_mul l0 A -> lj_mul (l ++ l0) A.
-Proof.
-  induction l; intros l0 A p; auto.
-  now apply mwk_lr, IHl.
-Qed.
+Lemma mwk_list_lr l l0 A : lj_mul l0 A -> lj_mul (l ++ l0) A.
+Proof. now induction l in l0, A |- *; intro p; auto; apply mwk_lr, IHl. Qed.
 
 (** *** Equivalence of the two presentations *)
-Lemma lj_mul2lj : forall l A,
-  lj_mul l A -> lj l A.
+Lemma lj_mul2lj l A : lj_mul l A -> lj l A.
 Proof.
-  intros l A p; induction p; try now constructor.
+  intros p; induction p; try now constructor.
   - eapply ex_r; [ eassumption | Permutation_Type_solve ].
   - apply and_rr.
     + apply ex_r with (l2 ++ l1); [ | Permutation_Type_solve ].
@@ -115,10 +104,9 @@ Proof.
       now apply wk_list_lr.
 Qed.
 
-Lemma lj2lj_mul : forall l A,
-  lj l A -> lj_mul l A.
+Lemma lj2lj_mul l A : lj l A -> lj_mul l A.
 Proof.
-  intros l A p; induction p; try now constructor.
+  intros p; induction p; try now constructor.
   - apply mex_r with (l ++ ivar X :: nil); [ | Permutation_Type_solve ].
     apply mwk_list_lr, max_r.
   - eapply mex_r; [ eassumption | Permutation_Type_solve ].
@@ -156,51 +144,51 @@ Fixpoint ill2lj A :=
 
 Lemma skeleton : forall l A,
   ill_cut.ill_ll l A -> lj (map ill2lj l) (ill2lj A).
-Proof with try eassumption ; try reflexivity ;
-           try (apply Permutation_Type_map; Permutation_Type_solve); try Permutation_Type_solve.
-  intros l A pi; induction pi ; cbn;
+Proof.
+  intros l A pi; induction pi; cbn;
     try (eapply ex_r with (map ill2lj (_ :: l1 ++ l2));
           [ cbn | apply Permutation_Type_map; Permutation_Type_solve]);
     try (now constructor);
-    try now (constructor; eapply ex_r; [eassumption | Permutation_Type_solve ])...
-  - apply ex_r with (map ill2lj l1)...
-    apply Permutation_Type_map...
-  - eapply ex_r...
-    apply Permutation_Type_map, Permutation_Type_app_head, Permutation_Type_app_tail...
+    try now (constructor; eapply ex_r; [ eassumption | Permutation_Type_solve ]).
+  - apply ex_r with (map ill2lj l1); [ | apply Permutation_Type_map ]; assumption.
+  - eapply ex_r; [ eassumption | ].
+    apply Permutation_Type_map, Permutation_Type_app_head,
+          Permutation_Type_app_tail, Permutation_Type_map; assumption.
   - list_simpl; apply and_rr.
-    + apply ex_r with (map ill2lj l2 ++ map ill2lj l1)...
-      apply wk_list_lr...
-    + apply wk_list_lr...
+    + apply ex_r with (map ill2lj l2 ++ map ill2lj l1); [ | apply Permutation_Type_app_comm ].
+      apply wk_list_lr; assumption.
+    + apply wk_list_lr; assumption.
   - apply co_lr.
     apply and_lr2.
-    apply ex_r with (iand (ill2lj A) (ill2lj B) :: ill2lj B :: map ill2lj (l1 ++ l2))...
+    apply ex_r with (iand (ill2lj A) (ill2lj B) :: ill2lj B :: map ill2lj (l1 ++ l2));
+      [ | apply Permutation_Type_swap ].
     apply and_lr1.
-    eapply ex_r...
-  - apply ex_r with (map ill2lj (iformulas.ilpam A B :: l0 ++ l1 ++ l2))...
+    eapply ex_r; [ eassumption | Permutation_Type_solve ].
+  - apply ex_r with (map ill2lj (iformulas.ilpam A B :: l0 ++ l1 ++ l2)); [ | Permutation_Type_solve ].
     cbn; apply map_lr.
-    + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0))...
-      rewrite map_app; apply wk_list_lr...
-    + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2))...
-      rewrite map_app; apply wk_list_lr...
-  - apply map_lr...
-    apply ax_r.
-  - apply ex_r with (map ill2lj (iformulas.ilmap A B :: l0 ++ l1 ++ l2))...
+    + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | Permutation_Type_solve ].
+      rewrite map_app; apply wk_list_lr; assumption.
+    + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2)); [ | Permutation_Type_solve ].
+      rewrite map_app; apply wk_list_lr; assumption.
+  - apply map_lr; [ assumption | apply ax_r ].
+  - apply ex_r with (map ill2lj (iformulas.ilmap A B :: l0 ++ l1 ++ l2)); [ | Permutation_Type_solve ].
     cbn; apply map_lr.
-    + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0))...
-      rewrite map_app; apply wk_list_lr...
-    + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2))...
-      rewrite map_app; apply wk_list_lr...
-  - apply ex_r with (map ill2lj (iformulas.ineg A :: l))...
-    cbn; apply map_lr...
-    apply ax_r.
+    + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | Permutation_Type_solve ].
+      rewrite map_app; apply wk_list_lr; assumption.
+    + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2)); [ | Permutation_Type_solve ].
+      rewrite map_app; apply wk_list_lr; assumption.
+  - apply ex_r with (map ill2lj (iformulas.ineg A :: l)); [ | list_simpl; apply Permutation_Type_cons_append ].
+    cbn; apply map_lr; [ assumption | apply ax_r ].
   - apply or_lr.
     + eapply ex_r.
       apply IHpi1.
-      rewrite <- map_cons...
+      rewrite <- map_cons; list_simpl; symmetry; apply Permutation_Type_middle.
     + eapply ex_r.
       apply IHpi2.
-      rewrite <- map_cons...
-  - eapply ex_r...
+      rewrite <- map_cons; list_simpl; symmetry; apply Permutation_Type_middle.
+  - assumption.
+  - eapply ex_r; [ eassumption | ].
+    list_simpl; symmetry; apply Permutation_Type_middle.
   - inversion f.
   - inversion a.
 Qed.
@@ -227,10 +215,10 @@ Definition oc_lj2ill_cbv A := (iformulas.ioc (lj2ill_cbv A)).
 
 
 (** *** prove equivalence of proof predicates *)
-Lemma lj_mul2illfrag_cbv : forall l A,
+Lemma lj_mul2illfrag_cbv l A :
   lj_mul l A -> ill_cut.ill_ll (map oc_lj2ill_cbv l) (oc_lj2ill_cbv A).
 Proof.
-unfold oc_lj2ill_cbv; intros l A pi; induction pi; cbn.
+unfold oc_lj2ill_cbv; intros pi; induction pi; cbn.
 - change (iformulas.ioc (iformulas.ivar X) :: nil) with (map iformulas.ioc (iformulas.ivar X :: nil)).
   apply ill_def.oc_irr.
   rewrite <- (app_nil_l _); apply ill_def.de_ilr ; rewrite app_nil_l.
@@ -261,19 +249,18 @@ unfold oc_lj2ill_cbv; intros l A pi; induction pi; cbn.
 - now rewrite <- (app_nil_l _); apply ill_def.co_ilr.
 Qed.
 
-Lemma lj2illfrag_cbv : forall l A,
+Lemma lj2illfrag_cbv l A :
   lj l A -> ill_cut.ill_ll (map oc_lj2ill_cbv l) (oc_lj2ill_cbv A).
-Proof. intros l A pi. apply lj_mul2illfrag_cbv, lj2lj_mul, pi. Qed.
+Proof. intros pi; apply lj_mul2illfrag_cbv, lj2lj_mul, pi. Qed.
 
-Lemma illfrag2lj_cbv : forall l A,
+Lemma illfrag2lj_cbv l A :
   ill_cut.ill_ll (map oc_lj2ill_cbv l) (oc_lj2ill_cbv A) -> lj l A.
 Proof.
-  intros l A H.
-  apply skeleton in H.
-  cbn in H ; rewrite ill2lj_lj2ill_cbv_id in H.
-  replace l with (map ill2lj (map oc_lj2ill_cbv l)) ; try assumption.
-  rewrite map_map ; rewrite <- (map_id l) at 2.
-  apply map_ext ; intros ; apply ill2lj_lj2ill_cbv_id.
+  intros H%skeleton.
+  cbn in H; rewrite ill2lj_lj2ill_cbv_id in H.
+  replace l with (map ill2lj (map oc_lj2ill_cbv l)); try assumption.
+  rewrite map_map; rewrite <- (map_id l) at 2.
+  apply map_ext; intros; apply ill2lj_lj2ill_cbv_id.
 Qed.
 
 End Atoms.
@@ -288,7 +275,7 @@ Notation iformula := (@iformula preiatom).
 Notation i2ac := IAtom2Atom.
 Notation ill2ll := (@ill_vs_ll.ill2ll _ _ IAtom2Atom_inj_base).
 
-Lemma lj2ill_cbv_oclpam : forall A : iformula, ill_vs_ll.oclpam (lj2ill_cbv A).
+Lemma lj2ill_cbv_oclpam (A : iformula) : ill_vs_ll.oclpam (lj2ill_cbv A).
 Proof.
 induction A; (try now constructor); cbn.
 - constructor; constructor; assumption.
@@ -296,22 +283,21 @@ induction A; (try now constructor); cbn.
 - constructor; constructor; assumption.
 Qed.
 
-Lemma lj2llfrag_cbv : forall l A, lj l A ->
+Lemma lj2llfrag_cbv l A : lj l A ->
   ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
 Proof.
-intros l A pi.
-apply (@lj2illfrag_cbv atom) in pi.
+intros pi%(@lj2illfrag_cbv atom).
 eapply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
 split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
 intros a; inversion a.
 Qed.
 
-Lemma llfrag2lj_cbv : forall l A,
+Lemma llfrag2lj_cbv l A :
   ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))) ->
   lj l A.
 Proof.
-intros l A pi.
+intros pi.
 apply (@illfrag2lj_cbv atom).
 apply ill_vs_ll.ll_to_ill_oclpam_axfree
   with (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
@@ -348,16 +334,20 @@ Definition oc_lj2ill_cbn A := (iformulas.ioc (lj2ill_cbn A)).
 
 
 (** *** prove equivalence of proof predicates *)
-Lemma lj2illfrag_cbn : forall l A,
+Lemma lj2illfrag_cbn l A :
   lj l A -> ill_cut.ill_ll (map oc_lj2ill_cbn l) (lj2ill_cbn A).
-Proof with try reflexivity ; try eassumption ;
-           try (cbn; apply Permutation_Type_map; Permutation_Type_solve); try (cbn; Permutation_Type_solve).
-  unfold oc_lj2ill_cbn ; intros l A pi; induction pi; try now constructor.
+Proof.
+(*
+ with try reflexivity ; try eassumption ;
+      try (cbn; apply Permutation_Type_map; Permutation_Type_solve); try (cbn; Permutation_Type_solve).
+*)
+  unfold oc_lj2ill_cbn; intros pi; induction pi; try now constructor.
   - rewrite <- map_map.
-    apply ill_def.ex_ir with (map iformulas.ioc (map lj2ill_cbn (l ++ ivar X :: nil)))...
+    apply ill_def.ex_ir with (map iformulas.ioc (map lj2ill_cbn (l ++ ivar X :: nil)));
+      [ | list_simpl; symmetry; apply Permutation_Type_cons_append ].
     list_simpl; rewrite <- (app_nil_l _).
     apply ill_def.wk_list_ilr, ill_def.de_ilr, ill_def.ax_ir.
-  - eapply ill_def.ex_ir with (map _ l1)...
+  - eapply ill_def.ex_ir with (map _ l1); [ eassumption | cbn; apply Permutation_Type_map; assumption ].
   - rewrite <- (app_nil_l _).
     apply ill_def.de_ilr, ill_def.zero_ilr.
   - rewrite <- map_map; list_simpl; rewrite <- (app_nil_l _).
@@ -367,7 +357,7 @@ Proof with try reflexivity ; try eassumption ;
               :: nil ++ (map iformulas.ioc (map lj2ill_cbn l))).
     rewrite <- map_map in IHpi.
     apply (ill_cut.cut_ll_ir (iformulas.ioc (lj2ill_cbn A))
-                             (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil))...
+                             (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil)), IHpi.
     change (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil)
       with (map iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B) :: nil)).
     apply ill_def.oc_irr.
@@ -380,64 +370,60 @@ Proof with try reflexivity ; try eassumption ;
               :: nil ++ (map iformulas.ioc (map lj2ill_cbn l))).
     rewrite<- map_map in IHpi.
     apply (@ill_cut.cut_ll_ir _ (iformulas.ioc (lj2ill_cbn B))
-          (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil))...
+          (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil)), IHpi.
     change (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil)
       with (map iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B) :: nil)).
     apply ill_def.oc_irr.
     rewrite <- (app_nil_l _).
     apply ill_def.de_ilr, ill_def.with_ilr2, ill_def.ax_exp_ill.
   - cbn; rewrite <- (app_nil_l _).
-    apply ill_def.de_ilr, ill_def.plus_ilr...
+    apply ill_def.de_ilr, ill_def.plus_ilr; assumption.
   - rewrite <- map_map in *.
-    apply ill_def.plus_irr1, ill_def.oc_irr...
+    apply ill_def.plus_irr1, ill_def.oc_irr; assumption.
   - rewrite <- map_map in *.
-    apply ill_def.plus_irr2, ill_def.oc_irr...
+    apply ill_def.plus_irr2, ill_def.oc_irr; assumption.
   - rewrite <- map_map in *; cbn.
     apply ill_def.ex_ir
       with (nil ++ map iformulas.ioc (map lj2ill_cbn l) ++
-                (iformulas.ioc (iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B)) :: nil))...
+                (iformulas.ioc (iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B)) :: nil));
+      [ | list_simpl; symmetry; apply Permutation_Type_cons_append ].
     apply ill_def.co_list_ilr.
     apply ill_def.ex_ir
       with (nil ++ (iformulas.ioc (iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B)) ::
-                          (map iformulas.ioc (map lj2ill_cbn l))) ++ (map iformulas.ioc (map lj2ill_cbn l)))...
-    apply (ill_cut.cut_ll_ir (iformulas.ioc (lj2ill_cbn B)))...
+                          (map iformulas.ioc (map lj2ill_cbn l))) ++ (map iformulas.ioc (map lj2ill_cbn l)));
+      [ | list_simpl; Permutation_Type_solve ].
+    apply (ill_cut.cut_ll_ir (iformulas.ioc (lj2ill_cbn B))); [ | assumption ].
     rewrite <- map_cons.
     apply ill_def.oc_irr.
     cbn; rewrite <- (app_nil_l _).
     apply ill_def.de_ilr.
     apply ill_def.ex_ir with (nil ++ map iformulas.ioc (map lj2ill_cbn l) ++
-                                iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B) :: nil)...
+                                iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B) :: nil);
+      [ | list_simpl; symmetry; apply Permutation_Type_cons_append ].
     apply ill_def.lmap_ilr.
-    + apply ill_def.oc_irr...
+    + apply ill_def.oc_irr; assumption.
     + apply ill_def.ax_exp_ill.
-  - rewrite <- (app_nil_l _).
-    apply ill_def.co_ilr...
-  - rewrite <- (app_nil_l _).
-    apply ill_def.wk_ilr...
+  - rewrite <- (app_nil_l _); apply ill_def.co_ilr; assumption.
+  - rewrite <- (app_nil_l _); apply ill_def.wk_ilr; assumption.
 Qed.
 
-Lemma illfrag2lj_cbn : forall l A,
+Lemma illfrag2lj_cbn l A :
   ill_cut.ill_ll (map oc_lj2ill_cbn l) (lj2ill_cbn A) -> lj l A.
 Proof.
-  intros l A H.
-  apply (@skeleton atom) in H.
-  cbn in H ; rewrite ill2lj_lj2ill_cbn_id in H.
-  replace l with (map ill2lj (map oc_lj2ill_cbn l)) ; try assumption.
+  intros H%(@skeleton atom).
+  cbn in H; rewrite ill2lj_lj2ill_cbn_id in H.
+  replace l with (map ill2lj (map oc_lj2ill_cbn l)); try assumption.
   rewrite map_map; rewrite <- (map_id l) at 2.
   apply map_ext; intros; apply ill2lj_lj2ill_cbn_id.
 Qed.
 
-Lemma lj2ill_cbn_oclpam : forall A, ill_vs_ll.oclpam (lj2ill_cbn A).
-Proof.
-induction A; (try now constructor); cbn.
-- constructor; constructor; assumption.
-- constructor; try constructor; assumption.
-Qed.
+Lemma lj2ill_cbn_oclpam A : ill_vs_ll.oclpam (lj2ill_cbn A).
+Proof. induction A; (try now constructor); cbn; constructor; try constructor; assumption. Qed.
 
-Lemma lj2llfrag_cbn : forall l A, lj l A ->
+Lemma lj2llfrag_cbn l A : lj l A ->
   ll_fragments.ll_ll (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
 Proof.
-intros l A pi.
+intros pi.
 apply lj2illfrag_cbn in pi.
 eapply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
@@ -445,11 +431,11 @@ split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
 intros a; inversion a.
 Qed.
 
-Lemma llfrag2lj_cbn : forall l A,
+Lemma llfrag2lj_cbn l A :
   ll_fragments.ll_ll (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))) ->
   lj l A.
 Proof.
-intros l A pi.
+intros pi.
 apply illfrag2lj_cbn.
 apply ill_vs_ll.ll_to_ill_oclpam_axfree
   with (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
@@ -468,13 +454,13 @@ Qed.
 
 (** ** 6 Import properties *)
 
-Lemma ax_gen_r : forall A : iformula, lj (A :: nil) A.
-Proof. intros A; apply (@illfrag2lj_cbv atom), ill_def.ax_exp_ill. Qed.
+Lemma ax_gen_r (A : iformula) : lj (A :: nil) A.
+Proof. apply (@illfrag2lj_cbv atom), ill_def.ax_exp_ill. Qed.
 
-Lemma cut_ir : forall (A : iformula) l1 l2 C,
+Lemma cut_ir (A : iformula) l1 l2 C :
   lj l1 A -> lj (A :: l2) C -> lj (l1 ++ l2) C.
 Proof.
-  intros A l1 l2 C pi1 pi2.
+  intros pi1 pi2.
   apply (@lj2illfrag_cbv atom) in pi1.
   apply (@lj2illfrag_cbv atom) in pi2; list_simpl in pi2.
   apply (@illfrag2lj_cbv atom); list_simpl.
@@ -485,10 +471,9 @@ Qed.
 
 (** ** 7 Specific developments *)
 
-Lemma disjunction_property : forall A B : iformula,
-  lj nil (ior A B) -> lj nil A + lj nil B.
+Lemma disjunction_property (A B : iformula) : lj nil (ior A B) -> lj nil A + lj nil B.
 Proof.
-  intros A B pi.
+  intros pi.
   remember nil as l; remember (ior A B) as C.
   induction pi; inversion Heql; inversion HeqC; subst; intuition.
   assert (l1 = nil) by (symmetry in p; apply Permutation_Type_nil, p); subst.
