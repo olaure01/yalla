@@ -3,7 +3,8 @@
 (** * Comparison between Intuitionistic Linear Logic and Linear Logic *)
 
 From OLlibs Require Import funtheory infinite List_more
-                           Permutation_Type_more Permutation_Type_solve GPermutation_Type.
+                           Permutation_Type_more Permutation_Type_solve
+                           CPermutation_Type GPermutation_Type.
 From Yalla Require Import ll_fragments.
 From Yalla Require Export ill_prop.
 
@@ -81,152 +82,143 @@ Qed.
 
 Proposition ill_to_ll {P} : forall l C, ill P l C ->
   ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))).
-Proof with myeeasy.
+Proof.
 intros l C Hill.
-induction Hill ; 
-  list_simpl ;
-  try list_simpl in IHHill ;
-  try list_simpl in IHHill1 ;
+induction Hill;
+  list_simpl;
+  try list_simpl in IHHill;
+  try list_simpl in IHHill1;
   try list_simpl in IHHill2.
-- eapply ex_r.
+- eapply ex_r, PCPermutation_Type_swap.
   apply ax_r.
-  apply PCPermutation_Type_swap.
-- eapply ex_r...
-  hyps_GPermutation_Type_unfold ; unfold PCPermutation_Type ; cbn ; destruct ipperm.
-  * apply Permutation_Type_cons...
-    apply Permutation_Type_map.
-    apply Permutation_Type_map.
-    apply Permutation_Type_rev'...
-  * subst...
+- eapply ex_r; [ eassumption | ].
+  hyps_GPermutation_Type_unfold; unfold PCPermutation_Type; cbn; destruct ipperm.
+  * apply Permutation_Type_cons; [ reflexivity | ].
+    do 2 apply Permutation_Type_map.
+    apply Permutation_Type_rev'; assumption.
+  * subst; reflexivity.
 - rewrite_all ill2ll_map_ioc.
   rewrite_all app_comm_cons.
   apply Permutation_Type_rev' in p.
   do 2 eapply Permutation_Type_map in p. 
-  eapply ex_wn_r...
+  eapply ex_wn_r; eassumption.
 - apply one_r.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply bot_r.
-  eapply ex_r...
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
-- apply tens_r...
+- apply tens_r; assumption.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply parr_r.
-  eapply ex_r...
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
-- apply parr_r...
-- rewrite app_comm_cons.
-  rewrite app_assoc.
+- apply parr_r; assumption.
+- rewrite app_comm_cons, app_assoc.
   eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
-  rewrite bidual.
-  rewrite ? app_assoc.
-  rewrite <- ? app_comm_cons.
-  apply tens_r...
-  eapply ex_r...
+  rewrite bidual, ? app_assoc, <- ? app_comm_cons.
+  apply tens_r; [ assumption | ].
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
-- apply parr_r...
+- apply parr_r; assumption.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   list_simpl.
   change (var (i2a atN) :: map dual (map ill2ll (rev l)))
     with ((var (i2a atN) :: nil) ++ map dual (map ill2ll (rev l))).
   apply tens_r.
-  + rewrite bidual...
+  + rewrite bidual; assumption.
   + apply ax_r.
-- apply parr_r...
-  eapply ex_r...
+- apply parr_r.
+  eapply ex_r; [ eassumption | ].
   symmetry.
   rewrite (app_comm_cons _ _ (ill2ll B)).
   apply PCPermutation_Type_cons_append.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
-  rewrite <- ? app_comm_cons.
-  rewrite <- ? app_assoc.
-  rewrite bidual.
-  apply tens_r...
-  eapply ex_r...
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
+  rewrite <- ? app_comm_cons, <- ? app_assoc, bidual.
+  apply tens_r; [ | assumption ].
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
-- apply parr_r...
-  eapply ex_r...
+- apply parr_r.
+  eapply ex_r; [ eassumption | ].
   symmetry.
   rewrite (app_comm_cons _ _ (ill2ll N)).
   apply PCPermutation_Type_cons_append.
 - cons2app.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
-  rewrite <- ? app_comm_cons.
-  rewrite <- ? app_assoc.
-  rewrite bidual.
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
+  rewrite <- ? app_comm_cons, <- ? app_assoc, bidual.
   list_simpl.
-  apply tens_r...
+  apply tens_r; [ | assumption ].
   apply ax_r.
 - apply top_r.
-- apply with_r...
+- apply with_r; assumption.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
-  apply plus_r1...
-  eapply ex_r...
+  apply plus_r1.
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
-  apply plus_r2...
-  eapply ex_r...
+  apply plus_r2.
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
-  apply top_r...
-- apply plus_r1...
-- apply plus_r2...
+  apply top_r.
+- apply plus_r1; assumption.
+- apply plus_r2; assumption.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
-  apply with_r...
-  + eapply ex_r ; [ apply IHHill1 | ].
+  apply with_r.
+  + eapply ex_r; [ apply IHHill1 | ].
     rewrite ? app_comm_cons.
     apply PCPermutation_Type_app_comm.
-  + eapply ex_r ; [ apply IHHill2 | ].
+  + eapply ex_r; [ apply IHHill2 | ].
     rewrite ? app_comm_cons.
     apply PCPermutation_Type_app_comm.
 - rewrite_all ill2ll_map_ioc.
-  apply oc_r...
+  apply oc_r; assumption.
 - rewrite ? app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
-  apply de_r...
-  eapply ex_r...
+  apply de_r.
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply wk_r.
-  eapply ex_r...
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- app_comm_cons.
-  apply co_r...
-  eapply ex_r...
+  apply co_r.
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
 - rewrite app_comm_cons.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- app_assoc.
   assert (pcut (i2pfrag P) = true) as fc by (now cbn).
-  eapply (@cut_r _ _ fc)...
-  eapply ex_r...
+  eapply (@cut_r _ _ fc); [ | eassumption ].
+  eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
 - replace (ill2ll (snd (projT2 (ipgax P) a))

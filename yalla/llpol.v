@@ -64,10 +64,7 @@ end.
 Lemma bipndual :
      (forall P, ndual (pdual P) = P)
   /\ (forall N, pdual (ndual N) = N).
-Proof.
-apply polform_ind ; intros ; cbn ;
-  try rewrite H ; try rewrite H0 ; try reflexivity.
-Qed.
+Proof. apply polform_ind; intros; cbn; try rewrite H; try rewrite H0; reflexivity. Qed.
 
 Definition dual A :=
 match A with

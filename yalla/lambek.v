@@ -3,7 +3,7 @@
 (** * Example of a concrete use of the yalla library: a variant of the Lambek calculus
   tensor-free Lambek calculus with additive conjunction and its unit *)
 
-From OLlibs Require Import dectype funtheory List_more.
+From OLlibs Require Import dectype funtheory List_more Permutation_Type.
 
 
 (** ** 0. load the [ill] library *)
