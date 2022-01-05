@@ -25,8 +25,8 @@ Notation ill_ll := (@ill_ll preiatom).
 Notation tl2ill := (@tl2ill atom_inf _ _ AtomIAtomTAtom_TAtom).
 Notation trans := (@trans _ _ AtomIAtomTAtom_Atom2IAtom).
 
-Definition a2t :=
-  compose (proj1_sig (sig_of_sig2 (bijective_inverse TAtom2PreIAtom_bij))) Atom2PreIAtom.
+Definition a2t X :=
+  proj1_sig (sig_of_sig2 (bijective_inverse TAtom2PreIAtom_bij)) (Atom2PreIAtom X).
 Lemma a2t_inj : injective a2t.
 Proof.
 unfold a2t; apply compose_injective.
@@ -39,7 +39,7 @@ Lemma a2i_a2i : forall a, t2i (a2t a) = a2i a.
 Proof.
 intros a; unfold t2i, a2t, a2i; f_equal.
 destruct (bijective_inverse TAtom2PreIAtom_bij) as [f Hf1 Hf2]; cbn.
-now unfold compose; rewrite Hf1.
+now rewrite Hf1.
 Qed.
 
 
@@ -314,7 +314,7 @@ Inductive otl : list tformula -> option tformula -> Type :=
                         otl (l1 ++ toc A :: toc A :: l2) C ->
                         otl (l1 ++ toc A :: l2) C.
 
-Instance otl_perm {Pi} : Proper ((@Permutation_Type _) ==> Basics.arrow) (fun l => otl l Pi).
+Instance otl_perm {Pi} : Proper ((@Permutation_Type _) ==> arrow) (fun l => otl l Pi).
 Proof.
 intros l1 l2 HP pi.
 eapply ex_otr ; eassumption.

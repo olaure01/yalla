@@ -116,7 +116,7 @@ Inductive ll : list formula -> Type :=
 | wk_r : forall A l, ll l -> ll (wn A :: l)
 | co_r : forall A l, ll (wn A :: wn A :: l) -> ll (wn A :: l).
 
-Instance ll_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) ll.
+Instance ll_perm : Proper ((@Permutation_Type _) ==> arrow) ll.
 Proof. intros l1 l2 HP pi; eapply ex_r; eassumption. Qed.
 
 (** ** 4. characterize corresponding [ll] fragment *)

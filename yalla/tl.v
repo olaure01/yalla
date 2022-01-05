@@ -229,7 +229,7 @@ Inductive tl P : list tformula -> option tformula -> Type :=
            tl P (fst (projT2 (tpgax P) a)) (snd (projT2 (tpgax P) a)).
 
 Global Instance tl_perm {P} {Pi} :
-  Proper ((PEPermutation_Type (tpperm P)) ==> Basics.arrow) (fun l => tl P l Pi) | 100.
+  Proper ((PEPermutation_Type (tpperm P)) ==> arrow) (fun l => tl P l Pi) | 100.
 Proof.
 intros l1 l2 HP pi.
 eapply ex_tr ; eassumption.

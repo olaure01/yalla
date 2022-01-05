@@ -126,7 +126,7 @@ Inductive ill P : list iformula -> iformula -> Type :=
 
 
 Instance ill_perm {P} : forall A,
-  Proper ((@PEPermutation_Type _ (ipperm P)) ==> Basics.arrow) (fun l => ill P l A).
+  Proper ((@PEPermutation_Type _ (ipperm P)) ==> arrow) (fun l => ill P l A).
 Proof.
 intros A l1 l2 HP pi.
 eapply ex_ir ; eassumption.

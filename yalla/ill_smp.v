@@ -101,7 +101,7 @@ Inductive ill : list iformula -> iformula -> Type :=
 | wk_ilr : forall A l C, ill l C -> ill (ioc A :: l) C
 | co_ilr : forall A l C, ill (ioc A :: ioc A :: l) C -> ill (ioc A :: l) C.
 
-Instance ill_perm {C} : Proper ((@Permutation_Type _) ==> Basics.arrow) (fun l => ill l C).
+Instance ill_perm {C} : Proper ((@Permutation_Type _) ==> arrow) (fun l => ill l C).
 Proof.
 intros l1 l2 HP pi.
 eapply ex_ir ; eassumption.

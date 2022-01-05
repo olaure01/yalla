@@ -373,7 +373,7 @@ Definition ll_nested_ind P := fun Pred ax_case ex_case ex_wn_case mix_case one_c
 #[global] Arguments ll_nested_ind [P] Pred.
 #[global] Arguments ll_nested_ind' [P] Pred.
 
-Global Instance ll_perm P : Proper ((@PCPermutation_Type _ (pperm P)) ==> Basics.arrow) (ll P) | 100.
+Global Instance ll_perm P : Proper ((@PCPermutation_Type _ (pperm P)) ==> arrow) (ll P) | 100.
 Proof. intros l1 l2 HP pi; apply (ex_r _ _ pi HP). Qed.
 
 Fixpoint psize P l (pi : ll P l) :=

@@ -208,8 +208,10 @@ induction pi ; simpl ; rewrite ? map_app ;
   + apply ll_def.ax_r.
   + symmetry.
     destruct (Nat.leb
-         (compose (compose nattree2nat (fun A : formulas.formula => fmformulas.form2nattree A)) mell2ll (covar X))
-         (compose (compose nattree2nat (fun A : formulas.formula => fmformulas.form2nattree A)) mell2ll (var X))).
+         (Basics.compose (Basics.compose nattree2nat
+                                         (fun A : formulas.formula => fmformulas.form2nattree A)) mell2ll (covar X))
+         (Basics.compose (Basics.compose nattree2nat
+                                         (fun A : formulas.formula => fmformulas.form2nattree A)) mell2ll (var X))).
     * reflexivity.
     * apply Permutation_Type_swap.
 - apply ll_def.one_r.
