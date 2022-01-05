@@ -15,8 +15,8 @@ Context { preiatom : DecType }.
 (** ** Definition and main properties of formulas *)
 
 (** A set of atoms for building formulas *)
-Global Definition iatom := option preiatom.
-Global Definition atN : iatom := None.
+#[global] Definition iatom := option preiatom.
+#[global] Definition atN : iatom := None.
 
 (** Intuitionistic formulas
 
@@ -35,7 +35,7 @@ Inductive iformula :=
 | iplus : iformula -> iformula -> iformula
 | ioc   : iformula -> iformula.
 
-Global Definition N := ivar atN.
+#[global] Definition N := ivar atN.
 
 (** Size of a [iformula] as its number of symbols *)
 Fixpoint ifsize A :=
@@ -103,7 +103,7 @@ intros Hl Hr; induction Hr in A, Hl |- * ;
 - inversion Hl; apply isub_neg_N.
 Qed.
 
-Global Instance isub_po : PreOrder isubform | 50.
+#[global] Instance isub_po : PreOrder isubform | 50.
 Proof. split; intros ?; [ apply isub_id | apply isub_trans ]. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
@@ -139,7 +139,7 @@ induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
   eapply IHl1; eassumption.
 Qed.
 
-Global Instance isub_list_po : PreOrder isubform_list | 50.
+#[global] Instance isub_list_po : PreOrder isubform_list | 50.
 Proof.
 split.
 - intros l; rewrite <- app_nil_l; apply isub_id_list.

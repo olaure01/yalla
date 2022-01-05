@@ -67,7 +67,7 @@ Qed.
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
 
-Global Instance border_formula : BOrder | 50.
+#[global] Instance border_formula : BOrder | 50.
 Proof.
 eapply border_inj.
 eapply compose_injective.
@@ -79,7 +79,7 @@ Defined.
 
 (** ** Finite multi-sets over [formula] *)
 
-Global Instance fmset_formula :
+#[global] Instance fmset_formula :
   FinMultiset (SortedList border_formula) formula | 50
   := FMConstr_slist border_formula.
 
