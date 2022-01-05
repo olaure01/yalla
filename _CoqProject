@@ -31,6 +31,7 @@ yalla/ll_cut_at.v
 yalla/ll_cut.v
 yalla/ll_def.v
 yalla/llfoc.v
+yalla/llfoc_triadic.v
 yalla/ll_fragments.v
 yalla/llpol.v
 yalla/ll_prop.v
