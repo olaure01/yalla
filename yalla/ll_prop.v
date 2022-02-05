@@ -498,10 +498,9 @@ induction lax ; intros l pi.
     as Q.
   cbn; cons2app; rewrite app_assoc.
   apply IHlax.
-  eapply (ext_wn (dual a :: nil)) in pi.
-  eapply ax_gen ; [ | | | | apply pi ] ; try (now rewrite HeqQ).
-  cbn in pi ; cbn ; intros a0.
-  destruct a0.
+  eapply ax_gen; [ | | | | refine (ext_wn (dual a :: nil) pi); assumption ];
+    try (now rewrite HeqQ).
+  cbn in pi; cbn; intros [p|s].
   + eapply ex_r ; [ | apply PCPermutation_Type_cons_append ].
     apply wk_r.
     assert ({ b | projT2 (pgax P) p = projT2 (pgax Q) b}) as [b Hgax]
@@ -518,11 +517,10 @@ induction lax ; intros l pi.
       apply wk_r.
       assert ({ b | nth k lax one :: nil = projT2 (pgax Q) b}) as [b Hgax].
       { subst ; cbn ; clear - Hlen.
-        apply Lt.lt_S_n in Hlen.
+        apply PeanoNat.Nat.succ_lt_mono in Hlen.
         exists (inr (exist _ k Hlen))... }
       rewrite Hgax.
       apply gax_r.
-Unshelve. assumption.
 Qed.
 
 Lemma deduction_list_inv {P} : pperm P = true -> pcut P = true -> forall lax l, 
@@ -545,7 +543,7 @@ induction lax ; intros l pi.
   rewrite app_assoc in pi.
   apply IHlax in pi.
   rewrite <- (app_nil_r l).
-  eapply (cut_r (wn (dual a)))...
+  refine (cut_r (wn (dual a)) _ _)...
   + cbn ; rewrite bidual.
     change nil with (map (@wn atom) nil).
     apply oc_r ; cbn.
@@ -568,9 +566,8 @@ induction lax ; intros l pi.
     destruct a'.
     * exists (inl p)...
     * destruct s as [k Hlen] ; cbn.
-      apply Lt.lt_n_S in Hlen.
+      apply PeanoNat.Nat.succ_lt_mono in Hlen.
       exists (inr (exist _ (S k) Hlen))...
-Unshelve. assumption.
 Qed.
 
 Lemma deduction {P} : pperm P = true -> (projT1 (pgax P) -> False) -> pcut P = true -> forall lax l,

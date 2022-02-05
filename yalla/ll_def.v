@@ -171,8 +171,8 @@ case_eq (k =? n1); intros Heq1; case_eq (k =? n2); intros Heq2; cbn;
 exfalso.
 apply Hneq.
 transitivity k.
-- symmetry; apply EqNat.beq_nat_true; apply Heq1.
-- apply EqNat.beq_nat_true; apply Heq2.
+- symmetry; apply Nat.eqb_eq, Heq1.
+- apply Nat.eqb_eq, Heq2.
 Qed.
 
 (** ** Rules *)
