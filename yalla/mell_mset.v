@@ -9,8 +9,8 @@ Import FMSetNotations.
 
 (** ** 0. load the [ll] library *)
 
-From Yalla Require Import atoms.
-From Yalla Require ll_cut fmformulas.
+From Yalla Require Import atoms fmformulas.
+From Yalla Require ll_cut.
 
 
 Section Atoms.

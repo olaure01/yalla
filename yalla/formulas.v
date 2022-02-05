@@ -176,7 +176,7 @@ intros Hl Hr; revert A Hl; induction Hr; intros A' Hl;
   try (constructor; apply IHHr); assumption.
 Qed.
 
-#[global] Instance sub_po : PreOrder subform | 50.
+#[export] Instance sub_po : PreOrder subform | 50.
 Proof. split; repeat intro; [ apply sub_id | eapply sub_trans; eassumption ]. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)

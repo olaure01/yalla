@@ -103,7 +103,7 @@ intros Hl Hr; induction Hr in A, Hl |- * ;
 - inversion Hl; apply isub_neg_N.
 Qed.
 
-#[global] Instance isub_po : PreOrder isubform | 50.
+#[export] Instance isub_po : PreOrder isubform | 50.
 Proof. split; intros ?; [ apply isub_id | apply isub_trans ]. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
@@ -139,7 +139,7 @@ induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
   eapply IHl1; eassumption.
 Qed.
 
-#[global] Instance isub_list_po : PreOrder isubform_list | 50.
+#[export] Instance isub_list_po : PreOrder isubform_list | 50.
 Proof.
 split.
 - intros l; rewrite <- app_nil_l; apply isub_id_list.

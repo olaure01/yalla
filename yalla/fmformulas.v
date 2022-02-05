@@ -58,16 +58,12 @@ match t with
 end.
 
 Lemma form_nattree_section : retract nattree2form form2nattree.
-Proof.
-intros A; induction A; cbn;
-  try rewrite IHA1; try rewrite IHA2; try rewrite IHA;
-  try rewrite a2a_n; reflexivity.
-Qed.
+Proof. now intros A; induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n. Qed.
 
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
 
-#[global] Instance border_formula : BOrder | 50.
+#[export] Instance border_formula : BOrder | 50.
 Proof.
 eapply border_inj.
 eapply compose_injective.
@@ -79,7 +75,7 @@ Defined.
 
 (** ** Finite multi-sets over [formula] *)
 
-#[global] Instance fmset_formula :
+#[export] Instance fmset_formula :
   FinMultiset (SortedList border_formula) formula | 50
   := FMConstr_slist border_formula.
 
