@@ -3,7 +3,7 @@ Usefull tactics and properties apparently missing in the List library. *)
 
 From Coq Require Import PeanoNat.
 From Coq Require Export List.
-From OLlibs Require Export List_Type.
+From Yalla.OLlibs Require Export List_Type.
 Import EqNotations.
 
 Set Implicit Arguments.

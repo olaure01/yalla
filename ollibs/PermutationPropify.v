@@ -12,8 +12,8 @@ this allows to solve the goal through the use of rewrite *)
 
 From Coq Require Import List PeanoNat Compare_dec.
 From Coq Require Export Permutation CPermutation.
-From OLlibs Require Import List_Type.
-From OLlibs Require Export Permutation_Type CPermutation_Type GPermutation GPermutation_Type.
+From Yalla.OLlibs Require Import List_Type.
+From Yalla.OLlibs Require Export Permutation_Type CPermutation_Type GPermutation GPermutation_Type.
 
 Set Implicit Arguments.
 

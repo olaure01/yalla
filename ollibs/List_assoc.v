@@ -6,7 +6,7 @@
 
 From Coq Require Import Bool.
 From Coq Require Export List.
-From OLlibs Require Export dectype.
+From Yalla.OLlibs Require Export dectype.
 
 Set Implicit Arguments.
 

@@ -2,7 +2,7 @@
 
 From Coq Require Export Eqdep_dec.
 From Coq Require Import PeanoNat List.
-From OLlibs Require Import List_Type.
+From Yalla.OLlibs Require Import List_Type.
 
 Set Implicit Arguments.
 
