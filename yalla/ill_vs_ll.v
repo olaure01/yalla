@@ -7,6 +7,7 @@ Require Import List_more.
 Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
+Require Import CPermutation_Type.
 Require Import GPermutation_Type.
 
 Require Import ll_fragments.

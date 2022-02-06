@@ -2,8 +2,7 @@
 (* v 1.1   Olivier Laurent *)
 
 Require Import funtheory.
-Require Import NPeano.
-Require Import EqNat.
+Require Import PeanoNat.
 
 
 (* We provide a possible value for parameters of the library
@@ -15,11 +14,11 @@ Definition atN : IAtom := None. (* iformulas.v *)
 Definition TAtom : Set := nat. (* tl.v *)
 
 
-Definition ateq : Atom -> Atom -> bool := beq_nat. (* subs.v *)
+Definition ateq : Atom -> Atom -> bool := Nat.eqb. (* subs.v *)
 Definition iateq : IAtom -> IAtom -> bool := fun x y => (* isubs.v & tl.v *)
   match x , y with
   | None , None => true
-  | Some n, Some m => beq_nat n m
+  | Some n, Some m => Nat.eqb n m
   | _ , _ => false
   end.
 
@@ -69,9 +68,8 @@ Qed.
 Fact ateq_eq : forall x y, ateq x y = true <-> x = y.
 Proof.
 split ; simpl ; intros H.
-- apply beq_nat_true in H ; subst ; reflexivity.
-- symmetry ; subst.
-  apply beq_nat_refl.
+- apply Nat.eqb_eq in H ; subst ; reflexivity.
+- subst; apply Nat.eqb_refl.
 Qed.
 
 (* isubs.v & tl.v *)
@@ -79,10 +77,9 @@ Fact iateq_eq : forall x y, iateq x y = true <-> x = y.
 Proof.
 destruct x ; destruct y ; split ; simpl ;
   intros H ; try (now inversion H).
-- apply beq_nat_true in H ; subst ; reflexivity.
+- apply Nat.eqb_eq in H ; subst ; reflexivity.
 - inversion H ; subst.
-  symmetry.
-  apply beq_nat_refl.
+  apply Nat.eqb_refl.
 Qed.
 
 (* lambek.v & nn.v & tl.v *)
@@ -174,5 +171,3 @@ Qed.
 
 (** Make definitions opaque, so that only properties can be used *)
 Global Opaque Atom IAtom atN TAtom ateq iateq a2n n2a i2n n2i i2a i2ac t2i a2t t2a a2i.
-
-

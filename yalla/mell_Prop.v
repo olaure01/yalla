@@ -121,7 +121,7 @@ Inductive mell : list formula -> Prop :=
               mell (wn A :: wn A :: l) ->
               mell (wn A :: l).
 
-Instance mell_perm : Proper ((@Permutation _) ==> Basics.impl) mell.
+#[export] Instance mell_perm : Proper ((@Permutation _) ==> Basics.impl) mell.
 Proof.
 intros l1 l2 HP pi.
 eapply ex_r ; eassumption.

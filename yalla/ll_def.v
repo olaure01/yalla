@@ -62,7 +62,7 @@ destruct (Ha2 b) as [c Heq2].
 exists c ; etransitivity...
 Qed.
 
-Instance le_pfrag_po : PreOrder le_pfrag.
+#[export] Instance le_pfrag_po : PreOrder le_pfrag.
 Proof.
 split.
 - nsplit 5 ; try reflexivity.
@@ -154,7 +154,7 @@ Inductive ll P : list formula -> Type :=
     ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1)
 | gax_r : forall a, ll P (projT2 (pgax P) a).
 
-Instance ll_perm {P} : Proper ((@PCPermutation_Type _ (pperm P)) ==> Basics.arrow) (ll P).
+#[export] Instance ll_perm {P} : Proper ((@PCPermutation_Type _ (pperm P)) ==> Basics.arrow) (ll P).
 Proof.
 intros l1 l2 HP pi ; eapply ex_r ; eassumption.
 Qed.

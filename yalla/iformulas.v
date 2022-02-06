@@ -99,7 +99,7 @@ intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   apply isub_neg_N.
 Qed.
 
-Instance isub_po : PreOrder isubform.
+#[export] Instance isub_po : PreOrder isubform.
 Proof.
 split.
 - intros l.
@@ -145,7 +145,7 @@ induction l1 ; intros l2 l3 Hl Hr ; constructor.
   eapply IHl1...
 Qed.
 
-Instance isub_list_po : PreOrder isubform_list.
+#[export] Instance isub_list_po : PreOrder isubform_list.
 Proof.
 split.
 - intros l.

@@ -109,7 +109,7 @@ Qed.
 
 (** ** 3. define proofs *)
 
-Instance ll_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) ll.
+#[export] Instance ll_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) ll.
 Proof.
 intros l1 l2 HP pi.
 eapply ex_r ; eassumption.

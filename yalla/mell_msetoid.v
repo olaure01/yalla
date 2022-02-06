@@ -100,7 +100,7 @@ Qed.
 
 (** *** 2bis. sequents *)
 
-Instance fmsetoid_formula : FinMultisetoid (list _) formula :=
+#[export] Instance fmsetoid_formula : FinMultisetoid (list _) formula :=
   FMoidConstr_list formula.
 
 
@@ -130,7 +130,7 @@ Inductive mell : list formula -> Prop :=
            mell (add (wn A) (add (wn A) l)) ->
            mell (add (wn A) l).
 
-Instance mell_meq : Proper (meq ==> iff) mell.
+#[export] Instance mell_meq : Proper (meq ==> iff) mell.
 Proof.
 intros m1 m2 Heq.
 split ; intros Hmell.

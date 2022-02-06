@@ -8,7 +8,6 @@ Require Import funtheory.
 Require Import nattree.
 Require Import fmsetlist_Type.
 Require Import List_more.
-Require Import List_more.
 Require Import Permutation_more.
 Require Import Permutation_Type_more.
 Require Import BOrders.
@@ -19,7 +18,7 @@ Import FMSetNotations.
 (** ** 0. load the [ll] library *)
 
 Require ll_cut.
-Require fmformulas.
+Require Import fmformulas.
 
 
 (** ** 1. define formulas *)
@@ -71,13 +70,13 @@ induction A ; intros B Heq ;
   try apply IHA2 in H1 ; subst...
 Qed.
 
-Instance border_formula : BOrder.
+#[export] Instance border_formula : BOrder.
 Proof.
 eapply (@border_inj _ border_nat).
 eapply compose_injective ; [ | eapply compose_injective ].
 - apply mell2ll_inj.
 - eapply section_injective.
-  intros A; apply fmformulas.form_nattree_section.
+  intros A; apply form_nattree_section.
 - apply nattree2nat_inj.
 Defined.
 
@@ -147,7 +146,7 @@ Qed.
 
 (** *** 2bis. sequents *)
 
-Instance fmset_formula : FinMultiset (SortedList _) formula :=
+#[export] Instance fmset_formula : FinMultiset (SortedList _) formula :=
   FMConstr_slist border_formula.
 
 
@@ -212,8 +211,8 @@ induction pi ; simpl ; rewrite ? map_app ;
   + apply ll_def.ax_r.
   + symmetry.
     destruct (Nat.leb
-         (compose (compose nattree2nat (fun A => fmformulas.form2nattree A)) mell2ll (covar X))
-         (compose (compose nattree2nat (fun A => fmformulas.form2nattree A)) mell2ll (var X))).
+         (compose (compose nattree2nat (fun A => form2nattree A)) mell2ll (covar X))
+         (compose (compose nattree2nat (fun A => form2nattree A)) mell2ll (var X))).
     * reflexivity.
     * apply Permutation_Type_swap.
 - apply ll_def.one_r.

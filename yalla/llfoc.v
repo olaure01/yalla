@@ -912,7 +912,7 @@ Inductive llFoc : list formula -> option formula -> Type :=
 | co_Fr : forall A l, llFoc (wn A :: wn A :: l) None ->
                       llFoc (wn A :: l) None.
 
-Instance llFoc_perm {Pi} :
+#[export] Instance llFoc_perm {Pi} :
   Proper ((@Permutation_Type _) ==> Basics.arrow) (fun l => llFoc l Pi).
 Proof.
 intros l1 l2 HP pi.

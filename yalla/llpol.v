@@ -216,7 +216,7 @@ Inductive llpol : list formula -> Type :=
               llpol (neg (wn P) :: neg (wn P) :: l) ->
               llpol (neg (wn P) :: l).
 
-Instance llpol_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) llpol.
+#[export] Instance llpol_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) llpol.
 Proof.
 intros l1 l2 HP pi.
 eapply ex_r ; eassumption.
@@ -1355,7 +1355,7 @@ Inductive llpolt : list formula -> Type :=
                llpolt (neg (wn P) :: neg (wn P) :: l) ->
                llpolt (neg (wn P) :: l).
 
-Instance llpolt_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) llpolt.
+#[export] Instance llpolt_perm : Proper ((@Permutation_Type _) ==> Basics.arrow) llpolt.
 Proof.
 intros l1 l2 HP pi.
 eapply ex_rt ; eassumption.

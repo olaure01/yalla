@@ -45,7 +45,7 @@ destruct (Ha2 b) as [c Heq2].
 exists c ; etransitivity...
 Qed.
 
-Instance le_ipfrag_po : PreOrder le_ipfrag.
+#[export] Instance le_ipfrag_po : PreOrder le_ipfrag.
 Proof.
 split.
 - nsplit 3 ; try reflexivity.
@@ -127,7 +127,7 @@ Inductive ill P : list iformula -> iformula -> Type :=
            ill P (fst (projT2 (ipgax P) a)) (snd (projT2 (ipgax P) a)).
 
 
-Instance ill_perm {P} : forall A,
+#[export] Instance ill_perm {P} : forall A,
   Proper ((@PEPermutation_Type _ (ipperm P)) ==> Basics.arrow) (fun l => ill P l A).
 Proof.
 intros A l1 l2 HP pi.

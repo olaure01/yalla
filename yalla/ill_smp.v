@@ -81,7 +81,7 @@ Qed.
 
 (** ** 3. define proofs *)
 
-Instance ill_perm {C} : Proper ((@Permutation_Type _) ==> Basics.arrow) (fun l => ill l C).
+#[export] Instance ill_perm {C} : Proper ((@Permutation_Type _) ==> Basics.arrow) (fun l => ill l C).
 Proof.
 intros l1 l2 HP pi.
 eapply ex_ir ; eassumption.

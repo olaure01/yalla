@@ -150,7 +150,7 @@ intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   try (constructor ; apply IHHr)...
 Qed.
 
-Instance sub_po : PreOrder subform.
+#[export] Instance sub_po : PreOrder subform.
 Proof.
 split.
 - intros l.
@@ -196,7 +196,7 @@ induction l1 ; intros l2 l3 Hl Hr ; constructor.
   eapply IHl1...
 Qed.
 
-Instance sub_list_po : PreOrder subform_list.
+#[export] Instance sub_list_po : PreOrder subform_list.
 Proof.
 split.
 - intros l.

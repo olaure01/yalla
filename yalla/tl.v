@@ -52,7 +52,7 @@ intros A B C Hl Hr ; revert A Hl ; induction Hr ; intros A' Hl ;
   try (constructor ; apply IHHr)...
 Qed.
 
-Instance tsub_po : PreOrder tsubform.
+#[export] Instance tsub_po : PreOrder tsubform.
 Proof.
 split.
 - intros l.
@@ -226,7 +226,7 @@ Inductive tl P : list tformula -> option tformula -> Type :=
 | gax_tr : forall a,
            tl P (fst (projT2 (tpgax P) a)) (snd (projT2 (tpgax P) a)).
 
-Instance tl_perm {P} {Pi} :
+#[export] Instance tl_perm {P} {Pi} :
   Proper ((PEPermutation_Type (tpperm P)) ==> Basics.arrow) (fun l => tl P l Pi).
 Proof.
 intros l1 l2 HP pi.
