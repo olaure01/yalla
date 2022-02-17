@@ -2,9 +2,9 @@
 
 
 (** * Intuitionistic Linear Logic *)
-(* not cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
+(* no results about cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 
-From Coq Require Import CMorphisms BoolOrder.
+From Coq Require Import CMorphisms BoolOrder Lia.
 From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Export basic_misc iformulas.
 
@@ -19,8 +19,8 @@ Notation iformula := (@iformula preiatom).
 Definition NoIAxioms := (existT (fun x => x -> list iformula * iformula) _ Empty_fun).
 
 Record ipfrag := mk_ipfrag {
-  ipcut : bool ;
-  ipgax : { iptypgax : Type & iptypgax -> list iformula * iformula } ;
+  ipcut : bool;
+  ipgax : { iptypgax : Type & iptypgax -> list iformula * iformula };
   ipperm : bool }.
 
 Definition le_ipfrag P Q :=
@@ -30,25 +30,24 @@ Definition le_ipfrag P Q :=
      (forall a, { b | projT2 (ipgax P) a = projT2 (ipgax Q) b })
      (Bool.le (ipperm P) (ipperm Q))).
 
-Lemma le_ipfrag_trans : forall P Q R,
+Lemma le_ipfrag_trans P Q R :
   le_ipfrag P Q -> le_ipfrag Q R -> le_ipfrag P R.
-Proof with myeeasy.
-intros P Q R H1 H2.
-destruct H1 as (Hc1 & Ha1 & Hp1).
-destruct H2 as (Hc2 & Ha2 & Hp2).
-nsplit 3 ; try (eapply le_trans ; myeeasy).
-intros a.
-destruct (Ha1 a) as [b Heq].
-destruct (Ha2 b) as [c Heq2].
-exists c ; etransitivity...
+Proof.
+intros [Hc1 [Ha1 Hp1]] [Hc2 [Ha2 Hp2]].
+repeat split.
+- now apply (le_trans _ (ipcut Q)).
+- intros a.
+  destruct (Ha1 a) as [b Heq].
+  destruct (Ha2 b) as [c Heq2].
+  exists c; transitivity (projT2 (ipgax Q) b); assumption.
+- now apply (le_trans _ (ipperm Q)).
 Qed.
 
 Instance le_ipfrag_po : PreOrder le_ipfrag.
 Proof.
 split.
-- nsplit 3 ; try reflexivity.
-  cbn ; intros a.
-  exists a ; reflexivity.
+- repeat split; try reflexivity.
+  intros a; exists a; reflexivity.
 - intros P Q R.
   apply le_ipfrag_trans.
 Qed.
@@ -59,10 +58,9 @@ Definition cutupd_ipfrag P b := mk_ipfrag b (ipgax P) (ipperm P).
 
 Definition cutrm_ipfrag P := cutupd_ipfrag P false.
 
-Lemma cutupd_ipfrag_true : forall P, le_ipfrag P (cutupd_ipfrag P true).
+Lemma cutupd_ipfrag_true P : le_ipfrag P (cutupd_ipfrag P true).
 Proof.
-intros P.
-nsplit 3; try reflexivity.
+repeat split; try reflexivity.
 - apply le_true.
 - intros a; exists a; reflexivity.
 Qed.
@@ -166,47 +164,46 @@ match pi with
 end.
 
 Lemma stronger_ipfrag P Q : le_ipfrag P Q -> forall l A, ill P l A -> ill Q l A.
-Proof with myeeasy.
-intros Hle l A H.
-induction H ; try (econstructor ; myeeasy ; fail).
-- apply (ex_ir _ l1)...
-  destruct Hle as (_ & _ & Hp).
-  hyps_GPermutation_Type_unfold ; unfold PEPermutation_Type.
-  destruct (ipperm P) ; destruct (ipperm Q) ;
-    cbn in Hp ; try inversion Hp ; subst...
-- destruct Hle as [Hcut _].
-  rewrite f in Hcut.
-  eapply (@cut_ir _ Hcut)...
-- destruct Hle as (_ & Hgax & _).
-  destruct (Hgax a) as [b Heq].
-  rewrite Heq.
+Proof.
+intros [Hcut [Hgax Hp]] l A H.
+induction H; try now constructor.
+- apply (ex_ir _ l1); [ assumption | ].
+  hyps_GPermutation_Type_unfold; unfold PEPermutation_Type.
+  now destruct (ipperm P); destruct (ipperm Q);
+    cbn in Hp; try inversion Hp; subst.
+- econstructor; eassumption.
+- rewrite f in Hcut.
+  eapply (@cut_ir _ Hcut); eassumption.
+- destruct (Hgax a) as [b ->].
   apply gax_ir.
 Qed.
 
 (** Generalized weakening for lists *)
-Lemma wk_list_ilr {P} : forall l l1 l2 C,
+Lemma wk_list_ilr {P} l l1 l2 C :
   ill P (l1 ++ l2) C -> ill P (l1 ++ map ioc l ++ l2) C.
-Proof with myeeasy.
-induction l ; intros...
+Proof.
+induction l in l1, l2, C |- *; intros pi; try assumption.
 apply wk_ilr.
-apply IHl...
+apply IHl; assumption.
 Qed.
 
 (** Generalized contraction for lists *)
-Lemma co_list_ilr {P} : forall l l1 l2 C,
+Lemma co_list_ilr {P} l l1 l2 C :
   ill P (l1 ++ map ioc l ++ map ioc l ++ l2) C ->
   ill P (l1 ++ map ioc l ++ l2) C.
-Proof with myeeasy ; try GPermutation_Type_solve.
-induction l ; intros l1 l2 C pi...
-cbn ; apply co_ilr.
-cons2app ; rewrite 2 app_assoc.
-apply IHl ; list_simpl.
-rewrite app_assoc ; rewrite 2 app_comm_cons.
-rewrite (app_assoc _ _ l2) in pi ; rewrite <- map_app in pi.
+Proof.
+induction l in l1, l2, C |- *; intros pi; try assumption.
+cbn; apply co_ilr.
+cons2app; rewrite 2 app_assoc.
+apply IHl; list_simpl.
+rewrite app_assoc, 2 app_comm_cons.
+rewrite (app_assoc _ _ l2), <- map_app in pi.
 replace (ioc a :: ioc a :: map ioc l ++ map ioc l)
   with (map ioc (a :: a :: l ++ l))
-  by (list_simpl ; reflexivity).
-eapply ex_oc_ir...
+  by (list_simpl; reflexivity).
+eapply ex_oc_ir; try eassumption.
+cbn; apply Permutation_Type_cons; [ reflexivity | ].
+symmetry; apply Permutation_Type_middle.
 Qed.
 
 (** *** Some tactics for manipulating rules *)
@@ -246,8 +243,8 @@ Ltac destruct_ill H f X l Hl Hr HP a :=
 
 
 (** Axiom expansion *)
-Lemma ax_exp_ill {P} : forall A, ill P (A :: nil) A.
-Proof with myeeasy.
+Lemma ax_exp_ill {P} A : ill P (A :: nil) A.
+Proof.
 induction A.
 - apply ax_ir.
 - rewrite <- (app_nil_l (ione :: _)).
@@ -256,60 +253,57 @@ induction A.
 - rewrite <- (app_nil_l (itens _ _ :: _)).
   apply tens_ilr.
   list_simpl ; cons2app.
-  apply tens_irr...
+  apply tens_irr; assumption.
 - apply lpam_irr.
   list_simpl.
   rewrite <- (app_nil_l (ilpam _ _ :: _)).
   rewrite <- (app_nil_l nil).
   rewrite (app_comm_cons _ _ A1).
-  apply lpam_ilr ; list_simpl...
+  apply lpam_ilr ; list_simpl; assumption.
 - apply gen_irr.
-  apply gen_ilr...
+  apply gen_ilr; assumption.
 - apply lmap_irr.
   list_simpl.
   cons2app.
   rewrite <- (app_nil_l ((A1 :: _) ++ _)).
-  apply lmap_ilr ; list_simpl...
+  apply lmap_ilr ; list_simpl; assumption.
 - apply neg_irr.
   cons2app.
-  apply neg_ilr...
+  apply neg_ilr; assumption.
 - apply top_irr.
 - apply with_irr.
   + rewrite <- (app_nil_l (iwith _ _ :: _)).
-    apply with_ilr1...
+    apply with_ilr1; assumption.
   + rewrite <- (app_nil_l (iwith _ _ :: _)).
-    apply with_ilr2...
+    apply with_ilr2; assumption.
 - rewrite <- (app_nil_l (izero :: _)).
   apply zero_ilr.
 - rewrite <- (app_nil_l (iplus _ _ :: _)).
   apply plus_ilr.
-  + apply plus_irr1...
-  + apply plus_irr2...
+  + apply plus_irr1; assumption.
+  + apply plus_irr2; assumption.
 - change (ioc A :: nil) with (map ioc (A :: nil)).
   apply oc_irr.
   cbn ; rewrite <- (app_nil_l (ioc A :: _)).
-  apply de_ilr...
+  apply de_ilr; assumption.
 Qed.
 
 
 (** ** Relating negation and implication *)
 
-Lemma ilmap_to_ineg {P} : forall A, ill P (ilmap A N :: nil) (ineg A).
+Lemma ilmap_to_ineg {P} A : ill P (ilmap A N :: nil) (ineg A).
 Proof.
-intros A.
 apply neg_irr.
 cons2app.
 rewrite <- (app_nil_l _).
-apply lmap_ilr ; apply ax_exp_ill.
+apply lmap_ilr; apply ax_exp_ill.
 Qed.
 
-Lemma ineg_to_ilmap {P} : forall A, ill P (ineg A :: nil) (ilmap A N).
+Lemma ineg_to_ilmap {P} A : ill P (ineg A :: nil) (ilmap A N).
 Proof.
-intros A.
 apply lmap_irr.
 cons2app.
-apply neg_ilr.
-apply ax_exp_ill.
+apply neg_ilr, ax_exp_ill.
 Qed.
 
 Lemma neg_map_rule {P} :
@@ -317,340 +311,285 @@ Lemma neg_map_rule {P} :
   forall l0 l1 l2 C D (pi0 : ill P l0 C) (pi : ill P (l1 ++ N :: l2) D),
     { pi : ill P (l1 ++ l0 ++ ineg C :: l2) D
          & ipsize pi < S (ipsize pi0 + ipsize pi) }.
-Proof with myeeasy.
-intros Hgax.
-intros l0 l1 l2 C D pi0 pi.
+Proof.
+intros Hgax l0 l1 l2 C D pi0 pi.
 remember (l1 ++ N :: l2) as l.
-revert l1 l2 Heql.
-induction pi ; intros l1' l2' Heq ; subst ;
-  try (destruct (IHpi _ _ eq_refl) as [pi' Hs]) ;
-  try (destruct (IHpi1 _ _ eq_refl) as [pi1' Hs1]) ;
+revert l1 l2 Heql; induction pi ; intros l1' l2' Heq; subst;
+  try (destruct (IHpi _ _ eq_refl) as [pi' Hs]);
+  try (destruct (IHpi1 _ _ eq_refl) as [pi1' Hs1]);
   try (destruct (IHpi2 _ _ eq_refl) as [pi2' Hs2]).
-- destruct l1' ; inversion Heq ; subst.
-  + exists (neg_ilr _ _ _ pi0)...
+- destruct l1'; inversion Heq; subst.
+  + exists (neg_ilr _ _ _ pi0); lia.
   + destruct l1' ; inversion H1.
-- case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
+- case_eq (ipperm P); intros Hperm; rewrite_all Hperm.
   + apply PEPermutation_Type_vs_elt_inv in p.
-    destruct p as [(l3 & l4) Heq HP] ; cbn in HP ; subst.
+    destruct p as [(l3 & l4) HP ->]; cbn in HP.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
     assert (PEPermutation_Type (ipperm P) (l3 ++ l0 ++ ineg C :: l4)
                                    (l1' ++ l0 ++ ineg C :: l2')) as HP'.
-    { rewrite Hperm.
-      symmetry.
+    { rewrite Hperm; cbn; symmetry.
       apply Permutation_Type_app_middle.
-      apply Permutation_Type_elt... }
-    exists (ex_ir _ _ _ _ pi' HP')...
-  + cbn in p ; subst.
+      apply Permutation_Type_elt; assumption. }
+    exists (ex_ir _ _ _ _ pi' HP'); lia.
+  + cbn in p; subst.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
-    exists pi'...
-- dichot_elt_app_inf_exec Heq ; subst.
+    exists pi'; lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + list_simpl in IHpi.
     assert (pi':=IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
     rewrite app_comm_cons ; rewrite 2 app_assoc.
-    exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
-  + dichot_elt_app_inf_exec Heq1 ; subst.
+    exists (ex_oc_ir _ _ _ _ _ _ pi' p); lia.
+  + dichot_elt_app_inf_exec Heq1; subst.
     * exfalso; symmetry in Heq0; decomp_map Heq0; inversion Heq0.
     * rewrite 2 app_assoc in IHpi.
-      assert (pi':=IHpi _ _ eq_refl).
-      list_simpl in pi' ; destruct pi' as [pi' Hs].
-      list_simpl ; exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
-- destruct l1' ; inversion Heq.
-- dichot_elt_app_inf_exec Heq ; subst.
+      assert (pi' := IHpi _ _ eq_refl).
+      list_simpl in pi'; destruct pi' as [pi' Hs].
+      list_simpl; exists (ex_oc_ir _ _ _ _ _ _ pi' p); lia.
+- destruct l1'; inversion Heq.
+- dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc in IHpi.
-    assert (pi':=IHpi _ _ eq_refl).
+    assert (pi' := IHpi _ _ eq_refl).
     list_simpl in pi'.
     destruct pi' as [pi' Hs].
     list_simpl.
-    exists (one_ilr _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    exists (one_ilr _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
-    assert (pi':=IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    assert (pi' := IHpi _ _ eq_refl).
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (one_ilr _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (one_ilr _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    rewrite <- (app_assoc l1').
-    exists (tens_irr _ _ _ _ _ pi' pi2)...
+    rewrite app_comm_cons, 2 app_assoc, <- (app_assoc l1').
+    exists (tens_irr _ _ _ _ _ pi' pi2); lia.
   + destruct (IHpi2 _ _ eq_refl) as [pi' Hs].
     list_simpl.
-    exists (tens_irr _ _ _ _ _ pi1 pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite 2 app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+    exists (tens_irr _ _ _ _ _ pi1 pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite 2 app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     list_simpl in pi'.
     destruct pi' as [pi' Hs].
     list_simpl.
-    exists (tens_ilr _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    exists (tens_ilr _ _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (tens_ilr _ _ _ _ _ _ pi')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (tens_ilr _ _ _ _ _ _ pi'); lia.
 - list_simpl in IHpi.
   assert (pi' := IHpi _ _ eq_refl).
-  rewrite app_comm_cons in pi'.
-  rewrite 2 app_assoc in pi'.
+  rewrite app_comm_cons, 2 app_assoc in pi'.
   destruct pi' as [pi' Hs].
   rewrite app_assoc.
-  exists (lpam_irr _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + dichot_elt_app_inf_exec Heq1 ; subst.
+  exists (lpam_irr _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + dichot_elt_app_inf_exec Heq1; subst.
     * destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
       list_simpl.
-      rewrite (app_comm_cons _ _ (ineg C)).
-      rewrite app_comm_cons.
-      rewrite 2 (app_assoc _ _ l3).
-      rewrite <- 2 app_comm_cons.
-      exists (lpam_ilr _ _ _ _ _ _ _ pi' pi2)...
-    * rewrite app_comm_cons in IHpi2.
-      rewrite app_assoc in IHpi2.
+      rewrite (app_comm_cons _ _ (ineg C)), app_comm_cons, 2 (app_assoc _ _ l3), <- 2 app_comm_cons.
+      exists (lpam_ilr _ _ _ _ _ _ _ pi' pi2); lia.
+    * rewrite app_comm_cons, app_assoc in IHpi2.
       assert (pi' := IHpi2 _ _ eq_refl).
       list_simpl in pi'.
       destruct pi' as [pi' Hs].
       list_simpl.
-      exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi')...
-  + destruct l4 ; inversion Heq1 ; subst.
+      exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
+  + destruct l4; inversion Heq1; subst.
     list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
-    rewrite (app_comm_cons _ _ (ineg C)) in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite (app_comm_cons _ _ (ineg C)), 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite (app_comm_cons _ _ (ineg C)).
-    rewrite 2 app_assoc.
-    exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi')...
+    rewrite (app_comm_cons _ _ (ineg C)), 2 app_assoc.
+    exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
 - list_simpl in IHpi.
   assert (pi' := IHpi _ _ eq_refl).
-  rewrite app_comm_cons in pi'.
-  rewrite 2 app_assoc in pi'.
+  rewrite app_comm_cons, 2 app_assoc in pi'.
   destruct pi' as [pi' Hs].
   rewrite app_assoc.
-  exists (gen_irr _ _ _ pi')...
-- destruct l1' ; inversion Heq ; subst.
+  exists (gen_irr _ _ _ pi'); lia.
+- destruct l1'; inversion Heq; subst.
   list_simpl.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
   list_simpl.
-  exists (gen_ilr _ _ _ pi')...
+  exists (gen_ilr _ _ _ pi'); lia.
 - rewrite app_comm_cons in IHpi.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
-  exists (lmap_irr _ _ _ _ pi')...
+  exists (lmap_irr _ _ _ _ pi'); lia.
 - dichot_elt_app_inf_exec Heq ; subst.
   + list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
   + symmetry in Heq1.
-    dichot_elt_app_inf_exec Heq1 ; subst.
-    * rewrite app_comm_cons in IHpi2.
-      rewrite app_assoc in IHpi2.
+    dichot_elt_app_inf_exec Heq1; subst.
+    * rewrite app_comm_cons, app_assoc in IHpi2.
       assert (pi' := IHpi2 _ _ eq_refl).
       list_simpl in pi'.
       destruct pi' as [pi' Hs].
       list_simpl.
-      exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi')...
+      exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
     * destruct l5 ; inversion Heq2 ; subst.
       assert (pi' := IHpi1 _ _ eq_refl).
       destruct pi' as [pi' Hs].
       list_simpl.
-      rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
-      exists (lmap_ilr _ _ _ _ _ _ _ pi' pi2)...
+      rewrite app_comm_cons, (app_assoc l4), (app_assoc (l4 ++ _)), <- (app_assoc l4).
+      exists (lmap_ilr _ _ _ _ _ _ _ pi' pi2); lia.
 - rewrite app_comm_cons in IHpi.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
-  exists (neg_irr _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + destruct l1 ; inversion Heq1.
-  + destruct l2 ; inversion Heq1 ; subst.
+  exists (neg_irr _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + destruct l1; inversion Heq1.
+  + destruct l2; inversion Heq1; subst.
     assert (pi' := IHpi _ _ eq_refl).
     destruct pi' as [pi' Hs].
-    rewrite ? app_comm_cons.
-    rewrite ? app_assoc.
-    rewrite <- (app_assoc l1').
-    exists (neg_ilr _ _ _ pi')...
-- exists (top_irr _ _)...
-- exists (with_irr _ _ _ _ pi1' pi2')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+    rewrite ? app_comm_cons, ? app_assoc, <- (app_assoc l1').
+    exists (neg_ilr _ _ _ pi'); lia.
+- exists (top_irr _ _); lia.
+- exists (with_irr _ _ _ _ pi1' pi2'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     list_simpl in pi'.
     destruct pi' as [pi' Hs].
     list_simpl.
-    exists (with_ilr1 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    exists (with_ilr1 _ _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (with_ilr1 _ _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (with_ilr1 _ _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     list_simpl in pi'.
     destruct pi' as [pi' Hs].
     list_simpl.
-    exists (with_ilr2 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    exists (with_ilr2 _ _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (with_ilr2 _ _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst ; list_simpl.
-  + exists (zero_ilr _ _ _ _)...
-  + destruct l3 ; inversion Heq1 ; subst.
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (zero_ilr _ _ _ _)...
-- exists (plus_irr1 _ _ _ _ pi')...
-- exists (plus_irr2 _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi1.
-    rewrite app_assoc in IHpi1.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (with_ilr2 _ _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst; list_simpl.
+  + exists (zero_ilr _ _ _ _); lia.
+  + destruct l3; inversion Heq1; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (zero_ilr _ _ _ _); lia.
+- exists (plus_irr1 _ _ _ _ pi'); lia.
+- exists (plus_irr2 _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi1.
     assert (pi1' := IHpi1 _ _ eq_refl).
     list_simpl in pi1'.
-    rewrite app_comm_cons in IHpi2.
-    rewrite app_assoc in IHpi2.
+    rewrite app_comm_cons, app_assoc in IHpi2.
     assert (pi2' := IHpi2 _ _ eq_refl).
     list_simpl in pi2'.
     destruct pi1' as [pi1' Hs1].
     destruct pi2' as [pi2' Hs2].
     list_simpl.
-    exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    exists (plus_ilr _ _ _ _ _ _ pi1' pi2'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi1.
     assert (pi1' := IHpi1 _ _ eq_refl).
-    rewrite app_comm_cons in pi1'.
-    rewrite 2 app_assoc in pi1'.
+    rewrite app_comm_cons, 2 app_assoc in pi1'.
     list_simpl in IHpi2.
     assert (pi2' := IHpi2 _ _ eq_refl).
-    rewrite app_comm_cons in pi2'.
-    rewrite 2 app_assoc in pi2'.
+    rewrite app_comm_cons, 2 app_assoc in pi2'.
     destruct pi1' as [pi1' Hs1].
     destruct pi2' as [pi2' Hs2].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (plus_ilr _ _ _ _ _ _ pi1' pi2'); lia.
 - decomp_map_inf Heq; inversion Heq3.
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     list_simpl in pi'.
     destruct pi' as [pi' Hs].
     list_simpl.
-    exists (de_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    exists (de_ilr _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (de_ilr _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (de_ilr _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     list_simpl in pi'.
     destruct pi' as [pi' Hs].
     list_simpl.
-    exists (wk_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    exists (wk_ilr _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (wk_ilr _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite 2 app_comm_cons in IHpi ; rewrite app_assoc in IHpi.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (wk_ilr _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite 2 app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    list_simpl in pi' ; destruct pi' as [pi' Hs].
-    list_simpl ; exists (co_ilr _ _ _ _ _ pi')...
+    list_simpl in pi'; destruct pi' as [pi' Hs].
+    list_simpl; exists (co_ilr _ _ _ _ _ pi'); lia.
   + symmetry in Heq1.
-    destruct l3 ; inversion Heq1 ; subst.
+    destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons ; rewrite 2 app_assoc.
-    exists (co_ilr _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (co_ilr _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    eexists (@cut_ir _ f _ _ _ _ _ pi1 pi')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (@cut_ir _ f _ _ _ _ _ pi1 pi'); lia.
   + symmetry in Heq1.
-    dichot_elt_app_inf_exec Heq1 ; subst.
+    dichot_elt_app_inf_exec Heq1; subst.
     * destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
       list_simpl.
-      rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
-      eexists (@cut_ir _ f _ _ _ _ _ pi' pi2)...
-    * rewrite app_comm_cons in IHpi2.
-      rewrite app_assoc in IHpi2.
+      rewrite app_comm_cons, (app_assoc l4), (app_assoc (l4 ++ _)), <- (app_assoc l4).
+      exists (@cut_ir _ f _ _ _ _ _ pi' pi2); lia.
+    * rewrite app_comm_cons, app_assoc in IHpi2.
       assert (pi' := IHpi2 _ _ eq_refl).
       list_simpl in pi'.
       destruct pi' as [pi' Hs].
       list_simpl.
-      eexists (@cut_ir _ f _ _ _ _ _ pi1 pi')...
+      exists (@cut_ir _ f _ _ _ _ _ pi1 pi'); lia.
 - exfalso.
   apply (Hgax a).
   rewrite Heq.
   apply in_inf_elt.
 Qed.
 
-Lemma ilpam_to_igen {P} : forall A, ill P (ilpam A N :: nil) (igen A).
+Lemma ilpam_to_igen {P} A : ill P (ilpam A N :: nil) (igen A).
 Proof.
-intros A.
-apply gen_irr.
-list_simpl.
-rewrite <- (app_nil_l _).
-rewrite <- (app_nil_r (A :: nil)).
-apply lpam_ilr ; apply ax_exp_ill.
+apply gen_irr; list_simpl.
+rewrite <- (app_nil_l _), <- (app_nil_r (A :: nil)).
+apply lpam_ilr; apply ax_exp_ill.
 Qed.
 
-Lemma igen_to_ilpam {P} : forall A, ill P (igen A :: nil) (ilpam A N).
+Lemma igen_to_ilpam {P} A : ill P (igen A :: nil) (ilpam A N).
 Proof.
-intros A.
-apply lpam_irr.
-list_simpl.
-apply gen_ilr.
-apply ax_exp_ill.
+apply lpam_irr; list_simpl.
+apply gen_ilr, ax_exp_ill.
 Qed.
 
 Lemma gen_pam_rule {P} :
@@ -658,318 +597,249 @@ Lemma gen_pam_rule {P} :
   forall l0 l1 l2 C D (pi0 : ill P l0 C) (pi : ill P (l1 ++ N :: l2) D),
     { pi : ill P (l1 ++ igen C :: l0 ++ l2) D
          & ipsize pi < S (ipsize pi0 + ipsize pi) }.
-Proof with myeeasy.
-intros Hgax.
-intros l0 l1 l2 C D pi0 pi.
+Proof.
+intros Hgax l0 l1 l2 C D pi0 pi.
 remember (l1 ++ N :: l2) as l.
-revert l1 l2 Heql.
-induction pi ; intros l1' l2' Heq ; subst ;
-  try (destruct (IHpi _ _ eq_refl) as [pi' Hs]) ;
-  try (destruct (IHpi1 _ _ eq_refl) as [pi1' Hs1]) ;
+revert l1 l2 Heql; induction pi; intros l1' l2' Heq; subst;
+  try (destruct (IHpi _ _ eq_refl) as [pi' Hs]);
+  try (destruct (IHpi1 _ _ eq_refl) as [pi1' Hs1]);
   try (destruct (IHpi2 _ _ eq_refl) as [pi2' Hs2]).
-- destruct l1' ; inversion Heq ; subst.
+- destruct l1'; inversion Heq; subst.
   + list_simpl.
-    exists (gen_ilr _ _ _ pi0)...
-  + destruct l1' ; inversion H1.
-- case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
+    exists (gen_ilr _ _ _ pi0); lia.
+  + destruct l1'; inversion H1.
+- case_eq (ipperm P); intros Hperm ; rewrite_all Hperm.
   + apply PEPermutation_Type_vs_elt_inv in p.
-    destruct p as [(l3 & l4) Heq HP] ; cbn in HP ; subst.
+    destruct p as [(l3 & l4) HP ->]; cbn in HP.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
     assert (PEPermutation_Type (ipperm P) (l3 ++ igen C :: l0 ++ l4)
                                    (l1' ++ igen C :: l0 ++ l2')) as HP'.
-    { rewrite Hperm.
-      symmetry.
+    { rewrite Hperm; cbn; symmetry.
       apply Permutation_Type_elt.
-      apply Permutation_Type_app_middle... }
-    exists (ex_ir _ _ _ _ pi' HP')...
-  + cbn in p ; subst.
+      apply Permutation_Type_app_middle; assumption. }
+    exists (ex_ir _ _ _ _ pi' HP'); lia.
+  + cbn in p; subst.
     destruct (IHpi _ _ eq_refl) as [pi' Hs].
-    exists pi'...
-- dichot_elt_app_inf_exec Heq ; subst.
+    exists pi'; lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + list_simpl in IHpi.
-    assert (pi':=IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
+    assert (pi' := IHpi _ _ eq_refl).
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons ; rewrite 2 app_assoc.
-    exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
-  + dichot_elt_app_inf_exec Heq1 ; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (ex_oc_ir _ _ _ _ _ _ pi' p); lia.
+  + dichot_elt_app_inf_exec Heq1; subst.
     * exfalso; symmetry in Heq0; decomp_map Heq0; inversion Heq0.
     * rewrite 2 app_assoc in IHpi.
-      assert (pi':=IHpi _ _ eq_refl).
-      list_simpl in pi' ; destruct pi' as [pi' Hs].
-      list_simpl ; exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
-- destruct l1' ; inversion Heq.
-- dichot_elt_app_inf_exec Heq ; subst.
+      assert (pi' := IHpi _ _ eq_refl).
+      list_simpl in pi'; destruct pi' as [pi' Hs].
+      list_simpl; exists (ex_oc_ir _ _ _ _ _ _ pi' p); lia.
+- destruct l1'; inversion Heq.
+- dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc in IHpi.
     assert (pi':=IHpi _ _ eq_refl).
     list_simpl in pi'.
     destruct pi' as [pi' Hs].
-    list_simpl.
-    exists (one_ilr _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    list_simpl; exists (one_ilr _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
-    assert (pi':=IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    assert (pi' := IHpi _ _ eq_refl).
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (one_ilr _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (one_ilr _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    rewrite <- (app_assoc l1').
-    exists (tens_irr _ _ _ _ _ pi' pi2)...
+    rewrite app_comm_cons, 2 app_assoc, <- (app_assoc l1').
+    exists (tens_irr _ _ _ _ _ pi' pi2); lia.
   + destruct (IHpi2 _ _ eq_refl) as [pi' Hs].
-    list_simpl.
-    exists (tens_irr _ _ _ _ _ pi1 pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite 2 app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+    list_simpl; exists (tens_irr _ _ _ _ _ pi1 pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite 2 app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    list_simpl in pi'.
-    destruct pi' as [pi' Hs].
-    list_simpl.
-    exists (tens_ilr _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    list_simpl in pi'; destruct pi' as [pi' Hs].
+    list_simpl; exists (tens_ilr _ _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (tens_ilr _ _ _ _ _ _ pi')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (tens_ilr _ _ _ _ _ _ pi'); lia.
 - list_simpl in IHpi.
   assert (pi' := IHpi _ _ eq_refl).
-  rewrite app_comm_cons in pi'.
-  rewrite 2 app_assoc in pi'.
+  rewrite app_comm_cons, 2 app_assoc in pi'.
   destruct pi' as [pi' Hs].
-  rewrite app_comm_cons.
-  rewrite app_assoc.
-  exists (lpam_irr _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + dichot_elt_app_inf_exec Heq1 ; subst.
+  rewrite app_comm_cons, app_assoc.
+  exists (lpam_irr _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + dichot_elt_app_inf_exec Heq1; subst.
     * destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
       list_simpl.
-      rewrite (app_comm_cons _ _ (igen C)).
-      rewrite 2 (app_assoc _ _ l3).
-      exists (lpam_ilr _ _ _ _ _ _ _ pi' pi2)...
-    * rewrite app_comm_cons in IHpi2.
-      rewrite app_assoc in IHpi2.
+      rewrite (app_comm_cons _ _ (igen C)), 2 (app_assoc _ _ l3).
+      exists (lpam_ilr _ _ _ _ _ _ _ pi' pi2); lia.
+    * rewrite app_comm_cons, app_assoc in IHpi2.
       assert (pi' := IHpi2 _ _ eq_refl).
-      list_simpl in pi'.
-      destruct pi' as [pi' Hs].
-      list_simpl.
-      exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi')...
-  + destruct l4 ; inversion Heq1 ; subst.
+      list_simpl in pi'; destruct pi' as [pi' Hs].
+      list_simpl; exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
+  + destruct l4; inversion Heq1; subst.
     list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
-    rewrite (app_comm_cons _ _ (igen C)) in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite (app_comm_cons _ _ (igen C)), 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite (app_comm_cons _ _ (igen C)).
-    rewrite 2 app_assoc.
-    exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi')...
+    rewrite (app_comm_cons _ _ (igen C)), 2 app_assoc.
+    exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
 - list_simpl in IHpi.
   assert (pi' := IHpi _ _ eq_refl).
-  rewrite app_comm_cons in pi'.
-  rewrite 2 app_assoc in pi'.
+  rewrite app_comm_cons, 2 app_assoc in pi'.
   destruct pi' as [pi' Hs].
-  rewrite app_comm_cons.
-  rewrite app_assoc.
-  exists (gen_irr _ _ _ pi')...
-- destruct l1' ; inversion Heq ; subst.
-  list_simpl.
+  rewrite app_comm_cons, app_assoc.
+  exists (gen_irr _ _ _ pi'); lia.
+- destruct l1'; inversion Heq; subst.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
   list_simpl.
-  exists (gen_ilr _ _ _ pi')...
+  exists (gen_ilr _ _ _ pi'); lia.
 - rewrite app_comm_cons in IHpi.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
-  exists (lmap_irr _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
+  exists (lmap_irr _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
   + symmetry in Heq1.
-    dichot_elt_app_inf_exec Heq1 ; subst.
-    * rewrite app_comm_cons in IHpi2.
-      rewrite app_assoc in IHpi2.
+    dichot_elt_app_inf_exec Heq1; subst.
+    * rewrite app_comm_cons, app_assoc in IHpi2.
       assert (pi' := IHpi2 _ _ eq_refl).
-      list_simpl in pi'.
-      destruct pi' as [pi' Hs].
-      list_simpl.
-      exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi')...
-    * destruct l5 ; inversion Heq2 ; subst.
+      list_simpl in pi'; destruct pi' as [pi' Hs].
+      list_simpl; exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi'); lia.
+    * destruct l5; inversion Heq2; subst.
       assert (pi' := IHpi1 _ _ eq_refl).
       destruct pi' as [pi' Hs].
       list_simpl.
-      rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
-      exists (lmap_ilr _ _ _ _ _ _ _ pi' pi2)...
+      rewrite app_comm_cons, (app_assoc l4), (app_assoc (l4 ++ _)), <- (app_assoc l4).
+      exists (lmap_ilr _ _ _ _ _ _ _ pi' pi2); lia.
 - rewrite app_comm_cons in IHpi.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
-  exists (neg_irr _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + destruct l1 ; inversion Heq1.
-  + destruct l2 ; inversion Heq1 ; subst.
+  exists (neg_irr _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + destruct l1; inversion Heq1.
+  + destruct l2; inversion Heq1; subst.
     assert (pi' := IHpi _ _ eq_refl).
     destruct pi' as [pi' Hs].
-    rewrite ? app_comm_cons.
-    rewrite ? app_assoc.
-    rewrite <- (app_assoc l1').
-    exists (neg_ilr _ _ _ pi')...
-- exists (top_irr _ _)...
-- exists (with_irr _ _ _ _ pi1' pi2')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+    rewrite ? app_comm_cons, ? app_assoc, <- (app_assoc l1').
+    exists (neg_ilr _ _ _ pi'); lia.
+- exists (top_irr _ _); lia.
+- exists (with_irr _ _ _ _ pi1' pi2'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    list_simpl in pi'.
-    destruct pi' as [pi' Hs].
-    list_simpl.
-    exists (with_ilr1 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    list_simpl in pi'; destruct pi' as [pi' Hs].
+    list_simpl; exists (with_ilr1 _ _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (with_ilr1 _ _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (with_ilr1 _ _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    list_simpl in pi'.
-    destruct pi' as [pi' Hs].
-    list_simpl.
-    exists (with_ilr2 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    list_simpl in pi'; destruct pi' as [pi' Hs].
+    list_simpl; exists (with_ilr2 _ _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (with_ilr2 _ _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst ; list_simpl.
-  + exists (zero_ilr _ _ _ _)...
-  + destruct l3 ; inversion Heq1 ; subst.
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (zero_ilr _ _ _ _)...
-- exists (plus_irr1 _ _ _ _ pi')...
-- exists (plus_irr2 _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi1.
-    rewrite app_assoc in IHpi1.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (with_ilr2 _ _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst; list_simpl.
+  + exists (zero_ilr _ _ _ _); lia.
+  + destruct l3; inversion Heq1; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (zero_ilr _ _ _ _); lia.
+- exists (plus_irr1 _ _ _ _ pi'); lia.
+- exists (plus_irr2 _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi1.
     assert (pi1' := IHpi1 _ _ eq_refl).
     list_simpl in pi1'.
-    rewrite app_comm_cons in IHpi2.
-    rewrite app_assoc in IHpi2.
+    rewrite app_comm_cons, app_assoc in IHpi2.
     assert (pi2' := IHpi2 _ _ eq_refl).
     list_simpl in pi2'.
     destruct pi1' as [pi1' Hs1].
     destruct pi2' as [pi2' Hs2].
-    list_simpl.
-    exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    list_simpl; exists (plus_ilr _ _ _ _ _ _ pi1' pi2'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi1.
     assert (pi1' := IHpi1 _ _ eq_refl).
-    rewrite app_comm_cons in pi1'.
-    rewrite 2 app_assoc in pi1'.
+    rewrite app_comm_cons, 2 app_assoc in pi1'.
     list_simpl in IHpi2.
     assert (pi2' := IHpi2 _ _ eq_refl).
-    rewrite app_comm_cons in pi2'.
-    rewrite 2 app_assoc in pi2'.
+    rewrite app_comm_cons, 2 app_assoc in pi2'.
     destruct pi1' as [pi1' Hs1].
     destruct pi2' as [pi2' Hs2].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (plus_ilr _ _ _ _ _ _ pi1' pi2'); lia.
 - decomp_map_inf Heq; inversion Heq3.
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite app_comm_cons in IHpi.
-    rewrite app_assoc in IHpi.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    list_simpl in pi'.
-    destruct pi' as [pi' Hs].
-    list_simpl.
-    exists (de_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    list_simpl in pi'; destruct pi' as [pi' Hs].
+    list_simpl; exists (de_ilr _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (de_ilr _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (de_ilr _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    list_simpl in pi'.
-    destruct pi' as [pi' Hs].
-    list_simpl.
-    exists (wk_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+    list_simpl in pi'; destruct pi' as [pi' Hs].
+    list_simpl; exists (wk_ilr _ _ _ _ _ pi'); lia.
+  + destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    exists (wk_ilr _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
-  + rewrite 2 app_comm_cons in IHpi ; rewrite app_assoc in IHpi.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (wk_ilr _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
+  + rewrite 2 app_comm_cons, app_assoc in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    list_simpl in pi' ; destruct pi' as [pi' Hs].
-    list_simpl ; exists (co_ilr _ _ _ _ _ pi')...
+    list_simpl in pi'; destruct pi' as [pi' Hs].
+    list_simpl; exists (co_ilr _ _ _ _ _ pi'); lia.
   + symmetry in Heq1.
-    destruct l3 ; inversion Heq1 ; subst.
+    destruct l3; inversion Heq1; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
-    rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons ; rewrite 2 app_assoc.
-    exists (co_ilr _ _ _ _ _ pi')...
-- dichot_elt_app_inf_exec Heq ; subst.
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (co_ilr _ _ _ _ _ pi'); lia.
+- dichot_elt_app_inf_exec Heq; subst.
   + list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
-    rewrite app_comm_cons in pi'.
-    rewrite 2 app_assoc in pi'.
+    rewrite app_comm_cons, 2 app_assoc in pi'.
     destruct pi' as [pi' Hs].
-    rewrite app_comm_cons.
-    rewrite 2 app_assoc.
-    eexists (@cut_ir _ f _ _ _ _ _ pi1 pi')...
+    rewrite app_comm_cons, 2 app_assoc.
+    exists (@cut_ir _ f _ _ _ _ _ pi1 pi'); lia.
   + symmetry in Heq1.
-    dichot_elt_app_inf_exec Heq1 ; subst.
+    dichot_elt_app_inf_exec Heq1; subst.
     * destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
       list_simpl.
-      rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
-      eexists (@cut_ir _ f _ _ _ _ _ pi' pi2)...
-    * rewrite app_comm_cons in IHpi2.
-      rewrite app_assoc in IHpi2.
+      rewrite app_comm_cons, (app_assoc l4), (app_assoc (l4 ++ _)), <- (app_assoc l4).
+      exists (@cut_ir _ f _ _ _ _ _ pi' pi2); lia.
+    * rewrite app_comm_cons, app_assoc in IHpi2.
       assert (pi' := IHpi2 _ _ eq_refl).
-      list_simpl in pi'.
-      destruct pi' as [pi' Hs].
-      list_simpl.
-      eexists (@cut_ir _ f _ _ _ _ _ pi1 pi')...
+      list_simpl in pi'; destruct pi' as [pi' Hs].
+      list_simpl; exists (@cut_ir _ f _ _ _ _ _ pi1 pi'); lia.
 - exfalso.
   apply (Hgax a).
   rewrite Heq.
@@ -983,9 +853,8 @@ Lemma strong_contradition_general_contradiction_ill {P} : ipcut P = true ->
   ill P nil izero -> forall l C, ill P l C.
 Proof.
 intros Hcut pi l C.
-rewrite <- (app_nil_l _).
-rewrite <- (app_nil_l _).
-eapply (@cut_ir _ Hcut) ; try eassumption.
+rewrite <- 2 (app_nil_l _).
+eapply (@cut_ir _ Hcut); try eassumption.
 apply zero_ilr.
 Qed.
 

@@ -27,7 +27,7 @@ Lemma cut_oc_comm (P_cutfree : pcut P = false) n A l1 l2 : ll P (l1 ++ wn A :: l
 Proof.
 intros pi2; induction n; intros IH l3 l4 pi1 Hs;
   remember (l3 ++ oc (dual A) :: l4) as l; destruct_ll pi1 f X l Hl Hr HP FL a;
-  try (exfalso; cbn in Hs; clear - Hs; easy; fail); try inversion Heql; subst.
+  try (now exfalso; cbn in Hs; clear - Hs); try inversion Heql; subst.
 - destruct l3; inversion Heql; subst.
   destruct l3; inversion H2; subst.
   destruct l3; inversion H3.

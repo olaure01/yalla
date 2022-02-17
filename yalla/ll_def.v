@@ -1059,7 +1059,7 @@ remember (aplus A B :: nil) as l; revert A B Heql;
 Qed.
 
 
-(** *** Tensor-One Par-Bottom cbnifications *)
+(** *** Tensor-One Par-Bottom simplifications *)
 
 Inductive munit_smp : formula -> formula -> Type :=
 | musmp_var : forall X, munit_smp (var X) (var X)

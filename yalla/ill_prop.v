@@ -18,7 +18,7 @@ Notation ill := (@ill preiatom).
 (** Consistency *)
 
 Lemma strong_consistency_ill_axfree {P} : (projT1 (ipgax P) -> False) ->
- ill P nil izero -> False.
+  ill P nil izero -> False.
 Proof.
 intros Hgax pi.
 apply cut_admissible_ill_axfree in pi ; try assumption.
@@ -248,58 +248,52 @@ Inductive ill_ps P PS : list iformula -> iformula -> Type :=
 
 Lemma stronger_ps_ipfrag P Q : le_ipfrag P Q ->
   forall PS l A, ill_ps P PS l A -> ill_ps Q PS l A.
-Proof with myeeasy.
+Proof.
 intros Hle PS l A H.
-induction H ; try now constructor.
-- apply (ex_ps_ir _ _ l1)...
+induction H; try now constructor.
+- apply (ex_ps_ir _ _ l1); try assumption.
   inversion Hle.
   destruct X as (_ & Hp).
-  unfold PEPermutation_Type in p.
-  unfold PEPermutation_Type.
-  destruct (ipperm P) ; destruct (ipperm Q) ;
-    cbn in Hp ; try inversion Hp ; subst...
-- eapply ex_oc_ps_ir...
+  unfold PEPermutation_Type in *.
+  now destruct (ipperm P); destruct (ipperm Q);
+    cbn in Hp; try inversion Hp; subst.
+- apply (ex_oc_ps_ir _ _ _ lw); assumption.
 - inversion Hle.
-  rewrite f in H1 ; cbn in H1.
-  eapply (@cut_ps_ir _ _ H1)...
-- destruct (fst (snd Hle) a) as [b Heq] ; rewrite_all Heq.
-  apply gax_ps_ir...
+  rewrite f in H1; cbn in H1.
+  apply (@cut_ps_ir _ _ H1 A); assumption.
+- destruct (fst (snd Hle) a) as [b Heq]; rewrite_all Heq.
+  apply gax_ps_ir; assumption.
 Qed.
 
-Lemma ill_ps_stronger {P} : forall PS QS l A,
+Lemma ill_ps_stronger {P} PS QS l A :
   ill_ps P PS l A -> (forall x y, Bool.le (PS x y) (QS x y)) -> ill_ps P QS l A.
-Proof with try eassumption.
-intros PS QS l A pi Hsb.
+Proof.
+intros pi Hsb.
 assert (forall x y, is_true (PS x y) -> is_true (QS x y)) as Hs.
 { intros x y HP.
   specialize Hsb with x y.
-  rewrite HP in Hsb... }
-induction pi ;
-  try (econstructor ; try apply Hs ; eassumption ; fail).
+  rewrite HP in Hsb; assumption. }
+induction pi;
+  try (econstructor; try apply Hs; eassumption). (* TODO bug??? removing [try] make it very long *)
 Qed.
 
-Lemma ill_ps_is_ps {P} : forall l A PS, ill_ps P PS l A -> is_true (PS l A).
+Lemma ill_ps_is_ps {P} l A PS : ill_ps P PS l A -> is_true (PS l A).
+Proof. intros pi; inversion pi; assumption. Qed.
+
+Lemma ill_ps_is_ill {P} l A PS : ill_ps P PS l A -> ill P l A.
 Proof.
-intros l A PS pi.
-inversion pi ; try assumption.
+intros pi; induction pi; try now constructor.
+- eapply ex_ir; eassumption.
+- eapply ex_oc_ir; eassumption.
+- apply (@cut_ir _ _ f A); assumption.
 Qed.
 
-Lemma ill_ps_is_ill {P} : forall l A PS, ill_ps P PS l A -> ill P l A.
-Proof with try eassumption.
-intros l A PS pi.
-induction pi ; try now constructor.
-- eapply ex_ir...
-- eapply ex_oc_ir...
-- eapply (@cut_ir _ _ f)...
-Qed.
-
-Lemma ill_is_ill_ps {P} : forall l A, ill P l A -> ill_ps P (fun _ _ => true) l A.
-Proof with myeeasy.
-intros l A pi.
-induction pi ; try now constructor.
-- eapply ex_ps_ir...
-- eapply ex_oc_ps_ir...
-- eapply (@cut_ps_ir _ _ f)...
+Lemma ill_is_ill_ps {P} l A : ill P l A -> ill_ps P (fun _ _ => true) l A.
+Proof.
+intros pi; induction pi; try now constructor.
+- now eapply ex_ps_ir; try eassumption.
+- now eapply ex_oc_ps_ir; try eassumption.
+- now apply (@cut_ps_ir _ _ f A).
 Qed.
 
 (** A fragment is a subset stable under sub-formula *)
@@ -310,288 +304,287 @@ Definition ifragment FS :=
 Lemma iconservativity {P} : ipcut P = false -> forall FS, ifragment FS ->
   forall l A, ill_ps P (fun _ _ => true) l A -> is_true (forallb FS (A :: l)) ->
     ill_ps P (fun l0 A0 => forallb FS (A0 :: l0)) l A.
-Proof with try eassumption ; try reflexivity.
+Proof.
 intros P_cutfree FS HFS l A pi.
 induction pi; cbn; intros HFrag;
   inversion HFrag; apply andb_true_iff in HFrag; destruct HFrag as [Hhd HFrag]; subst.
-- apply ax_ps_ir...
-- apply (ex_ps_ir _ _ l1)...
-  apply IHpi...
+- apply ax_ps_ir; assumption.
+- apply (ex_ps_ir _ _ l1); trivial.
+  apply IHpi.
   apply forallb_forall, Forall_forall.
   unfold is_true in HFrag; rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
+  constructor; [ assumption | ].
   symmetry in p.
   eapply PEPermutation_Type_Forall in p.
-  apply p in HFrag...
-- eapply ex_oc_ps_ir...
-  apply IHpi...
+  apply p in HFrag; assumption.
+- eapply ex_oc_ps_ir; try eassumption.
+  apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
   apply Forall_app in HFrag as [HF1 HF2].
   apply Forall_app in HF2 as [HF2 HF3].
-  constructor...
-  apply Forall_app; split...
-  apply Forall_app; split...
+  constructor; [ assumption | ].
+  apply Forall_app; split; [ assumption | ].
+  apply Forall_app; split; [ | assumption ].
   apply (Permutation_Type_map ioc) in p.
-  symmetry in p ; eapply Permutation_Type_Forall...
-- apply one_ps_irr...
-- apply one_ps_ilr...
-  apply IHpi...
+  symmetry in p; eapply Permutation_Type_Forall; eassumption.
+- apply one_ps_irr; assumption.
+- apply one_ps_ilr; [ assumption | ].
+  apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
+  constructor; [ assumption | ].
   apply Forall_app in HFrag as [ HFhd HFtl ].
-  inversion HFtl ; apply Forall_app; split...
-- rewrite forallb_forall in HFrag; apply Forall_forall, Forall_app in HFrag.
-  destruct HFrag.
-  apply tens_ps_irr...
-  + apply IHpi1...
+  inversion HFtl ; apply Forall_app; split; assumption.
+- rewrite forallb_forall in HFrag; apply Forall_forall, Forall_app in HFrag as [H H1].
+  apply tens_ps_irr; [ assumption | | ].
+  + apply IHpi1.
     apply forallb_forall, Forall_forall.
-    constructor...
-    eapply HFS...
-    apply isub_tens_l...
-  + apply IHpi2...
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_tens_l; reflexivity.
+  + apply IHpi2.
     apply forallb_forall, Forall_forall.
-    constructor...
-    eapply HFS...
-    apply isub_tens_r...
-- apply tens_ps_ilr...
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_tens_r; reflexivity.
+- apply tens_ps_ilr; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
+  constructor; [ assumption | ].
   apply Forall_app in HFrag as [ HFhd HFtl ].
-  inversion HFtl ; apply Forall_app; split...
-  constructor ; [ | constructor ]...
-  + eapply HFS...
-    apply isub_tens_l...
-  + eapply HFS...
-    apply isub_tens_r...
-- apply lpam_ps_irr...
+  inversion HFtl; apply Forall_app; split; [ assumption | ].
+  constructor ; [ | constructor ]; [ | | assumption ].
+  + eapply HFS; [ eassumption | ].
+    apply isub_tens_l; reflexivity.
+  + eapply HFS; [ eassumption | ].
+    apply isub_tens_r; reflexivity.
+- apply lpam_ps_irr; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  + eapply HFS...
-    apply isub_lpam_r...
-  + apply Forall_app; split...
-    constructor ; [ | constructor ]...
-    eapply HFS...
-    apply isub_lpam_l...
-- apply lpam_ps_ilr...
-  + apply IHpi1...
-    apply forallb_forall, Forall_forall.
-    rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-    apply Forall_app in HFrag as [ HFhd HFtl ].
-    inversion HFtl.
-    apply Forall_app in H3; destruct H3.
-    constructor...
-    eapply HFS...
-    apply isub_lpam_l...
-  + apply IHpi2...
-    apply forallb_forall, Forall_forall.
-    rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-    apply Forall_app in HFrag as [ HFhd HFtl ].
-    inversion HFtl.
-    apply Forall_app in H3; destruct H3.
-    constructor...
-    apply Forall_app; split...
-    constructor...
-    eapply HFS...
-    apply isub_lpam_r...
-- apply gen_ps_irr...
-  apply IHpi.
-  apply forallb_forall, Forall_forall.
-  rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  + eapply HFS...
-    apply isub_gen_N.
-  + apply Forall_app; split...
+  constructor.
+  + eapply HFS; [ eassumption | ].
+    apply isub_lpam_r; reflexivity.
+  + apply Forall_app; split; [ assumption | ].
     constructor ; [ | constructor ].
-    eapply HFS...
-    apply isub_gen...
-- apply gen_ps_ilr...
-  apply IHpi...
+    eapply HFS; [ eassumption | ].
+    apply isub_lpam_l; reflexivity.
+- apply lpam_ps_ilr; [ assumption | | ].
+  + apply IHpi1.
+    apply forallb_forall, Forall_forall.
+    rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+    apply Forall_app in HFrag as [ HFhd HFtl ].
+    inversion HFtl.
+    apply Forall_app in H3; destruct H3.
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_lpam_l; reflexivity.
+  + apply IHpi2.
+    apply forallb_forall, Forall_forall.
+    rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+    apply Forall_app in HFrag as [ HFhd HFtl ].
+    inversion HFtl.
+    apply Forall_app in H3; destruct H3.
+    constructor; [ assumption | ].
+    apply Forall_app; split; [ assumption | ].
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_lpam_r; reflexivity.
+- apply gen_ps_irr; [ assumption | ].
+  apply IHpi.
+  apply forallb_forall, Forall_forall.
+  rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+  constructor.
+  + eapply HFS; [ eassumption | ].
+    apply isub_gen_N.
+  + apply Forall_app; split; [ assumption | ].
+    constructor ; [ | constructor ].
+    eapply HFS; [ eassumption | ].
+    apply isub_gen; reflexivity.
+- apply gen_ps_ilr; [ assumption | ].
+  apply IHpi.
   apply forallb_forall, Forall_forall.
   apply andb_true_iff in HFrag as [ HFhd HFtl ].
   rewrite forallb_forall in HFtl; apply Forall_forall in HFtl.
-  constructor...
-  eapply HFS...
-  apply isub_gen...
-- apply lmap_ps_irr...
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_gen; reflexivity.
+- apply lmap_ps_irr; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  + eapply HFS...
-    apply isub_lmap_r...
-  + constructor...
-    eapply HFS...
-    apply isub_lmap_l...
-- apply lmap_ps_ilr...
-  + apply IHpi1...
+  constructor.
+  + eapply HFS; [ eassumption | ].
+    apply isub_lmap_r; reflexivity.
+  + constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_lmap_l; reflexivity.
+- apply lmap_ps_ilr; [ assumption | | ].
+  + apply IHpi1.
     apply forallb_forall, Forall_forall.
     rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
     apply Forall_app in HFrag as [ HFhd HFtl ].
     apply Forall_app in HFtl; destruct HFtl.
     inversion H1.
-    constructor...
-    eapply HFS...
-    apply isub_lmap_l...
-  + apply IHpi2...
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_lmap_l; reflexivity.
+  + apply IHpi2.
     apply forallb_forall, Forall_forall.
     rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
     apply Forall_app in HFrag as [ HFhd HFtl ].
     apply Forall_app in HFtl; destruct HFtl.
     inversion H1.
-    constructor...
-    apply Forall_app; split...
-    constructor...
-    eapply HFS...
-    apply isub_lmap_r...
-- apply neg_ps_irr...
+    constructor; [ assumption | ].
+    apply Forall_app; split; [ assumption | ].
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_lmap_r; reflexivity.
+- apply neg_ps_irr; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  + eapply HFS...
+  constructor.
+  + eapply HFS; [ eassumption | ].
     apply isub_neg_N.
-  + constructor...
-    eapply HFS...
-    constructor...
-- apply neg_ps_ilr...
-  apply IHpi...
+  + constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    constructor; reflexivity.
+- apply neg_ps_ilr; [ assumption | ].
+  apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
   apply Forall_app in HFrag as [ HFhd HFtl ].
   inversion HFtl ; subst.
-  constructor...
-  eapply HFS...
-  apply isub_neg...
-- apply top_ps_irr...
-- apply with_ps_irr...
-  + apply IHpi1...
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_neg; reflexivity.
+- apply top_ps_irr; assumption.
+- apply with_ps_irr; [ assumption | | ].
+  + apply IHpi1.
     apply forallb_forall, Forall_forall.
     rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-    constructor...
-    eapply HFS...
-    apply isub_with_l...
-  + apply IHpi2...
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_with_l; reflexivity.
+  + apply IHpi2.
     apply forallb_forall, Forall_forall.
     rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-    constructor...
-    eapply HFS...
-    apply isub_with_r...
-- apply with_ps_ilr1...
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_with_r; reflexivity.
+- apply with_ps_ilr1; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
+  constructor; [ assumption | ].
   apply Forall_app in HFrag as [ HFhd HFtl ].
-  inversion HFtl; apply Forall_app; split...
-  constructor...
-  eapply HFS...
-  apply isub_with_l...
-- apply with_ps_ilr2...
+  inversion HFtl; apply Forall_app; split; [ assumption | ].
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_with_l; reflexivity.
+- apply with_ps_ilr2; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
+  constructor; [ assumption | ].
   apply Forall_app in HFrag as [ HFhd HFtl ].
-  inversion HFtl ; apply Forall_app; split...
-  constructor...
-  eapply HFS...
-  apply isub_with_r...
-- apply zero_ps_ilr...
-- apply plus_ps_irr1...
+  inversion HFtl ; apply Forall_app; split; [ assumption | ].
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_with_r; reflexivity.
+- apply zero_ps_ilr; assumption.
+- apply plus_ps_irr1; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  eapply HFS...
-  apply isub_plus_l...
-- apply plus_ps_irr2...
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_plus_l; reflexivity.
+- apply plus_ps_irr2; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  eapply HFS...
-  apply isub_plus_r...
-- apply plus_ps_ilr...
-  + apply IHpi1...
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_plus_r; reflexivity.
+- apply plus_ps_ilr; [ assumption | | ].
+  + apply IHpi1.
     apply forallb_forall, Forall_forall.
     rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-    constructor...
+    constructor; [ assumption | ].
     apply Forall_app in HFrag as [ HFhd HFtl ].
-    inversion HFtl ; apply Forall_app; split...
-    constructor...
-    eapply HFS...
-    apply isub_plus_l...
-  + apply IHpi2...
+    inversion HFtl ; apply Forall_app; split; [ assumption | ].
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_plus_l; reflexivity.
+  + apply IHpi2.
     apply forallb_forall, Forall_forall.
     rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-    constructor...
+    constructor; [ assumption | ].
     apply Forall_app in HFrag as [ HFhd HFtl ].
-    inversion HFtl; apply Forall_app; split...
-    constructor...
-    eapply HFS...
-    apply isub_plus_r...
-- apply oc_ps_irr...
+    inversion HFtl; apply Forall_app; split; [ assumption | ].
+    constructor; [ | assumption ].
+    eapply HFS; [ eassumption | ].
+    apply isub_plus_r; reflexivity.
+- apply oc_ps_irr; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  eapply HFS...
-  apply isub_oc...
-- apply de_ps_ilr...
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_oc; reflexivity.
+- apply de_ps_ilr; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
+  constructor; [ assumption | ].
   apply Forall_app in HFrag as [ HFhd HFtl ].
-  inversion HFtl; apply Forall_app; split...
-  constructor...
-  eapply HFS...
-  apply isub_oc...
-- apply wk_ps_ilr...
-  apply IHpi...
-  apply forallb_forall, Forall_forall.
-  rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
-  apply Forall_app in HFrag as [ HFhd HFtl ].
-  inversion HFtl; apply Forall_app; split...
-- apply co_ps_ilr...
+  inversion HFtl; apply Forall_app; split; [ assumption | ].
+  constructor; [ | assumption ].
+  eapply HFS; [ eassumption | ].
+  apply isub_oc; reflexivity.
+- apply wk_ps_ilr; [ assumption | ].
   apply IHpi.
   apply forallb_forall, Forall_forall.
   rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
-  constructor...
+  constructor; [ assumption | ].
   apply Forall_app in HFrag as [ HFhd HFtl ].
-  apply Forall_app; split...
-  inversion HFtl ; subst.
-  constructor...
+  inversion HFtl; apply Forall_app; split; assumption.
+- apply co_ps_ilr; [ assumption | ].
+  apply IHpi.
+  apply forallb_forall, Forall_forall.
+  rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
+  constructor; [ assumption | ].
+  apply Forall_app in HFrag as [ HFhd HFtl ].
+  apply Forall_app; split; [ assumption | ].
+  inversion HFtl; subst.
+  constructor; assumption.
 - rewrite P_cutfree in f.
   inversion f.
-- apply gax_ps_ir...
+- apply gax_ps_ir; assumption.
 Qed.
 
 (** Sub-formula property *)
 Proposition isubformula {P} : ipcut P = false -> forall l A,
   ill P l A -> ill_ps P (fun l' C => isubformb_list (C :: l') (A :: l)) l A.
-Proof with try eassumption ; try reflexivity.
+Proof.
 intros P_cutfree l A pi.
 apply ill_is_ill_ps in pi.
-apply iconservativity...
+apply iconservativity; trivial.
 - intros C Hf B Hs.
   remember (A :: l) as l'.
-  revert Hf ; clear - Hs ; induction l' ; intro Hf ; inversion Hf ; subst.
-  cbn ; apply orb_true_iff.
+  revert Hf; clear - Hs; induction l'; intro Hf; inversion Hf; subst.
+  cbn; apply orb_true_iff.
   apply orb_true_iff in H0.
   destruct H0.
   + left.
-    eapply isubb_trans...
-    apply isubb_isub...
+    apply (isubb_trans _ C); [ | assumption ].
+    apply isubb_isub; assumption.
   + right.
-    apply IHl'...
+    apply IHl'; assumption.
 - apply (isubb_id_list (A :: l) nil).
 Qed.
 
@@ -599,27 +592,26 @@ Lemma cut_admissible_ifragment_axfree {P} : (projT1 (ipgax P) -> False) ->
 forall FS, ifragment FS -> forall l A,
   ill_ps P (fun l A => forallb FS (A :: l)) l A ->
   ill_ps (cutrm_ipfrag P) (fun l A => forallb FS (A :: l)) l A.
-Proof with myeeasy.
+Proof.
 intros P_axfree FS HFS l A pi.
-assert (is_true (forallb FS (A :: l))) as HFSl by (destruct pi ; myeeasy).
+assert (is_true (forallb FS (A :: l))) as HFSl by now destruct pi.
 apply ill_ps_is_ill in pi.
-eapply cut_admissible_ill_axfree in pi...
+apply cut_admissible_ill_axfree in pi; [ | assumption ].
 apply ill_is_ill_ps in pi.
-apply iconservativity...
+now apply iconservativity.
 Qed.
 
 Lemma iconservativity_axfree {P} : (projT1 (ipgax P) -> False) ->
 forall FS, ifragment FS ->
   forall l A, ill P l A -> is_true (forallb FS (A :: l)) ->
     ill_ps P (fun l A => forallb FS (A :: l)) l A.
-Proof with try eassumption ; try reflexivity.
+Proof.
 intros P_axfree FS Hf l A pi HFS.
-eapply cut_admissible_ill_axfree in pi...
+apply cut_admissible_ill_axfree in pi; [ | assumption ].
 apply ill_is_ill_ps in pi.
-eapply iconservativity in pi...
-clear - P_axfree pi ; induction pi ; try now econstructor.
-- eapply ex_ps_ir...
-- eapply ex_oc_ps_ir...
+eapply iconservativity in pi; try eassumption; try reflexivity.
+clear - P_axfree pi; induction pi;
+  (try now constructor); try (econstructor; eassumption); now econstructor.
 Qed.
 
 End Fragments.
