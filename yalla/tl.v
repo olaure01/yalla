@@ -8,7 +8,7 @@ From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GP
 
 (** ** 0. load the [ill] library *)
 
-From Yalla Require Import ll_def ill_vs_ll.
+From Yalla Require Import ollibs_ext ll_def ill_vs_ll.
 
 
 Section Atoms.

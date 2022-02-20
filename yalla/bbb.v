@@ -10,6 +10,7 @@ From Yalla Require Import ll_fragments.
 
 Set Implicit Arguments.
 
+
 Section Atoms.
 
 Context {atom : InfDecType}.
@@ -254,7 +255,7 @@ intros pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
   dichot_elt_app_inf_exec Heq ; subst.
   + rewrite app_assoc in HP.
     apply IHpi in HP.
-    eapply ex_bbb_r; [ apply bot_bbb_r; eassumption | apply Permutation_Type_cons_app; reflexivity ].
+    eapply ex_bbb_r; [ apply bot_bbb_r; eassumption | apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
     * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
@@ -356,7 +357,7 @@ intros pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
     rewrite 2 app_comm_cons in HP.
     apply IHpi in HP.
-    eapply ex_bbb_r; [ apply parr_bbb_r; eassumption | apply Permutation_Type_cons_app; reflexivity ].
+    eapply ex_bbb_r; [ apply parr_bbb_r; eassumption | apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
     * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
@@ -382,7 +383,7 @@ intros pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
     rewrite app_comm_cons in HP.
     apply IHpi in HP.
-    eapply ex_bbb_r; [ apply plus_bbb_r1; eassumption | apply Permutation_Type_cons_app; reflexivity ].
+    eapply ex_bbb_r; [ apply plus_bbb_r1; eassumption | apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
     * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
@@ -397,7 +398,7 @@ intros pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
     rewrite app_comm_cons in HP.
     apply IHpi in HP.
-    eapply ex_bbb_r ; [ apply plus_bbb_r2; eassumption | apply Permutation_Type_cons_app; reflexivity ].
+    eapply ex_bbb_r ; [ apply plus_bbb_r2; eassumption | apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
     * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
@@ -452,7 +453,7 @@ intros pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
     rewrite app_comm_cons in HP.
     apply IHpi in HP.
-    eapply ex_bbb_r ; [ apply de_bbb_r; eassumption | apply Permutation_Type_cons_app; reflexivity ].
+    eapply ex_bbb_r ; [ apply de_bbb_r; eassumption | apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1 ; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
     * symmetry in Heq2; decomp_map_inf Heq2; cbn in Heq1, Heq2, Heq3; subst; cbn in HP.
@@ -473,7 +474,7 @@ intros pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
   dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc in HP.
     apply IHpi in HP.
-    eapply ex_bbb_r; [ apply wk_bbb_r; eassumption | apply Permutation_Type_cons_app; reflexivity ].
+    eapply ex_bbb_r; [ apply wk_bbb_r; eassumption | apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
     * symmetry in Heq2; decomp_map_inf Heq2 ; cbn in Heq1, Heq2, Heq3; subst; cbn in HP.
@@ -492,7 +493,7 @@ intros pi; induction pi using ll_nested_ind; intros l' l0' l1' HP.
     apply (@Permutation_Type_cons _ (wn A) _ eq_refl) in HP.
     rewrite 2 app_comm_cons in HP.
     apply IHpi in HP.
-    eapply ex_bbb_r; [ apply co_bbb_r; eassumption | apply Permutation_Type_cons_app; reflexivity ].
+    eapply ex_bbb_r; [ apply co_bbb_r; eassumption | apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1; subst.
     * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
     * symmetry in Heq2; decomp_map_inf Heq2; cbn in Heq1, Heq2, Heq3; subst; cbn in HP.
@@ -520,7 +521,7 @@ apply bbb_to_ll in pi1.
 apply bbb_to_ll in pi2.
 eapply ex_r in pi1; [ | apply Permutation_Type_swap ].
 eapply ex_r in pi2; [ | apply Permutation_Type_swap ].
-apply (cut_ll_r _ _ _ pi1) in pi2.
+apply (cut_ll_r pi1) in pi2.
 apply (ex_r _ ((l2 ++ l1) ++ map (fun _ => tens (wn one) bot) (@nil unit)
                           ++ map (fun _ => wn (tens (wn one) bot)) (tt :: tt :: nil))) in pi2;
  [ | cbn; Permutation_Type_solve ].

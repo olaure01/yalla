@@ -9,6 +9,8 @@ From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type
 From Yalla Require Import subs ll_fragments bbb.
 From Yalla Require Export nn_def.
 
+Set Implicit Arguments.
+
 
 Section Atoms.
 
@@ -21,6 +23,8 @@ Notation unill := (@unill _ _ Atoms).
 Notation trans := (@trans _ _ Atoms).
 Notation i2a := (@i2a _ _ Atoms).
 Notation a2i := (@a2i _ _ Atoms).
+Arguments ll_to_ill_trans_gen {_ _ _} R {P} _ [l].
+Arguments ll_to_ill_trans {_ _ _} R {P} _ [l].
 Notation ll_to_ill_trans := (@ll_to_ill_trans _ _ Atoms).
 Notation p2ipfrag := (@p2ipfrag _ _ Atoms).
 
@@ -32,112 +36,108 @@ Variable R : iformula.
 
 (** In [llR] (where [bot] is equivalent to [R]),
   [A] is implied by the dual of its translation. *)
-Lemma back_to_llR : forall A,
+Lemma back_to_llR A :
   llR (unill R) (unill (trans R A) :: A :: nil).
-Proof with myeeasy ; try ((try rewrite a2a_i) ; GPermutation_Type_solve).
-induction A ; simpl ; rewrite ? bidual.
+Proof.
+induction A; simpl; rewrite ? bidual.
 - apply parr_r.
   unfold IAtom2Atom, iatom2atom; rewrite a2a_i.
-  apply (ex_r ((covar c :: var c :: nil) ++ unill R :: nil))...
+  apply (ex_r ((covar c :: var c :: nil) ++ unill R :: nil));
+    [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
   eapply (@cut_r _ (pfrag_llR (unill R)) eq_refl (dual one)).
-  + apply (ex_r (unill R :: one :: nil))...
+  + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
-  + apply bot_r.
-    apply ax_r.
+  + apply bot_r, ax_r.
 - unfold IAtom2Atom, iatom2atom; rewrite a2a_i.
-  apply (ex_r (covar c :: var c :: nil))...
-  apply ax_r...
-- eapply parr_r.
-  apply bot_r.
+  apply (ex_r (covar c :: var c :: nil)); [ | apply Permutation_Type_swap ].
+  apply ax_r.
+- apply parr_r, bot_r.
   apply (@gax_r _ (pfrag_llR (unill R)) false).
-- apply (ex_r (bot :: one :: nil))...
-  apply bot_r.
-  apply one_r.
+- apply (ex_r (bot :: one :: nil)); [ | apply Permutation_Type_swap ].
+  apply bot_r, one_r.
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
-  apply parr_r.
-  apply parr_r.
+  apply parr_r, parr_r.
   change (tens (dual (unill R)) (unill (trans R A2)) ::
-  tens (dual (unill R)) (unill (trans R A1)) :: unill R :: tens A1 A2 :: nil)
+            tens (dual (unill R)) (unill (trans R A1)) :: unill R :: tens A1 A2 :: nil)
     with (tens (dual (unill R)) (unill (trans R A2)) ::  
-    (tens (dual (unill R)) (unill (trans R A1)) :: unill R :: tens A1 A2 :: nil) ++ nil).
+            (tens (dual (unill R)) (unill (trans R A1)) :: unill R :: tens A1 A2 :: nil) ++ nil).
   apply tens_r.
   + apply (@gax_r _ (pfrag_llR (unill R)) true).
   + apply (ex_r (tens (dual (unill R)) (unill (trans R A1))
-             :: (unill (trans R A2) :: tens A1 A2 :: nil) ++ (unill R :: nil)))...
+             :: (unill (trans R A2) :: tens A1 A2 :: nil) ++ (unill R :: nil))).
     2:{ list_simpl.
         transitivity ((tens (dual (unill R)) (unill (trans R A1))
-              :: (unill (trans R A2) :: unill R :: tens A1 A2 :: nil)))...
-        - apply Permutation_Type_cons...
-          apply Permutation_Type_cons...
+              :: (unill (trans R A2) :: unill R :: tens A1 A2 :: nil))).
+        - apply Permutation_Type_cons, Permutation_Type_cons, Permutation_Type_swap; reflexivity.
         - apply Permutation_Type_swap. }
     apply tens_r.
-    -- eapply ex_r ; [ | apply Permutation_Type_swap ]...
+    -- eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
     -- apply (ex_r (tens A1 A2 ::
-             (unill (trans R A2) :: nil) ++ unill (trans R A1) :: nil))...
-       2:{ list_simpl.
-           etransitivity; [ apply Permutation_Type_cons_append | ].
-           apply Permutation_Type_swap. }
+               (unill (trans R A2) :: nil) ++ unill (trans R A1) :: nil));
+         [ | etransitivity; [ apply Permutation_Type_cons_append | apply Permutation_Type_swap ] ].
        apply tens_r.
-       ++ eapply ex_r ; [ apply IHA1 | ]...
-       ++ eapply ex_r ; [ apply IHA2 | ]...
+       ++ eapply ex_r; [ apply IHA1 | apply Permutation_Type_swap ].
+       ++ eapply ex_r; [ apply IHA2 | apply Permutation_Type_swap ].
 - apply (ex_r (parr A1 A2 ::
-                 tens (unill (trans R A2)) (unill (trans R A1)) :: nil))...
+          tens (unill (trans R A2)) (unill (trans R A1)) :: nil)); [ | apply Permutation_Type_swap ].
   apply parr_r.
   apply (ex_r (tens (unill (trans R A2)) (unill (trans R A1))
-                  :: (A1 :: nil) ++ (A2 :: nil)))...
-  apply tens_r...
-- apply parr_r.
-  apply top_r.
-- eapply ex_r ; [ | apply Permutation_Type_swap ].
-  eapply top_r.
+                  :: (A1 :: nil) ++ (A2 :: nil)));
+    [ | etransitivity; [ apply Permutation_Type_middle
+                       | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ] ].
+  apply tens_r; assumption.
+- apply parr_r, top_r.
+- eapply ex_r; [ apply top_r | apply Permutation_Type_swap ].
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
-  apply parr_r.
-  apply with_r.
+  apply parr_r, with_r.
   + apply (ex_r (tens (dual (unill R)) (unill (trans R A1)) ::
-                    (aplus A1 A2 :: nil) ++ unill R :: nil))...
+                    (aplus A1 A2 :: nil) ++ unill R :: nil));
+      [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
     apply tens_r.
-    * eapply ex_r ; [ | apply Permutation_Type_swap ]...
-    * eapply ex_r ; [ | apply Permutation_Type_swap ].
+    * eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
+    * eapply ex_r; [ | apply Permutation_Type_swap ].
       apply plus_r1.
-      eapply ex_r ; [ | apply Permutation_Type_swap ]...
+      eapply ex_r; [ | apply Permutation_Type_swap ]; assumption.
   + apply (ex_r (tens (dual (unill R)) (unill (trans R A2)) ::
-                    (aplus A1 A2 :: nil) ++ unill R :: nil))...
-    apply tens_r...
-    * eapply ex_r ; [ | apply Permutation_Type_swap ]...
-    * eapply ex_r ; [ | apply Permutation_Type_swap ].
+                    (aplus A1 A2 :: nil) ++ unill R :: nil));
+      [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
+    apply tens_r.
+    * eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
+    * eapply ex_r; [ | apply Permutation_Type_swap ].
       apply plus_r2.
-      eapply ex_r ; [ | apply Permutation_Type_swap ]...
+      eapply ex_r; [ | apply Permutation_Type_swap ]; assumption.
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
-  eapply ex_r ; [ | apply Permutation_Type_swap ].
+  eapply ex_r; [ | apply Permutation_Type_swap ].
   apply with_r.
-  + eapply ex_r ; [ | apply Permutation_Type_swap ].
-    apply plus_r1...
-  + eapply ex_r ; [ | apply Permutation_Type_swap ].
-    apply plus_r2...
+  + eapply ex_r; [ | apply Permutation_Type_swap ].
+    apply plus_r1; assumption.
+  + eapply ex_r; [ | apply Permutation_Type_swap ].
+    apply plus_r2; assumption.
 - apply parr_r.
   apply (ex_r ((oc A ::
                   map wn (tens (dual (unill R)) (unill (trans R A)) :: nil))
-                  ++ unill R :: nil)) ; [idtac | cbn]...
+                  ++ unill R :: nil));
+    [ | etransitivity; [ apply Permutation_Type_middle
+                       | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ] ].
   apply (@cut_r _ (pfrag_llR (unill R)) eq_refl (dual one)).
-  + apply (ex_r (unill R :: one :: nil))...
+  + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
-  + apply bot_r.
-    apply oc_r; cbn.
+  + apply bot_r, oc_r.
     apply (ex_r ((wn (tens (dual (unill R)) (unill (trans R A))) :: nil)
-                     ++ (A :: nil) ++ nil))...
-    apply de_r.
-    apply tens_r...
-    apply (@gax_r _ (pfrag_llR (unill R)) true).
+                     ++ (A :: nil) ++ nil)); [ | apply Permutation_Type_swap ].
+    apply de_r, tens_r.
+    * apply (@gax_r _ (pfrag_llR (unill R)) true).
+    * assumption.
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
   change (wn A :: nil) with (map wn (A :: nil)).
-  apply oc_r ; cbn.
-  apply parr_r.
-  apply (ex_r (tens (dual (unill R)) (unill (trans R A)) :: (wn A :: nil) ++ unill R :: nil))...
+  apply oc_r, parr_r.
+  apply (ex_r (tens (dual (unill R)) (unill (trans R A)) :: (wn A :: nil) ++ unill R :: nil));
+    [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
   apply tens_r.
-  + eapply ex_r...
-  + apply (ex_r (wn A :: unill (trans R A) :: nil))...
-    apply de_r...
-    eapply ex_r; [ | apply Permutation_Type_swap ]...
+  + eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
+  + apply (ex_r (wn A :: unill (trans R A) :: nil)); [ | apply Permutation_Type_swap ].
+    apply de_r.
+    eapply ex_r; [ | apply Permutation_Type_swap ]; assumption.
 Qed.
 
 (** The previous lemma comes with the following result from the [ll_fragments] library:
@@ -146,42 +146,37 @@ Lemma ll_to_llR : forall R l, ll_ll l -> llR R l.
 >> to deduce: *)
 
 (** A sequent whose translation is provable in [ill] was provable in [llR]. *)
-Lemma ill_trans_to_llR : forall l,  ill_ll (map (trans R) l) R -> llR (unill R) l.
-Proof with myeeasy ; try GPermutation_Type_solve.
-intros l Hill.
-apply (@ill_to_ll _ _ iatom2atom) in Hill.
-apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true))
-  in Hill.
+Lemma ill_trans_to_llR l :  ill_ll (map (trans R) l) R -> llR (unill R) l.
+Proof.
+intros Hill%(@ill_to_ll _ _ iatom2atom).
+apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true)) in Hill.
 - eapply cut_admissible_axfree in Hill.
   + apply (ll_to_llR (unill R)) in Hill.
     assert (forall l',
       llR (unill R) (l' ++ map dual (map unill (map (trans R) (rev l))))
         -> llR (unill R) (l' ++ rev l)) as Hll.
     { clear.
-      induction l using rev_rect ; intros...
+      induction l using rev_rect; intros; [ assumption | ].
       assert (Hb := back_to_llR x).
       rewrite rev_unit in X.
       apply (ex_r _ (dual (unill (trans R x))
-               :: l' ++ map dual (map unill (map (trans R) (rev l))))) in X...
+               :: l' ++ map dual (map unill (map (trans R) (rev l))))) in X;
+        [ | symmetry; apply Permutation_Type_middle ].
       apply (@cut_r _ _ (eq_refl (pcut (pfrag_llR (unill R)))) _ _ _ X) in Hb.
       rewrite rev_unit.
       change (x :: rev l) with ((x :: nil) ++ rev l).
       rewrite app_assoc.
-      eapply IHl.
-      eapply ex_r... }
+      apply IHl.
+      eapply ex_r; [ eassumption | list_simpl; apply Permutation_Type_middle ]. }
     assert (llR (unill R) (dual (unill R) :: nil)) as HR
-      by (apply (@gax_r _ (pfrag_llR (unill R)) true)).
+      by apply (@gax_r _ (pfrag_llR (unill R)) true).
     apply (@cut_r _ _ (eq_refl (pcut (pfrag_llR (unill R)))) _ _ _ HR) in Hill.
-    rewrite app_nil_r in Hill.
-    rewrite <- (app_nil_l (rev _)) in Hill.
-    rewrite <- ? map_rev in Hill.
+    rewrite app_nil_r, <- (app_nil_l (rev _)), <- ? map_rev in Hill.
     apply Hll in Hill.
-    eapply ex_r ; [ apply Hill | ].
-    symmetry.
-    apply Permutation_Type_rev.
-  + intros Hax ; inversion Hax.
-- nsplit 4 ; myeasy.
-  intros Hax ; inversion Hax.
+    eapply ex_r; [ apply Hill | symmetry; apply Permutation_Type_rev ].
+  + intros Hax; inversion Hax.
+- repeat split.
+  intros Hax; inversion Hax.
 Qed.
 
 
@@ -198,26 +193,22 @@ Inductive ielem : iformula -> Type :=
 | ie_iplus : forall A B, ielem A -> ielem B -> ielem (iplus A B)
 | ie_itop : ielem itop.
 
-Lemma ie_ie : forall A, ielem A ->
-  ill_ll (A :: nil) (negR R (trans R (unill A))).
-Proof with try now (apply ax_exp_ill).
-induction A ; intros Hgfn ; inversion Hgfn ;
-  cbn ; unfold trans.
-- unfold IAtom2Atom; rewrite (i2i_not_atN _ H0).
+Lemma ie_ie A : ielem A -> ill_ll (A :: nil) (negR R (trans R (unill A))).
+Proof.
+induction A; intros Hgfn; inversion Hgfn; cbn; unfold trans.
+- unfold IAtom2Atom; rewrite (i2i_not_atN H0).
   apply negR_irr.
-  apply negR_ilr...
-  reflexivity.
+  apply negR_ilr; [ reflexivity | | ]; apply ax_exp_ill.
 - apply negR_irr.
-  apply negR_ilr...
-  reflexivity.
+  apply negR_ilr; [ reflexivity | | ]; apply ax_exp_ill.
 - apply IHA1 in X.
   apply IHA2 in X0.
   apply negR_irr.
-  apply negR_ilr ; [ reflexivity | | ]...
+  apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
   rewrite <- (app_nil_l _).
   apply tens_ilr.
-  list_simpl ; cons2app.
-  apply tens_irr ; eassumption.
+  list_simpl; cons2app.
+  apply tens_irr; assumption.
 - apply negR_irr.
   rewrite <- (app_nil_l _).
   apply zero_ilr.
@@ -226,59 +217,48 @@ induction A ; intros Hgfn ; inversion Hgfn ;
 - apply IHA1 in X.
   apply IHA2 in X0.
   apply negR_irr.
-  apply negR_ilr ; [ reflexivity | | ]...
+  apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
   rewrite <- (app_nil_l _).
-  apply plus_ilr ; constructor ; eassumption.
+  apply plus_ilr; constructor; assumption.
 Qed.
 
-Lemma ie_dual : forall A, ielem A ->
-  ill_ll (trans R (dual (unill A)) :: nil) A.
-Proof with try now (apply ax_exp_ill).
-induction A ; intros Hgfn ; inversion Hgfn ;
-  cbn ; unfold trans...
-- unfold IAtom2Atom; rewrite (i2i_not_atN _ H0)...
+Lemma ie_dual A : ielem A -> ill_ll (trans R (dual (unill A)) :: nil) A.
+Proof.
+induction A; intros Hgfn; inversion Hgfn; cbn; unfold trans; try now apply ax_exp_ill.
+- unfold IAtom2Atom; rewrite (i2i_not_atN H0); apply ax_exp_ill.
 - apply IHA1 in X.
   apply IHA2 in X0.
   rewrite <- (app_nil_l _).
   apply tens_ilr.
-  list_simpl.
-  cons2app.
-  apply tens_irr ; eassumption.
+  list_simpl; cons2app.
+  apply tens_irr; assumption.
 - apply top_irr.
 - apply IHA1 in X.
   apply IHA2 in X0.
   rewrite <- (app_nil_l _).
-  apply plus_ilr ; constructor ; eassumption.
+  apply plus_ilr; constructor; assumption.
 Qed.
 
 End RTranslation.
 
 
-Lemma ie_ie_diag : forall A, ielem A ->
-  ill_ll (trans A (unill A) :: A :: nil) A.
+Lemma ie_ie_diag A : ielem A -> ill_ll (trans A (unill A) :: A :: nil) A.
 Proof.
-intros A Hgfn.
-eapply ex_ir ; [ | apply Permutation_Type_swap ].
-cons2app.
-rewrite <- (app_nil_l _).
+intros Hgfn.
+eapply ex_ir; [ | apply Permutation_Type_swap ].
+cons2app; rewrite <- (app_nil_l _).
 eapply cut_ir_axfree.
-- intros a ; destruct a.
-- apply ie_ie.
-  assumption.
-- apply negR_ilr ; try apply ax_exp_ill.
-  reflexivity.
+- intros a; destruct a.
+- apply ie_ie; assumption.
+- apply negR_ilr; [ reflexivity | apply ax_exp_ill | apply ax_exp_ill ].
 Qed.
 
-Lemma ie_dual_diag : forall A, ielem A ->
-  ill_ll (trans A (dual (unill A)) :: nil) A.
+Lemma ie_dual_diag  A : ielem A -> ill_ll (trans A (dual (unill A)) :: nil) A.
+Proof. apply ie_dual. Qed.
+
+Proposition llR_ie_to_ill_trans R l : ielem R -> llR (unill R) l -> ill_ll (map (trans R) l) R.
 Proof.
-intros A ; apply ie_dual.
-Qed.
-
-Proposition llR_ie_to_ill_trans : forall R l, ielem R ->
-  llR (unill R) l -> ill_ll (map (trans R) l) R.
-Proof with myeeasy ; try GPermutation_Type_solve.
-intros R l Hie Hll.
+intros Hie Hll.
 assert (Hax := @ax_exp_ill _ ipfrag_ill R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
 induction Hll ; 
@@ -287,86 +267,86 @@ induction Hll ;
   (try now (apply P_axfree in H ; inversion H)) ;
   (try now (inversion f)) ;
   cbn.
-- eapply ex_ir.
-  + eapply lmap_ilr ; [ | apply Hax ].
-    eapply (ax_ir _ (a2i X)).
-  + GPermutation_Type_solve.
-- eapply ex_ir...
-  apply Permutation_Type_map...
-- list_simpl in IHHll ; rewrite trans_wn in IHHll.
-  list_simpl ; rewrite trans_wn.
+- cons2app; rewrite <- (app_nil_l _).
+  apply lmap_ilr.
+  + apply (ax_ir _ (a2i X)).
+  + assumption.
+- eapply ex_ir; [ eassumption | ].
+  apply Permutation_Type_map; assumption.
+- list_simpl in IHHll; rewrite trans_wn in IHHll.
+  list_simpl; rewrite trans_wn.
   eapply Permutation_Type_map in p.
-  eapply ex_oc_ir...
-- rewrite <- (app_nil_l _).
-  rewrite <- (app_nil_l _).
-  apply lmap_ilr...
-  apply one_irr.
+  eapply ex_oc_ir; eassumption.
+- rewrite <- 2 (app_nil_l _).
+  apply lmap_ilr; [ apply one_irr | assumption ].
 - rewrite <- (app_nil_l (ione :: _)).
-  apply one_ilr...
+  apply one_ilr; assumption.
 - apply negR_irr in IHHll1.
   apply negR_irr in IHHll2.
   apply (tens_irr _ _ _ _ _ IHHll1) in IHHll2.
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll2) in Hax.
-  apply (ex_ir _ _ _ _ Hax)...
+  apply (ex_ir _ _ _ _ Hax).
+  fold (map (trans R)); list_simpl.
+  symmetry; etransitivity; [ apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity | ].
+  rewrite ? app_assoc; apply Permutation_Type_cons_append.
 - rewrite <- (app_nil_l (itens _ _ :: _)).
   apply tens_ilr.
-  eapply ex_ir...
+  eapply ex_ir; [ eassumption | apply Permutation_Type_swap ].
 - rewrite <- (app_nil_l (izero :: _)).
   apply zero_ilr.
 - apply negR_irr in IHHll.
   apply (plus_irr1 _ _ (negR R (trans R B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
-  apply (ex_ir _ _ _ _ Hax)...
+  apply (ex_ir _ _ _ _ Hax).
+  fold (map (trans R)); list_simpl.
+  symmetry; apply Permutation_Type_cons_append.
 - apply negR_irr in IHHll.
   apply (plus_irr2 _ _ (negR R (trans R B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
-  apply (ex_ir _ _ _ _ Hax)...
+  apply (ex_ir _ _ _ _ Hax).
+  fold (map (trans R)); list_simpl.
+  symmetry; apply Permutation_Type_cons_append.
 - rewrite <- (app_nil_l (iplus _ _ :: _)).
-  apply plus_ilr...
-- cbn in IHHll ; rewrite map_map in IHHll.
-  cbn in IHHll ; rewrite <- map_map in IHHll.
-  apply negR_irr in IHHll.
-  apply oc_irr in IHHll.
-  apply negR_ilr...
-  eapply ex_ir...
-  list_simpl...
-  rewrite ? map_map...
+  apply plus_ilr; assumption.
+- cbn in IHHll; rewrite map_map in IHHll.
+  cbn in IHHll; rewrite <- map_map in IHHll.
+  apply negR_irr, oc_irr in IHHll.
+  list_simpl in IHHll; rewrite ? map_map in IHHll.
+  apply negR_ilr; [ reflexivity | assumption | rewrite ? map_map; assumption ].
 - rewrite <- (app_nil_l (ioc _ :: _)).
-  apply de_ilr...
-  eapply ex_ir ; [ | apply Permutation_Type_middle ].
-  apply negR_ilr...
-  apply negR_irr.
-  eapply ex_ir...
+  apply de_ilr.
+  eapply ex_ir; [ | apply Permutation_Type_middle ].
+  apply negR_ilr; [ reflexivity | assumption | ].
+  apply negR_irr; assumption.
 - rewrite <- (app_nil_l (ioc _ :: _)).
-  apply wk_ilr...
+  apply wk_ilr; assumption.
 - rewrite <- (app_nil_l (ioc _ :: _)).
   change nil with (map (@ioc preiatom) nil).
   rewrite <- (app_nil_l (map _ _ ++ _)).
-  apply co_ilr.
-  eapply ex_ir...
+  apply co_ilr; assumption.
 - apply negR_irr in IHHll1.
   apply negR_irr in IHHll2.
   apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll1.
   apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll2.
   assert (pi0 := @trans_dual _ _ _ R (cutupd_ipfrag ipfrag_ill true) eq_refl eq_refl A).
   rewrite <- (app_nil_l _) in pi0.
-  eapply (cut_ir _ _ _ _ _ _ IHHll2) in pi0.
+  assert (@ipcut preiatom (cutupd_ipfrag ipfrag_ill true) = true) as Hcut by reflexivity.
+  eapply (@cut_ir _ _ Hcut _ _ _ _ _ IHHll2) in pi0.
   list_simpl in pi0.
-  eapply (cut_ir _ _ _ _ _ _ IHHll1) in pi0.
-  unfold ill_ll ;  change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
-  apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
-  eapply ex_ir...
-- destruct a ; subst.
-  + apply ie_dual_diag...
+  eapply (@cut_ir _ _ Hcut _ _ _ _ _ IHHll1) in pi0.
+  unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+  apply cut_admissible_ill_axfree; [ intros a; destruct a | ].
+  fold (map (trans R)) in pi0; list_simpl in pi0; list_simpl; assumption.
+- destruct a; subst.
+  + apply ie_dual_diag; assumption.
   + cbn.
-    eapply ex_ir ; [ | apply Permutation_Type_swap ].
+    eapply ex_ir; [ | apply Permutation_Type_swap ].
     rewrite <- 2 (app_nil_l (negR _ _ :: _)).
-    apply lmap_ilr...
+    apply lmap_ilr.
     * apply one_irr.
     * eapply ex_ir.
-      -- apply ie_ie_diag...
-      -- GPermutation_Type_solve.
-Unshelve. all : reflexivity.
+      -- apply ie_ie_diag; assumption.
+      -- apply Permutation_Type_swap.
 Qed.
 
 
@@ -378,45 +358,40 @@ Qed.
  - the sequent is provable in [ll].
 *)
 
-Theorem ill_trans_to_llR_bot : forall l : list formula,
+Theorem ill_trans_to_llR_bot (l : list formula) :
   (forall R, ill_ll (map (trans R) l) R) -> llR bot l.
-Proof with myeeasy ; try GPermutation_Type_solve.
-intros l Hill.
+Proof.
+intros Hill.
 remember (fresh_of_list l) as z.
 specialize Hill with (ivar (a2i z)).
-apply ill_trans_to_llR in Hill...
-apply (subs_llR _ bot z) in Hill ; subst.
+apply ill_trans_to_llR in Hill.
+apply (subs_llR bot z) in Hill; subst.
 cbn in Hill.
 rewrite repl_at_eq in Hill.
-- change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj)) (flat_map atom_list l))
-   with  (fresh_of_list l) in Hill.
-  rewrite (@subs_fresh_list atom_inf) in Hill...
+- change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
+                    (flat_map atom_list l))
+    with (fresh_of_list l) in Hill.
+  rewrite (@subs_fresh_list atom_inf) in Hill; assumption.
 - apply a2a_i.
 Qed.
 
-Theorem llR_bot_to_ll : forall l, llR bot l -> @ll_ll atom_inf l.
-Proof with myeeasy.
-intros l HR.
-induction HR ;
-  (try now (inversion f)) ;
-  try now constructor.
-- eapply ex_r...
-- eapply ex_wn_r...
-- eapply cut_ll_r...
+Theorem llR_bot_to_ll l : llR bot l -> @ll_ll atom_inf l.
+Proof.
+intros HR; induction HR; (try now (inversion f));
+  (try now constructor); try (econstructor; eassumption).
+- eapply cut_ll_r; eassumption.
 - destruct a.
   + apply one_r.
-  + apply bot_r.
-    apply one_r.
+  + apply bot_r, one_r.
 Qed.
 
-Theorem ll_ll_to_ill_trans : forall R (l : list formula),
-  ll_ll l -> ill_ll (map (trans R) l) R.
+Theorem ll_ll_to_ill_trans R (l : list formula) : ll_ll l -> ill_ll (map (trans R) l) R.
 Proof.
-intros R l Hll.
-apply (ll_to_ill_trans R) in Hll ; myeasy.
-- eapply stronger_ipfrag ; [ | apply Hll ].
-  nsplit 3 ; myeasy.
-  intros a ; destruct a.
+intros Hll%(ll_to_ill_trans R).
+- eapply stronger_ipfrag; [ | apply Hll ].
+  repeat split.
+  intros a; destruct a.
+- reflexivity.
 - intros L eqpmix; inversion eqpmix.
 Qed.
 
@@ -429,67 +404,48 @@ Qed.
  - the sequent is provable in [ll_mix02].
 *)
 
-Lemma ill_trans_to_llR_one : forall l : list formula,
-  ill_ll (map (trans ione) l) ione -> llR one l.
-Proof.
-apply ill_trans_to_llR.
-Qed.
+Lemma ill_trans_to_llR_one (l : list formula) : ill_ll (map (trans ione) l) ione -> llR one l.
+Proof. apply ill_trans_to_llR. Qed.
 
-Theorem llR_one_to_ll_mix02 : forall l, llR one l -> @ll_mix02 atom_inf l.
-Proof with myeeasy.
-intros l pi.
-induction pi ; try now constructor.
-- eapply ex_r...
-- eapply ex_wn_r...
-- eapply cut_mix02_r...
-- destruct a ; cbn.
+Theorem llR_one_to_ll_mix02 l : llR one l -> @ll_mix02 atom_inf l.
+Proof.
+intros pi; induction pi; (try now constructor); try (econstructor; eassumption).
+- eapply cut_mix02_r; eassumption.
+- destruct a; cbn.
   + apply bot_r.
     change nil with (concat (@nil (list formula))).
-    apply mix_r...
-    apply Forall_inf_nil.
+    apply mix_r; constructor.
   + change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
-    apply mix_r...
-    repeat (apply Forall_inf_cons; try apply one_r)...
+    apply mix_r; [ reflexivity | ].
+    repeat (apply Forall_inf_cons; try apply one_r).
     apply Forall_inf_nil.
 Qed.
 
-Theorem ll_mix02_to_ill_trans : forall l : list formula,
-  ll_mix02 l -> ill_ll (map (trans ione) l) ione.
-Proof with myeeasy.
-intros l Hll.
-apply (ll_to_ill_trans ione) in Hll ; myeasy.
-- eapply stronger_ipfrag ; [ | apply Hll ].
-  nsplit 3 ; myeasy.
-  intros a ; destruct a.
+Theorem ll_mix02_to_ill_trans (l : list formula) : ll_mix02 l -> ill_ll (map (trans ione) l) ione.
+Proof.
+intros Hll%(ll_to_ill_trans ione).
+- eapply stronger_ipfrag; [ | apply Hll ].
+  repeat split.
+  intros a; destruct a.
+- reflexivity.
 - intros L eqpmix FL FLind.
-  destruct L.
-  { apply one_irr. }
-  destruct L.
-  { inversion eqpmix. }
-  destruct L.
-  { cbn.
-    rewrite app_nil_r.
-    assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l0) ione).
-    { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin.
-      { left... }
-      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-      refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
-    assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l1) ione).
-    { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin.
-      { right; left... }
-      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-      refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
-    rewrite map_app.
-    rewrite <- (app_nil_l (map _ l0 ++ map _ l1)).
-    rewrite <- (app_nil_r (map _ l0 ++ map _ l1)).
-    eapply cut_ir_axfree.
-    + intros a ; destruct a.
-    + apply tens_irr...
-    + apply tens_ilr.
-      apply one_ilr.
-      apply one_ilr.
-      apply one_irr. }
-    inversion eqpmix.
+  destruct L; [ apply one_irr | ].
+  destruct L; [ inversion eqpmix | ].
+  destruct L; [ | inversion eqpmix ].
+  cbn; rewrite app_nil_r.
+  assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l0) ione).
+  { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by (left; reflexivity).
+    apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+    refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+  assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l1) ione).
+  { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; left; reflexivity).
+    apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+    refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+  rewrite map_app, <- (app_nil_l (map _ l0 ++ map _ l1)), <- (app_nil_r (map _ l0 ++ map _ l1)).
+  eapply cut_ir_axfree.
+  + intros a; destruct a.
+  + apply tens_irr; eassumption.
+  + apply tens_ilr, one_ilr, one_ilr, one_irr.
 Qed.
 
 (** ** Study of the case [R = zero] *)
@@ -499,29 +455,18 @@ Qed.
  - the sequent is provable in [llR zero].
 *)
 
-Lemma ill_trans_to_llR_zero : forall l : list formula,
-  ill_ll (map (trans izero) l) izero -> llR zero l.
-Proof.
-apply ill_trans_to_llR.
-Qed.
+Lemma ill_trans_to_llR_zero (l : list formula) : ill_ll (map (trans izero) l) izero -> llR zero l.
+Proof. apply ill_trans_to_llR. Qed.
 
-Lemma llR_zero_to_ill_trans : forall l : list formula,
-  llR zero l -> ill_ll (map (trans izero) l) izero.
-Proof with myeeasy.
-intros l pi.
-eapply llR_ie_to_ill_trans...
-constructor.
-Qed.
+Lemma llR_zero_to_ill_trans (l : list formula) : llR zero l -> ill_ll (map (trans izero) l) izero.
+Proof. intros pi; apply llR_ie_to_ill_trans; [ constructor | assumption ]. Qed.
 
 (** Moreover in these systems, the general weakening rule is admissible. *)
-Lemma aff_to_ill_trans : forall l A,
-  ill_ll (map (trans izero) l) izero -> ill_ll (map (trans izero) (A :: l)) izero.
-Proof with myeeasy.
-intros l A Hll.
-cbn.
-cons2app.
+Lemma aff_to_ill_trans l A : ill_ll (map (trans izero) l) izero -> ill_ll (map (trans izero) (A :: l)) izero.
+Proof.
+intros Hll; cbn; cons2app.
 rewrite <- (app_nil_r (map _ _)).
-eapply cut_ir_axfree ; try (now (intros a ; destruct a))...
+eapply cut_ir_axfree; [ intros a; destruct a | eassumption | ].
 apply zero_ilr.
 Qed.
 
@@ -534,10 +479,10 @@ Qed.
  - the sequent is provable in [ll_mix0].
 *)
 
-Theorem ill_trans_to_llR_wn_one : forall l : list formula,
+Theorem ill_trans_to_llR_wn_one (l : list formula) :
   (forall R, ill_ll nil R -> ill_ll (map (trans R) l) R) -> llR (wn one) l.
-Proof with myeeasy ; try GPermutation_Type_solve.
-intros l Hill.
+Proof.
+intros Hill.
 remember (fresh_of_list l) as z.
 assert (ill_ll nil (ilpam (ioc (ivar (a2i z))) (ivar (a2i z))))
   as Hz.
@@ -547,67 +492,57 @@ assert (ill_ll nil (ilpam (ioc (ivar (a2i z))) (ivar (a2i z))))
 specialize Hill with (ilpam (ioc (ivar (a2i z))) (ivar (a2i z))).
 assert (Hz2 := Hz).
 apply Hill in Hz2 ; clear Hill.
-apply ill_trans_to_llR in Hz2...
-apply (subs_llR _ bot z) in Hz2 ; subst.
-simpl in Hz2; unfold IAtom2Atom in Hz2; rewrite a2a_i, repl_at_eq in Hz2...
-eapply (llR1_R2 _ (wn one)) in Hz2.
-- change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj)) (flat_map atom_list l))
+apply ill_trans_to_llR in Hz2.
+apply (subs_llR bot z) in Hz2; subst.
+simpl in Hz2; unfold IAtom2Atom in Hz2; rewrite a2a_i, repl_at_eq in Hz2; [ | reflexivity ].
+eapply (@llR1_R2 _ _ (wn one)) in Hz2.
+- change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
+                    (flat_map atom_list l))
    with  (fresh_of_list l) in Hz2.
-  rewrite (@subs_fresh_list atom_inf) in Hz2...
-- cbn.
-  rewrite <- (app_nil_l (wn _ :: _)).
+  rewrite (@subs_fresh_list atom_inf) in Hz2; assumption.
+- cbn; rewrite <- (app_nil_l (wn _ :: _)).
   apply tens_r.
   + change (wn one :: nil) with (map (@wn atom) (one :: nil)).
-    apply oc_r ; cbn.
-    apply bot_r.
-    apply de_r.
-    apply one_r.
+    apply oc_r, bot_r, de_r, one_r.
   + apply one_r.
-- cbn.
-  apply (ex_r (parr bot (wn one) :: oc bot :: nil))...
-  apply parr_r.
-  apply bot_r.
+- apply (ex_r (parr bot (wn one) :: oc bot :: nil)); [ | apply Permutation_Type_swap ].
+  apply parr_r, bot_r.
   change (oc bot) with (@dual atom (wn one)).
   apply ax_exp.
 Qed.
 
-Theorem llR_wn_one_to_ll_mix0 : forall l, llR (wn one) l -> @ll_mix0 atom_inf l.
-Proof with myeeasy.
-intros l pi.
-induction pi ; try now constructor.
-- eapply ex_r...
-- eapply ex_wn_r...
-- eapply cut_mix0_r...
-- destruct a ; cbn.
+Theorem llR_wn_one_to_ll_mix0 l : llR (wn one) l -> @ll_mix0 atom_inf l.
+Proof.
+intros pi; induction pi; (try now constructor); try (econstructor; eassumption).
+- eapply cut_mix0_r; eassumption.
+- destruct a; cbn.
   + change nil with (map (@wn atom) nil).
-    apply oc_r.
-    apply bot_r.
+    apply oc_r, bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
-    apply mix_r...
-    apply Forall_inf_nil.
-  + apply wk_r.
-    apply one_r.
+    apply mix_r; constructor.
+  + apply wk_r, one_r.
 Qed.
 
-Theorem ll_mix0_to_ill_trans : forall R (l : list formula),
-  ill_ll nil R -> ll_mix0 l -> ill_ll (map (trans R) l) R.
-Proof with myeeasy.
-intros R l HR Hll.
+Theorem ll_mix0_to_ill_trans R (l : list formula) : ill_ll nil R -> ll_mix0 l ->
+  ill_ll (map (trans R) l) R.
+Proof.
+intros HR Hll.
 apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 true)) in Hll.
-- apply (ll_to_ill_trans R) in Hll ; myeasy.
-  + unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
-    apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
-    eapply stronger_ipfrag ; [ | apply Hll ].
-    nsplit 3...
-    intros a ; destruct a.
+- apply (ll_to_ill_trans R) in Hll.
+  + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+    apply cut_admissible_ill_axfree; [ intros a; destruct a | ].
+    eapply stronger_ipfrag; [ | apply Hll ].
+    repeat split.
+    intros a; destruct a.
+  + reflexivity.
   + intros L eqpmix FL FLind.
     destruct L; try now inversion eqpmix.
-    cbn.
-    eapply stronger_ipfrag ; [ | apply HR ].
-    nsplit 3...
-    intros a ; destruct a.
-- nsplit 4...
-  intros a ; destruct a.
+    cbn; eapply stronger_ipfrag; [ | apply HR ].
+    repeat split.
+    intros a; destruct a.
+- repeat split.
+  + intros a; destruct a.
+  + reflexivity.
 Qed.
 
 (** ** Study of the case [R = oc bot] *)
@@ -618,152 +553,131 @@ Qed.
  - the sequent is provable in [ll_bbb].
 *)
 
-Theorem ill_trans_to_llR_oc_bot : forall l : list formula,
+Theorem ill_trans_to_llR_oc_bot (l : list formula) :
   (forall R, ill_ll (map (trans (ioc R)) l) (ioc R)) ->
   llR (oc bot) l.
-Proof with myeeasy ; try GPermutation_Type_solve.
-intros l Hill.
+Proof.
+intros Hill.
 remember (fresh_of_list l) as z.
 specialize Hill with (ivar (a2i z)).
-apply ill_trans_to_llR in Hill...
-apply (subs_llR _ bot z) in Hill ; subst.
-simpl in Hill; unfold IAtom2Atom in Hill; rewrite a2a_i, repl_at_eq in Hill...
-change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj)) (flat_map atom_list l))
+apply ill_trans_to_llR in Hill.
+apply (subs_llR bot z) in Hill ; subst.
+simpl in Hill; unfold IAtom2Atom in Hill; rewrite a2a_i, repl_at_eq in Hill; [ | reflexivity ].
+change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
+                  (flat_map atom_list l))
    with  (fresh_of_list l) in Hill.
-rewrite (@subs_fresh_list atom_inf) in Hill...
+rewrite (@subs_fresh_list atom_inf) in Hill; assumption.
 Qed.
 
-Theorem llR_oc_bot_to_ll_bbb : forall l, llR (oc bot) l -> @ll_bbb atom_inf l.
+Theorem llR_oc_bot_to_ll_bbb l : llR (oc bot) l -> @ll_bbb atom_inf l.
+Proof. apply bb_to_bbb. Qed.
+
+Lemma ll_mix02_to_ill_trans_gen R (l : list formula) : ll_mix02 l ->
+  ill_ll (ioc R :: map (trans (ioc R)) l) (ioc R).
 Proof.
-apply bb_to_bbb.
-Qed.
-
-Lemma ll_mix02_to_ill_trans_gen : forall R (l : list formula),
- ll_mix02 l -> ill_ll (ioc R :: map (trans (ioc R)) l) (ioc R).
-Proof with myeeasy.
-intros R l Hll.
+intros Hll.
 change (ioc R :: map (trans _) l)
   with (map ioc (R :: nil) ++ map (trans (ioc R)) l).
 apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
-- eapply (ll_to_ill_trans_gen (ioc R) _ _ (R :: nil)) in Hll ; myeasy.
-  + unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+- assert (@pperm atom_inf (cutupd_pfrag pfrag_mix02 true) = true) as Hperm by reflexivity.
+  apply (ll_to_ill_trans_gen (ioc R) Hperm (R :: nil)) in Hll.
+  + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
     apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
     eapply stronger_ipfrag ; [ | apply Hll ].
-    nsplit 3...
-    intros a ; destruct a.
+    repeat split.
+    intros a; destruct a.
   + intros L eqpmix FL FLind.
-    destruct L.
-    { intros ; apply ax_exp_ill. }
-    destruct L.
-    { inversion eqpmix. }
-    destruct L.
-    { assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) true))
-               (map ioc (R :: nil) ++ map (trans (ioc R)) l0) (ioc R)).
-      { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin.
-        { left... }
-        apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-        refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+    destruct L; [ intros; apply ax_exp_ill | ].
+    destruct L; [ inversion eqpmix | ].
+    destruct L; [ | inversion eqpmix ].
     assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) true))
-               (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
-      { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin.
-        { right; left... }
-        apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-        refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
-      cbn.
-      rewrite app_nil_r.
-      rewrite map_app.
-      rewrite <- (app_nil_l (ioc R :: _)).
-      rewrite <- (app_nil_r (map _ l1)).
-      rewrite app_comm_cons.
-      rewrite (app_assoc _ (map _ l1)).
-      eapply (cut_ir _ (itens (ioc R) (ioc R))).
-      - rewrite <- 2 (app_nil_l (ioc R :: _)).
-        rewrite <- ? app_assoc.
-        change nil with (map (@ioc preiatom) nil) at 2.
-        apply co_ilr.
-        eapply ex_ir.
-        + apply tens_irr ; [ apply X | apply X0 ].
-        + GPermutation_Type_solve.
-      - apply tens_ilr.
-        apply wk_ilr.
-        apply ax_exp_ill. }
-    inversion eqpmix.
-- nsplit 4...
-  intros a ; destruct a.
-Unshelve. all: reflexivity.
+                (map ioc (R :: nil) ++ map (trans (ioc R)) l0) (ioc R)).
+    { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by (left; reflexivity).
+      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+      apply (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+    assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) true))
+                (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
+    { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; left; reflexivity).
+      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
+      apply (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+    cbn.
+    rewrite app_nil_r, map_app, <- (app_nil_l (ioc R :: _)), <- (app_nil_r (map _ l1)).
+    rewrite app_comm_cons, (app_assoc _ (map _ l1)).
+    assert (ipcut (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) true)) = true)
+      as Hcut by reflexivity.
+    apply (@cut_ir _ _ Hcut (itens (ioc R) (ioc R))).
+    * rewrite <- 2 (app_nil_l (ioc R :: _)), <- ? app_assoc.
+      change nil with (map (@ioc preiatom) nil) at 2.
+      apply co_ilr.
+      eapply ex_ir.
+      -- apply tens_irr; [ apply X | apply X0 ].
+      -- symmetry; apply Permutation_Type_cons, Permutation_Type_middle; reflexivity.
+    * apply tens_ilr, wk_ilr, ax_exp_ill.
+- repeat split; [ | reflexivity ].
+  intros a; destruct a.
 Qed.
 
-Theorem ll_bbb_to_ill_trans : forall R (l : list formula),
-  ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
-Proof with myeeasy ; try GPermutation_Type_solve ; try now (apply ax_exp_ill).
-intros R l Hll.
-induction Hll ; (try now (inversion f)) ; cbn.
-- eapply ex_ir.
-  + eapply lmap_ilr ; [ | ].
-    * eapply (ax_ir _ (a2i X)).
-    * rewrite app_nil_l...
-  + GPermutation_Type_solve.
-- eapply ex_ir...
-  apply Permutation_Type_map...
+Theorem ll_bbb_to_ill_trans R (l : list formula) : ll_bbb l ->
+  ill_ll (map (trans (ioc R)) l) (ioc R).
+Proof.
+intros Hll; induction Hll; (try now (inversion f)); cbn.
+- cons2app; rewrite <- (app_nil_l _).
+  apply lmap_ilr.
+  + apply (ax_ir _ (a2i X)).
+  + rewrite app_nil_l; apply ax_exp_ill.
+- eapply ex_ir; [ eassumption | apply Permutation_Type_map; assumption ].
 - apply (ll_mix02_to_ill_trans_gen R) in l.
   rewrite <- (app_nil_l (ioc _ :: _)) in l.
   rewrite map_app.
   rewrite <- (app_nil_r (map _ l1)).
-  eapply (cut_ir_axfree) ; [ intros a ; destruct a | | ]...
-  eapply ex_ir ; [ | apply Permutation_Type_app_comm ]...
-- apply negR_ilr...
+  eapply (cut_ir_axfree); [ intros a; destruct a | eassumption | ].
+  eapply ex_ir; [ | apply Permutation_Type_app_comm ]; assumption.
+- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
   apply one_irr.
 - rewrite <- (app_nil_l (ione :: _)).
-  apply one_ilr...
-- apply negR_ilr...
+  apply one_ilr; assumption.
+- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
   list_simpl.
-  eapply ex_ir ; [ | apply Permutation_Type_app_comm ].
-  apply tens_irr ; apply negR_irr ; eapply ex_ir.
-  + apply IHHll1.
-  + GPermutation_Type_solve.
-  + apply IHHll2.
-  + GPermutation_Type_solve.
+  eapply ex_ir; [ | apply Permutation_Type_app_comm ].
+  list_simpl in IHHll1; list_simpl in IHHll2.
+  apply tens_irr; apply negR_irr; assumption.
 - rewrite <- (app_nil_l (itens _ _ :: _)).
   apply tens_ilr.
-  eapply ex_ir...
+  eapply ex_ir; [ eassumption | apply Permutation_Type_swap ].
 - rewrite <- (app_nil_l (izero :: _)).
   apply zero_ilr.
-- apply negR_ilr...
-  apply plus_irr1 ; apply negR_irr ; eapply ex_ir...
-- apply negR_ilr...
-  apply plus_irr2 ; apply negR_irr ; eapply ex_ir...
-- rewrite <- (app_nil_r (map _ _)).
-  rewrite <- (app_nil_l (iplus _ _ :: _)).
-  apply plus_ilr ; eapply ex_ir ; [ apply IHHll1 | | apply IHHll2 | ]...
-- apply negR_ilr...
-  rewrite map_map ; cbn.
-  rewrite <- map_map.
-  cbn in IHHll ; rewrite map_map in IHHll.
-  cbn in IHHll ; rewrite <- map_map in IHHll.
-  apply oc_irr.
-  apply negR_irr.
-  eapply ex_ir...
+- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
+  apply plus_irr1; apply negR_irr; assumption.
+- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
+  apply plus_irr2; apply negR_irr; assumption.
+- rewrite <- (app_nil_r (map _ _)), <- (app_nil_l (iplus _ _ :: _)).
+  list_simpl in IHHll1; list_simpl in IHHll2.
+  apply plus_ilr; list_simpl; [ apply IHHll1 | apply IHHll2 ].
+- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
+  rewrite map_map; cbn; rewrite <- map_map.
+  cbn in IHHll; rewrite map_map in IHHll.
+  cbn in IHHll; rewrite <- map_map in IHHll.
+  apply oc_irr, negR_irr; assumption.
 - rewrite <- (app_nil_l (ioc _ :: _)).
-  apply de_ilr...
+  apply de_ilr.
   list_simpl.
-  apply negR_ilr...
-  apply negR_irr...
+  apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
+  apply negR_irr; assumption.
 - rewrite <- (app_nil_l (ioc _ :: _)).
-  apply wk_ilr...
+  apply wk_ilr; assumption.
 - rewrite <- 2 (app_nil_l (ioc _ :: _)).
   change nil with (map (@ioc preiatom) nil).
-  apply co_ilr.
-  eapply ex_ir...
+  apply co_ilr; assumption.
 Qed.
 
 (** The following result is the converse of [bb_to_bbb] proved in the [bbb] library *)
 
-Theorem bbb_to_bb : forall l, ll_bbb l -> @llR atom_inf (oc bot) l.
+Theorem bbb_to_bb l : ll_bbb l -> @llR atom_inf (oc bot) l.
 Proof.
-intros l pi.
+intros pi.
 apply ill_trans_to_llR_oc_bot.
 intros R.
-apply ll_bbb_to_ill_trans ; eassumption.
+apply ll_bbb_to_ill_trans; assumption.
 Qed.
 
 End Atoms.

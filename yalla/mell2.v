@@ -3,14 +3,15 @@
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory dectype List_more
-                           Permutation_Type_more Permutation_Type_solve Dependent_Forall_Type.
+From OLlibs Require Import funtheory dectype List_more Permutation_Type_more Dependent_Forall_Type.
 
 
 (** ** 0. load the [yalla] library *)
 
 From Yalla Require Import atoms.
 From Yalla Require ll_cut.
+
+Set Implicit Arguments.
 
 
 Section Atoms.
@@ -109,7 +110,7 @@ Inductive mell : list formula -> Type :=
               mell (wn A :: l).
 
 Instance mell_perm : Proper ((@Permutation_Type _) ==> arrow) mell.
-Proof. intros l1 l2 HP pi; apply (ex_r l1); assumption. Qed.
+Proof. intros l1 l2 HP pi; apply ex_r with l1; assumption. Qed.
 
 (** ** 4. characterize corresponding [ll] fragment *)
 
@@ -131,7 +132,7 @@ intros pi; induction pi; try (now constructor); rewrite ? map_app.
   apply ll_def.mix_r; now repeat constructor.
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r IHpi1 IHpi2).
-  + cbn; Permutation_Type_solve.
+  + cbn; rewrite map_app; apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
 - cbn; rewrite mell2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- mell2ll_map_wn; assumption.
@@ -182,7 +183,7 @@ revert l Heql0; induction pi using ll_def.ll_nested_ind; intros l' Heql0; subst;
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1; reflexivity.
   + apply IHpi2; reflexivity.
-  + Permutation_Type_solve.
+  + apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
 - destruct l'; inversion Heql0.
   destruct f; inversion H0; subst.
   apply parr_r, IHpi; reflexivity.

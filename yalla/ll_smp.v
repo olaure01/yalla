@@ -3,8 +3,7 @@
 (** * Example of a concrete use of the yalla library: LL *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory infinite List_more
-                           Permutation_Type_more Permutation_Type_solve.
+From OLlibs Require Import funtheory infinite List_more Permutation_Type_more.
 
 
 (** ** 0. load the [yalla] library *)
@@ -132,7 +131,7 @@ intros pi; induction pi; try (now constructor); try rewrite map_app.
   apply Permutation_Type_map; assumption.
 - eapply ll_def.ex_r.
   + apply (ll_def.tens_r IHpi1 IHpi2).
-  + cbn; Permutation_Type_solve.
+  + list_simpl; apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
 - cbn; rewrite ll2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- ll2ll_map_wn; assumption.
@@ -208,8 +207,7 @@ Lemma ax_gen_r A : ll (dual A :: A :: nil).
 Proof.
 apply llfrag2ll.
 cbn ; rewrite <- ll2ll_dual.
-eapply ll_def.ex_r ; [ apply ll_def.ax_exp
-                     | apply Permutation_Type.Permutation_Type_swap ].
+eapply ll_def.ex_r; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
 Qed.
 
 (** *** cut admissibility *)

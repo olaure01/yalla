@@ -5,10 +5,9 @@
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
 From Coq Require Import CMorphisms BoolOrder PeanoNat Lia.
-From OLlibs Require Import dectype List_more Dependent_Forall_Type
-                           Permutation_Type_more CPermutation_Type Permutation_Type_solve
-                           CPermutation_Type_solve GPermutation_Type.
-From Yalla Require Export basic_misc formulas.
+From OLlibs Require Import dectype funtheory List_more Dependent_Forall_Type
+                           Permutation_Type_more CPermutation_Type GPermutation_Type.
+From Yalla Require Export formulas.
 From Yalla Require issue12394. (* TODO remove when issue #12394 solved *)
 
 Import EqNotations.
@@ -559,7 +558,7 @@ replace (wn a :: wn a :: map wn l ++ map wn l ++ l')
    with (nil ++ map wn (a :: a :: l ++ l) ++ l')
   by (list_simpl; reflexivity).
 apply ex_wn_r with ((a :: l) ++ a :: l); [ list_simpl; list_simpl in pi; assumption | ].
-rewrite (app_comm_cons _ l); symmetry; apply Permutation_Type_cons_app; reflexivity.
+rewrite (app_comm_cons _ l); symmetry; apply Permutation_Type_middle.
 Qed.
 
 Lemma co_const_list_r P n A l : ll P (repeat (wn A) n ++ l) -> ll P ((wn A) :: l).
@@ -582,21 +581,30 @@ induction L in l0, l |- *; intros pi.
     [ | rewrite P_perm; cbn; rewrite 2 (app_assoc _ _ (a ++ _));
         apply Permutation_Type_app_tail, Permutation_Type_app_swap ].
   apply co_list_r.
-  apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L);
-    [ | rewrite P_perm; cbn; Permutation_Type_solve ].
-  apply IHL.
-  rewrite <- app_assoc; assumption.
+  apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L).
+  + apply IHL.
+    rewrite <- app_assoc; assumption.
+  + rewrite P_perm; cbn.
+    rewrite ? app_assoc; apply Permutation_Type_app_tail.
+    etransitivity; [ apply Permutation_Type_app_comm | ].
+    rewrite <- ? app_assoc; apply Permutation_Type_app_head.
+    rewrite ? app_assoc; apply Permutation_Type_app_tail.
+    apply Permutation_Type_app_comm.
 Qed.
 
 Lemma ex_concat_r P (P_perm : pperm P = true) l A L :
   ll P (l ++ flat_map (cons A) L) -> ll P (l ++ repeat A (length L) ++ concat L).
 Proof.
 induction L in l |- *; intros pi; [ assumption | ].
-apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L);
-  [ | rewrite P_perm; cbn; Permutation_Type_solve]...
-apply IHL.
-now apply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L);
-  [ | rewrite P_perm; cbn; symmetry; apply Permutation_Type_cons_app; rewrite app_assoc ].
+apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L).
+- apply IHL.
+  now apply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L);
+    [ | rewrite P_perm; cbn; symmetry; apply Permutation_Type_cons_app; rewrite app_assoc ].
+- rewrite P_perm; cbn.
+  cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail.
+  list_simpl.
+  etransitivity; [ apply Permutation_Type_middle | ].
+  apply Permutation_Type_app_head, Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
 Qed.
 
 
@@ -1418,8 +1426,11 @@ induction pi using ll_nested_ind ; try (now constructor).
 - eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   apply co_list_r.
   apply ex_r with (tens A B :: (l2 ++ map wn l0) ++ l1 ++ map wn l0);
-    [ | rewrite Q_perm; GPermutation_Type_solve ].
-  apply tens_r; assumption.
+    [ apply tens_r; assumption | rewrite Q_perm; cbn ].
+  list_simpl; rewrite ? app_comm_cons; remember (tens A B :: l2) as l2'.
+  symmetry; etransitivity; [ apply Permutation_Type_app_comm | ].
+  rewrite ? app_assoc; apply Permutation_Type_app_tail, Permutation_Type_app_tail.
+  apply Permutation_Type_app_comm.
 - rewrite <- app_comm_cons, <- map_app in IHpi.
   rewrite <- app_comm_cons, <- map_app.
   apply oc_r; assumption.

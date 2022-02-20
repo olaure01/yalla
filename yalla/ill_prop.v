@@ -298,10 +298,12 @@ Qed.
 
 (** A fragment is a subset stable under sub-formula *)
 Definition ifragment FS :=
-  forall A : iformula, is_true (FS A) -> forall B, isubform B A -> is_true (FS B).
+  forall A : iformula, FS A -> forall B, isubform B A -> FS B.
+
+Definition ifragmentb FS := ifragment (fun A => is_true (FS A)).
 
 (** Conservativity over fragments *)
-Lemma iconservativity {P} : ipcut P = false -> forall FS, ifragment FS ->
+Lemma iconservativity {P} : ipcut P = false -> forall FS, ifragmentb FS ->
   forall l A, ill_ps P (fun _ _ => true) l A -> is_true (forallb FS (A :: l)) ->
     ill_ps P (fun l0 A0 => forallb FS (A0 :: l0)) l A.
 Proof.
@@ -589,7 +591,7 @@ apply iconservativity; trivial.
 Qed.
 
 Lemma cut_admissible_ifragment_axfree {P} : (projT1 (ipgax P) -> False) ->
-forall FS, ifragment FS -> forall l A,
+forall FS, ifragmentb FS -> forall l A,
   ill_ps P (fun l A => forallb FS (A :: l)) l A ->
   ill_ps (cutrm_ipfrag P) (fun l A => forallb FS (A :: l)) l A.
 Proof.
@@ -602,7 +604,7 @@ now apply iconservativity.
 Qed.
 
 Lemma iconservativity_axfree {P} : (projT1 (ipgax P) -> False) ->
-forall FS, ifragment FS ->
+forall FS, ifragmentb FS ->
   forall l A, ill P l A -> is_true (forallb FS (A :: l)) ->
     ill_ps P (fun l A => forallb FS (A :: l)) l A.
 Proof.

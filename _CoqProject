@@ -13,7 +13,6 @@ microyalla/nano_macro_ill.v
 microyalla/nano_macro_ll.v
 
 yalla/atoms.v
-yalla/basic_misc.v
 yalla/bbb.v
 yalla/fmformulas.v
 yalla/fmiformulas.v
@@ -39,6 +38,7 @@ yalla/mell2.v
 yalla/mell_msetoid.v
 yalla/mell_mset.v
 yalla/mell_Prop.v
+yalla/ollibs_ext.v
 yalla/nn_def.v
 yalla/nn_foc.v
 yalla/nn_prop.v

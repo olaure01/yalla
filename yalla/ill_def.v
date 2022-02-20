@@ -5,8 +5,8 @@
 (* no results about cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 
 From Coq Require Import CMorphisms BoolOrder Lia.
-From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
-From Yalla Require Export basic_misc iformulas.
+From OLlibs Require Import dectype funtheory List_more Permutation_Type_more GPermutation_Type.
+From Yalla Require Export iformulas.
 
 
 Section Atoms.

@@ -125,9 +125,9 @@ revert l3 l4 Heql; induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
   rewrite 2 app_comm_cons; apply IHpi; list_simpl; reflexivity.
 - dichot_elt_app_inf_exec Heq; subst.
   + apply (ex_r (l0 ++ l4 ++ l2 ++ l1 ++ l)).
-    * eapply (cut_r (dual A0)); [ rewrite bidual | assumption ].
+    * apply (@cut_r _ _ f (dual A0)); [ rewrite bidual | assumption ].
       apply (ex_r ((l2 ++ l1) ++ l ++ A0 :: l4)).
-      -- eapply (cut_r (dual A)); try rewrite bidual.
+      -- apply (@cut_r _ _ f (dual A)); try rewrite bidual.
          ++ eapply ex_r; [ apply pi2 | ].
             rewrite 2 app_comm_cons; apply PCPermutation_Type_app_comm.
          ++ eapply ex_r; [ apply (gax_r a) | ].
@@ -138,9 +138,9 @@ revert l3 l4 Heql; induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
     * rewrite 2 app_assoc.
       etransitivity; [ apply PCPermutation_Type_app_comm | ]; list_simpl; reflexivity.
   + apply (ex_r (l3 ++ l6 ++ l2 ++ l1 ++ l5)).
-    * eapply (cut_r A0); [ | assumption ].
+    * apply (@cut_r _ _ f A0); [ | assumption ].
       apply (ex_r ((l2 ++ l1) ++ l5 ++ dual A0 :: l6)).
-      -- eapply (cut_r (dual A)); try rewrite bidual.
+      -- apply (@cut_r _ _ f (dual A)); try rewrite bidual.
          ++ eapply ex_r; [ apply pi1 | ].
             rewrite 2 app_comm_cons; apply PCPermutation_Type_app_comm.
          ++ eapply ex_r; [ apply (gax_r a) | ].
@@ -149,7 +149,6 @@ revert l3 l4 Heql; induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
          etransitivity; [ | apply PCPermutation_Type_app_comm ]; list_simpl; reflexivity.
     * rewrite 2 app_assoc.
       etransitivity; [ apply PCPermutation_Type_app_comm | ]; list_simpl; reflexivity.
-    Unshelve. all: assumption.
 - destruct (Hcut _ _ _ _ _ _ _ Hgax Heq) as [x Hcut'].
   apply (ex_r (l4 ++ l2 ++ l1 ++ l5)).
   + rewrite <- Hcut'; apply (gax_r x).
@@ -299,16 +298,15 @@ remember (l1 ++ dual A :: l2) as l; destruct_ll pi2 f X l Hl Hr HP FL a; cbn in 
     refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_assoc.
-    eapply (cut_r A0); [ assumption | ].
+    apply (@cut_r _ _ f A0); [ assumption | ].
     list_simpl; rewrite app_comm_cons.
     revert Hr IHsize0; rewrite app_comm_cons; intros Hr IHsize0.
     refine (IHsize0 (psize pi1 + psize Hr) _ _ _ _ _ pi1 Hr _ Hat); lia.
   + list_simpl.
-    eapply (cut_r A0); [ | assumption ].
+    apply (@cut_r _ _ f A0); [ | assumption ].
     list_simpl; rewrite app_comm_cons.
     revert Hl IHsize0; rewrite app_comm_cons; intros Hl IHsize0.
     refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
-  Unshelve. all: assumption.
 - rewrite <- (app_nil_r l0), <- app_assoc.
   apply cut_gax_l with A a; try assumption.
   destruct Hat as [[X HX] | [X HX]]; subst; constructor.

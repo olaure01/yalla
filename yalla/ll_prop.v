@@ -10,6 +10,7 @@ From Yalla Require Export ll_cut.
 
 Set Implicit Arguments.
 
+
 Section Atoms.
 
 Context {atom : DecType}.
@@ -81,9 +82,11 @@ assert (ll P (dual (awith A B) :: A :: nil)) as pi'.
 { apply plus_r1.
   eapply ex_r ; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r ((l2 ++ l1) ++ A :: nil)) ; [ | GPermutation_Type_solve ].
-eapply cut_r_axfree; try eassumption.
-eapply ex_r; [ apply pi | GPermutation_Type_solve ].
+eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
+- eapply cut_r_axfree; try eassumption.
+  eapply ex_r; [ apply pi | ].
+  rewrite app_comm_cons; apply PCPermutation_Type_app_comm.
+- list_simpl; cons2app; rewrite (app_assoc l1); apply PCPermutation_Type_app_comm.
 Qed.
 
 Lemma with_rev2_noax P : (projT1 (pgax P) -> False) ->
@@ -94,9 +97,11 @@ assert (ll P (dual (awith B A) :: A :: nil)) as pi'.
 { apply plus_r2.
   eapply ex_r; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r ((l2 ++ l1) ++ A :: nil)); [ | GPermutation_Type_solve ].
-eapply cut_r_axfree; try eassumption.
-eapply ex_r; [ apply pi | GPermutation_Type_solve ].
+eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
+- eapply cut_r_axfree; try eassumption.
+  eapply ex_r; [ apply pi | ].
+  rewrite app_comm_cons; apply PCPermutation_Type_app_comm.
+- list_simpl; cons2app; rewrite (app_assoc l1); apply PCPermutation_Type_app_comm.
 Qed.
 
 Lemma oc_rev_noax P : (projT1 (pgax P) -> False) ->
@@ -107,9 +112,11 @@ assert (ll P (dual (oc A) :: A :: nil)) as pi'.
 { apply de_r.
   eapply ex_r; [ | apply PCPermutation_Type_swap ].
   apply ax_exp. }
-eapply (ex_r ((l2 ++ l1) ++ A :: nil)); [ | GPermutation_Type_solve ].
-eapply cut_r_axfree; try eassumption.
-eapply ex_r; [ apply pi | GPermutation_Type_solve ].
+eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
+- eapply cut_r_axfree; try eassumption.
+  eapply ex_r; [ apply pi | ].
+  rewrite app_comm_cons; apply PCPermutation_Type_app_comm.
+- list_simpl; cons2app; rewrite (app_assoc l1); apply PCPermutation_Type_app_comm.
 Qed.
 
 
@@ -286,10 +293,12 @@ Qed.
 
 (** A fragment is a subset of formulas closed under subformula. *)
 Definition fragment FS :=
-  forall A : formula, is_true (FS A) -> forall B, subform B A -> is_true (FS B).
+  forall A : formula, FS A -> forall B, subform B A -> FS B.
+
+Definition fragmentb FS := fragment (fun A => is_true (FS A)).
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
-Lemma conservativity P : pcut P = false -> forall FS, fragment FS ->
+Lemma conservativity P : pcut P = false -> forall FS, fragmentb FS ->
   forall l, ll_ps P (fun _ => true) l -> is_true (forallb FS l) -> ll_ps P (forallb FS) l.
 Proof.
 intros P_cutfree FS HFS l pi.
@@ -306,8 +315,8 @@ induction pi using (ll_ps_nested_ind P (fun _ => true)); intros HFrag.
   unfold is_true in HFrag; rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
   apply forallb_forall, Forall_forall.
   apply (Permutation_Type_map wn) in p.
-  eapply Permutation_Type_Forall; try eassumption.
-  GPermutation_Type_solve.
+  eapply Permutation_Type_Forall; [ | eassumption ].
+  symmetry; apply Permutation_Type_app_head, Permutation_Type_app_tail; assumption.
 - unfold is_true in HFrag; rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
   apply mix_ps_r; [ assumption | | ].
   + apply forallb_forall, Forall_forall; assumption.
@@ -427,7 +436,7 @@ Qed.
 
 (* Cut is admissible in any fragment with no axioms. *)
 Lemma cut_admissible_fragment_axfree P : (projT1 (pgax P) -> False) ->
- forall FS, fragment FS -> forall l,
+ forall FS, fragmentb FS -> forall l,
    ll_ps P (forallb FS) l -> ll_ps (cutrm_pfrag P) (forallb FS) l.
 Proof.
 intros P_axfree FS HFS l pi.
@@ -440,7 +449,7 @@ Qed.
 
 (** Linear logic (with no axioms) is conservative over its fragments. *)
 Lemma conservativity_axfree P : (projT1 (pgax P) -> False) ->
-  forall FS, fragment FS -> forall l,
+  forall FS, fragmentb FS -> forall l,
     ll P l -> is_true (forallb FS l) -> ll_ps P (forallb FS) l.
 Proof.
 intros P_axfree FS Hf l pi HFS.
