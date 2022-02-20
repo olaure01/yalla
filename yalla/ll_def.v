@@ -1457,6 +1457,28 @@ eapply ext_wn_param in pi; try eassumption.
   rewrite P_mix in Q_mix; inversion Q_mix.
 Qed.
 
+
+(** ** Consistency properties *)
+
+Lemma weak_consistency_no_dual_proofs_ll P : pcut P = true ->
+  iffT (ll P nil) { A & ll P (A :: nil) & ll P (dual A :: nil) }.
+Proof.
+intros Hcut; split.
+- now intros pi; exists one; constructor.
+- intros [A pi1 pi2].
+  rewrite <- app_nil_r.
+  eapply (@cut_r _ Hcut); eassumption.
+Qed.
+
+Lemma strong_contradition_general_contradiction_ll P : pcut P = true ->
+  ll P (zero :: nil) -> forall l, ll P l.
+Proof.
+intros Hcut pi l.
+rewrite <- app_nil_l.
+eapply (@cut_r _ Hcut); try eassumption.
+apply top_r.
+Qed.
+
 End Atoms.
 
 Arguments ll_nested_ind : clear implicits.
