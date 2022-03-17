@@ -153,7 +153,7 @@ Inductive llfoc : list formula -> option formula -> Type :=
 | parr_fr : forall A B l Pi,
                     llfoc (A :: B :: l) Pi ->
                     llfoc (parr A B :: l) Pi
-| top_fr : forall l Pi, option_test sformula Pi -> Forall_inf tFoc l ->
+| top_fr : forall l Pi, option_testT sformula Pi -> Forall_inf tFoc l ->
                     llfoc (top :: l) Pi
 | plus_fr1 : forall A B l, llfoc (polcont l A) (polfoc A) ->
                              llfoc l (Some (aplus A B))
@@ -188,7 +188,7 @@ match pi with
 | co_fr pi0 => S (fpsize pi0)
 end.
 
-Lemma top_gen_fr l Pi : option_test sformula Pi -> llfoc (top :: l) Pi.
+Lemma top_gen_fr l Pi : option_testT sformula Pi -> llfoc (top :: l) Pi.
 Proof.
 remember (list_sum (map fsize l)) as n eqn:Heqn.
 revert l Pi Heqn; induction n using lt_wf_rect; intros l Pi -> Hs.

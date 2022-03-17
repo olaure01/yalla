@@ -83,11 +83,7 @@ Class FullAtoms := {
 
 (** ** Consistency by concrete instance based on [nat] *)
 
-Definition option_nat_to_nat :=
-fun o => match o with
-| None => 0
-| Some n => S n
-end.
+Definition option_nat_to_nat := option_eval_default 0 S.
 
 Definition nat_to_option_nat :=
 fun n => match n with

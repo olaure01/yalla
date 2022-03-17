@@ -10,6 +10,8 @@ From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GP
 
 From Yalla Require Import ollibs_ext ll_def ill_vs_ll.
 
+Set Implicit Arguments.
+
 
 Section Atoms.
 
@@ -44,20 +46,14 @@ Inductive tsubform : tformula -> tformula -> Type :=
 | tsub_plus_r : forall A B C, tsubform A B -> tsubform A (tplus C B)
 | tsub_oc : forall A B, tsubform A B -> tsubform A (toc B).
 
-Lemma tsub_trans : forall A B C, tsubform A B -> tsubform B C -> tsubform A C.
+Lemma tsub_trans A B C : tsubform A B -> tsubform B C -> tsubform A C.
 Proof.
-intros A B C Hl Hr; revert A Hl; induction Hr; intros A' Hl;
+intros Hl Hr; revert A Hl; induction Hr; intros A' Hl;
   try (constructor; apply IHHr); assumption.
 Qed.
 
 #[export] Instance tsub_po : PreOrder tsubform | 50.
-Proof.
-split.
-- intros l.
-  apply tsub_id.
-- intros l1 l2 l3.
-  apply tsub_trans.
-Qed.
+Proof. split; [ intros l; apply tsub_id | intros l1 l2 l3; apply tsub_trans ]. Qed.
 
 (** ** 2. define embedding into [iformula] *)
 
@@ -73,17 +69,15 @@ Proof.
 unfold t2i; intros x y Heq; apply TAtom2PreIAtom_inj.
 now injection Heq.
 Qed.
-Lemma atN_or_t2i : forall x, (atN = x) + { y | x = t2i y }.
+Lemma atN_or_t2i x : (atN = x) + { y | x = t2i y }.
 Proof.
-intros x; destruct x; [ right | left ]; auto.
+destruct x as [c|]; [ right | left; reflexivity ].
 unfold t2i.
 destruct (bijective_surjective TAtom2PreIAtom_bij c) as [y ->].
 now exists y.
 Qed.
-Lemma notatN : forall x, ~ atN = t2i x.
-Proof.
-unfold t2i; intros x Heq; inversion Heq.
-Qed.
+Lemma notatN x : ~ atN = t2i x.
+Proof. unfold t2i; intros Heq; inversion Heq. Qed.
 Definition iateq := @eqb (option_dectype preiatom).
 Definition iateq_eq := @eqb_eq (option_dectype preiatom).
 
@@ -125,21 +119,19 @@ induction A; intros B Heq; destruct B;
   apply IHA in H0 ; subst; reflexivity.
 Qed.
 
-Lemma N_not_tl2ill : forall A, N = tl2ill A -> False.
-Proof. intros A Heq; destruct A; inversion Heq. Qed.
+Lemma N_not_tl2ill A : ~ N = tl2ill A.
+Proof. intros Heq; destruct A; inversion Heq. Qed.
 
-Lemma tl2ill_nz : forall A, nonzerospos (tl2ill A).
+Lemma tl2ill_nz A : nonzerospos (tl2ill A).
 Proof. induction A; cbn; constructor; assumption. Qed.
 
-Lemma tl2ill_map_ioc : forall l,
-  map tl2ill (map toc l) = map ioc (map tl2ill l).
+Lemma tl2ill_map_ioc l : map tl2ill (map toc l) = map ioc (map tl2ill l).
 Proof. induction l; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 
-Lemma tl2ill_map_ioc_inv : forall l1 l2,
-  map ioc l1 = map tl2ill l2 ->
-    { l2' | l2 = map toc l2' & l1 = map tl2ill l2' }.
+Lemma tl2ill_map_ioc_inv l1 l2 : map ioc l1 = map tl2ill l2 ->
+  { l2' | l2 = map toc l2' & l1 = map tl2ill l2' }.
 Proof.
-induction l1; intros l2 Heq; destruct l2; inversion Heq.
+revert l2; induction l1; intros l2 Heq; destruct l2; inversion Heq.
 - exists nil; reflexivity.
 - apply IHl1 in H1.
   destruct t; inversion H0.
@@ -153,28 +145,23 @@ Qed.
 Definition NoTAxioms := (existT (fun x => x -> list tformula * option tformula) _ Empty_fun).
 
 Record tpfrag := mk_tpfrag {
-  tpcut : bool ;
-  tpgax : { tptypgax : Type & tptypgax -> list tformula * option tformula } ;
+  tpcut : bool;
+  tpgax : { tptypgax : Type & tptypgax -> list tformula * option tformula };
   tpperm : bool }.
 
 Definition le_tpfrag P Q :=
-  prod 
-     (Bool.le (tpcut P) (tpcut Q))
-  (prod
-     (forall a, { b | projT2 (tpgax P) a = projT2 (tpgax Q) b })
-     (Bool.le (tpperm P) (tpperm Q))).
+  ((Bool.le (tpcut P) (tpcut Q))
+ * (forall a, { b | projT2 (tpgax P) a = projT2 (tpgax Q) b })
+ * (Bool.le (tpperm P) (tpperm Q)))%type.
 
-Lemma le_tpfrag_trans : forall P Q R,
-  le_tpfrag P Q -> le_tpfrag Q R -> le_tpfrag P R.
+Lemma le_tpfrag_trans P Q R : le_tpfrag P Q -> le_tpfrag Q R -> le_tpfrag P R.
 Proof.
-intros P Q R H1 H2.
-destruct H1 as (Hc1 & Ha1 & Hp1).
-destruct H2 as (Hc2 & Ha2 & Hp2).
-split ; [ | split ] ; try (eapply BoolOrder.le_trans ; eassumption).
+intros [[Hc1 Ha1] Hp1] [[Hc2 Ha2] Hp2].
+repeat split; try (eapply BoolOrder.le_trans; eassumption).
 intros a.
 destruct (Ha1 a) as [b Heq].
 destruct (Ha2 b) as [c Heq2].
-exists c ; etransitivity ; eassumption.
+exists c; etransitivity; eassumption.
 Qed.
 
 Definition cutupd_tpfrag P b := mk_tpfrag b (tpgax P) (tpperm P).
@@ -228,7 +215,7 @@ Inductive tl P : list tformula -> option tformula -> Type :=
 | gax_tr : forall a,
            tl P (fst (projT2 (tpgax P) a)) (snd (projT2 (tpgax P) a)).
 
-#[export] Instance tl_perm {P} {Pi} :
+#[export] Instance tl_perm P Pi :
   Proper ((PEPermutation_Type (tpperm P)) ==> arrow) (fun l => tl P l Pi) | 100.
 Proof.
 intros l1 l2 HP pi.
@@ -239,16 +226,16 @@ Lemma stronger_tpfrag P Q : le_tpfrag P Q -> forall l A, tl P l A -> tl Q l A.
 Proof.
 intros Hle l A H.
 induction H; try now constructor.
-- apply (ex_tr _ l1); [ assumption | ].
-  destruct Hle as (_ & _ & Hp).
+- apply ex_tr with l1; [ assumption | ].
+  destruct Hle as [[_ _] Hp].
   hyps_GPermutation_Type_unfold; unfold PEPermutation_Type.
   destruct (tpperm P); destruct (tpperm Q); cbn in Hp; try inversion Hp; subst;
     [ assumption | | ]; reflexivity.
 - eapply ex_oc_tr ; [ apply IHtl | assumption ].
-- destruct Hle as [Hcut _].
+- destruct Hle as [[Hcut _] _].
   rewrite f in Hcut.
   apply (@cut_tr _ Hcut A); assumption.
-- destruct Hle as (_ & Hgax & _).
+- destruct Hle as [[_ Hgax] _].
   destruct (Hgax a) as [b ->].
   apply gax_tr.
 Qed.
@@ -257,7 +244,7 @@ Qed.
 (** ** 4. characterize corresponding [ill] fragment *)
 
 (*
-Lemma tl2ill_dec : forall A,
+Lemma tl2ill_dec A :
    {B | A = tl2ill B} + (A = N)
  + ((forall B, A = tl2ill B -> False) * (A = N -> False)).
 Proof.
@@ -381,19 +368,17 @@ Definition t2ipfrag P := {|
                         end)) ;
   ipperm := tpperm P |}.
 
-Lemma cutrm_t2ipfrag : forall P,
-  cutrm_ipfrag (t2ipfrag P) = t2ipfrag (cutrm_tpfrag P).
+Lemma cutrm_t2ipfrag P : cutrm_ipfrag (t2ipfrag P) = t2ipfrag (cutrm_tpfrag P).
 Proof. reflexivity. Qed.
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
-Lemma tl2tlfrag {P} : forall l C, tl P l C ->
+Lemma tl2tlfrag P l C : tl P l C ->
    (forall D, C = Some D -> ill (t2ipfrag P) (map tl2ill l) (tl2ill D))
  * (C = None -> ill (t2ipfrag P) (map tl2ill l) N).
 Proof.
-intros l C pi.
-induction pi;
+intros pi; induction pi;
   (split; [ intros D HeqC | intros HeqC; (try now inversion HeqC) ]);
   try destruct IHpi as [piS piE];
   try destruct IHpi1 as [piS1 piE1];
@@ -436,7 +421,7 @@ induction pi;
   rewrite HeqC in pi; assumption.
 Qed.
 
-Lemma tlfrag2tl_cutfree {P} : tpcut P = false -> forall l,
+Lemma tlfrag2tl_cutfree P : tpcut P = false -> forall l,
    (forall A, ill (t2ipfrag P) (map tl2ill l) (tl2ill A) -> tl P l (Some A))
  * (ill (t2ipfrag P) (map tl2ill l) N -> tl P l None).
 Proof.
@@ -570,7 +555,7 @@ induction pi;
     apply gax_tr.
 Qed.
 
-Lemma tlfrag2tl_axfree {P} : (projT1 (tpgax P) -> False) -> forall l,
+Lemma tlfrag2tl_axfree P : (projT1 (tpgax P) -> False) -> forall l,
    (forall A, ill (t2ipfrag P) (map tl2ill l) (tl2ill A) -> tl P l (Some A))
  * (ill (t2ipfrag P) (map tl2ill l) N -> tl P l None).
 Proof.
@@ -579,13 +564,13 @@ intros l; split; [ intros A | ]; intros pi.
 - apply cut_admissible_ill in pi; (try now (intros a; exfalso; apply (Hgax a))).
   rewrite cutrm_t2ipfrag in pi.
   apply tlfrag2tl_cutfree in pi; [ | reflexivity ].
-  apply (stronger_tpfrag (cutrm_tpfrag P)); [ | assumption ].
-  split; [ | split ]; try reflexivity; intuition.
+  apply (@stronger_tpfrag (cutrm_tpfrag P)); [ | assumption ].
+  repeat split; try reflexivity; intuition.
 - apply cut_admissible_ill in pi; (try now (intros a; exfalso; apply (Hgax a))).
   rewrite cutrm_t2ipfrag in pi.
   apply tlfrag2tl_cutfree in pi; [ | reflexivity ].
-  apply (stronger_tpfrag (cutrm_tpfrag P)); [ | assumption ].
-  split; [ | split ]; try reflexivity; intuition.
+  apply (@stronger_tpfrag (cutrm_tpfrag P)); [ | assumption ].
+  repeat split; try reflexivity; intuition.
 Qed.
 
 
@@ -593,26 +578,25 @@ Qed.
 
 (** *** axiom expansion *)
 
-Lemma ax_gen_r {P} : forall A, tl P (A :: nil) (Some A).
+Lemma ax_gen_r P A : tl P (A :: nil) (Some A).
 Proof.
-intro A.
-apply (stronger_tpfrag (cutrm_tpfrag P)).
-- split ; [ | split ] ; cbn ; try reflexivity.
-  intros a ; exists a ; reflexivity.
-- eapply tlfrag2tl_cutfree ; try reflexivity.
+apply (@stronger_tpfrag (cutrm_tpfrag P)).
+- repeat split; cbn; try reflexivity.
+  intros a; exists a; reflexivity.
+- eapply tlfrag2tl_cutfree; try reflexivity.
   apply ax_exp_ill.
 Qed.
 
 (** *** cut admissibility *)
 
-Lemma cut_tl_r_axfree {P} : (projT1 (tpgax P) -> False) -> forall A l0 l1 l2 C,
+Lemma cut_tl_r_axfree P : (projT1 (tpgax P) -> False) -> forall A l0 l1 l2 C,
   tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C -> tl P (l1 ++ l0 ++ l2) C.
 Proof.
 intros Hgax.
 intros A l0 l1 l2 C pi1 pi2.
-destruct (tl2tlfrag _ _ pi1) as [pi1' _] ; cbn in pi1'.
+destruct (tl2tlfrag pi1) as [pi1' _] ; cbn in pi1'.
 assert (pi1'' := pi1' _ eq_refl).
-destruct (tl2tlfrag _ _ pi2) as [pi2' pi2''].
+destruct (tl2tlfrag pi2) as [pi2' pi2''].
 case_eq (tpcut P); intros Hcut.
 - eapply cut_tr; eassumption.
 - case_eq C.
@@ -628,13 +612,13 @@ case_eq (tpcut P); intros Hcut.
     list_simpl; eapply cut_ir_axfree; eassumption.
 Qed.
 
-Lemma cut_admissible_tl_axfree {P} : (projT1 (tpgax P) -> False) ->
+Lemma cut_admissible_tl_axfree P : notT (projT1 (tpgax P)) ->
   forall l Pi, tl P l Pi -> tl (cutrm_tpfrag P) l Pi.
 Proof.
 intros Hgax l Pi pi.
 induction pi; try now econstructor.
-- apply (ex_tr _ l1); assumption.
-- eapply ex_oc_tr ; [ apply IHpi | assumption ].
+- apply ex_tr with l1; assumption.
+- eapply ex_oc_tr; [ apply IHpi | assumption ].
 - eapply cut_tl_r_axfree; eassumption.
 Qed.
 
@@ -645,32 +629,32 @@ Definition easytpgax P := forall a,
 * (forall A C, snd (projT2 (tpgax P) a) = Some A -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A)
 * (forall A C, In_inf A (fst (projT2 (tpgax P) a)) -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A).
 
-Lemma tatomic_easytpgax {P} :
-  (forall a, prod (option_test tatomic (snd (projT2 (tpgax P) a)))
+Lemma tatomic_easytpgax P :
+  (forall a, prod (option_testT tatomic (snd (projT2 (tpgax P) a)))
                   (Forall_inf tatomic (fst (projT2 (tpgax P) a)))) -> easytpgax P.
 Proof.
-intros Hgax a ; split ; [ split | ].
+intros Hgax a; split; [ split | ].
 - destruct (Hgax a) as [Hat _].
-  cbn ; intros D Heq.
+  cbn; intros D Heq.
   destruct (snd (projT2 (tpgax P) a)).
-  + destruct t ; inversion Hat ; subst.
-    destruct D ; inversion Heq.
-  + destruct D ; inversion Heq.
+  + destruct t; inversion Hat; subst.
+    destruct D; inversion Heq.
+  + destruct D; inversion Heq.
 - destruct (Hgax a) as [Hat _].
-  cbn ; intros A C Heq1 Heq2.
-  destruct (snd (projT2 (tpgax P) a)) ; inversion Heq1 ; subst.
-  destruct A ; inversion Hat ; subst.
-  destruct C ; inversion Heq2.
-  apply i2ac_inj in H0 ; subst ; reflexivity.
+  cbn; intros A C Heq1 Heq2.
+  destruct (snd (projT2 (tpgax P) a)); inversion Heq1; subst.
+  destruct A; inversion Hat; subst.
+  destruct C; inversion Heq2.
+  apply i2ac_inj in H0; subst; reflexivity.
 - destruct (Hgax a) as [_ Hat].
   cbn ; intros A C Hin Heq.
-  eapply Forall_inf_forall in Hat ; try eassumption.
-  destruct A ; inversion Hat ; subst.
-  destruct C ; inversion Heq.
-  apply i2ac_inj in H0 ; subst ; reflexivity.
+  eapply Forall_inf_forall in Hat; try eassumption.
+  destruct A; inversion Hat; subst.
+  destruct C; inversion Heq.
+  apply i2ac_inj in H0; subst; reflexivity.
 Qed.
 
-Lemma easytpgax_easyipgax {P} : easytpgax P -> easyipgax_nzeropos (t2ipfrag P).
+Lemma easytpgax_easyipgax P : easytpgax P -> easyipgax_nzeropos (t2ipfrag P).
 Proof.
 intros Hgax.
 split; [ split | ]; cbn.
@@ -742,16 +726,16 @@ split; [ split | ]; cbn.
       apply Hgaxa; cbn.
       rewrite <- Heq'3; reflexivity. }
   + eapply ex_ir; cbn; [ | eassumption ].
-    refine (snd (tl2tlfrag _ _ _) _); [ apply gax_tr | assumption ].
+    refine (snd (tl2tlfrag _) _); [ apply gax_tr | assumption ].
   + eapply ex_ir; cbn; [ | eassumption ].
-    refine (fst (tl2tlfrag _ _ _) _ _); [ apply gax_tr | assumption ].
+    refine (fst (tl2tlfrag _) _ _); [ apply gax_tr | assumption ].
 - intros Hin.
   apply in_inf_split in Hin as [(l1,l2) Heq].
   decomp_map Heq; symmetry in Heq3.
   eapply N_not_tl2ill; eassumption.
 Qed.
 
-Theorem ll_is_tl_cutfree {P} : tpcut P = false -> easytpgax P -> forall l,
+Theorem ll_is_tl_cutfree P : tpcut P = false -> easytpgax P -> forall l,
   (forall A, tl P l (Some A)
          -> ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
                           rev (map dual (map ill2ll (map tl2ill l)))))
@@ -797,7 +781,7 @@ split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
     apply tl2ill_nz.
 Qed.
 
-Theorem ll_is_tl_axfree {P} : (projT1 (tpgax P) -> False) -> forall l,
+Theorem ll_is_tl_axfree P : notT (projT1 (tpgax P)) -> forall l,
    (forall A, tl P l (Some A)
            -> ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
                            rev (map dual (map ill2ll (map tl2ill l)))))
@@ -830,7 +814,7 @@ split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
     [ | | reflexivity ].
   + apply tlfrag2tl_axfree; assumption.
   + constructor; [ constructor | ].
-    clear; induction l; cbn; constructor; intuition.
+    clear; induction l; cbn; constructor; auto.
     apply tl2ill_nz.
 Qed.
 

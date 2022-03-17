@@ -244,14 +244,14 @@ change nil with (map tl2ill (map ntrans nil)) in pi.
 apply IH in pi.
 list_simpl in pi.
 apply cut_admissible_ill in pi; try now (intros a; destruct a).
-eapply (stronger_tpfrag (cutrm_tpfrag tpfrag_tl)).
+eapply (@stronger_tpfrag _ (cutrm_tpfrag tpfrag_tl)).
 - repeat split.
   intros a; destruct a.
 - eapply tlfrag2tl_cutfree; [ reflexivity | ].
   rewrite <- (@cutrm_t2ipfrag atom_inf).
   eapply stronger_ipfrag; [ | apply pi].
   repeat split.
-  intros a ; destruct a.
+  intros a; destruct a.
 Qed.
 
 (* ** Proof of Focusing *)
@@ -714,7 +714,8 @@ intros pi; induction pi; intros l0 Heq;
       list_simpl; apply Permutation_Type_app_head, Permutation_Type_swap. }
     polfoccont_cbn; destruct (polarity D); [ assumption | ].
     cons2app; rewrite ? app_assoc.
-    etransitivity; [ apply Permutation_Type_cons; [ reflexivity | ] | apply Permutation_Type_middle ].
+    etransitivity; [ apply Permutation_Type_cons; [ reflexivity | ]
+                   | apply Permutation_Type_middle ].
     list_simpl; assumption.
   + apply (@Permutation_Type_middle_polcont atom_inf).
 - polfoccont_cbn.
@@ -849,19 +850,15 @@ intros pi; induction pi; intros l0 Heq;
 Qed.
 
 Theorem tl_to_llfoc (l : list formula) : tl_ll (map ntrans l) None -> llfoc l None.
-Proof.
-intros pi%tl_to_otl.
-eapply otl_to_llfoc in pi; [ | reflexivity ].
-apply pi; reflexivity.
-Qed.
+Proof. intros pi%tl_to_otl; eapply otl_to_llfoc in pi; [ apply pi | ]; reflexivity. Qed.
 
 End Focusing.
 
 
-Theorem weak_focusing l : ll_ll l -> @llfoc atom_inf l None.
+Theorem weak_focusing (l : list formula) : ll_ll l -> llfoc l None.
 Proof. intros pi; apply tl_to_llfoc, ll_to_tl; assumption. Qed.
 
-Theorem focusing l : ll_ll l -> @llFoc atom_inf l None.
+Theorem focusing (l : list formula) : ll_ll l -> llFoc l None.
 Proof.
 intros pi%weak_focusing.
 refine (fst (fst (llfoc_to_llFoc pi _)) eq_refl).
