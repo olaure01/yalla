@@ -8,7 +8,6 @@
 
 Require Import BoolOrder.
 Require Import List_more.
-Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import GPermutation_Type.
@@ -1009,7 +1008,7 @@ Qed.
 
 (** Provability in [ll_mix2] is equivalent to
 provability of [ll] extended with the provability of [one :: one :: nil]
-and to provability of [ll] extended with the provability of [parr (dual B) (dual A) :: tens A B :: nil]
+and to provability of [ll] extended with the provability of [parr (dual B) (dual A) :: parr A B :: nil]
 for all [A] and [B] *)
 
 Lemma mix2_to_ll_one_one {P} : pcut P = true -> pperm P = true -> forall bc b2 bp l,

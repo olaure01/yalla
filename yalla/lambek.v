@@ -9,7 +9,6 @@
 
 Require Import funtheory.
 Require Import List_more.
-Require Import List_more.
 Require Import Permutation_Type.
 
 (** ** 0. load the [ill] library *)

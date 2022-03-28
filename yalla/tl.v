@@ -10,7 +10,6 @@ Require Import CMorphisms.
 Require Import funtheory.
 Require Import BoolOrder.
 Require Import List_more.
-Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import GPermutation_Type.
 

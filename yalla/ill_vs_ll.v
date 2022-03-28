@@ -4,7 +4,6 @@
 
 Require Import funtheory.
 Require Import List_more.
-Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import CPermutation_Type.

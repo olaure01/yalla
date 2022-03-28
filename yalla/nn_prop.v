@@ -5,7 +5,6 @@
 (** Properties relying on cut admissibility *)
 
 Require Import List_more.
-Require Import List_more.
 Require Import Permutation_Type.
 Require Import GPermutation_Type.
 

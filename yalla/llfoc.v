@@ -11,7 +11,6 @@ Require Import CMorphisms.
 
 Require Import List_more.
 Require Import List_Type.
-Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.
 Require Import GPermutation_Type.
