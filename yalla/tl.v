@@ -131,11 +131,10 @@ Proof. induction l; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma tl2ill_map_ioc_inv l1 l2 : map ioc l1 = map tl2ill l2 ->
   { l2' | l2 = map toc l2' & l1 = map tl2ill l2' }.
 Proof.
-revert l2; induction l1; intros l2 Heq; destruct l2; inversion Heq.
+induction l1 in l2 |- *; intros Heq; destruct l2; inversion Heq.
 - exists nil; reflexivity.
-- apply IHl1 in H1.
+- apply IHl1 in H1 as [l2' -> ->].
   destruct t; inversion H0.
-  destruct H1 as [l2' Heq1 H1]; subst.
   exists (t :: l2'); reflexivity.
 Qed.
 
@@ -159,8 +158,7 @@ Proof.
 intros [[Hc1 Ha1] Hp1] [[Hc2 Ha2] Hp2].
 repeat split; try (eapply BoolOrder.le_trans; eassumption).
 intros a.
-destruct (Ha1 a) as [b Heq].
-destruct (Ha2 b) as [c Heq2].
+destruct (Ha1 a) as [b Heq], (Ha2 b) as [c Heq2].
 exists c; etransitivity; eassumption.
 Qed.
 
@@ -217,26 +215,20 @@ Inductive tl P : list tformula -> option tformula -> Type :=
 
 #[export] Instance tl_perm P Pi :
   Proper ((PEPermutation_Type (tpperm P)) ==> arrow) (fun l => tl P l Pi) | 100.
-Proof.
-intros l1 l2 HP pi.
-eapply ex_tr ; eassumption.
-Qed.
+Proof. intros l1 l2 HP pi; apply ex_tr with l1; assumption. Qed.
 
 Lemma stronger_tpfrag P Q : le_tpfrag P Q -> forall l A, tl P l A -> tl Q l A.
 Proof.
-intros Hle l A H.
-induction H; try now constructor.
+intros [[Hcut Hgax] Hp] l A H.
+induction H; (try now constructor).
 - apply ex_tr with l1; [ assumption | ].
-  destruct Hle as [[_ _] Hp].
   hyps_GPermutation_Type_unfold; unfold PEPermutation_Type.
-  destruct (tpperm P); destruct (tpperm Q); cbn in Hp; try inversion Hp; subst;
+  destruct (tpperm P), (tpperm Q); cbn in Hp; try inversion Hp; subst;
     [ assumption | | ]; reflexivity.
-- eapply ex_oc_tr ; [ apply IHtl | assumption ].
-- destruct Hle as [[Hcut _] _].
-  rewrite f in Hcut.
+- eapply ex_oc_tr; [ apply IHtl | assumption ].
+- rewrite f in Hcut.
   apply (@cut_tr _ Hcut A); assumption.
-- destruct Hle as [[_ Hgax] _].
-  destruct (Hgax a) as [b ->].
+- destruct (Hgax a) as [b ->].
   apply gax_tr.
 Qed.
 
@@ -429,13 +421,17 @@ intros Hcut.
 enough (forall l A, ill (t2ipfrag P) l A ->
       (forall l0 A0, l = map tl2ill l0 -> A = tl2ill A0 -> tl P l0 (Some A0))
     * (forall l0, l = map tl2ill l0 -> A = N -> tl P l0 None)) as HI
-  by (intros l; split; [ intros A | ]; intros pi; apply HI in pi; apply pi; reflexivity).
+  by (intros l; split; [ intros A | ]; intros pi; apply (HI _ _ pi); reflexivity).
 intros l A pi.
 induction pi;
   (split; [ intros l'' A'' Heql HeqA | intros l'' Heql HeqN ]); subst;
   try (now (destruct A''; inversion HeqA));
   try (now (symmetry in Heql; decomp_map_inf Heql; destruct x; inversion Heql3));
-  try (now inversion HeqN).
+  try (now inversion HeqN);
+  try (symmetry in Heql; decomp_map_inf Heql; subst;
+       destruct x; inversion Heql3; subst;
+       constructor; apply IHpi; list_simpl; reflexivity);
+  try (destruct A''; inversion HeqA; subst; constructor; apply IHpi; reflexivity).
 - destruct l''; inversion Heql; destruct l''; inversion Heql.
   destruct A''; inversion HeqA; destruct t; inversion H0; subst.
   apply t2i_inj in H4; subst.
@@ -468,38 +464,14 @@ induction pi;
 - destruct l''; inversion Heql.
   destruct A''; inversion HeqA; subst.
   apply one_trr.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply one_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply one_tlr, IHpi; list_simpl; reflexivity.
 - symmetry in Heql; decomp_map_inf Heql; destruct A''; inversion HeqA; subst.
   apply tens_trr; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 - symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply tens_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
-  apply tens_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
   destruct x; inversion Heql1; subst.
-- destruct A''; inversion HeqA; subst.
-  apply neg_trr, IHpi; reflexivity.
 - symmetry in Heql; decomp_map_inf Heql; subst.
   destruct x; inversion Heql3; subst.
   destruct l3; inversion Heql4.
   apply neg_tlr, IHpi; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply zero_tlr.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply zero_tlr.
-- destruct A''; inversion HeqA; subst.
-  apply plus_trr1, IHpi; reflexivity.
-- destruct A''; inversion HeqA; subst.
-  apply plus_trr2, IHpi; reflexivity.
 - symmetry in Heql; decomp_map_inf Heql; subst.
   destruct x; inversion Heql3; subst.
   apply plus_tlr; [ apply IHpi1 | apply IHpi2 ]; list_simpl; reflexivity.
@@ -510,24 +482,6 @@ induction pi;
   destruct Heql as [l0' Heq Heq']; subst.
   destruct A'' ; inversion HeqA; subst.
   apply oc_trr, IHpi; [ rewrite tl2ill_map_ioc | ]; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply de_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply de_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply wk_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply wk_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply co_tlr, IHpi; list_simpl; reflexivity.
-- symmetry in Heql; decomp_map_inf Heql; subst.
-  destruct x; inversion Heql3; subst.
-  apply co_tlr, IHpi; list_simpl; reflexivity.
 - inversion f.
   rewrite H0 in Hcut; inversion Hcut.
 - inversion f.
@@ -570,7 +524,8 @@ intros l; split; [ intros A | ]; intros pi.
   rewrite cutrm_t2ipfrag in pi.
   apply tlfrag2tl_cutfree in pi; [ | reflexivity ].
   apply (@stronger_tpfrag (cutrm_tpfrag P)); [ | assumption ].
-  repeat split; try reflexivity; intuition.
+  repeat split; try reflexivity.
+  intros a; exists a; reflexivity.
 Qed.
 
 
@@ -581,7 +536,7 @@ Qed.
 Lemma ax_gen_r P A : tl P (A :: nil) (Some A).
 Proof.
 apply (@stronger_tpfrag (cutrm_tpfrag P)).
-- repeat split; cbn; try reflexivity.
+- repeat split; try reflexivity.
   intros a; exists a; reflexivity.
 - eapply tlfrag2tl_cutfree; try reflexivity.
   apply ax_exp_ill.
@@ -594,7 +549,7 @@ Lemma cut_tl_r_axfree P : (projT1 (tpgax P) -> False) -> forall A l0 l1 l2 C,
 Proof.
 intros Hgax.
 intros A l0 l1 l2 C pi1 pi2.
-destruct (tl2tlfrag pi1) as [pi1' _] ; cbn in pi1'.
+destruct (tl2tlfrag pi1) as [pi1' _]; cbn in pi1'.
 assert (pi1'' := pi1' _ eq_refl).
 destruct (tl2tlfrag pi2) as [pi2' pi2''].
 case_eq (tpcut P); intros Hcut.

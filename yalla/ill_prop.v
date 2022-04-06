@@ -4,7 +4,7 @@
 (** * Intuitionistic Linear Logic *)
 (* Properties depending on cut admissibility *)
 
-From Coq Require Import Bool.
+From Coq Require Import Bool Lia.
 From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ill_cut.
 
@@ -33,6 +33,62 @@ remember nil as l ; remember izero as C ; revert Heql HeqC ; induction pi ;
   symmetry in p ; apply Permutation_Type_nil in p ; subst ; reflexivity.
 - destruct l1 ; destruct l0 ; inversion Heql.
 - apply (Hgax a).
+Qed.
+
+
+(** ** Relating negation and implication *)
+
+Lemma ilmap_to_ineg {P} A : ill P (ilmap A N :: nil) (ineg A).
+Proof.
+apply neg_irr.
+cons2app; rewrite <- (app_nil_l _).
+apply lmap_ilr; apply ax_exp_ill.
+Qed.
+
+Lemma ineg_to_ilmap {P} A : ill P (ineg A :: nil) (ilmap A N).
+Proof.
+apply lmap_irr.
+cons2app.
+apply neg_ilr, ax_exp_ill.
+Qed.
+
+Lemma neg_map_rule {P} :
+  (forall a, notT (In_inf N (fst (projT2 (ipgax P) a)))) ->
+  forall l0 l1 l2 C D, ill P l0 C -> ill P (l1 ++ N :: l2) D -> ill P (l1 ++ l0 ++ ineg C :: l2) D.
+Proof.
+intros Hgax l0 l1 l2 C D pi0 pi.
+replace (l1 ++ l0 ++ ineg C :: l2) with (l1 ++ (l0 ++ ineg C :: nil) ++ l2)
+  by (list_simpl; reflexivity).
+apply cut_at_ir_gaxat with atN; [ | | apply neg_ilr | ]; try assumption.
+intros b l l' Heq.
+exfalso.
+apply (Hgax b).
+rewrite Heq.
+apply in_inf_elt.
+Qed.
+
+Lemma ilpam_to_igen {P} A : ill P (ilpam A N :: nil) (igen A).
+Proof.
+apply gen_irr; list_simpl.
+rewrite <- (app_nil_l _), <- (app_nil_r (A :: nil)).
+apply lpam_ilr; apply ax_exp_ill.
+Qed.
+
+Lemma igen_to_ilpam {P} A : ill P (igen A :: nil) (ilpam A N).
+Proof. apply lpam_irr, gen_ilr, ax_exp_ill. Qed.
+
+Lemma gen_pam_rule {P} :
+  (forall a, notT (In_inf N (fst (projT2 (ipgax P) a)))) ->
+  forall l0 l1 l2 C D, ill P l0 C -> ill P (l1 ++ N :: l2) D -> ill P (l1 ++ igen C :: l0 ++ l2) D.
+Proof.
+intros Hgax l0 l1 l2 C D pi0 pi.
+rewrite app_comm_cons.
+apply cut_at_ir_gaxat with atN; [ | | apply gen_ilr | ]; try assumption.
+intros b l l' Heq.
+exfalso.
+apply (Hgax b).
+rewrite Heq.
+apply in_inf_elt.
 Qed.
 
 

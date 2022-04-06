@@ -48,7 +48,7 @@ Proof. induction l as [ | a l IHl ]; [ | list_simpl; rewrite IHl ]; reflexivity.
 Lemma ill2ll_map_ioc_inv l1 l2 : map wn l1 = map dual (map ill2ll l2) ->
   { l2' | l2 = map ioc l2' & l1 = map dual (map ill2ll l2') }.
 Proof.
-intros Heq; revert l1 Heq; induction l2; intros [ | b l1 ] Heq; inversion Heq.
+induction l2 in l1 |- *; intros Heq; destruct l1; inversion Heq.
 - exists nil; reflexivity.
 - destruct a; inversion H0.
   apply IHl2 in H1 as [l0 -> ->].
@@ -1044,7 +1044,7 @@ Definition easyipgax_nzeropos P := forall a,
                        (ill2ll C :: rev (map dual (map ill2ll l)))
        -> ill P l C)
 (*     -> { b | fst (projT2 (ipgax P) b) = l & snd (projT2 (ipgax P) b) = C })    *)
-* (In_inf N (fst (projT2 (ipgax P) a)) -> False).
+* notT (In_inf N (fst (projT2 (ipgax P) a))).
 
 Lemma dual_jfragment_zeropos {P} : ipcut P = false -> easyipgax_nzeropos P -> forall l0,
   Forall_inf nonzerospos l0 -> ll (i2pfrag P) (map dual (map ill2ll l0)) ->
@@ -2080,7 +2080,7 @@ Definition easyipgax_oclmap P := forall a,
                          :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a)))))
                        (ill2ll C :: rev (map dual (map ill2ll l)))
        -> ill P l C)
-* (In_inf N (fst (projT2 (ipgax P) a)) -> False).
+* notT (In_inf N (fst (projT2 (ipgax P) a))).
 
 (** Cut-free conservativity *)
 Theorem ll_to_ill_oclpam_cutfree {P} :
@@ -2623,7 +2623,7 @@ intros l Hll ; induction Hll ;
                    apply (ex_ir _ (rev (l4 ++ l11 ++ l13) ++
                                      igen x0 :: rev (l6 ++ l14) ++ nil)).
                    +++ apply gen_pam_rule; try assumption.
-                       intros a ; apply Hgax.
+                       intros a; apply Hgax.
                    +++ apply Permutation_Type_rev' in HP3 .
                        apply Permutation_Type_rev' in HP4''.
                        list_simpl in HP3 ; list_simpl in HP4''.
@@ -3175,32 +3175,32 @@ intros l Hll ; induction Hll ;
             assert (Hocl3 := Forall_inf_app_l _ _ Hocl1).
             assert (Hocl4 := Forall_inf_app_r _ _ Hocl1).
             assert (Hocl5 := Forall_inf_app Hocl2 Hocl4).
-            apply IHHll2 in Hocl3 ; [ apply IHHll1 in Hocl5 | | ].
+            apply IHHll2 in Hocl3; [ apply IHHll1 in Hocl5 | | ].
             ** split.
                --- destruct Hocl5 as [Hocl5 _].
                    destruct Hocl3 as [Hocl3 _].
                    apply neg_map_rule with _ (rev l6 ++ rev l14) (rev l12) _ C in Hocl3.
-                   +++ eapply ex_ir ; [ apply Hocl3 | ].
-                       rewrite Hperm ; cbn.
+                   +++ eapply ex_ir; [ apply Hocl3 | ].
+                       rewrite Hperm; cbn.
                        rewrite app_assoc.
                        apply Permutation_Type_elt.
                        cbn in HP3.
-                       apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
+                       apply Permutation_Type_rev' in HP3; list_simpl in HP3.
                        cbn in HP4''.
-                       apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                       list_simpl ; Permutation_Type_solve.
-                   +++ intros a Ha ; apply (snd (Hgax a) Ha).
-                   +++ eapply ex_ir ; [ apply Hocl5 | ].
-                       rewrite Hperm ; cbn ; Permutation_Type_solve.
-               --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
+                       apply Permutation_Type_rev' in HP4''; list_simpl in HP4''.
+                       list_simpl; Permutation_Type_solve.
+                   +++ intros a Ha; apply (snd (Hgax a) Ha).
+                   +++ eapply ex_ir; [ apply Hocl5 | ].
+                       rewrite Hperm; cbn; Permutation_Type_solve.
+               --- intros Hnil lw; destruct lo; [ contradiction Hnil; reflexivity | ].
                    apply (Permutation_Type_app_tail l10) in HP4c.
                    assert (HP''' := Permutation_Type_trans HP4' HP4c).
-                   symmetry in HP''' ; apply Permutation_Type_vs_cons_inv in HP'''.
-                   destruct HP''' as [(l4l & l4r) Heq'].
+                   symmetry in HP'''.
+                   apply Permutation_Type_vs_cons_inv in HP''' as [(l4l & l4r) Heq'].
                    rewrite <- app_assoc in Heq'.
-                   cbn in Heq' ; dichot_elt_app_inf_exec Heq' ; subst.
+                   cbn in Heq'; dichot_elt_app_inf_exec Heq'; subst.
                    +++ assert (l4l ++ i :: l <> nil) as Hnil'
-                         by (intros Hnil' ; destruct l4l ; inversion Hnil').
+                         by (intros Hnil'; destruct l4l; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
                        destruct Hocl5 as [Hocl5 _].
                        apply neg_map_rule with _ (rev l6 ++ rev l14) (rev l12) _ C in Hnil'.
@@ -3217,7 +3217,7 @@ intros l Hll ; induction Hll ;
                        *** eapply ex_ir ; [ apply Hocl5 | ].
                            rewrite Hperm ; cbn ; Permutation_Type_solve.
                    +++ assert (l17 ++ i :: l4r <> nil) as Hnil'
-                         by (intros Hnil' ; destruct l17 ; inversion Hnil').
+                         by (intros Hnil'; destruct l17; inversion Hnil').
                        rewrite Heq'1 in Hnil'.
                        assert (l10 ++ l16 <> nil) as Hnil''.
                        { intros Hnil''.
@@ -3227,8 +3227,7 @@ intros l Hll ; induction Hll ;
                          destruct Hnil''; subst; reflexivity. }
                        apply (snd Hocl5) with lw in Hnil''.
                        destruct Hocl3 as [Hocl3 _].
-                       apply neg_map_rule with _ (rev l6 ++ rev l14) (rev l12 ++ lw) _ C
-                         in Hocl3.
+                       apply neg_map_rule with _ (rev l6 ++ rev l14) (rev l12 ++ lw) _ C in Hocl3.
                        *** eapply ex_ir ; [ apply Hocl3 | ].
                            rewrite Hperm ; cbn ; list_simpl.
                            rewrite 3 app_assoc.
