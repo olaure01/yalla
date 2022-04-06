@@ -7,6 +7,7 @@ From Yalla Require Import ill_def microill.
 
 Set Implicit Arguments.
 
+
 Fixpoint ill2ill A :=
 match A with
 | ivar x    => @iformulas.ivar nat_dectype (Some x)
@@ -76,11 +77,11 @@ Theorem ill2ill_proof : forall l A, ill l A -> ill_def.ill ipfrag_ill (map ill2i
 Proof.
 intros l A pi.
 induction pi; rewrite <- (app_nil_l _); try (now constructor).
-- apply (ex_ir _ (map ill2ill l)); try assumption.
+- apply (ex_ir (map ill2ill l)); try assumption.
   cbn; rewrite <- transp_map.
   apply transp_perm.
 - now rewrite map_app, app_nil_l; constructor.
-- apply (ex_ir _ (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
+- apply (ex_ir (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
   + now constructor.
   + cbn; rewrite map_app.
     etransitivity; [ apply Permutation_Type_app_comm | ].

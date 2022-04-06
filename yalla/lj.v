@@ -10,6 +10,8 @@ From OLlibs Require Import funtheory infinite List_more Permutation_Type_more Pe
 From Yalla Require Import atoms.
 From Yalla Require ill_cut ill_vs_ll.
 
+Set Implicit Arguments.
+
 
 Section Atoms.
 
@@ -339,7 +341,8 @@ Lemma lj2illfrag_cbn l A :
 Proof.
 (*
  with try reflexivity ; try eassumption ;
-      try (cbn; apply Permutation_Type_map; Permutation_Type_solve); try (cbn; Permutation_Type_solve).
+      try (cbn; apply Permutation_Type_map; Permutation_Type_solve);
+      try (cbn; Permutation_Type_solve).
 *)
   unfold oc_lj2ill_cbn; intros pi; induction pi; try now constructor.
   - rewrite <- map_map.
@@ -347,7 +350,8 @@ Proof.
       [ | list_simpl; symmetry; apply Permutation_Type_cons_append ].
     list_simpl; rewrite <- (app_nil_l _).
     apply ill_def.wk_list_ilr, ill_def.de_ilr, ill_def.ax_ir.
-  - eapply ill_def.ex_ir with (map _ l1); [ eassumption | cbn; apply Permutation_Type_map; assumption ].
+  - eapply ill_def.ex_ir with (map _ l1);
+      [ eassumption | cbn; apply Permutation_Type_map; assumption ].
   - rewrite <- (app_nil_l _).
     apply ill_def.de_ilr, ill_def.zero_ilr.
   - rewrite <- map_map; list_simpl; rewrite <- (app_nil_l _).
@@ -356,8 +360,9 @@ Proof.
       with (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B))
               :: nil ++ (map iformulas.ioc (map lj2ill_cbn l))).
     rewrite <- map_map in IHpi.
-    apply (ill_cut.cut_ll_ir (iformulas.ioc (lj2ill_cbn A))
-                             (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil)), IHpi.
+    apply (@ill_cut.cut_ll_ir _ (iformulas.ioc (lj2ill_cbn A))
+                                (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B))
+                                   :: nil)), IHpi.
     change (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B)) :: nil)
       with (map iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B) :: nil)).
     apply ill_def.oc_irr.
@@ -392,7 +397,7 @@ Proof.
       with (nil ++ (iformulas.ioc (iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B)) ::
                           (map iformulas.ioc (map lj2ill_cbn l))) ++ (map iformulas.ioc (map lj2ill_cbn l)));
       [ | list_simpl; Permutation_Type_solve ].
-    apply (ill_cut.cut_ll_ir (iformulas.ioc (lj2ill_cbn B))); [ | assumption ].
+    apply (@ill_cut.cut_ll_ir _ (iformulas.ioc (lj2ill_cbn B))); [ | assumption ].
     rewrite <- map_cons.
     apply ill_def.oc_irr.
     cbn; rewrite <- (app_nil_l _).

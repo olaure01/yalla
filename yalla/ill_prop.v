@@ -4,9 +4,11 @@
 (** * Intuitionistic Linear Logic *)
 (* Properties depending on cut admissibility *)
 
-From Coq Require Import Bool Lia.
+From Coq Require Import Bool.
 From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ill_cut.
+
+Set Implicit Arguments.
 
 
 Section Atoms.
@@ -17,7 +19,7 @@ Notation ill := (@ill preiatom).
 
 (** Consistency *)
 
-Lemma strong_consistency_ill_axfree {P} : (projT1 (ipgax P) -> False) ->
+Lemma strong_consistency_ill_axfree P : (projT1 (ipgax P) -> False) ->
   ill P nil izero -> False.
 Proof.
 intros Hgax pi.
@@ -38,22 +40,21 @@ Qed.
 
 (** ** Relating negation and implication *)
 
-Lemma ilmap_to_ineg {P} A : ill P (ilmap A N :: nil) (ineg A).
+Lemma ilmap_to_ineg P A : ill P (ilmap A N :: nil) (ineg A).
 Proof.
 apply neg_irr.
 cons2app; rewrite <- (app_nil_l _).
 apply lmap_ilr; apply ax_exp_ill.
 Qed.
 
-Lemma ineg_to_ilmap {P} A : ill P (ineg A :: nil) (ilmap A N).
+Lemma ineg_to_ilmap P A : ill P (ineg A :: nil) (ilmap A N).
 Proof.
 apply lmap_irr.
 cons2app.
 apply neg_ilr, ax_exp_ill.
 Qed.
 
-Lemma neg_map_rule {P} :
-  (forall a, notT (In_inf N (fst (projT2 (ipgax P) a)))) ->
+Lemma neg_map_rule P : (forall a, notT (In_inf N (fst (projT2 (ipgax P) a)))) ->
   forall l0 l1 l2 C D, ill P l0 C -> ill P (l1 ++ N :: l2) D -> ill P (l1 ++ l0 ++ ineg C :: l2) D.
 Proof.
 intros Hgax l0 l1 l2 C D pi0 pi.
@@ -67,18 +68,17 @@ rewrite Heq.
 apply in_inf_elt.
 Qed.
 
-Lemma ilpam_to_igen {P} A : ill P (ilpam A N :: nil) (igen A).
+Lemma ilpam_to_igen P A : ill P (ilpam A N :: nil) (igen A).
 Proof.
 apply gen_irr; list_simpl.
 rewrite <- (app_nil_l _), <- (app_nil_r (A :: nil)).
 apply lpam_ilr; apply ax_exp_ill.
 Qed.
 
-Lemma igen_to_ilpam {P} A : ill P (igen A :: nil) (ilpam A N).
+Lemma igen_to_ilpam P A : ill P (igen A :: nil) (ilpam A N).
 Proof. apply lpam_irr, gen_ilr, ax_exp_ill. Qed.
 
-Lemma gen_pam_rule {P} :
-  (forall a, notT (In_inf N (fst (projT2 (ipgax P) a)))) ->
+Lemma gen_pam_rule P : (forall a, notT (In_inf N (fst (projT2 (ipgax P) a)))) ->
   forall l0 l1 l2 C D, ill P l0 C -> ill P (l1 ++ N :: l2) D -> ill P (l1 ++ igen C :: l0 ++ l2) D.
 Proof.
 intros Hgax l0 l1 l2 C D pi0 pi.
@@ -95,7 +95,7 @@ Qed.
 (** ** Reversibility statements *)
 (** axiom-free cases *)
 
-Lemma ione_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ione_rev_noax P : (projT1 (ipgax P) -> False) ->
   forall l1 l2 C, ill P (l1 ++ ione :: l2) C -> ill P (l1 ++ l2) C.
 Proof.
 intros Hgax l1 l2 C pi.
@@ -104,7 +104,7 @@ eapply cut_ir_axfree ; try eassumption.
 apply one_irr.
 Qed.
 
-Lemma itens_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma itens_rev_noax P : (projT1 (ipgax P) -> False) ->
   forall l1 l2 A B C, ill P (l1 ++ itens A B :: l2) C -> ill P (l1 ++ A :: B :: l2) C.
 Proof.
 intros Hgax l1 l2 A B C pi.
@@ -115,7 +115,7 @@ rewrite <- (app_nil_l l2) ; rewrite 2 app_comm_cons.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma ilpam_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ilpam_rev_noax P : (projT1 (ipgax P) -> False) ->
   forall l A B, ill P l (ilpam A B) -> ill P (l ++ A :: nil) B.
 Proof.
 intros Hgax l A B pi.
@@ -126,7 +126,7 @@ rewrite <- (app_nil_l _).
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma igen_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma igen_rev_noax P : (projT1 (ipgax P) -> False) ->
   forall l A, ill P l (igen A) -> ill P (l ++ A :: nil) N.
 Proof.
 intros Hgax l A pi.
@@ -136,7 +136,7 @@ rewrite <- (app_nil_l _).
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma ilmap_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ilmap_rev_noax P : (projT1 (ipgax P) -> False) ->
   forall l A B, ill P l (ilmap A B) -> ill P (A :: l) B.
 Proof.
 intros Hgax l A B pi.
@@ -149,7 +149,7 @@ rewrite <- (app_nil_l l) ; rewrite app_comm_cons ; rewrite <- app_assoc.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma ineg_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ineg_rev_noax P : (projT1 (ipgax P) -> False) ->
   forall l A, ill P l (ineg A) -> ill P (A :: l) N.
 Proof.
 intros Hgax l A pi.
@@ -161,7 +161,7 @@ rewrite <- (app_nil_l l) ; rewrite app_comm_cons ; rewrite <- app_assoc.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma iwith_rev1_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma iwith_rev1_noax P : (projT1 (ipgax P) -> False) ->
   forall l A B, ill P l (iwith A B) -> ill P l A.
 Proof.
 intros Hgax l A B pi.
@@ -173,7 +173,7 @@ rewrite <- (app_nil_l _).
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma iwith_rev2_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma iwith_rev2_noax P : (projT1 (ipgax P) -> False) ->
   forall l A B, ill P l (iwith B A) -> ill P l A.
 Proof.
 intros Hgax l A B pi.
@@ -185,7 +185,7 @@ rewrite <- (app_nil_l _).
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma iplus_rev1_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma iplus_rev1_noax P : (projT1 (ipgax P) -> False) ->
   forall l1 l2 A B C, ill P (l1 ++ iplus A B :: l2) C -> ill P (l1 ++ A :: l2) C.
 Proof.
 intros Hgax l1 l2 A B C pi.
@@ -195,7 +195,7 @@ rewrite <- (app_nil_l l2) ; rewrite app_comm_cons.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma iplus_rev2_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma iplus_rev2_noax P : (projT1 (ipgax P) -> False) ->
   forall l1 l2 A B C, ill P (l1 ++ iplus B A :: l2) C -> ill P (l1 ++ A :: l2) C.
 Proof.
 intros Hgax l1 l2 A B C pi.
@@ -205,7 +205,7 @@ rewrite <- (app_nil_l l2) ; rewrite app_comm_cons.
 eapply cut_ir_axfree ; eassumption.
 Qed.
 
-Lemma ioc_rev_noax {P} : (projT1 (ipgax P) -> False) ->
+Lemma ioc_rev_noax P : (projT1 (ipgax P) -> False) ->
   forall l A, ill P l (ioc A) -> ill P l A.
 Proof.
 intros Hgax l A pi.
@@ -307,13 +307,13 @@ Lemma stronger_ps_ipfrag P Q : le_ipfrag P Q ->
 Proof.
 intros Hle PS l A H.
 induction H; try now constructor.
-- apply (ex_ps_ir _ _ l1); try assumption.
+- apply ex_ps_ir with l1; try assumption.
   inversion Hle.
   destruct X as (_ & Hp).
   unfold PEPermutation_Type in *.
   now destruct (ipperm P); destruct (ipperm Q);
     cbn in Hp; try inversion Hp; subst.
-- apply (ex_oc_ps_ir _ _ _ lw); assumption.
+- apply ex_oc_ps_ir with lw; assumption.
 - inversion Hle.
   rewrite f in H1; cbn in H1.
   apply (@cut_ps_ir _ _ H1 A); assumption.
@@ -321,7 +321,7 @@ induction H; try now constructor.
   apply gax_ps_ir; assumption.
 Qed.
 
-Lemma ill_ps_stronger {P} PS QS l A :
+Lemma ill_ps_stronger P PS QS l A :
   ill_ps P PS l A -> (forall x y, Bool.le (PS x y) (QS x y)) -> ill_ps P QS l A.
 Proof.
 intros pi Hsb.
@@ -333,10 +333,10 @@ induction pi;
   try (econstructor; try apply Hs; eassumption). (* TODO bug??? removing [try] make it very long *)
 Qed.
 
-Lemma ill_ps_is_ps {P} l A PS : ill_ps P PS l A -> is_true (PS l A).
+Lemma ill_ps_is_ps P l A PS : ill_ps P PS l A -> is_true (PS l A).
 Proof. intros pi; inversion pi; assumption. Qed.
 
-Lemma ill_ps_is_ill {P} l A PS : ill_ps P PS l A -> ill P l A.
+Lemma ill_ps_is_ill P l A PS : ill_ps P PS l A -> ill P l A.
 Proof.
 intros pi; induction pi; try now constructor.
 - eapply ex_ir; eassumption.
@@ -344,7 +344,7 @@ intros pi; induction pi; try now constructor.
 - apply (@cut_ir _ _ f A); assumption.
 Qed.
 
-Lemma ill_is_ill_ps {P} l A : ill P l A -> ill_ps P (fun _ _ => true) l A.
+Lemma ill_is_ill_ps P l A : ill P l A -> ill_ps P (fun _ _ => true) l A.
 Proof.
 intros pi; induction pi; try now constructor.
 - now eapply ex_ps_ir; try eassumption.
@@ -359,7 +359,7 @@ Definition ifragment FS :=
 Definition ifragmentb FS := ifragment (fun A => is_true (FS A)).
 
 (** Conservativity over fragments *)
-Lemma iconservativity {P} : ipcut P = false -> forall FS, ifragmentb FS ->
+Lemma iconservativity P : ipcut P = false -> forall FS, ifragmentb FS ->
   forall l A, ill_ps P (fun _ _ => true) l A -> is_true (forallb FS (A :: l)) ->
     ill_ps P (fun l0 A0 => forallb FS (A0 :: l0)) l A.
 Proof.
@@ -367,7 +367,7 @@ intros P_cutfree FS HFS l A pi.
 induction pi; cbn; intros HFrag;
   inversion HFrag; apply andb_true_iff in HFrag; destruct HFrag as [Hhd HFrag]; subst.
 - apply ax_ps_ir; assumption.
-- apply (ex_ps_ir _ _ l1); trivial.
+- apply ex_ps_ir with l1; trivial.
   apply IHpi.
   apply forallb_forall, Forall_forall.
   unfold is_true in HFrag; rewrite forallb_forall in HFrag; apply Forall_forall in HFrag.
@@ -626,7 +626,7 @@ induction pi; cbn; intros HFrag;
 Qed.
 
 (** Sub-formula property *)
-Proposition isubformula {P} : ipcut P = false -> forall l A,
+Proposition isubformula P : ipcut P = false -> forall l A,
   ill P l A -> ill_ps P (fun l' C => isubformb_list (C :: l') (A :: l)) l A.
 Proof.
 intros P_cutfree l A pi.
@@ -646,8 +646,8 @@ apply iconservativity; trivial.
 - apply (isubb_id_list (A :: l) nil).
 Qed.
 
-Lemma cut_admissible_ifragment_axfree {P} : (projT1 (ipgax P) -> False) ->
-forall FS, ifragmentb FS -> forall l A,
+Lemma cut_admissible_ifragment_axfree P : (projT1 (ipgax P) -> False) ->
+  forall FS, ifragmentb FS -> forall l A,
   ill_ps P (fun l A => forallb FS (A :: l)) l A ->
   ill_ps (cutrm_ipfrag P) (fun l A => forallb FS (A :: l)) l A.
 Proof.
@@ -659,8 +659,8 @@ apply ill_is_ill_ps in pi.
 now apply iconservativity.
 Qed.
 
-Lemma iconservativity_axfree {P} : (projT1 (ipgax P) -> False) ->
-forall FS, ifragmentb FS ->
+Lemma iconservativity_axfree P : (projT1 (ipgax P) -> False) ->
+  forall FS, ifragmentb FS ->
   forall l A, ill P l A -> is_true (forallb FS (A :: l)) ->
     ill_ps P (fun l A => forallb FS (A :: l)) l A.
 Proof.

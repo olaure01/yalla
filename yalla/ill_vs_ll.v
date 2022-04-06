@@ -1483,7 +1483,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
          rewrite rev_involutive in H7 ; subst.
          list_simpl.
          cbn in HP0.
-         apply (ex_ir _ (rev ll ++ ilpam x0_1 x0_2 :: rev l10 ++ rev l9)).
+         apply (ex_ir (rev ll ++ ilpam x0_1 x0_2 :: rev l10 ++ rev l9)).
          ++ apply lpam_ilr.
             ** apply IHHll1.
                --- constructor; [ assumption | ].
@@ -1518,7 +1518,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
          rewrite rev_involutive in H7 ; subst.
          list_simpl.
          cbn in HP0.
-         apply (ex_ir _ (rev ll ++ igen x0 :: rev l10 ++ rev l9)).
+         apply (ex_ir (rev ll ++ igen x0 :: rev l10 ++ rev l9)).
          ++ apply gen_pam_rule.
             ** intros a.
                apply Hgax.
@@ -1629,7 +1629,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
          rewrite rev_involutive in H7 ; subst.
          list_simpl.
          cbn in HP0.
-         apply (ex_ir _ (rev l10 ++ rev l9 ++ ilmap x0_1 x0_2 :: rev lr)).
+         apply (ex_ir (rev l10 ++ rev l9 ++ ilmap x0_1 x0_2 :: rev lr)).
          ++ apply lmap_ilr.
             ** apply IHHll2.
                --- constructor; [ assumption | ].
@@ -1664,7 +1664,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
          rewrite rev_involutive in H7 ; subst.
          list_simpl.
          cbn in HP0.
-         apply (ex_ir _ (rev l10 ++ rev l9 ++ ineg x0 :: rev lr)).
+         apply (ex_ir (rev l10 ++ rev l9 ++ ineg x0 :: rev lr)).
          ++ apply neg_map_rule.
             ** intros a.
                apply Hgax.
@@ -1715,7 +1715,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
       symmetry in HP.
       apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (rev l3 ++ C1 :: nil));
+      apply (ex_ir (rev l3 ++ C1 :: nil));
         [ | apply PEPermutation_Type_add_inside; [ assumption | reflexivity ] ].
       apply IHHll.
       -- constructor; [ assumption | ].
@@ -1726,7 +1726,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
       symmetry in HP.
       apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (rev l3 ++ C :: nil));
+      apply (ex_ir (rev l3 ++ C :: nil));
         [ | apply PEPermutation_Type_app; [ assumption | reflexivity ] ].
       apply IHHll.
       -- constructor ; [ constructor | ].
@@ -1737,7 +1737,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
       symmetry in HP.
       apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (C1 :: rev l3)) ; [ | apply PEPermutation_Type_cons, HP; reflexivity ].
+      apply (ex_ir (C1 :: rev l3)) ; [ | apply PEPermutation_Type_cons, HP; reflexivity ].
       apply IHHll.
       -- constructor; [ assumption | constructor; [ assumption | ] ].
          apply Forall_inf_rev; assumption.
@@ -1746,7 +1746,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
       symmetry in HP.
       apply PEPermutation_Type_rev in HP.
       rewrite rev_involutive in HP.
-      apply (ex_ir _ (C :: rev l3)) ; [ | apply PEPermutation_Type_cons, HP; reflexivity ].
+      apply (ex_ir (C :: rev l3)) ; [ | apply PEPermutation_Type_cons, HP; reflexivity ].
       apply IHHll.
       -- constructor; [ constructor | ].
          constructor; [ assumption | ].
@@ -1802,7 +1802,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
     symmetry in HP.
     apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
-    apply (ex_ir _ (rev l3)) ; [ | apply HP ].
+    apply (ex_ir (rev l3)) ; [ | apply HP ].
     apply plus_irr1.
     apply IHHll.
     * constructor; [ assumption | ].
@@ -1844,7 +1844,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
     symmetry in HP.
     apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
-    apply (ex_ir _ (rev l3)) ; [ | apply HP ].
+    apply (ex_ir (rev l3)) ; [ | apply HP ].
     apply plus_irr2.
     apply IHHll.
     * constructor; [ assumption | ].
@@ -1884,7 +1884,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
     symmetry in HP.
     apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
-    apply (ex_ir _ (rev l3)) ; [ | apply HP ].
+    apply (ex_ir (rev l3)) ; [ | apply HP ].
     apply with_irr.
     * apply IHHll1.
       -- constructor; [ assumption | ].
@@ -1940,7 +1940,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
     symmetry in HP.
     apply PEPermutation_Type_rev in HP.
     rewrite rev_involutive in HP.
-    apply (ex_ir _ (rev (map ioc l0'))) ; [ | apply HP ].
+    apply (ex_ir (rev (map ioc l0'))) ; [ | apply HP ].
     list_simpl.
     apply oc_irr.
     apply IHHll.
@@ -2396,14 +2396,14 @@ intros l Hll ; induction Hll ;
             ** split.
                --- destruct Hocl4 as [Hocl4 _].
                    destruct Hocl3 as [Hocl3 _].
-                   apply (ex_ir _ (rev (l4 ++ l11 ++ l13) ++
-                                     ilpam x0_1 x0_2 :: rev (l6 ++ l14) ++ nil)).
+                   apply (ex_ir (rev (l4 ++ l11 ++ l13) ++
+                                   ilpam x0_1 x0_2 :: rev (l6 ++ l14) ++ nil)).
                    +++ apply lpam_ilr; assumption.
                    +++ apply Permutation_Type_rev' in HP3 .
                        apply Permutation_Type_rev' in HP4''.
                        list_simpl in HP3 ; list_simpl in HP4''.
                        rewrite Hperm ; list_simpl ; Permutation_Type_solve.
-               --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
+               --- intros Hnil lw; destruct lo; [ contradiction Hnil; reflexivity | ].
                    apply (Permutation_Type_app_head l9) in HP4c.
                    assert (HP''' := Permutation_Type_trans HP4' HP4c).
                    symmetry in HP''' ; apply Permutation_Type_vs_cons_inv in HP'''.
@@ -2415,8 +2415,8 @@ intros l Hll ; induction Hll ;
                          by (intros Hnil' ; destruct l4l ; inversion Hnil').
                        apply (snd Hocl4) with lw in Hnil'.
                        destruct Hocl3 as [Hocl3 _].
-                       apply (ex_ir _ (rev (l4 ++ l11 ++ l13) ++
-                                         ilpam x0_1 x0_2 :: rev (l6 ++ l14) ++ lw)).
+                       apply (ex_ir (rev (l4 ++ l11 ++ l13) ++
+                                       ilpam x0_1 x0_2 :: rev (l6 ++ l14) ++ lw)).
                        *** apply lpam_ilr; try assumption.
                            eapply ex_ir ; [ apply Hnil' | ].
                            rewrite Hperm ; cbn ; Permutation_Type_solve.
@@ -2428,7 +2428,7 @@ intros l Hll ; induction Hll ;
                          by (intros Hnil' ; destruct l17 ; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
                        destruct Hocl4 as [Hocl4 _].
-                       apply (ex_ir _ (rev (l4 ++ l11 ++ l13) ++
+                       apply (ex_ir (rev (l4 ++ l11 ++ l13) ++
                                       ilpam x0_1 x0_2 :: (rev (l6 ++ l14) ++ lw) ++ nil)).
                        *** apply lpam_ilr; assumption.
                        *** apply Permutation_Type_rev' in HP3 .
@@ -2493,13 +2493,13 @@ intros l Hll ; induction Hll ;
               cbn in HP4a ; cbn in HP4b ; cbn in HP4c ; cbn in HP4d.
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
             destruct HP4' as [l3' Heq' HP4'].
-            symmetry in Heq'; decomp_map_inf Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             apply (Permutation_Type_app_head l3b) in HP4d.
             assert (HP' := Permutation_Type_trans HP4'' HP4d).
             rewrite map_map in HP'.
             symmetry in HP' ; apply Permutation_Type_map_inv in HP'.
             clear HP4'' ; destruct HP' as [l4'' Heq' HP4''].
-            symmetry in Heq'; decomp_map_inf Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             cbn in HP2 ; cbn in HP4a.
             apply (Permutation_Type_app_tail (ill2ll C :: l4b)) in HP4a.
             apply (Permutation_Type_app_head (map dual (map ill2ll l6))) in HP4a.
@@ -2507,7 +2507,7 @@ intros l Hll ; induction Hll ;
             rewrite <- (map_map _ _ l13) in HP'.
             symmetry in HP4c ; apply Permutation_Type_map_inv in HP4c.
             destruct HP4c as [l4'' Heq' HP4c].
-            symmetry in Heq'; decomp_map_inf Heq' ; subst.
+            symmetry in Heq'; decomp_map_inf Heq'; subst.
             rewrite <- (map_map _ _ l14) in HP4b.
             cbn in HP4b ; cbn in HP'.
             apply (@Permutation_Type_cons _ (ill2ll C) _ eq_refl) in HP4b.
@@ -2620,8 +2620,7 @@ intros l Hll ; induction Hll ;
             ** split.
                --- destruct Hocl4 as [Hocl4 _].
                    destruct Hocl3 as [Hocl3 _].
-                   apply (ex_ir _ (rev (l4 ++ l11 ++ l13) ++
-                                     igen x0 :: rev (l6 ++ l14) ++ nil)).
+                   apply (ex_ir (rev (l4 ++ l11 ++ l13) ++ igen x0 :: rev (l6 ++ l14) ++ nil)).
                    +++ apply gen_pam_rule; try assumption.
                        intros a; apply Hgax.
                    +++ apply Permutation_Type_rev' in HP3 .
@@ -2640,8 +2639,7 @@ intros l Hll ; induction Hll ;
                          by (intros Hnil' ; destruct l4l ; inversion Hnil').
                        apply (snd Hocl4) with lw in Hnil'.
                        destruct Hocl3 as [Hocl3 _].
-                       apply (ex_ir _ (rev (l4 ++ l11 ++ l13) ++
-                                         igen x0 :: rev (l6 ++ l14) ++ lw)).
+                       apply (ex_ir (rev (l4 ++ l11 ++ l13) ++ igen x0 :: rev (l6 ++ l14) ++ lw)).
                        *** apply gen_pam_rule; try assumption.
                            ---- intros a ; apply Hgax.
                            ---- eapply ex_ir ; [ apply Hnil' | ].
@@ -2654,8 +2652,8 @@ intros l Hll ; induction Hll ;
                          by (intros Hnil' ; destruct l17 ; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
                        destruct Hocl4 as [Hocl4 _].
-                       apply (ex_ir _ (rev (l4 ++ l11 ++ l13) ++
-                                         igen x0 :: (rev (l6 ++ l14) ++ lw) ++ nil)).
+                       apply (ex_ir (rev (l4 ++ l11 ++ l13) ++
+                                       igen x0 :: (rev (l6 ++ l14) ++ lw) ++ nil)).
                        *** apply gen_pam_rule; try assumption.
                            intros a ; apply Hgax.
                        *** apply Permutation_Type_rev' in HP3 .
@@ -2808,12 +2806,11 @@ intros l Hll ; induction Hll ;
             rewrite <- map_map in HP1.
             list_simpl in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
             apply Permutation_Type_app_app_inv in HP4.
-            destruct HP4 as [[[[l3a l3b] l3c] l3d] [[HP4' HP4''] [HP4''' HP4'''']]] ;
-              cbn in HP4' ; cbn in HP4'' ; cbn in HP4''' ; cbn in HP4''''.
+            destruct HP4 as [[[[l3a l3b] l3c] l3d] [[HP4' HP4''] [HP4''' HP4'''']]];
+              cbn in HP4', HP4'', HP4''', HP4''''.
             apply Permutation_Type_app_app_inv in HP4''''.
-            destruct HP4'''' as [[[[l3e l3f] l3g] l3h] [[HP4a HP4b] [HP4c HP4d]]] ;
-              cbn in HP4a ; cbn in HP4b ; cbn in HP4c ; cbn in HP4d.
-            cbn in HP1.
+            destruct HP4'''' as [[[[l3e l3f] l3g] l3h] [[HP4a HP4b] [HP4c HP4d]]];
+              cbn in HP4a, HP4b, HP4c, HP4d, HP1.
             apply (@Permutation_Type_cons _ (ill2ll C) _ eq_refl) in HP4a.
             apply (Permutation_Type_app HP4''') in HP4a.
             apply (Permutation_Type_app_head (map dual (map ill2ll l4))) in HP4a.
@@ -2891,16 +2888,14 @@ intros l Hll ; induction Hll ;
          ++ cbn in HP3 ; rewrite map_map in HP3.
             symmetry in HP3 ; apply Permutation_Type_map_inv in HP3 as [l3''' Heq' HP3].
             symmetry in Heq'; decomp_map_inf Heq'; subst.
-            rewrite <- map_map in HP1.
-            rewrite <- map_map in HP2.
-            rewrite app_assoc in HP4 ; apply Permutation_Type_cons_app_inv in HP4.
+            rewrite <- map_map in HP1, HP2.
+            rewrite app_assoc in HP4; apply Permutation_Type_cons_app_inv in HP4.
             apply Permutation_Type_app_app_inv in HP4.
-            destruct HP4 as [[[[l3a l3b] l3c] l3d] [[HP4' HP4''] [HP4''' HP4'''']]] ;
-              cbn in HP4' ; cbn in HP4'' ; cbn in HP4''' ; cbn in HP4''''.
+            destruct HP4 as [[[[l3a l3b] l3c] l3d] [[HP4' HP4''] [HP4''' HP4'''']]];
+              cbn in HP4', HP4'', HP4''', HP4''''.
             apply Permutation_Type_app_app_inv in HP4'''.
-            destruct HP4''' as [[[[l3e l3f] l3g] l3h] [[HP4a HP4b] [HP4c HP4d]]] ;
-              cbn in HP4a ; cbn in HP4b ; cbn in HP4c ; cbn in HP4d.
-            cbn in HP1.
+            destruct HP4''' as [[[[l3e l3f] l3g] l3h] [[HP4a HP4b] [HP4c HP4d]]];
+              cbn in HP4a, HP4b, HP4c, HP4d, HP1.
             apply (Permutation_Type_app_head (map dual (map ill2ll l4))) in HP4a.
             assert (HP' := Permutation_Type_trans HP1 HP4a).
             symmetry in HP4' ; apply Permutation_Type_map_inv in HP4'.
@@ -2938,16 +2933,16 @@ intros l Hll ; induction Hll ;
             ** split.
                --- destruct Hocl5 as [Hocl5 _].
                    destruct Hocl3 as [Hocl3 _].
-                   apply (ex_ir _ (nil ++ rev (l4 ++ l13) ++
-                                     ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
+                   apply (ex_ir (nil ++ rev (l4 ++ l13) ++
+                                   ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
                    +++ apply lmap_ilr; try assumption.
-                       eapply ex_ir ; [ apply Hocl5 | ].
-                       rewrite Hperm ; cbn ; Permutation_Type_solve.
-                   +++ rewrite Hperm ; cbn.
+                       eapply ex_ir; [ apply Hocl5 | ].
+                       rewrite Hperm; cbn; Permutation_Type_solve.
+                   +++ rewrite Hperm; cbn.
                        cbn in HP3.
-                       apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
+                       apply Permutation_Type_rev' in HP3; list_simpl in HP3.
                        cbn in HP4''.
-                       apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
+                       apply Permutation_Type_rev' in HP4''; list_simpl in HP4''.
                        list_simpl ; Permutation_Type_solve.
                --- intros Hnil lw ; destruct lo ; [ contradiction Hnil ; reflexivity | ].
                    apply (Permutation_Type_app_tail l10) in HP4c.
@@ -2960,17 +2955,17 @@ intros l Hll ; induction Hll ;
                          by (intros Hnil' ; destruct l4l ; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
                        destruct Hocl5 as [Hocl5 _].
-                       apply (ex_ir _ (nil ++ (rev (l4 ++ l13) ++ lw) ++
-                                     ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
+                       apply (ex_ir (nil ++ (rev (l4 ++ l13) ++ lw) ++
+                                      ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
                        *** apply lmap_ilr; try assumption.
-                           eapply ex_ir ; [ apply Hocl5 | ].
-                           rewrite Hperm ; cbn ; Permutation_Type_solve.
-                       *** rewrite Hperm ; cbn.
+                           eapply ex_ir; [ apply Hocl5 | ].
+                           rewrite Hperm; cbn; Permutation_Type_solve.
+                       *** rewrite Hperm; cbn.
                            cbn in HP3.
-                           apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
+                           apply Permutation_Type_rev' in HP3; list_simpl in HP3.
                            cbn in HP4''.
-                           apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
-                           list_simpl ; Permutation_Type_solve.
+                           apply Permutation_Type_rev' in HP4''; list_simpl in HP4''.
+                           list_simpl; Permutation_Type_solve.
                    +++ assert (l17 ++ i :: l4r <> nil) as Hnil'
                          by (intros Hnil'; destruct l17; inversion Hnil').
                        rewrite Heq'1 in Hnil'.
@@ -2982,16 +2977,16 @@ intros l Hll ; induction Hll ;
                          destruct Hnil''; subst; reflexivity. }
                        apply (snd Hocl5) with lw in Hnil''.
                        destruct Hocl3 as [Hocl3 _].
-                       apply (ex_ir _ (lw ++ rev (l4 ++ l13) ++
-                                     ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
+                       apply (ex_ir (lw ++ rev (l4 ++ l13) ++
+                                       ilmap x0_1 x0_2 :: rev (l6 ++ l14 ++ l12))).
                        *** apply lmap_ilr; try assumption.
-                           eapply ex_ir ; [ apply Hnil'' | ].
-                           rewrite Hperm ; cbn ; Permutation_Type_solve.
-                       *** rewrite Hperm ; cbn.
+                           eapply ex_ir; [ apply Hnil'' | ].
+                           rewrite Hperm; cbn; Permutation_Type_solve.
+                       *** rewrite Hperm; cbn.
                            cbn in HP3.
-                           apply Permutation_Type_rev' in HP3 ; list_simpl in HP3.
+                           apply Permutation_Type_rev' in HP3; list_simpl in HP3.
                            cbn in HP4''.
-                           apply Permutation_Type_rev' in HP4'' ; list_simpl in HP4''.
+                           apply Permutation_Type_rev' in HP4''; list_simpl in HP4''.
                            list_simpl ; Permutation_Type_solve.
             ** inversion_clear Hoclm as [ | ? ? ? HF ].
                assert (Hoclm1 := Forall_inf_app_l _ _ HF).
@@ -3166,10 +3161,10 @@ intros l Hll ; induction Hll ;
             apply (Permutation_Type_app_head (map dual (map ill2ll l6))) in HP4''''.
             assert (HP'' := Permutation_Type_trans HP2 HP4'''').
             specialize IHHll2 with (rev (l4 ++ l13)) l15 x0.
-            cbn in HP4' ; apply (Permutation_Type_Forall_inf HP4') in Hocl.
+            cbn in HP4'; apply (Permutation_Type_Forall_inf HP4') in Hocl.
             assert (Hocl1 := Forall_inf_app_l _ _ Hocl).
             assert (Hocl2 := Forall_inf_app_r _ _ Hocl).
-            rewrite <- (map_map _ _ l12) in HP''. 
+            rewrite <- (map_map _ _ l12) in HP''.
             specialize IHHll1 with (rev (ivar atN :: l6 ++ l14 ++ l12)) (l10 ++ l16) C.
             cbn in HP4c ; apply (Permutation_Type_Forall_inf HP4c) in Hocl1.
             assert (Hocl3 := Forall_inf_app_l _ _ Hocl1).
@@ -3179,7 +3174,7 @@ intros l Hll ; induction Hll ;
             ** split.
                --- destruct Hocl5 as [Hocl5 _].
                    destruct Hocl3 as [Hocl3 _].
-                   apply neg_map_rule with _ (rev l6 ++ rev l14) (rev l12) _ C in Hocl3.
+                   apply neg_map_rule with _ _ (rev l6 ++ rev l14) (rev l12) _ C in Hocl3.
                    +++ eapply ex_ir; [ apply Hocl3 | ].
                        rewrite Hperm; cbn.
                        rewrite app_assoc.
@@ -3203,7 +3198,7 @@ intros l Hll ; induction Hll ;
                          by (intros Hnil'; destruct l4l; inversion Hnil').
                        apply (snd Hocl3) with lw in Hnil'.
                        destruct Hocl5 as [Hocl5 _].
-                       apply neg_map_rule with _ (rev l6 ++ rev l14) (rev l12) _ C in Hnil'.
+                       apply neg_map_rule with _ _ (rev l6 ++ rev l14) (rev l12) _ C in Hnil'.
                        *** eapply ex_ir ; [ apply Hnil' | ].
                            rewrite Hperm ; cbn ; list_simpl.
                            rewrite 4 app_assoc.
@@ -3227,7 +3222,7 @@ intros l Hll ; induction Hll ;
                          destruct Hnil''; subst; reflexivity. }
                        apply (snd Hocl5) with lw in Hnil''.
                        destruct Hocl3 as [Hocl3 _].
-                       apply neg_map_rule with _ (rev l6 ++ rev l14) (rev l12 ++ lw) _ C in Hocl3.
+                       apply neg_map_rule with _ _ (rev l6 ++ rev l14) (rev l12 ++ lw) _ C in Hocl3.
                        *** eapply ex_ir ; [ apply Hocl3 | ].
                            rewrite Hperm ; cbn ; list_simpl.
                            rewrite 3 app_assoc.
@@ -3487,7 +3482,7 @@ intros l Hll ; induction Hll ;
          inversion Hr'.
          constructor; assumption.
 - symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
-  destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
+  destruct l'; inversion Heq; [ destruct C; inversion H0 | ]; subst.
   + apply (@PEPermutation_Type_cons _ _ _ (ill2ll C2) eq_refl) in HP.
     apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP.
     rewrite app_comm_cons in HP.
@@ -3569,8 +3564,8 @@ intros l Hll ; induction Hll ;
          ++ intros Hnil l2.
             assert (IH := IH2 Hnil l2).
             assert (IH' := IH4 Hnil l2).
-            list_simpl in IH ; list_simpl in IH'.
-            list_simpl ; apply with_irr; assumption.
+            list_simpl in IH; list_simpl in IH'.
+            list_simpl; apply with_irr; assumption.
       -- inversion_clear Hoclm as [ | ? ? Hoclm' ].
          inversion_clear Hoclm'.
          constructor; assumption.
@@ -3738,11 +3733,11 @@ intros l Hll ; induction Hll ;
     apply Forall_inf_app; [ assumption | ].
     inversion Hr; assumption.
 - symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
-  destruct l' ; inversion Heq ; [ destruct C ; inversion H0 | ] ; subst.
-  symmetry in H1 ; dichot_elt_app_inf_exec H1 ; subst ;
-    [ symmetry in H0; decomp_map_inf H0 ; destruct x ; inversion H0
-    | list_simpl in H2 ; symmetry in H2; decomp_map_inf H2 ; symmetry in H3; decomp_map_inf H3 ;
-                         destruct x ; inversion H2 ; destruct x0 ; inversion H3 ] ;
+  destruct l'; inversion Heq; [ destruct C; inversion H0 | ]; subst.
+  symmetry in H1; dichot_elt_app_inf_exec H1; subst;
+    [ symmetry in H0; decomp_map_inf H0; destruct x; inversion H0
+    | list_simpl in H2; symmetry in H2; decomp_map_inf H2; symmetry in H3; decomp_map_inf H3;
+                        destruct x; inversion H2; destruct x0; inversion H3 ] ;
       cbn in H3 ; cbn in H5 ; subst.
   apply (f_equal (@rev _)) in H6 ; list_simpl in H6 ; subst.
   assert (PCPermutation_Type (ipperm P) (wn (dual (ill2ll x0)) :: wn (dual (ill2ll x0)) :: l)
@@ -3755,7 +3750,7 @@ intros l Hll ; induction Hll ;
     etransitivity; [ apply HP | ].
     GPermutation_Type_solve. }
   specialize IHHll with (rev (ioc x0 :: ioc x0 :: l8) ++ rev l6) lo C.
-  list_simpl in IHHll ; list_simpl in HP' ;  apply IHHll in HP'; try assumption.
+  list_simpl in IHHll; list_simpl in HP';  apply IHHll in HP'; try assumption.
   + destruct HP' as [IH1 IH2].
     split.
     * eapply ex_ir ; [ apply co_ilr | ].

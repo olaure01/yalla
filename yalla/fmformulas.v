@@ -5,6 +5,8 @@
 From OLlibs Require Import funtheory infinite nattree fmsetlist_Type BOrders.
 From Yalla Require Export formulas.
 
+Set Implicit Arguments.
+
 
 Section Atoms.
 

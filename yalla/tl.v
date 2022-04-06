@@ -8,7 +8,7 @@ From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GP
 
 (** ** 0. load the [ill] library *)
 
-From Yalla Require Import ollibs_ext ll_def ill_vs_ll.
+From Yalla Require Import ll_def ill_vs_ll.
 
 Set Implicit Arguments.
 
@@ -405,10 +405,10 @@ intros pi; induction pi;
   apply (@cut_ir _ _ f' (tl2ill A) _ _ _ _ (piS1 _ eq_refl) (piS2 _ HeqC)).
 - assert (ipcut (t2ipfrag P) = true) as f' by assumption.
   apply (@cut_ir _ _ f' (tl2ill A) _ _ _ _ (piS1 _ eq_refl) (piE2 HeqC)).
-- assert (pi := gax_ir (t2ipfrag P) a).
+- assert (pi := @gax_ir _ (t2ipfrag P) a).
   cbn in pi.
   rewrite HeqC in pi; assumption.
-- assert (pi := gax_ir (t2ipfrag P) a).
+- assert (pi := @gax_ir _ (t2ipfrag P) a).
   cbn in pi.
   rewrite HeqC in pi; assumption.
 Qed.

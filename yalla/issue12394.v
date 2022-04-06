@@ -1,6 +1,8 @@
 From Coq Require Import Eqdep_dec.
 From OLlibs Require Import List_more.
 
+Set Implicit Arguments.
+
 Lemma injection_list A P :
   (forall x y : A, { x = y } + { x <> y }) ->
   forall (a : A) l p p' (F F' : Forall_inf P l),

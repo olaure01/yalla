@@ -269,7 +269,7 @@ induction Hll ;
   cbn.
 - cons2app; rewrite <- (app_nil_l _).
   apply lmap_ilr.
-  + apply (ax_ir _ (a2i X)).
+  + apply (ax_ir (a2i X)).
   + assumption.
 - eapply ex_ir; [ eassumption | ].
   apply Permutation_Type_map; assumption.
@@ -283,9 +283,9 @@ induction Hll ;
   apply one_ilr; assumption.
 - apply negR_irr in IHHll1.
   apply negR_irr in IHHll2.
-  apply (tens_irr _ _ _ _ _ IHHll1) in IHHll2.
-  apply (lmap_ilr _ _ _ _ _ _ _ IHHll2) in Hax.
-  apply (ex_ir _ _ _ _ Hax).
+  apply (tens_irr _ _ _ _ IHHll1) in IHHll2.
+  apply (lmap_ilr _ _ _ _ _ _ IHHll2) in Hax.
+  apply (ex_ir _ _ _ Hax).
   fold (map (trans R)); list_simpl.
   symmetry; etransitivity; [ apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity | ].
   rewrite ? app_assoc; apply Permutation_Type_cons_append.
@@ -295,15 +295,15 @@ induction Hll ;
 - rewrite <- (app_nil_l (izero :: _)).
   apply zero_ilr.
 - apply negR_irr in IHHll.
-  apply (plus_irr1 _ _ (negR R (trans R B))) in IHHll.
-  apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
-  apply (ex_ir _ _ _ _ Hax).
+  apply (plus_irr1 _ (negR R (trans R B))) in IHHll.
+  apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
+  apply (ex_ir _ _ _ Hax).
   fold (map (trans R)); list_simpl.
   symmetry; apply Permutation_Type_cons_append.
 - apply negR_irr in IHHll.
-  apply (plus_irr2 _ _ (negR R (trans R B))) in IHHll.
-  apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
-  apply (ex_ir _ _ _ _ Hax).
+  apply (plus_irr2 _ (negR R (trans R B))) in IHHll.
+  apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
+  apply (ex_ir _ _ _ Hax).
   fold (map (trans R)); list_simpl.
   symmetry; apply Permutation_Type_cons_append.
 - rewrite <- (app_nil_l (iplus _ _ :: _)).
@@ -326,8 +326,8 @@ induction Hll ;
   apply co_ilr; assumption.
 - apply negR_irr in IHHll1.
   apply negR_irr in IHHll2.
-  apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll1.
-  apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll2.
+  apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll1.
+  apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll2.
   assert (pi0 := @trans_dual _ _ _ R (cutupd_ipfrag ipfrag_ill true) eq_refl eq_refl A).
   rewrite <- (app_nil_l _) in pi0.
   assert (@ipcut preiatom (cutupd_ipfrag ipfrag_ill true) = true) as Hcut by reflexivity.
@@ -462,7 +462,8 @@ Lemma llR_zero_to_ill_trans (l : list formula) : llR zero l -> ill_ll (map (tran
 Proof. intros pi; apply llR_ie_to_ill_trans; [ constructor | assumption ]. Qed.
 
 (** Moreover in these systems, the general weakening rule is admissible. *)
-Lemma aff_to_ill_trans l A : ill_ll (map (trans izero) l) izero -> ill_ll (map (trans izero) (A :: l)) izero.
+Lemma aff_to_ill_trans l A : ill_ll (map (trans izero) l) izero ->
+  ill_ll (map (trans izero) (A :: l)) izero.
 Proof.
 intros Hll; cbn; cons2app.
 rewrite <- (app_nil_r (map _ _)).
@@ -623,7 +624,7 @@ Proof.
 intros Hll; induction Hll; (try now (inversion f)); cbn.
 - cons2app; rewrite <- (app_nil_l _).
   apply lmap_ilr.
-  + apply (ax_ir _ (a2i X)).
+  + apply (ax_ir (a2i X)).
   + rewrite app_nil_l; apply ax_exp_ill.
 - eapply ex_ir; [ eassumption | apply Permutation_Type_map; assumption ].
 - apply (ll_mix02_to_ill_trans_gen R) in l.

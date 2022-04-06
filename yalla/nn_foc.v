@@ -146,22 +146,22 @@ induction A; simpl.
   assert (H' := @ineg_to_ilmap _ ipfrag_ill
                   (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app.
-  refine (cut_ir_axfree _ _ _ _ _ _ H' _) ; [ intros a ; destruct a | ].
+  refine (cut_ir_axfree _ _ _ H' _) ; [ intros a ; destruct a | ].
   unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
   apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
   apply neg_tens_propag; [ reflexivity | reflexivity | | ].
   + apply pntrans_to_trans in IHA1.
     cons2app in IHA1.
     assert (H1 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A1))).
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
-    refine (cut_ir _ _ _ _ _ _ H1 IHA1); reflexivity.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
+    refine (cut_ir _ _ H1 IHA1); reflexivity.
   + apply pntrans_to_trans in IHA2.
     cons2app in IHA2.
     assert (H2 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A2))).
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
-    refine (cut_ir _ _ _ _ _ _ H2 IHA2); reflexivity.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
+    refine (cut_ir _ _ H2 IHA2); reflexivity.
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl.
@@ -176,22 +176,22 @@ induction A; simpl.
   assert (H' := @ineg_to_ilmap _ ipfrag_ill
                   (iplus (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app.
-  refine (cut_ir_axfree _ _ _ _ _ _ H' _) ; [ intros a ; destruct a | ].
+  refine (cut_ir_axfree _ _ _ H' _) ; [ intros a ; destruct a | ].
   unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
   apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
   apply neg_plus_propag; [ reflexivity | reflexivity | | ].
   + apply pntrans_to_trans in IHA1.
     cons2app in IHA1.
     assert (H1 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A1))).
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
-    refine (cut_ir _ _ _ _ _ _ H1 IHA1); reflexivity.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
+    refine (cut_ir _ _ H1 IHA1); reflexivity.
   + apply pntrans_to_trans in IHA2.
     cons2app in IHA2.
     assert (H2 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A2))).
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
-    apply (stronger_ipfrag _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
-    refine (cut_ir _ _ _ _ _ _ H2 IHA2); reflexivity.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
+    refine (cut_ir _ _ H2 IHA2); reflexivity.
 - rewrite <- (app_nil_l _).
   apply plus_ilr ; list_simpl.
   + apply plus_irr1; assumption.
@@ -232,7 +232,7 @@ assert (forall l1 l2, ill_ll (map (trans N) l1 ++ map tl2ill (map ntrans l2)) N
   assert (Ha := ntrans_to_trans a).
   eapply ex_ir in pi ; [ | apply Permutation_Type_middle ].
   assert (projT1 (@ipgax preiatom ipfrag_ill) -> False) as Hgax by (intros x; destruct x).
-  eapply (cut_ir_axfree Hgax _ _ _ _ _ Ha) in pi.
+  eapply (cut_ir_axfree Hgax _ _ Ha) in pi.
   list_simpl in pi.
   change (tl2ill (ntrans a) :: map tl2ill (map ntrans l2))
     with (map tl2ill (map ntrans (a :: l2))) in pi.

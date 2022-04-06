@@ -11,6 +11,8 @@ From OLlibs Require Import funtheory infinite List_more Permutation_Type_more.
 From Yalla Require Import atoms.
 From Yalla Require ll_fragments.
 
+Set Implicit Arguments.
+
 
 Section Atoms.
 

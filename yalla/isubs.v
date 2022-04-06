@@ -82,8 +82,8 @@ induction pi; list_simpl;
   rewrite Hmapioc.
   apply oc_irr.
   rewrite <- Hmapioc; assumption.
-- refine (cut_ir _ (isubs A x A0) _ _ _ _ _ _); assumption.
-- apply (gax_ir ((axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
+- refine (cut_ir (isubs A x A0) _ _ _ ); assumption.
+- apply (@gax_ir _ ((axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
             (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
                        isubs A x (snd (projT2 (ipgax P) a))))))) a).
 Qed.

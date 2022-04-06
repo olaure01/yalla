@@ -8,6 +8,8 @@ From Coq Require Import CMorphisms BoolOrder.
 From OLlibs Require Import dectype funtheory List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Export iformulas.
 
+Set Implicit Arguments.
+
 
 Section Atoms.
 
@@ -121,53 +123,78 @@ Inductive ill P : list iformula -> iformula -> Type :=
            ill P l0 A -> ill P (l1 ++ A :: l2) C-> ill P (l1 ++ l0 ++ l2) C
 | gax_ir : forall a,
            ill P (fst (projT2 (ipgax P) a)) (snd (projT2 (ipgax P) a)).
-
+#[global] Arguments ax_ir [P] _.
+#[global] Arguments ex_ir [P] _ _ _ _ _.
+#[global] Arguments ex_oc_ir [P] _ _ _ _ _ _ _.
+#[global] Arguments one_irr {P}.
+#[global] Arguments one_ilr [P] _ _ _.
+#[global] Arguments tens_irr [P] _ _ _ _ _ _.
+#[global] Arguments tens_ilr [P] _ _ _ _ _ _.
+#[global] Arguments lpam_irr [P] _ _ _ _.
+#[global] Arguments lpam_ilr [P] _ _ _ _ _ _ _ _.
+#[global] Arguments gen_irr [P] _ _ _.
+#[global] Arguments gen_ilr [P] _ _ _.
+#[global] Arguments lmap_irr [P] _ _ _ _.
+#[global] Arguments lmap_ilr [P] _ _ _ _ _ _ _ _.
+#[global] Arguments neg_irr [P] _ _ _.
+#[global] Arguments neg_ilr [P] _ _ _.
+#[global] Arguments top_irr [P] _.
+#[global] Arguments with_irr [P] _ _ _ _ _.
+#[global] Arguments with_ilr1 [P] _ _ _ _ _ _.
+#[global] Arguments with_ilr2 [P] _ _ _ _ _ _.
+#[global] Arguments zero_ilr [P] _ _ _.
+#[global] Arguments plus_irr1 [P] _ _ _ _.
+#[global] Arguments plus_irr2 [P] _ _ _ _.
+#[global] Arguments plus_ilr [P] _ _ _ _ _ _ _.
+#[global] Arguments oc_irr [P A l] _.
+#[global] Arguments de_ilr [P] _ _ _ _ _.
+#[global] Arguments wk_ilr [P] _ _ _ _ _.
+#[global] Arguments co_ilr [P] _ _ _ _ _.
+#[global] Arguments cut_ir [P f] _ [l0 l1 l2] _ _ _.
+#[global] Arguments gax_ir [P] _.
 
 Instance ill_perm {P} : forall A,
   Proper ((@PEPermutation_Type _ (ipperm P)) ==> arrow) (fun l => ill P l A).
-Proof.
-intros A l1 l2 HP pi.
-eapply ex_ir ; eassumption.
-Qed.
+Proof. intros A l1 l2 HP pi; eapply ex_ir ; eassumption. Qed.
 
 Fixpoint ipsize {P l A} (pi : ill P l A) :=
 match pi with
-| ax_ir _ _ => 1
-| ex_ir _ _ _ _ pi0 _ => S (ipsize pi0)
-| ex_oc_ir _ _ _ _ _ _ pi0 _ => S (ipsize pi0)
-| one_irr _ => 1
-| one_ilr _ _ _ _ pi0 => S (ipsize pi0)
-| tens_irr _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
-| tens_ilr _ _ _ _ _ _ pi0 => S (ipsize pi0)
-| lpam_irr _ _ _ _ pi0 => S (ipsize pi0)
-| lpam_ilr _ _ _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
-| gen_irr _ _ _ pi0 => S (ipsize pi0)
-| gen_ilr _ _ _ pi0 => S (ipsize pi0)
-| lmap_irr _ _ _ _ pi0 => S (ipsize pi0)
-| lmap_ilr _ _ _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
-| neg_irr _ _ _ pi0 => S (ipsize pi0)
-| neg_ilr _ _ _ pi0 => S (ipsize pi0)
-| top_irr _ _ => 1
-| with_irr _ _ _ _ pi1 pi2 => S (max (ipsize pi1) (ipsize pi2))
-| with_ilr1 _ _ _ _ _ _ pi0 => S (ipsize pi0)
-| with_ilr2 _ _ _ _ _ _ pi0 => S (ipsize pi0)
-| zero_ilr _ _ _ _ => 1
-| plus_irr1 _ _ _ _ pi0 => S (ipsize pi0)
-| plus_irr2 _ _ _ _ pi0 => S (ipsize pi0)
-| plus_ilr _ _ _ _ _ _ pi1 pi2 => S (max (ipsize pi1) (ipsize pi2))
-| oc_irr _ _ _ pi0 => S (ipsize pi0)
-| de_ilr _ _ _ _ _ pi0 => S (ipsize pi0)
-| wk_ilr _ _ _ _ _ pi0 => S (ipsize pi0)
-| co_ilr _ _ _ _ _ pi0 => S (ipsize pi0)
-| cut_ir _ _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
-| gax_ir _ _ => 1
+| ax_ir _ => 1
+| ex_ir _ _ _ pi0 _ => S (ipsize pi0)
+| ex_oc_ir _ _ _ _ _ pi0 _ => S (ipsize pi0)
+| one_irr => 1
+| one_ilr _ _ _ pi0 => S (ipsize pi0)
+| tens_irr _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
+| tens_ilr _ _ _ _ _ pi0 => S (ipsize pi0)
+| lpam_irr _ _ _ pi0 => S (ipsize pi0)
+| lpam_ilr _ _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
+| gen_irr _ _ pi0 => S (ipsize pi0)
+| gen_ilr _ _ pi0 => S (ipsize pi0)
+| lmap_irr _ _ _ pi0 => S (ipsize pi0)
+| lmap_ilr _ _ _ _ _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
+| neg_irr _ _ pi0 => S (ipsize pi0)
+| neg_ilr _ _ pi0 => S (ipsize pi0)
+| top_irr _ => 1
+| with_irr _ _ _ pi1 pi2 => S (max (ipsize pi1) (ipsize pi2))
+| with_ilr1 _ _ _ _ _ pi0 => S (ipsize pi0)
+| with_ilr2 _ _ _ _ _ pi0 => S (ipsize pi0)
+| zero_ilr _ _ _ => 1
+| plus_irr1 _ _ _ pi0 => S (ipsize pi0)
+| plus_irr2 _ _ _ pi0 => S (ipsize pi0)
+| plus_ilr _ _ _ _ _ pi1 pi2 => S (max (ipsize pi1) (ipsize pi2))
+| oc_irr pi0 => S (ipsize pi0)
+| de_ilr _ _ _ _ pi0 => S (ipsize pi0)
+| wk_ilr _ _ _ _ pi0 => S (ipsize pi0)
+| co_ilr _ _ _ _ pi0 => S (ipsize pi0)
+| cut_ir _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
+| gax_ir _ => 1
 end.
 
 Lemma stronger_ipfrag P Q : le_ipfrag P Q -> forall l A, ill P l A -> ill Q l A.
 Proof.
 intros [Hcut [Hgax Hp]] l A H.
 induction H; try now constructor.
-- apply (ex_ir _ l1); [ assumption | ].
+- apply (ex_ir l1); [ assumption | ].
   hyps_GPermutation_Type_unfold; unfold PEPermutation_Type.
   now destruct (ipperm P); destruct (ipperm Q);
     cbn in Hp; try inversion Hp; subst.
@@ -183,8 +210,7 @@ Lemma wk_list_ilr {P} l l1 l2 C :
   ill P (l1 ++ l2) C -> ill P (l1 ++ map ioc l ++ l2) C.
 Proof.
 induction l in l1, l2, C |- *; intros pi; try assumption.
-apply wk_ilr.
-apply IHl; assumption.
+apply wk_ilr, IHl; assumption.
 Qed.
 
 (** Generalized contraction for lists *)

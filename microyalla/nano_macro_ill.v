@@ -31,7 +31,7 @@ induction pi; rewrite <- (app_nil_l _) ; try (now constructor).
   apply Permutation_Type_app_head.
   apply Permutation_Type_swap.
 - now rewrite map_app; rewrite app_nil_l ; constructor.
-- apply (ex_ir _ (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
+- apply (ex_ir (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
   + now constructor.
   + cbn; rewrite map_app.
     etransitivity; [ apply Permutation_Type_app_comm | ].

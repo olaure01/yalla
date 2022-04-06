@@ -387,7 +387,7 @@ assert (ill (p2ipfrag P) (nil ++ map ioc l0 ++ R :: nil) R) as Hax'
 induction Hll using ll_nested_ind.
 - eapply ex_ir.
   + eapply lmap_ilr; [ | apply Hax' ].
-    eapply (ax_ir _ (a2i X)).
+    eapply (ax_ir (a2i X)).
   + reflexivity.
 - rewrite P_perm in p.
   eapply ex_ir; [ eassumption | ].
@@ -407,17 +407,17 @@ induction Hll using ll_nested_ind.
   + eapply ex_ir; [ eassumption
                   | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
 - apply one_ilr; assumption.
-- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l1))
+- apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l1))
     in IHHll1; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
   apply negR_irr in IHHll1.
-  apply (ex_ir _ _ (trans B :: map ioc l0 ++ map trans l2))
+  apply (ex_ir _ (trans B :: map ioc l0 ++ map trans l2))
     in IHHll2; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
   apply negR_irr in IHHll2.
-  apply (tens_irr _ _ _ _ _ IHHll1) in IHHll2.
-  apply (lmap_ilr _ _ _ _ _ _ _ IHHll2) in Hax.
+  apply (tens_irr _ _ _ _ IHHll1) in IHHll2.
+  apply (lmap_ilr _ _ _ _ _ _ IHHll2) in Hax.
   rewrite <- (app_nil_l (map _ _ ++ _)).
   apply co_list_ilr.
-  apply (ex_ir _ _ _ _ Hax).
+  apply (ex_ir _ _ _ Hax).
   cbn; rewrite P_perm; list_simpl.
   apply Permutation_Type_app_head.
   etransitivity; [ apply Permutation_Type_app_comm | list_simpl; apply Permutation_Type_app_head ].
@@ -428,22 +428,22 @@ induction Hll using ll_nested_ind.
   cbn; rewrite P_perm; cbn.
   apply Permutation_Type_app_head, Permutation_Type_swap.
 - apply zero_ilr.
-- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l))
+- apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l))
     in IHHll; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
   apply negR_irr in IHHll.
-  apply (plus_irr1 _ _ (negR (trans B))) in IHHll.
-  apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
-  apply (ex_ir _ _ _ _ Hax).
+  apply (plus_irr1 _ (negR (trans B))) in IHHll.
+  apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
+  apply (ex_ir _ _ _ Hax).
   cbn; rewrite P_perm; list_simpl.
   apply Permutation_Type_app_head.
   etransitivity; [ apply Permutation_Type_app_comm | ].
   apply Permutation_Type_cons; reflexivity.
-- apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l))
+- apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l))
     in IHHll; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
   apply negR_irr in IHHll.
-  apply (plus_irr2 _ _ (negR (trans B))) in IHHll.
-  apply (lmap_ilr _ _ _ _ _ _ _ IHHll) in Hax.
-  apply (ex_ir _ _ _ _ Hax).
+  apply (plus_irr2 _ (negR (trans B))) in IHHll.
+  apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
+  apply (ex_ir _ _ _ Hax).
   cbn; rewrite P_perm; list_simpl.
   apply Permutation_Type_app_head.
   etransitivity; [ apply Permutation_Type_app_comm | ].
@@ -451,7 +451,7 @@ induction Hll using ll_nested_ind.
 - apply plus_ilr; assumption.
 - cbn in IHHll; rewrite map_map in IHHll.
   cbn in IHHll; rewrite <- map_map in IHHll.
-  apply (ex_ir _ _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l)))
+  apply (ex_ir _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l)))
     in IHHll; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_cons_app;
                   list_simpl; rewrite map_id, map_map; reflexivity ].
   apply negR_irr, oc_irr in IHHll.
@@ -467,10 +467,10 @@ induction Hll using ll_nested_ind.
 - apply wk_ilr; eassumption.
 - rewrite <- (app_nil_l (map _ _ ++ _)).
   apply co_ilr; assumption.
-- apply (ex_ir _ _ (trans (dual A) :: map ioc l0 ++ map trans l1)) in IHHll1;
+- apply (ex_ir _ (trans (dual A) :: map ioc l0 ++ map trans l1)) in IHHll1;
     [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
   apply negR_irr in IHHll1.
-  apply (ex_ir _ _ (trans A :: map ioc l0 ++ map trans l2)) in IHHll2;
+  apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l2)) in IHHll2;
     [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
   apply negR_irr in IHHll2.
   assert (ipperm (p2ipfrag P) = true) as Hperm by (cbn; assumption).
@@ -488,7 +488,7 @@ induction Hll using ll_nested_ind.
 - rewrite <- (app_nil_l _).
   apply wk_list_ilr.
   change (projT1 (pgax P)) with (projT1 (ipgax (p2ipfrag P))) in a.
-  eapply (gax_ir _ a).
+  apply (gax_ir a).
 Qed.
 
 Theorem ll_to_ill_trans l :

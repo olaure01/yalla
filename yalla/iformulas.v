@@ -7,6 +7,8 @@ From Coq Require Import Bool RelationClasses Lia.
 From OLlibs Require Import dectype List_more.
 From Yalla Require Export atoms.
 
+Set Implicit Arguments.
+
 
 Section Atoms.
 

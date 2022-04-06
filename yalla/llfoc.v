@@ -4,7 +4,7 @@
 
 From Coq Require Import CMorphisms Wf_nat Lia.
 From OLlibs Require Import infinite funtheory List_more Permutation_Type_more.
-From Yalla Require Import ollibs_ext ll_fragments.
+From Yalla Require Import ll_fragments.
 
 Set Implicit Arguments.
 

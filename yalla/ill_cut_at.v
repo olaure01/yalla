@@ -1,26 +1,10 @@
 (** * Intuitionistic Linear Logic *)
 (* Atomic cut admissibility *)
 
-From Coq Require Import List.
-From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import dectype List_more GPermutation_Type.
 From Yalla Require Export ill_def.
 
-(* TODO move to GPermutation_Type, deduce PEPermutation_Type_vs_elt_inv from it *)
-Lemma PEPermutation_Type_vs_elt_subst A b (a : A) l l1 l2 : PEPermutation_Type b l (l1 ++ a :: l2) ->
-  {'(l3, l4) & forall l0, PEPermutation_Type b (l1 ++ l0 ++ l2) (l3 ++ l0 ++ l4)
-             & l = l3 ++ a :: l4 }.
-Proof.
-(* TODO replace with: case_perm; intros HP. *)
-unfold PCPermutation_Type, PEPermutation_Type; destruct b; intros HP.
-- destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as ((l', l'') & ->).
-  exists (l', l''); [ | reflexivity ].
-  intros l0.
-  apply Permutation_Type_app_inv, (Permutation_Type_app_middle l0) in HP.
-  symmetry; assumption.
-- exists (l1, l2); [ reflexivity | assumption ].
-Qed.
-
-
+Set Implicit Arguments.
 
 
 Section Atoms.
@@ -43,8 +27,8 @@ remember (ivar X) as A eqn:HeqX.
 induction pi; inversion HeqX; subst;
   try (list_simpl; rewrite app_assoc; constructor;
        list_simpl; rewrite ? app_comm_cons, (app_assoc l0); apply IHpi; assumption).
-- cbn; rewrite <- Hb; apply (gax_ir _ b).
-- apply (ex_ir _ (l1 ++ l0 ++ l2)).
+- cbn; rewrite <- Hb; apply (gax_ir b).
+- apply (ex_ir (l1 ++ l0 ++ l2)).
   + apply IHpi; assumption.
   + apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
 - list_simpl; rewrite app_assoc.
@@ -92,7 +76,7 @@ remember (l1 ++ ivar X :: l2) as l eqn:Heql; induction pi2 in l1, l2, Heql |- *;
 - unit_vs_elt_inv Heql; inversion Heql; subst; list_simpl; assumption.
 - apply PEPermutation_Type_vs_elt_subst in p as [(l4, l5) HP ->].
   specialize (HP l0); symmetry in HP.
-  refine (ex_ir _ _ _ _ _ HP).
+  refine (ex_ir _ _ _ _ HP).
   apply IHpi2; reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_assoc.

@@ -117,7 +117,7 @@ intros pi; induction pi; rewrite <- (app_nil_l _); try (now constructor); rewrit
 - rewrite app_nil_l; constructor; assumption.
 - eapply ill_def.ex_ir.
   + cbn in IHpi2; rewrite <- (app_nil_l _) in IHpi2.
-    apply (ill_def.lmap_ilr _ _ _ _ _ _ _ IHpi1 IHpi2).
+    apply (ill_def.lmap_ilr _ _ _ _ _ _ IHpi1 IHpi2).
   + cbn; symmetry; apply Permutation_Type_cons_app; rewrite map_app; reflexivity.
 - cbn; rewrite ill2ill_map_ioc.
   apply ill_def.oc_irr.
