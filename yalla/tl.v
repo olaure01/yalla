@@ -16,8 +16,7 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context { atom : InfDecType }.
-Context { preiatom : DecType }.
-Context { tatom : DecType }.
+Context { preiatom tatom : DecType }.
 Context { Atoms : TLAtomType atom preiatom tatom }.
 
 
@@ -671,15 +670,12 @@ split; [ split | ]; cbn.
              symmetry; eapply (snd (Hgax _)); [ | assumption ].
              apply Hin; constructor; reflexivity.
     - exfalso.
-      apply PEPermutation_Type_vs_elt_inv in HP as [[l1' l2'] HP Heq'];
+      apply PEPermutation_Type_vs_elt_inv in HP as [[l1' l2'] _ Heq'];
         clear - Hgax Heq'; cbn in Heq'.
-      apply (f_equal (@rev _)) in Heq'.
-      rewrite rev_involutive in Heq'; list_simpl in Heq'.
-      rewrite map_map in Heq'.
-      decomp_map Heq'; subst.
-      assert (Hgaxa := fst (fst (Hgax a)) x).
-      apply Hgaxa; cbn.
-      rewrite <- Heq'3; reflexivity. }
+      apply (f_equal (@rev _)) in Heq'; rewrite rev_involutive in Heq'; list_simpl in Heq'.
+      rewrite map_map in Heq'; decomp_map Heq'; subst.
+      symmetry in Heq'3.
+      apply (fst (fst (Hgax a)) x Heq'3). }
   + eapply ex_ir; cbn; [ | eassumption ].
     refine (snd (tl2tlfrag _) _); [ apply gax_tr | assumption ].
   + eapply ex_ir; cbn; [ | eassumption ].

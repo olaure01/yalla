@@ -24,14 +24,14 @@ revert l3 l4 Heql; induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
   + destruct l4; inversion H1; subst.
     * cbn in Hgax; list_simpl; rewrite <- Hgax; apply (gax_r a).
     * destruct l4; inversion H2.
-- apply PCPermutation_Type_vs_elt_inv in p as [[l4' l5'] Heq p]; cbn in Heq; cbn in p; subst.
-  assert (PEPermutation_Type (pperm P) (l1 ++ l5' ++ l4' ++ l2) (l1 ++ l5 ++ l4 ++ l2)) as HP'.
-  { apply PEPermutation_Type_app_head.
-    rewrite 2 app_assoc ; apply PEPermutation_Type_app_tail; symmetry; assumption. }
-  apply PEPermutation_PCPermutation_Type in HP'.
-  apply (ex_r (l1 ++ l5' ++ l4' ++ l2)); [ apply IHpi; reflexivity | ].
-  apply PEPermutation_PCPermutation_Type; symmetry; apply PEPermutation_Type_app_head.
-  rewrite 2 (app_assoc _ _ l2); apply PEPermutation_Type_app_tail; assumption.
+- apply PCPermutation_Type_vs_elt_subst in p as [[l4' l5'] HP ->].
+  specialize (HP (l2 ++ l1)); list_simpl in HP.
+  assert (PCPermutation_Type (pperm P) (l1 ++ l5' ++ l4' ++ l2) (l1 ++ l5 ++ l4 ++ l2)) as HP'.
+  { etransitivity; [ rewrite app_assoc; apply PCPermutation_Type_app_rot | ].
+    etransitivity; [ | apply PCPermutation_Type_app_rot ].
+    list_simpl; symmetry; assumption. }
+  refine (ex_r _ _ _ HP').
+  apply IHpi; reflexivity.
 - symmetry in Heq; trichot_elt_app_inf_exec Heq; subst.
   + list_simpl; rewrite app_assoc.
      apply (ex_wn_r _ lw); [ list_simpl | assumption ].
@@ -183,14 +183,10 @@ remember (l1 ++ dual A :: l2) as l; destruct_ll pi2 f X l Hl Hr HP FL a; cbn in 
     eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; assumption.
   + destruct l1; inversion H1; [ | destruct l1; inversion H2 ]; subst.
     apply codual in H0; cbn; subst; list_simpl; assumption.
-- apply PCPermutation_Type_vs_elt_inv in HP.
-  destruct HP as [(l1',l2') Heq HP']; subst.
-  apply (ex_r (l1' ++ l0 ++ l2')).
-  + refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
-  + etransitivity; [ apply PCPermutation_Type_app_comm | ].
-    etransitivity; [ | apply PCPermutation_Type_app_comm ].
-    list_simpl; symmetry.
-    apply PEPermutation_PCPermutation_Type, PEPermutation_Type_app_head; assumption.
+- apply PCPermutation_Type_vs_elt_subst in HP as [(l1',l2') HP ->].
+  specialize (HP l0); symmetry in HP.
+  refine (ex_r _ _ _ HP).
+  refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
 - trichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_assoc.
     eapply ex_wn_r; [ | apply HP ].

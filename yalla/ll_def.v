@@ -672,14 +672,10 @@ induction pi using ll_nested_ind; intros l1' l2' Heq; subst;
   destruct l1'; inversion Heq.
   destruct l1'; inversion H1.
   destruct l1'; inversion H3.
-- apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  cbn in HP', Heq.
-  apply IHpi in Heq.
-  apply (ex_r _ _ Heq).
-  apply PEPermutation_PCPermutation_Type in HP'; unfold id in HP'.
-  symmetry.
-  etransitivity; [ apply PCPermutation_Type_app_comm | ].
-  etransitivity; [ apply HP' | apply PCPermutation_Type_app_comm ].
+- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+  specialize (HP' nil); symmetry in HP'.
+  refine (ex_r _ _ _ HP').
+  apply IHpi; reflexivity.
 - dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
@@ -736,18 +732,10 @@ induction pi using ll_nested_ind; intros A' B' l1' l2' Heq; subst.
   destruct l1'; inversion Heq.
   destruct l1'; inversion H1.
   destruct l1'; inversion H3.
-- apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  cbn in HP'.
-  apply IHpi in Heq.
-  eapply ex_r; [ eassumption | ].
-  destruct (pperm P); cbn in HP'; cbn.
-  + symmetry.
-    etransitivity; [ apply Permutation_Type_app_comm | ].
-    etransitivity; [ | apply Permutation_Type_app_comm ].
-    rewrite <- ? app_comm_cons.
-    do 2 (apply Permutation_Type_cons; trivial).
-  + etransitivity; [ constructor | ].
-    list_simpl; rewrite <- HP', 2 app_comm_cons; constructor.
+- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+  specialize (HP' (A' :: B' :: nil)); symmetry in HP'.
+  refine (ex_r _ _ _ HP').
+  apply IHpi; reflexivity.
 - dichot_elt_app_inf_exec Heq; subst.
   + rewrite 2 app_comm_cons, app_assoc.
     eapply ex_wn_r; [ | eassumption ].
@@ -830,16 +818,10 @@ induction pi using ll_nested_ind; intros l1' l2' Heq; subst.
   destruct l1'; inversion Heq.
   destruct l1'; inversion H1.
   destruct l1'; inversion H3.
-- apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  cbn in HP'; apply IHpi in Heq.
-  eapply ex_r; [ eassumption | ].
-  destruct (pperm P); cbn in HP'; cbn.
-  + symmetry.
-    etransitivity; [ apply Permutation_Type_app_comm | ].
-    etransitivity; [ | apply Permutation_Type_app_comm ].
-    now rewrite <- ? app_assoc; apply Permutation_Type_app_head.
-  + etransitivity; [ constructor | ].
-    list_simpl; rewrite <- HP'; symmetry; apply CPermutation_Type_app_rot.
+- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+  specialize (HP' l0); symmetry in HP'.
+  refine (ex_r _ _ _ HP').
+  apply IHpi; reflexivity.
 - dichot_elt_app_inf_exec Heq; subst.
   + rewrite 2 app_assoc; eapply ex_wn_r; [ | eassumption ].
     list_simpl; apply IHpi; list_simpl; reflexivity.
@@ -921,13 +903,10 @@ induction pi using ll_nested_ind; intros A' l1' l2' Heq; subst.
   destruct l1'; inversion Heq.
   destruct l1'; inversion H1.
   destruct l1'; inversion H3.
-- apply PCPermutation_Type_vs_elt_inv in p as [(l3, l4) HP' Heq].
-  cbn in HP'; apply IHpi in Heq.
-  cbn in Heq; eapply ex_r; [ eassumption | ].
-  etransitivity; [ apply PCPermutation_Type_app_comm | ].
-  etransitivity; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
-  apply PEPermutation_PCPermutation_Type_cons; [ reflexivity | ].
-  symmetry; assumption.
+- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+  specialize (HP' (A' :: nil)); symmetry in HP'.
+  refine (ex_r _ _ _ HP').
+  apply IHpi; reflexivity.
 - dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_comm_cons; rewrite app_assoc.
     eapply ex_wn_r; [ | eassumption ].

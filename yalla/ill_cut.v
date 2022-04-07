@@ -499,19 +499,13 @@ intros A l0 l1 l2 C pi1 pi2 Heqs Hc.
 rewrite_all Heqs; clear s Heqs.
 remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a.
 - (* ax_ir *)
-  unit_vs_elt_inv Heql ; list_simpl; assumption.
+  unit_vs_elt_inv Heql; list_simpl; assumption.
 - (* ex_ir *)
   cbn in IHsize.
-  case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm ; cbn in HP.
-  + assert (HP' := HP).
-    apply Permutation_Type_vs_elt_inv in HP' ; destruct HP' as [(l1',l2') Heq] ;
-      cbn in Heq ; subst.
-    apply Permutation_Type_app_inv in HP.
-    eapply (ex_ir (l1' ++ l0 ++ l2'));
-      [ | rewrite Hperm ; apply Permutation_Type_app_middle; assumption ].
-    refine (IHsize _ _ _ _ _ pi1 Hl _ _); [ lia | assumption ].
-  + subst.
-    refine (IHsize _ _ _ _ _ pi1 Hl _ _); [ lia | assumption ].
+  apply PEPermutation_Type_vs_elt_subst in HP as [(l1',l2') HP ->].
+  specialize (HP l0); symmetry in HP.
+  refine (ex_ir _ _ _ _ HP).
+  refine (IHsize _ _ _ _ _ pi1 Hl _ Hc); lia.
 - (* ex_oc_ir *)
   cbn in IHsize.
   dichot_elt_app_inf_exec Heql ; subst.

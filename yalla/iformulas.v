@@ -42,38 +42,32 @@ Inductive iformula :=
 (** Size of a [iformula] as its number of symbols *)
 Fixpoint ifsize A :=
 match A with
-| ivar X     => 1
-| ione       => 1
-| itens A B  => S (ifsize A + ifsize B)
-| ilpam A B  => S (ifsize A + ifsize B)
-| igen A     => S (ifsize A)
-| ilmap A B  => S (ifsize A + ifsize B)
-| ineg A     => S (ifsize A)
-| itop       => 1
-| iwith A B  => S (ifsize A + ifsize B)
-| izero      => 1
-| iplus A B  => S (ifsize A + ifsize B)
-| ioc A      => S (ifsize A)
+| ivar X => 1
+| ione | itop | izero => 1
+| itens A B | ilpam A B | ilmap A B | iwith A B | iplus A B => S (ifsize A + ifsize B)
+| igen A | ineg A | ioc A => S (ifsize A)
 end.
 
 Ltac ifsize_auto :=
-  cbn ;
+  cbn;
   match goal with
   | H: ifsize _ < _ |- _ => cbn in H
   | H: ifsize _ <= _ |- _ => cbn in H
   | H: ifsize _ = _ |- _ => cbn in H
-  end ;
+  end;
   lia.
 
 (** Atomic [iformula] *)
-Inductive iatomic_Prop : iformula -> Prop :=
-| iatomic_Prop_var : forall x, iatomic_Prop (ivar x).
-
 Inductive iatomic : iformula -> Type :=
 | iatomic_var : forall x, iatomic (ivar x).
 
+(* Unused
+Inductive iatomic_Prop : iformula -> Prop :=
+| iatomic_Prop_var : forall x, iatomic_Prop (ivar x).
+
 Lemma iatomic_Prop_iatomic A : iatomic_Prop A -> iatomic A.
 Proof. induction A; intros Hat; try (exfalso; inversion Hat; fail); constructor. Qed.
+*)
 
 
 (** ** Sub-formulas *)
@@ -148,7 +142,7 @@ split.
 - intros l1 l2 l3; apply isub_trans_list.
 Qed.
 
-(* unused
+(* Unused
 From OLlibs Require Import GPermutation_Type.
 
 Lemma isub_perm_list b l l1 l2 :
