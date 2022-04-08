@@ -24,18 +24,12 @@ Context { preiatom : DecType }.
 
 (with implication in both directions for non-commutative systems) *)
 Inductive iformula :=
-| ivar  : iatom -> iformula
-| ione  : iformula
-| itens : iformula -> iformula -> iformula
-| ilpam : iformula -> iformula -> iformula
-| igen  : iformula -> iformula
-| ilmap : iformula -> iformula -> iformula
-| ineg  : iformula -> iformula
-| itop  : iformula
-| iwith : iformula -> iformula -> iformula
-| izero : iformula
-| iplus : iformula -> iformula -> iformula
-| ioc   : iformula -> iformula.
+| ivar (_ : iatom)
+| ione | itens (_ _ : iformula)
+| ilpam (_ _ : iformula) | igen (_ : iformula)
+| ilmap (_ _ : iformula) | ineg (_ : iformula)
+| itop | iwith (_ _ : iformula) | izero | iplus (_ _ : iformula)
+| ioc (_ : iformula).
 
 #[global] Definition N := ivar atN.
 

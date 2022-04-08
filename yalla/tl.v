@@ -24,13 +24,11 @@ Context { Atoms : TLAtomType atom preiatom tatom }.
 
 (** Tensor formulas *)
 Inductive tformula :=
-| tvar : tatom -> tformula
-| tone : tformula
-| ttens : tformula -> tformula -> tformula
-| tneg : tformula -> tformula
-| tzero : tformula
-| tplus : tformula -> tformula -> tformula
-| toc : tformula -> tformula.
+| tvar (_ : tatom)
+| tone | ttens (_ _ : tformula)
+| tneg (_ : tformula)
+| tzero | tplus (_ _ : tformula)
+| toc (_ : tformula).
 
 Inductive tatomic : tformula -> Type :=
 | tatomic_var : forall x, tatomic (tvar x).

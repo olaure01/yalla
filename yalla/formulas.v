@@ -17,19 +17,12 @@ Context {atom : DecType}.
 
 (** Formulas *)
 Inductive formula :=
-| var : atom -> formula
-| covar : atom -> formula
-| one : formula
-| bot : formula
-| tens : formula -> formula -> formula
-| parr : formula -> formula -> formula
-| zero : formula
-| top : formula
-| aplus : formula -> formula -> formula
-| awith : formula -> formula -> formula
-| oc : formula -> formula
-| wn : formula -> formula.
-
+| var (_ : atom) | covar (_ : atom)
+| one | bot
+| tens (_ _ : formula) | parr (_ _ : formula)
+| zero | top
+| aplus (_ _ : formula) | awith (_ _ : formula)
+| oc (_ : formula) | wn (_ : formula).
 
 (** n-ary operators *)
 
