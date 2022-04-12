@@ -34,19 +34,18 @@ Inductive tatomic : tformula -> Type :=
 | tatomic_var : forall x, tatomic (tvar x).
 
 Inductive tsubform : tformula -> tformula -> Type :=
-| tsub_id : forall A, tsubform A A
-| tsub_tens_l : forall A B C, tsubform A B -> tsubform A (ttens B C)
-| tsub_tens_r : forall A B C, tsubform A B -> tsubform A (ttens C B)
-| tsub_neg_l  : forall A B, tsubform A B -> tsubform A (tneg B)
-| tsub_neg_r  : forall A B, tsubform A B -> tsubform A (tneg B)
-| tsub_plus_l : forall A B C, tsubform A B -> tsubform A (tplus B C)
-| tsub_plus_r : forall A B C, tsubform A B -> tsubform A (tplus C B)
-| tsub_oc : forall A B, tsubform A B -> tsubform A (toc B).
+| tsub_id A : tsubform A A
+| tsub_tens_l A B C : tsubform A B -> tsubform A (ttens B C)
+| tsub_tens_r A B C : tsubform A B -> tsubform A (ttens C B)
+| tsub_neg_l A B : tsubform A B -> tsubform A (tneg B)
+| tsub_neg_r A B : tsubform A B -> tsubform A (tneg B)
+| tsub_plus_l A B C : tsubform A B -> tsubform A (tplus B C)
+| tsub_plus_r A B C : tsubform A B -> tsubform A (tplus C B)
+| tsub_oc A B : tsubform A B -> tsubform A (toc B).
 
 Lemma tsub_trans A B C : tsubform A B -> tsubform B C -> tsubform A C.
 Proof.
-intros Hl Hr; revert A Hl; induction Hr; intros A' Hl;
-  try (constructor; apply IHHr); assumption.
+intros Hl Hr; revert A Hl; induction Hr; intros A' Hl; try (constructor; apply IHHr); assumption.
 Qed.
 
 #[export] Instance tsub_po : PreOrder tsubform | 50.
@@ -91,8 +90,7 @@ end.
 
 Lemma tl2ill_inj : injective tl2ill.
 Proof.
-intros A.
-induction A; intros B Heq; destruct B; inversion Heq;
+intro A; induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA in H0;
   try apply IHA1 in H0; try apply IHA2 in H1; subst; try reflexivity.
 now apply TAtom2PreIAtom_inj in H0; subst.
@@ -100,8 +98,7 @@ Qed.
 
 Lemma tl2ll_inj : injective (fun x => ill2ll (tl2ill x)).
 Proof.
-intros A.
-induction A; intros B Heq; destruct B;
+intro A; induction A; intros B Heq; destruct B;
  try (now inversion Heq;
       try apply IHA in H0;
       try apply IHA1 in H0; try apply IHA2 in H1; subst).
@@ -113,7 +110,7 @@ induction A; intros B Heq; destruct B;
   now apply i2ac_inj, t2i_inj in H0; subst.
 - inversion Heq.
   apply formulas.dual_inj in H0.
-  apply IHA in H0 ; subst; reflexivity.
+  apply IHA in H0; subst; reflexivity.
 Qed.
 
 Lemma N_not_tl2ill A : ~ N = tl2ill A.
@@ -541,11 +538,10 @@ Qed.
 
 (** *** cut admissibility *)
 
-Lemma cut_tl_r_axfree P : (projT1 (tpgax P) -> False) -> forall A l0 l1 l2 C,
+Lemma cut_tl_r_axfree P : notT (projT1 (tpgax P)) -> forall A l0 l1 l2 C,
   tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C -> tl P (l1 ++ l0 ++ l2) C.
 Proof.
-intros Hgax.
-intros A l0 l1 l2 C pi1 pi2.
+intros Hgax A l0 l1 l2 C pi1 pi2.
 destruct (tl2tlfrag pi1) as [pi1' _]; cbn in pi1'.
 assert (pi1'' := pi1' _ eq_refl).
 destruct (tl2tlfrag pi2) as [pi2' pi2''].
@@ -568,10 +564,9 @@ Lemma cut_admissible_tl_axfree P : notT (projT1 (tpgax P)) ->
   forall l Pi, tl P l Pi -> tl (cutrm_tpfrag P) l Pi.
 Proof.
 intros Hgax l Pi pi.
-induction pi; try now econstructor.
-- apply ex_tr with l1; assumption.
-- eapply ex_oc_tr; [ apply IHpi | assumption ].
+induction pi; try (econstructor; eassumption).
 - eapply cut_tl_r_axfree; eassumption.
+- contradiction (Hgax a).
 Qed.
 
 (** *** conservativity with respect to [ll] *)

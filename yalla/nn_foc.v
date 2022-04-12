@@ -32,8 +32,7 @@ Definition a2t X :=
 Lemma a2t_inj : injective a2t.
 Proof.
 unfold a2t; apply compose_injective.
-- apply bijective_injective.
-  apply Atom2PreIAtom_bij.
+- apply bijective_injective, Atom2PreIAtom_bij.
 - destruct (bijective_inverse TAtom2PreIAtom_bij).
   now apply section_injective with TAtom2PreIAtom.
 Qed.
@@ -81,7 +80,7 @@ end.
 Lemma pntrans_neg (A : formula) :
    (aformula A -> ptrans A = tneg (ntrans A))
 /\ (sformula A -> ntrans A = tneg (ptrans A)).
-Proof. induction A ; (split; intros Hpol; inversion Hpol); reflexivity. Qed.
+Proof. induction A; (split; intros Hpol; inversion Hpol); reflexivity. Qed.
 
 Lemma pntrans_dual A : ptrans (dual A) = ntrans A /\ ntrans (dual A) = ptrans A.
 Proof.
@@ -217,7 +216,7 @@ induction A; simpl.
 Qed.
 
 Definition tpfrag_tl := @mk_tpfrag tatom false NoTAxioms true.
-(*                                 atoms cut   axioms            perm  *)
+(*                                 atoms cut   axioms    perm  *)
 Definition tl_ll := tl tpfrag_tl.
 
 Proposition ll_to_tl (l : list formula) : ll_ll l -> tl_ll (map ntrans l) None.
@@ -305,18 +304,13 @@ intros pi.
 remember (Some (tneg A)) as Pi.
 revert A HeqPi; induction pi; intros A' HeqPi;
   try (now (inversion HeqPi)); subst;
-  try (now (rewrite app_comm_cons;
-            constructor;
-            rewrite <- app_comm_cons;
-            apply IHpi)).
+  try (now (rewrite app_comm_cons; constructor; rewrite <- app_comm_cons; apply IHpi)).
 - eapply ex_otr.
   + apply IHpi; reflexivity.
   + apply Permutation_Type_cons; [ reflexivity | assumption ].
 - inversion HeqPi; subst; assumption.
-- rewrite app_comm_cons.
-  apply plus_otlr; rewrite <- app_comm_cons.
-  + apply IHpi1; reflexivity.
-  + apply IHpi2; reflexivity.
+- rewrite app_comm_cons; apply plus_otlr; rewrite <- app_comm_cons;
+    [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 Qed.
 
 Lemma tsubform_toc_ntrans A B : tsubform (toc A) (ntrans B) -> { A' | A = tneg A' }.
@@ -610,13 +604,11 @@ Qed.
 Proposition tl_to_otl l : tl_ll (map ntrans l) None -> otl (map ntrans l) None.
 Proof.
 intros pi.
-replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil))
-  by (list_simpl; reflexivity).
-eapply tl_to_otl_neg; [ eassumption | | | ].
+replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
+eapply tl_to_otl_neg; [ eassumption | | | list_simpl; reflexivity ].
 + clear; induction l; constructor; [ | assumption ].
   eexists; reflexivity.
 + intros D HD; inversion HD.
-+ list_simpl; reflexivity.
 Qed.
 
 (* ** From [tl] to [llfoc] *)

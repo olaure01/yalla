@@ -16,14 +16,10 @@ Context { IAtoms : IAtomType_into_nat preiatom }.
 (** ** Encoding of [iformula] into [nat]-labelled trees for ordering *)
 
 (** Embedding of [IAtom] into [nat] *)
-Definition i2n := snd (proj1_sig IAtom_into_nat).
-Definition n2i := fst (proj1_sig IAtom_into_nat).
-Definition i2i_n : retract n2i i2n.
-Proof.
-unfold n2i, i2n.
-destruct IAtom_into_nat as [(s, i) Hr].
-apply Hr.
-Defined.
+Notation i2n := (snd (proj1_sig IAtom_into_nat)).
+Notation n2i := (fst (proj1_sig IAtom_into_nat)).
+Definition i2i_n : retract n2i i2n :=
+  eq_rect _ _ (proj2_sig IAtom_into_nat) _ (surjective_pairing (proj1_sig IAtom_into_nat)).
 
 (** Embedding of [iformula] into [nattree] *)
 Fixpoint iform2nattree A :=
@@ -60,21 +56,16 @@ match t with
 end.
 
 Lemma iform_nattree_section : retract nattree2iform iform2nattree.
-Proof.
-intros A; induction A; cbn;
-  try rewrite IHA1; try rewrite IHA2; try rewrite IHA;
-  try rewrite i2i_n; reflexivity.
-Qed.
+Proof. now intros A; induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? i2i_n. Qed.
 
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
 
 #[export] Instance border_iformula : BOrder | 50.
 Proof.
-eapply border_inj.
-eapply compose_injective.
+eapply border_inj, compose_injective.
 - eapply section_injective.
-  intros A; apply iform_nattree_section.
+  intro; apply iform_nattree_section.
 - apply nattree2nat_inj.
 Defined.
 

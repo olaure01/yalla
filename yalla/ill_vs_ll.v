@@ -242,71 +242,61 @@ apply tens_r.
 - apply top_r.
 Qed.
 
-Fact no_at_prove_ill : forall i, @ill_ll preiatom nil (ivar i) -> False.
+Fact no_at_prove_ill i : notT (@ill_ll preiatom nil (ivar i)).
 Proof.
-intros i pi.
-remember (ivar i) as C.
-remember nil as l.
-revert Heql HeqC.
-induction pi ; intros Heql HeqC ; subst ;
-  (try now (inversion Heql)) ;
-  (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql).
+intros pi.
+remember (ivar i) as C eqn:HeqC.
+remember nil as l eqn:Heql.
+revert Heql HeqC; induction pi; intros Heql HeqC; subst;
+  (try now (inversion Heql));
+  (try now (inversion HeqC));
+  try now (destruct l1; inversion Heql).
 - symmetry in p.
-  apply PEPermutation_Type_nil in p ; subst.
-  intuition.
-- apply app_eq_nil in Heql ; destruct Heql as [? Heql] ; subst.
-  apply app_eq_nil in Heql ; destruct Heql as [Heql ?] ; subst.
-  destruct lw' ; inversion Heql ; subst.
-  symmetry in p ; apply Permutation_Type_nil in p ; subst.
-  intuition.
-- destruct l1 ; destruct l0 ; inversion Heql.
-- destruct l ; inversion Heql.
+  apply PEPermutation_Type_nil in p; auto.
+- apply app_eq_nil in Heql as [? Heql]; subst.
+  apply app_eq_nil in Heql as [Heql ?]; subst.
+  destruct lw'; inversion Heql; subst.
+  symmetry in p; apply Permutation_Type_nil in p; subst; auto.
+- destruct l1; destruct l0; inversion Heql.
+- destruct l; inversion Heql.
 Qed.
 
-Fact no_biat_prove_ill : forall i j, i <> j ->
-  @ill_ll preiatom (ivar i :: nil) (ivar j) -> False.
+Fact no_biat_prove_ill i j : i <> j -> notT (@ill_ll preiatom (ivar i :: nil) (ivar j)).
 Proof.
-intros i j Ha pi.
-remember (ivar j) as C.
-remember (ivar i :: nil) as l.
-revert Heql HeqC.
-induction pi ; intros Heql HeqC ; subst ;
-  (try now (inversion Heql)) ;
-  (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
-- inversion HeqC ; inversion Heql ; subst ; intuition.
+intros Ha pi.
+remember (ivar j) as C eqn:HeqC.
+remember (ivar i :: nil) as l eqn:Heql.
+revert Heql HeqC; induction pi; intros Heql HeqC; subst;
+  (try now (inversion Heql));
+  (try now (inversion HeqC));
+  try now (destruct l1; inversion Heql; destruct l1; inversion H1).
+- inversion HeqC; inversion Heql; subst; auto.
 - symmetry in p.
-  apply PEPermutation_Type_length_1_inv in p ; subst ; intuition.
-- destruct l1 ; inversion Heql ; subst.
-  + destruct lw' ; inversion H0.
-    cbn in H ; subst.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    intuition.
-  + apply app_eq_nil in H1 ; destruct H1 as [? Heq] ; subst.
-    apply app_eq_nil in Heq ; destruct Heq as [Heq ?] ; subst.
-    destruct lw' ; inversion Heq.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    intuition.
-- destruct l1 ; destruct l0 ; inversion Heql ;
-    try destruct l0 ; try destruct l1 ; inversion Heql.
-- destruct l ; inversion Heql ; subst.
-  destruct l ; inversion H1.
+  apply PEPermutation_Type_length_1_inv in p; auto.
+- destruct l1; inversion Heql; subst.
+  + destruct lw'; inversion H0.
+    cbn in H; subst.
+    symmetry in p; apply Permutation_Type_nil in p; subst; auto.
+  + apply app_eq_nil in H1 as [? Heq]; subst.
+    apply app_eq_nil in Heq as [Heq ?]; subst.
+    destruct lw'; inversion Heq.
+    symmetry in p; apply Permutation_Type_nil in p; subst; auto.
+- destruct l1; destruct l0; inversion Heql;
+    try destruct l0; try destruct l1; inversion Heql.
+- destruct l; inversion Heql; destruct l; inversion H1.
 Qed.
 
-Fact no_biat_map_prove_ill : forall i j, i <> j ->
-  @ill_ll preiatom nil (ilpam (ivar i) (ivar j)) -> False.
+Fact no_biat_map_prove_ill i j : i <> j -> notT (@ill_ll preiatom nil (ilpam (ivar i) (ivar j))).
 Proof.
-intros i j Ha pi.
-apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
-eapply no_biat_prove_ill ; eassumption.
+intros Ha pi%ilpam_rev_noax; [ | intros Hax; inversion Hax ].
+eapply no_biat_prove_ill; eassumption.
 Qed.
 
 (** We need two distinct atoms *)
 Hypothesis twoat : x <> y.
 
 Fact pre_pre_counter_ex_ill :
-  ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x) -> False.
+  notT (ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x)).
 Proof.
 intros pi.
 remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l.
@@ -340,8 +330,8 @@ induction pi ; intros Heql HeqC ; subst ;
 Qed.
 
 Fact pre_counter_ex_ill :
-  ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil)
-         (itens (ivar x) (ilpam izero (ivar z))) -> False.
+  notT (ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil)
+               (itens (ivar x) (ilpam izero (ivar z)))).
 Proof.
 intros pi.
 remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l.
@@ -376,11 +366,11 @@ induction pi ; intros Heql HeqC ; subst ;
 - destruct l1, l0; inversion Heql; try destruct l0; try destruct l1; inversion H1.
 Qed.
 
-Fact counter_ex_ill : ill_ll nil cons_counter_ex -> False.
+Fact counter_ex_ill : notT (ill_ll nil cons_counter_ex).
 Proof.
 intros pi.
 apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
-apply pre_counter_ex_ill in pi ; assumption.
+apply pre_counter_ex_ill in pi; assumption.
 Qed.
 
 End Non_Conservativity_Atoms.
@@ -408,7 +398,7 @@ apply tens_r.
 - apply top_r.
 Qed.
 
-Fact counter_ex_atfree_ill : @ill_ll preiatom nil cons_counter_ex_atfree -> False.
+Fact counter_ex_atfree_ill : notT (@ill_ll preiatom nil cons_counter_ex_atfree).
 Proof.
 intros pi.
 apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
@@ -1020,10 +1010,10 @@ Inductive nonzerospos : iformula -> Type :=
 | nzsp_ione  : nonzerospos ione
 | nzsp_itens : forall A B, nonzerospos A -> nonzerospos B -> nonzerospos (itens A B)
 | nzsp_ilpam : forall A B, nonzerospos A -> nonzerospos B ->
-                             (zeropos B -> False) -> nonzerospos (ilpam A B)
+                             notT (zeropos B) -> nonzerospos (ilpam A B)
 | nzsp_igen : forall A, nonzerospos A -> nonzerospos (igen A)
 | nzsp_ilmap : forall A B, nonzerospos A -> nonzerospos B ->
-                             (zeropos B -> False) -> nonzerospos (ilmap A B)
+                             notT (zeropos B) -> nonzerospos (ilmap A B)
 | nzsp_ineg : forall A, nonzerospos A -> nonzerospos (ineg A)
 | nzsp_itop  : nonzerospos itop
 | nzsp_iwith : forall A B, nonzerospos A -> nonzerospos B -> nonzerospos (iwith A B)
@@ -2019,7 +2009,7 @@ Qed.
 
 
 (** Axiom-free conservativity *)
-Proposition ll_to_ill_nzeropos_axfree {P} : (projT1 (ipgax P) -> False) -> forall l,
+Proposition ll_to_ill_nzeropos_axfree {P} : notT (projT1 (ipgax P)) -> forall l,
 ll (i2pfrag P) l -> forall l0 C, Forall_inf nonzerospos (C :: l0) ->
   PCPermutation_Type (pperm (i2pfrag P))
     l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
@@ -3797,11 +3787,10 @@ intros l Hll ; induction Hll ;
       apply in_inf_elt.
 Qed.
 
-Proposition ll_to_ill_oclpam_axfree P : ipperm P = true ->
-  (projT1 (ipgax P) -> False) -> forall l,
-  ll (i2pfrag P) l -> forall l0 C, Forall_inf oclpam (C :: l0) ->
-    Permutation_Type l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
-      ill P l0 C.
+Proposition ll_to_ill_oclpam_axfree P : ipperm P = true -> notT (projT1 (ipgax P)) ->
+  forall l, ll (i2pfrag P) l -> forall l0 C, Forall_inf oclpam (C :: l0) ->
+            Permutation_Type l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
+    ill P l0 C.
 Proof.
 intros Hperm P_axfree l pi l0 C Hoclm HP.
 apply cut_admissible_axfree in pi; [ | assumption ].

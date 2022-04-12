@@ -129,7 +129,7 @@ Qed.
 Lemma billpol2ll_dual :
      (forall P, formulas.dual (pllpol2ll P) = nllpol2ll (pdual P))
   /\ (forall N, formulas.dual (nllpol2ll N) = pllpol2ll (ndual N)).
-Proof. apply polform_ind; intros; cbn; rewrite ? H, ? H0 ; reflexivity. Qed.
+Proof. apply polform_ind; intros; cbn; rewrite ? H, ? H0; reflexivity. Qed.
 
 Lemma llpol2ll_dual A : formulas.dual (llpol2ll A) = llpol2ll (dual A).
 Proof. destruct A; apply billpol2ll_dual. Qed.

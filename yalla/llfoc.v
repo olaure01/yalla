@@ -16,20 +16,20 @@ Notation formula := (@formula atom).
 
 (** ** Synchronous and asynchronous formulas *)
 Inductive sformula : formula -> Type :=
-| pvar : forall x, sformula (var x)
+| pvar x : sformula (var x)
 | pone : sformula one
-| ptens : forall A B, sformula (tens A B)
+| ptens A B : sformula (tens A B)
 | pzero : sformula zero
-| pplus : forall A B, sformula (aplus A B)
-| poc : forall A, sformula (oc A).
+| pplus A B : sformula (aplus A B)
+| poc A : sformula (oc A).
 
 Inductive aformula : formula -> Type :=
-| ncovar : forall x, aformula (covar x)
+| ncovar x : aformula (covar x)
 | nbot : aformula bot
-| nparr : forall A B, aformula (parr A B)
+| nparr A B : aformula (parr A B)
 | ntop : aformula top
-| nwith : forall A B, aformula (awith A B)
-| nwn : forall A, aformula (wn A).
+| nwith A B : aformula (awith A B)
+| nwn A : aformula (wn A).
 
 Lemma polarity A : sformula A + aformula A.
 Proof. induction A; now (left + right; constructor). Defined.
@@ -49,17 +49,17 @@ Proof. intros Hn; destruct A; inversion Hn; constructor. Qed.
 Definition tFoc x :=
   (sformula x + { X | x = covar X } + { y | x = wn y } + (x = top))%type.
 
-Lemma tFoc_dec x : tFoc x + (tFoc x -> False).
+Lemma tFoc_dec x : tFoc x + notT (tFoc x).
 Proof.
-induction x ;
-  try (now (left; left; left; left; constructor)) ;
-  try (now (left; left; left; right; eexists; reflexivity)) ;
-  try (now (left; left; right; eexists; reflexivity)) ;
-  try (now (left; right; reflexivity)) ;
+induction x;
+  try (now (left; left; left; left; constructor));
+  try (now (left; left; left; right; eexists; reflexivity));
+  try (now (left; left; right; eexists; reflexivity));
+  try (now (left; right; reflexivity));
   try (now (right; intros [[[ H | [X H] ] | [X H] ] | H]; inversion H)).
 Qed.
 
-Lemma tFocl_dec l : Forall_inf tFoc l + (Forall_inf tFoc l -> False).
+Lemma tFocl_dec l : Forall_inf tFoc l + notT (Forall_inf tFoc l).
 Proof.
 induction l.
 - left; constructor.
@@ -72,20 +72,20 @@ induction l.
     inversion_clear H; auto.
 Qed.
 
-Lemma not_tFoc x : (tFoc x -> False) ->
+Lemma not_tFoc x : notT (tFoc x) ->
   (x = bot) + {'(y1, y2) | x = parr y1 y2 } + {'(y1, y2) | x = awith y1 y2 }.
 Proof.
 destruct x; intros HnF;
-  try (now (exfalso; apply HnF; left; left; left; constructor)) ;
-  try (now (exfalso; apply HnF; left; left; right; eexists; reflexivity)) ;
-  try (now (exfalso; apply HnF; left; right; eexists; reflexivity)) ;
+  try (now (exfalso; apply HnF; left; left; left; constructor));
+  try (now (exfalso; apply HnF; left; left; right; eexists; reflexivity));
+  try (now (exfalso; apply HnF; left; right; eexists; reflexivity));
   try (now (exfalso; apply HnF; right; reflexivity)).
 - left; left; reflexivity.
-- left; right ; exists (x1, x2); reflexivity.
+- left; right; exists (x1, x2); reflexivity.
 - right; exists (x1, x2); reflexivity.
 Qed.
 
-Lemma not_tFocl l : (Forall_inf tFoc l -> False) ->
+Lemma not_tFocl l : notT (Forall_inf tFoc l) ->
   {'(A, l1, l2) & l = l1 ++ A :: l2
                 & ((A = bot) + {'(A1, A2) | A = parr A1 A2 }
                              + {'(A1, A2) | A = awith A1 A2 })%type }.
@@ -96,8 +96,7 @@ intros HnF%Forall_inf_neg_Exists_inf.
     apply (not_tFoc H0).
   + apply IHl in X as [[[b l1] l2] Heq Hf]; subst.
     now exists (b, a :: l1, l2).
-- intros x.
-  destruct (tFoc_dec x); auto.
+- intros x; destruct (tFoc_dec x); auto.
 Qed.
 
 Definition polcont l A :=
@@ -194,7 +193,7 @@ remember (list_sum (map fsize l)) as n eqn:Heqn.
 revert l Pi Heqn; induction n using lt_wf_rect; intros l Pi -> Hs.
 destruct (tFocl_dec l).
 - apply top_fr; assumption.
-- apply not_tFocl in f as [ [[A l1] l2] -> [[-> | [[B C] ->]] | [[B C] ->]] ].
+- apply not_tFocl in n as [ [[A l1] l2] -> [[-> | [[B C] ->]] | [[B C] ->]] ].
   + rewrite app_comm_cons.
     eapply ex_fr; [ apply bot_fr | apply Permutation_Type_middle ].
     cbn ; eapply X; [ | reflexivity | assumption ].
@@ -213,7 +212,7 @@ destruct (tFocl_dec l).
         [ eapply X; trivial
         | etransitivity; [ apply Permutation_Type_swap
                          | apply Permutation_Type_cons; reflexivity ]].
-      cbn; rewrite 2 map_app, 2 list_sum_app ; simpl; lia.
+      cbn; rewrite 2 map_app, 2 list_sum_app; simpl; lia.
     * list_simpl; eapply ex_fr;
         [ eapply X; trivial
         | etransitivity; [ apply Permutation_Type_swap
@@ -625,19 +624,11 @@ Qed.
 
 Lemma with_rev1_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ awith A B :: l2 ->
   { pi' : llfoc (l1 ++ A :: l2) Pi | fpsize pi' < fpsize pi }.
-Proof.
-intros Heq.
-eapply with_rev_f in Heq.
-apply Heq.
-Qed.
+Proof. intros Heq%(with_rev_f pi); apply Heq. Qed.
 
 Lemma with_rev2_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ awith A B :: l2 ->
   { pi' : llfoc (l1 ++ B :: l2) Pi | fpsize pi' < fpsize pi }.
-Proof.
-intros Heq.
-eapply with_rev_f in Heq.
-apply Heq.
-Qed.
+Proof. intros Heq%(with_rev_f pi); apply Heq. Qed.
 
 Lemma llfoc_to_ll l Pi : llfoc l Pi ->
    (Pi = None -> ll_ll l)
@@ -729,7 +720,7 @@ Qed.
 
 Definition Foc x := (sformula x + { X | x = covar X } + { y | x = wn y })%type.
 
-Lemma Foc_dec x : Foc x + (Foc x -> False).
+Lemma Foc_dec x : Foc x + notT (Foc x).
 Proof.
 induction x;
   try (now left; left; left; constructor);
@@ -739,7 +730,7 @@ induction x;
   now right; intros [[ H | [X H] ] | [X H] ]; inversion H.
 Qed.
 
-Lemma Focl_dec l : Forall_inf Foc l + (Forall_inf Foc l -> False).
+Lemma Focl_dec l : Forall_inf Foc l + notT (Forall_inf Foc l).
 Proof.
 induction l.
 - left; constructor.
@@ -750,9 +741,8 @@ induction l.
   + now right; intros H; inversion_clear H.
 Qed.
 
-Lemma not_Foc x : (Foc x -> False) ->
-  (x = bot) + {'(y1, y2) | x = parr y1 y2 } +
-  (x = top) + {'(y1, y2) | x = awith y1 y2 }.
+Lemma not_Foc x : notT (Foc x) ->
+  (x = bot) + {'(y1, y2) | x = parr y1 y2 } + (x = top) + {'(y1, y2) | x = awith y1 y2 }.
 Proof.
 destruct x; intros HnF ;
   try (now exfalso; apply HnF; left; left; constructor);
@@ -765,7 +755,7 @@ destruct x; intros HnF ;
 - right; exists (x1,x2); reflexivity.
 Qed.
 
-Lemma not_Focl l : (Forall_inf Foc l -> False) ->
+Lemma not_Focl l : notT (Forall_inf Foc l) ->
   {'(A, l1, l2) & l = l1 ++ A :: l2
                 & ((A = bot) + {'(A1, A2) | A = parr A1 A2 }
                  + (A = top) + {'(A1, A2) | A = awith A1 A2 })%type }.
@@ -776,8 +766,7 @@ intros HnF%Forall_inf_neg_Exists_inf.
     apply (not_Foc H0).
   + apply IHl in X as [[[b l1] l2] Heq Hf]; subst.
     now exists (b, a::l1, l2).
-- intros x.
-  destruct (Foc_dec x); auto.
+- intros x; destruct (Foc_dec x); auto.
 Qed.
 
 Inductive llFoc : list formula -> option formula -> Type :=
@@ -822,8 +811,7 @@ Proof.
 remember (list_sum (map fsize l)) as n; revert l Heqn ; induction n using lt_wf_rect; intros l ->.
 destruct (tFocl_dec l).
 - apply top_Fr; assumption.
-- apply not_tFocl in f.
-  destruct f as [ [[A l1] l2] -> [[-> | [[B C] ->]] | [[B C] ->]] ].
+- apply not_tFocl in n as [ [[A l1] l2] -> [[-> | [[B C] ->]] | [[B C] ->]] ].
   + rewrite app_comm_cons.
     eapply ex_Fr; [ apply bot_Fr | apply Permutation_Type_middle ].
     list_simpl; eapply X; [ | reflexivity ].
@@ -1073,7 +1061,7 @@ destruct l0 as [|A l0].
     apply X with (list_sum (map fsize l0)) l; rewrite <- ? app_assoc; auto.
     * assert (Hs := fsize_pos A); simpl; lia.
     * apply Forall_inf_app; auto.
-  + apply not_Foc in f as [[[ -> | [(A1, A2) ->]] | ->] | [(A1, A2) ->]]; cbn.
+  + apply not_Foc in n as [[[ -> | [(A1, A2) ->]] | ->] | [(A1, A2) ->]]; cbn.
     * apply ex_Fr with (bot :: l2 ++ lf ++ l0);
         [ | rewrite ? app_assoc; apply Permutation_Type_middle ].
       apply bot_Fr.
@@ -1177,8 +1165,7 @@ Proof.
     eapply incl_Foc; [ | reflexivity | eassumption ].
     eapply ex_Fr; [ apply foc_Fr; eassumption | ].
     apply Permutation_Type_middle.
-  + eapply (snd H) in f; [ | reflexivity ].
-    apply f.
+  + apply (snd H _ eq_refl n).
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   apply H in H0.
@@ -1213,8 +1200,7 @@ Proof.
       -- apply (llFoc_foc_is_llFoc_foc IH).
       -- apply (Foc_context IH).
       -- apply Permutation_Type_middle.
-    * eapply (snd H) in f; [ | reflexivity ].
-      apply f.
+    * apply (snd H _ eq_refl n).
   + rewrite (polconta _ Ha),(polfoca Ha) in H.
     apply H in Heq.
     change (wn A :: l) with ((wn A :: nil) ++ l).

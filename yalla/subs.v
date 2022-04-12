@@ -132,16 +132,12 @@ Lemma subs_fresh_incl C lat A :
   incl (atom_list A) lat -> subs C (fresh lat) A = A.
 Proof.
 induction A; cbn; intros Hincl;
-  try rewrite IHA;
-  try (rewrite IHA2 ; [ rewrite IHA1 | ]);
-  cbn; intuition;
+  rewrite ? IHA, ? IHA1, ? IHA2;
+  cbn; trivial;
   try now apply incl_app_inv in Hincl.
-- rewrite repl_at_neq; auto.
-  intros ->.
-  apply (fresh_prop lat), (Hincl (fresh lat)); intuition.
-- rewrite repl_at_neq; auto.
-  intros ->.
-  apply (fresh_prop lat), (Hincl (fresh lat)); intuition.
+  all: rewrite repl_at_neq; [ reflexivity | intros -> ].
+  all: apply (fresh_prop lat), (Hincl (fresh lat)).
+  all: left; reflexivity.
 Qed.
 
 Lemma subs_fresh C A : subs C (fresh_of A) A = A.
