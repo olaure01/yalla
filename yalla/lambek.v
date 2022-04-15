@@ -30,16 +30,16 @@ Inductive lform :=
 
 Fixpoint l2ill A :=
 match A with
-| lvar x    => iformulas.ivar x
-| ltop      => iformulas.itop
+| lvar x => iformulas.ivar x
+| ltop => iformulas.itop
 | lwith A B => iformulas.iwith (l2ill A) (l2ill B)
-| lpam A B  => iformulas.ilpam (l2ill A) (l2ill B)
+| lpam A B => iformulas.ilpam (l2ill A) (l2ill B)
 end.
 
 (*
 Lemma l2ill_inj : injective l2ill.
 Proof.
-intros A; induction A; intros B Heq; destruct B; inversion Heq ;
+intros A; induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 *)
@@ -48,17 +48,14 @@ Qed.
 (** ** 3. define proofs *)
 
 Inductive lprove : list lform -> lform -> Type :=
-| ax_lr   : forall X, lprove (lvar X :: nil) (lvar X)
-| top_lrr  : forall l, lprove l ltop
-| with_lrr : forall A B l, lprove l A -> lprove l B -> lprove l (lwith A B)
-| with_llr1 : forall A B C l1 l2, lprove (l1 ++ A :: l2) C ->
-                                  lprove (l1 ++ lwith A B :: l2) C
-| with_llr2 : forall A B C l1 l2, lprove (l1 ++ A :: l2) C ->
-                                  lprove (l1 ++ lwith B A :: l2) C
-| lpam_lrr  : forall A B l, lprove (l ++ A :: nil) B -> lprove l (lpam A B)
-| lpam_llr : forall A B C l1 l2 l3,
-                  lprove l2 A -> lprove (l1 ++ B :: l3) C ->
-                  lprove (l1 ++ lpam A B :: l2 ++ l3) C.
+| ax_lr X : lprove (lvar X :: nil) (lvar X)
+| top_lrr l : lprove l ltop
+| with_lrr A B l : lprove l A -> lprove l B -> lprove l (lwith A B)
+| with_llr1 A B C l1 l2 : lprove (l1 ++ A :: l2) C -> lprove (l1 ++ lwith A B :: l2) C
+| with_llr2 A B C l1 l2 : lprove (l1 ++ A :: l2) C -> lprove (l1 ++ lwith B A :: l2) C
+| lpam_lrr A B l : lprove (l ++ A :: nil) B -> lprove l (lpam A B)
+| lpam_llr A B C l1 l2 l3 : lprove l2 A -> lprove (l1 ++ B :: l3) C ->
+                            lprove (l1 ++ lpam A B :: l2 ++ l3) C.
 
 
 (** ** 4. characterize corresponding [ill] fragment *)
@@ -80,20 +77,17 @@ intros pi; induction pi;
   now constructor.
 Qed.
 
-Lemma illfrag2l l A :
-  ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A) -> lprove l A.
+Lemma illfrag2l l A : ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A) -> lprove l A.
 Proof.
 intros pi.
-remember (map l2ill l) as l0.
-remember (l2ill A) as A0.
-revert l A Heql0 HeqA0; induction pi;
-  intros l' A' Heql0 HeqA0; subst;
+remember (map l2ill l) as l0 eqn:Heql0; remember (l2ill A) as A0 eqn:HeqA0.
+revert l A Heql0 HeqA0; induction pi; intros l' A' Heql0 HeqA0; subst;
   (try now (destruct A'; inversion HeqA0));
   (try now (symmetry in Heql0; decomp_map_inf Heql0; destruct x; inversion Heql0));
   (try now (symmetry in Heql0; decomp_map_inf Heql0; destruct x; inversion Heql3)).
-- destruct A'; inversion HeqA0.
-  destruct l'; inversion Heql0; destruct l' ; inversion Heql0.
-  destruct l; inversion H3; subst.
+- destruct A'; inversion HeqA0 as [H0].
+  destruct l'; inversion Heql0 as [[H1 H2]]; destruct l'; inversion H2.
+  destruct l; inversion H1; subst.
   apply ax_lr.
 - apply IHpi; [ assumption | reflexivity ].
 - symmetry in Heql0; decomp_map_inf Heql0; subst.
@@ -132,13 +126,12 @@ Proof. apply illfrag2l, ill_def.ax_exp_ill. Qed.
 
 (** *** cut admissibility *)
 
-Lemma cut_r A l0 l1 l2 C :
-  lprove l0 A -> lprove (l1 ++ A :: l2) C -> lprove (l1 ++ l0 ++ l2) C.
+Lemma cut_r A l0 l1 l2 C : lprove l0 A -> lprove (l1 ++ A :: l2) C -> lprove (l1 ++ l0 ++ l2) C.
 Proof.
 intros pi1%l2illfrag pi2%l2illfrag.
-rewrite map_app in pi2.
 apply illfrag2l.
 rewrite 2 map_app.
+rewrite map_app in pi2.
 eapply ill_cut.cut_ir_axfree; [ intros a; destruct a | | ]; eassumption.
 Qed.
 

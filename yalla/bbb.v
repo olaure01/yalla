@@ -21,40 +21,34 @@ Notation llR := (@llR atom).
 (** It contains [ll_mix2] but allows [mix0] as well above one side of each [mix2] rule. *)
 
 Inductive ll_bbb : list formula -> Type :=
-| ax_bbb_r : forall X, ll_bbb (covar X :: var X :: nil)
-| ex_bbb_r : forall l1 l2, ll_bbb l1 -> Permutation_Type l1 l2 -> ll_bbb l2
-| mix2_bbb_r : forall l1 l2, ll_bbb l1 -> ll_mix02 l2 -> ll_bbb (l2 ++ l1)
+| ax_bbb_r X : ll_bbb (covar X :: var X :: nil)
+| ex_bbb_r l1 l2 : ll_bbb l1 -> Permutation_Type l1 l2 -> ll_bbb l2
+| mix2_bbb_r l1 l2 : ll_bbb l1 -> ll_mix02 l2 -> ll_bbb (l2 ++ l1)
 | one_bbb_r : ll_bbb (one :: nil)
-| bot_bbb_r : forall l, ll_bbb l -> ll_bbb (bot :: l)
-| tens_bbb_r : forall A B l1 l2,
-                ll_bbb (A :: l1) -> ll_bbb (B :: l2) -> ll_bbb (tens A B :: l2 ++ l1)
-| parr_bbb_r : forall A B l, ll_bbb (A :: B :: l) -> ll_bbb (parr A B :: l)
-| top_bbb_r : forall l, ll_bbb (top :: l)
-| plus_bbb_r1 : forall A B l, ll_bbb (A :: l) -> ll_bbb (aplus A B :: l)
-| plus_bbb_r2 : forall A B l, ll_bbb (A :: l) -> ll_bbb (aplus B A :: l)
-| with_bbb_r : forall A B l, ll_bbb (A :: l) -> ll_bbb (B :: l) ->
-                                   ll_bbb (awith A B :: l)
-| oc_bbb_r : forall A l, ll_bbb (A :: map wn l) -> ll_bbb (oc A :: map wn l)
-| de_bbb_r : forall A l, ll_bbb (A :: l) -> ll_bbb (wn A :: l)
-| wk_bbb_r : forall A l, ll_bbb l -> ll_bbb (wn A :: l)
-| co_bbb_r : forall A l, ll_bbb (wn A :: wn A :: l) -> ll_bbb (wn A :: l).
+| bot_bbb_r l : ll_bbb l -> ll_bbb (bot :: l)
+| tens_bbb_r A B l1 l2 : ll_bbb (A :: l1) -> ll_bbb (B :: l2) -> ll_bbb (tens A B :: l2 ++ l1)
+| parr_bbb_r A B l : ll_bbb (A :: B :: l) -> ll_bbb (parr A B :: l)
+| top_bbb_r l : ll_bbb (top :: l)
+| plus_bbb_r1 A B l : ll_bbb (A :: l) -> ll_bbb (aplus A B :: l)
+| plus_bbb_r2 A B l : ll_bbb (A :: l) -> ll_bbb (aplus B A :: l)
+| with_bbb_r A B l : ll_bbb (A :: l) -> ll_bbb (B :: l) -> ll_bbb (awith A B :: l)
+| oc_bbb_r A l : ll_bbb (A :: map wn l) -> ll_bbb (oc A :: map wn l)
+| de_bbb_r A l : ll_bbb (A :: l) -> ll_bbb (wn A :: l)
+| wk_bbb_r A l : ll_bbb l -> ll_bbb (wn A :: l)
+| co_bbb_r A l : ll_bbb (wn A :: wn A :: l) -> ll_bbb (wn A :: l).
+Arguments ex_bbb_r _ [_].
 
 (** Generalized weakening for lists *)
 Lemma wk_list_bbb_r l l' : ll_bbb l' -> ll_bbb (map wn l ++ l').
-Proof.
-induction l; intros; [ assumption | ].
-cbn; apply wk_bbb_r.
-apply IHl; assumption.
-Qed.
+Proof. induction l; intros; [ | cbn; apply wk_bbb_r, IHl ]; assumption. Qed.
 
 (** Generalized contraction for lists *)
-Lemma co_list_bbb_r l l' :
-  ll_bbb (map wn l ++ map wn l ++ l') -> ll_bbb (map wn l ++ l').
+Lemma co_list_bbb_r l l' : ll_bbb (map wn l ++ map wn l ++ l') -> ll_bbb (map wn l ++ l').
 Proof.
 induction l in l' |- *; intros; [ assumption | ].
-apply (@ex_bbb_r (map wn l ++ wn a :: l')); [ | Permutation_Type_solve ].
+apply (ex_bbb_r (map wn l ++ wn a :: l')); [ | Permutation_Type_solve ].
 apply IHl.
-apply (@ex_bbb_r (wn a :: map wn l ++ map wn l ++ l')); [ | Permutation_Type_solve ].
+apply (ex_bbb_r (wn a :: map wn l ++ map wn l ++ l')); [ | Permutation_Type_solve ].
 apply co_bbb_r.
 eapply ex_bbb_r; [ eassumption | Permutation_Type_solve ].
 Qed.
@@ -128,7 +122,7 @@ Qed.
 Lemma mix2_to_bbb l : ll_mix2 l -> ll_bbb l.
 Proof.
 intros pi; induction pi using ll_nested_ind; try now constructor.
-- apply (@ex_bbb_r l1); assumption.
+- apply (ex_bbb_r l1); assumption.
 - apply (Permutation_Type_map wn) in p.
   eapply ex_bbb_r; [ eassumption | ].
   Permutation_Type_solve.
@@ -142,8 +136,7 @@ intros pi; induction pi using ll_nested_ind; try now constructor.
   eapply stronger_pfrag; [ | eassumption ].
   repeat split.
   + intros a; exists a; reflexivity.
-  + intro n.
-    repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
+  + intro n; repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
 - destruct a.
 Qed.
 
@@ -154,24 +147,20 @@ intros pi; induction pi; try now constructor.
 - apply (ex_r l1); assumption.
 - rewrite <- (app_nil_r _), <- app_assoc.
   change (l2 ++ l1 ++ nil) with (concat (l2 :: l1 :: nil)).
-  apply mix_r; [ reflexivity | ].
-  repeat constructor; assumption.
+  apply mix_r; repeat constructor; assumption.
 Qed.
 
 Lemma mix2_std_bbb_r l1 l2 : ll_bbb l1 -> ll_bbb l2 -> ll_bbb (l2 ++ l1).
-Proof.
-intros pi1 pi2%bbb_to_mix02.
-apply mix2_bbb_r; assumption.
-Qed.
+Proof. intros pi1 pi2%bbb_to_mix02; apply mix2_bbb_r; assumption. Qed.
 
 (** [ll_bbb] as an enriched [ll] system *)
 
 Lemma bbb_to_ll l : ll_bbb l -> ll_ll (wn (tens (wn one) bot) :: l).
 Proof.
 intros pi; induction pi;
-  (try now (apply wk_r ; constructor)) ;
-  try now (eapply ex_r ; [ | apply Permutation_Type_swap ] ;
-           constructor ; eapply ex_r ; [ eassumption | cbn; Permutation_Type_solve ]).
+  (try now (apply wk_r; constructor));
+  try now (eapply ex_r; [ | apply Permutation_Type_swap ];
+           constructor; eapply ex_r; [ eassumption | cbn; Permutation_Type_solve ]).
 - eapply ex_r; [ eassumption | cbn; Permutation_Type_solve ].
 - apply co_r, co_r, de_r.
   apply (ex_r (tens (wn one) bot :: (wn (tens (wn one) bot) :: l1)
@@ -182,8 +171,7 @@ intros pi; induction pi;
     apply stronger_pfrag with (pfrag_mix02); [ | assumption ].
     repeat split.
     * intro a; split with a; reflexivity.
-    * intros n.
-      repeat (destruct n; try reflexivity).
+    * intros n; repeat (destruct n; try reflexivity).
   + apply bot_r; assumption.
 - apply co_r.
   apply (ex_r (tens A B :: (wn (tens (wn one) bot) :: l2)
@@ -201,6 +189,7 @@ intros pi; induction pi;
   eapply ex_r; [ eassumption | cbn; Permutation_Type_solve ].
 Qed.
 
+(* TODO use [repeat] instead of [map _ (_ : list unit)] *)
 Lemma ll_to_bbb l : ll_ll l ->
   forall l' (l0 l1 : list unit),
     Permutation_Type l (l' ++ map (fun _ => tens (wn one) bot) l1
@@ -613,17 +602,15 @@ Example bbb_ex : ll_bbb (one :: oc (tens (parr one one) bot) :: nil).
 Proof.
 change (one :: oc (tens (parr one one) bot) :: nil)
   with ((@one atom :: nil) ++ (oc (tens (parr one one) bot) :: nil)).
-apply (@ex_bbb_r ((oc (tens (parr one one) bot) :: nil) ++ one :: nil));
+apply (ex_bbb_r ((oc (tens (parr one one) bot) :: nil) ++ one :: nil));
   [ | Permutation_Type_solve ].
 apply mix2_bbb_r.
 - apply one_bbb_r.
 - change (oc (tens (parr one one) bot) :: nil)
     with (@oc atom (tens (parr one one) bot) :: map wn (nil ++ nil)).
   apply oc_r.
-  rewrite map_app.
-  apply tens_r.
-  + apply parr_r.
-    cbn.
+  rewrite map_app; apply tens_r.
+  + apply parr_r; cbn.
     change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r; [ reflexivity | ].
     repeat (apply Forall_inf_cons; try apply one_r).
@@ -653,35 +640,31 @@ Qed.
 (** ** Additional results on a weakened version of [ll_bbb]
  without [mix2] above [mix2] on the [mix0] side *)
 Inductive ll_bbb0 : list formula -> Type :=
-| ax_bbb0_r : forall X, ll_bbb0 (covar X :: var X :: nil)
-| ex_bbb0_r : forall l1 l2, ll_bbb0 l1 -> Permutation_Type l1 l2 -> ll_bbb0 l2
-| mix2_bbb0_r : forall l1 l2, ll_bbb0 l1 -> ll_mix0 l2 -> ll_bbb0 (l2 ++ l1)
+| ax_bbb0_r X : ll_bbb0 (covar X :: var X :: nil)
+| ex_bbb0_r l1 l2 : ll_bbb0 l1 -> Permutation_Type l1 l2 -> ll_bbb0 l2
+| mix2_bbb0_r l1 l2 : ll_bbb0 l1 -> ll_mix0 l2 -> ll_bbb0 (l2 ++ l1)
 | one_bbb0_r : ll_bbb0 (one :: nil)
-| bot_bbb0_r : forall l, ll_bbb0 l -> ll_bbb0 (bot :: l)
-| tens_bbb0_r : forall A B l1 l2, ll_bbb0 (A :: l1) -> ll_bbb0 (B :: l2) ->
-                               ll_bbb0 (tens A B :: l2 ++ l1)
-| parr_bbb0_r : forall A B l, ll_bbb0 (A :: B :: l) -> ll_bbb0 (parr A B :: l)
-| top_bbb0_r : forall l, ll_bbb0 (top :: l)
-| plus_bbb0_r1 : forall A B l, ll_bbb0 (A :: l) -> ll_bbb0 (aplus A B :: l)
-| plus_bbb0_r2 : forall A B l, ll_bbb0 (A :: l) -> ll_bbb0 (aplus B A :: l)
-| with_bbb0_r : forall A B l, ll_bbb0 (A :: l) -> ll_bbb0 (B :: l) ->
-                              ll_bbb0 (awith A B :: l)
-| oc_bbb0_r : forall A l, ll_bbb0 (A :: map wn l) -> ll_bbb0 (oc A :: map wn l)
-| de_bbb0_r : forall A l, ll_bbb0 (A :: l) -> ll_bbb0 (wn A :: l)
-| wk_bbb0_r : forall A l, ll_bbb0 l -> ll_bbb0 (wn A :: l)
-| co_bbb0_r : forall A l, ll_bbb0 (wn A :: wn A :: l) -> ll_bbb0 (wn A :: l).
+| bot_bbb0_r l : ll_bbb0 l -> ll_bbb0 (bot :: l)
+| tens_bbb0_r A B l1 l2 : ll_bbb0 (A :: l1) -> ll_bbb0 (B :: l2) -> ll_bbb0 (tens A B :: l2 ++ l1)
+| parr_bbb0_r A B l : ll_bbb0 (A :: B :: l) -> ll_bbb0 (parr A B :: l)
+| top_bbb0_r l : ll_bbb0 (top :: l)
+| plus_bbb0_r1 A B l : ll_bbb0 (A :: l) -> ll_bbb0 (aplus A B :: l)
+| plus_bbb0_r2 A B l : ll_bbb0 (A :: l) -> ll_bbb0 (aplus B A :: l)
+| with_bbb0_r A B l : ll_bbb0 (A :: l) -> ll_bbb0 (B :: l) -> ll_bbb0 (awith A B :: l)
+| oc_bbb0_r A l : ll_bbb0 (A :: map wn l) -> ll_bbb0 (oc A :: map wn l)
+| de_bbb0_r A l : ll_bbb0 (A :: l) -> ll_bbb0 (wn A :: l)
+| wk_bbb0_r A l : ll_bbb0 l -> ll_bbb0 (wn A :: l)
+| co_bbb0_r A l : ll_bbb0 (wn A :: wn A :: l) -> ll_bbb0 (wn A :: l).
 
 (** The example given above in [ll_bbb] and [llR (oc bot)] is not cut-free provable
     in [ll_bbb0]. *)
 Lemma mix0_bbb0_false : ll_bbb0 nil -> False.
 Proof.
 intros pi.
-remember nil as l.
+remember nil as l eqn:Heql.
 revert Heql; induction pi; intros Heql; inversion Heql; subst.
-- symmetry in p.
-  apply Permutation_Type_nil in p; auto.
-- apply app_eq_nil in Heql.
-  destruct Heql; subst; auto.
+- now symmetry in p; apply Permutation_Type_nil in p.
+- now apply app_eq_nil in Heql as [-> ->].
 Qed.
 
 Lemma ex_implies_mix2_mix02 l :
@@ -689,13 +672,10 @@ Lemma ex_implies_mix2_mix02 l :
     @ll_mix0 atom (one :: one :: nil).
 Proof.
 intros pi; induction pi; intro HP;
-  try now (apply Permutation_Type_sym in HP ;
-           apply Permutation_Type_length_2_inv in HP as [HP | HP] ;
+  try now (apply Permutation_Type_sym, Permutation_Type_length_2_inv in HP as [HP | HP];
            inversion HP).
-- apply IHpi.
-  Permutation_Type_solve.
-- apply Permutation_Type_sym in HP.
-  apply Permutation_Type_length_2_inv in HP as [HP | HP].
+- apply IHpi; Permutation_Type_solve.
+- apply Permutation_Type_sym, Permutation_Type_length_2_inv in HP as [HP | HP].
   + symmetry in HP.
     rewrite <- (app_nil_l (one :: _)) in HP.
     dichot_elt_app_inf_exec HP; subst.
@@ -804,16 +784,15 @@ intros pi; induction pi; intro HP;
   destruct l; inversion H1.
 Qed.
 
-Lemma ex_not_bbb0 :
-  ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil) -> False.
+Lemma ex_not_bbb0 : notT (ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil)).
 Proof.
 intros pi.
 apply (@mix0_not_mix2 atom).
-eapply ex_implies_mix2_mix02 ; [ eassumption | reflexivity ].
+eapply ex_implies_mix2_mix02; [ eassumption | reflexivity ].
 Qed.
 
-Lemma bbb_neq_bbb0 : { l & prod (ll_bbb l) (ll_bbb0 l -> False) }.
-Proof. eexists; split; [ apply bbb_ex | apply ex_not_bbb0 ]. Qed.
+Lemma bbb_neq_bbb0 : { l & ll_bbb l & notT (ll_bbb0 l) }.
+Proof. eexists; [ apply bbb_ex | apply ex_not_bbb0 ]. Qed.
 
 (** The same example is provable in [ll_bbb0] with cut,
     thus cut admissibility does not hold for [ll_bbb0]. *)
@@ -847,9 +826,7 @@ Proof. apply llR_oc_bot_to_bbb0_cut, bb_ex. Qed.
 End bbb0_with_cut.
 
 Lemma cut_not_rule_bbb0 :
-(forall A l1 l2,
-  ll_bbb0 (dual A :: l1) -> ll_bbb0 (A :: l2) -> ll_bbb0 (l2 ++ l1))
-    -> False.
+  notT (forall A l1 l2, ll_bbb0 (dual A :: l1) -> ll_bbb0 (A :: l2) -> ll_bbb0 (l2 ++ l1)).
 Proof. intros Hcut; apply ex_not_bbb0, bbb0_cut_ex, Hcut. Qed.
 
 End Atoms.
