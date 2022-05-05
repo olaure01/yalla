@@ -802,8 +802,7 @@ Inductive llFoc : list formula -> option formula -> Type :=
 | co_Fr : forall A l, llFoc (wn A :: wn A :: l) None ->
                       Forall_inf Foc l -> llFoc (wn A :: l) None.
 
-Instance llFoc_perm Pi :
-  Proper ((@Permutation_Type _) ==> arrow) (fun l => llFoc l Pi).
+Instance llFoc_perm Pi : Proper ((@Permutation_Type _) ==> arrow) (fun l => llFoc l Pi).
 Proof. intros l1 l2 HP pi; apply ex_Fr with l1; assumption. Qed.
 
 Lemma top_gen_Fr l : llFoc (top :: l) None.
@@ -1046,16 +1045,12 @@ Proof.
 enough (forall l l1 l2 l0 lf,
   (forall lf, Forall_inf Foc lf -> llFoc (l1 ++ lf) None -> llFoc (l2 ++ lf) None) ->
   Forall_inf Foc lf -> Permutation_Type l (l1 ++ lf ++ l0) ->
-  llFoc l None -> llFoc (l2 ++ lf ++ l0) None) as Hgen.
-{ intros.
-  rewrite <- (app_nil_l l0).
-  apply Hgen with (l1 ++ l0) l1; auto. }
+  llFoc l None -> llFoc (l2 ++ lf ++ l0) None) as Hgen
+  by (intros; rewrite <- (app_nil_l l0); apply Hgen with (l1 ++ l0) l1; auto).
 clear l1 l2 l0; intros l l1 l2 l0 lf.
 remember (list_sum (map fsize l0)) as n; revert l0 lf l Heqn.
-induction n using lt_wf_rect; intros l0 lf l -> HFoc HF HP pi.
-destruct l0 as [|A l0].
-- apply HFoc; [ now rewrite app_nil_r | ].
-  apply (ex_Fr pi HP).
+induction n using lt_wf_rect; intros [|A l0] lf l -> HFoc HF HP pi.
+- apply HFoc, (ex_Fr pi HP); now rewrite app_nil_r.
 - destruct (Foc_dec A).
   + replace (l2 ++ lf ++ A :: l0) with (l2 ++ (lf ++ A :: nil) ++ l0) by now rewrite <- app_assoc.
     apply X with (list_sum (map fsize l0)) l; rewrite <- ? app_assoc; auto.

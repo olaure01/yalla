@@ -222,12 +222,9 @@ From OLlibs Require Import GPermutation_Type.
 Lemma sub_perm_list b l l1 l2 : subform_list l l1 ->
     PCPermutation_Type b l1 l2 -> subform_list l l2.
 Proof.
-intros H1 HP; revert H1; induction l; intro H1.
-- constructor.
-- inversion H1; subst.
-  constructor.
-  + apply (PCPermutation_Type_Exists _ _ HP); assumption.
-  + apply IHl; assumption.
+intros HF HP; apply Forall_forall.
+setoid_rewrite <- (PCPermutation_Type_Exists _ _ HP).
+apply Forall_forall; assumption.
 Qed.
 *)
 
@@ -419,36 +416,19 @@ Qed.
 
 Lemma subb_trans A B C :
   is_true (subformb A B) -> is_true (subformb B C) -> is_true (subformb A C).
-Proof.
-intros Hl%subb_sub Hr%subb_sub; apply subb_sub.
-transitivity B; assumption.
-Qed.
+Proof. setoid_rewrite subb_sub; apply sub_trans. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
 Definition subformb_list l1 l2 := forallb (fun A => existsb (subformb A) l2) l1.
 
 Lemma subb_sub_list l1 l2 : is_true (subformb_list l1 l2) <-> subform_list l1 l2.
 Proof.
-split; intros H; induction l1; try (now (inversion H; constructor)).
-- unfold subformb_list in H.
-  unfold is_true in H; rewrite forallb_forall, <- Forall_forall in H.
-  inversion H; subst.
-  apply existsb_exists, Exists_exists in H2.
-  constructor.
-  + clear - H2; induction l2; inversion H2; subst.
-    * constructor.
-      apply subb_sub; assumption.
-    * apply Exists_cons_tl, IHl2; assumption.
-  + apply IHl1, forallb_forall, Forall_forall; assumption.
-- inversion H; subst.
-  unfold subformb_list; cbn.
-  apply andb_true_iff; split.
-  + apply existsb_exists, Exists_exists.
-    clear - H2; induction l2; inversion H2; subst.
-    * constructor.
-      apply subb_sub; assumption.
-    * apply Exists_cons_tl, IHl2; assumption.
-  + apply IHl1; assumption.
+setoid_rewrite Forall_forall.
+setoid_rewrite Exists_exists.
+setoid_rewrite <- subb_sub.
+setoid_rewrite <- existsb_exists.
+setoid_rewrite <- forallb_forall.
+reflexivity.
 Qed.
 
 Lemma subb_id_list l l0 : is_true (subformb_list l (l0 ++ l)).
@@ -456,10 +436,6 @@ Proof. apply subb_sub_list, sub_id_list. Qed.
 
 Lemma subb_trans_list l1 l2 l3 :
   is_true (subformb_list l1 l2) -> is_true (subformb_list l2 l3) -> is_true (subformb_list l1 l3).
-Proof.
-intros Hl%subb_sub_list Hr%subb_sub_list.
-apply subb_sub_list.
-transitivity l2; assumption.
-Qed.
+Proof. setoid_rewrite subb_sub_list; apply sub_trans_list. Qed.
 
 End Atoms.

@@ -32,8 +32,7 @@ Definition le_ipfrag P Q :=
      (forall a, { b | projT2 (ipgax P) a = projT2 (ipgax Q) b })
      (Bool.le (ipperm P) (ipperm Q))).
 
-Lemma le_ipfrag_trans P Q R :
-  le_ipfrag P Q -> le_ipfrag Q R -> le_ipfrag P R.
+Lemma le_ipfrag_trans P Q R : le_ipfrag P Q -> le_ipfrag Q R -> le_ipfrag P R.
 Proof.
 intros [Hc1 [Ha1 Hp1]] [Hc2 [Ha2 Hp2]].
 repeat split.
@@ -50,8 +49,7 @@ Proof.
 split.
 - repeat split; try reflexivity.
   intros a; exists a; reflexivity.
-- intros P Q R.
-  apply le_ipfrag_trans.
+- intros P Q R; apply le_ipfrag_trans.
 Qed.
 
 Definition axupd_ipfrag P G := mk_ipfrag (ipcut P) G (ipperm P).
@@ -153,11 +151,11 @@ Inductive ill P : list iformula -> iformula -> Type :=
 #[global] Arguments cut_ir [P f] _ [l0 l1 l2] _ _ _.
 #[global] Arguments gax_ir [P] _.
 
-Instance ill_perm {P} : forall A,
+Instance ill_perm P : forall A,
   Proper ((@PEPermutation_Type _ (ipperm P)) ==> arrow) (fun l => ill P l A).
 Proof. intros A l1 l2 HP pi; eapply ex_ir ; eassumption. Qed.
 
-Fixpoint ipsize {P l A} (pi : ill P l A) :=
+Fixpoint ipsize P l A (pi : ill P l A) :=
 match pi with
 | ax_ir _ => 1
 | ex_ir _ _ _ pi0 _ => S (ipsize pi0)
@@ -206,7 +204,7 @@ induction H; try now constructor.
 Qed.
 
 (** Generalized weakening for lists *)
-Lemma wk_list_ilr {P} l l1 l2 C :
+Lemma wk_list_ilr P l l1 l2 C :
   ill P (l1 ++ l2) C -> ill P (l1 ++ map ioc l ++ l2) C.
 Proof.
 induction l in l1, l2, C |- *; intros pi; try assumption.
@@ -214,7 +212,7 @@ apply wk_ilr, IHl; assumption.
 Qed.
 
 (** Generalized contraction for lists *)
-Lemma co_list_ilr {P} l l1 l2 C :
+Lemma co_list_ilr P l l1 l2 C :
   ill P (l1 ++ map ioc l ++ map ioc l ++ l2) C ->
   ill P (l1 ++ map ioc l ++ l2) C.
 Proof.
@@ -269,7 +267,7 @@ Ltac destruct_ill H f X l Hl Hr HP a :=
 
 
 (** Axiom expansion *)
-Lemma ax_exp_ill {P} A : ill P (A :: nil) A.
+Lemma ax_exp_ill P A : ill P (A :: nil) A.
 Proof.
 induction A.
 - apply ax_ir.
@@ -317,7 +315,7 @@ Qed.
 
 (** ** Consistency properties *)
 
-Lemma strong_contradition_general_contradiction_ill {P} : ipcut P = true ->
+Lemma strong_contradition_general_contradiction_ill P : ipcut P = true ->
   ill P nil izero -> forall l C, ill P l C.
 Proof.
 intros Hcut pi l C.

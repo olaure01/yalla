@@ -143,12 +143,9 @@ Lemma isub_perm_list b l l1 l2 :
   isubform_list l l1 -> PCPermutation_Type b l1 l2 ->
   isubform_list l l2.
 Proof.
-intros H1 HP; induction l in H1 |- *.
-- constructor.
-- inversion H1; subst.
-  constructor.
-  + eapply PCPermutation_Type_Exists; eassumption.
-  + apply IHl; assumption.
+intros HF HP; apply Forall_forall.
+setoid_rewrite <- (PCPermutation_Type_Exists _ _ HP).
+apply Forall_forall; assumption.
 Qed.
 *)
 
@@ -184,6 +181,7 @@ induction A in B |- *; destruct B; (split; [ intros Heqb | intros Heq ]);
 - subst; cbn; apply (@eqb_eq (option_dectype _)); reflexivity.
 Qed.
 
+(* Unused
 Fixpoint eqb_iformlist l1 l2 :=
 match l1, l2 with
 | nil, nil => true
@@ -201,7 +199,9 @@ induction l1 in l2 |- *; destruct l2; (split; [ intros Heqb | intros Heq ]);
 - subst; cbn; apply andb_true_iff.
   split; [ apply eqb_eq_iform | apply IHl1 ]; reflexivity.
 Qed.
+*)
 
+(* Unused
 (** * In with [bool] output for formula list *)
 Fixpoint inb_iform A l :=
 match l with
@@ -226,6 +226,7 @@ induction l; (split; [ intros Heqb | intros Heq ]).
   + cbn; apply orb_true_iff; right.
     apply IHl, H.
 Qed.
+*)
 
 
 (** ** Sub-formulas in [bool] *)
@@ -369,40 +370,19 @@ Qed.
 
 Lemma isubb_trans A B C :
   is_true (isubformb A B) -> is_true (isubformb B C) -> is_true (isubformb A C).
-Proof.
-intros Hl Hr.
-apply isubb_isub in Hl.
-apply isubb_isub in Hr.
-apply isubb_isub.
-transitivity B; assumption.
-Qed.
+Proof. setoid_rewrite isubb_isub; apply isub_trans. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
 Definition isubformb_list l1 l2 := forallb (fun A => existsb (isubformb A) l2) l1.
 
 Lemma isubb_isub_list l1 l2 : is_true (isubformb_list l1 l2) <-> isubform_list l1 l2.
 Proof.
-split; intros H; induction l1; try (now (inversion H; constructor)).
-- unfold isubformb_list in H.
-  unfold is_true in H; rewrite forallb_forall in H; apply Forall_forall in H.
-  inversion H; subst.
-  apply existsb_exists, Exists_exists in H2.
-  constructor.
-  + clear - H2; induction l2; inversion H2; subst.
-    * constructor.
-      apply isubb_isub; assumption.
-    * apply Exists_cons_tl.
-      apply IHl2; assumption.
-  + apply IHl1, forallb_forall, Forall_forall; assumption.
-- inversion H; subst.
-  unfold isubformb_list; cbn.
-  apply andb_true_iff; split.
-  + apply existsb_exists, Exists_exists.
-    clear - H2; induction l2; inversion H2; subst.
-    * constructor.
-      apply isubb_isub; assumption.
-    * apply Exists_cons_tl, IHl2; assumption.
-  + apply IHl1; assumption.
+setoid_rewrite Forall_forall.
+setoid_rewrite Exists_exists.
+setoid_rewrite <- isubb_isub.
+setoid_rewrite <- existsb_exists.
+setoid_rewrite <- forallb_forall.
+reflexivity.
 Qed.
 
 Lemma isubb_id_list l l0 : is_true (isubformb_list l (l0 ++ l)).
@@ -410,12 +390,6 @@ Proof. apply isubb_isub_list, isub_id_list. Qed.
 
 Lemma isubb_trans_list l1 l2 l3 :
   is_true (isubformb_list l1 l2) -> is_true (isubformb_list l2 l3) -> is_true (isubformb_list l1 l3).
-Proof.
-intros Hl Hr.
-apply isubb_isub_list in Hl.
-apply isubb_isub_list in Hr.
-apply isubb_isub_list.
-transitivity l2; assumption.
-Qed.
+Proof. setoid_rewrite isubb_isub_list; apply isub_trans_list. Qed.
 
 End Atoms.
