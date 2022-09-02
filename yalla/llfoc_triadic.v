@@ -1,153 +1,10 @@
 (** * Andreoli's triadic system for focusing *)
 
-From Coq Require Import Bool Logic Wf_nat Lia.
-From OLlibs Require Import infinite List_more Permutation_Type_more.
+From Coq Require Import Wf_nat Lia.
+From OLlibs Require Import Datatypes_more Bool_more infinite List_more Permutation_Type_more.
 From Yalla Require Import ll_fragments llfoc.
 
 Set Implicit Arguments.
-
-
-(* TODO move to OLlibs and appropriate places of stdlib with Prop versions *)
-Lemma reflect_neg P b : reflect P b -> reflect (not P) (negb b).
-Proof. intros H. now inversion H; constructor. Qed.
-
-Inductive reflectT (P : Type) : bool -> Type :=
-  | ReflectTT : P -> reflectT P true
-  | ReflectTF : notT P -> reflectT P false.
-#[global] Hint Constructors reflectT : bool.
-
-Lemma reflectT_iffT P b : reflectT P b -> (iffT P (b = true)).
-Proof. now destruct 1; split; [ | | | discriminate ]. Qed.
-
-Lemma reflectT_neg P b : reflectT P b -> reflectT (notT P) (negb b).
-Proof. intros H. now inversion H; constructor. Qed.
-
-Lemma filter_idem A f (l : list A) : filter f (filter f l) = filter f l.
-Proof.
-induction l as [|a l IHl]; cbn.
-- reflexivity.
-- destruct (f a) eqn:Hfa; cbn; rewrite ? Hfa, IHl; reflexivity.
-Qed.
-
-Lemma filter_negb_filter A f (l : list A) : filter (fun x => negb (f x)) (filter f l) = nil.
-Proof.
-induction l as [|a l IHl]; cbn.
-- reflexivity.
-- case_eq (f a); cbn; intros Hfa; rewrite ? Hfa, IHl; reflexivity.
-Qed.
-
-Lemma filter_filter_comm A f g (l : list A) : filter f (filter g l) = filter g (filter f l).
-Proof.
-induction l as [|a l IHl]; cbn; [ reflexivity | ].
-case_eq (f a); case_eq (g a); intros Hg Hf; cbn; rewrite ? Hf, ? Hg, IHl; reflexivity.
-Qed.
-
-Lemma forallb_filter A f (l : list A) : forallb f (filter f l) = true.
-Proof.
-induction l as [|a l IHl]; cbn; [ reflexivity | ].
-case_eq (f a); intros Hfa; cbn; [ rewrite Hfa | ]; assumption.
-Qed.
-
-Lemma forallb_filter_id A f (l : list A) : forallb f l = true -> filter f l = l.
-Proof.
-induction l; cbn; intros Hb.
-- reflexivity.
-- apply andb_prop in Hb as [-> Hb].
-  rewrite (IHl Hb); reflexivity.
-Qed.
-
-Lemma Forall_filter A f P (l : list A) : (forall a, reflect (P a) (f a)) -> Forall P (filter f l).
-Proof.
-intros Hspec.
-induction l as [|a l IHl]; cbn; [ constructor | ].
-now destruct (Hspec a); try constructor.
-Qed.
-
-Lemma Forall_inf_filter A f P (l : list A) :
-  (forall a, reflectT (P a) (f a)) -> Forall_inf P (filter f l).
-Proof.
-intros Hspec.
-induction l as [|a l IHl]; cbn; [ constructor | ].
-now destruct (Hspec a); try constructor.
-Qed.
-
-Lemma partition_filter A f (l : list A) :
-  partition f l = (filter f l, filter (fun x => negb (f x)) l).
-Proof.
-induction l as [|a l IHl]; cbn.
-- reflexivity.
-- destruct (f a); destruct (partition f l); cbn;
-  inversion IHl; subst; reflexivity.
-Qed.
-
-Lemma fst_partition_incl A f (l : list A) : incl (fst (partition f l)) l.
-Proof. rewrite partition_filter; cbn; apply incl_filter. Qed.
-
-Lemma snd_partition_incl A f (l : list A) : incl (snd (partition f l)) l.
-Proof. rewrite partition_filter; cbn; apply incl_filter. Qed.
-
-Lemma fst_partition_incl_inf A f (l : list A) : incl_inf (fst (partition f l)) l.
-Proof. rewrite partition_filter; cbn; apply incl_inf_filter. Qed.
-
-Lemma snd_partition_incl_inf A f (l : list A) : incl_inf (snd (partition f l)) l.
-Proof. rewrite partition_filter; cbn; apply incl_inf_filter. Qed.
-
-Definition prod_map A B (f : A -> B) p :=
-  match p with
-  | (a1, a2) => (f a1, f a2)
-  end.
-
-Definition prod_map2 A B C (f : A -> B -> C) p1 p2 :=
-  match p1, p2 with
-  | (a1, a2), (b1, b2) => (f a1 b1, f a2 b2)
-  end.
-
-Lemma partition_app A f (l1 l2 : list A) :
-  partition f (l1 ++ l2) = prod_map2 (@app A) (partition f l1) (partition f l2).
-Proof.
-induction l1 as [|a l1 IHl1]; cbn.
-- destruct (partition f l2); reflexivity.
-- destruct (f a); rewrite IHl1; destruct (partition f l1), (partition f l2); reflexivity.
-Qed.
-
-Lemma partition_Permutation_Type A f (l l1 l2 : list A) :
-  (l1, l2) = partition f l -> Permutation_Type (l1 ++ l2) l.
-Proof.
-induction l as [|a l IHl] in l1, l2 |- *; cbn; intros Hp.
-- inversion Hp; subst; reflexivity.
-- destruct (partition f l), (f a); inversion Hp; subst.
-  + cbn; apply Permutation_Type_cons; [ reflexivity | ].
-    apply IHl; reflexivity.
-  + symmetry; apply Permutation_Type_cons_app; symmetry.
-    apply IHl; reflexivity.
-Qed.
-
-Lemma Permutation_Type_partition A f (l l' l1 l2 l1' l2' : list A) :
-  Permutation_Type l l' -> (l1, l2) = partition f l -> (l1', l2') = partition f l' ->
-  Permutation_Type l1 l1' * Permutation_Type l2 l2'.
-Proof.
-intros HP; induction HP as [ | x l l' HP IHHP | x y l
-                           | l l' l'' HP1 IHHP1 HP2 IHHP2 ] in l1, l2, l1', l2' |- *;
-  cbn; intros Hp1 Hp2.
-- inversion Hp1; inversion Hp2; subst.
-  split; reflexivity.
-- destruct (partition f l) as [l3 l4], (partition f l') as [l3' l4'], (f x);
-    inversion Hp1; inversion Hp2; subst;
-    destruct (IHHP l3 l4 l3' l4' eq_refl eq_refl); split; try assumption.
-  + apply Permutation_Type_cons; [ reflexivity | assumption ].
-  + apply Permutation_Type_cons; [ reflexivity | assumption ].
-- destruct (partition f l) as [l3 l4], (f x), (f y);
-    inversion Hp1; inversion Hp2; subst; split; try reflexivity.
-  + apply Permutation_Type_swap.
-  + apply Permutation_Type_swap.
-- destruct (partition f l) as [l3 l4], (partition f l') as [l3' l4'],
-           (partition f l'') as [l3'' l4''];
-     inversion Hp1; inversion Hp2; subst;
-     destruct (IHHP1 l3 l4 l3' l4' eq_refl eq_refl);
-     destruct (IHHP2 l3' l4' l3'' l4'' eq_refl eq_refl); split; try assumption.
-  + transitivity l3'; assumption.
-  + transitivity l4'; assumption.
-Qed.
 
 
 Section Atoms.
@@ -156,135 +13,57 @@ Context { atom : InfDecType }.
 Notation formula := (@formula atom).
 Notation aformula := (@aformula atom).
 Notation sformula := (@sformula atom).
+Notation is_Foc := (@is_Foc atom).
 
-(* TODO integrate *_formula in llfoc.v and get Foc from ttFoc (and rename ttFoc) *)
-Lemma wk_list_Fr (lw l : list formula) : llFoc l None -> Forall_inf Foc l ->
-  llFoc (map wn lw ++ l) None.
-Proof.
-induction lw as [|A lw IHlw] in l |- *; cbn; intros pi HF; [ assumption | ].
-apply wk_Fr; [ apply IHlw; assumption | ].
-apply Forall_inf_app; [ | assumption ].
-clear; induction lw as [|A lw IHlw]; cbn; constructor; [ | assumption ].
-right; exists A; reflexivity.
-Qed.
-
-Lemma wk_gen_list_Fr (lw l : list formula) : llFoc l None -> llFoc (map wn lw ++ l) None.
-Proof.
-induction lw as [|A lw IHlw] in l |- *; cbn; intros pi; [ assumption | ].
-apply wk_gen_Fr, IHlw; assumption.
-Qed.
-
-(*
-Variant is_var : formula -> Type := isvar : forall X, is_var (var X).
-*)
-Variant covar_formula : formula -> Type := iscovar : forall X, covar_formula (covar X).
-Variant wn_formula : formula -> Type := iswn : forall A, wn_formula (wn A).
-
-Definition ttFoc x := (sformula x + covar_formula x)%type.
-
-Definition is_covar (A : formula) :=
-  match A with
-  | covar _ => true
-  | _ => false
-  end.
-
-Lemma covar_spec A : reflectT (covar_formula A) (is_covar A).
-Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
-
-Definition is_wn (A : formula) :=
-  match A with
-  | wn _ => true
-  | _ => false
-  end.
-
-Lemma wn_spec A : reflectT (wn_formula A) (is_wn A).
-Proof.
-destruct A; cbn; constructor; try (intros H; inversion H); constructor.
-Qed.
-
-Definition is_ttFoc (A : formula) :=
-  match A with
-  | covar _ | var _ | one | tens _ _ | zero | aplus _ _ | oc _ => true
-  | _ => false
-  end.
-
-Lemma ttFoc_spec A : reflectT (ttFoc A) (is_ttFoc A).
-Proof.
-destruct A; cbn; constructor; try (now repeat constructor); intros H; inversion H; inversion X.
-Qed.
-
-Lemma Foc_not_wn_ttFoc A : Foc A -> notT (wn_formula A) -> ttFoc A.
-Proof.
-intros [[Hs|[X ->]]|[B ->]] Hwn.
-- left; assumption.
-- right; constructor.
-- exfalso; apply Hwn; constructor.
-Qed.
-
-Lemma ttFoc_Foc A : ttFoc A -> Foc A.
-Proof. now intros [Hs|[X]]; left; [left|right; exists X]. Qed.
-
-Lemma ttFoc_not_wn A : ttFoc A -> wn_formula A -> False.
-Proof.
-intros Hf Hwn; destruct A; inversion Hwn.
-inversion Hf as [Hf'|Hf']; inversion Hf'.
-Qed.
-
+(** * Triadic system *)
 
 Inductive atrifoc : list formula -> list formula -> list formula -> Type :=
-| foc_tfr : forall A lw ls1 ls2, sformula A ->
-              strifoc lw (ls1 ++ ls2) A -> atrifoc lw (ls1 ++ A :: ls2) nil
-| focd_tfr : forall A lw1 lw2 ls, strifoc (lw1 ++ A :: lw2) ls A -> atrifoc (lw1 ++ A :: lw2) ls nil
-| bot_tfr : forall lw ls l, atrifoc lw ls l -> atrifoc lw ls (bot :: l)
-| parr_tfr : forall A B lw ls l,
-                    atrifoc lw ls (A :: B :: l) -> atrifoc lw ls (parr A B :: l)
-| top_tfr : forall lw ls l, Forall_inf ttFoc ls -> atrifoc lw ls (top :: l)
-| with_tfr : forall A B lw ls l, atrifoc lw ls (A :: l) -> atrifoc lw ls (B :: l) ->
-                    atrifoc lw ls (awith A B :: l)
-| wn_tfr : forall A lw ls l, atrifoc (A :: lw) ls l -> atrifoc lw ls (wn A :: l)
-| as_tfr : forall A lw ls l, ttFoc A -> atrifoc lw (A :: ls) l -> atrifoc lw ls (A :: l)
+| foc_tfr A lw ls1 ls2 : sformula A -> strifoc lw (ls1 ++ ls2) A -> atrifoc lw (ls1 ++ A :: ls2) nil
+| focd_tfr A lw1 lw2 ls : (forall X, A <> covar X) ->
+    strifoc (lw1 ++ A :: lw2) ls A -> atrifoc (lw1 ++ A :: lw2) ls nil
+| bot_tfr lw ls l : atrifoc lw ls l -> atrifoc lw ls (bot :: l)
+| parr_tfr A B lw ls l : atrifoc lw ls (A :: B :: l) -> atrifoc lw ls (parr A B :: l)
+| top_tfr lw ls l : Forall_inf Foc ls -> atrifoc lw ls (top :: l)
+| with_tfr A B lw ls l : atrifoc lw ls (A :: l) -> atrifoc lw ls (B :: l) -> atrifoc lw ls (awith A B :: l)
+| wn_tfr A lw ls l : atrifoc (A :: lw) ls l -> atrifoc lw ls (wn A :: l)
+| as_tfr A lw ls l : Foc A -> atrifoc lw (A :: ls) l -> atrifoc lw ls (A :: l)
 with strifoc : list formula -> list formula -> formula -> Type :=
-| ax_tfr : forall X lw, strifoc lw (covar X :: nil) (var X)
-| axd_tfr : forall X lw1 lw2, strifoc (lw1 ++ covar X :: lw2) nil (var X)
-| exs_tfr : forall A lw ls1 ls2, strifoc lw ls1 A -> Permutation_Type ls1 ls2 -> strifoc lw ls2 A
+| ax_tfr X lw : strifoc lw (covar X :: nil) (var X)
+| axd_tfr X lw1 lw2 : strifoc (lw1 ++ covar X :: lw2) nil (var X)
+| exs_tfr A lw ls1 ls2 : strifoc lw ls1 A -> Permutation_Type ls1 ls2 -> strifoc lw ls2 A
   (* some shuffle is necessary below the tens_tfr rule *)
-| one_tfr : forall lw, strifoc lw nil one
-| tens_tfr : forall A B lw ls1 ls2,
-                    strifoc lw ls1 A -> strifoc lw ls2 B -> strifoc lw (ls1 ++ ls2) (tens A B)
-| plus_tfr1 : forall A B lw ls, strifoc lw ls A -> strifoc lw ls (aplus A B)
-| plus_tfr2 : forall A B lw ls, strifoc lw ls A -> strifoc lw ls (aplus B A)
-| oc_tfr : forall A lw, atrifoc lw nil (A :: nil) -> strifoc lw nil (oc A)
-| unfoc_tfr : forall A lw ls, aformula A -> atrifoc lw ls (A :: nil) -> strifoc lw ls A.
+| one_tfr lw : strifoc lw nil one
+| tens_tfr A B lw ls1 ls2 : strifoc lw ls1 A -> strifoc lw ls2 B -> strifoc lw (ls1 ++ ls2) (tens A B)
+| plus_tfr1 A B lw ls : strifoc lw ls A -> strifoc lw ls (aplus A B)
+| plus_tfr2 A B lw ls : strifoc lw ls A -> strifoc lw ls (aplus B A)
+| oc_tfr A lw : atrifoc lw nil (A :: nil) -> strifoc lw nil (oc A)
+| unfoc_tfr A lw ls : aformula A -> atrifoc lw ls (A :: nil) -> strifoc lw ls A.
+(* alternative: remove constraint on [covar] in [focd_tfr] and remove [axd_tfr] *)
 
 Scheme astrifoc_rect := Induction for atrifoc Sort Type
   with satrifoc_rect := Induction for strifoc Sort Type.
 Combined Scheme trifoc_rect from astrifoc_rect, satrifoc_rect.
 
 Lemma tsync_context :
-  (forall lw ls l, atrifoc lw ls l -> Forall_inf ttFoc ls)
-* (forall lw ls A, strifoc lw ls A -> Forall_inf ttFoc ls).
+  (forall lw ls l, atrifoc lw ls l -> Forall_inf Foc ls)
+* (forall lw ls A, strifoc lw ls A -> Forall_inf Foc ls).
 Proof.
 apply trifoc_rect; try now intuition constructor.
 - intros A lw ls1 ls2 Hs pi HF.
-  apply (inl : _ -> ttFoc _) in Hs.
+  apply (inl : _ -> Foc _) in Hs.
   apply Forall_inf_app; [ | constructor; [ assumption | ] ].
-  + now apply Forall_inf_app_l in HF.
-  + now apply Forall_inf_app_r in HF.
+  + exact (Forall_inf_app_l _ _ HF).
+  + exact (Forall_inf_app_r _ _ HF).
 - intros A lw ls1 ls2 _ _ HF.
-  now inversion HF.
+  inversion HF. assumption.
 - intros X _.
   constructor; [ | constructor ].
-  right; constructor.
+  right. constructor.
 - intros A lw ls1 ls2 pi HF HP.
   eapply Permutation_Type_Forall_inf; eassumption.
 - intros A B lw ls1 ls2 pi1 HF1 pi2 HF2.
   apply Forall_inf_app; assumption.
 Qed.
-
-Lemma wk_list_tfr lw0 :
-  (forall lw ls l, atrifoc lw ls l -> atrifoc (lw ++ lw0) ls l)
-* (forall lw ls A, strifoc lw ls A -> strifoc (lw ++ lw0) ls A).
-Proof. apply trifoc_rect; try intuition (list_simpl; econstructor; eassumption). Qed.
 
 Lemma exw_tfr :
   (forall lw ls l, atrifoc lw ls l -> forall lw0, Permutation_Type lw lw0 -> atrifoc lw0 ls l)
@@ -292,16 +71,15 @@ Lemma exw_tfr :
 Proof.
 apply trifoc_rect;
   try now (intros; try specialize (X lw0); try (intuition (list_simpl; constructor; assumption))).
-- intros A lw1 lw2 ls pi IHpi lw0 HP.
+- intros A lw1 lw2 ls Hnc pi IHpi lw0 HP.
   symmetry in HP; destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
-  apply focd_tfr, IHpi.
-  symmetry; assumption.
+  apply focd_tfr, IHpi; [ | symmetry ]; assumption.
 - intros A B lw ls l pi1 IHpi1 pi2 IHpi2 lw0 HP.
   apply with_tfr; [ apply IHpi1 | apply IHpi2 ]; assumption.
 - intros A lw ls l pi IHpi lw0 HP.
   apply wn_tfr, IHpi, Permutation_Type_cons; [ reflexivity | assumption ].
 - intros X lw1 lw2 lw0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
+  symmetry in HP. destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
   apply axd_tfr.
 - intros A lw ls1 ls2 pi IHpi HP' lw0 HP.
   eapply exs_tfr; [ | eassumption ].
@@ -316,39 +94,111 @@ Lemma ex_tfr :
 Proof.
 apply trifoc_rect; try now (intros; constructor; auto).
 - intros A lw ls1 ls2 Hs pi IHpi ls0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
-  apply foc_tfr, IHpi; try assumption.
-  symmetry in HP; apply Permutation_Type_app_inv in HP; assumption.
+  symmetry in HP. destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
+  apply foc_tfr, IHpi; [ assumption | ].
+  symmetry in HP. exact (Permutation_Type_app_inv _ _ _ _ _ HP).
 - intros lw ls l HF ls0 HP.
   apply top_tfr.
   apply Permutation_Type_Forall_inf with ls; assumption.
 - intros X lw ls0 HP.
-  apply Permutation_Type_length_1_inv in HP; subst.
+  apply Permutation_Type_length_1_inv in HP as ->.
   apply ax_tfr.
 - intros X lw1 lw2 ls0 HP.
-  apply Permutation_Type_nil in HP; subst.
+  apply Permutation_Type_nil in HP as ->.
   apply axd_tfr.
 - intros A lw ls1 ls2 pi IHpi HP' ls0 HP.
   apply IHpi.
   transitivity ls2; assumption.
 - intros lw ls0 HP.
-  apply Permutation_Type_nil in HP; subst.
+  apply Permutation_Type_nil in HP as ->.
   apply one_tfr.
 - intros A B lw ls1 ls2 pi1 IHpi1 pi2 IHpi2 lw0 HP.
   eapply exs_tfr; [ | eassumption ].
-  apply tens_tfr; auto.
+  now apply tens_tfr.
 - intros A lw pi IHpi ls0 HP.
-  apply Permutation_Type_nil in HP; subst.
-  apply oc_tfr; auto.
+  apply Permutation_Type_nil in HP as ->.
+  now apply oc_tfr.
 Qed.
 
-Lemma bot_gen_tfr lw ls l1 l2 :
-  atrifoc lw ls (l1 ++ l2) -> atrifoc lw ls (l1 ++ bot :: l2).
+Lemma wk_list_tfr lw0 :
+  (forall lw ls l, atrifoc lw ls l -> atrifoc (lw ++ lw0) ls l)
+* (forall lw ls A, strifoc lw ls A -> strifoc (lw ++ lw0) ls A).
+Proof. apply trifoc_rect; intuition (list_simpl; econstructor; eassumption). Qed.
+
+Lemma wk_tfr C lw ls :
+  (forall l, atrifoc lw ls l -> atrifoc (C :: lw) ls l)
+* (forall A, strifoc lw ls A -> strifoc (C :: lw) ls A).
+Proof.
+split; intros P pi; (eapply exw_tfr; [ apply wk_list_tfr, pi | symmetry; apply Permutation_Type_cons_append ]).
+Qed.
+
+Lemma co_tfr C :
+  (forall lw ls l, atrifoc lw ls l ->
+     forall lw1 lw2, lw = lw1 ++ C :: C :: lw2 -> atrifoc (lw1 ++ C :: lw2) ls l)
+* (forall lw ls A, strifoc lw ls A ->
+     forall lw1 lw2, lw = lw1 ++ C :: C :: lw2 -> strifoc (lw1 ++ C :: lw2) ls A).
+Proof.
+apply trifoc_rect; intros; subst; try now (econstructor; eauto).
+- assert (pi := X _ _ H).
+  assert (In_inf A (lw0 ++ C :: lw3)) as [(l1, l2) HA]%in_inf_split.
+  { enough (incl_inf (lw0 ++ C :: C :: lw3) (lw0 ++ C :: lw3)) as Hi.
+    { apply Hi. rewrite <- H. apply in_inf_elt. }
+    apply incl_inf_app_app; [ apply incl_inf_refl | ].
+    now intros D [->|HD]; [ left | ]. }
+  rewrite ? HA in *.
+  apply focd_tfr; assumption.
+- apply wn_tfr.
+  rewrite app_comm_cons. apply X. reflexivity.
+- assert (In_inf (covar X) (lw0 ++ C :: lw3)) as [(l1, l2) HX]%in_inf_split.
+  { enough (incl_inf (lw0 ++ C :: C :: lw3) (lw0 ++ C :: lw3)) as Hi.
+    { apply Hi. rewrite <- H. apply in_inf_elt. }
+    apply incl_inf_app_app; [ apply incl_inf_refl | ].
+    now intros D [->|HD]; [ left | ]. }
+  rewrite ? HX in *.
+  apply axd_tfr.
+Qed.
+
+Lemma de_tfr C :
+  (forall lw ls l, atrifoc lw ls l ->
+     forall ls1 ls2, ls = ls1 ++ C :: ls2 -> atrifoc (lw ++ C :: nil) (ls1 ++ ls2) l)
+* (forall lw ls A, strifoc lw ls A ->
+     forall ls1 ls2, ls = ls1 ++ C :: ls2 -> strifoc (lw ++ C :: nil) (ls1 ++ ls2) A).
+Proof.
+apply trifoc_rect; intros; subst; try now (econstructor; eauto); try now (destruct ls1; inversion H).
+- trichot_elt_elt_inf_exec H.
+  + list_simpl. apply foc_tfr; [ assumption | ].
+    rewrite app_assoc. apply X. rewrite <- app_assoc. reflexivity.
+  + apply focd_tfr, wk_list_tfr; [ | assumption ].
+    intros Y ->. inversion s.
+  + rewrite app_assoc. apply foc_tfr; [ assumption | ]. rewrite <- app_assoc.
+    apply X. list_simpl. reflexivity.
+- list_simpl. apply focd_tfr; [ assumption | ].
+  rewrite app_comm_cons, app_assoc. apply X. reflexivity.
+- apply top_tfr. apply Forall_inf_app.
+  + apply Forall_inf_app_l in f. assumption.
+  + apply Forall_inf_app_r in f. inversion f. assumption.
+- constructor; [ assumption | ].
+  rewrite app_comm_cons. apply X. reflexivity.
+- unit_vs_elt_inv H. apply axd_tfr.
+- destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1, l2) ->].
+  apply Permutation_Type_app_inv in p.
+  eapply ex_tfr; [ | eassumption ].
+  apply X. reflexivity.
+- dichot_elt_app_inf_exec H; subst.
+  + rewrite app_assoc. apply tens_tfr.
+    * apply X. reflexivity.
+    * apply wk_list_tfr. assumption.
+  + rewrite <- app_assoc. apply tens_tfr.
+    * apply wk_list_tfr. assumption.
+    * apply X0. reflexivity.
+Qed.
+
+Lemma bot_gen_tfr lw ls l1 l2 : atrifoc lw ls (l1 ++ l2) -> atrifoc lw ls (l1 ++ bot :: l2).
 Proof.
 remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi; subst.
+  intros lw ls l1 -> pi.
 destruct l1.
-- apply bot_tfr; assumption.
+- apply bot_tfr. assumption.
 - list_simpl; destruct f;
     try (inversion pi; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; assumption).
@@ -360,25 +210,24 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply parr_tfr; rewrite 2 app_comm_cons.
-    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
+    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); cbn; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
-    apply top_tfr; assumption.
+    apply top_tfr. assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
-    * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
-    * apply X with (list_sum (map fsize (f2 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (f1 :: l1))); cbn; try lia; assumption.
+    * apply X with (list_sum (map fsize (f2 :: l1))); cbn; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply wn_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
 Qed.
 
-Lemma parr_gen_tfr A B lw ls l1 l2 :
-  atrifoc lw ls (l1 ++ A :: B :: l2) -> atrifoc lw ls (l1 ++ parr A B :: l2).
+Lemma parr_gen_tfr A B lw ls l1 l2 : atrifoc lw ls (l1 ++ A :: B :: l2) -> atrifoc lw ls (l1 ++ parr A B :: l2).
 Proof.
 remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi; subst.
+  intros lw ls l1 -> pi.
 destruct l1.
-- apply parr_tfr; assumption.
+- apply parr_tfr. assumption.
 - list_simpl; destruct f;
     try (inversion pi; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; assumption).
@@ -389,10 +238,10 @@ destruct l1.
     apply bot_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
-    apply parr_tfr; rewrite 2 app_comm_cons.
+    apply parr_tfr. rewrite 2 app_comm_cons.
     apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
-    apply top_tfr; assumption.
+    apply top_tfr. assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
     * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
@@ -402,11 +251,10 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
 Qed.
 
-Lemma top_gen_tfr lw ls l1 l2 : Forall_inf ttFoc ls ->
-  atrifoc lw ls (l1 ++ top :: l2).
+Lemma top_gen_tfr lw ls l1 l2 : Forall_inf Foc ls -> atrifoc lw ls (l1 ++ top :: l2).
 Proof.
 remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> HF; subst.
+  intros lw ls l1 -> HF.
 destruct l1.
 - apply top_tfr; assumption.
 - list_simpl; destruct f;
@@ -418,9 +266,9 @@ destruct l1.
     constructor; [ right; constructor | assumption ].
   + apply bot_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
-  + apply parr_tfr; rewrite 2 app_comm_cons.
+  + apply parr_tfr. rewrite 2 app_comm_cons.
     apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
-  + apply top_tfr; assumption.
+  + apply top_tfr. assumption.
   + apply with_tfr; rewrite app_comm_cons.
     * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
     * apply X with (list_sum (map fsize (f2 :: l1))); simpl; try lia; assumption.
@@ -428,12 +276,11 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
 Qed.
 
-Lemma with_gen_tfr A B lw ls l1 l2 :
-  atrifoc lw ls (l1 ++ A :: l2) -> atrifoc lw ls (l1 ++ B :: l2) ->
+Lemma with_gen_tfr A B lw ls l1 l2 : atrifoc lw ls (l1 ++ A :: l2) -> atrifoc lw ls (l1 ++ B :: l2) ->
   atrifoc lw ls (l1 ++ awith A B :: l2).
 Proof.
 remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi1 pi2; subst.
+  intros lw ls l1 -> pi1 pi2.
 destruct l1.
 - apply with_tfr; assumption.
 - list_simpl; destruct f;
@@ -448,11 +295,11 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
     inversion pi2; subst; [ | inversion X1; inversion X3; inversion H ].
-    apply parr_tfr; rewrite 2 app_comm_cons.
+    apply parr_tfr. rewrite 2 app_comm_cons.
     apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
     inversion pi2; subst; [ | inversion X1; inversion X3; inversion H ].
-    apply top_tfr; assumption.
+    apply top_tfr. assumption.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
     inversion pi2; subst; [ | inversion X2; inversion X4; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
@@ -464,13 +311,12 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
 Qed.
 
-Lemma wn_gen_tfr A lw ls l1 l2 :
-  atrifoc (A :: lw) ls (l1 ++ l2) -> atrifoc lw ls (l1 ++ wn A :: l2).
+Lemma wn_gen_tfr A lw ls l1 l2 : atrifoc (A :: lw) ls (l1 ++ l2) -> atrifoc lw ls (l1 ++ wn A :: l2).
 Proof.
 remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi; subst.
+  intros lw ls l1 -> pi.
 destruct l1.
-- apply wn_tfr; assumption.
+- apply wn_tfr. assumption.
 - list_simpl; destruct f;
     try (inversion pi; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; assumption).
@@ -481,10 +327,10 @@ destruct l1.
     apply bot_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
-    apply parr_tfr; rewrite 2 app_comm_cons.
+    apply parr_tfr. rewrite 2 app_comm_cons.
     apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
-    apply top_tfr; assumption.
+    apply top_tfr. assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
     * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
@@ -495,11 +341,10 @@ destruct l1.
     apply exw_tfr with (f :: A :: lw); [ assumption | apply Permutation_Type_swap ].
 Qed.
 
-Lemma unfoc_gen_tfr A lw ls l1 l2 : ttFoc A ->
-  atrifoc lw (A :: ls) (l1 ++ l2) -> atrifoc lw ls (l1 ++ A :: l2).
+Lemma unfoc_gen_tfr A lw ls l1 l2 : Foc A -> atrifoc lw (A :: ls) (l1 ++ l2) -> atrifoc lw ls (l1 ++ A :: l2).
 Proof.
 remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> HF pi; subst.
+  intros lw ls l1 -> HF pi.
 destruct l1.
 - apply as_tfr; assumption.
 - list_simpl; destruct f;
@@ -514,7 +359,7 @@ destruct l1.
     apply bot_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
-    apply parr_tfr; rewrite 2 app_comm_cons.
+    apply parr_tfr. rewrite 2 app_comm_cons.
     apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply top_tfr.
@@ -528,18 +373,18 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
 Qed.
 
-Lemma exa_tfr : forall lw ls l,
-  atrifoc lw ls l -> forall l0, Permutation_Type l l0 -> atrifoc lw ls l0.
+Lemma exa_tfr lw ls l : atrifoc lw ls l -> forall l0, Permutation_Type l l0 -> atrifoc lw ls l0.
 Proof.
+revert lw ls l.
 apply (astrifoc_rect (fun lw ls l _ => forall l0, Permutation_Type l l0 -> atrifoc lw ls l0)
                      (fun _ _ _ _ => unit));
   try now intuition constructor.
 - intros A lw ls1 ls2 Hs pi _ l0 HP.
   apply Permutation_Type_nil in HP; subst.
   apply foc_tfr, pi; assumption.
-- intros A lw1 lw2 ls pi _ ls0 HP.
+- intros A lw1 lw2 ls Hnc pi _ ls0 HP.
   apply Permutation_Type_nil in HP; subst.
-  apply focd_tfr, pi.
+  apply focd_tfr, pi. assumption.
 - intros lw ls l pi IHpi l0 HP.
   symmetry in HP; destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
   symmetry in HP; apply Permutation_Type_cons_app_inv in HP.
@@ -568,9 +413,7 @@ apply (astrifoc_rect (fun lw ls l _ => forall l0, Permutation_Type l l0 -> atrif
 Qed.
 
 Lemma unfoc_tfr_rev A lw ls : aformula A -> strifoc lw ls A -> atrifoc lw ls (A :: nil).
-Proof.
-intros Ha pi; induction pi; (try now inversion Ha); [ apply (fst ex_tfr _ ls1) | ]; auto.
-Qed.
+Proof. intros Ha pi. induction pi; (try now inversion Ha); [ apply (fst ex_tfr _ ls1) | ]; auto. Qed.
 
 Lemma trifoc_set:
   (forall lw ls l, atrifoc lw ls l -> atrifoc (nodup (@eq_dt_dec formulas_dectype) lw) ls l)
@@ -580,8 +423,8 @@ apply trifoc_rect; try (now intuition constructor); try (now econstructor; eassu
 - intros A lw1 lw2 ls pi IHpi.
   assert (In_inf A (nodup (@eq_dt_dec formulas_dectype) (lw1 ++ A :: lw2))) as Hin
     by apply (in_in_inf (@eq_dt_dec formulas_dectype)), nodup_In, in_elt.
-  apply in_inf_split in Hin as [(l1, l2) Hin]; rewrite_all Hin.
-  apply focd_tfr; assumption.
+  apply in_inf_split in Hin as [(l1, l2) Hin]. rewrite ? Hin in *.
+  apply focd_tfr. assumption.
 - intros A lw ls l pi IHpi.
   apply wn_tfr.
   cbn in IHpi; destruct (in_dec _ A lw) as [Hin|Hnin]; [ | assumption ].
@@ -590,8 +433,495 @@ apply trifoc_rect; try (now intuition constructor); try (now econstructor; eassu
 - intros X lw1 lw2.
   assert (In_inf (covar X) (nodup (@eq_dt_dec formulas_dectype) (lw1 ++ covar X :: lw2))) as Hin
     by apply (in_in_inf (@eq_dt_dec formulas_dectype)), nodup_In, in_elt.
-  apply in_inf_split in Hin as [(l1, l2) Hin]; rewrite_all Hin.
+  apply in_inf_split in Hin as [(l1, l2) ->].
   apply axd_tfr.
 Qed.
 
+
+(** * From monadic to triadic *)
+
+Lemma wFoc_wn_Foc_partition l lw ls : Forall_inf wFoc l -> partition is_wn l = (map wn lw, ls) ->
+  partition is_Foc ls = (ls, nil).
+Proof.
+intros HF Hp.
+apply forallb_true_partition.
+rewrite partition_filter in Hp. inversion Hp.
+clear - HF. induction l as [|a l IHl]; [ reflexivity | ].
+cbn. inversion_clear HF.
+destruct (wn_spec a) as [Hwn|Hnwn]; [ inversion Hwn; subst | cbn; apply andb_true_iff ]; cbn; rewrite IHl; auto.
+split; [ | reflexivity ].
+destruct (Foc_spec a) as [ | Hntt ]; [ reflexivity | contradiction Hntt ].
+apply wFoc_not_wn_Foc; assumption.
+Qed.
+
+Lemma mon_to_tri l Pi : llFoc l Pi ->
+  (forall A, Pi = Some A -> forall lw ls, partition is_wn l = (map wn lw, ls) -> strifoc lw ls A)
+* (Pi = None -> forall lw lsa ls la,
+                  partition is_wn l = (map wn lw, lsa) -> partition is_Foc lsa = (ls, la) ->
+                  atrifoc lw ls la).
+Proof.
+intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
+  try inversion Hs; try inversion Hn; subst.
+- cbn in Hp. injection Hp as [= Heq <-]. symmetry in Heq. apply map_eq_nil in Heq as ->. apply ax_tfr.
+- remember (partition is_wn l1) as p' eqn:Hp'. symmetry in Hp'. destruct p' as [lw' ls'].
+  destruct (Permutation_Type_partition _ p Hp' Hp).
+  apply Permutation_Type_map_inv in p0 as [lw'' ->]. symmetry in p0.
+  apply exw_tfr with lw''; [ | assumption ].
+  apply ex_tfr with ls'; [ | assumption ].
+  apply IHpi; reflexivity.
+- intros lw lsa ls la Hp1 Hp2.
+  remember (partition is_wn l1) as p' eqn:Hp'. symmetry in Hp'. destruct p' as [lw' lsa'].
+  destruct (Permutation_Type_partition _ p Hp' Hp1).
+  remember (partition is_Foc lsa') as p'' eqn:Hp''. symmetry in Hp''. destruct p'' as [ls' la'].
+  destruct (Permutation_Type_partition _ p1 Hp'' Hp2).
+  apply Permutation_Type_map_inv in p0 as [lw'' ->]. symmetry in p0.
+  apply exw_tfr with lw''; [ | assumption ].
+  apply ex_tfr with ls'; [ | assumption ].
+  apply exa_tfr with la'; [ | assumption ].
+  eapply (snd IHpi); [ reflexivity | reflexivity | assumption ].
+- intros lw lsa ls la Hp1 Hp2.
+  assert (Hs := (inl : _ -> Foc _) (sync_focus_F pi)).
+  assert (HF := wFoc_context pi).
+  assert (is_wn A = false) as Hwn
+    by now destruct (wn_spec A); [ exfalso; apply (Foc_not_wn Hs) | ].
+  cbn in Hp1; rewrite Hwn in Hp1.
+  remember (partition is_wn l) as p; destruct p as [p1 p2].
+  assert (Forall_inf Foc p2) as Hlsa.
+  { apply (Forall_inf_arrow _ (fun A => (uncurry (@wFoc_not_wn_Foc _ A)))).
+    apply Forall_inf_prod.
+    - assert (Hincl := partition_incl2_inf is_wn l).
+      rewrite <- Heqp in Hincl. cbn in Hincl.
+      apply (incl_inf_Forall_inf Hincl). assumption.
+    - rewrite partition_filter in Heqp. injection Heqp as [= -> ->].
+      apply (reflectT_iffT _ _  (Forall_inf_forallb_reflectT _ _ _ (fun D => (reflectT_neg _ _ (wn_spec D))))),
+            forallb_filter. }
+  assert (forall x, In_inf x lsa -> is_Foc x = true) as Hlsa'.
+  { injection Hp1 as [= -> <-].
+    clear - Hs Hlsa. intros B [->|Hin]; destruct (Foc_spec B); auto.
+    exfalso. apply n. apply Forall_inf_forall with p2; assumption. }
+  apply forallb_forall_inf, forallb_true_filter in Hlsa'.
+  rewrite <- Hlsa', partition_filter, filter_negb_filter in Hp2.
+  injection Hp2 as [= <- <-]. injection Hp1 as [= -> <-]. rewrite 2 Hlsa'.
+  rewrite <- (app_nil_l (A :: _)). apply foc_tfr; [ apply (sync_focus_F pi) | ].
+  apply IHpi; [ reflexivity | f_equal ].
+- cbn in Hp. injection Hp as [= Heq <-]. symmetry in Heq. apply map_eq_nil in Heq as ->. apply one_tfr.
+- intros lw lsa ls la Hp1 Hp2.
+  cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= -> <-].
+  specialize (snd IHpi eq_refl lw l1). clear IHpi. intros IHpi.
+  cbn in Hp2. destruct (partition is_Foc l1). injection Hp2 as [= <- <-].
+  apply bot_tfr, IHpi; reflexivity.
+- rewrite partition_app in Hp.
+  destruct (partition is_wn l1) eqn:Hp1, (partition is_wn l2) eqn:Hp2. cbn in Hp. injection Hp as [= Hp <-].
+  symmetry in Hp. decomp_map_inf Hp. subst.
+  apply tens_tfr.
+  + apply wk_list_tfr.
+    destruct (polarity A); pol_simpl.
+    * apply IHpi1, Hp1. reflexivity.
+    * apply unfoc_tfr; [ assumption | ].
+      assert (partition is_Foc l0 = (l0, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l1 l6).
+      destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
+      -- apply wn_tfr.
+         cbn in IHpi1. apply IHpi1 with (lsa := l0); [ reflexivity | | eassumption ].
+         rewrite Hp1. reflexivity.
+      -- apply as_tfr; [ assumption | ].
+         apply IHpi1 with (lsa := A :: l0); [ reflexivity | | ]; cbn.
+         ++ rewrite Hp1.
+            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            reflexivity.
+         ++ rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+      -- apply IHpi1 with (lsa := A :: l0); [ reflexivity | | ]; cbn.
+         ++ rewrite Hp1.
+            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            reflexivity.
+         ++ rewrite Hp'.
+            apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+            reflexivity.
+  + apply exw_tfr with (l7 ++ l6); [ apply wk_list_tfr | apply Permutation_Type_app_comm ].
+    destruct (polarity B); pol_simpl.
+    * apply IHpi2, Hp2. reflexivity.
+    * apply unfoc_tfr; [ assumption | ].
+      assert (partition is_Foc l4 = (l4, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l2 l7).
+      destruct (wn_spec B) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec B) as [Htt|Hntt] ].
+      -- apply wn_tfr.
+         cbn in IHpi2. apply IHpi2 with (lsa := l4); [ reflexivity | | eassumption ].
+         rewrite Hp2. reflexivity.
+      -- apply as_tfr; [ assumption | ].
+         apply IHpi2 with (lsa := B :: l4); [ reflexivity | | ]; cbn.
+         ++ rewrite Hp2.
+            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            reflexivity.
+         ++ rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+      -- apply IHpi2 with (lsa := B :: l4); [ reflexivity | | ]; cbn.
+         ++ rewrite Hp2.
+            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            reflexivity.
+         ++ rewrite Hp'.
+            apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+            reflexivity.
+- intros lw lsa ls la Hp1 Hp2.
+  cbn in Hp1. destruct (partition is_wn l) eqn:Hp. injection Hp1 as [= -> <-].
+  cbn in Hp2. destruct (partition is_Foc l1) eqn:Hp'. injection Hp2 as [= <- <-].
+  apply parr_tfr.
+  destruct (wn_spec A) as [HwnA|HnwnA]; [ inversion HwnA; subst | destruct (Foc_spec A) as [HttA|HnttA] ].
+  + apply wn_tfr.
+    destruct (wn_spec B) as [HwnB|HnwnB]; [ inversion HwnB; subst | destruct (Foc_spec B) as [HttB|HnttB] ].
+    * apply wn_tfr.
+      eapply exw_tfr; [ | apply Permutation_Type_swap ].
+      eapply IHpi, Hp'; [ | cbn; rewrite Hp ]; reflexivity.
+    * apply as_tfr; [ assumption | ].
+      eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in HttB as ->. reflexivity.
+    * eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttB as ->.
+         reflexivity.
+  + apply as_tfr; [ assumption | ].
+    destruct (wn_spec B) as [HwnB|HnwnB]; [ inversion HwnB; subst | destruct (Foc_spec B) as [HttB|HnttB] ].
+    * apply wn_tfr.
+      eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in HttA as ->. reflexivity.
+    * apply as_tfr; [ assumption | ].
+      eapply ex_tfr; [ | apply Permutation_Type_swap ].
+      eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (Foc_spec _)) in HttB as ->.
+         apply (reflectT_iffT _ _ (Foc_spec _)) in HttA as ->.
+         reflexivity.
+    * eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttB as ->.
+         apply (reflectT_iffT _ _ (Foc_spec _)) in HttA as ->.
+         reflexivity.
+  + eapply exa_tfr; [ | apply Permutation_Type_swap ].
+    destruct (wn_spec B) as [HwnB|HnwnB]; [ inversion HwnB; subst | destruct (Foc_spec B) as [HttB|HnttB] ].
+    * apply wn_tfr.
+      eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttA as ->.
+         reflexivity.
+    * apply as_tfr; [ assumption | ].
+      eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (Foc_spec _)) in HttB as ->.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttA as ->.
+         reflexivity.
+    * eapply exa_tfr; [ | apply Permutation_Type_swap ].
+      eapply IHpi; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttB as ->.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttA as ->.
+         reflexivity.
+- intros lw lsa ls la Hp1 Hp2.
+  cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= -> <-].
+  assert (Forall_inf Foc ls) as Htt.
+  { rewrite partition_filter in Hp2. injection Hp2 as [= <- <-].
+    apply forall_Forall_inf.
+    intros C [_ HC]%filter_In_inf_inv.
+    apply (reflectT_iffT _ _ (Foc_spec _)), HC. }
+  cbn in Hp2. destruct (partition is_Foc l1). injection Hp2 as [= <- <-].
+  apply top_tfr, Htt.
+- apply plus_tfr1.
+  destruct (polarity A) as [HsA|HaA]; pol_simpl.
+  + now apply IHpi.
+  + apply unfoc_tfr; [ assumption | ].
+    assert (partition is_Foc ls = (ls, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l lw).
+    destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
+    * apply wn_tfr.
+      cbn in IHpi. apply IHpi with (lsa := ls); [ reflexivity | | eassumption ].
+      rewrite Hp. reflexivity.
+    * apply as_tfr; [ assumption | ].
+      apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
+      -- rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+    * apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
+      -- rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         reflexivity.
+- apply plus_tfr2.
+  destruct (polarity A) as [HsA|HaA]; pol_simpl.
+  + now apply IHpi.
+  + apply unfoc_tfr; [ assumption | ].
+    assert (partition is_Foc ls = (ls, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l lw).
+    destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
+    * apply wn_tfr.
+      cbn in IHpi. apply IHpi with (lsa := ls); [ reflexivity | | eassumption ].
+      rewrite Hp. reflexivity.
+    * apply as_tfr; [ assumption | ].
+      apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
+      -- rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- rewrite Hp'.
+         apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->.
+         reflexivity.
+    * apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
+      -- rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         reflexivity.
+- intros lw lsa ls la Hp1 Hp2.
+  cbn in Hp1. destruct (partition is_wn l) eqn:Hp. injection Hp1 as [= -> <-].
+  cbn in Hp2. destruct (partition is_Foc l1) eqn:Hp'. injection Hp2 as [= <- <-].
+  apply with_tfr.
+  + destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
+    * apply wn_tfr.
+      eapply IHpi1, Hp'; [ | cbn; rewrite Hp]; reflexivity.
+    * apply as_tfr; [ assumption | ].
+      eapply IHpi1; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+    * eapply IHpi1; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         reflexivity.
+  + destruct (wn_spec B) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec B) as [Htt|Hntt] ].
+    * apply wn_tfr.
+      eapply IHpi2, Hp'; [ | cbn; rewrite Hp ]; reflexivity.
+    * apply as_tfr; [ assumption | ].
+      eapply IHpi2; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+    * eapply IHpi2; [ reflexivity | | ].
+      -- cbn. rewrite Hp.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         reflexivity.
+      -- cbn. rewrite Hp'.
+         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         reflexivity.
+- assert (ls = nil) as ->.
+  { clear - Hp. induction l as [|A l IHl] in Hp, lw |- *; cbn in Hp.
+    - injection Hp as [= _ <-]. reflexivity.
+    - destruct (partition is_wn (map wn l)). injection Hp as [= Heq ->].
+      symmetry in Heq. decomp_map Heq. subst.
+      exact (IHl _ eq_refl). }
+  apply oc_tfr.
+  destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
+  + apply wn_tfr.
+    cbn in IHpi. apply IHpi with (lsa := nil); [ reflexivity | | reflexivity ].
+    rewrite Hp. reflexivity.
+  + apply as_tfr; [ assumption | ].
+    apply IHpi with (lsa := A :: nil); [ reflexivity | | ]; cbn.
+    * rewrite Hp.
+      apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+      reflexivity.
+    * apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+  + apply IHpi with (lsa := A :: nil); [ reflexivity | | ]; cbn.
+    * rewrite Hp.
+      apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+      reflexivity.
+    * apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+      reflexivity.
+- intros lw lsa ls la Hp1 Hp2.
+  assert (partition is_Foc lsa = (lsa, nil)) as Hp'.
+  { apply (@wFoc_wn_Foc_partition (wn A :: l) lw); [ | assumption ].
+    constructor; [ | assumption ]. right. constructor. }
+  rewrite Hp2 in Hp'. injection Hp' as [= -> ->].
+  cbn in Hp1. destruct (partition is_wn l) eqn:Hp. injection Hp1 as [= Heq <-].
+  symmetry in Heq. decomp_map_inf Heq. injection Heq1 as ->. subst.
+  destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
+  + apply (focd_tfr nil), wk_tfr, unfoc_tfr, wn_tfr; [ intros ? [=] | constructor | ].
+    cbn in IHpi. eapply IHpi; [ reflexivity | | eassumption ].
+    rewrite Hp. list_simpl. reflexivity.
+  + destruct (covar_spec A) as [Hc|Hnc]; [ inversion Hc; subst | ].
+    * assert (aformula (covar X)) by constructor. pol_simpl. cbn in IHpi.
+      eapply exw_tfr; [ | symmetry; apply Permutation_Type_cons_append ].
+      rewrite <- (app_nil_l l1). eapply de_tfr; [ | reflexivity ].
+      eapply IHpi; [ reflexivity | | ].
+      -- rewrite Hp. reflexivity.
+      -- cbn. rewrite Hp2. reflexivity.
+    * apply (focd_tfr nil), wk_tfr; [ intros ? [= ->]; contradiction Hnc; constructor | ].
+      assert (sformula A) as HA by (destruct Htt; [ assumption | contradiction Hnc ]).
+      pol_simpl. cbn in IHpi. eapply IHpi, Hp. reflexivity.
+  + assert (aformula A) as HA
+      by (destruct A; (try now constructor); contradiction Hntt; now repeat constructor).
+    pol_simpl. 
+    apply (focd_tfr nil), wk_tfr, unfoc_tfr; [ now intros ? ->; apply Hntt; right | assumption | ].
+    cbn in IHpi. eapply IHpi with (lsa := A :: l1); [ reflexivity | | ].
+    * rewrite Hp.
+      apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+      reflexivity.
+    * cbn. rewrite Hp2.
+      apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+      reflexivity.
+- intros lw lsa ls la Hp1 Hp2.
+  cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= Heq <-].
+  symmetry in Heq. decomp_map_inf Heq. subst.
+  change (x :: l3) with ((x :: nil) ++ l3).
+  apply (fst exw_tfr (l3 ++ x :: nil)); [ | apply Permutation_Type_app_comm ].
+  apply wk_list_tfr.
+  exact (snd IHpi eq_refl _ l1 _ _ eq_refl Hp2).
+- intros lw lsa ls la Hp1 Hp2.
+  assert (Hp1' := Hp1).
+  cbn in Hp1'. destruct (partition is_wn l). injection Hp1' as [= Heq <-].
+  symmetry in Heq. decomp_map_inf Heq. injection Heq1 as ->. subst.
+  rewrite <- (app_nil_l (A :: _)). eapply co_tfr; [ | reflexivity ].
+  list_simpl. eapply IHpi; [ reflexivity | | eassumption ].
+  cbn in Hp1. cbn. destruct (partition is_wn l). injection Hp1 as [= -> ->]. reflexivity.
+Qed.
+
+
+(** * From triadic to monadic *)
+
+Lemma tri_to_mon:
+  (forall lw ls l, atrifoc lw ls l -> llFoc (map wn lw ++ ls ++ l) None)
+* (forall lw ls A, strifoc lw ls A ->
+     {'(lw', lx) & (incl_inf lw' lw * incl_inf lx lw * Forall_inf covar_formula lx)%type
+                 & llFoc (polcont (map wn lw' ++ lx ++ ls) A) (polfoc A) }).
+Proof.
+apply trifoc_rect.
+- intros A lw ls1 ls2 Hs pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. list_simpl. pol_simpl.
+  eapply incl_Foc; [ | rewrite 2 app_assoc; apply Permutation_Type_middle | exact Hincl | exact Hinclx | ].
+  + rewrite <- ? app_assoc. apply foc_Fr, IHpi.
+  + eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. constructor.
+- intros A lw1 lw2 ls Hnc pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. list_simpl.
+  apply de_Fr in IHpi.
+  + replace (map wn lw1 ++ wn A :: map wn lw2 ++ ls) with (map wn (lw1 ++ A :: lw2) ++ ls)
+      by (list_simpl; reflexivity).
+    assert (incl_inf (A :: lw') (lw1 ++ A :: lw2)) as Hincl'
+      by (intros C [-> | Hin%Hincl]; [ apply in_inf_elt | assumption ]).
+    eapply incl_Foc; [ | reflexivity | exact Hincl' | exact Hinclx | ]; [ assumption | ].
+    eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. constructor.
+  + apply Forall_inf_app; [ | apply Forall_inf_app ].
+    * apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
+    * eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. left. right. constructor.
+    * apply tsync_context in pi. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+- intros lw ls l pi IHpi.
+  eapply ex_Fr; [ apply bot_Fr, IHpi | ].
+  rewrite ?(app_assoc _ ls). apply Permutation_Type_middle.
+- intros A B lw ls l pi IHpi.
+  eapply ex_Fr; [ apply parr_Fr; eapply ex_Fr; [ apply IHpi | ]
+                | rewrite ?(app_assoc _ ls); apply Permutation_Type_middle ].
+  transitivity (A :: map wn lw ++ ls ++ B :: l).
+  + rewrite ?(app_assoc _ ls). symmetry. apply Permutation_Type_middle.
+  + apply Permutation_Type_cons; [ reflexivity | ].
+    rewrite ?(app_assoc _ ls). symmetry. apply Permutation_Type_middle.
+- intros lw ls l HF.
+  apply (@ex_Fr _ (top :: map wn lw ++ ls ++ l)); [ apply top_gen_Fr | ].
+  rewrite ?(app_assoc _ ls). apply Permutation_Type_middle.
+- intros A B lw ls l pi1 IHpi1 pi2 IHpi2.
+  eapply ex_Fr; [ apply with_Fr; eapply ex_Fr; [ apply IHpi1 | | apply IHpi2 | ]
+                | rewrite ?(app_assoc _ ls); apply Permutation_Type_middle ].
+  + rewrite ?(app_assoc _ ls). symmetry. apply Permutation_Type_middle.
+  + rewrite ?(app_assoc _ ls). symmetry. apply Permutation_Type_middle.
+- intros A lw ls l _ IHpi.
+  eapply ex_Fr; [ apply IHpi | ].
+  rewrite ?(app_assoc _ ls). apply Permutation_Type_middle.
+- intros A lw ls l _ _ IHpi.
+  eapply ex_Fr; [ apply IHpi | ].
+  etransitivity; [ rewrite <- app_comm_cons; symmetry; apply Permutation_Type_middle | ].
+  rewrite ?(app_assoc _ ls). apply Permutation_Type_middle.
+- intros X lw. cbn. exists (nil, nil).
+  + repeat split; [ intros ? [] | intros ? [] | constructor ].
+  + apply ax_Fr.
+- intros X lw1 lw2. exists (nil, covar X :: nil).
+  + repeat split; [ intros ? [] | | ].
+    * intros C [-> | [] ]. apply in_inf_elt.
+    * repeat constructor.
+  + apply ax_Fr.
+- intros A lw ls1 ls2 _ [(lw', lx) [[Hincl Hinclx] Hcv] IHpi] HP.
+  exists (lw', lx); [ repeat split; assumption | ].
+  eapply ex_Fr; [ apply IHpi | ].
+  now apply Permutation_Type_polcont, Permutation_Type_app, Permutation_Type_app.
+- intros lw. cbn. exists (nil, nil).
+  + repeat split; [ intros ? [] | intros ? [] | constructor ].
+  + apply one_Fr.
+- intros A B lw ls1 ls2 pi1 [(lw1', lx1) [[Hincl1 Hinclx1] Hcv1] IHpi1]
+                        pi2 [(lw2', lx2) [[Hincl2 Hinclx2] Hcv2] IHpi2]. cbn.
+  exists (lw1' ++ lw2', lx1 ++ lx2); [ repeat split; try (apply incl_inf_app; assumption) | ].
+  { apply Forall_inf_app; assumption. }
+  apply (@ex_Fr _ ((map wn lw1' ++ lx1 ++ ls1) ++ map wn lw2' ++ lx2 ++ ls2)).
+  + apply tens_Fr; [ assumption | assumption | | ].
+    * apply Forall_inf_app; [ | apply Forall_inf_app ].
+      -- apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
+      -- eapply Forall_inf_arrow; [ | exact Hcv1 ].
+         intros C HC. inversion HC. left. right. constructor.
+      -- apply tsync_context in pi1. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+    * apply Forall_inf_app; [ | apply Forall_inf_app ].
+      -- apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
+      -- eapply Forall_inf_arrow; [ | exact Hcv2 ].
+         intros C HC. inversion HC. left. right. constructor.
+      -- apply tsync_context in pi2. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+  + list_simpl. apply Permutation_Type_app_head.
+    rewrite ? app_assoc. apply Permutation_Type_app_tail. rewrite <- ? app_assoc.
+    etransitivity; [ rewrite app_assoc; apply Permutation_Type_app_swap_app | ].
+    list_simpl. apply Permutation_Type_app_head, Permutation_Type_app_head, Permutation_Type_app_comm.
+- intros A B lw ls pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. cbn.
+  exists (lw', lx); [ repeat split; assumption | ].
+  apply plus_Fr1; [ assumption | ].
+  apply Forall_inf_app; [ | apply Forall_inf_app ].
+  + apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
+  + eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. left. right. constructor.
+  + apply tsync_context in pi. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+- intros A B lw ls pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. cbn.
+  exists (lw', lx); [ repeat split; assumption | ].
+  apply plus_Fr2; [ assumption | ].
+  apply Forall_inf_app; [ | apply Forall_inf_app ].
+  + apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
+  + eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. left. right. constructor.
+  + apply tsync_context in pi. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+- intros A lw pi IHpi. exists (lw, nil); [ repeat split; [ apply incl_inf_refl | intros ? [] | constructor ] | ].
+  list_simpl. eapply oc_Fr, ex_Fr; [ apply IHpi | ].
+  symmetry. apply Permutation_Type_cons_append.
+- intros A lw ls Ha pi IHpi.
+  exists (lw, nil); [ repeat split; [ apply incl_inf_refl | intros ? [] | constructor ] | ].
+  pol_simpl. eapply ex_Fr; [ apply IHpi | ].
+  symmetry. list_simpl. rewrite app_assoc. apply Permutation_Type_cons_append.
+Qed.
+
+Lemma mon_tri_equiv l lw lsa ls la : partition is_wn l = (map wn lw, lsa) -> partition is_Foc lsa = (ls, la) ->
+  iffT (llFoc l None) (atrifoc lw ls la).
+Proof.
+intros Hp1 Hp2. split; intros pi.
+- eapply mon_to_tri; [ | reflexivity | | ]; eassumption.
+- apply tri_to_mon in pi.
+  eapply ex_Fr; [ exact pi | ].
+  apply partition_Permutation_Type in Hp1, Hp2.
+  symmetry. etransitivity; [ apply Hp1 | ].
+  apply Permutation_Type_app_head, Hp2.
+Qed.
+
 End Atoms.
+
+(* TODO analyse embeddings to compare bottom wn-rules in tri and top wn-rules in mon *)

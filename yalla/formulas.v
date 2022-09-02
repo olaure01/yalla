@@ -1,5 +1,5 @@
-From Coq Require Import Bool List EqNat RelationClasses Lia.
-From OLlibs Require Import funtheory dectype.
+From Coq Require Import List EqNat RelationClasses Lia.
+From OLlibs Require Import funtheory dectype Bool_more.
 From Yalla Require Export atoms.
 
 Set Implicit Arguments.
@@ -21,6 +21,56 @@ Inductive formula :=
 | zero | top
 | aplus (_ _ : formula) | awith (_ _ : formula)
 | oc (_ : formula) | wn (_ : formula).
+
+Variant var_formula : formula -> Type := isvar : forall X, var_formula (var X).
+Variant covar_formula : formula -> Type := iscovar X : covar_formula (covar X).
+Variant wn_formula : formula -> Type := iswn A : wn_formula (wn A).
+
+Definition is_var (A : formula) :=
+  match A with
+  | var _ => true
+  | _ => false
+  end.
+
+Lemma var_spec A : reflectT (var_formula A) (is_var A).
+Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
+
+Definition is_covar (A : formula) :=
+  match A with
+  | covar _ => true
+  | _ => false
+  end.
+
+Lemma covar_spec A : reflectT (covar_formula A) (is_covar A).
+Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
+
+Definition is_wn (A : formula) :=
+  match A with
+  | wn _ => true
+  | _ => false
+  end.
+
+Lemma wn_spec A : reflectT (wn_formula A) (is_wn A).
+Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
+
+(** Atomic [formula] *)
+Variant atomic : formula -> Type :=
+| atomic_var x : atomic (var x)
+| atomic_covar x : atomic (covar x).
+
+(* Unused
+Variant atomic_Prop : formula -> Prop :=
+| atomic_Prop_var : forall x, atomic_Prop (var x)
+| atomic_Prop_covar : forall x, atomic_Prop (covar x).
+
+Lemma atomic_Prop_atomic A : atomic_Prop A -> atomic A.
+Proof.
+induction A; intros Hat;
+  try (now exfalso; inversion Hat);
+  now constructor.
+Qed.
+*)
+
 
 (** n-ary operators *)
 
@@ -97,6 +147,7 @@ Proof. induction n as [|n IHn]; [ | cbn; rewrite <- IHn ]; reflexivity. Qed.
 Lemma dual_oc_n n A : dual (oc_n n A) = wn_n n (dual A).
 Proof. induction n as [|n IHn]; [ | cbn; rewrite <- IHn ]; reflexivity. Qed.
 
+
 (** Size of a [formula] as its number of symbols *)
 Fixpoint fsize A :=
 match A with
@@ -118,23 +169,6 @@ Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 Lemma fsize_oc_n n A : fsize (oc_n n A) = n + fsize A.
 Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
-(** Atomic [formula] *)
-Inductive atomic : formula -> Type :=
-| atomic_var x : atomic (var x)
-| atomic_covar x : atomic (covar x).
-
-(* Unused
-Inductive atomic_Prop : formula -> Prop :=
-| atomic_Prop_var : forall x, atomic_Prop (var x)
-| atomic_Prop_covar : forall x, atomic_Prop (covar x).
-
-Lemma atomic_Prop_atomic A : atomic_Prop A -> atomic A.
-Proof.
-induction A; intros Hat;
-  try (now exfalso; inversion Hat);
-  now constructor.
-Qed.
-*)
 
 (** Atoms in a formula *)
 Fixpoint atom_list A : list atom :=
