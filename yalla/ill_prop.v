@@ -69,12 +69,11 @@ Proof.
 intros pi0 pi.
 replace (l1 ++ l0 ++ ineg C :: l2) with (l1 ++ (l0 ++ ineg C :: nil) ++ l2)
   by (list_simpl; reflexivity).
-apply cut_at_ir_gaxat with atN; [ | | apply neg_ilr | ]; try assumption.
+apply cut_at_ir_gax with atN; [ | | apply neg_ilr | ]; try assumption.
 intros b l l' Heq.
 exfalso.
 apply (Hgax b).
-rewrite Heq.
-apply in_inf_elt.
+rewrite Heq. apply in_inf_elt.
 Qed.
 
 Lemma ilpam_to_igen P A : ill P (ilpam A N :: nil) (igen A).
@@ -91,7 +90,7 @@ Lemma gen_pam_rule P (Hgax : noN_iax P) l0 l1 l2 C D :
 Proof.
 intros pi0 pi.
 rewrite app_comm_cons.
-apply cut_at_ir_gaxat with atN; [ | | apply gen_ilr | ]; try assumption.
+apply cut_at_ir_gax with atN; [ | | apply gen_ilr | ]; try assumption.
 intros b l l' Heq.
 exfalso.
 apply (Hgax b).
@@ -207,7 +206,7 @@ Section Fragments.
 Definition ifragment FS := forall A : iformula, FS A -> forall B, isubform B A -> FS B.
 
 (** Conservativity over fragments *)
-Lemma iconservativity P (P_cutfree : ipcut P = false) FS (Hfrag : ifragment FS) l A (pi : ill P l A) :
+Lemma iconservativity P (P_cutfree : no_icut P) FS (Hfrag : ifragment FS) l A (pi : ill P l A) :
   Forall_inf FS (A :: l) -> Forall_iformula FS pi.
 Proof.
 induction pi; cbn; intros HFS; inversion HFS as [|D l' Hhd Htl]; subst; repeat split; try assumption;
@@ -231,7 +230,7 @@ induction pi; cbn; intros HFS; inversion HFS as [|D l' Hhd Htl]; subst; repeat s
 Qed.
 
 (** Sub-formula property *)
-Proposition isubformula_cutfree P (P_cutfree : ipcut P = false) l A (pi : ill P l A) :
+Proposition isubformula_cutfree P (P_cutfree : no_icut P) l A (pi : ill P l A) :
   Forall_iformula (fun x => Exists (isubform x) (A :: l)) pi.
 Proof.
 apply (iconservativity P_cutfree).
@@ -254,6 +253,7 @@ apply cut_admissible_ill_axfree in pi; [ | assumption ].
 exists (stronger_ipfrag (cutrm_ipfrag_le P) pi).
 apply Forall_isequent_stronger_ipfrag.
 apply iconservativity; trivial.
+apply noicut_cutrm.
 Qed.
 
 Lemma cut_admissible_ifragment_axfree P (P_axfree : no_iax P) FS (Hfrag : ifragment FS) l A (pi : ill P l A) :

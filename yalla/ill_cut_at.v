@@ -62,7 +62,7 @@ induction pi; inversion HeqX; subst;
   apply gax_ir.
 Qed.
 
-Theorem cut_at_ir_gaxat l0 l1 l2 C :
+Theorem cut_at_ir_gax l0 l1 l2 C :
   ill P l0 (ivar X) -> ill P (l1 ++ ivar X :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
 Proof.
 intros pi1 pi2.

@@ -71,8 +71,8 @@ induction n in l |- *; destruct l; trivial.
 - cbn; f_equal; apply IHn.
 Qed.
 
-Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
-(*                               atoms       cut   axioms   mix       perm  *)
+Definition pfrag_ll := @mk_pfrag nat_dectype pcut_none NoAxioms pmix_none true.
+(*                               atoms       cut       axioms   mix       perm  *)
 
 Theorem ll2ll_proof l : ll l -> ll_def.ll pfrag_ll (map ll2ll l).
 Proof.

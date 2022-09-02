@@ -19,8 +19,8 @@ Lemma ill2ill_map_ioc : forall l,
   map ill2ill (map ioc l) = map iformulas.ioc (map ill2ill l).
 Proof. now induction l; [| cbn; rewrite IHl]. Qed.
 
-Definition ipfrag_ill := @ill_def.mk_ipfrag nat_dectype false ill_def.NoIAxioms true.
-(*                                          atoms       cut   axioms            perm  *)
+Definition ipfrag_ill := @ill_def.mk_ipfrag nat_dectype ill_def.ipcut_none ill_def.NoIAxioms true.
+(*                                          atoms       cut                axioms            perm  *)
 
 Theorem ill2ill_proof : forall l A, ill l A -> ill_def.ill ipfrag_ill (map ill2ill l) (ill2ill A).
 Proof.

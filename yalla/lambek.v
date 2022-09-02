@@ -61,8 +61,8 @@ Inductive lprove : list lform -> lform -> Type :=
 (** ** 4. characterize corresponding [ill] fragment *)
 
 (** cut / axioms / permutation *)
-Definition ipfrag_lambek := @ill_def.mk_ipfrag preiatom false ill_def.NoIAxioms false.
-(*                                             atoms    cut   axioms            perm  *)
+Definition ipfrag_lambek := @ill_def.mk_ipfrag preiatom ill_def.ipcut_none ill_def.NoIAxioms false.
+(*                                             atoms    cut                axioms            perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)

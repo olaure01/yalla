@@ -135,7 +135,7 @@ apply Forall_forall; assumption.
 Qed.
 *)
 
-(* Unused
+
 (** ** Equality in [bool] *)
 
 Fixpoint eqb_iform A B :=
@@ -166,6 +166,11 @@ induction A in B |- *; destruct B; (split; [ intros Heqb | intros Heq ]);
 - apply (@eqb_eq (option_dectype _)) in H0 as ->. reflexivity.
 - subst. cbn. apply (@eqb_eq (option_dectype _)). reflexivity.
 Qed.
-*)
+
+Definition iformulas_dectype := {|
+  car := iformula;
+  eqb := eqb_iform;
+  eqb_eq := eqb_eq_iform |}.
+
 
 End Atoms.

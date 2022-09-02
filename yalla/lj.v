@@ -15,8 +15,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : DecType }.
-Context { preiatom : DecType }.
+Context { atom : DecType } { preiatom : DecType }.
 
 (** ** 1. define formulas *)
 
@@ -258,13 +257,11 @@ End Atoms.
 
 Section Atoms_inj.
 
-Context { atom : InfDecType }.
-Context { preiatom : DecType }.
-Context { Atoms : IAtom2AtomType_inj atom preiatom }.
+Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_retract atom preiatom }.
 
 Notation iformula := (@iformula preiatom).
 Notation i2ac := IAtom2Atom.
-Notation ill2ll := (@ill_vs_ll.ill2ll _ _ IAtom2Atom_inj_base).
+Notation ill2ll := ill_vs_ll.ill2ll.
 
 Lemma lj2ill_cbv_oclpam (A : iformula) : ill_vs_ll.oclpam (lj2ill_cbv A).
 Proof. induction A; (try now constructor); cbn; constructor; try constructor; assumption. Qed.
@@ -275,7 +272,11 @@ Proof.
 intros pi%(@lj2illfrag_cbv atom).
 eapply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
-split; [ | split ; [ | split ] ]; try (intros; cbn; constructor). intros [].
+split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
+- intros C. cbn. destruct (ill_vs_ll.ill2ll_inv C) as [x _], (existsb ill_def.ipcut_none (fst x)) eqn:Hb.
+  + exfalso. apply existsb_exists in Hb as [z [_ Hz]]. discriminate Hz.
+  + apply BoolOrder.false_le.
+- intros [].
 Qed.
 
 Lemma llfrag2lj_cbv l A :
@@ -403,7 +404,11 @@ Proof.
 intros pi%lj2illfrag_cbn.
 apply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
-split; [ | split ; [ | split ] ]; try (intros; cbn; constructor). intros [].
+split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
+- intros C. cbn. destruct (ill_vs_ll.ill2ll_inv C) as [x _], (existsb ill_def.ipcut_none (fst x)) eqn:Hb.
+  + exfalso. apply existsb_exists in Hb as [z [_ Hz]]. discriminate Hz.
+  + apply BoolOrder.false_le.
+- intros [].
 Qed.
 
 Lemma llfrag2lj_cbn l A :

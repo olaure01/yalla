@@ -24,14 +24,16 @@ Lemma mix_by_tens_n P L : Forall_inf (ll P) L -> ll P (tens_n (length L) bot :: 
 Proof.
 intros FL. induction FL as [|l0 [|l L] pi FL IHFL].
 - apply one_r.
-- apply bot_r. cbn. rewrite app_nil_r. assumption.
-- apply tens_r, bot_r; assumption.
+- apply bot_r.
+  cbn; rewrite app_nil_r; assumption.
+- apply tens_r; [ assumption | ].
+  apply bot_r; assumption.
 Qed.
 
 (** Provability in [P + mix_n] by adding [wn (tens_n n bot)], and provability in [P + cut + ax : parr_n n bot] are equivalent *)
 
 Lemma ll_to_mix_cut P n l : ll P (wn (tens_n n bot) :: l) ->
-  ll (cutupd_pfrag (pmixupd_point_pfrag P n true) true) l.
+  ll (cutupd_pfrag (pmixupd_point_pfrag P n true) pcut_all) l.
 Proof.
 intros pi.
 rewrite <- (app_nil_r _).
@@ -43,12 +45,12 @@ apply cut_r with (wn (tens_n n bot)); [ reflexivity | | ].
     by (symmetry; apply repeat_to_concat).
   apply mix_r.
   + cbn. rewrite repeat_length, Nat.eqb_refl. reflexivity.
-  + remember (cutupd_pfrag (pmixupd_point_pfrag P n true) true) as P'. clear.
+  + remember (cutupd_pfrag (pmixupd_point_pfrag P n true) pcut_all) as P'. clear.
     induction n; constructor; [ | assumption ].
     apply one_r.
 - apply stronger_pfrag with P; [ | assumption ].
   repeat split; cbn.
-  + apply BoolOrder.le_true.
+  + intro. apply BoolOrder.le_true.
   + intros a. exists a. reflexivity.
   + intros n0.
     destruct (n0 =? n) eqn:Heq; [ | reflexivity ].
@@ -62,7 +64,7 @@ Proof.
 intros pi.
 eapply (ext_wn_param fp ((tens_n n bot) :: nil)) in pi.
 - eapply ex_r; [ eassumption | symmetry; rewrite fp; apply Permutation_Type_cons_append ].
-- intros Hcut. assumption.
+- now intros Hcut.
 - cbn. intros a.
   eapply ex_r; [ | rewrite fp; apply Permutation_Type_cons_append ].
   apply wk_r, gax_r.
@@ -100,7 +102,7 @@ eapply (ext_wn_param fp ((tens_n n bot) :: nil)) in pi.
     cbn in H. rewrite Heq, H0 in H. discriminate H.
 Qed.
 
-Lemma parr_n_to_mix P n l : pcut P = true ->
+Lemma parr_n_to_mix P n l : full_cut P ->
   ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
@@ -125,7 +127,8 @@ induction pi using ll_nested_ind; try now constructor.
     intros l' Hin.
     apply In_Forall_inf_in with _ _ _ _ PL in Hin as [pi' Hin].
     apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
-- apply cut_r with A; assumption.
+- apply cut_r with A; try assumption.
+  rewrite HeqP' in f. assumption.
 - revert a. rewrite HeqP'. cbn. intros [a|[]].
   + change (ll (pmixupd_point_pfrag P n true) (projT2 (pgax P) a))
       with (ll (pmixupd_point_pfrag P n true) (projT2 (pgax (pmixupd_point_pfrag P n true)) a)).
@@ -145,14 +148,14 @@ Lemma mix_to_parr_n P n l : ll (pmixupd_point_pfrag P n true) l ->
                                           (fun a => match a with
                                                     | inl x => projT2 (pgax P) x
                                                     | inr tt => parr_n n one :: nil
-                                                    end))) true) l.
+                                                    end))) pcut_all) l.
 Proof.
 intros pi.
 remember (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> _) _
                                               (fun a => match a with
                                                         | inl x => projT2 (pgax P) x
                                                         | inr tt => parr_n n one :: nil
-                                                        end))) true) as P'.
+                                                        end))) pcut_all) as P'.
 induction pi using ll_nested_ind; try now constructor.
 - rewrite HeqP'. rewrite HeqP' in IHpi.
   apply ex_r with l1; assumption.
@@ -168,7 +171,7 @@ induction pi using ll_nested_ind; try now constructor.
                          (fun a => match a with
                                    | inl x => projT2 (pgax P) x
                                    | inr tt => parr_n n one :: nil
-                                   end))) true)) (inr tt))
+                                   end))) pcut_all)) (inr tt))
         by (replace n with (length L) by (apply Nat.eqb_eq, Heq); reflexivity).
       rewrite HeqP'.
       apply gax_r.
@@ -192,7 +195,7 @@ induction pi using ll_nested_ind; try now constructor.
                              (fun a => match a with
                                        | inl x => projT2 (pgax P) x
                                        | inr tt => parr_n n one :: nil
-                                       end))) true)) (inl a)).
+                                       end))) pcut_all)) (inl a)).
   rewrite HeqP'.
   apply gax_r.
 Qed.
@@ -202,7 +205,7 @@ Lemma ll_to_parr_n P l n : ll P (wn (tens_n n bot) :: l) ->
                                           (fun a => match a with
                                                     | inl x => projT2 (pgax P) x
                                                     | inr tt => parr_n n one :: nil
-                                                    end))) true) l.
+                                                    end))) pcut_all) l.
 Proof.
 intros pi.
 rewrite <- (app_nil_r l).
@@ -218,17 +221,17 @@ apply cut_r with (wn (tens_n n bot)); [ reflexivity | | ].
                              (fun a => match a with
                                        | inl x => projT2 (pgax P) x
                                        | inr tt => parr_n n one :: nil
-                                       end))) true)) (inr tt)).
+                                       end))) pcut_all)) (inr tt)).
   apply gax_r.
 - apply stronger_pfrag with P; [ | assumption ].
   repeat split.
-  + apply BoolOrder.le_true.
+  + intro. apply BoolOrder.le_true.
   + intro a. exists (inl a). reflexivity.
   + reflexivity.
   + reflexivity.
 Qed.
 
-Lemma parr_to_ll P n l : pcut P = true -> pperm P = true ->
+Lemma parr_to_ll P n l : full_cut P -> pperm P = true ->
   ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
@@ -271,7 +274,7 @@ intros Hpmixn Hpmixm L Heq FL. destruct n; [ destruct m | ].
       apply mix_r; [ rewrite Heql2 | ]; assumption.
 Qed.
 
-Lemma mix_conservativity P Q : Bool.le (pcut P) (pcut Q) -> Bool.le (pperm P) (pperm Q) ->
+Lemma mix_conservativity P Q : (forall C, Bool.le (pcut P C) (pcut Q C)) -> Bool.le (pperm P) (pperm Q) ->
   (forall a, { b | projT2 (pgax P) a = projT2 (pgax Q) b }) ->
   (forall n, pmix P n = true ->
     forall L, length L = n -> Forall_inf (ll Q) L -> ll Q (concat L)) ->
@@ -287,7 +290,7 @@ induction pi using ll_nested_ind; try now constructor.
   intros l' Hin.
   apply (In_Forall_inf_in _ PL) in Hin as [pi' Hin].
   apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
-- rewrite f in Hcut.
+- specialize (Hcut A). rewrite f in Hcut.
   apply cut_r with A; assumption.
 - destruct (Hgax a) as [b ->]; apply gax_r.
 Qed.
@@ -440,8 +443,8 @@ Qed.
 (** ** Standard linear logic: [ll_ll] (no mix, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_ll :=  @mk_pfrag atom  false NoAxioms pmix_none true.
-(*                                atoms cut   axioms   mix       perm  *)
+Definition pfrag_ll :=  @mk_pfrag atom  pcut_none NoAxioms pmix_none true.
+(*                                atoms cut       axioms   mix       perm  *)
 
 Definition ll_ll := ll pfrag_ll.
 
@@ -452,7 +455,7 @@ eapply cut_r_axfree; try eassumption.
 intros a; destruct a.
 Qed.
 
-Lemma cut_ll_admissible l : ll (cutupd_pfrag pfrag_ll true) l -> ll_ll l.
+Lemma cut_ll_admissible l : ll (cutupd_pfrag pfrag_ll pcut_all) l -> ll_ll l.
 Proof.
 intros pi; induction pi using ll_nested_ind; try (now constructor).
 - eapply ex_r; eassumption.
@@ -466,15 +469,15 @@ Qed.
 (** ** Linear logic with mix0: [ll_mix0] (no mix2, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mix0 := @mk_pfrag atom  false NoAxioms pmix0 true.
-(*                                 atoms cut   axioms   mix   perm  *)
+Definition pfrag_mix0 := @mk_pfrag atom  pcut_none NoAxioms pmix0 true.
+(*                                 atoms cut       axioms   mix   perm  *)
 
 Definition ll_mix0 := ll pfrag_mix0.
 
 Lemma cut_mix0_r A l1 l2 : ll_mix0 (dual A :: l1) -> ll_mix0 (A :: l2) -> ll_mix0 (l2 ++ l1).
 Proof. apply cut_r_axfree. intros []. Qed.
 
-Lemma cut_mix0_admissible l : ll (cutupd_pfrag pfrag_mix0 true) l -> ll_mix0 l.
+Lemma cut_mix0_admissible l : ll (cutupd_pfrag pfrag_mix0 pcut_all) l -> ll_mix0 l.
 Proof.
 intros pi. induction pi using ll_nested_ind; try (now constructor); try (econstructor; eassumption).
 - apply mix_r; [ assumption | ].
@@ -490,14 +493,14 @@ Qed.
 Lemma mix0_to_ll P (fp : pperm P = true) b0 l : ll (pmixupd_point_pfrag P 0 b0) l -> ll P (wn one :: l).
 Proof. intros pi. change one with (@tens_n atom 0 bot). apply mix_to_ll with b0; assumption. Qed.
 
-Lemma ll_to_mix0_cut P l : ll P (wn one :: l) -> ll (cutupd_pfrag (pmixupd_point_pfrag P 0 true) true) l.
+Lemma ll_to_mix0_cut P l : ll P (wn one :: l) -> ll (cutupd_pfrag (pmixupd_point_pfrag P 0 true) pcut_all) l.
 Proof. intros pi. change one with (@tens_n atom 0 bot) in pi. apply ll_to_mix_cut; assumption. Qed.
 
 Lemma mix0_wn_one l : ll_mix0 (wn one :: l) -> ll_mix0 l.
 Proof.
 intros pi.
 (* an alternative proof is by introducing a cut with (oc bot) *)
-apply stronger_pfrag with (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag pfrag_mix0 0 true) true)).
+apply stronger_pfrag with (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag pfrag_mix0 0 true) pcut_all)).
 - repeat split.
   + intro a. exists a. reflexivity.
   + intros [|n]; reflexivity.
@@ -510,7 +513,7 @@ Qed.
 (** Provability in [ll_mix0] is equivalent to provability of [ll]
 extended with the provability of [bot :: bot :: nil] *)
 
-Lemma mix0_to_ll_bot P : pcut P = true -> pperm P = true -> forall bc b0 bp l,
+Lemma mix0_to_ll_bot P : full_cut P -> pperm P = true -> forall bc b0 bp l,
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 0) then b0 else P.(pmix) k) bp) l ->
   ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
@@ -526,15 +529,18 @@ remember (axupd_pfrag P (existT (fun x => x -> _) _
 intros fc fp bc b0 bp l pi.
 eapply stronger_pfrag in pi.
 - eapply mix0_to_ll in pi; [ | eassumption ].
-  assert (pcut P' = true) as fc' by (rewrite HeqP'; cbn; assumption).
-  apply (stronger_pfrag _ P') in pi.
-  + rewrite <- (app_nil_l l). apply (@cut_r _ _ fc' (oc bot) _ _ pi).
-    change nil with (map (@wn atom) nil). apply oc_r. cbn.
-    rewrite <- app_nil_r. apply (@cut_r _ _ fc' bot).
-    * apply one_r.
-    * assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
-        by (rewrite HeqP'; exists (inr tt); reflexivity).
-      apply gax_r.
+  assert (full_cut P') as fc' by (rewrite HeqP'; cbn; intro; apply fc).
+  eapply stronger_pfrag in pi.
+  + assert (ll P' (bot :: map wn nil)) as pi'.
+    { change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
+      apply (cut_r bot (fc' _)).
+      - apply one_r.
+      - assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
+          by (rewrite HeqP' ; now (exists (inr tt))).
+        apply gax_r. }
+    apply oc_r in pi'.
+    rewrite <- (app_nil_l l).
+    apply (cut_r (oc bot) (fc' _)); [ cbn; apply pi | apply pi' ].
   + repeat split; rewrite HeqP'; try reflexivity.
     cbn. intros a. exists (inl a). reflexivity.
 - repeat split; intros; cbn.
@@ -597,15 +603,15 @@ Qed.
 (** ** Linear logic with mix2: [ll_mix2] (no mix0, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mix2 := @mk_pfrag atom  false NoAxioms pmix2 true.
-(*                                 atoms cut   axioms   mix   perm  *)
+Definition pfrag_mix2 := @mk_pfrag atom  pcut_none NoAxioms pmix2 true.
+(*                                 atoms cut       axioms   mix   perm  *)
 
 Definition ll_mix2 := ll pfrag_mix2.
 
 Lemma cut_mix2_r A l1 l2 : ll_mix2 (dual A :: l1) -> ll_mix2 (A :: l2) -> ll_mix2 (l2 ++ l1).
 Proof. intros pi1 pi2. eapply cut_r_axfree; try eassumption. intros []. Qed.
 
-Lemma cut_mix2_admissible l : ll (cutupd_pfrag pfrag_mix2 true) l -> ll_mix2 l.
+Lemma cut_mix2_admissible l : ll (cutupd_pfrag pfrag_mix2 pcut_all) l -> ll_mix2 l.
 Proof.
 intros pi; induction pi using ll_nested_ind;
   try (now constructor); try (econstructor; eassumption).
@@ -621,10 +627,12 @@ Qed.
 
 Lemma mix2_to_ll P (fp : pperm P = true) b2 l : ll (pmixupd_point_pfrag P 2 b2) l ->
   ll P (wn (tens bot bot) :: l).
-Proof. intros pi. change (tens bot bot) with (@tens_n atom 2 bot). apply mix_to_ll with b2; assumption. Qed.
+Proof.
+intros pi; change (tens bot bot) with (@tens_n atom 2 bot); apply mix_to_ll with b2; assumption.
+Qed.
 
 Lemma ll_to_mix2_cut P l : ll P (wn (tens bot bot) :: l) ->
-  ll (cutupd_pfrag (pmixupd_point_pfrag P 2 true) true) l.
+  ll (cutupd_pfrag (pmixupd_point_pfrag P 2 true) pcut_all) l.
 Proof. intros pi. change (tens bot bot) with (tens_n 2 bot). apply ll_to_mix_cut. assumption. Qed.
 
 (** Provability in [ll_mix2] is equivalent to
@@ -632,7 +640,7 @@ provability of [ll] extended with the provability of [one :: one :: nil]
 and to provability of [ll] extended with the provability of [parr (dual B) (dual A) :: parr A B :: nil]
 for all [A] and [B] *)
 
-Lemma mix2_to_ll_one_one P : pcut P = true -> pperm P = true -> forall bc b2 bp l,
+Lemma mix2_to_ll_one_one P : full_cut P -> pperm P = true -> forall bc b2 bp l,
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 2) then b2 else P.(pmix) k) bp) l ->
   ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
@@ -648,9 +656,9 @@ remember (axupd_pfrag P (existT (fun x => x -> _) _
 intros fc fp bc b2 bp l pi.
 eapply stronger_pfrag in pi.
 - eapply mix2_to_ll in pi; [ | eassumption ].
-  assert (pcut P' = true) as fc' by (rewrite HeqP'; cbn; assumption).
-  apply (stronger_pfrag _ P') in pi.
-  + rewrite <- (app_nil_l l). apply (@cut_r _ _ fc' (oc (parr one one)) _ _ pi).
+  assert (full_cut P') as fc' by (rewrite HeqP'; cbn; intro; apply fc).
+  eapply stronger_pfrag in pi.
+  + rewrite <- (app_nil_l l). apply (cut_r (oc (parr one one)) (fc' _) pi).
     change nil with (map (@wn atom) nil). apply oc_r. cbn.
     apply parr_r.
     assert ({ b | one :: one :: nil = projT2 (pgax P') b }) as [b ->]
@@ -665,7 +673,7 @@ eapply stronger_pfrag in pi.
   + rewrite fp. apply BoolOrder.le_true.
 Qed.
 
-Lemma ll_one_one_to_ll_tens_parr_one_one_cut P : (pcut P = true) ->
+Lemma ll_one_one_to_ll_tens_parr_one_one_cut P : full_cut P ->
   ll P (parr one one :: parr bot bot :: nil) -> ll P (one :: one :: nil).
 Proof.
 intros Hcut pi.
@@ -678,8 +686,7 @@ assert (ll P (dual (parr (parr one one) (parr bot bot)) :: one :: one :: nil)) a
   - rewrite <- (app_nil_l (one :: nil)), (app_comm_cons _ _ one).
     apply tens_r; change one with (dual (@bot atom)); apply ax_exp. }
 rewrite <- (app_nil_l _).
-eapply cut_r; [ assumption | apply pi' | ].
-apply parr_r, pi.
+eapply cut_r; [ apply Hcut | apply pi' | apply parr_r, pi ].
 Qed.
 
 Lemma ll_tens_parr_one_one_to_ll_tens_parr P l :
@@ -818,15 +825,15 @@ Qed.
 (** ** Linear logic with both mix0 and mix2: [ll_mix02] (no axiom, commutative) *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mix02 := @mk_pfrag atom  false NoAxioms pmix02 true.
-(*                                  atoms cut   axioms   mix    perm  *)
+Definition pfrag_mix02 := @mk_pfrag atom  pcut_none NoAxioms pmix02 true.
+(*                                  atoms cut       axioms   mix    perm  *)
 
 Definition ll_mix02 := ll pfrag_mix02.
 
 Lemma cut_mix02_r A l1 l2 : ll_mix02 (dual A :: l1) -> ll_mix02 (A :: l2) -> ll_mix02 (l2 ++ l1).
 Proof. intros pi1 pi2. eapply cut_r_axfree; try eassumption. intros []. Qed.
 
-Lemma cut_mix02_admissible l : ll (cutupd_pfrag pfrag_mix02 true) l -> ll_mix02 l.
+Lemma cut_mix02_admissible l : ll (cutupd_pfrag pfrag_mix02 pcut_all) l -> ll_mix02 l.
 Proof.
 intros pi; induction pi using ll_nested_ind;
   try (now constructor); try (econstructor; eassumption).
@@ -849,7 +856,7 @@ intros pi.
 eapply (ext_wn_param fp (tens (wn one) (wn one) :: nil)) in pi.
 - eapply ex_r; [ eassumption | ].
   symmetry. apply PCPermutation_Type_cons_append.
-- intros Hcut. assumption.
+- now intros Hcut.
 - cbn. intros a.
   eapply ex_r; [ | apply PCPermutation_Type_cons_append ].
   apply wk_r, gax_r.
@@ -893,7 +900,7 @@ eapply (ext_wn_param fp (tens (wn one) (wn one) :: nil)) in pi.
 Qed.
 
 Lemma ll_to_mix02_cut P l : ll P (wn (tens (wn one) (wn one)) :: l) ->
-  ll (mk_pfrag true P.(pgax) (fun k => if (k =? 0) then true
+  ll (mk_pfrag pcut_all P.(pgax) (fun k => if (k =? 0) then true
                                  else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
 Proof.
 intros pi.
@@ -919,9 +926,9 @@ eapply stronger_pfrag in pi.
     apply mix_r; [ reflexivity | ].
     apply Forall_inf_nil.
 - repeat split.
-  + apply BoolOrder.le_true.
-  + intros a. exists a. reflexivity.
-  + intros n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
+  + intros A; destruct (pcut P A); reflexivity.
+  + intros a; exists a; reflexivity.
+  + intros n; repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
   + reflexivity.
 Qed.
 
@@ -943,7 +950,7 @@ eapply (@ext_wn_param _ _ _ fp _ (one :: tens (wn one) bot :: nil)) in pi.
   etransitivity; [ apply Permutation_Type_cons_append | ].
   cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
   apply Permutation_Type_cons_append.
-- exact id.
+- now intros Hcut.
 - cbn. intros a.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
   apply wk_r, wk_r, gax_r.
@@ -982,7 +989,7 @@ Qed.
 (** Provability in [ll_mix02] is equivalent to provability of [ll]
 extended with the provability of both [bot :: bot :: nil] and [one :: one :: nil] *)
 
-Lemma mix02_to_ll_one_eq_bot P (fc : pcut P = true) (fp : pperm P = true) bc b0 b2 bp l :
+Lemma mix02_to_ll_one_eq_bot P (fc : full_cut P) (fp : pperm P = true) bc b0 b2 bp l :
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 0) then b0 else (if (k =? 2) then b2 else P.(pmix) k)) bp) l ->
   ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
@@ -1000,27 +1007,27 @@ remember (axupd_pfrag P (existT (fun x => x -> _) _
 intros pi.
 eapply stronger_pfrag in pi.
 - eapply mix02_to_ll in pi; [ | eassumption ].
-  assert (pcut P' = true) as fc' by (rewrite HeqP'; cbn; assumption).
+  assert (full_cut P') as fc' by (rewrite HeqP'; cbn; apply fc).
   apply (stronger_pfrag _ P') in pi.
-  + rewrite <- (app_nil_l l). apply (@cut_r _ _ fc' (oc (parr (oc bot) (oc bot))) _ _ pi).
+  + rewrite <- (app_nil_l l). apply (cut_r (oc (parr (oc bot) (oc bot))) (fc' _) pi).
     change nil with (map (@wn atom) nil). apply oc_r.
     apply parr_r.
     change (oc bot :: oc bot :: map wn nil)
       with ((@oc atom bot :: nil) ++ oc bot :: map wn nil).
-    apply (@cut_r _ _ fc' one).
+    apply (cut_r one (fc' _)).
     * apply bot_r, oc_r.
       change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
-      apply (@cut_r _ _ fc' bot).
+      apply (cut_r bot (fc' _)).
       -- apply one_r.
       -- assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
            by (now rewrite HeqP'; exists (inr false)).
          apply gax_r.
     * change (one :: oc bot :: nil)
         with ((@one atom :: nil) ++ oc bot :: map wn nil).
-      apply (@cut_r _ _ fc' one).
+      apply (cut_r one (fc' _)).
       -- apply bot_r, oc_r.
          change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
-         apply (@cut_r _ _ fc' bot).
+         apply (cut_r bot (fc' _)).
          ++ apply one_r.
          ++ assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
               by (now rewrite HeqP'; exists (inr false)).
@@ -1073,29 +1080,24 @@ apply (stronger_pfrag _
   + intros n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
 Qed.
 
-(* Hgax_cut is here only to allow the use of cut_admissible
-   the more general result without Hgax_cut should be provable by induction *)
-Lemma ll_to_mix02'_axcut P :
-    (forall a, Forall_inf atomic (projT2 (pgax P) a)) ->
-    (forall a b x l1 l2 l3 l4,
-       projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-       { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-    pperm P = true ->
-  forall l, ll P (wn one :: wn (tens bot bot) :: l) ->
-  ll (mk_pfrag true P.(pgax) (fun k => if (k =? 0) then true
-                                 else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
+(* Hcut is here only to allow the use of cut_admissible
+   the more general result without Hcut should be provable by induction *)
+Lemma ll_to_mix02'_axcut P (Hgax_at : atomic_ax P) (Hcut : cut_closed P) (Hperm : pperm P = true) l :
+  ll P (wn one :: wn (tens bot bot) :: l) ->
+  ll (mk_pfrag pcut_all P.(pgax) (fun k => if (k =? 0) then true
+                                     else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
 Proof.
-intros Hgax_at Hgax_cut Hperm l pi.
+intros pi.
 apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag
-                                                 (pmixupd_point_pfrag P 0 true) 2 true) true))).
+                                                 (pmixupd_point_pfrag P 0 true) 2 true) pcut_all))).
 { repeat split.
-  - intros a; exists a; reflexivity.
-  - intros n; repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
+  - intros a. exists a. reflexivity.
+  - intros n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
   - reflexivity. }
 eapply cut_admissible; try eassumption.
 eapply stronger_pfrag in pi.
 - rewrite <- (app_nil_r l).
-  refine (@cut_r _ _ _ (wn (tens bot bot)) _ _ _ _); [ reflexivity | | ]; cbn.
+  refine (cut_r (wn (tens bot bot)) _ _ _); [ reflexivity | | ]; cbn.
   + change nil with (map (@wn atom) nil).
     apply oc_r, parr_r.
     change (one :: one :: map wn nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
@@ -1117,25 +1119,20 @@ eapply stronger_pfrag in pi.
   + reflexivity.
 Qed.
 
-(* Hgax_cut is here only to allow the use of cut_admissible
-   the more general result without Hgax_cut should be provable by induction *)
-Lemma ll_to_mix02''_axcut P :
-    (forall a, Forall_inf atomic (projT2 (pgax P) a)) ->
-    (forall a b x l1 l2 l3 l4,
-       projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-       { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-    pperm P = true ->
-  forall l, ll P (wn one :: wn (tens (wn one) bot) :: l) ->
+(* Hcut is here only to allow the use of cut_admissible
+   the more general result without Hcut should be provable by induction *)
+Lemma ll_to_mix02''_axcut P (Hgax_at : atomic_ax P) (Hcut : cut_closed P) (Hperm : pperm P = true) l :
+  ll P (wn one :: wn (tens (wn one) bot) :: l) ->
   ll (pmixupd_point_pfrag (pmixupd_point_pfrag P 0 true) 2 true) l.
 Proof.
-intros Hgax_at Hgax_cut Hperm l pi.
+intros pi.
 apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag
-                                                 (pmixupd_point_pfrag P 0 true) 2 true) true)));
+                                                 (pmixupd_point_pfrag P 0 true) 2 true) pcut_all)));
   [ repeat split; try (intros a; exists a); reflexivity | ].
 eapply cut_admissible; try eassumption.
 eapply stronger_pfrag in pi.
 - rewrite <- (app_nil_r l).
-  refine (@cut_r _ _ _ (wn (tens (wn one) bot)) _ _ _ _); [ reflexivity | | ]; cbn.
+  refine (cut_r (wn (tens (wn one) bot)) _ _ _); [ reflexivity | | ]; cbn.
   + change nil with (map (@wn atom) nil).
     apply oc_r, parr_r.
     change (one :: oc bot :: map wn nil)
@@ -1163,27 +1160,23 @@ eapply stronger_pfrag in pi.
 Qed.
 
 
-(* Hgax_cut is here only to allow the use of cut_admissible
-   the more general result without Hgax_cut should be provable by induction *)
-Lemma ll_to_mix02'''_axcut P : (forall a, Forall_inf atomic (projT2 (pgax P) a)) ->
-  (forall a b x l1 l2 l3 l4,
-     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-  pperm P = true -> forall l n,
+(* Hcut is here only to allow the use of cut_admissible
+   the more general result without Hcut should be provable by induction *)
+Lemma ll_to_mix02'''_axcut P (Hgax_at : atomic_ax P) (Hcut : cut_closed P) (Hperm : pperm P = true) l n :
   ll P (wn one :: repeat (wn (tens (wn one) bot)) n ++ l)  ->
   ll (pmixupd_point_pfrag (pmixupd_point_pfrag P 0 true) 2 true) l.
 Proof.
-intros Hgax_at Hgax_cut fp l n pi.
+intros pi.
 apply ll_to_mix02''_axcut; try assumption.
 induction n as [|n IHn ] in l, pi |- *; cons2app.
-- eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
+- eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ].
   cbn. apply wk_r.
-  eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ]; assumption.
-- eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
+  eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ]; assumption.
+- eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ].
   cbn. apply co_r. rewrite 2 app_comm_cons.
-  eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
+  eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ].
   list_simpl. apply IHn.
-  list_simpl in pi. eapply ex_r; [ apply pi | rewrite fp; cbn ].
+  list_simpl in pi. eapply ex_r; [ apply pi | rewrite Hperm; cbn ].
   apply Permutation_Type_cons, Permutation_Type_middle. reflexivity.
 Qed.
 
@@ -1193,11 +1186,11 @@ Qed.
 
 (** cut / axioms / mix / permutation *)
 Definition pfrag_llR R :=
-  mk_pfrag true (existT (fun x => x -> list formula) _
-                        (fun a => match a with
-                                  | true => dual R :: nil
-                                  | false => R :: one :: nil
-                                  end))
+  mk_pfrag pcut_all (existT (fun x => x -> list formula) _
+                            (fun a => match a with
+                                      | true => dual R :: nil
+                                      | false => R :: one :: nil
+                                      end))
              pmix_none true.
 (*         cut  axioms  mix  perm  *)
 
@@ -1209,13 +1202,13 @@ Proof.
 intros HR1 HR2 l Hll. induction Hll; try (now constructor); try (econstructor; eassumption).
 destruct a.
 - rewrite <- (app_nil_l _).
-  apply (@cut_r _ (pfrag_llR R2) eq_refl (dual R2)).
+  apply (@cut_r _ (pfrag_llR R2) (dual R2) eq_refl).
   + rewrite bidual.
     eapply ex_r, PCPermutation_Type_swap.
     apply HR1.
  + assert ({ b | dual R2 :: nil = projT2 (pgax (pfrag_llR R2)) b }) as [b ->] by now exists true.
    apply gax_r.
-- eapply (@cut_r _ (pfrag_llR R2) eq_refl R2) in HR2.
+- eapply (@cut_r _ (pfrag_llR R2) R2 eq_refl) in HR2.
   + eapply ex_r; [ apply HR2 | ].
     symmetry. apply Permutation_Type_cons_app. rewrite app_nil_r. reflexivity.
   + assert ({ b | R2 :: one :: nil = projT2 (pgax (pfrag_llR R2)) b }) as [b ->] by now exists false.
@@ -1237,6 +1230,7 @@ repeat split.
 intros [|]; cbn.
 - rewrite subs_dual. exists true. reflexivity.
 - exists false. reflexivity.
+- reflexivity.
 Qed.
 
 Lemma llR_to_ll R l : llR R l-> ll_ll (l ++ wn R :: wn (tens (dual R) bot) :: nil).
@@ -1249,7 +1243,7 @@ replace (wn R :: wn (tens (dual R) bot) :: nil)
 apply deduction_list; try reflexivity.
 eapply ax_gen ; [ | | | | apply pi ]; try reflexivity.
 intros [|]; cbn.
-- assert ({ b | dual R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll true)
+- assert ({ b | dual R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll pcut_all)
     (existT (fun x => x -> list formula) (sum _ {k : nat | k < 2})
             (fun a => match a with
                       | inl x => Empty_fun x
@@ -1263,9 +1257,9 @@ intros [|]; cbn.
     as [b ->] by (now exists (inr (exist _ 0 (le_n_S _ _ (le_S _ _ (le_n 0)))))).
   apply gax_r.
 - rewrite <- (app_nil_r nil), ! app_comm_cons.
-  refine (@cut_r _ _ _ (dual (parr one R)) _ _ _ _); [ reflexivity | | ].
+  refine (cut_r (dual (parr one R)) _ _ _); [ reflexivity | | ].
   + rewrite bidual.
-    assert ({ b | parr one R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll true)
+    assert ({ b | parr one R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll pcut_all)
       (existT (fun x => x -> list formula) (sum _ {k : nat | k < 2})
               (fun a => match a with
                         | inl x => Empty_fun x
@@ -1311,9 +1305,9 @@ Lemma ll_wn_wn_to_llR R l : ll_ll (l ++ wn R :: wn (tens (dual R) bot) :: nil) -
 Proof.
 intros pi%(ll_to_llR R).
 rewrite <- (app_nil_l l).
-refine (@cut_r _ _ _ (oc (dual R)) _ _ _ _); [ reflexivity | | ].
+refine (cut_r (oc (dual R)) _ _ _); [ reflexivity | | ].
 - rewrite <- (app_nil_l (dual _ :: l)).
-  refine (@cut_r _ _ _ (oc (parr one R)) _ _ _ _); [ reflexivity | | ].
+  refine (cut_r (oc (parr one R)) _ _ _); [ reflexivity | | ].
   + cbn. rewrite bidual; eapply ex_r; [apply pi | ].
     symmetry. etransitivity; [ apply Permutation_Type_cons_append | ].
     cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.

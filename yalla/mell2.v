@@ -95,8 +95,8 @@ Proof. intros l1 ? ? ?; apply ex_r with l1; assumption. Qed.
 (** ** 4. characterize corresponding [ll] fragment *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := @ll_def.mk_pfrag atom  false ll_def.NoAxioms ll_def.pmix2 true.
-(*                                        atoms cut   axioms          mix          perm  *)
+Definition pfrag_mell := @ll_def.mk_pfrag atom  ll_def.pcut_none ll_def.NoAxioms ll_def.pmix2 true.
+(*                                        atoms cut              axioms          mix          perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)

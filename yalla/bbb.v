@@ -327,7 +327,7 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
             ** intros a. exists a. reflexivity.
             ** intro nn. repeat (destruct nn; try reflexivity; try now constructor).
          ++ intros [].
-         ++ intros [].
+         ++ intros _ [].
          ++ eapply ex_r in pi1'; [ | apply Permutation_Type_app_comm ]; eassumption.
     * symmetry in Heq2. apply repeat_eq_app in Heq2 as [_ Heq2]; discriminate Heq2.
 - assert (HP' := HP).
@@ -510,11 +510,11 @@ Qed.
 Lemma mix2_bb_r l1 l2 : llR (oc bot) l1 -> llR (oc bot) l2 -> llR (oc bot) (l2 ++ l1).
 Proof.
 intros pi1 pi2.
-assert (pcut (pfrag_llR (oc bot : formula)) = true) as Hcut by reflexivity.
-apply (@cut_r _ _ Hcut one).
+assert (forall C, pcut (pfrag_llR (oc bot : formula)) C = true) as Hcut by reflexivity.
+apply (cut_r one (Hcut _)).
 - apply bot_r. assumption.
 - cons2app.
-  apply (@cut_r _ _ Hcut (oc bot)).
+  apply (cut_r (oc bot) (Hcut _)).
   + apply wk_r. assumption.
   + apply (@gax_r _ (pfrag_llR (oc bot)) false).
 Qed.
@@ -611,8 +611,9 @@ Proof.
 assert (Hax := @gax_r _ (@pfrag_llR atom (oc bot)) false); cbn in Hax.
 assert (llR (oc bot) ((one :: nil) ++ one :: nil))
   as Hr by (eapply mix2_bb_r ; apply one_r).
-eapply (@cut_r _ (pfrag_llR _) eq_refl) in Hax.
+eapply (@cut_r _ (pfrag_llR _)) in Hax.
 - apply Hax.
+- reflexivity.
 - eapply ex_r; [ | apply Permutation_Type_swap ].
   cbn. change (wn one :: nil) with (map (@wn atom) (one :: nil)).
   apply oc_r.

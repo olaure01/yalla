@@ -22,8 +22,8 @@ Lemma nll2ll_map_wn : forall l,
   map nll2ll (map wn l) = map formulas.wn (map nll2ll l).
 Proof. now induction l; [| cbn; rewrite IHl]. Qed.
 
-Definition pfrag_ll := @mk_pfrag nat_dectype false NoAxioms pmix_none true.
-(*                               atoms       cut   axioms   mix       perm  *)
+Definition pfrag_ll := @mk_pfrag nat_dectype pcut_none NoAxioms pmix_none true.
+(*                               atoms       cut       axioms   mix       perm  *)
 
 Theorem nll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map nll2ll l).
 Proof.

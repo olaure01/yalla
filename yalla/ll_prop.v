@@ -110,7 +110,7 @@ Qed.
 Definition fragment FS := forall A : formula, FS A -> forall B, subform B A -> FS B.
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
-Lemma conservativity P (P_cutfree : pcut P = false) FS (Hfrag : fragment FS) l (pi : ll P l) :
+Lemma conservativity P (P_cutfree : no_cut P) FS (Hfrag : fragment FS) l (pi : ll P l) :
   Forall_inf FS l -> Forall_formula FS pi.
 Proof.
 induction pi using ll_nested_ind; cbn; intros HFS; try split; try now (inversion HFS; auto);
@@ -141,7 +141,7 @@ Qed.
 
 (** Cut-free subformula property:
 cut-free proofs only use subformulas of the conclusion. *)
-Proposition subformula_cutfree P (P_cutfree : pcut P = false) l (pi : ll P l) :
+Proposition subformula_cutfree P (P_cutfree : no_cut P) l (pi : ll P l) :
   Forall_formula (fun x => Exists (subform x) l) pi.
 Proof.
 apply (conservativity P_cutfree).
@@ -163,7 +163,7 @@ intros HFS.
 apply cut_admissible_axfree in pi; [ | assumption ].
 exists (stronger_pfrag _ _ (cutrm_pfrag_le P) _ pi).
 apply Forall_sequent_stronger_pfrag.
-apply conservativity; trivial.
+apply conservativity; [ apply nocut_cutrm | | ]; assumption.
 Qed.
 
 Variable P : @pfrag atom.
@@ -181,8 +181,7 @@ Qed.
 
 (** Subformula property:
 any provable sequent is provable by a proof containing only subformulas of this sequent. *)
-Proposition subformula l (pi : ll P l) :
-  { pi': ll P l & Forall_formula (fun x => Exists (subform x) l) pi' }.
+Proposition subformula l (pi : ll P l) : { pi': ll P l & Forall_formula (fun x => Exists (subform x) l) pi' }.
 Proof using P_axfree.
 refine (conservativity_axfree P_axfree _ pi _).
 - intros A Hf B Hs.
@@ -199,7 +198,7 @@ Qed.
 (** ** Deduction Theorem *)
 
 Variable P_perm : pperm P = true.
-Variable P_cut : pcut P = true.
+Variable P_cut : full_cut P.
 
 (** Deduction lemma for linear logic. *)
 Lemma deduction_list lax l :
@@ -259,7 +258,7 @@ induction lax as [|A lax IHlax] in l |- *; intros pi.
   cbn. intros a. exists (inl a). reflexivity.
 - list_simpl in pi. cons2app in pi. rewrite app_assoc in pi.
   apply IHlax in pi.
-  rewrite <- (app_nil_r l). refine (cut_r (wn (dual A)) _ _); [ assumption | | ].
+  rewrite <- (app_nil_r l). refine (cut_r (wn (dual A)) _ _ _); [ cbn; apply P_cut | | ].
   + cbn. rewrite bidual.
     change nil with (map (@wn atom) nil).
     apply oc_r. cbn.

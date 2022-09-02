@@ -150,8 +150,8 @@ Qed.
 *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := @ll_def.mk_pfrag atom  false ll_def.NoAxioms (fun n => false) true.
-(*                                        atoms cut   axioms                           perm  *)
+Definition pfrag_mell := @ll_def.mk_pfrag atom  ll_def.pcut_none ll_def.NoAxioms (fun n => false) true.
+(*                                        atoms cut              axioms                           perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)

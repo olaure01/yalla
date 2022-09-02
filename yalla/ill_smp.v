@@ -103,8 +103,8 @@ Proof. intros l1 l2 HP pi; eapply ex_ir; eassumption. Qed.
 
 (** ** 4. characterize corresponding [ill] fragment *)
 
-Definition ipfrag_ill := @ill_def.mk_ipfrag preiatom false ill_def.NoIAxioms true.
-(*                                          atoms    cut           axioms    perm  *)
+Definition ipfrag_ill := @ill_def.mk_ipfrag preiatom ill_def.ipcut_none ill_def.NoIAxioms true.
+(*                                          atoms    cut                axioms    perm  *)
 Definition ill_ll := ill_def.ill ipfrag_ill.
 
 (** ** 5. prove equivalence of proof predicates *)

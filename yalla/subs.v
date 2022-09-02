@@ -63,12 +63,13 @@ Qed.
 (** Substitution in proofs *)
 
 Lemma subs_ll P A x l :
+  (forall C, pcut P C = true -> pcut P (subs A x C) = true) ->
   ll P l ->
     ll (axupd_pfrag P (existT (fun x => x -> list formula) _
                             (fun a => map (subs A x) (projT2 (pgax P) a))))
        (map (subs A x) l).
 Proof.
-intros pi.
+intros Hcut pi.
 assert (forall l, map (subs A x) (map wn l) = map wn (map (subs A x) l)) as Hmapwn
   by (clear; induction l; [ | cbn; rewrite IHl ]; reflexivity).
 induction pi using ll_nested_ind; list_simpl; try (now constructor).
@@ -90,16 +91,17 @@ induction pi using ll_nested_ind; list_simpl; try (now constructor).
   rewrite Hmapwn.
   apply oc_r.
   rewrite <- Hmapwn; assumption.
-- refine (cut_r (subs A x A0) _ _); [ | rewrite <- subs_dual | ]; assumption.
+- refine (cut_r (subs A x A0) _ _ _); [ cbn; apply Hcut | rewrite <- subs_dual | ]; assumption.
 - apply (@gax_r _ (axupd_pfrag P (existT (fun x => x -> list formula) _
                                (fun a => map (subs A x) (projT2 (pgax P) a)))) a).
 Qed.
 
 Lemma subs_ll_axfree P : (projT1 (pgax P) -> False) -> forall A x l,
+  (forall C, pcut P C = true -> pcut P (subs A x C) = true) ->
   ll P l -> ll P (map (subs A x) l).
 Proof.
-intros P_axfree A x l pi.
-apply (subs_ll A x) in pi.
+intros P_axfree A x l Hcut pi.
+apply (subs_ll A x) in pi; [ | assumption ].
 eapply stronger_pfrag; [ | eassumption ].
 repeat split; try reflexivity.
 cbn; intros a.

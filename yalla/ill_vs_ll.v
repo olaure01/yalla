@@ -10,17 +10,16 @@ From Yalla Require Export ill_prop.
 
 Set Implicit Arguments.
 
-
 Section Atoms.
 
-Context { atom : InfDecType }.
-Context { preiatom : DecType }.
-Context { Atoms : IAtom2AtomType atom preiatom }.
+Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_fin atom preiatom }.
 
 Notation iatom := (option preiatom).
 Notation formula := (@formula atom).
 Notation iformula := (@iformula preiatom).
-Notation i2a := IAtom2Atom.
+Notation i2a := IAtom2Atom_fin_base.
+Notation i2a_inv := IAtom2Atom_fin.
+
 
 (** ** Characterization of [ill] as a fragment of [ll] *)
 
@@ -43,7 +42,7 @@ match A with
 end.
 
 Lemma ill2ll_map_ioc l : map dual (map ill2ll (map ioc l)) = map wn (map dual (map ill2ll l)).
-Proof. induction l as [ | a l IHl ]; [ | list_simpl; rewrite IHl ]; reflexivity. Qed.
+Proof. induction l as [ | a l IHl ]; [ | list_simpl; cbn in IHl; rewrite IHl ]; reflexivity. Qed.
 
 Lemma ill2ll_map_ioc_inv l1 l2 : map wn l1 = map dual (map ill2ll l2) ->
   { l2' | l2 = map ioc l2' & l1 = map dual (map ill2ll l2') }.
@@ -55,18 +54,328 @@ induction l2 in l1 |- *; intros Heq; destruct l1; inversion Heq.
   exists (a :: l0); reflexivity.
 Qed.
 
+Lemma ill2ll_inv A : {'(l,lop) & forall B, iffT (A = ill2ll B) (In_inf B l)
+                               & forall B, iffT (A = dual (ill2ll B)) (In_inf B lop) }.
+Proof.
+destruct (i2a_inv (i2a atN)) as [lN HlN].
+induction A.
+- destruct (i2a_inv c) as [lc Hc].
+  exists (map ivar lc, nil); split; intros Himg.
+  + destruct B; inversion Himg as [Himg']. subst.
+    apply in_inf_map, Hc. reflexivity.
+  + apply in_inf_map_inv in Himg as [i Himg].
+    destruct B; inversion Himg as [Himg']. subst.
+    cbn. f_equal. apply Hc. assumption.
+  + destruct B; discriminate Himg.
+  + destruct Himg.
+- destruct (i2a_inv c) as [lc Hc].
+  exists (nil, map ivar lc); split; intros Himg.
+  + destruct B; discriminate Himg.
+  + destruct Himg.
+  + destruct B; inversion Himg as [Himg']. subst.
+    apply in_inf_map, Hc. reflexivity.
+  + apply in_inf_map_inv in Himg as [i Himg].
+    destruct B; inversion Himg as [Himg']. subst.
+    cbn. f_equal. apply Hc. assumption.
+- exists (ione :: nil, nil); intros B; split; intros Himg.
+  + destruct B; inversion Himg; left; reflexivity.
+  + destruct Himg as [<-|[]]; reflexivity.
+  + destruct B; inversion Himg; left; reflexivity.
+  + destruct Himg.
+- exists (nil, ione :: nil); intros B; split; intros Himg.
+  + destruct B; inversion Himg; left; reflexivity.
+  + destruct Himg.
+  + destruct B; inversion Himg; left; reflexivity.
+  + destruct Himg as [<-|[]]; reflexivity.
+- destruct IHA1 as [(l1, l1op) H1 H1op].
+  destruct IHA2 as [(l2, l2op) H2 H2op].
+  destruct (@eq_dt_dec formulas_dectype A1 (covar (i2a atN)));
+    destruct (@eq_dt_dec formulas_dectype A2 (covar (i2a atN))).
+  + subst; exists (nil, nil); intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]]; destruct B1; inversion Himg1.
+    * destruct Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- destruct B1; discriminate Himg1.
+      -- destruct B; discriminate Himg1.
+      -- destruct B1; discriminate Himg2.
+      -- destruct B; discriminate Himg1.
+    * destruct Himg.
+  + subst; exists (nil, map (fun '(x, y) => ilmap x (ivar y)) (list_prod l2 lN) ++ map ineg l2);
+      intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]]; destruct B1; discriminate Himg1.
+    * destruct Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- destruct B1; inversion Himg1.
+      -- contradiction.
+      -- subst; destruct B2; inversion Himg1 as [Hi].
+         apply HlN in Hi.
+         apply in_inf_or_app. left.
+         change (ilmap B1 (ivar i)) with ((fun '(x, y) => ilmap x (ivar y)) (B1, i)).
+         apply in_inf_map, in_inf_prod; [ apply H2, bidual | apply Hi ].
+      -- inversion Himg1 as [Hi]. rewrite bidual in Hi.
+         apply in_inf_or_app. right.
+         apply in_inf_map, H2, Hi.
+    * apply in_inf_app_or in Himg as [Himg|Himg].
+      -- apply in_inf_map_inv in Himg as [(B', i) <- [Hin Hi]%in_inf_prod_inv].
+         cbn. rewrite bidual. f_equal; [f_equal | ].
+         ++ apply HlN, Hi.
+         ++ apply H2, Hin.
+      -- apply in_inf_map_inv in Himg as [B' <- ->%H2].
+         simpl ill2ll. simpl dual. rewrite bidual. reflexivity.
+  + subst; exists (nil, map (fun '(x, y) => ilpam x (ivar y)) (list_prod l1 lN) ++ map igen l1);
+      intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]]; destruct B2; discriminate Himg2.
+    * destruct Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- subst; destruct B2; inversion Himg2 as [Hi].
+         apply HlN in Hi.
+         apply in_inf_or_app; left.
+         change (ilpam B1 (ivar i)) with ((fun '(x, y) => ilpam x (ivar y)) (B1, i)).
+         apply in_inf_map, in_inf_prod; [ apply H1, bidual | apply Hi ].
+      -- inversion Himg1 as [Hi]. rewrite bidual in Hi.
+         apply in_inf_or_app; right.
+         apply in_inf_map, H1, Hi.
+      -- destruct B1; discriminate Himg2.
+      -- destruct B; discriminate Himg2.
+    * apply in_inf_app_or in Himg as [Himg|Himg].
+      -- apply in_inf_map_inv in Himg as [(B', i) <- [Hin Hi]%in_inf_prod_inv].
+         cbn. rewrite bidual. f_equal; [ | f_equal ].
+         ++ apply H1, Hin.
+         ++ apply HlN, Hi.
+      -- apply in_inf_map_inv in Himg as [B' <- ->%H1].
+         simpl ill2ll. simpl dual. rewrite bidual. reflexivity.
+  + exists (map (fun '(x, y) => itens x y) (list_prod l1 l2),
+          map (fun '(x, y) => ilpam x y) (list_prod l1 l2op) ++
+          map (fun '(x, y) => ilmap x y) (list_prod l2 l1op));
+      intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      change (itens B1 B2) with ((fun '(x, y) => itens x y) (B1, B2)).
+      apply in_inf_map, in_inf_prod.
+      -- apply H1; assumption.
+      -- apply H2; assumption.
+    * apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+      cbn; f_equal.
+      -- apply H1; assumption.
+      -- apply H2; assumption.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- apply in_inf_or_app; left.
+         change (ilpam B1 B2) with ((fun '(x, y) => ilpam x y) (B1, B2)).
+         apply in_inf_map, in_inf_prod.
+         ++ apply H1; rewrite <- (bidual (ill2ll B1)); assumption.
+         ++ apply H2op; assumption.
+      -- contradiction.
+      -- apply in_inf_or_app; right.
+         change (ilmap B1 B2) with ((fun '(x, y) => ilmap x y) (B1, B2)).
+         apply in_inf_map, in_inf_prod.
+         ++ apply H2. rewrite <- (bidual (ill2ll B1)). assumption.
+         ++ apply H1op. assumption.
+      -- contradiction.
+    * apply in_inf_app_or in Himg as [Hin|Hin].
+      -- apply in_inf_map_inv in Hin as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+         cbn. f_equal.
+         ++ rewrite bidual. apply H1. assumption.
+         ++ apply H2op. assumption.
+      -- apply in_inf_map_inv in Hin as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+         cbn. f_equal.
+         ++ apply H1op; assumption.
+         ++ rewrite bidual; apply H2; assumption.
+- destruct IHA1 as [(l1, l1op) H1 H1op].
+  destruct IHA2 as [(l2, l2op) H2 H2op].
+  destruct (@eq_dt_dec formulas_dectype A1 (var (i2a atN)));
+    destruct (@eq_dt_dec formulas_dectype A2 (var (i2a atN))).
+  + subst. exists (nil, nil); intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- destruct B1; discriminate Himg2.
+      -- destruct B; discriminate Himg1.
+      -- destruct B1; discriminate Himg1.
+      -- destruct B; discriminate Himg1.
+    * destruct Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]]. destruct B1; discriminate Himg2.
+    * destruct Himg.
+  + subst. exists (map (fun '(x, y) => ilpam x (ivar y)) (list_prod l2op lN) ++ map igen l2op, nil);
+      intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- subst; destruct B2; inversion Himg1 as [Hi].
+         apply HlN in Hi.
+         apply in_inf_or_app; left.
+         change (ilpam B1 (ivar i)) with ((fun '(x, y) => ilpam x (ivar y)) (B1, i)).
+         apply in_inf_map, in_inf_prod; [ apply H2op; reflexivity | apply Hi ].
+      -- inversion Himg1 as [Hi].
+         apply in_inf_or_app; right.
+         apply in_inf_map, H2op, Hi.
+      -- destruct B1; discriminate Himg1.
+      -- contradiction n.
+    * apply in_inf_app_or in Himg as [Himg|Himg].
+      -- apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin Hi]%in_inf_prod_inv].
+         cbn. f_equal; [ f_equal | ].
+         ++ apply HlN, Hi.
+         ++ apply H2op, Hin.
+      -- apply in_inf_map_inv in Himg as [B' <- ->%H2op].
+         reflexivity.
+    * destruct B; inversion Himg as [[Himg1 Himg2]]. destruct B2; discriminate Himg1.
+    * destruct Himg.
+  + subst. exists (map (fun '(x, y) => ilmap x (ivar y)) (list_prod l1op lN) ++ map ineg l1op, nil);
+      intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- destruct B1; discriminate Himg2.
+      -- destruct B; discriminate Himg2.
+      -- subst. destruct B2; inversion Himg2 as [Hi].
+         apply HlN in Hi.
+         apply in_inf_or_app; left.
+         change (ilmap B1 (ivar i)) with ((fun '(x, y) => ilmap x (ivar y)) (B1, i)).
+         apply in_inf_map, in_inf_prod; [ apply H1op; reflexivity | apply Hi ].
+      -- inversion Himg1 as [Hi].
+         apply in_inf_or_app; right.
+         apply in_inf_map, H1op, Hi.
+    * apply in_inf_app_or in Himg as [Himg|Himg].
+      -- apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin Hi]%in_inf_prod_inv].
+         cbn. f_equal; [ | f_equal ].
+         ++ apply H1op, Hin.
+         ++ apply HlN, Hi.
+      -- apply in_inf_map_inv in Himg as [B' <- ->%H1op].
+         reflexivity.
+    * destruct B; inversion Himg as [[Himg1 Himg2]]. destruct B1; discriminate Himg2.
+    * destruct Himg.
+  + exists (map (fun '(x, y) => ilpam x y) (list_prod l2op l1) ++
+            map (fun '(x, y) => ilmap x y) (list_prod l1op l2),
+            map (fun '(x, y) => itens x y) (list_prod l2op l1op));
+      intros B; split; intros Himg.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      -- apply in_inf_or_app; left.
+         change (ilpam B1 B2) with ((fun '(x, y) => ilpam x y) (B1, B2)).
+         apply in_inf_map, in_inf_prod.
+         ++ apply H2op. assumption.
+         ++ apply H1. assumption.
+      -- contradiction n.
+      -- apply in_inf_or_app; right.
+         change (ilmap B1 B2) with ((fun '(x, y) => ilmap x y) (B1, B2)).
+         apply in_inf_map, in_inf_prod.
+         ++ apply H1op. assumption.
+         ++ apply H2. assumption.
+      -- contradiction n0.
+    * apply in_inf_app_or in Himg as [Hin|Hin].
+      -- apply in_inf_map_inv in Hin as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+         cbn. f_equal.
+         ++ apply H1. assumption.
+         ++ apply H2op. assumption.
+      -- apply in_inf_map_inv in Hin as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+         cbn. f_equal.
+         ++ apply H1op. assumption.
+         ++ apply H2. assumption.
+    * destruct B; inversion Himg as [[Himg1 Himg2]].
+      change (itens B1 B2) with ((fun '(x, y) => itens x y) (B1, B2)).
+      apply in_inf_map, in_inf_prod.
+      -- apply H2op. assumption.
+      -- apply H1op. assumption.
+    * apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+      cbn. f_equal.
+      -- apply H1op. assumption.
+      -- apply H2op. assumption.
+- exists (izero :: nil, itop :: nil); intros B; split; intros Himg.
+  + destruct B; inversion Himg; left; reflexivity.
+  + destruct Himg as [<-|[]]; reflexivity.
+  + destruct B; inversion Himg; left; reflexivity.
+  + destruct Himg as [<-|[]]; reflexivity.
+- exists (itop :: nil, izero :: nil); intros B; split; intros Himg.
+  + destruct B; inversion Himg. left. reflexivity.
+  + destruct Himg as [<-|[]]. reflexivity.
+  + destruct B; inversion Himg. left. reflexivity.
+  + destruct Himg as [<-|[]]. reflexivity.
+- destruct IHA1 as [(l1, l1op) H1 H1op].
+  destruct IHA2 as [(l2, l2op) H2 H2op].
+  exists (map (fun '(x, y) => iplus x y) (list_prod l1 l2),
+          map (fun '(x, y) => iwith x y) (list_prod l1op l2op));
+    intros B; split; intros Himg.
+  + destruct B; inversion Himg as [[Himg1 Himg2]].
+    change (iplus B1 B2) with ((fun '(x, y) => iplus x y) (B1, B2)).
+    apply in_inf_map, in_inf_prod.
+    * apply H1; assumption.
+    * apply H2; assumption.
+  + apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+    cbn; f_equal.
+    * apply H1; assumption.
+    * apply H2; assumption.
+  + destruct B; inversion Himg as [[Himg1 Himg2]].
+    change (iwith B1 B2) with ((fun '(x, y) => iwith x y) (B1, B2)).
+    apply in_inf_map, in_inf_prod.
+    * apply H1op; assumption.
+    * apply H2op; assumption.
+  + apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+    cbn; f_equal.
+    * apply H1op; assumption.
+    * apply H2op; assumption.
+- destruct IHA1 as [(l1, l1op) H1 H1op].
+  destruct IHA2 as [(l2, l2op) H2 H2op].
+  exists (map (fun '(x, y) => iwith x y) (list_prod l1 l2),
+          map (fun '(x, y) => iplus x y) (list_prod l1op l2op));
+    intros B; split; intros Himg.
+  + destruct B; inversion Himg as [[Himg1 Himg2]].
+    change (iwith B1 B2) with ((fun '(x, y) => iwith x y) (B1, B2)).
+    apply in_inf_map, in_inf_prod.
+    * apply H1; assumption.
+    * apply H2; assumption.
+  + apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+    cbn; f_equal.
+    * apply H1; assumption.
+    * apply H2; assumption.
+  + destruct B; inversion Himg as [[Himg1 Himg2]].
+    change (iplus B1 B2) with ((fun '(x, y) => iplus x y) (B1, B2)).
+    apply in_inf_map, in_inf_prod.
+    * apply H1op; assumption.
+    * apply H2op; assumption.
+  + apply in_inf_map_inv in Himg as [(B1, B2) <- [Hin1 Hin2]%in_inf_prod_inv].
+    cbn; f_equal.
+    * apply H1op; assumption.
+    * apply H2op; assumption.
+- destruct IHA as [(l1, l1op) H1 H1op].
+  exists (map ioc l1, nil); intros B; split; intros Himg.
+  + destruct B; inversion Himg as [Himg1].
+    apply in_inf_map, H1. assumption.
+  + apply in_inf_map_inv in Himg as [B1 <- Hin].
+    cbn. f_equal.
+    apply H1. assumption.
+  + destruct B; discriminate Himg.
+  + destruct Himg.
+- destruct IHA as [(l1, l1op) H1 H1op].
+  exists (nil, map ioc l1op); intros B; split; intros Himg.
+  + destruct B; discriminate Himg.
+  + destruct Himg.
+  + destruct B; inversion Himg as [Himg1].
+    apply in_inf_map, H1op. assumption.
+  + apply in_inf_map_inv in Himg as [B1 <- Hin].
+    cbn. f_equal.
+    apply H1op. assumption.
+Defined.
+
+Lemma ill2ll_not_inj : ill2ll (ilmap itop itop) = ill2ll (ilpam izero izero).
+Proof. reflexivity. Qed.
+
+Lemma ill2ll_dec A : {B | A = ill2ll B} + (forall B, A <> ill2ll B).
+Proof.
+destruct (ill2ll_inv A) as [(l, _) H _].
+destruct l as [|B l].
+- right. intros B HB.
+  destruct (fst (H B) HB).
+- left. exists B.
+  apply H. left. reflexivity.
+Qed.
+
 
 (** Translation of proof fragments *)
 Definition i2pfrag P := {|
-  pcut := ipcut P;
+  pcut := fun A => existsb (ipcut P) (fst (projT1 (sigT_of_sigT2 (ill2ll_inv A))));
   pgax := existT (fun x => x -> _) _
           (fun a => ill2ll (snd (projT2 (ipgax P) a))
                     :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a)))));
   pmix := pmix_none;
   pperm := ipperm P |}.
 
-Lemma cutrm_i2pfrag P : cutrm_pfrag (i2pfrag P) = i2pfrag (cutrm_ipfrag P).
-Proof. reflexivity. Qed.
+Lemma cutrm_i2pfrag P : le_pfrag (cutrm_pfrag (i2pfrag P)) (i2pfrag (cutrm_ipfrag P)).
+Proof.
+repeat split.
+- intros a. exists a. reflexivity.
+- reflexivity.
+Qed.
 
 Proposition ill_to_ll P l C : ill P l C ->
   ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))).
@@ -195,14 +504,16 @@ intros Hill. induction Hill; list_simpl;
 - rewrite app_comm_cons.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- app_assoc.
-  assert (pcut (i2pfrag P) = true) as fc by (now cbn).
-  eapply (@cut_r _ _ fc); [ | eassumption ].
+  assert (pcut (i2pfrag P) (ill2ll A) = true) as fc.
+  { cbn. destruct (ill2ll_inv (ill2ll A)) as [(l, lop) Hl _]. cbn.
+    assert (Hin := fst (Hl A) eq_refl).
+    apply (exists_existsb_inf _ _ A); assumption. }
+  eapply (cut_r _ fc); [ | eassumption ].
   eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
-- replace (ill2ll (snd (projT2 (ipgax P) a))
-   :: map dual (map ill2ll (rev (fst (projT2 (ipgax P) a)))))
-  with (projT2 (pgax (i2pfrag P)) a) by (cbn; rewrite 2 map_rev; reflexivity).
+- enough (ll (i2pfrag P) (projT2 (pgax (i2pfrag P)) a)) as pi.
+  { cbn in pi. rewrite 2 map_rev. exact pi. }
   apply gax_r.
 Qed.
 
@@ -450,14 +761,16 @@ End Atoms.
 Section Conservativity_Atoms.
 
 (** Embedding of [IAtom] into [Atom] *)
-Context { atom : InfDecType }.
-Context { preiatom : DecType }.
-Context { Atoms : IAtom2AtomType_inj atom preiatom }.
 
+Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_retract atom preiatom }.
+
+(*
+Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_inj atom preiatom }.
+*)
 Notation formula := (@formula atom).
 Notation iformula := (@iformula preiatom).
-Notation i2a := IAtom2Atom.
-Notation i2a_inj := IAtom2Atom_inj.
+Notation i2a := IAtom2Atom_retract_base.
+Notation i2a_inj := (section_injective IAtom2Atom_retract).
 
 (** *** Comparisons between [ll] connectives and [ill] *)
 
@@ -466,11 +779,10 @@ Proof.
 cut (forall l2,
   ll_mix0 (dual (ill2ll A) :: nil) ->
   Permutation_Type (oc F :: ill2ll A :: nil) l2 -> ll_mix0 l2 -> False).
-{ intros H pi1 pi2 ; eapply H; try eassumption; reflexivity. }
-revert F; induction A; cbn; intros F l2 pi1 HP2 pi2.
-- remember (covar (i2a i) :: nil) as l1 ; revert Heql1 ;
-    clear - pi1 ; induction pi1 ; intros Heql1 ;
-    try (now inversion Heql1) ; subst.
+{ intros H pi1 pi2. eapply H; [ eassumption | reflexivity | eassumption ]. }
+revert F. induction A; cbn; intros F l2 pi1 HP2 pi2.
+- remember (covar (i2a i) :: nil) as l1. revert Heql1. clear - pi1.
+  induction pi1; intros Heql1; try (now inversion Heql1); subst.
   + symmetry in p; apply Permutation_Type_length_1_inv in p.
     apply IHpi1; assumption.
   + destruct l1 ; inversion Heql1 ; destruct lw' ; inversion H0.
@@ -494,12 +806,12 @@ revert F; induction A; cbn; intros F l2 pi1 HP2 pi2.
     destruct HP2; inversion e.
     destruct l; inversion H1.
 - rewrite <- (app_nil_l (parr _ _ :: _)) in pi1.
-  eapply parr_rev in pi1 ; [ | intros a; destruct a ].
-  list_simpl in pi1.
+  eapply parr_rev in pi1 ; [ | intros [] ].
+  rewrite app_nil_l in pi1.
   assert ((ll_mix0 (oc F :: ill2ll A1 :: nil) * ll_mix0 (ill2ll A2 :: nil))
         + (ll_mix0 (ill2ll A1 :: nil) * ll_mix0 (oc F :: ill2ll A2 :: nil)))
     as [[pi2' pi2''] | [pi2' pi2'']].
-  { revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
+  { revert HP2; clear - pi2; induction pi2; intros HP2 ;
       try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
       try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
     - apply IHpi2.
@@ -532,11 +844,14 @@ revert F; induction A; cbn; intros F l2 pi1 HP2 pi2.
   cons2app in HP2.
   assert (Heq2 := HP2).
   symmetry in Heq2; apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
-  eapply parr_rev in pi2; [ | intros a; destruct a ].
+  assert (ll_mix0 (l' ++ ill2ll A2 :: dual (ill2ll A1) :: l'')) as pi2'
+    by (apply parr_rev; [ intros [] | assumption ]).
   destruct pi1 as [pi1' pi1''].
   rewrite bidual in pi1'.
   eapply (@cut_mix0_r _ _ (l' ++ ill2ll A2 :: l'')) in pi1';
-    [ | eapply ex_r; [ apply pi2 | GPermutation_Type_solve ]].
+    [ | eapply ex_r; [ apply pi2' | ] ].
+  2:{ cbn. clear. symmetry. etransitivity; [ apply Permutation_Type_middle | ].
+      apply Permutation_Type_app_head, Permutation_Type_swap. }
   eapply IHA2.
   + assumption.
   + apply Permutation_Type_swap.
@@ -544,7 +859,7 @@ revert F; induction A; cbn; intros F l2 pi1 HP2 pi2.
     list_simpl in HP2; cons2app in HP2; apply Permutation_Type_app_inv in HP2.
     list_simpl; etransitivity; [ symmetry; apply Permutation_Type_middle | ].
     symmetry; apply Permutation_Type_cons, HP2; reflexivity.
-- eapply tens_rev in pi1 ; [ | intros a; destruct a | reflexivity ].
+- eapply tens_rev in pi1 ; [ | intros [] | reflexivity ].
   destruct pi1 as [_ pi1'].
   clear - pi1'.
   assert ({ l & Permutation_Type (covar (i2a atN) :: nil) l }) as [l HP] by (eexists; reflexivity).
@@ -960,12 +1275,11 @@ Definition easyipgax_nzeropos P := forall a,
        -> ill P l C)
 * notT (In_inf N (fst (projT2 (ipgax P) a))).
 
-Lemma dual_jfragment_zeropos {P} : ipcut P = false -> easyipgax_nzeropos P -> forall l0,
+Lemma dual_jfragment_zeropos {P} (Hcut : no_icut P) (Hgax : easyipgax_nzeropos P) l0 :
   Forall_inf nonzerospos l0 -> ll (i2pfrag P) (map dual (map ill2ll l0)) ->
   {'(C, Cl1, Cl2) & zeropos C & l0 = Cl1 ++ C :: Cl2 }.
 Proof.
-intros Hcut Hgax.
-intros l0 Hnzsp Hll.
+intros Hnzsp Hll.
 remember (map dual (map ill2ll l0)) as l.
 revert l0 Hnzsp Heql.
 induction Hll ; intros l0 Hnzsp HP.
@@ -1179,10 +1493,11 @@ induction Hll ; intros l0 Hnzsp HP.
   + destruct l1' ; inversion H1 ; subst.
     * exists (ioc x, nil, l2'); [ assumption | reflexivity ].
     * exists (C, ioc x :: l1', l2'); [ assumption | reflexivity ].
-- cbn in f.
-  rewrite f in Hcut.
-  inversion Hcut.
-- unfold i2pfrag in HP ; cbn in HP.
+- exfalso. clear - f Hcut. cbn in f.
+  destruct (ill2ll_inv A) as [[l ?] _ _].
+  apply existsb_exists in f as [B [Hin Hcut']].
+  rewrite Hcut in Hcut'. discriminate Hcut'.
+- unfold i2pfrag in HP. cbn in HP.
   destruct l0 ; inversion HP.
   apply (fst (Hgax a)) in H0.
   destruct H0 as [[[Z lz1] lz2] Hz Heq].
@@ -1199,14 +1514,13 @@ induction Hll ; intros l0 Hnzsp HP.
 Qed.
 
 (** Cut-free conservativity *)
-Theorem ll_to_ill_nzeropos_cutfree P : ipcut P = false -> easyipgax_nzeropos P ->
-  forall l, ll (i2pfrag P) l -> forall l0 C, Forall_inf nonzerospos (C :: l0) ->
+Theorem ll_to_ill_nzeropos_cutfree P (Hcut : no_icut P) (Hgax : easyipgax_nzeropos P) l :
+  ll (i2pfrag P) l -> forall l0 C, Forall_inf nonzerospos (C :: l0) ->
     PCPermutation_Type (pperm (i2pfrag P))
                 l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
       ill P l0 C.
 Proof.
-intros Hcut Hgax.
-intros l Hll; induction Hll; intros l0 C Hnzsp HP.
+intros Hll; induction Hll; intros l0 C Hnzsp HP.
 - apply PCPermutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP] ; inversion HP ; destruct C ; inversion H0.
   destruct l0 using rev_rect ; inversion H1.
@@ -1214,21 +1528,20 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
   destruct l0 using rev_rect ; list_simpl in H5 ; inversion H5.
   destruct x ; inversion H4.
   rewrite <- H2 in H6.
-  apply i2a_inj in H6 ; subst.
+  apply i2a_inj in H6 as ->.
   apply ax_ir.
 - apply IHHll; [ | etransitivity ]; eassumption.
 - apply PCPermutation_Type_vs_cons_inv in HP ; destruct HP as [[l1' l2'] HP Heq].
-  cbn in HP, Heq ; dichot_elt_app_inf_exec Heq ; subst.
-  + apply PEPermutation_Type_rev in HP ; rewrite rev_involutive in HP ; list_simpl in HP.
-    rewrite map_map in HP.
+  dichot_elt_app_inf_exec Heq ; subst.
+  + apply PEPermutation_Type_rev in HP. rewrite rev_involutive in HP.
+    rewrite ? rev_app_distr, <- map_rev, <- ? app_assoc, map_map in HP.
     symmetry in HP ; apply PEPermutation_Type_map_inv in HP ; destruct HP as [l' Heq HP].
     symmetry in Heq; decomp_map_inf Heq ; subst.
-    cbn in Heq2 ; rewrite <- (map_map _ _ l7) in Heq2.
-    symmetry in Heq2.
+    rewrite <- (map_map _ _ l7) in Heq2. symmetry in Heq2.
     apply ill2ll_map_ioc_inv in Heq2 ; destruct Heq2 as [l' Heq2 Heq] ; subst.
     symmetry in HP ; eapply ex_ir ; [ | apply HP ] ; cbn.
     rewrite app_assoc.
-    apply Permutation_Type_rev' in p ; rewrite Heq in p.
+    apply Permutation_Type_rev' in p. rewrite Heq in p.
     rewrite map_map in p.
     apply Permutation_Type_map_inv in p ; destruct p as [lw'' Heq' p].
     symmetry in p ; eapply ex_oc_ir; [ | eassumption ].
@@ -1257,7 +1570,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
       rewrite <- (map_map _ _ (rev l8)).
       rewrite <- (map_map _ _ (rev lw'')).
       rewrite ill2ll_map_ioc.
-      GPermutation_Type_solve.
+      etransitivity; [ apply PCPermutation_Type_app_comm | list_simpl; reflexivity ].
   + dichot_elt_app_inf_exec Heq1 ; subst ;
       [ exfalso; symmetry in Heq0; decomp_map Heq0; destruct C; inversion Heq0 | ].
     apply PEPermutation_Type_rev in HP ; rewrite rev_involutive in HP ; list_simpl in HP.
@@ -1387,48 +1700,40 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
     dichot_elt_app_inf_exec Heq' ; subst.
     * decomp_map_inf Heq'1 ; symmetry in Heq'1; decomp_map_inf Heq'1 ;
         cbn in Heq'1 ; cbn in Heq'4 ; cbn in Heq'5 ; subst.
-      apply (PEPermutation_Type_Forall_inf _ _ HP0) in H3l ; cbn in H3l.
-      destruct x0 ; inversion Hnzsp'; inversion H1 ; subst.
-      -- cbn in H7.
-         apply (f_equal (@rev _)) in H7.
-         rewrite rev_involutive in H7 ; subst.
-         list_simpl.
-         cbn in HP0.
+      apply (PEPermutation_Type_Forall_inf _ _ HP0) in H3l. cbn in H3l.
+      destruct x0; inversion Hnzsp'; inversion H1; subst.
+      -- cbn in H7. apply (f_equal (@rev _)) in H7.
+         rewrite rev_involutive in H7. subst.
+         list_simpl. cbn in HP0.
          apply (ex_ir (rev ll ++ ilpam x0_1 x0_2 :: rev l10 ++ rev l9)).
          ++ apply lpam_ilr.
             ** apply IHHll1.
                --- constructor; [ assumption | ].
-                   apply Forall_inf_app_r in H3l.
-                   apply Forall_inf_app_r in H3l.
-                   apply Forall_inf_rev; assumption.
-               --- rewrite bidual; list_simpl; reflexivity.
+                   apply Forall_inf_app_r, Forall_inf_app_r in H3l.
+                   apply Forall_inf_rev. assumption.
+               --- rewrite bidual. list_simpl. reflexivity.
             ** apply IHHll2.
                --- constructor; [ assumption | ].
                    assert (H3l' := Forall_inf_app_l _ _ H3l).
                    assert (H3l'' := Forall_inf_app_r _ _ H3l).
-                   apply Forall_inf_app_l in H3l''.
+                   apply Forall_inf_app_l, Forall_inf_rev in H3l''.
                    apply Forall_inf_rev in H3l'.
-                   apply Forall_inf_rev in H3l''.
                    apply Forall_inf_app; [ assumption | ].
                    constructor; assumption.
-               --- list_simpl.
-                   GPermutation_Type_solve.
-         ++ case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
+               --- list_simpl. rewrite ? app_comm_cons. apply PCPermutation_Type_app_comm.
+         ++ destruct (ipperm P) eqn:Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
-               list_simpl in HP0.
-               list_simpl.
+               list_simpl in HP0. list_simpl.
                apply Permutation_Type_elt.
-               symmetry.
-               etransitivity ; [ apply Permutation_Type_app_comm | ].
-               Permutation_Type_solve.
-            ** destruct (HPeq eq_refl) ; subst.
-               list_simpl; reflexivity.
+               symmetry. etransitivity ; [ apply Permutation_Type_app_comm | ].
+               etransitivity; [ apply HP0 | ].
+               etransitivity; [ | apply Permutation_Type_app_comm ]. rewrite app_assoc. reflexivity.
+            ** destruct (HPeq eq_refl) as [-> ->]. list_simpl. reflexivity.
       -- cbn in H7.
          apply (f_equal (@rev _)) in H7.
-         rewrite rev_involutive in H7 ; subst.
-         list_simpl.
-         cbn in HP0.
+         rewrite rev_involutive in H7. subst.
+         list_simpl. cbn in HP0.
          apply (ex_ir (rev ll ++ igen x0 :: rev l10 ++ rev l9)).
          ++ apply gen_pam_rule.
             ** intros a.
@@ -1607,8 +1912,7 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
                Permutation_Type_solve.
             ** destruct (HPeq eq_refl); subst.
                list_simpl; reflexivity.
-- list_simpl in HP.
-  symmetry in HP.
+- list_simpl in HP. symmetry in HP.
   apply PCPermutation_Type_vs_cons_inv in HP.
   destruct HP as [(l' & l'') HP Heq].
   destruct l'.
@@ -1928,7 +2232,10 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
       apply PEPermutation_PCPermutation_Type in HP. unfold id in HP.
       etransitivity; try eassumption.
       list_simpl. rewrite ? app_comm_cons. apply PCPermutation_Type_app_comm.
-- cbn in f. rewrite Hcut in f. discriminate f.
+- exfalso. clear - f Hcut. cbn in f.
+  destruct (ill2ll_inv A) as [[l ?] _ _].
+  apply existsb_exists in f as [B [Hin Hcut']].
+  rewrite Hcut in Hcut'. discriminate Hcut'.
 - apply (Hgax a). assumption.
 Qed.
 
@@ -1938,12 +2245,11 @@ Proposition ll_to_ill_nzeropos_axfree P (P_axfree : notT (projT1 (ipgax P))) l C
 Proof.
 intros Hnz pi.
 apply cut_admissible_axfree in pi; [ | assumption ].
-rewrite cutrm_i2pfrag in pi.
-eapply ll_to_ill_nzeropos_cutfree in pi; try eassumption.
+apply (stronger_pfrag _ _ (cutrm_i2pfrag P)) in pi.
+eapply ll_to_ill_nzeropos_cutfree in pi; [ | | | eassumption | reflexivity ].
 - apply (stronger_ipfrag (cutrm_ipfrag_le P)), pi.
-- reflexivity.
+- apply noicut_cutrm.
 - intros a. destruct (P_axfree a).
-- reflexivity.
 Qed.
 
 
@@ -1986,18 +2292,15 @@ Definition easyipgax_oclmap P := forall a,
 * notT (In_inf N (fst (projT2 (ipgax P) a))).
 
 (** Cut-free conservativity *)
-Theorem ll_to_ill_oclpam_cutfree {P} :
-  ipperm P = true -> ipcut P = false -> easyipgax_oclmap P ->
-  forall l, ll (i2pfrag P) l -> forall l0 l1 C, Forall_inf oclpam (C :: l0) ->
+Theorem ll_to_ill_oclpam_cutfree P (Hperm : ipperm P = true) (Hcut : no_icut P) (Hgax : easyipgax_oclmap P) l :
+  ll (i2pfrag P) l -> forall l0 l1 C, Forall_inf oclpam (C :: l0) ->
     Forall_inf oclike l1 ->
     PCPermutation_Type (pperm (i2pfrag P)) l
                 (ill2ll C :: map ill2ll l1 ++ rev (map dual (map ill2ll l0))) ->
       ill P l0 C
    *  (l1 <> nil -> forall l2, ill P (l0 ++ l2) C).
 Proof.
-intros Hperm Hcut Hgax.
-intros l Hll ; induction Hll ;
-  intros l0 lo C Hoclm Hocl HP ; try (now inversion f).
+intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
 - apply PCPermutation_Type_length_2_inv in HP.
   destruct HP as [HP | HP] ; inversion HP ; destruct C ; inversion H0 ; subst.
   destruct lo ; list_simpl in H1 ; inversion H1.
@@ -3681,7 +3984,10 @@ intros l Hll ; induction Hll ;
     inversion Hr as [ | ? ? Hr' ].
     inversion Hr'.
     constructor; assumption.
-- cbn in f; rewrite f in Hcut; inversion Hcut.
+- exfalso. clear - f Hcut. cbn in f.
+  destruct (ill2ll_inv A) as [[l ?] _ _].
+  apply existsb_exists in f as [B [Hin Hcut']].
+  rewrite Hcut in Hcut'. discriminate Hcut'.
 - destruct lo.
   + apply (snd (fst (Hgax a))) in HP.
     split; [ assumption | ].
@@ -3710,11 +4016,11 @@ Proposition ll_to_ill_oclpam_axfree P (Hperm : ipperm P = true) (P_axfree : notT
 Proof.
 intros Hoclm pi .
 apply cut_admissible_axfree in pi; [ | assumption ].
-rewrite cutrm_i2pfrag in pi.
-eapply ll_to_ill_oclpam_cutfree in pi; try eassumption.
+apply (stronger_pfrag _ _ (cutrm_i2pfrag P)) in pi.
+eapply ll_to_ill_oclpam_cutfree in pi; [ | eassumption | | | eassumption | | ].
 - destruct pi as [pi _].
   apply (stronger_ipfrag (cutrm_ipfrag_le P)), pi.
-- reflexivity.
+- apply noicut_cutrm.
 - intros a. destruct (P_axfree a).
 - apply Forall_inf_nil.
 - cbn. rewrite Hperm. reflexivity.

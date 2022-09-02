@@ -21,8 +21,11 @@ Notation iformula := (@iformula preiatom).
 
 Definition NoIAxioms := (existT (fun x => x -> list iformula * iformula) _ Empty_fun).
 
+Definition ipcut_none (A : iformula) := false.
+Definition ipcut_all (A : iformula) := true.
+
 Record ipfrag := mk_ipfrag {
-  ipcut : bool;
+  ipcut : iformula -> bool;
   ipgax : { iptypgax : Type & iptypgax -> list iformula * iformula };
   ipperm : bool }.
 
@@ -33,13 +36,17 @@ Definition noN_iax P := forall a, notT (In_inf N (fst (projT2 (ipgax P) a))).
 Definition atomic_iax P := forall a,
   Forall_inf iatomic (fst (projT2 (ipgax P) a)) * iatomic (snd (projT2 (ipgax P) a)).
 
+Definition full_icut P := forall C, ipcut P C = true.
+
+Definition no_icut P := forall C, ipcut P C = false.
+
 Definition icut_closed P := forall a b l1 l2,
   fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 ->
   { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
       & snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }.
 
 Definition le_ipfrag P Q :=
-   ((Bool.le (ipcut P) (ipcut Q))
+   ((forall A, Bool.le (ipcut P A) (ipcut Q A))
  * ((forall a, { b | projT2 (ipgax P) a = projT2 (ipgax Q) b })
  *  (Bool.le (ipperm P) (ipperm Q))))%type.
 
@@ -47,7 +54,7 @@ Lemma le_ipfrag_trans P Q R : le_ipfrag P Q -> le_ipfrag Q R -> le_ipfrag P R.
 Proof.
 intros [Hc1 [Ha1 Hp1]] [Hc2 [Ha2 Hp2]].
 repeat split.
-- apply (BoolOrder.le_trans _ (ipcut Q)); assumption.
+- intros A. now apply (BoolOrder.le_trans _ (ipcut Q A)).
 - intros a.
   destruct (Ha1 a) as [b Heq].
   destruct (Ha2 b) as [c Heq2].
@@ -67,12 +74,15 @@ Definition axupd_ipfrag P G := mk_ipfrag (ipcut P) G (ipperm P).
 
 Definition cutupd_ipfrag P b := mk_ipfrag b (ipgax P) (ipperm P).
 
-Definition cutrm_ipfrag P := cutupd_ipfrag P false.
+Definition cutrm_ipfrag P := cutupd_ipfrag P ipcut_none.
 
-Lemma cutupd_ipfrag_true P : le_ipfrag P (cutupd_ipfrag P true).
+Lemma noicut_cutrm P : no_icut (cutrm_ipfrag P).
+Proof. intro. reflexivity. Qed.
+
+Lemma cutupd_ipfrag_true P : le_ipfrag P (cutupd_ipfrag P ipcut_all).
 Proof.
 repeat split; try reflexivity.
-- apply BoolOrder.le_true.
+- intro. apply BoolOrder.le_true.
 - intros a. exists a. reflexivity.
 Qed.
 
@@ -111,7 +121,7 @@ Inductive ill P : list iformula -> iformula -> Type :=
 | de_ilr A l1 l2 C : ill P (l1 ++ A :: l2) C -> ill P (l1 ++ ioc A :: l2) C
 | wk_ilr A l1 l2 C : ill P (l1 ++ l2) C -> ill P (l1 ++ ioc A :: l2) C
 | co_ilr A l1 l2 C : ill P (l1 ++ ioc A :: ioc A :: l2) C -> ill P (l1 ++ ioc A :: l2) C
-| cut_ir (f : ipcut P = true) A l0 l1 l2 C : ill P l0 A -> ill P (l1 ++ A :: l2) C-> ill P (l1 ++ l0 ++ l2) C
+| cut_ir A (f : ipcut P A = true) l0 l1 l2 C : ill P l0 A -> ill P (l1 ++ A :: l2) C-> ill P (l1 ++ l0 ++ l2) C
 | gax_ir a : ill P (fst (projT2 (ipgax P) a)) (snd (projT2 (ipgax P) a)).
 #[global] Arguments ax_ir [P] _.
 #[global] Arguments ex_ir [P] _ _ _ _ _.
@@ -140,7 +150,7 @@ Inductive ill P : list iformula -> iformula -> Type :=
 #[global] Arguments de_ilr [P] _ _ _ _ _.
 #[global] Arguments wk_ilr [P] _ _ _ _ _.
 #[global] Arguments co_ilr [P] _ _ _ _ _.
-#[global] Arguments cut_ir [P f] _ [l0 l1 l2] _ _ _.
+#[global] Arguments cut_ir [P] _ f [l0 l1 l2 _] _ _.
 #[global] Arguments gax_ir [P] _.
 
 Instance ill_perm P A : Proper ((@PEPermutation_Type _ (ipperm P)) ==> arrow) (fun l => ill P l A).
@@ -166,7 +176,7 @@ induction pi; try (constructor; assumption).
 - apply (ex_ir l1); [ assumption | ].
   destruct Hfrag as [_ [_ Hp]]. apply (PEPermutation_Type_monot (ipperm P) _ Hp), p.
 - apply (ex_oc_ir _ lw); assumption.
-- destruct Hfrag as [Hcut _]. rewrite f in Hcut. apply (@cut_ir _ Hcut A); assumption.
+- destruct Hfrag as [Hcut _]. specialize (Hcut A). rewrite f in Hcut. apply (cut_ir A Hcut); assumption.
 - destruct Hfrag as [_ [Hgax _]], (Hgax a) as [b ->]. apply gax_ir.
 Defined.
 
@@ -263,7 +273,7 @@ Ltac destruct_ill H f X l Hl Hr HP a :=
                                | ? ? ? ? Hl
                                | ? ? ? ? Hl
                                | ? ? ? ? Hl
-                               | f ? ? ? ? ? Hl Hr
+                               | ? f ? ? ? ? Hl Hr
                                | a ] ; subst
   end.
 
@@ -308,9 +318,9 @@ Qed.
 
 (** ** Consistency properties *)
 
-Lemma strong_contradition_general_contradiction_ill P : ipcut P = true ->
+Lemma strong_contradition_general_contradiction_ill P : ipcut P izero = true ->
   ill P nil izero -> forall l C, ill P l C.
-Proof. intros Hcut pi l C. rewrite <- 2 (app_nil_l _). apply (@cut_ir _ Hcut _ _ _ _ _ pi), zero_ilr. Qed.
+Proof. intros Hcut pi l C. rewrite <- 2 (app_nil_l _). apply (@cut_ir _ _ Hcut _ _ _ _ pi), zero_ilr. Qed.
 
 End Atoms.
 
@@ -343,6 +353,6 @@ Ltac destruct_ill H f X l Hl Hr HP a :=
                                | ? ? ? ? Hl
                                | ? ? ? ? Hl
                                | ? ? ? ? Hl
-                               | f ? ? ? ? ? Hl Hr
-                               | a ] ; subst
+                               | ? f ? ? ? ? Hl Hr
+                               | a ]; subst
   end.

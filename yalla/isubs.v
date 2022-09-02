@@ -56,13 +56,14 @@ end.
 
 (** Substitution in proofs *)
 Lemma subs_ill P A x l C : iateq atN x = false ->
+  (forall D, ipcut P D = true -> ipcut P (isubs A x D) = true) ->
   ill P l C ->
     ill (axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
             (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
                        isubs A x (snd (projT2 (ipgax P) a))))))
         (map (isubs A x) l) (isubs A x C).
 Proof.
-intros HN pi.
+intros HN Hcut pi.
 assert (forall l, map (isubs A x) (map ioc l) = map ioc (map (isubs A x) l)) as Hmapioc
   by (clear; induction l; [ | cbn; rewrite IHl ]; reflexivity).
 induction pi; list_simpl;
@@ -82,18 +83,20 @@ induction pi; list_simpl;
   rewrite Hmapioc.
   apply oc_irr.
   rewrite <- Hmapioc; assumption.
-- refine (cut_ir (isubs A x A0) _ _ _ ); assumption.
+- refine (cut_ir (isubs A x A0) _ _ _ ); cbn; try assumption.
+  apply Hcut; assumption.
 - apply (@gax_ir _ ((axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
             (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
                        isubs A x (snd (projT2 (ipgax P) a))))))) a).
 Qed.
 
-Lemma subs_ill_axfree P : (projT1 (ipgax P) -> False) -> forall A x l C,
-iateq atN x = false -> ill P l C ->
+Lemma subs_ill_axfree P : (projT1 (ipgax P) -> False) -> forall A x,
+  (forall D, ipcut P D = true -> ipcut P (isubs A x D) = true) ->
+  forall l C, iateq atN x = false -> ill P l C ->
   ill P (map (isubs A x) l) (isubs A x C).
 Proof.
-intros P_axfree A x l C HN pi.
-apply (subs_ill A x) in pi; [ | assumption ].
+intros P_axfree A x Hcut l C HN pi.
+apply (subs_ill A x) in pi; [ | assumption | assumption ].
 eapply stronger_ipfrag; [ | eassumption ].
 repeat split; [ reflexivity | | reflexivity ].
 intros a. destruct (P_axfree a).
@@ -110,7 +113,7 @@ induction pi; try now constructor.
 - cbn in p.
   eapply ex_ir; [ apply IHpi | assumption ].
 - eapply ex_oc_ir; eassumption.
-- cbn in f; eapply (@cut_ir _ _ f); eassumption.
+- cbn in f; eapply (cut_ir _ f); eassumption.
 - apply Hgax.
 Qed.
 

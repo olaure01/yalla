@@ -3,8 +3,7 @@
 (** * Focusing by Polarized Translation *)
 
 From Coq Require Import CMorphisms.
-From OLlibs Require Import funtheory infinite List_more
-                           Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Import ll_fragments llfoc tl nn_prop.
 
 Set Implicit Arguments.
@@ -12,9 +11,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : DecType }.
-Context { preiatom : InfDecType }.
-Context { tatom : DecType }.
+Context { atom : DecType } { preiatom : InfDecType } { tatom : DecType }.
 Context { Atoms : AtomIAtomTAtomType atom preiatom tatom }.
 
 Notation atom_inf := (@atom_inf _ _ AtomIAtomTAtom_Atom2IAtom).
@@ -143,20 +140,20 @@ induction A; simpl.
                   (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app.
   refine (cut_ir_axfree _ _ _ H' _) ; [ intros a ; destruct a | ].
-  unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+  unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
   apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
-  apply neg_tens_propag; [ reflexivity | reflexivity | | ].
+  apply neg_tens_propag; [ reflexivity | intro; reflexivity | | ].
   + apply pntrans_to_trans in IHA1.
     cons2app in IHA1.
     assert (H1 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A1))).
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in H1.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHA1.
     refine (cut_ir _ _ H1 IHA1); reflexivity.
   + apply pntrans_to_trans in IHA2.
     cons2app in IHA2.
     assert (H2 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A2))).
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in H2.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHA2.
     refine (cut_ir _ _ H2 IHA2); reflexivity.
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
@@ -173,20 +170,20 @@ induction A; simpl.
                   (iplus (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
   cons2app.
   refine (cut_ir_axfree _ _ _ H' _) ; [ intros a ; destruct a | ].
-  unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+  unfold ill_ll ; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
   apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
-  apply neg_plus_propag; [ reflexivity | reflexivity | | ].
+  apply neg_plus_propag; [ reflexivity | intro; reflexivity | | ].
   + apply pntrans_to_trans in IHA1.
     cons2app in IHA1.
     assert (H1 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A1))).
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H1.
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA1.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in H1.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHA1.
     refine (cut_ir _ _ H1 IHA1); reflexivity.
   + apply pntrans_to_trans in IHA2.
     cons2app in IHA2.
     assert (H2 := @ilmap_to_ineg _ ipfrag_ill (tl2ill (ptrans A2))).
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in H2.
-    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHA2.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in H2.
+    apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHA2.
     refine (cut_ir _ _ H2 IHA2); reflexivity.
 - rewrite <- (app_nil_l _).
   apply plus_ilr ; list_simpl.
@@ -212,8 +209,8 @@ induction A; simpl.
   apply de_ilr, negR_irr; assumption.
 Qed.
 
-Definition tpfrag_tl := @mk_tpfrag tatom false NoTAxioms true.
-(*                                 atoms cut   axioms    perm  *)
+Definition tpfrag_tl := @mk_tpfrag tatom tpcut_none NoTAxioms true.
+(*                                 atoms cut        axioms    perm  *)
 Definition tl_ll := tl tpfrag_tl.
 
 Proposition ll_to_tl (l : list formula) : ll_ll l -> tl_ll (map ntrans l) None.
@@ -243,11 +240,10 @@ apply cut_admissible_ill in pi; try now (intros a; destruct a).
 eapply (@stronger_tpfrag _ (cutrm_tpfrag tpfrag_tl)).
 - repeat split.
   intros a; destruct a.
-- eapply tlfrag2tl_cutfree; [ reflexivity | ].
-  rewrite <- (@cutrm_t2ipfrag atom_inf).
+- eapply tlfrag2tl.
+  apply (stronger_ipfrag (@cutrm_t2ipfrag_le atom_inf _ _ _ tpfrag_tl)).
   eapply stronger_ipfrag; [ | apply pi].
-  repeat split.
-  intros a; destruct a.
+  repeat split. intros [].
 Qed.
 
 (* ** Proof of Focusing *)

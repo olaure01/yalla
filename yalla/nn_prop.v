@@ -41,14 +41,14 @@ Lemma back_to_llR A :
 Proof.
 induction A; simpl; rewrite ? bidual.
 - apply parr_r.
-  unfold IAtom2Atom, iatom2atom; rewrite a2a_i.
+  destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite Hr2.
   apply (ex_r ((covar c :: var c :: nil) ++ unill R :: nil));
     [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
-  eapply (@cut_r _ (pfrag_llR (unill R)) eq_refl (dual one)).
+  eapply (@cut_r _ (pfrag_llR (unill R)) (dual one) eq_refl).
   + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r, ax_r.
-- unfold IAtom2Atom, iatom2atom; rewrite a2a_i.
+- destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite Hr2.
   apply (ex_r (covar c :: var c :: nil)); [ | apply Permutation_Type_swap ].
   apply ax_r.
 - apply parr_r, bot_r.
@@ -119,7 +119,7 @@ induction A; simpl; rewrite ? bidual.
                   ++ unill R :: nil));
     [ | etransitivity; [ apply Permutation_Type_middle
                        | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ] ].
-  apply (@cut_r _ (pfrag_llR (unill R)) eq_refl (dual one)).
+  apply (@cut_r _ (pfrag_llR (unill R)) (dual one) eq_refl).
   + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r, oc_r.
@@ -148,35 +148,36 @@ Lemma ll_to_llR : forall R l, ll_ll l -> llR R l.
 (** A sequent whose translation is provable in [ill] was provable in [llR]. *)
 Lemma ill_trans_to_llR l :  ill_ll (map (trans R) l) R -> llR (unill R) l.
 Proof.
-intros Hill%(@ill_to_ll _ _ iatom2atom).
-apply (stronger_pfrag _ (mk_pfrag true NoAxioms pmix_none true)) in Hill.
+intros Hill%(@ill_to_ll _ _ iatom2atom_fin).
+apply (stronger_pfrag _ (mk_pfrag pcut_all NoAxioms pmix_none true)) in Hill.
 - eapply cut_admissible_axfree in Hill.
   + apply (ll_to_llR (unill R)) in Hill.
+    assert (forall C, pcut (pfrag_llR (unill R)) C = true) as Hcut by (intro; reflexivity).
     assert (forall l',
       llR (unill R) (l' ++ map dual (map unill (map (trans R) (rev l))))
         -> llR (unill R) (l' ++ rev l)) as Hll.
-    { clear.
+    { clear - Hcut.
       induction l using rev_rect; intros; [ assumption | ].
       assert (Hb := back_to_llR x).
       rewrite rev_unit in X.
       apply (ex_r _ (dual (unill (trans R x))
                :: l' ++ map dual (map unill (map (trans R) (rev l))))) in X;
         [ | symmetry; apply Permutation_Type_middle ].
-      apply (@cut_r _ _ (eq_refl (pcut (pfrag_llR (unill R)))) _ _ _ X) in Hb.
+      apply (cut_r _ (Hcut _) X) in Hb.
       rewrite rev_unit.
       change (x :: rev l) with ((x :: nil) ++ rev l).
       rewrite app_assoc.
       apply IHl.
       eapply ex_r; [ eassumption | list_simpl; apply Permutation_Type_middle ]. }
-    assert (llR (unill R) (dual (unill R) :: nil)) as HR
-      by apply (@gax_r _ (pfrag_llR (unill R)) true).
-    apply (@cut_r _ _ (eq_refl (pcut (pfrag_llR (unill R)))) _ _ _ HR) in Hill.
+    assert (llR (unill R) (dual (unill R) :: nil)) as HR by apply (@gax_r _ (pfrag_llR (unill R)) true).
+    apply (cut_r _ (Hcut _) HR) in Hill.
     rewrite app_nil_r, <- (app_nil_l (rev _)), <- ? map_rev in Hill.
     apply Hll in Hill.
     eapply ex_r; [ apply Hill | symmetry; apply Permutation_Type_rev ].
   + intros Hax; inversion Hax.
 - repeat split.
-  intros Hax; inversion Hax.
+  + intro. apply BoolOrder.le_true.
+  + intros [].
 Qed.
 
 
@@ -326,15 +327,15 @@ induction Hll ;
   apply co_ilr; assumption.
 - apply negR_irr in IHHll1.
   apply negR_irr in IHHll2.
-  apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll1.
-  apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill true) (cutupd_ipfrag_true _)) in IHHll2.
-  assert (pi0 := @trans_dual _ _ _ R (cutupd_ipfrag ipfrag_ill true) eq_refl eq_refl A).
+  apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHHll1.
+  apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHHll2.
+  assert (full_icut (cutupd_ipfrag (@ipfrag_ill preiatom) ipcut_all)) as Hcut by (intro; reflexivity).
+  assert (pi0 := @trans_dual _ _ _ R (cutupd_ipfrag ipfrag_ill ipcut_all) eq_refl Hcut A).
   rewrite <- (app_nil_l _) in pi0.
-  assert (@ipcut preiatom (cutupd_ipfrag ipfrag_ill true) = true) as Hcut by reflexivity.
-  eapply (@cut_ir _ _ Hcut _ _ _ _ _ IHHll2) in pi0.
+  apply (cut_ir _ (Hcut _) IHHll2) in pi0.
   list_simpl in pi0.
-  eapply (@cut_ir _ _ Hcut _ _ _ _ _ IHHll1) in pi0.
-  unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+  apply (cut_ir _ (Hcut _) IHHll1) in pi0.
+  unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
   apply cut_admissible_ill_axfree; [ intros a; destruct a | ].
   fold (map (trans R)) in pi0; list_simpl in pi0; list_simpl; assumption.
 - destruct a; subst.
@@ -344,9 +345,8 @@ induction Hll ;
     rewrite <- 2 (app_nil_l (negR _ _ :: _)).
     apply lmap_ilr.
     * apply one_irr.
-    * eapply ex_ir.
-      -- apply ie_ie_diag; assumption.
-      -- apply Permutation_Type_swap.
+    * eapply ex_ir; [ | apply Permutation_Type_swap ].
+      apply ie_ie_diag. assumption.
 Qed.
 
 
@@ -388,11 +388,11 @@ Qed.
 Theorem ll_ll_to_ill_trans R (l : list formula) : ll_ll l -> ill_ll (map (trans R) l) R.
 Proof.
 intros Hll%(ll_to_ill_trans R).
-- eapply stronger_ipfrag; [ | apply Hll ].
-  repeat split.
-  intros a; destruct a.
+- apply cut_ll_admissible.
+  eapply stronger_ipfrag; [ | apply Hll ].
+  repeat split. intros [].
 - reflexivity.
-- intros L eqpmix; inversion eqpmix.
+- intros L [=].
 Qed.
 
 
@@ -424,9 +424,9 @@ Qed.
 Theorem ll_mix02_to_ill_trans (l : list formula) : ll_mix02 l -> ill_ll (map (trans ione) l) ione.
 Proof.
 intros Hll%(ll_to_ill_trans ione).
-- eapply stronger_ipfrag; [ | apply Hll ].
-  repeat split.
-  intros a; destruct a.
+- apply cut_ll_admissible.
+  eapply stronger_ipfrag; [ | apply Hll ].
+  repeat split. intros [].
 - reflexivity.
 - intros L eqpmix FL FLind.
   destruct L; [ apply one_irr | ].
@@ -495,7 +495,8 @@ assert (Hz2 := Hz).
 apply Hill in Hz2 ; clear Hill.
 apply ill_trans_to_llR in Hz2.
 apply (subs_llR bot z) in Hz2; subst.
-simpl in Hz2; unfold IAtom2Atom in Hz2; rewrite a2a_i, repl_at_eq in Hz2; [ | reflexivity ].
+simpl in Hz2. destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].
+rewrite Hr2, repl_at_eq in Hz2; [ | reflexivity ].
 eapply (@llR1_R2 _ _ (wn one)) in Hz2.
 - change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
                     (flat_map atom_list l))
@@ -528,9 +529,9 @@ Theorem ll_mix0_to_ill_trans R (l : list formula) : ill_ll nil R -> ll_mix0 l ->
   ill_ll (map (trans R) l) R.
 Proof.
 intros HR Hll.
-apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 true)) in Hll.
+apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 pcut_all)) in Hll.
 - apply (ll_to_ill_trans R) in Hll.
-  + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+  + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
     apply cut_admissible_ill_axfree; [ intros a; destruct a | ].
     eapply stronger_ipfrag; [ | apply Hll ].
     repeat split.
@@ -540,9 +541,9 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 true)) in Hll.
     destruct L; try now inversion eqpmix.
     cbn; eapply stronger_ipfrag; [ | apply HR ].
     repeat split.
-    intros a. destruct a.
+    intros [].
 - repeat split.
-  + intros a. destruct a.
+  + intros [].
   + reflexivity.
 Qed.
 
@@ -563,7 +564,8 @@ remember (fresh_of_list l) as z.
 specialize Hill with (ivar (a2i z)).
 apply ill_trans_to_llR in Hill.
 apply (subs_llR bot z) in Hill ; subst.
-simpl in Hill; unfold IAtom2Atom in Hill; rewrite a2a_i, repl_at_eq in Hill; [ | reflexivity ].
+simpl in Hill. destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].
+rewrite Hr2, repl_at_eq in Hill; [ | reflexivity ].
 change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
                   (flat_map atom_list l))
    with  (fresh_of_list l) in Hill.
@@ -579,10 +581,10 @@ Proof.
 intros Hll.
 change (ioc R :: map (trans _) l)
   with (map ioc (R :: nil) ++ map (trans (ioc R)) l).
-apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
-- assert (@pperm atom_inf (cutupd_pfrag pfrag_mix02 true) = true) as Hperm by reflexivity.
+apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 pcut_all)) in Hll.
+- assert (@pperm atom_inf (cutupd_pfrag pfrag_mix02 pcut_all) = true) as Hperm by reflexivity.
   apply (ll_to_ill_trans_gen (ioc R) Hperm (R :: nil)) in Hll.
-  + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill true)).
+  + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
     apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
     eapply stronger_ipfrag ; [ | apply Hll ].
     repeat split.
@@ -591,12 +593,12 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
     destruct L; [ intros; apply ax_exp_ill | ].
     destruct L; [ inversion eqpmix | ].
     destruct L; [ | inversion eqpmix ].
-    assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) true))
+    assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all))
                 (map ioc (R :: nil) ++ map (trans (ioc R)) l0) (ioc R)).
     { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by (left; reflexivity).
       apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
       apply (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
-    assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) true))
+    assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all))
                 (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
     { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; left; reflexivity).
       apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
@@ -604,9 +606,9 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
     cbn.
     rewrite app_nil_r, map_app, <- (app_nil_l (ioc R :: _)), <- (app_nil_r (map _ l1)).
     rewrite app_comm_cons, (app_assoc _ (map _ l1)).
-    assert (ipcut (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) true)) = true)
+    assert (forall C, ipcut (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all)) C = true)
       as Hcut by reflexivity.
-    apply (@cut_ir _ _ Hcut (itens (ioc R) (ioc R))).
+    apply (cut_ir (itens (ioc R) (ioc R)) (Hcut _)).
     * rewrite <- 2 (app_nil_l (ioc R :: _)), <- ? app_assoc.
       change nil with (map (@ioc preiatom) nil) at 2.
       apply co_ilr.
