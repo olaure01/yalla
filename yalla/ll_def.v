@@ -1500,3 +1500,14 @@ Ltac destruct_ll H f X l Hl Hr HP FL a :=
                             | f ? ? ? Hl Hr
                             | a ] ; subst
   end.
+
+Ltac ll_swap :=
+  match goal with
+  | |- ll ?P (?a1 :: ?a2 :: nil) => eapply ex_r; [ | apply PCPermutation_Type_swap ]
+  end.
+Ltac ll_swap_hyp H :=
+  match goal with
+  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ =>
+        eapply ex_r in H; [ | apply PCPermutation_Type_swap ]
+  end.
+Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.

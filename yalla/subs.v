@@ -12,7 +12,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context {atom : InfDecType}.
+Context {atom : DecType}.
 
 Definition ateq := @eqb atom.
 Definition ateq_eq := @eqb_eq atom.
@@ -125,10 +125,19 @@ match A with
 | wn B      => atom_list B
 end.
 
-(** Provide an [Atom] which is fresh for [A] *)
-Definition fresh_of A := fresh (atom_list A).
+End Atoms.
 
-Lemma subs_fresh_incl C lat A :
+
+Section InfAtoms.
+
+Context {atom : InfDecType}.
+
+Notation formula := (@formula atom).
+
+(** Provide an [Atom] which is fresh for [A] *)
+Definition fresh_of (A : formula) := fresh (atom_list A).
+
+Lemma subs_fresh_incl C lat (A : formula) :
   incl (atom_list A) lat -> subs C (fresh lat) A = A.
 Proof.
 induction A; cbn; intros Hincl;
@@ -144,9 +153,9 @@ Lemma subs_fresh C A : subs C (fresh_of A) A = A.
 Proof. now intros; apply subs_fresh_incl. Qed.
 
 (** Provide an [Atom] which is fresh for all elements of [l] *)
-Definition fresh_of_list l := fresh (flat_map atom_list l).
+Definition fresh_of_list (l : list formula) := fresh (flat_map atom_list l).
 
-Lemma subs_fresh_list_incl C lat l :
+Lemma subs_fresh_list_incl C lat (l : list formula) :
   incl (flat_map atom_list l) lat -> map (subs C (fresh lat)) l = l.
 Proof.
 induction l; cbn; intros Hincl; [ reflexivity | ].
@@ -157,4 +166,4 @@ Qed.
 Lemma subs_fresh_list C l : map (subs C (fresh_of_list l)) l = l.
 Proof. now intros; apply subs_fresh_list_incl. Qed.
 
-End Atoms.
+End InfAtoms.

@@ -276,7 +276,7 @@ Proof.
 intros Hperm Hcut A B x HR.
 induction A; cbn; rewrite ? HR.
 - case_eq (ateq c x); intros Hateq.
-  + unfold repl_at; rewrite Hateq; cbn.
+  + cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
     assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i; assumption).
     unfold repl_iat; rewrite Hiateq; cbn.
@@ -286,12 +286,12 @@ induction A; cbn; rewrite ? HR.
       rewrite <- ateq_a2i in Hiateq.
       rewrite Hiateq in Hateq.
       inversion Hateq.
-    * unfold repl_at; rewrite Hateq; cbn.
+    * cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
       unfold repl_iat; rewrite Hiateq; cbn.
       eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
       apply negR_ilr; [ assumption | | ]; apply ax_exp_ill.
 - case_eq (ateq c x); intros Hateq.
-  + unfold repl_at; rewrite Hateq; cbn.
+  + cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
     assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i ; assumption).
     unfold repl_iat; rewrite Hiateq; cbn.
@@ -301,7 +301,7 @@ induction A; cbn; rewrite ? HR.
       rewrite <- ateq_a2i in Hiateq.
       rewrite Hiateq in Hateq.
       inversion Hateq.
-    * unfold repl_at; rewrite Hateq; cbn.
+    * cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
       unfold repl_iat; rewrite Hiateq; cbn.
       eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
       apply negR_ilr; [ assumption | | ]; apply ax_exp_ill.
