@@ -947,10 +947,9 @@ eapply (ext_wn_param fp (tens (wn one) (wn one) :: nil)) in pi.
             apply in_inf_map_inv in Hin as [l'' <- Hin].
             apply ex_r with ((fun l0 => l0 ++ (map wn (tens (wn one) (wn one) :: nil))) l'');
               [ | symmetry; apply PCPermutation_Type_cons_append ].
-            apply (in_inf_map (fun l : list formula => l ++ map wn (tens (wn one) (wn one) :: nil))) in Hin.
-            apply Forall_inf_forall with (map
-             (fun l : list formula => l ++ map wn (tens (wn one) (wn one) :: nil))
-             (l0 :: l1 :: l2 :: L)); assumption.
+            apply (in_inf_map (fun l => l ++ map wn (tens (wn one) (wn one) :: nil))) in Hin.
+            apply Forall_inf_forall
+             with (map (fun l => l ++ map wn (tens (wn one) (wn one) :: nil)) (l0 :: l1 :: l2 :: L)); assumption.
 Qed.
 
 Lemma ll_to_mix02_cut P l : ll P (wn (tens (wn one) (wn one)) :: l) ->
@@ -1241,13 +1240,13 @@ Lemma ll_to_mix02'''_axcut P : (forall a, Forall_inf atomic (projT2 (pgax P) a))
   (forall a b x l1 l2 l3 l4,
      projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
      { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-  pperm P = true -> forall l (l0 : list unit),
-  ll P (wn one :: map (fun _ => wn (tens (wn one) bot)) l0 ++ l)  ->
+  pperm P = true -> forall l n,
+  ll P (wn one :: repeat (wn (tens (wn one) bot)) n ++ l)  ->
   ll (pmixupd_point_pfrag (pmixupd_point_pfrag P 0 true) 2 true) l.
 Proof.
-intros Hgax_at Hgax_cut fp l l0 pi.
+intros Hgax_at Hgax_cut fp l n pi.
 apply ll_to_mix02''_axcut; try assumption.
-revert l pi; induction l0; intros l pi; cons2app.
+revert l pi; induction n as [|n IHn ]; intros l pi; cons2app.
 - eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
   cbn; apply wk_r.
   eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ]; assumption.
@@ -1255,7 +1254,7 @@ revert l pi; induction l0; intros l pi; cons2app.
   cbn; apply co_r.
   rewrite 2 app_comm_cons.
   eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
-  list_simpl; apply IHl0.
+  list_simpl; apply IHn.
   list_simpl in pi.
   eapply ex_r; [ apply pi | rewrite fp; cbn ].
   apply Permutation_Type_cons, Permutation_Type_middle; reflexivity.

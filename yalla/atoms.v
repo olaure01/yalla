@@ -85,23 +85,17 @@ Class FullAtoms := {
 
 Definition option_nat_to_nat := option_eval_default 0 S.
 
-Definition nat_to_option_nat :=
-fun n => match n with
+Definition nat_to_option_nat n :=
+match n with
 | 0 => None
 | S k => Some k
 end.
 
 Lemma option_nat_into_nat : embedding (option nat) nat.
-Proof.
-exists (nat_to_option_nat, option_nat_to_nat).
-now intros x; destruct x.
-Qed.
+Proof. exists (nat_to_option_nat, option_nat_to_nat); intros []; reflexivity. Qed.
 
 Lemma injective_option_nat_to_nat : injective option_nat_to_nat.
-Proof.
-apply section_injective with nat_to_option_nat.
-now intros x; destruct x.
-Qed.
+Proof. apply section_injective with nat_to_option_nat; intros []; reflexivity. Qed.
 
 Lemma nat_bijective_nat : nat_bijective nat.
 Proof. exists id; apply id_bijective. Qed.
