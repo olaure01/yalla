@@ -373,8 +373,8 @@ intros pi; induction pi;
   try rewrite ? map_app in piS2;
   try rewrite ? map_app in piE2;
   list_simpl;
-  (try now (constructor; intuition));
-  try now (destruct D; inversion HeqC; subst; constructor; intuition).
+  (try now (constructor; auto));
+  try now (destruct D; inversion HeqC; subst; constructor; auto).
 - eapply ex_ir.
   + apply (piS _ HeqC).
   + apply PEPermutation_Type_map; assumption.
@@ -508,7 +508,8 @@ intros l; split; [ intros A | ]; intros pi.
   rewrite cutrm_t2ipfrag in pi.
   apply tlfrag2tl_cutfree in pi; [ | reflexivity ].
   apply (@stronger_tpfrag (cutrm_tpfrag P)); [ | assumption ].
-  repeat split; try reflexivity; intuition.
+  repeat split; [ | reflexivity ].
+  intros a. destruct (Hgax a).
 - apply cut_admissible_ill in pi; (try now (intros a; exfalso; apply (Hgax a))).
   rewrite cutrm_t2ipfrag in pi.
   apply tlfrag2tl_cutfree in pi; [ | reflexivity ].
@@ -737,17 +738,16 @@ Proof.
 intros Hgax l.
 split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
 - apply tl2tlfrag in pi.
-  apply ill_to_ll; intuition.
+  apply ill_to_ll, pi. reflexivity.
 - eapply (@ll_to_ill_nzeropos_axfree _ _ _ (t2ipfrag P) Hgax (ill2ll (tl2ill A)
             :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
     [ | | reflexivity ].
   + apply tlfrag2tl_axfree; assumption.
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
     remember (A :: l) as l0 ; clear.
-    induction l0; cbn; constructor; intuition.
-    apply tl2ill_nz.
+    induction l0; cbn; constructor; [ apply tl2ill_nz | assumption ].
 - apply tl2tlfrag in pi.
-  apply ill_to_ll; intuition.
+  apply ill_to_ll, pi. reflexivity.
 - eapply (@ll_to_ill_nzeropos_axfree _ _ _ (t2ipfrag P) Hgax (ill2ll N
             :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
     [ | | reflexivity ].

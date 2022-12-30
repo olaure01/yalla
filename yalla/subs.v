@@ -160,7 +160,7 @@ Lemma subs_fresh_list_incl C lat (l : list formula) :
 Proof.
 induction l; cbn; intros Hincl; [ reflexivity | ].
 apply incl_app_inv in Hincl.
-rewrite subs_fresh_incl; [ rewrite IHl | ]; intuition.
+now rewrite subs_fresh_incl; [ rewrite IHl | ].
 Qed.
 
 Lemma subs_fresh_list C l : map (subs C (fresh_of_list l)) l = l.

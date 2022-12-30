@@ -659,7 +659,7 @@ Inductive reflectT (P : Type) : bool -> Type :=
 Hint Constructors reflectT : bool.
 
 Lemma reflectT_iffT : forall P b, reflectT P b -> (CRelationClasses.iffT P (b = true)).
-Proof. destruct 1; split; intuition; discriminate. Qed.
+Proof. now destruct 1; split; [ | | | discriminate ]. Qed.
 (* END TODO *)
 
 Lemma polsequent_spec l : reflectT (polsequent l) (polsequent_bool l).

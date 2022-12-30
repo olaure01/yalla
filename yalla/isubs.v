@@ -95,7 +95,8 @@ Proof.
 intros P_axfree A x l C HN pi.
 apply (subs_ill A x) in pi; [ | assumption ].
 eapply stronger_ipfrag; [ | eassumption ].
-repeat split; cbn; intuition.
+repeat split; [ reflexivity | | reflexivity ].
+intros a. destruct (P_axfree a).
 Qed.
 
 (** Substitution of axioms *)
@@ -144,13 +145,14 @@ induction A; cbn; intros Hincl;
   with (@fresh (option_infdectype preiatom) lat);
   try rewrite IHA;
   try (rewrite IHA2; [ rewrite IHA1 | ]);
-  cbn; intuition;
+  cbn; trivial;
   (try now apply incl_app_inv in Hincl);
   try now apply incl_cons_inv in Hincl.
 rewrite repl_iat_neq; auto.
 intros ->.
 apply (@fresh_prop (option_infdectype preiatom) lat),
-      (Hincl (@fresh (option_infdectype preiatom) lat)); intuition.
+      (Hincl (@fresh (option_infdectype preiatom) lat)).
+left. reflexivity.
 Qed.
 
 Lemma subs_ifresh C A : isubs C (ifresh_of A) A = A.
@@ -167,7 +169,7 @@ apply incl_app_inv in Hincl.
 change (proj1_sig (nat_injective_choice (option_dectype preiatom)
             (nat_injective_option infinite_nat_injective)) lat)
   with (@fresh (option_infdectype preiatom) lat).
-rewrite subs_ifresh_incl; [ rewrite IHl | ]; intuition.
+now rewrite subs_ifresh_incl; [ rewrite IHl | ].
 Qed.
 
 Lemma subs_ifresh_list C l : map (isubs C (ifresh_of_list l)) l = l.

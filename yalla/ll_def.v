@@ -1240,7 +1240,7 @@ induction pi using ll_nested_ind; cbn; intros Hgax;
   try (assert (Hgax2 := Forall_inf_app_r _ _ Hgax));
   try (apply IHpi1 in Hgax1);
   try (apply IHpi2 in Hgax2);
-  try (now constructor; intuition).
+  try (now constructor; auto).
 - apply IHpi in Hgax.
   eapply ex_r; [ eassumption | ].
   destruct (pperm P); destruct (pperm Q); inversion Hperm; cbn; cbn in p;
@@ -1267,7 +1267,7 @@ induction pi using ll_nested_ind; cbn; intros Hgax;
          apply inj_pair2_eq_dec in H2;
            [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
          assert (Pa = p) as Heq; subst.
-         { apply issue12394.injection_list in H2; intuition.
+         { apply issue12394.injection_list in H2 as [-> _]; [ reflexivity | ].
            apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq. }
 (* once cleaned give explicit names to generated hypotheses *)
 (* end TODO *)
@@ -1282,7 +1282,7 @@ induction pi using ll_nested_ind; cbn; intros Hgax;
          apply inj_pair2_eq_dec in H2;
            [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
          assert (Pa = p /\ Fl = PL) as [-> ->].
-         { apply issue12394.injection_list in H2; intuition.
+         { apply issue12394.injection_list in H2 as [-> H2]; [ easy | ].
            apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq. }
 (* end TODO *)
          apply Forall_inf_app_r in Hgax.
@@ -1301,7 +1301,7 @@ Proof.
 intros Hperm Hpmix Hcut Hgax pi.
 apply (ax_gen_loc Hperm Hpmix Hcut pi).
 remember (gax_elts pi) as lax.
-clear - Hgax; induction lax; intuition.
+now clear - Hgax; induction lax; constructor.
 Qed.
 
 Lemma ax_exp_frag {P} : forall l P', ll P' l ->
@@ -1418,7 +1418,7 @@ induction pi using ll_nested_ind ; try (now constructor).
   apply (ex_r ((l2 ++ map wn l0) ++ l1 ++ map wn l0));
     [ | rewrite Q_perm, <- app_assoc;
         symmetry; apply Permutation_Type_app_middle, Permutation_Type_app_rot ].
-  refine (cut_r A _ _); intuition.
+  refine (cut_r A _ _); [ apply Hpcut | | ]; assumption.
 - apply Hpgax.
 Qed.
 

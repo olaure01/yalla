@@ -118,13 +118,12 @@ Proof.
 intros a; induction a; intros b Heq; destruct b; inversion Heq;
   (try apply IHa in H0) ;
   (try apply IHa1 in H0) ;
-  (try apply IHa2 in H1) ; subst;
-  intuition.
+  (try apply IHa2 in H1) ; subst; try reflexivity.
 - now f_equal; apply Atom2PreIAtom_inj.
 - now f_equal; apply Atom2PreIAtom_inj.
-- apply IHa1 in H1.
-  apply IHa2 in H0.
-  now subst.
+- apply IHa1 in H1 as ->.
+  apply IHa2 in H0 as ->.
+  reflexivity.
 Qed.
 
 Lemma trans_wn l :
@@ -514,39 +513,39 @@ induction A; simpl; intros Hnin; rewrite ? a2a_i; try apply munit_smp_id.
 - rewrite repl_at_eq; [ | reflexivity ].
   apply musmp_to.
   rewrite repl_at_neq; [ apply munit_smp_id | ].
-  intros Heq; intuition.
+  intros Heq. apply Hnin. left. assumption.
 - rewrite repl_at_neq; [ apply munit_smp_id | ].
-  intros Heq; intuition.
+  intros Heq. apply Hnin. left. assumption.
 - rewrite repl_at_eq; [ | reflexivity ].
   apply musmp_to, munit_smp_id.
 - rewrite repl_at_eq; [ | reflexivity ].
   rewrite ? bidual.
   apply musmp_to.
   apply musmp_tens; apply musmp_pb; [ apply IHA1 | apply IHA2 ].
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
+  + intros Hin. apply Hnin.
+    apply in_or_app. left. assumption.
+  + intros Hin. apply Hnin.
+    apply in_or_app. right. assumption.
 - apply musmp_parr; [ apply IHA1 | apply IHA2 ].
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
+  + intros Hin. apply Hnin.
+    apply in_or_app. left. assumption.
+  + intros Hin. apply Hnin.
+    apply in_or_app. right. assumption.
 - rewrite repl_at_eq; [ | reflexivity ].
   apply musmp_to, munit_smp_id.
 - rewrite repl_at_eq; [ | reflexivity ].
   rewrite ? bidual.
   apply musmp_to.
   apply musmp_plus; apply musmp_pb; [ apply IHA1 | apply IHA2 ].
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
+  + intros Hin. apply Hnin.
+    apply in_or_app. left. assumption.
+  + intros Hin. apply Hnin.
+    apply in_or_app. right. assumption.
 - apply musmp_with; [ apply IHA1 | apply IHA2 ].
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
-  + intros Hin; apply Hnin.
-    apply in_or_app; intuition.
+  + intros Hin. apply Hnin.
+    apply in_or_app. left. assumption.
+  + intros Hin. apply Hnin.
+    apply in_or_app. right. assumption.
 - rewrite repl_at_eq; [ | reflexivity ].
   rewrite ? bidual.
   apply musmp_to.

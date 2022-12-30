@@ -409,21 +409,21 @@ Proof.
 intros Hpmix0 Hpmixn l pi.
 eapply mix_conservativity_updr; [ | apply pi].
 cbn; intros k Hpmixk L Hl HF.
-destruct L ; [ apply mix_r | ]; intuition.
+destruct L; [ apply mix_r | ]; try assumption.
 rewrite <- Hl in Hpmixk.
 case_eq (n <=? length (l0 :: L)); intros Heq.
-- apply mix_r; intuition.
+- apply mix_r; [ | assumption ].
   now cbn; cbn in Heq; rewrite Heq.
-- apply mix_0_n_r with n; cbn; intuition.
-  + destruct n; intuition.
+- apply mix_0_n_r with n; cbn; [ assumption | | | assumption ].
+  + destruct n; [ assumption | ].
     now cbn; rewrite Nat.leb_refl.
   + transitivity (S (S (length L))); try lia.
     case (Nat.compare_spec n (S (length L))); intros Ho; try lia.
     -- exfalso.
-       subst; rewrite Nat.leb_refl in Heq; inversion Heq.
+       subst; rewrite Nat.leb_refl in Heq; discriminate Heq.
     -- exfalso.
        eapply or_introl, Nat.le_lteq, Nat.leb_le in Ho.
-       cbn in Heq; rewrite Ho in Heq; inversion Heq.
+       cbn in Heq; rewrite Ho in Heq; discriminate Heq.
 Qed.
 
 (** provability in [P + mix_0 + mix_2] is equivalent to provability in [P + mix_k] for all k *)

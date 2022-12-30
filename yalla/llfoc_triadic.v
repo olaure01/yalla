@@ -18,7 +18,7 @@ Inductive reflectT (P : Type) : bool -> Type :=
 #[global] Hint Constructors reflectT : bool.
 
 Lemma reflectT_iffT : forall P b, reflectT P b -> (CRelationClasses.iffT P (b = true)).
-Proof. destruct 1; split; intuition; discriminate. Qed.
+Proof. now destruct 1; split; [ | | | discriminate ]. Qed.
 
 Lemma reflectT_neg P b : reflectT P b -> reflectT (notT P) (negb b).
 Proof. now intros H; inversion H; constructor. Qed.
@@ -308,14 +308,14 @@ apply trifoc_rect;
   eapply exs_tfr; [ | eassumption ].
   apply IHpi, HP.
 - intros A B lw ls1 ls2 pi1 IHpi1 pi2 IHpi2 lw0 HP.
-  apply tens_tfr; intuition.
+  apply tens_tfr; [ apply IHpi1 | apply IHpi2 ]; apply HP.
 Qed.
 
 Lemma ex_tfr :
   (forall lw ls l, atrifoc lw ls l -> forall ls0, Permutation_Type ls ls0 -> atrifoc lw ls0 l)
 * (forall lw ls A, strifoc lw ls A -> forall ls0, Permutation_Type ls ls0 -> strifoc lw ls0 A).
 Proof.
-apply trifoc_rect; try now (intros; constructor; intuition).
+apply trifoc_rect; try now (intros; constructor; auto).
 - intros A lw ls1 ls2 Hs pi IHpi ls0 HP.
   symmetry in HP; destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
   apply foc_tfr, IHpi; try assumption.

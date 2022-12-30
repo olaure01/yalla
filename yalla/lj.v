@@ -480,9 +480,9 @@ Lemma disjunction_property (A B : iformula) : lj nil (ior A B) -> lj nil A + lj 
 Proof.
   intros pi.
   remember nil as l; remember (ior A B) as C.
-  induction pi; inversion Heql; inversion HeqC; subst; intuition.
-  assert (l1 = nil) by (symmetry in p; apply Permutation_Type_nil, p); subst.
-  now apply IHpi.
+  induction pi; inversion Heql; inversion HeqC; subst; [ | left; assumption | right; assumption ].
+  assert (l1 = nil) as -> by (symmetry in p; apply Permutation_Type_nil, p).
+  apply IHpi; reflexivity.
 Qed.
 
 End Atoms_inj.
