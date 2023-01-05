@@ -301,60 +301,58 @@ Hypothesis P_gax_cut : forall a b x l1 l2 l3 l4,
 
 Theorem cut_r_gaxat A l1 l2 : ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
 Proof.
-case_eq (pcut P); intros P_cutfree.
-{ intros pi1 pi2; refine (cut_r A pi1 pi2); assumption. }
+destruct (pcut P) eqn:P_cutfree.
+{ intros pi1 pi2. refine (@cut_r _ _ P_cutfree A _ _ pi1 pi2). }
 enough (forall c s A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2)),
           s = psize pi1 + psize pi2 -> fsize A = c -> ll P (l1 ++ l0 ++ l2)) as IH.
 { intros pi1 pi2.
   rewrite <- (app_nil_l _) in pi2.
-  apply (ex_r (nil ++ l1 ++ l2)); [ | simpl; apply PCPermutation_Type_app_comm ].
-  apply (IH _ _ A _ _ _ pi1 pi2 eq_refl eq_refl). }
-clear A l1 l2; induction c as [c IHcut0] using lt_wf_rect.
+  apply (ex_r (nil ++ l1 ++ l2)); [ | cbn; apply PCPermutation_Type_app_comm ].
+  exact (IH _ _ A _ _ _ pi1 pi2 eq_refl eq_refl). }
+clear A l1 l2. induction c as [c IHcut0] using lt_wf_rect.
 assert (forall A, fsize A < c -> forall l0 l1 l2,
           ll P (dual A :: l0) -> ll P (l1 ++ A :: l2) -> ll P (l1 ++ l0 ++ l2)) as IHcut
-  by (intros A Hs l0 l1 l2 pi1 pi2; apply (IHcut0 _ Hs _ _ _ _ _ pi1 pi2 eq_refl eq_refl));
-  clear IHcut0.
+  by (intros A Hs l0 l1 l2 pi1 pi2; apply (IHcut0 _ Hs _ _ _ _ _ pi1 pi2 eq_refl eq_refl)). clear IHcut0.
 induction s as [s IHsize0] using lt_wf_rect.
 assert (forall A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2)),
           psize pi1 + psize pi2 < s -> fsize A = c -> ll P (l1 ++ l0 ++ l2)) as IHsize
-  by (intros; eapply (IHsize0 (psize pi1 + psize pi2)); [ | reflexivity | ]; assumption);
-  clear IHsize0.
+  by (intros; eapply (IHsize0 (psize pi1 + psize pi2)); [ | reflexivity | ]; assumption). clear IHsize0.
 intros A l0 l1 l2 pi1 pi2 -> <-.
-remember (l1 ++ A :: l2) as l; destruct_ll pi2 f X l Hl Hr HP Hax a.
+remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* ax_r *)
-  destruct l1; inversion Heql; subst.
-  + eapply ex_r; [ apply pi1 | apply PCPermutation_Type_cons_append ].
-  + unit_vs_elt_inv H1; list_simpl; assumption.
+  destruct l1; injection Heql as [= <- Heql].
+  + subst l2. eapply ex_r; [ apply pi1 | apply PCPermutation_Type_cons_append ].
+  + unit_vs_elt_inv Heql. list_simpl. assumption.
 - (* ex_r *)
   cbn in IHsize.
   apply PCPermutation_Type_vs_elt_subst in HP as [[l1' l2'] HP ->].
   eapply ex_r; [ refine (IHsize _ _ _ _ pi1 Hl _ _); lia | ].
-  symmetry; apply HP.
+  symmetry. apply HP.
 - (* ex_wn_r *)
-  symmetry in Heql; trichot_elt_app_inf_exec Heql; list_simpl; subst.
-  + rewrite 2 app_assoc; eapply ex_wn_r; [ | apply HP ]; rewrite <- 2 app_assoc.
-    revert Hl IHsize; list_simpl; intros Hl IHsize.
+  symmetry in Heql. trichot_elt_app_inf_exec Heql; list_simpl; subst.
+  + rewrite 2 app_assoc. eapply ex_wn_r, HP. rewrite <- 2 app_assoc.
+    revert Hl IHsize. list_simpl. intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _ _); lia.
-  + destruct Heql1 as [Heql1 ->].
-    cbn in Heql1; symmetry in Heql1; decomp_map_inf Heql1; subst; cbn; cbn in HP, pi1.
-    list_simpl; rewrite app_assoc, <- (app_nil_l (map wn l7 ++ l3)).
+  + clear IHsize.
+    destruct Heql1 as [Heql1 ->]. symmetry in Heql1. decomp_map_inf Heql1. subst.
+    list_simpl. rewrite app_assoc, <- (app_nil_l (map wn l7 ++ l3)).
     apply (cut_oc_comm P_cutfree (dual x)); [ assumption | ].
-    intros lw' pi0; list_simpl.
-    clear IHsize; apply Permutation_Type_vs_elt_subst in HP as [(l2', l3') HP ->].
-    specialize (HP lw'); symmetry in HP.
+    intros lw' pi0. list_simpl.
+    apply Permutation_Type_vs_elt_subst in HP as [(l2', l3') HP ->].
+    specialize (HP lw'). symmetry in HP.
     rewrite (app_assoc (map wn l2)), (app_assoc _ _ l3), <- (app_assoc (map wn l2)), <- 2 map_app.
     refine (ex_wn_r _ _ _ _ _ HP).
-    list_simpl; rewrite app_assoc.
+    list_simpl. rewrite app_assoc.
     enough (ll P ((l ++ map wn l2') ++
                   flat_map (fun '(_, p2) => app (map wn lw') p2) ((0, map wn l3' ++ l3)::nil)))
       as pi' by (list_simpl in pi'; list_simpl; assumption).
-    apply substitution_oc with x; try assumption.
-    * intros; apply IHcut with x; [ cbn; lia | | ]; assumption.
-    * list_simpl; list_simpl in Hl; assumption.
+    apply substitution_oc with x; [ assumption | | ].
+    * intros. apply IHcut with x; [ cbn; lia | | ]; assumption.
+    * list_simpl. list_simpl in Hl. assumption.
   + rewrite <- 2 app_assoc.
-    eapply ex_wn_r ; [ | apply HP ].
+    eapply ex_wn_r, HP.
     rewrite (app_assoc (map wn lw)), (app_assoc l).
-    revert Hl IHsize; cbn; rewrite (app_assoc (map wn lw) l5), (app_assoc l); intros Hl IHsize.
+    revert Hl IHsize. cbn. rewrite (app_assoc (map wn lw) l5), (app_assoc l). intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _ _); lia.
 - (* mix_r *)
   apply concat_vs_elt in Heql as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
@@ -858,82 +856,75 @@ remember (l1 ++ A :: l2) as l; destruct_ll pi2 f X l Hl Hr HP Hax a.
     revert Hl IHsize; cbn; rewrite (app_comm_cons l1 _ A0); intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _ _); cbn; lia.
 - (* with_r *)
-  destruct l1; inversion Heql; subst; list_simpl.
+  destruct l1; injection Heql as [= <- ->]; list_simpl.
   + (* main case *)
-    remember (dual (awith A0 B) :: l0) as l'; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a;
-      try inversion Heql'.
+    remember (dual (awith A0 B) :: l0) as l' eqn:Heql'.
+    destruct_ll pi1 f X l Hl2 Hr2 HP Hax a; try inversion Heql'.
     * (* ex_r *)
-      remember (with_r Hl Hr) as Hwith ; clear HeqHwith.
-      destruct (PCPermutation_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] HP' Heq];
-        cbn in Heq, HP'; subst.
+      remember (with_r Hl Hr) as Hwith eqn:HeqHwith. clear HeqHwith.
+      destruct (PCPermutation_Type_vs_cons_inv _ _ _ _ HP) as [[p1 p2] HP' ->].
       apply (PEPermutation_Type_app_tail _ _ _ l2) in HP'.
-      apply PEPermutation_PCPermutation_Type in HP'; unfold id in HP'; list_simpl in HP'.
+      apply PEPermutation_PCPermutation_Type in HP'. unfold id in HP'. list_simpl in HP'.
       eapply ex_r; [ | symmetry; apply HP' ].
       eapply ex_r; [ | symmetry; apply PCPermutation_Type_app_rot ].
-      revert Hwith IHsize; cbn;
-        replace (awith A0 B) with (dual (aplus (dual A0) (dual B)))
-          by (cbn; rewrite 2 bidual; reflexivity);
-        intros Hwith IHsize.
-      refine (IHsize _ _ _ _ Hwith Hl2 _ _); cbn; rewrite ? fsize_dual; lia.
+      revert Hwith IHsize. cbn.
+      replace (awith A0 B) with (dual (aplus (dual A0) (dual B))) by (cbn; rewrite 2 bidual; reflexivity).
+      intros Hwith IHsize.
+      refine (IHsize _ _ _ _ Hwith Hl2 _ _); [ | cbn; rewrite ! fsize_dual]; lia.
     * (* ex_wn_r *)
-      remember (with_r Hl Hr) as Hwith eqn:HeqHwith; clear HeqHwith.
+      remember (with_r Hl Hr) as Hwith eqn:HeqHwith. clear HeqHwith.
       destruct l; inversion Heql'; [ destruct lw'; inversion Heql' | ]; subst.
-      -- assert (lw = nil)
-           by (clear - HP; symmetry in HP; apply (Permutation_Type_nil HP)); subst.
-         list_simpl in Heql'; subst; list_simpl in Hl2.
-         revert Hl2 IHsize; cbn; change (aplus (dual A0) (dual B)) with (dual (awith A0 B));
-           intros Hl2 IHsize.
-         revert Hwith IHsize; rewrite <- (app_nil_l (awith _ _ :: _)); intros Hwith IHsize.
-         refine (IHsize _ _ _ _ Hl2 Hwith _ _); cbn; lia.
-      -- list_simpl; eapply ex_wn_r; [ | apply HP ]; rewrite 2 app_assoc, <- (app_assoc l).
-         revert Hl2 IHsize; cbn; change (aplus (dual A0) (dual B)) with (dual (awith A0 B));
-           intros Hl2 IHsize.
-         revert Hwith IHsize; rewrite <- (app_nil_l (awith _ _ :: _)); intros Hwith IHsize.
-         refine (IHsize _ _ _ _ Hl2 Hwith _ _); cbn; lia.
+      -- assert (lw = nil) as ->
+           by (clear - HP; symmetry in HP; apply (Permutation_Type_nil HP)).
+         list_simpl in Heql'. subst. list_simpl in Hl2.
+         revert Hl2 IHsize. cbn. change (aplus (dual A0) (dual B)) with (dual (awith A0 B)). intros Hl2.
+         revert Hwith. rewrite <- (app_nil_l (awith _ _ :: _)). intros Hwith IHsize.
+         refine (IHsize _ _ _ _ Hl2 Hwith _ _); [ | cbn ]; lia.
+      -- list_simpl. eapply ex_wn_r; [ | apply HP ]; rewrite 2 app_assoc, <- (app_assoc l).
+         revert Hl2 IHsize. cbn. change (aplus (dual A0) (dual B)) with (dual (awith A0 B)). intros Hl2.
+         revert Hwith. rewrite <- (app_nil_l (awith _ _ :: _)). intros Hwith IHsize.
+         refine (IHsize _ _ _ _ Hl2 Hwith _ _); [ | cbn ]; lia.
     * (* mix_r *)
-      remember (with_r Hl) as Hwith; clear HeqHwith.
+      remember (with_r Hl) as Hwith eqn:HeqHwith. clear HeqHwith.
       rewrite <- (app_nil_l (aplus _ _ :: _)) in H0.
-      apply concat_vs_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (Heqt & HeqL))); subst.
-      symmetry in Heqb.
-      apply app_eq_nil in Heqb as [Heqb1 Heqb2].
-      apply ex_r with ((l2 ++ l2') ++ concat L2); [ | GPermutation_Type_solve].
+      apply concat_vs_elt in H0 as ((((L1 & L2) & l1') & l2') & (Heqb & (-> & ->))).
+      symmetry in Heqb. apply app_eq_nil in Heqb as [Heqb ->].
+      apply ex_r with ((l2 ++ l2') ++ concat L2); [ | list_simpl; apply PCPermutation_Type_app_rot ].
       change ((l2 ++ l2') ++ concat L2) with (nil ++ (l2 ++ l2') ++ concat L2).
-      rewrite <- Heqb1.
+      rewrite <- Heqb.
       change ((l2 ++ l2') ++ concat L2) with (concat ((l2 ++ l2') :: L2)).
       rewrite <- concat_app.
       apply mix_r.
-      -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+      -- clear IHsize. rewrite app_length. rewrite app_length in f. cbn. cbn in f. assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
-         inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
-         apply Forall_inf_app; [ assumption |].
-         apply Forall_inf_cons; [| assumption ].
+         inversion FL2; subst. clear FL2. rename X0 into FL2. rename X into pi.
+         apply Forall_inf_app; [ assumption | ].
+         apply Forall_inf_cons; [ | assumption ].
          clear pi.
          destruct (In_Forall_inf_elt _ _ (nil ++ (aplus (dual A0) (dual B)) :: l2') Hax) as [pi Hin].
          change (l2 ++ l2') with (nil ++ l2 ++ l2').
-         revert Hwith IHsize;
-           replace (awith A0 B)
-              with (dual (aplus (dual A0) (dual B))) by (cbn; rewrite 2 bidual; reflexivity);
-           intros Hwith IHsize.
-         apply (psize_inf_mix f) in Hin.
-         refine (IHsize _ _ _ _ (Hwith Hr) pi _ _); cbn; cbn in Hin; rewrite ? fsize_dual; lia.
+         revert Hwith IHsize.
+         replace (awith A0 B) with (dual (aplus (dual A0) (dual B))) by (cbn; rewrite 2 bidual; reflexivity).
+         intros Hwith IHsize.
+         apply (psize_inf_mix f) in Hin. cbn in Hin.
+         refine (IHsize _ _ _ _ (Hwith Hr) pi _ _); cbn; rewrite ? fsize_dual; lia.
     * (* plus_r1 *)
-      clear IHsize; subst.
-      rewrite <- (app_nil_l (A0 :: _)) in Hl; refine (IHcut _ _ _ _ _ Hl2 Hl); cbn; lia.
+      clear IHsize. subst.
+      rewrite <- (app_nil_l (A0 :: _)) in Hl. refine (IHcut _ _ _ _ _ Hl2 Hl). cbn. lia.
     * (* plus_r2 *)
-      clear IHsize; subst.
-      rewrite <- (app_nil_l (B :: _)) in Hr; refine (IHcut _ _ _ _ _ Hl2 Hr); cbn; lia.
+      clear IHsize. subst.
+      rewrite <- (app_nil_l (B :: _)) in Hr. refine (IHcut _ _ _ _ _ Hl2 Hr). cbn. lia.
     * (* cut_r *)
-      rewrite f in P_cutfree; inversion P_cutfree.
+      rewrite f in P_cutfree. discriminate P_cutfree.
     * (* gax_r *)
       exfalso.
-      assert (Hat := P_gax_at a); rewrite H0 in Hat; inversion Hat as [ | ? ? Hat' ]; inversion Hat'.
+      assert (Hat := P_gax_at a). rewrite H0 in Hat. inversion Hat as [ | ? ? [] ].
   + (* commutative case *)
     apply with_r.
-    * revert Hl IHsize; cbn; rewrite (app_comm_cons l1 _ A0); intros Hl IHsize.
+    * revert Hl IHsize. cbn. rewrite (app_comm_cons l1 _ A0). intros Hl IHsize.
       refine (IHsize _ _ _ _ pi1 Hl _ _); cbn; lia.
-    * revert Hr IHsize; cbn; rewrite (app_comm_cons l1 _ B); intros Hr IHsize.
+    * revert Hr IHsize. cbn. rewrite (app_comm_cons l1 _ B). intros Hr IHsize.
       refine (IHsize _ _ _ _ pi1 Hr _ _); cbn; lia.
 - (* oc_r *)
   destruct l1; inversion Heql; subst; list_simpl.
