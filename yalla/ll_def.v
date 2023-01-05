@@ -25,6 +25,38 @@ Notation Dependent_Forall_inf_forall_formula :=
     (@list_eq_dec _ (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
                                             (fun x y => proj2 (eqb_eq x y)))).
 
+(* TODO generalize into OLlibs.Dependent_Forall_Type *)
+(* TODO dealing with issue coq/coq#12394 *)
+(* Example:
+  [ old code
+         apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
+         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec; apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
+         subst.
+    new code should be cbnified or old code back once coq/coq#12394 solved
+         apply inj_pair2_eq_dec in H2;
+           [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
+         assert (Pa = p) as Heq; subst.
+         { apply issue12394.injection_list in H2 as [-> _]; [ reflexivity | ].
+           apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq. } *)
+Ltac Dependent_Forall_inversion H :=
+  match type of H with
+  | Dependent_Forall_inf _ _ =>
+    let a := fresh in
+    let b := fresh in
+    let L := fresh "L" in
+    let H1 := fresh H in
+    let H2 := fresh H in
+    let H3 := fresh H in
+    let Heq1 := fresh in
+    let Heq2 := fresh in
+    let Heq := fresh "HeqD" in
+    inversion H as [|a b L H1 H2 H3 [Heq1 Heq2] Heq]; subst a; subst b;
+    apply inj_pair2_eq_dec in Heq;
+      [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ];
+    apply issue12394.injection_list in Heq as [-> ->];
+      [ | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ]
+  end.
+
 
 (** ** Fragments for proofs *)
 
@@ -134,6 +166,9 @@ Lemma eq_pfrag_refl P : eq_pfrag P P.
 Proof. repeat split; intro a; split with a; reflexivity. Qed.
 *)
 
+(** Same proof fragment as [P] but with value [G] for [pgax]. *)
+Definition axupd_pfrag P G := mk_pfrag (pcut P) G (pmix P) (pperm P).
+
 (** Same proof fragment as [P] but with value [b] for [pcut]. *)
 Definition cutupd_pfrag P b := mk_pfrag b (pgax P) (pmix P) (pperm P).
 
@@ -144,14 +179,14 @@ repeat split; try reflexivity.
 - intros a. exists a. reflexivity.
 Qed.
 
-(** Same proof fragment as [P] but with value [G] for [pgax]. *)
-Definition axupd_pfrag P G := mk_pfrag (pcut P) G (pmix P) (pperm P).
-
 (** Same proof fragment as [P] but without the [cut] rule. *)
 Definition cutrm_pfrag P := cutupd_pfrag P false.
 
 Lemma cutrm_cutrm P : cutrm_pfrag (cutrm_pfrag P) = cutrm_pfrag P.
 Proof. unfold cutrm_pfrag, cutupd_pfrag. reflexivity. Qed.
+
+Lemma cutrm_pfrag_le P : le_pfrag (cutrm_pfrag P) P.
+Proof. repeat split; try reflexivity. intros a. exists a. reflexivity. Qed.
 
 
 (** Same proof fragment as [P] but with a different pmix *)
@@ -242,10 +277,10 @@ Section ll_ind.
   Definition Forall_Proofs (Pred : forall l, ll P l -> Type) L (piL : Forall_inf (ll P) L) :=
     Dependent_Forall_inf Pred piL.
 
-  Lemma Forall_Proofs_to_Forall_inf : forall (Pred : forall l, ll P l -> Type) L (piL : Forall_inf (ll P) L),
+  Lemma Forall_Proofs_to_Forall_inf (Pred : forall l, ll P l -> Type) L (piL : Forall_inf (ll P) L) :
     Forall_Proofs Pred piL -> 
     Forall_inf (fun x => Pred (projT1 x) (projT2 x)) (Forall_to_list piL).
-  Proof. intros Pred L piL PpiL; induction PpiL; constructor; assumption. Qed.
+  Proof. intros PpiL. induction PpiL; constructor; assumption. Qed.
 
   Fixpoint pre_ll_nested_ind l (pi : ll P l) : forall (Pred : forall l, ll P l -> Type),
     (forall X, Pred (covar X :: var X :: nil) (ax_r X)) ->
@@ -340,8 +375,7 @@ Section ll_ind.
                         (list_to_Forall (Forall_to_list f)))) as HL
     by (apply X2; clear e; induction HP; cbn; constructor; assumption).
   clear - HL.
-  rewrite (flat_map_concat_map (@projT1 _ (ll P)) (Forall_to_list f)) in HL;
-    unfold eq_rect_r in HL; cbn in HL.
+  rewrite (flat_map_concat_map (@projT1 _ (ll P)) (Forall_to_list f)) in HL. unfold eq_rect_r in HL. cbn in HL.
   rewrite <- (Forall_to_list_to_Forall f).
   replace e with
       (rew [fun n : nat => pmix P n = true] f_equal (length (A:=list formula))
@@ -350,8 +384,8 @@ Section ll_ind.
                    (eq_ind_r (fun n => pmix P n = true) e (Forall_to_list_length f))
                    (map_length (projT1 (P:=ll P)) (Forall_to_list f)))
     by apply (Eqdep_dec.UIP_dec Bool.bool_dec).
-  rewrite <- (Forall_to_list_support f); assumption.
-  Qed.
+  rewrite <- (Forall_to_list_support f). assumption.
+  Defined.
 
 End ll_ind.
 
@@ -364,6 +398,136 @@ Definition ll_nested_ind P := fun Pred ax_case ex_case ex_wn_case mix_case one_c
 
 #[export] Instance ll_perm P : Proper ((@PCPermutation_Type _ (pperm P)) ==> arrow) (ll P) | 100.
 Proof. intros l1 l2 HP pi. exact (ex_r _ _ pi HP). Qed.
+
+(* Unused
+Lemma same_pfrag P Q : eq_pfrag P Q -> forall l, ll P l -> ll Q l.
+Proof.
+intros Heq l pi.
+induction pi using ll_nested_ind'; try now constructor.
+- apply (ex_r l1 _ IHpi).
+  destruct Heq as (_ & _ & _  & Hp).
+  unfold PCPermutation_Type in *.
+  destruct (pperm P), (pperm Q); cbn in Hp; try inversion Hp; try assumption.
+- apply (ex_wn_r l1 lw); assumption.
+- assert ({L' & (map (@projT1 _ (ll Q)) L') = (map (@projT1 _ (ll P)) L)}) as [L' eqL'].
+  { destruct eqpmix.
+    induction L.
+    - split with nil; reflexivity.
+    - inversion X; subst.
+      destruct (IHL X1) as [L' eq].
+      split with (existT (ll Q) (projT1 a) X0 :: L').
+      cbn; rewrite eq; reflexivity. }
+  rewrite flat_map_concat_map, <- eqL', <- flat_map_concat_map.
+  apply mix'_r.
+  destruct Heq as (_ & _ & Hpmix & _).
+  specialize Hpmix with (length L).
+  rewrite <- map_length with _ _ (@projT1 _ (ll Q)) L', eqL', map_length.
+  case_eq (pmix Q (length L)); intros eq; [ reflexivity | exfalso ].
+  rewrite eq, eqpmix in Hpmix.
+  inversion Hpmix.
+- destruct Heq as [Hcut _].
+  rewrite f in Hcut; symmetry in Hcut.
+  apply (@cut_r _ Hcut A); assumption.
+- destruct Heq as (_ & Hgax & _).
+  destruct (fst Hgax a) as [b ->].
+  apply gax_r.
+Qed.
+*)
+
+Lemma stronger_pfrag P Q : le_pfrag P Q -> forall l, ll P l -> ll Q l.
+Proof.
+intros Hle l pi.
+induction pi using ll_nested_ind; try (constructor; assumption).
+- refine (ex_r _ _ IHpi _).
+  apply (PCPermutation_Type_monot (pperm P)), p.
+  apply Hle.
+- exact (ex_wn_r _ _ _ _ IHpi p).
+- apply mix_r.
+  + destruct Hle as (_ & _ & Hmix & _).
+    specialize (Hmix (length L)).
+    eapply implb_true_iff, eqpmix.
+    apply le_implb, Hmix.
+  + clear eqpmix. induction L; constructor; inversion X; subst.
+    * apply X0.
+    * eapply IHL, X1.
+- refine (cut_r _ IHpi1 IHpi2).
+  destruct Hle as (Hcut & _ & _ & _).
+  eapply implb_true_iff, f.
+  apply le_implb, Hcut.
+- destruct Hle as (_ & Hgax & _ & _).
+  destruct (Hgax a) as [b ->].
+  apply gax_r.
+Defined.
+#[global] Arguments stronger_pfrag : clear implicits.
+
+
+(** Proofs with sequent satisfying a given predicate *)
+
+Fixpoint Forall_sequent P PS l (pi : ll P l) : Type :=
+match pi with
+| ax_r X => PS (covar X :: var X :: nil)
+| ex_r _ l2 pi1 _ => Forall_sequent PS pi1 * PS l2
+| ex_wn_r l1 _ lw' l2 pi1 _ => Forall_sequent PS pi1 * PS (l1 ++ map wn lw' ++ l2)
+| @mix_r _ L _ PL => ((fix Forall_sequent_Forall P L (PL : Forall_inf (ll P) L) {struct PL} : Type :=
+       match PL with
+       | Forall_inf_nil _ => True
+       | @Forall_inf_cons _ _ l L Pl PL => (Forall_sequent PS Pl * Forall_sequent_Forall P L PL)%type
+       end) P L PL) * PS (concat L)
+| one_r => PS (one :: nil)
+| @bot_r _ l pi1 => Forall_sequent PS pi1 * PS (bot :: l)
+| @tens_r _ A B l1 l2 pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS (tens A B :: l2 ++ l1)
+| @parr_r _ A B l pi1 => Forall_sequent PS pi1 * PS (parr A B :: l)
+| top_r l => PS (top :: l)
+| @plus_r1 _ A B l pi1 => Forall_sequent PS pi1 * PS (aplus A B :: l)
+| @plus_r2 _ A B l pi1 => Forall_sequent PS pi1 * PS (aplus B A :: l)
+| @with_r _ A B l pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS (awith A B :: l)
+| @oc_r _ A l pi1 => Forall_sequent PS pi1 * PS (oc A :: map wn l)
+| @de_r _ A l pi1 => Forall_sequent PS pi1 * PS (wn A :: l)
+| @wk_r _ A l pi1 => Forall_sequent PS pi1 * PS (wn A :: l)
+| @co_r _ A l pi1 => Forall_sequent PS pi1 * PS (wn A :: l)
+| @cut_r _ _ A l1 l2 pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS (l2 ++ l1)
+| gax_r a => PS (projT2 (pgax P) a)
+end.
+
+Definition Forall_formula P FS := @Forall_sequent P (Forall_inf FS).
+
+Lemma Forall_sequent_is P PS l (pi : ll P l) : Forall_sequent PS pi -> PS l.
+Proof. destruct pi; cbn; tauto. Qed.
+
+Lemma Forall_sequent_impl P PS QS (HPQ : forall x, PS x -> QS x) l (pi : ll P l) :
+  Forall_sequent PS pi -> Forall_sequent QS pi.
+Proof.
+induction pi using ll_nested_ind;
+  try (now cbn; apply HPQ);
+  try (now cbn; intros [IH H]; split; auto);
+  try (now cbn; intros [[IH1 IH2] H]; split; auto).
+cbn. clear eqpmix. intros [HFS HPS].
+split; [ clear HPS | exact (HPQ _ HPS) ].
+induction PL; [ exact I | ].
+unfold Forall_Proofs in X. Dependent_Forall_inversion X.
+split.
+- apply X1, HFS.
+- apply (IHPL X2), HFS.
+Qed.
+
+Lemma Forall_sequent_stronger_pfrag P Q (Hfrag : le_pfrag P Q) PS l (pi : ll P l) :
+  Forall_sequent PS pi -> Forall_sequent PS (stronger_pfrag _ _ Hfrag _ pi).
+Proof.
+induction pi using ll_nested_ind; intros HFS; try (cbn in HFS; cbn; tauto).
+- cbn in HFS. cbn. clear eqpmix. destruct HFS as [HFS HPS].
+  split; [ clear HPS | exact HPS ].
+  induction PL in X, HFS |- *.
+  + exact HFS.
+  + unfold Forall_Proofs in X. Dependent_Forall_inversion X.
+    destruct HFS as [Hp HFS]. split.
+    * exact (X1 Hp).
+    * exact (IHPL X2 HFS).
+- cbn. cbn in HFS. destruct Hfrag as (_ & ? & _ & _), (s a) as [b H].
+  rewrite H. cbn. rewrite <- H. assumption.
+Qed.
+
+
+(** Size of proofs *)
 
 Fixpoint psize P l (pi : ll P l) :=
 match pi with
@@ -432,75 +596,6 @@ cbn. clear eq. induction FL in l, pi |- *; intros Hin; inversion Hin.
   apply IHFL with l pi; assumption.
 Qed.
 
-(* Unused
-Lemma same_pfrag P Q : eq_pfrag P Q -> forall l, ll P l -> ll Q l.
-Proof.
-intros Heq l pi.
-induction pi using ll_nested_ind'; try now constructor.
-- apply (ex_r l1 _ IHpi).
-  destruct Heq as (_ & _ & _  & Hp).
-  unfold PCPermutation_Type in *.
-  destruct (pperm P), (pperm Q); cbn in Hp; try inversion Hp; try assumption.
-- apply (ex_wn_r l1 lw); assumption.
-- assert ({L' & (map (@projT1 _ (ll Q)) L') = (map (@projT1 _ (ll P)) L)}) as [L' eqL'].
-  { destruct eqpmix.
-    induction L.
-    - split with nil; reflexivity.
-    - inversion X; subst.
-      destruct (IHL X1) as [L' eq].
-      split with (existT (ll Q) (projT1 a) X0 :: L').
-      cbn; rewrite eq; reflexivity. }
-  rewrite flat_map_concat_map, <- eqL', <- flat_map_concat_map.
-  apply mix'_r.
-  destruct Heq as (_ & _ & Hpmix & _).
-  specialize Hpmix with (length L).
-  rewrite <- map_length with _ _ (@projT1 _ (ll Q)) L', eqL', map_length.
-  case_eq (pmix Q (length L)); intros eq; [ reflexivity | exfalso ].
-  rewrite eq, eqpmix in Hpmix.
-  inversion Hpmix.
-- destruct Heq as [Hcut _].
-  rewrite f in Hcut; symmetry in Hcut.
-  apply (@cut_r _ Hcut A); assumption.
-- destruct Heq as (_ & Hgax & _).
-  destruct (fst Hgax a) as [b ->].
-  apply gax_r.
-Qed.
-*)
-
-Lemma stronger_pfrag P Q : le_pfrag P Q -> forall l, ll P l -> ll Q l.
-Proof.
-intros Hle l pi.
-induction pi using ll_nested_ind'; try now constructor.
-- apply (ex_r l1 _ IHpi).
-  destruct Hle as (_ & _ & _  & Hp).
-  unfold PCPermutation_Type in *.
-  destruct (pperm P), (pperm Q); cbn in Hp; try inversion Hp; try assumption.
-  apply CPermutation_Permutation_Type; assumption.
-- apply (ex_wn_r l1 lw); assumption.
-- assert ({L' & (map (@projT1 _ (ll Q)) L') = (map (@projT1 _ (ll P)) L)}) as [L' eqL'].
-  { destruct eqpmix.
-    induction L.
-    - split with nil. reflexivity.
-    - inversion X. subst.
-      destruct (IHL X1) as [L' eq].
-      split with (existT (ll Q) (projT1 a) X0 :: L').
-      cbn. rewrite eq. reflexivity. }
-  rewrite flat_map_concat_map, <- eqL', <- flat_map_concat_map.
-  apply mix'_r.
-  destruct Hle as (_ & _ & Hpmix & _).
-  specialize Hpmix with (length L).
-  rewrite <- map_length with _ _ (@projT1 _ (ll Q)) L', eqL', map_length.
-  destruct (pmix Q (length L)) eqn:eq; [ reflexivity | exfalso ].
-  rewrite eqpmix in Hpmix.
-  discriminate Hpmix.
-- destruct Hle as [Hcut _].
-  rewrite f in Hcut. cbn in Hcut.
-  apply (@cut_r _ Hcut A); assumption.
-- destruct Hle as (_ & Hgax & _).
-  destruct (Hgax a) as [b ->].
-  apply gax_r.
-Qed.
-#[global] Arguments stronger_pfrag : clear implicits.
 
 (** *** Variants of rules *)
 
@@ -1175,38 +1270,15 @@ induction pi using ll_nested_ind; cbn; intros Hgax;
     * inversion Hin.
     * inversion Hin.
       -- subst.
-         inversion X.
-(* TODO old code
-         apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
-         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec; apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
-         subst.
-   new code should be cbnified or old code back once coq/coq#12394 solved *)
-         apply inj_pair2_eq_dec in H2;
-           [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
-         assert (Pa = p) as Heq; subst.
-         { apply issue12394.injection_list in H2 as [-> _]; [ reflexivity | ].
-           apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq. }
-(* once cleaned give explicit names to generated hypotheses *)
-(* end TODO *)
-         apply X0.
+         unfold Forall_Proofs in X. Dependent_Forall_inversion X.
+         apply X1.
          now apply Forall_inf_app_l in Hgax.
-      -- inversion X.
-(* TODO idem
-         apply inj_pair2_eq_dec in H; [ | apply list_eq_dec; apply Formula_dec.eq_dec].
-         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec; apply list_eq_dec; apply Formula_dec.eq_dec].
-         subst.
-*)
-         apply inj_pair2_eq_dec in H2;
-           [ | apply (@list_eq_dec _ (@eqb (list_dectype formulas_dectype))); apply eqb_eq ].
-         assert (Pa = p /\ Fl = PL) as [-> ->].
-         { apply issue12394.injection_list in H2 as [-> H2]; [ easy | ].
-           apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq. }
-(* end TODO *)
+      -- unfold Forall_Proofs in X. Dependent_Forall_inversion X.
          apply Forall_inf_app_r in Hgax.
          apply IHPL; assumption.
 - eapply cut_r; [ | eassumption | eassumption ].
   rewrite f in Hcut; destruct (pcut Q); inversion Hcut; reflexivity.
-- inversion Hgax; subst; assumption.
+- inversion_clear Hgax. assumption.
 Qed.
 
 Lemma ax_gen P Q l : Bool.le (pperm P) (pperm Q) ->
