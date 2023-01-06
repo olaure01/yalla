@@ -3,7 +3,7 @@
 
 (** * Definitions of various Linear Logic fragments *)
 
-From Coq Require Import BoolOrder PeanoNat Lia.
+From Coq Require Import PeanoNat Lia.
 From OLlibs Require Import infinite funtheory List_more Dependent_Forall_Type
                            CPermutation_Type Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ll_prop.
@@ -22,13 +22,10 @@ Notation ll := (@ll atom).
 
 Lemma mix_by_tens_n P L : Forall_inf (ll P) L -> ll P (tens_n (length L) bot :: concat L).
 Proof.
-intros FL; induction FL.
+intros FL. induction FL as [|l0 [|l L] pi FL IHFL].
 - apply one_r.
-- destruct l.
-  + apply bot_r.
-    cbn; rewrite app_nil_r; assumption.
-  + apply tens_r; [ assumption | ].
-    apply bot_r; assumption.
+- apply bot_r. cbn. rewrite app_nil_r. assumption.
+- apply tens_r, bot_r; assumption.
 Qed.
 
 (** Provability in [P + mix_n] by adding [wn (tens_n n bot)], and provability in [P + cut + ax : parr_n n bot] are equivalent *)
@@ -39,26 +36,22 @@ Proof.
 intros pi.
 rewrite <- (app_nil_r _).
 apply cut_r with (wn (tens_n n bot)); [ reflexivity | | ].
-- cbn; change nil with (map (@wn atom) nil); apply oc_r.
-  rewrite dual_tens_n; cbn.
-  apply parr_n_r.
+- cbn. change nil with (map (@wn atom) nil). apply oc_r.
+  rewrite dual_tens_n. cbn. apply parr_n_r.
   rewrite app_nil_r.
   replace (repeat one n) with (concat (repeat (@one atom :: nil) n))
     by (symmetry; apply repeat_to_concat).
   apply mix_r.
-  + cbn; rewrite repeat_length.
-    rewrite Nat.eqb_refl; reflexivity.
-  + remember (cutupd_pfrag (pmixupd_point_pfrag P n true) true) as P'.
-    clear; induction n.
-    * apply Forall_inf_nil.
-    * apply Forall_inf_cons; [ | assumption ].
-      apply one_r.
+  + cbn. rewrite repeat_length, Nat.eqb_refl. reflexivity.
+  + remember (cutupd_pfrag (pmixupd_point_pfrag P n true) true) as P'. clear.
+    induction n; constructor; [ | assumption ].
+    apply one_r.
 - apply stronger_pfrag with P; [ | assumption ].
   repeat split; cbn.
   + apply BoolOrder.le_true.
-  + intros a; split with a; reflexivity.
+  + intros a. exists a. reflexivity.
   + intros n0.
-    case_eq (n0 =? n); intros Heq; [ | reflexivity ].
+    destruct (n0 =? n) eqn:Heq; [ | reflexivity ].
     apply BoolOrder.le_true.
   + reflexivity.
 Qed.
@@ -69,14 +62,14 @@ Proof.
 intros pi.
 eapply (ext_wn_param fp ((tens_n n bot) :: nil)) in pi.
 - eapply ex_r; [ eassumption | symmetry; rewrite fp; apply Permutation_Type_cons_append ].
-- intros Hcut; assumption.
-- cbn; intros a.
+- intros Hcut. assumption.
+- cbn. intros a.
   eapply ex_r; [ | rewrite fp; apply Permutation_Type_cons_append ].
   apply wk_r, gax_r.
 - intros.
   remember (length L) as nL.
-  case_eq (nL =? n); intros Heq.
-  + cbn in H; rewrite Heq in H.
+  destruct (nL =? n) eqn:Heq.
+  + cbn in H. rewrite Heq in H.
     apply ex_r with (map wn (tens_n n bot :: nil) ++ concat L);
       [ cbn | rewrite fp; apply Permutation_Type_app_comm ].
     apply co_const_list_r with (S nL).
@@ -92,23 +85,23 @@ eapply (ext_wn_param fp ((tens_n n bot) :: nil)) in pi.
     apply de_r, tens_n_r.
     apply forall_Forall_inf.
     intros l' Hin.
-    destruct (in_inf_map_inv _ _ _ Hin) as [l'' <- Hin'']; clear Hin.
+    destruct (in_inf_map_inv _ _ _ Hin) as [l'' <- Hin'']. clear Hin.
     apply bot_r.
-    destruct (in_inf_map_inv _ _ _ Hin'') as [l' <- Hin']; clear Hin''.
-    subst; replace (length L) with n by (symmetry; apply Nat.eqb_eq, Heq).
+    destruct (in_inf_map_inv _ _ _ Hin'') as [l' <- Hin']. clear Hin''.
+    subst. replace (length L) with n by (symmetry; apply Nat.eqb_eq, Heq).
     apply ex_r with (l' ++ map wn (tens_n n bot :: nil)).
     * apply Forall_inf_forall with (map (fun l => l ++ map wn (tens_n n bot :: nil)) L);
         [ assumption | ].
       change (l' ++ map wn (tens_n n bot :: nil))
         with ((fun l0 => l0 ++ map wn (tens_n n bot :: nil)) l').
-      apply in_inf_map; assumption.
-    * symmetry; rewrite fp; apply Permutation_Type_cons_append.
+      apply in_inf_map. assumption.
+    * symmetry. rewrite fp. apply Permutation_Type_cons_append.
   + exfalso.
-    cbn in H; rewrite Heq, H0 in H; inversion H.
+    cbn in H. rewrite Heq, H0 in H. discriminate H.
 Qed.
 
 Lemma parr_n_to_mix P n l : pcut P = true ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr tt => parr_n n one :: nil
@@ -116,64 +109,62 @@ Lemma parr_n_to_mix P n l : pcut P = true ->
   ll (pmixupd_point_pfrag P n true) l.
 Proof.
 intros bcut pi.
-remember (axupd_pfrag P (existT (fun x => x -> list formula) _
+remember (axupd_pfrag P (existT (fun x => x -> _) _
                                 (fun a => match a with
                                           | inl x => projT2 (pgax P) x
                                           | inr tt => parr_n n one :: nil
                                           end))) as P'.
 induction pi using ll_nested_ind; try now constructor.
 - apply ex_r with l1; [ assumption | ].
-  cbn; rewrite HeqP' in p; cbn in p; assumption.
+  cbn. rewrite HeqP' in p. cbn in p. assumption.
 - apply ex_wn_r with lw; assumption.
 - apply mix_r.
-  + cbn; rewrite HeqP' in eqpmix; cbn in eqpmix.
+  + cbn. rewrite HeqP' in eqpmix. cbn in eqpmix.
     case (length L =? n); [ reflexivity | assumption ].
   + apply forall_Forall_inf.
     intros l' Hin.
     apply In_Forall_inf_in with _ _ _ _ PL in Hin as [pi' Hin].
     apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
 - apply cut_r with A; assumption.
-- revert a; rewrite HeqP'; cbn; intro a.
-  destruct a.
-  + change (ll (pmixupd_point_pfrag P n true) (projT2 (pgax P) p))
-      with (ll (pmixupd_point_pfrag P n true) (projT2 (pgax (pmixupd_point_pfrag P n true)) p)).
+- revert a. rewrite HeqP'. cbn. intros [a|[]].
+  + change (ll (pmixupd_point_pfrag P n true) (projT2 (pgax P) a))
+      with (ll (pmixupd_point_pfrag P n true) (projT2 (pgax (pmixupd_point_pfrag P n true)) a)).
     apply gax_r.
-  + destruct u.
-    apply parr_n_r.
+  + apply parr_n_r.
     rewrite app_nil_r, repeat_to_concat.
     apply mix_r.
-    * cbn; rewrite repeat_length, Nat.eqb_refl; reflexivity.
+    * cbn. rewrite repeat_length, Nat.eqb_refl. reflexivity.
     * apply forall_Forall_inf.
       intros l' Hin.
-      apply in_inf_in, repeat_spec in Hin; subst.
+      apply in_inf_in, repeat_spec in Hin as ->.
       apply one_r.
 Qed.
 
 Lemma mix_to_parr_n P n l : ll (pmixupd_point_pfrag P n true) l ->
-  ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> _) _
                                           (fun a => match a with
                                                     | inl x => projT2 (pgax P) x
                                                     | inr tt => parr_n n one :: nil
                                                     end))) true) l.
 Proof.
 intros pi.
-remember (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> list formula) _
+remember (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> _) _
                                               (fun a => match a with
                                                         | inl x => projT2 (pgax P) x
                                                         | inr tt => parr_n n one :: nil
                                                         end))) true) as P'.
 induction pi using ll_nested_ind; try now constructor.
-- rewrite HeqP'; rewrite HeqP' in IHpi.
+- rewrite HeqP'. rewrite HeqP' in IHpi.
   apply ex_r with l1; assumption.
 - apply ex_wn_r with lw; assumption.
-- case_eq (length L =? n); intros Heq.
+- destruct (length L =? n) eqn:Heq.
   + rewrite <- (app_nil_r _).
     apply cut_r with (tens_n (length L) bot).
-    * rewrite HeqP'; reflexivity.
+    * rewrite HeqP'. reflexivity.
     * rewrite dual_tens_n; change (dual bot) with (@one atom).
       replace (parr_n (length L) one :: nil)
          with (projT2 (pgax (cutupd_pfrag (axupd_pfrag P
-                 (existT (fun x => x -> list formula) _
+                 (existT (fun x => x -> _) _
                          (fun a => match a with
                                    | inl x => projT2 (pgax P) x
                                    | inr tt => parr_n n one :: nil
@@ -186,10 +177,9 @@ induction pi using ll_nested_ind; try now constructor.
       intros l' Hin.
       apply In_Forall_inf_in with _ _ _ _ PL in Hin as [pi' Hin].
       apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
-  + cbn in eqpmix.
-    rewrite Heq in eqpmix.
+  + cbn in eqpmix. rewrite Heq in eqpmix.
     apply mix_r.
-    * rewrite HeqP'; assumption.
+    * rewrite HeqP'. assumption.
     * apply forall_Forall_inf.
       intros l' Hin.
       apply In_Forall_inf_in with _ _ _ _ PL in Hin as [pi' Hin].
@@ -198,7 +188,7 @@ induction pi using ll_nested_ind; try now constructor.
 - cbn.
   change (projT2 (pgax P) a)
     with (projT2 (pgax (cutupd_pfrag (axupd_pfrag P
-                     (existT (fun x => x -> list formula) _
+                     (existT (fun x => x -> _) _
                              (fun a => match a with
                                        | inl x => projT2 (pgax P) x
                                        | inr tt => parr_n n one :: nil
@@ -208,7 +198,7 @@ induction pi using ll_nested_ind; try now constructor.
 Qed.
 
 Lemma ll_to_parr_n P l n : ll P (wn (tens_n n bot) :: l) ->
-  ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (cutupd_pfrag (axupd_pfrag P (existT (fun x => x -> _) _
                                           (fun a => match a with
                                                     | inl x => projT2 (pgax P) x
                                                     | inr tt => parr_n n one :: nil
@@ -217,9 +207,8 @@ Proof.
 intros pi.
 rewrite <- (app_nil_r l).
 apply cut_r with (wn (tens_n n bot)); [ reflexivity | | ].
-- cbn.
-  change nil with (map (@wn atom) nil).
-  apply oc_r; cbn.
+- cbn. change nil with (map (@wn atom) nil).
+  apply oc_r. cbn.
   rewrite dual_tens_n.
   change (dual bot) with (@one atom).
   pattern (@parr_n atom n one :: nil) at 2.
@@ -234,42 +223,42 @@ apply cut_r with (wn (tens_n n bot)); [ reflexivity | | ].
 - apply stronger_pfrag with P; [ | assumption ].
   repeat split.
   + apply BoolOrder.le_true.
-  + intro a; split with (inl a); reflexivity.
+  + intro a. exists (inl a). reflexivity.
   + reflexivity.
   + reflexivity.
 Qed.
 
 Lemma parr_to_ll P n l : pcut P = true -> pperm P = true ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr tt => parr_n n one :: nil
                                       end))) l ->
   ll P (wn (tens_n n bot) :: l).
-Proof. intros Hcut Hperm pi; apply mix_to_ll with true, parr_n_to_mix; assumption. Qed.
+Proof. intros Hcut Hperm pi. apply mix_to_ll with true, parr_n_to_mix; assumption. Qed.
 
 (** provability in [P + mix_n + mix_m] is equivalent to provability in [P + mix_n + mix_m + pmix_(n+m-1)] *)
 
 Lemma mix_n_m_r P n m : P.(pmix) n = true -> P.(pmix) m = true ->
   forall L, length L = n + m - 1 -> Forall_inf (ll P) L -> ll P (concat L).
 Proof.
-intros Hpmixn Hpmixm L Heq FL; destruct n; [ destruct m | ].
+intros Hpmixn Hpmixm L Heq FL. destruct n; [ destruct m | ].
 - destruct L; inversion Heq.
   apply mix_r; assumption.
-- cbn in Heq; rewrite Nat.sub_0_r in Heq.
+- cbn in Heq. rewrite Nat.sub_0_r in Heq.
   change (concat L) with (concat (nil :: L)).
   apply mix_r.
-  + cbn; rewrite Heq; assumption.
+  + cbn. rewrite Heq. assumption.
   + apply Forall_inf_cons; [ | assumption ].
     change nil with (concat (@nil (list formula))).
     apply mix_r; [ assumption | constructor ].
-- cbn in Heq; rewrite Nat.sub_0_r in Heq.
+- cbn in Heq. rewrite Nat.sub_0_r in Heq.
   destruct (decomp_length_plus L n m Heq) as ((l1 & l2) & (Heql1 & (Heql2 & HeqL))).
   rewrite HeqL, concat_app.
   replace (concat l1 ++ concat l2) with (concat (l1 ++ ((concat l2) :: nil)))
     by (rewrite concat_app; cbn; rewrite app_nil_r; reflexivity).
   apply mix_r.
-  + rewrite app_length, Nat.add_comm, Heql1; assumption.
+  + rewrite app_length, Nat.add_comm, Heql1. assumption.
   + rewrite HeqL in FL.
     assert (FL1 := Forall_inf_app_l _ _ FL).
     assert (FL2 := Forall_inf_app_r _ _ FL).
@@ -483,16 +472,11 @@ Definition pfrag_mix0 := @mk_pfrag atom  false NoAxioms pmix0 true.
 Definition ll_mix0 := ll pfrag_mix0.
 
 Lemma cut_mix0_r A l1 l2 : ll_mix0 (dual A :: l1) -> ll_mix0 (A :: l2) -> ll_mix0 (l2 ++ l1).
-Proof.
-intros pi1 pi2.
-eapply cut_r_axfree; try eassumption.
-intros a; destruct a.
-Qed.
+Proof. apply cut_r_axfree. intros []. Qed.
 
 Lemma cut_mix0_admissible l : ll (cutupd_pfrag pfrag_mix0 true) l -> ll_mix0 l.
 Proof.
-intros pi; induction pi using ll_nested_ind;
-  try (now constructor); try (econstructor; eassumption).
+intros pi. induction pi using ll_nested_ind; try (now constructor); try (econstructor; eassumption).
 - apply mix_r; [ assumption | ].
   apply forall_Forall_inf.
   intros l' Hin.
@@ -503,21 +487,11 @@ intros pi; induction pi using ll_nested_ind;
 Qed.
 
 (** Provability in [ll_mix0] is equivalent to adding [wn one] in [ll] *)
-Lemma mix0_to_ll P : pperm P = true -> forall b0 l,
-  ll (pmixupd_point_pfrag P 0 b0) l -> ll P (wn one :: l).
-Proof.
-intros fp b0 l pi.
-change one with (@tens_n atom 0 bot).
-apply mix_to_ll with b0; assumption.
-Qed.
+Lemma mix0_to_ll P (fp : pperm P = true) b0 l : ll (pmixupd_point_pfrag P 0 b0) l -> ll P (wn one :: l).
+Proof. intros pi. change one with (@tens_n atom 0 bot). apply mix_to_ll with b0; assumption. Qed.
 
-Lemma ll_to_mix0_cut P l : ll P (wn one :: l) ->
-  ll (cutupd_pfrag (pmixupd_point_pfrag P 0 true) true) l.
-Proof.
-intros pi.
-change one with (@tens_n atom 0 bot) in pi.
-apply ll_to_mix_cut; assumption.
-Qed.
+Lemma ll_to_mix0_cut P l : ll P (wn one :: l) -> ll (cutupd_pfrag (pmixupd_point_pfrag P 0 true) true) l.
+Proof. intros pi. change one with (@tens_n atom 0 bot) in pi. apply ll_to_mix_cut; assumption. Qed.
 
 Lemma mix0_wn_one l : ll_mix0 (wn one :: l) -> ll_mix0 l.
 Proof.
@@ -525,11 +499,11 @@ intros pi.
 (* an alternative proof is by introducing a cut with (oc bot) *)
 apply stronger_pfrag with (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag pfrag_mix0 0 true) true)).
 - repeat split.
-  + intro a; split with a; reflexivity.
-  + intro n; destruct n; reflexivity.
+  + intro a. exists a. reflexivity.
+  + intros [|n]; reflexivity.
 - apply cut_admissible_axfree.
-  + intros a; destruct a.
-  + apply ll_to_mix_cut; assumption.
+  + intros [].
+  + apply ll_to_mix_cut. assumption.
 Qed.
 
 
@@ -538,13 +512,13 @@ extended with the provability of [bot :: bot :: nil] *)
 
 Lemma mix0_to_ll_bot P : pcut P = true -> pperm P = true -> forall bc b0 bp l,
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 0) then b0 else P.(pmix) k) bp) l ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr tt => bot :: bot :: nil
                                       end))) l.
 Proof.
-remember (axupd_pfrag P (existT (fun x => x -> list formula) _
+remember (axupd_pfrag P (existT (fun x => x -> _) _
                                 (fun a => match a with
                                           | inl x => projT2 (pgax P) x
                                           | inr tt => bot :: bot :: nil
@@ -552,29 +526,26 @@ remember (axupd_pfrag P (existT (fun x => x -> list formula) _
 intros fc fp bc b0 bp l pi.
 eapply stronger_pfrag in pi.
 - eapply mix0_to_ll in pi; [ | eassumption ].
-  assert (pcut P' = true) as fc' by (rewrite HeqP' ; cbn ; assumption).
-  eapply stronger_pfrag in pi.
-  + assert (ll P' (bot :: map wn nil)) as pi'.
-    { change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
-      eapply (@cut_r _ _ fc' bot).
-      - apply one_r.
-      - assert ({ b | bot :: bot :: nil = projT2 (pgax P') b })
-          as [b ->] by (rewrite HeqP' ; now (exists (inr tt))).
-        apply gax_r. }
-    apply oc_r in pi'.
-    rewrite <- (app_nil_l l).
-    eapply (@cut_r _ _ fc' (oc bot)) ; [ cbn ; apply pi | apply pi' ].
+  assert (pcut P' = true) as fc' by (rewrite HeqP'; cbn; assumption).
+  apply (stronger_pfrag _ P') in pi.
+  + rewrite <- (app_nil_l l). apply (@cut_r _ _ fc' (oc bot) _ _ pi).
+    change nil with (map (@wn atom) nil). apply oc_r. cbn.
+    rewrite <- app_nil_r. apply (@cut_r _ _ fc' bot).
+    * apply one_r.
+    * assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
+        by (rewrite HeqP'; exists (inr tt); reflexivity).
+      apply gax_r.
   + repeat split; rewrite HeqP'; try reflexivity.
-    cbn; intros a; exists (inl a); reflexivity.
+    cbn. intros a. exists (inl a). reflexivity.
 - repeat split; intros; cbn.
-  + rewrite fc; destruct bc; reflexivity.
-  + exists a; reflexivity.
+  + rewrite fc. apply BoolOrder.le_true.
+  + exists a. reflexivity.
   + reflexivity.
-  + rewrite fp; apply BoolOrder.le_true.
+  + rewrite fp. apply BoolOrder.le_true.
 Qed.
 
 Lemma ll_bot_to_mix0 P l :
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> list _) _
                               (fun a => match a with
                                         | inl x => projT2 (pgax P) x
                                         | inr tt => bot :: bot :: nil
@@ -583,25 +554,23 @@ Lemma ll_bot_to_mix0 P l :
 Proof.
 intros pi.
 remember (pmixupd_point_pfrag P 0 true) as P'.
-apply (stronger_pfrag _
-  (axupd_pfrag P' (existT (fun x => x -> list formula) _
-                          (fun a => match a with
-                                    | inl x => projT2 (pgax P) x
-                                    | inr tt => bot :: bot :: nil
-                                    end)))) in pi.
+apply (stronger_pfrag _ (axupd_pfrag P' (existT (fun x => x -> _) _
+                                                (fun a => match a with
+                                                          | inl x => projT2 (pgax P) x
+                                                          | inr tt => bot :: bot :: nil
+                                                          end)))) in pi.
 - eapply ax_gen; try eassumption; try reflexivity.
-  clear - HeqP'; cbn; intros a; destruct a.
-  + assert ({ b | projT2 (pgax P) p = projT2 (pgax P') b })
-      as [b ->] by (rewrite HeqP' ; now exists p).
+  clear - HeqP'. cbn. intros [p | []].
+  + assert ({ b | projT2 (pgax P) p = projT2 (pgax P') b }) as [b ->]
+        by (rewrite HeqP'; exists p; reflexivity).
     apply gax_r.
-  + destruct u.
-    apply bot_r, bot_r.
+  + apply bot_r, bot_r.
     change nil with (concat (@nil (list formula))).
     apply mix_r.
-    * rewrite HeqP'; reflexivity.
+    * rewrite HeqP'. reflexivity.
     * apply Forall_inf_nil.
-- rewrite HeqP'; repeat split; cbn; intros; try reflexivity.
-  + exists a; reflexivity.
+- rewrite HeqP'. repeat split; cbn; intros; try reflexivity.
+  + exists a. reflexivity.
   + destruct n.
     * apply BoolOrder.le_true.
     * reflexivity.
@@ -609,25 +578,19 @@ Qed.
 
 (** [mix2] is not valid in [ll_mix0] *)
 
-Lemma mix0_not_mix2 : ll_mix0 (one :: one :: nil) -> False.
+Lemma mix0_not_mix2 : notT (ll_mix0 (one :: one :: nil)).
 Proof.
 intros pi.
 remember (one :: one :: nil) as l.
-revert Heql ; induction pi ; intros Heql ; subst ; try inversion Heql.
+induction pi in Heql |- *; subst; try now inversion Heql.
 - apply IHpi.
-  cbn in p ; apply Permutation_Type_sym in p.
-  apply Permutation_Type_length_2_inv in p.
-  destruct p; assumption.
-- destruct l1; destruct lw'; inversion Heql; subst.
-  + now symmetry in p; apply Permutation_Type_nil in p; subst.
-  + now symmetry in p; apply Permutation_Type_nil in p; subst.
-  + destruct l1; inversion H2.
-    destruct l1; inversion H3.
-- destruct L.
-  + inversion H0.
-  + inversion i.
-- inversion f.
-- destruct a.
+  apply Permutation_Type_sym,Permutation_Type_length_2_inv in p as [ | ]; assumption.
+- destruct l1, lw'; inversion Heql; subst.
+  + symmetry in p. now apply Permutation_Type_nil in p as ->.
+  + symmetry in p. now apply Permutation_Type_nil in p as ->.
+  + destruct l1; inversion H1.
+    destruct l1; inversion H2.
+- destruct L; discriminate.
 Qed.
 
 
@@ -640,11 +603,7 @@ Definition pfrag_mix2 := @mk_pfrag atom  false NoAxioms pmix2 true.
 Definition ll_mix2 := ll pfrag_mix2.
 
 Lemma cut_mix2_r A l1 l2 : ll_mix2 (dual A :: l1) -> ll_mix2 (A :: l2) -> ll_mix2 (l2 ++ l1).
-Proof.
-intros pi1 pi2.
-eapply cut_r_axfree; try eassumption.
-intros a; destruct a.
-Qed.
+Proof. intros pi1 pi2. eapply cut_r_axfree; try eassumption. intros []. Qed.
 
 Lemma cut_mix2_admissible l : ll (cutupd_pfrag pfrag_mix2 true) l -> ll_mix2 l.
 Proof.
@@ -652,8 +611,7 @@ intros pi; induction pi using ll_nested_ind;
   try (now constructor); try (econstructor; eassumption).
 - apply mix_r; [ assumption | ].
   apply forall_Forall_inf.
-  intros l' Hin.
-  destruct (In_Forall_inf_in _ PL Hin) as [pi' HFin].
+  intros l' [pi' HFin]%(In_Forall_inf_in _ PL).
   apply (Dependent_Forall_inf_forall_formula _ _ X HFin).
 - eapply cut_mix2_r; eassumption.
 - destruct a.
@@ -663,13 +621,11 @@ Qed.
 
 Lemma mix2_to_ll P (fp : pperm P = true) b2 l : ll (pmixupd_point_pfrag P 2 b2) l ->
   ll P (wn (tens bot bot) :: l).
-Proof.
-intros pi; change (tens bot bot) with (@tens_n atom 2 bot); apply mix_to_ll with b2; assumption.
-Qed.
+Proof. intros pi. change (tens bot bot) with (@tens_n atom 2 bot). apply mix_to_ll with b2; assumption. Qed.
 
 Lemma ll_to_mix2_cut P l : ll P (wn (tens bot bot) :: l) ->
   ll (cutupd_pfrag (pmixupd_point_pfrag P 2 true) true) l.
-Proof. intros pi; change (tens bot bot) with (tens_n 2 bot); apply ll_to_mix_cut; assumption. Qed.
+Proof. intros pi. change (tens bot bot) with (tens_n 2 bot). apply ll_to_mix_cut. assumption. Qed.
 
 (** Provability in [ll_mix2] is equivalent to
 provability of [ll] extended with the provability of [one :: one :: nil]
@@ -678,13 +634,13 @@ for all [A] and [B] *)
 
 Lemma mix2_to_ll_one_one P : pcut P = true -> pperm P = true -> forall bc b2 bp l,
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 2) then b2 else P.(pmix) k) bp) l ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr tt => one :: one :: nil
                                       end))) l.
 Proof.
-remember (axupd_pfrag P (existT (fun x => x -> list formula) _
+remember (axupd_pfrag P (existT (fun x => x -> _) _
                                 (fun a => match a with
                                           | inl x => projT2 (pgax P) x
                                           | inr tt => one :: one :: nil
@@ -693,25 +649,20 @@ intros fc fp bc b2 bp l pi.
 eapply stronger_pfrag in pi.
 - eapply mix2_to_ll in pi; [ | eassumption ].
   assert (pcut P' = true) as fc' by (rewrite HeqP'; cbn; assumption).
-  eapply stronger_pfrag in pi.
-  + assert (ll P' (parr one one :: map wn nil)) as pi'.
-    { change (parr one one :: map wn nil) with ((@parr atom one one :: nil) ++ nil).
-      eapply (@cut_r _ _ fc' bot).
-      - apply one_r.
-      - apply bot_r, parr_r.
-        assert ({ b | one :: one :: nil = projT2 (pgax P') b })
-          as [b ->] by (now rewrite HeqP'; exists (inr tt)).
-        apply gax_r. }
-    apply oc_r in pi'.
-    rewrite <- (app_nil_l l).
-    eapply (@cut_r _ _ fc' (oc (parr one one))); [ cbn; apply pi | apply pi' ].
+  apply (stronger_pfrag _ P') in pi.
+  + rewrite <- (app_nil_l l). apply (@cut_r _ _ fc' (oc (parr one one)) _ _ pi).
+    change nil with (map (@wn atom) nil). apply oc_r. cbn.
+    apply parr_r.
+    assert ({ b | one :: one :: nil = projT2 (pgax P') b }) as [b ->]
+      by (now rewrite HeqP'; exists (inr tt)).
+    apply gax_r.
   + repeat split; rewrite HeqP'; try reflexivity.
-    cbn; intros a; exists (inl a); reflexivity.
+    cbn. intros a. exists (inl a). reflexivity.
 - repeat split; intros; cbn.
-  + rewrite fc; destruct bc; reflexivity.
-  + exists a; reflexivity.
+  + rewrite fc. apply BoolOrder.le_true.
+  + exists a. reflexivity.
   + reflexivity.
-  + rewrite fp; apply BoolOrder.le_true.
+  + rewrite fp. apply BoolOrder.le_true.
 Qed.
 
 Lemma ll_one_one_to_ll_tens_parr_one_one_cut P : (pcut P = true) ->
@@ -732,19 +683,19 @@ apply parr_r, pi.
 Qed.
 
 Lemma ll_tens_parr_one_one_to_ll_tens_parr P l :
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                               (fun a => match a with
                                         | inl x => projT2 (pgax P) x
                                         | inr tt => parr one one :: parr bot bot :: nil
                                         end))) l ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
                                       end))) l.
 Proof.
 intros pi.
-remember (axupd_pfrag P (existT (fun x => x -> list formula) _
+remember (axupd_pfrag P (existT (fun x => x -> _) _
                          (fun a => match a with
                                    | inl x => projT2 (pgax P) x
                                    | inr tt => parr one one :: parr bot bot :: nil
@@ -753,7 +704,7 @@ apply (@ax_gen _ P') ; (try now (rewrite HeqP'; cbn)); [ | assumption ].
 clear - HeqP'; cbn; intros a.
 revert a; rewrite HeqP'; intros a; destruct a; cbn.
 - assert ({ b | projT2 (pgax P) p =
-                projT2 (pgax (axupd_pfrag P (existT (fun x => x -> list formula) _
+                projT2 (pgax (axupd_pfrag P (existT (fun x => x -> _) _
                        (fun a => match a with
                                  | inl x => projT2 (pgax P) x
                                  | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
@@ -762,7 +713,7 @@ revert a; rewrite HeqP'; intros a; destruct a; cbn.
   apply gax_r.
 - destruct u.
   assert ({ b | parr one one :: parr bot bot :: nil =
-                projT2 (pgax (axupd_pfrag P (existT (fun x => x -> list formula) _
+                projT2 (pgax (axupd_pfrag P (existT (fun x => x -> _) _
                        (fun a => match a with
                                  | inl x => projT2 (pgax P) x
                                  | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
@@ -772,7 +723,7 @@ revert a; rewrite HeqP'; intros a; destruct a; cbn.
 Qed.
 
 Lemma ll_tens_parr_to_mix2 P l :
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> list _) _
                               (fun a => match a with
                                         | inl x => projT2 (pgax P) x
                                         | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
@@ -782,7 +733,7 @@ Proof.
 intros pi.
 remember (pmixupd_point_pfrag P 2 true) as P'.
 apply (stronger_pfrag _
-  (axupd_pfrag P' (existT (fun x => x -> list formula) _
+  (axupd_pfrag P' (existT (fun x => x -> list _) _
                           (fun a => match a with
                                     | inl x => projT2 (pgax P) x
                                     | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
@@ -813,7 +764,7 @@ apply (stronger_pfrag _
 Qed.
 
 Lemma ll_one_one_to_mix2 P l :
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> list _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr tt => one :: one :: nil
@@ -823,50 +774,44 @@ Proof.
 intros pi.
 remember (pmixupd_point_pfrag P 2 true) as P'.
 apply (stronger_pfrag _
-  (axupd_pfrag P' (existT (fun x => x -> list formula) _
+  (axupd_pfrag P' (existT (fun x => x -> _) _
                           (fun a => match a with
                                     | inl x => projT2 (pgax P) x
                                     | inr tt => one :: one :: nil
                                     end)))) in pi.
 - eapply ax_gen; try eassumption; try reflexivity.
-  clear - HeqP'; cbn; intros a; destruct a.
+  clear - HeqP'; cbn; intros [p|[]].
   + assert ({ b | projT2 (pgax P) p = projT2 (pgax P') b })
       as [b ->] by (now rewrite HeqP'; exists p).
     apply gax_r.
-  + destruct u.
-    change (one :: one :: nil) with ((@one atom :: nil) ++ one :: nil).
+  + change (one :: one :: nil) with ((@one atom :: nil) ++ one :: nil).
     rewrite HeqP'.
     change ((one :: nil) ++ one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r; [ reflexivity | ].
     repeat (apply Forall_inf_cons; try apply one_r).
     apply Forall_inf_nil.
-- rewrite HeqP'; repeat split; cbn; intros; try reflexivity.
-  + exists a; reflexivity.
+- rewrite HeqP'. repeat split; cbn; intros; try reflexivity.
+  + exists a. reflexivity.
   + repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
 Qed.
 
 (** [mix0] is not valid in [ll_mix2] *)
 
-Lemma mix2_not_mix0 : ll_mix2 nil -> False.
+Lemma mix2_not_mix0 : notT (ll_mix2 nil).
 Proof.
 intros pi.
 remember nil as l.
-revert Heql; induction pi using ll_nested_ind; intros Heql; subst; try inversion Heql.
+induction pi in Heql using ll_nested_ind; subst; try now inversion Heql.
 - apply IHpi.
-  cbn in p; apply Permutation_Type_sym, Permutation_Type_nil in p; assumption.
-- apply app_eq_nil in Heql; destruct Heql as [-> Heql].
-  apply app_eq_nil in Heql; destruct Heql as [Heql2 _].
-  destruct lw'; inversion Heql2.
-  symmetry in p; apply Permutation_Type_nil in p; subst; auto.
-- destruct L; try (destruct L); try (destruct L); try (destruct L); inversion eqpmix.
-  clear H0.
-  cbn in Heql.
-  destruct l; inversion Heql; destruct l0; inversion Heql.
+  cbn in p. apply Permutation_Type_sym, Permutation_Type_nil in p as ->. reflexivity.
+- apply app_eq_nil in Heql as [-> [Heql ->]%app_eq_nil].
+  destruct lw'; inversion Heql.
+  symmetry in p. now apply Permutation_Type_nil in p as ->.
+- destruct L as [|? [|? [|? L]]]; try discriminate eqpmix.
+  cbn in Heql. rewrite app_nil_r in Heql. apply app_eq_nil in Heql as [-> ->].
   destruct (In_Forall_inf_in nil PL) as [pi Hin].
-  + left; reflexivity.
+  + left. reflexivity.
   + apply (Dependent_Forall_inf_forall_formula _ _ X Hin eq_refl).
-- inversion f.
-- destruct a.
 Qed.
 
 
@@ -879,11 +824,7 @@ Definition pfrag_mix02 := @mk_pfrag atom  false NoAxioms pmix02 true.
 Definition ll_mix02 := ll pfrag_mix02.
 
 Lemma cut_mix02_r A l1 l2 : ll_mix02 (dual A :: l1) -> ll_mix02 (A :: l2) -> ll_mix02 (l2 ++ l1).
-Proof.
-intros pi1 pi2.
-eapply cut_r_axfree; try eassumption.
-intros a; destruct a.
-Qed.
+Proof. intros pi1 pi2. eapply cut_r_axfree; try eassumption. intros []. Qed.
 
 Lemma cut_mix02_admissible l : ll (cutupd_pfrag pfrag_mix02 true) l -> ll_mix02 l.
 Proof.
@@ -891,8 +832,7 @@ intros pi; induction pi using ll_nested_ind;
   try (now constructor); try (econstructor; eassumption).
 - apply mix_r; [ assumption | ].
   apply forall_Forall_inf.
-  intros l' Hin.
-  apply (In_Forall_inf_in _ PL) in Hin as [pi Hin].
+  intros l' [pi Hin]%(In_Forall_inf_in _ PL).
   apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
 - eapply cut_mix02_r; eassumption.
 - destruct a.
@@ -908,9 +848,9 @@ Proof.
 intros pi.
 eapply (ext_wn_param fp (tens (wn one) (wn one) :: nil)) in pi.
 - eapply ex_r; [ eassumption | ].
-  symmetry; apply PCPermutation_Type_cons_append.
-- intros Hcut; assumption.
-- cbn; intros a.
+  symmetry. apply PCPermutation_Type_cons_append.
+- intros Hcut. assumption.
+- cbn. intros a.
   eapply ex_r; [ | apply PCPermutation_Type_cons_append ].
   apply wk_r, gax_r.
 - intros L Hpmix eqpmix FL.
@@ -979,9 +919,9 @@ eapply stronger_pfrag in pi.
     apply mix_r; [ reflexivity | ].
     apply Forall_inf_nil.
 - repeat split.
-  + destruct pcut; reflexivity.
-  + intros a; exists a; reflexivity.
-  + intros n; repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
+  + apply BoolOrder.le_true.
+  + intros a. exists a. reflexivity.
+  + intros n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
   + reflexivity.
 Qed.
 
@@ -989,7 +929,7 @@ Qed.
 
 Lemma mix02_to_ll' P (fp : pperm P = true) b0 b2 l :
   ll (pmixupd_point_pfrag (pmixupd_point_pfrag P 0 b0) 2 b2) l -> ll P (wn one :: wn (tens bot bot) :: l).
-Proof. intros pi; eapply mix0_to_ll; [ | eapply mix2_to_ll ]; eassumption. Qed.
+Proof. intros pi. eapply mix0_to_ll; [ | eapply mix2_to_ll ]; eassumption. Qed.
 
 Lemma mix02_to_ll'' P (fp : pperm P = true) b0 b2 bp l :
   ll (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then b0
@@ -1003,23 +943,20 @@ eapply (@ext_wn_param _ _ _ fp _ (one :: tens (wn one) bot :: nil)) in pi.
   etransitivity; [ apply Permutation_Type_cons_append | ].
   cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
   apply Permutation_Type_cons_append.
-- intros Hcut; assumption.
-- cbn; intros a.
+- exact id.
+- cbn. intros a.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
   apply wk_r, wk_r, gax_r.
 - destruct L.
-  { intros Hpmix0 Hpmix0' pi'; cbn.
+  { intros Hpmix0 Hpmix0' pi'. cbn.
     apply de_r.
-    eapply ex_r ; [ | apply PCPermutation_Type_swap ].
+    eapply ex_r; [ | apply PCPermutation_Type_swap ].
     apply wk_r, one_r. }
   destruct L.
-  { intros Hpmix1 Hpmix1' FL.
-    cbn in Hpmix1, Hpmix1'.
-    rewrite Hpmix1 in Hpmix1'; inversion Hpmix1'. }
+  { intros Hpmix1 Hpmix1' FL. cbn in Hpmix1, Hpmix1'. rewrite Hpmix1 in Hpmix1'; inversion Hpmix1'. }
   destruct L.
-  2:{ intros Hpmix Hpmix' FL; cbn in Hpmix, Hpmix'.
-      rewrite Hpmix in Hpmix'; inversion Hpmix'. }
-  intros _ _ FL; cbn.
+  2:{ intros Hpmix Hpmix' FL. cbn in Hpmix, Hpmix'. rewrite Hpmix in Hpmix'. inversion Hpmix'. }
+  intros _ _ FL. cbn.
   inversion FL; inversion X0; subst; clear FL X0 X2;
     rename X into pi1; rename X1 into pi2; rename l1 into l2; rename l0 into l1.
   apply (ex_r (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)) ; [ | rewrite fp; cbn ].
@@ -1034,14 +971,12 @@ eapply (@ext_wn_param _ _ _ fp _ (one :: tens (wn one) bot :: nil)) in pi.
       symmetry; rewrite ? (app_comm_cons _ _ (wn one)); apply Permutation_Type_middle. }
   apply tens_r.
   + eapply ex_r; [ apply pi1 | rewrite fp; cbn ].
-    symmetry; etransitivity; [ apply Permutation_Type_swap | ].
+    symmetry. etransitivity; [ apply Permutation_Type_swap | ].
     etransitivity; [ apply Permutation_Type_cons_append | ].
-    cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
-    apply Permutation_Type_cons_append.
+    cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_cons_append.
   + apply bot_r; eapply ex_r; [ apply pi2 | rewrite fp; cbn ].
-    symmetry; etransitivity; [ apply Permutation_Type_cons_append | ].
-    cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
-    apply Permutation_Type_cons_append.
+    symmetry. etransitivity; [ apply Permutation_Type_cons_append | ].
+    cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_cons_append.
 Qed.
 
 (** Provability in [ll_mix02] is equivalent to provability of [ll]
@@ -1049,14 +984,14 @@ extended with the provability of both [bot :: bot :: nil] and [one :: one :: nil
 
 Lemma mix02_to_ll_one_eq_bot P (fc : pcut P = true) (fp : pperm P = true) bc b0 b2 bp l :
   ll (mk_pfrag bc P.(pgax) (fun k => if (k =? 0) then b0 else (if (k =? 2) then b2 else P.(pmix) k)) bp) l ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr true => one :: one :: nil
                                       | inr false => bot :: bot :: nil
                                       end))) l.
 Proof.
-remember (axupd_pfrag P (existT (fun x => x -> list formula) _
+remember (axupd_pfrag P (existT (fun x => x -> _) _
                                 (fun a => match a with
                                           | inl x => projT2 (pgax P) x
                                           | inr true => one :: one :: nil
@@ -1066,44 +1001,42 @@ intros pi.
 eapply stronger_pfrag in pi.
 - eapply mix02_to_ll in pi; [ | eassumption ].
   assert (pcut P' = true) as fc' by (rewrite HeqP'; cbn; assumption).
-  eapply (stronger_pfrag _ P') in pi.
-  + assert (ll P' (parr (oc bot) (oc bot) :: map wn nil)) as pi'.
-    { apply parr_r.
-      change (oc bot :: oc bot :: map wn nil)
-        with ((@oc atom bot :: nil) ++ oc bot :: map wn nil).
-      eapply (@cut_r _ _ fc' one).
-      - apply bot_r, oc_r.
-        change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
-        eapply (@cut_r _ _ fc' bot).
-        + apply one_r.
-        + assert ({ b | bot :: bot :: nil = projT2 (pgax P') b })
-            as [b ->] by (now rewrite HeqP'; exists (inr false)).
-          apply gax_r.
-      - change (one :: oc bot :: nil)
-          with ((@one atom :: nil) ++ oc bot :: map wn nil).
-        eapply (@cut_r _ _ fc' one).
-        + apply bot_r, oc_r.
-          change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
-          eapply (@cut_r _ _ fc' bot).
-          * apply one_r.
-          * assert ({ b | bot :: bot :: nil = projT2 (pgax P') b })
-              as [b ->] by (now rewrite HeqP'; exists (inr false)).
+  apply (stronger_pfrag _ P') in pi.
+  + rewrite <- (app_nil_l l). apply (@cut_r _ _ fc' (oc (parr (oc bot) (oc bot))) _ _ pi).
+    change nil with (map (@wn atom) nil). apply oc_r.
+    apply parr_r.
+    change (oc bot :: oc bot :: map wn nil)
+      with ((@oc atom bot :: nil) ++ oc bot :: map wn nil).
+    apply (@cut_r _ _ fc' one).
+    * apply bot_r, oc_r.
+      change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
+      apply (@cut_r _ _ fc' bot).
+      -- apply one_r.
+      -- assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
+           by (now rewrite HeqP'; exists (inr false)).
+         apply gax_r.
+    * change (one :: oc bot :: nil)
+        with ((@one atom :: nil) ++ oc bot :: map wn nil).
+      apply (@cut_r _ _ fc' one).
+      -- apply bot_r, oc_r.
+         change (bot :: map wn nil) with ((@bot atom :: nil) ++ nil).
+         apply (@cut_r _ _ fc' bot).
+         ++ apply one_r.
+         ++ assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
+              by (now rewrite HeqP'; exists (inr false)).
             apply gax_r.
-        + assert ({ b | one :: one :: nil = projT2 (pgax P') b })
-            as [b ->] by (now rewrite HeqP'; exists (inr true)).
-          apply gax_r. }
-    apply oc_r in pi'.
-    rewrite <- (app_nil_l l).
-    eapply (@cut_r _ _ fc' (oc (parr (oc bot) (oc bot)))); [ cbn; apply pi | apply pi' ].
+      -- assert ({ b | one :: one :: nil = projT2 (pgax P') b }) as [b ->]
+           by (now rewrite HeqP'; exists (inr true)).
+          apply gax_r.
   + repeat split; rewrite HeqP'; try reflexivity.
-    cbn; intros a; exists (inl a); reflexivity.
+    cbn. intros a. exists (inl a). reflexivity.
 - repeat split; intros; cbn; try reflexivity.
-  + rewrite fc; destruct bc; reflexivity.
-  + exists a; reflexivity.
+  + rewrite fc. apply BoolOrder.le_true.
+  + exists a. reflexivity.
 Qed.
 
 Lemma ll_one_eq_bot_to_mix02 P l :
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) _
+  ll (axupd_pfrag P (existT (fun x => x -> _) _
                             (fun a => match a with
                                       | inl x => projT2 (pgax P) x
                                       | inr true => one :: one :: nil
@@ -1116,32 +1049,28 @@ intros pi.
 remember (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then true
                                          else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) as P'.
 apply (stronger_pfrag _
-  (axupd_pfrag P' (existT (fun x => x -> list formula) _
+  (axupd_pfrag P' (existT (fun x => x -> _) _
                           (fun a => match a with
                                     | inl x => projT2 (pgax P) x
                                     | inr true => one :: one :: nil
                                     | inr false => bot :: bot :: nil
                                     end)))) in pi.
 - eapply ax_gen; try eassumption; try reflexivity.
-  clear - HeqP'; cbn; intros a; destruct a.
-  + assert ({ b | projT2 (pgax P) p = projT2 (pgax P') b })
-      as [b ->] by (now rewrite HeqP'; exists p).
+  clear - HeqP'. cbn. intros [p|[|]].
+  + assert ({ b | projT2 (pgax P) p = projT2 (pgax P') b }) as [b ->]
+      by (now rewrite HeqP'; exists p).
     apply gax_r.
-  + destruct b.
-    * change (one :: one :: nil) with ((@one atom :: nil) ++ one :: nil).
-      rewrite HeqP'.
-      change ((one :: nil) ++ one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
-      apply mix_r; [ reflexivity | ].
-      repeat (apply Forall_inf_cons; try apply one_r).
-      apply Forall_inf_nil.
-    * apply bot_r, bot_r.
-      rewrite HeqP'.
-      change nil with (concat (@nil (list formula))).
-      apply mix_r; [ reflexivity | ].
-      apply Forall_inf_nil.
-- rewrite HeqP'; repeat split; cbn; try reflexivity.
-  + intros a; exists a; reflexivity.
-  + intros n; repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
+  + change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
+    rewrite HeqP'.
+    apply mix_r; [ reflexivity | ].
+    repeat (constructor; try apply one_r).
+  + apply bot_r, bot_r.
+    change nil with (concat (@nil (list formula))).
+    rewrite HeqP'.
+    apply mix_r; [ reflexivity | apply Forall_inf_nil ].
+- rewrite HeqP'. repeat split; cbn; try reflexivity.
+  + intros a. exists a. reflexivity.
+  + intros n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
 Qed.
 
 (* Hgax_cut is here only to allow the use of cut_admissible
@@ -1183,8 +1112,8 @@ eapply stronger_pfrag in pi.
     apply Forall_inf_nil.
 - eapply le_pfrag_po; [ apply cutupd_pfrag_true| ].
   repeat split.
-  + intros a; exists a; reflexivity.
-  + intros n; repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
+  + intros a. exists a. reflexivity.
+  + intros n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
   + reflexivity.
 Qed.
 
@@ -1228,8 +1157,8 @@ eapply stronger_pfrag in pi.
     apply Forall_inf_nil.
 - eapply le_pfrag_po; [ apply cutupd_pfrag_true| ].
   repeat split.
-  + intros a; exists a; reflexivity.
-  + intros n; repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
+  + intros a. exists a. reflexivity.
+  + intros n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
   + reflexivity.
 Qed.
 
@@ -1246,18 +1175,16 @@ Lemma ll_to_mix02'''_axcut P : (forall a, Forall_inf atomic (projT2 (pgax P) a))
 Proof.
 intros Hgax_at Hgax_cut fp l n pi.
 apply ll_to_mix02''_axcut; try assumption.
-revert l pi; induction n as [|n IHn ]; intros l pi; cons2app.
+induction n as [|n IHn ] in l, pi |- *; cons2app.
 - eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
-  cbn; apply wk_r.
+  cbn. apply wk_r.
   eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ]; assumption.
 - eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
-  cbn; apply co_r.
-  rewrite 2 app_comm_cons.
+  cbn. apply co_r. rewrite 2 app_comm_cons.
   eapply ex_r; [ | rewrite fp; apply Permutation_Type_app_comm ].
-  list_simpl; apply IHn.
-  list_simpl in pi.
-  eapply ex_r; [ apply pi | rewrite fp; cbn ].
-  apply Permutation_Type_cons, Permutation_Type_middle; reflexivity.
+  list_simpl. apply IHn.
+  list_simpl in pi. eapply ex_r; [ apply pi | rewrite fp; cbn ].
+  apply Permutation_Type_cons, Permutation_Type_middle. reflexivity.
 Qed.
 
 (* llR *)
@@ -1279,29 +1206,25 @@ Definition llR R := ll (pfrag_llR R).
 Lemma llR1_R2 R1 R2 : llR R2 (dual R1 :: R2 :: nil) -> llR R2 (dual R2 :: R1 :: nil) ->
   forall l, llR R1 l-> llR R2 l.
 Proof.
-intros HR1 HR2 l Hll; induction Hll; try (now constructor); try (econstructor; eassumption).
+intros HR1 HR2 l Hll. induction Hll; try (now constructor); try (econstructor; eassumption).
 destruct a.
 - rewrite <- (app_nil_l _).
   apply (@cut_r _ (pfrag_llR R2) eq_refl (dual R2)).
   + rewrite bidual.
-    eapply ex_r.
+    eapply ex_r, PCPermutation_Type_swap.
     apply HR1.
-    apply PCPermutation_Type_swap.
- + assert ({ b | dual R2 :: nil = projT2 (pgax (pfrag_llR R2)) b })
-     as [b ->] by now exists true.
+ + assert ({ b | dual R2 :: nil = projT2 (pgax (pfrag_llR R2)) b }) as [b ->] by now exists true.
    apply gax_r.
 - eapply (@cut_r _ (pfrag_llR R2) eq_refl R2) in HR2.
   + eapply ex_r; [ apply HR2 | ].
-    symmetry; apply Permutation_Type_cons_app.
-    rewrite app_nil_r; reflexivity.
-  + assert ({ b | R2 :: one :: nil = projT2 (pgax (pfrag_llR R2)) b })
-      as [b ->] by now exists false.
+    symmetry. apply Permutation_Type_cons_app. rewrite app_nil_r. reflexivity.
+  + assert ({ b | R2 :: one :: nil = projT2 (pgax (pfrag_llR R2)) b }) as [b ->] by now exists false.
     apply gax_r.
 Qed.
 
 Lemma ll_to_llR R l : ll_ll l -> llR R l.
 Proof.
-intros pi; induction pi; try (now constructor); try (econstructor; eassumption).
+intros pi. induction pi; try (now constructor); try (econstructor; eassumption).
 - eapply cut_r; [ reflexivity | eassumption | eassumption ].
 - destruct a.
 Qed.
@@ -1311,10 +1234,9 @@ Proof.
 intros pi%(subs_ll C x).
 eapply stronger_pfrag in pi; [ eassumption | ].
 repeat split.
-intros a; destruct a; cbn.
-- exists true.
-  rewrite subs_dual; reflexivity.
-- exists false; reflexivity.
+intros [|]; cbn.
+- rewrite subs_dual. exists true. reflexivity.
+- exists false. reflexivity.
 Qed.
 
 Lemma llR_to_ll R l : llR R l-> ll_ll (l ++ wn R :: wn (tens (dual R) bot) :: nil).
@@ -1326,7 +1248,7 @@ replace (wn R :: wn (tens (dual R) bot) :: nil)
   by (cbn; rewrite bidual; reflexivity).
 apply deduction_list; try reflexivity.
 eapply ax_gen ; [ | | | | apply pi ]; try reflexivity.
-intros a; destruct a; cbn.
+intros [|]; cbn.
 - assert ({ b | dual R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll true)
     (existT (fun x => x -> list formula) (sum _ {k : nat | k < 2})
             (fun a => match a with
@@ -1340,8 +1262,7 @@ intros a; destruct a; cbn.
                       end)))) b })
     as [b ->] by (now exists (inr (exist _ 0 (le_n_S _ _ (le_S _ _ (le_n 0)))))).
   apply gax_r.
-- rewrite <- (app_nil_r nil).
-  rewrite_all app_comm_cons.
+- rewrite <- (app_nil_r nil), ! app_comm_cons.
   refine (@cut_r _ _ _ (dual (parr one R)) _ _ _ _); [ reflexivity | | ].
   + rewrite bidual.
     assert ({ b | parr one R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll true)
@@ -1363,16 +1284,10 @@ intros a; destruct a; cbn.
     * eapply ex_r; [ | apply PCPermutation_Type_swap ].
       eapply stronger_pfrag; [ | apply ax_exp ].
       repeat split; try reflexivity.
-      cbn; intros [a | [n Hlt]].
-      -- destruct a.
-      -- destruct n; cbn.
-         ++ exists (inr (exist _ 0 Hlt)); reflexivity.
-         ++ destruct n; cbn.
-            ** exists (inr (exist _ 1 Hlt)); reflexivity.
-            ** exfalso.
-               inversion Hlt; subst.
-               inversion H0; subst.
-               inversion H1.
+      intros [[] | [[|[|n]] Hlt]]; cbn.
+      -- exists (inr (exist _ 0 Hlt)). reflexivity.
+      -- exists (inr (exist _ 1 Hlt)). reflexivity.
+      -- exfalso. inversion Hlt. inversion H0. inversion H2.
     * apply bot_r, one_r.
 Qed.
 
@@ -1383,14 +1298,11 @@ eapply (ex_r _ (wn (tens (dual (wn R)) bot) :: l ++ wn (wn R) :: nil)) in pi ;
   [ | symmetry; cons2app; rewrite ? app_assoc; apply Permutation_Type_cons_append ].
 eapply (@cut_ll_r _ nil) in pi.
 - eapply cut_ll_r with (wn (wn R)).
-  + cbn.
-    change (wn R :: nil) with (map wn (R :: nil)).
-    apply oc_r; cbn.
+  + cbn. change (wn R :: nil) with (map wn (R :: nil)). apply oc_r. cbn.
     replace (wn R) with (dual (oc (dual R))) by (cbn; rewrite bidual; reflexivity).
     apply ax_exp.
   + eapply ex_r; [ apply pi | symmetry; list_simpl; apply Permutation_Type_cons_append ].
-- cbn; rewrite bidual.
-  change nil with (map (@wn atom) nil).
+- cbn. rewrite bidual. change nil with (map (@wn atom) nil).
   apply oc_r, parr_r.
   eapply ex_r; [ apply wk_r, one_r | apply Permutation_Type_swap ].
 Qed.
@@ -1402,21 +1314,18 @@ rewrite <- (app_nil_l l).
 refine (@cut_r _ _ _ (oc (dual R)) _ _ _ _); [ reflexivity | | ].
 - rewrite <- (app_nil_l (dual _ :: l)).
   refine (@cut_r _ _ _ (oc (parr one R)) _ _ _ _); [ reflexivity | | ].
-  + cbn; rewrite bidual; eapply ex_r; [apply pi | ].
-         symmetry; etransitivity; [ apply Permutation_Type_cons_append | ].
-         cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail.
-         list_simpl; apply Permutation_Type_cons_append.
+  + cbn. rewrite bidual; eapply ex_r; [apply pi | ].
+    symmetry. etransitivity; [ apply Permutation_Type_cons_append | ].
+    cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
+    list_simpl. apply Permutation_Type_cons_append.
   + change nil with (map (@wn atom) nil).
     apply oc_r, parr_r.
     apply (ex_r (R :: one :: nil)).
-    * assert ({ b | R :: one :: nil = projT2 (pgax (pfrag_llR R)) b })
-        as [b ->] by now exists false.
+    * assert ({ b | R :: one :: nil = projT2 (pgax (pfrag_llR R)) b }) as [b ->] by now exists false.
       apply gax_r.
     * apply Permutation_Type_swap.
-- change nil with (map (@wn atom) nil).
-  apply oc_r.
-  assert ({ b | dual R :: map wn nil = projT2 (pgax (pfrag_llR R)) b })
-    as [b ->] by now exists true.
+- change nil with (map (@wn atom) nil). apply oc_r.
+  assert ({ b | dual R :: map wn nil = projT2 (pgax (pfrag_llR R)) b }) as [b ->] by now exists true.
   apply gax_r.
 Qed.
 
@@ -1425,9 +1334,8 @@ Proof.
 intros pi.
 eapply ll_wn_wn_to_llR.
 eapply (ex_r (wn (tens (dual (wn R)) bot) :: wn (wn R) :: l)).
-2:{ cons2app; etransitivity; [ rewrite ? app_assoc; apply Permutation_Type_cons_append | ].
-    rewrite ? app_assoc; apply Permutation_Type_app_tail.
-    apply Permutation_Type_cons_append. }
+2:{ cons2app. etransitivity; [ rewrite ? app_assoc; apply Permutation_Type_cons_append | ].
+    rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_cons_append. }
 apply wk_r, de_r.
 eapply ex_r; [ apply pi | symmetry; apply Permutation_Type_cons_append ].
 Qed.
