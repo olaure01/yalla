@@ -18,13 +18,9 @@ Context { preiatom : DecType }.
 Section Cut_Elim_Proof.
 
 Context { P : @ipfrag preiatom }.
-Hypothesis P_gax_noN_l : forall a, notT (In_inf N (fst (projT2 (ipgax P) a))).
-Hypothesis P_gax_at_l : forall a, Forall_inf iatomic (fst (projT2 (ipgax P) a)).
-Hypothesis P_gax_at_r : forall a, iatomic (snd (projT2 (ipgax P) a)).
-Hypothesis P_gax_cut : forall a b l1 l2,
-                            fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 -> 
-                          { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
-                              & snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }.
+Hypothesis P_gax_noN_l : noN_iax P.
+Hypothesis P_gax_at : atomic_iax P.
+Hypothesis P_gax_cut : icut_closed P.
 
 Lemma cut_oc_comm_left (P_cutfree : ipcut P = false) A C l1 l2 l0 : ill P l0 (ioc A) ->
   (forall lw, ill P (map ioc lw) A -> ill P (l1 ++ map ioc lw ++ l2) C) ->
@@ -40,7 +36,7 @@ intros pi IH; remember (ioc A) as B eqn:HeqB; induction pi in HeqB |- *; inversi
   list_simpl; rewrite (app_assoc l0), (app_assoc _ l3), <- (app_assoc l0); assumption.
 - apply IH; assumption.
 - rewrite f in P_cutfree; inversion P_cutfree.
-- exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+- exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
 Qed.
 
 Lemma substitution_ioc (P_cutfree : ipcut P = false) A lw :
@@ -389,10 +385,10 @@ revert l' L Heq; induction pi; intros l' L Heq;
         apply co_list_ilr; list_simpl; assumption.
 - rewrite f in P_cutfree; inversion P_cutfree.
 - assert (L = nil) as ->.
-  { specialize P_gax_at_l with a.
-    rewrite Heq in P_gax_at_l.
-    apply Forall_inf_app_r in P_gax_at_l.
-    destruct L; inversion P_gax_at_l as [ | ? ? Hat]; [ reflexivity | ].
+  { assert (Hatl := fst (P_gax_at a)).
+    rewrite Heq in Hatl.
+    apply Forall_inf_app_r in Hatl.
+    destruct L; inversion Hatl as [ | ? ? Hat]; [ reflexivity | ].
     inversion Hat. }
   list_simpl in Heq; list_simpl; subst; apply gax_ir.
 Qed.
@@ -485,7 +481,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hone _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply one_ilr.
     revert Hl IHsize; list_simpl; intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
@@ -529,7 +525,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Htens _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply tens_ilr.
     revert Hl IHsize; list_simpl; intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
@@ -571,7 +567,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hlpam _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply lpam_ilr; [ assumption | ].
     revert Hr IHsize; list_simpl; intros Hr IHsize.
     refine (IHsize _ _ _ _ pi1 Hr _); lia.
@@ -610,7 +606,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
          revert Hgen IHsize; rewrite <- (app_nil_l _); intros Hgen IHsize.
          refine (IHsize _ _ _ _ Hr2 Hgen _); cbn; lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + list_simpl; apply gen_ilr.
     refine (IHsize _ _ _ _ pi1 Hl _); cbn; lia.
 - (* lmap_ilr *)
@@ -646,7 +642,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1), app_assoc.
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hlmap _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + dichot_elt_app_inf_exec Heql0; subst.
     * list_simpl; rewrite 2 app_assoc.
       apply lmap_ilr; [ assumption | ].
@@ -683,7 +679,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hneg _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply neg_ilr.
     revert Hl IHsize; list_simpl; intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
@@ -721,7 +717,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hwith _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply with_ilr1.
     revert Hl IHsize; list_simpl; intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
@@ -755,7 +751,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hwith _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply with_ilr2.
     revert Hl IHsize; list_simpl; intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
@@ -785,7 +781,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hzero _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply zero_ilr.
 - (* plus_ilr *)
   trichot_elt_elt_inf_exec Heql.
@@ -821,7 +817,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
          cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hplus _); lia.
     * rewrite f in P_cutfree; inversion P_cutfree.
-    * exfalso; assert (Hiq := P_gax_at_r a); rewrite H0 in Hiq; inversion Hiq.
+    * exfalso; assert (Hiq := snd (P_gax_at a)); rewrite H0 in Hiq; inversion Hiq.
   + rewrite 2 app_assoc; apply plus_ilr.
     * revert Hl IHsize; list_simpl; intros Hl IHsize.
       list_simpl; refine (IHsize _ _ _ _ pi1 Hl _); lia.
@@ -884,7 +880,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
 - (* cut_ir *)
   rewrite f in P_cutfree; inversion P_cutfree.
 - (* gax_ir *)
-  assert (Hiq := P_gax_at_l a); rewrite Heql in Hiq.
+  assert (Hiq := fst (P_gax_at a)); rewrite Heql in Hiq.
   apply Forall_inf_elt in Hiq.
   inversion Hiq; subst.
   apply subs_gax_l with x; try assumption.
@@ -899,25 +895,16 @@ End Cut_Elim_Proof.
 
 (** If axioms are atomic and closed under cut, then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
-Lemma cut_admissible_ill P :
-  (forall a, notT (In_inf N (fst (projT2 (ipgax P) a)))) ->
-  (forall a, Forall_inf iatomic (fst (projT2 (ipgax P) a))) ->
-  (forall a, iatomic (snd (projT2 (ipgax P) a))) ->
-  (forall a b l1 l2, fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 -> 
-                  { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
-                      & snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }) ->
-  forall l C, ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
+Lemma cut_admissible_ill P (HatN : noN_iax P) (Hat : atomic_iax P) (Hcut : icut_closed P) l C :
+  ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
 Proof.
-intros HatNl Hatl Hatr Hcut l C pi.
-induction pi; try (econstructor; eassumption).
+intros pi. induction pi; try (econstructor; eassumption).
 - eapply cut_ir_gaxat; eassumption.
-- revert a.
-  change (ipgax P) with (ipgax (cutrm_ipfrag P)).
-  apply gax_ir.
+- revert a. change (ipgax P) with (ipgax (cutrm_ipfrag P)). apply gax_ir.
 Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is valid. *)
-Lemma cut_ir_axfree P (P_axfree : notT (projT1 (ipgax P))) A l0 l1 l2 C :
+Lemma cut_ir_axfree P (P_axfree : no_iax P) A l0 l1 l2 C :
   ill P l0 A -> ill P (l1 ++ A :: l2) C -> @ill preiatom P (l1 ++ l0 ++ l2) C.
 Proof.
 intros pi1 pi2.
@@ -927,11 +914,11 @@ Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
-Lemma cut_admissible_ill_axfree P (P_axfree : notT (projT1 (ipgax P))) l C :
+Lemma cut_admissible_ill_axfree P (P_axfree : no_iax P) l C :
   ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
 Proof.
 intros pi.
-apply cut_admissible_ill; [ | | | | assumption ].
+apply cut_admissible_ill; [ | | | assumption ].
 all: intros a; contradiction (P_axfree a).
 Qed.
 

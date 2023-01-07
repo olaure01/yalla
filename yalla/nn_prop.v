@@ -465,7 +465,7 @@ Proof. intros pi; apply llR_ie_to_ill_trans; [ constructor | assumption ]. Qed.
 Lemma aff_to_ill_trans l A : ill_ll (map (trans izero) l) izero ->
   ill_ll (map (trans izero) (A :: l)) izero.
 Proof.
-intros Hll; cbn; cons2app.
+intros Hll. cbn. cons2app.
 rewrite <- (app_nil_r (map _ _)).
 eapply cut_ir_axfree; [ intros a; destruct a | eassumption | ].
 apply zero_ilr.
@@ -534,15 +534,15 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix0 true)) in Hll.
     apply cut_admissible_ill_axfree; [ intros a; destruct a | ].
     eapply stronger_ipfrag; [ | apply Hll ].
     repeat split.
-    intros a; destruct a.
+    intros a. destruct a.
   + reflexivity.
   + intros L eqpmix FL FLind.
     destruct L; try now inversion eqpmix.
     cbn; eapply stronger_ipfrag; [ | apply HR ].
     repeat split.
-    intros a; destruct a.
+    intros a. destruct a.
 - repeat split.
-  + intros a; destruct a.
+  + intros a. destruct a.
   + reflexivity.
 Qed.
 
@@ -567,7 +567,7 @@ simpl in Hill; unfold IAtom2Atom in Hill; rewrite a2a_i, repl_at_eq in Hill; [ |
 change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
                   (flat_map atom_list l))
    with  (fresh_of_list l) in Hill.
-rewrite (@subs_fresh_list atom_inf) in Hill; assumption.
+rewrite (@subs_fresh_list atom_inf) in Hill. assumption.
 Qed.
 
 Theorem llR_oc_bot_to_ll_bbb l : llR (oc bot) l -> @ll_bbb atom_inf l.
@@ -615,17 +615,16 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 true)) in Hll.
       -- symmetry; apply Permutation_Type_cons, Permutation_Type_middle; reflexivity.
     * apply tens_ilr, wk_ilr, ax_exp_ill.
 - repeat split; [ | reflexivity ].
-  intros a; destruct a.
+  intros [].
 Qed.
 
-Theorem ll_bbb_to_ill_trans R (l : list formula) : ll_bbb l ->
-  ill_ll (map (trans (ioc R)) l) (ioc R).
+Theorem ll_bbb_to_ill_trans R (l : list formula) : ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
 Proof.
-intros Hll; induction Hll; (try now (inversion f)); cbn.
-- cons2app; rewrite <- (app_nil_l _).
+intros Hll. induction Hll; (try now (inversion f)); cbn.
+- cons2app. rewrite <- (app_nil_l _).
   apply lmap_ilr.
   + apply (ax_ir (a2i X)).
-  + rewrite app_nil_l; apply ax_exp_ill.
+  + rewrite app_nil_l. apply ax_exp_ill.
 - eapply ex_ir; [ eassumption | apply Permutation_Type_map; assumption ].
 - apply (ll_mix02_to_ill_trans_gen R) in l.
   rewrite <- (app_nil_l (ioc _ :: _)) in l.
@@ -663,22 +662,17 @@ intros Hll; induction Hll; (try now (inversion f)); cbn.
   apply de_ilr.
   list_simpl.
   apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
-  apply negR_irr; assumption.
+  apply negR_irr. assumption.
 - rewrite <- (app_nil_l (ioc _ :: _)).
-  apply wk_ilr; assumption.
+  apply wk_ilr. assumption.
 - rewrite <- 2 (app_nil_l (ioc _ :: _)).
   change nil with (map (@ioc preiatom) nil).
-  apply co_ilr; assumption.
+  apply co_ilr. assumption.
 Qed.
 
 (** The following result is the converse of [bb_to_bbb] proved in the [bbb] library *)
 
 Theorem bbb_to_bb l : ll_bbb l -> @llR atom_inf (oc bot) l.
-Proof.
-intros pi.
-apply ill_trans_to_llR_oc_bot.
-intros R.
-apply ll_bbb_to_ill_trans; assumption.
-Qed.
+Proof. intros pi. apply ill_trans_to_llR_oc_bot. intros R. apply ll_bbb_to_ill_trans; assumption. Qed.
 
 End Atoms.

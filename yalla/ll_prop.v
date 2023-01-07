@@ -19,9 +19,9 @@ Notation ll := (@ll atom).
 
 (** Consistency statements *)
 
-Lemma weak_consistency_axfree P : notT (projT1 (pgax P)) -> pmix P 0 = false -> notT (ll P nil).
+Lemma weak_consistency_axfree P (Hgax : no_ax P) (Hmix0 : pmix P 0 = false) : notT (ll P nil).
 Proof.
-intros Hgax Hmix0 pi.
+intros pi.
 apply cut_admissible_axfree in pi; [ | assumption ].
 remember nil as l. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
 - symmetry in p.
@@ -37,9 +37,9 @@ remember nil as l. induction pi using ll_nested_ind in Heql |- *; inversion Heql
 - exact (Hgax a).
 Qed.
 
-Lemma strong_consistency_axfree P : notT (projT1 (pgax P)) -> notT (ll P (zero :: nil)).
+Lemma strong_consistency_axfree P (Hgax : no_ax P) : notT (ll P (zero :: nil)).
 Proof.
-intros Hgax pi.
+intros pi.
 apply cut_admissible_axfree in pi; [ | assumption ].
 remember (zero :: nil) as l. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
 - symmetry in p.
@@ -67,8 +67,7 @@ Qed.
 (** Some additional reversibility statements *)
 (* TODO atomic gax should be enough, induction on cut-free proof, see ll_def *)
 
-Lemma with_rev1_noax P (Hgax : notT (projT1 (pgax P))) A B l1 l2 :
-  ll P (l1 ++ awith A B :: l2) -> ll P (l1 ++ A :: l2).
+Lemma with_rev1_noax P (Hgax : no_ax P) A B l1 l2 : ll P (l1 ++ awith A B :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
 intros pi.
 assert (ll P (dual (awith A B) :: A :: nil)) as pi'
@@ -80,8 +79,7 @@ eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
 - list_simpl. cons2app. rewrite (app_assoc l1). apply PCPermutation_Type_app_comm.
 Qed.
 
-Lemma with_rev2_noax P (Hgax : notT (projT1 (pgax P))) A B l1 l2 :
-  ll P (l1 ++ awith B A :: l2) -> ll P (l1 ++ A :: l2).
+Lemma with_rev2_noax P (Hgax : no_ax P) A B l1 l2 : ll P (l1 ++ awith B A :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
 intros pi.
 assert (ll P (dual (awith B A) :: A :: nil)) as pi'
@@ -93,8 +91,7 @@ eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
 - list_simpl. cons2app. rewrite (app_assoc l1). apply PCPermutation_Type_app_comm.
 Qed.
 
-Lemma oc_rev_noax P (Hgax : notT (projT1 (pgax P))) A l1 l2 :
-  ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
+Lemma oc_rev_noax P (Hgax : no_ax P) A l1 l2 : ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
 intros pi.
 assert (ll P (dual (oc A) :: A :: nil)) as pi'
@@ -116,7 +113,9 @@ Definition fragment FS := forall A : formula, FS A -> forall B, subform B A -> F
 Lemma conservativity P (P_cutfree : pcut P = false) FS (Hfrag : fragment FS) l (pi : ll P l) :
   Forall_inf FS l -> Forall_formula FS pi.
 Proof.
-induction pi using ll_nested_ind; cbn; intros HFS; try split; try now (inversion HFS; auto).
+induction pi using ll_nested_ind; cbn; intros HFS; try split; try now (inversion HFS; auto);
+  try (inversion_clear HFS; try split; try apply IHpi; try apply IHpi1; try apply IHpi2;
+       repeat constructor; try assumption; (eapply Hfrag; [ eassumption | ]); repeat constructor).
 - symmetry in p.
   eapply IHpi, PCPermutation_Type_Forall_inf; eassumption.
 - symmetry in p.
@@ -137,42 +136,6 @@ induction pi using ll_nested_ind; cbn; intros HFS; try split; try now (inversion
     constructor; [ | exact (Forall_inf_app_l _ _ X0) ].
     apply (Hfrag _ X).
     constructor; constructor.
-- inversion_clear HFS.
-  apply IHpi.
-  constructor; [ | constructor ; [ | assumption ] ].
-  + apply (Hfrag _ X).
-    constructor; constructor.
-  + apply (Hfrag _ X).
-    constructor; constructor.
-- inversion_clear HFS.
-  apply IHpi.
-  constructor; [ | assumption ].
-  apply (Hfrag _ X).
-  constructor; constructor.
-- inversion_clear HFS.
-  apply IHpi.
-  constructor; [ | assumption ].
-  apply (Hfrag _ X).
-  constructor; constructor.
-- inversion_clear HFS. split.
-  + apply IHpi1.
-    constructor; [ | assumption ].
-    apply (Hfrag _ X).
-    constructor; constructor.
-  + apply IHpi2.
-    constructor; [ | assumption ].
-    apply (Hfrag _ X).
-    constructor; constructor.
-- inversion_clear HFS.
-  apply IHpi.
-  constructor; [ | assumption ].
-  apply (Hfrag _ X).
-  constructor; constructor.
-- inversion_clear HFS.
-  apply IHpi.
-  constructor; [ | assumption ].
-  apply (Hfrag _ X).
-  constructor; constructor.
 - rewrite P_cutfree in f. discriminate f.
 Qed.
 
@@ -186,14 +149,14 @@ apply (conservativity P_cutfree).
   eapply Exists_impl, Hf.
   intros C HAC.
   transitivity A; assumption.
-- clear. induction l; constructor.
+- clear. induction l as [|A l IHl]; constructor.
   + constructor; constructor.
-  + eapply Forall_inf_arrow, IHl. clear. cbn.
-    intros A Hl. right. exact Hl.
+  + eapply Forall_inf_arrow, IHl.
+    intros B Hl. right. exact Hl.
 Qed.
 
 (** Linear logic (with no axioms) is conservative over its fragments. *)
-Lemma conservativity_axfree P (P_axfree : notT (projT1 (pgax P))) FS (Hfrag : fragment FS) l (pi : ll P l) :
+Lemma conservativity_axfree P (P_axfree : no_ax P) FS (Hfrag : fragment FS) l (pi : ll P l) :
   Forall_inf FS l -> { pi' : ll P l & Forall_formula FS pi' }.
 Proof.
 intros HFS.
@@ -204,7 +167,7 @@ apply conservativity; trivial.
 Qed.
 
 Variable P : @pfrag atom.
-Variable P_axfree : notT (projT1 (pgax P)).
+Variable P_axfree : no_ax P.
 
 (** Cut is admissible in any fragment with no axioms. *)
 Lemma cut_admissible_fragment_axfree FS (Hfrag : fragment FS) l (pi : ll P l) : Forall_formula FS pi ->
@@ -218,7 +181,7 @@ Qed.
 
 (** Subformula property:
 any provable sequent is provable by a proof containing only subformulas of this sequent. *)
-Proposition subformula  l (pi : ll P l) :
+Proposition subformula l (pi : ll P l) :
   { pi': ll P l & Forall_formula (fun x => Exists (subform x) l) pi' }.
 Proof using P_axfree.
 refine (conservativity_axfree P_axfree _ pi _).

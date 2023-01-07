@@ -94,6 +94,14 @@ Record pfrag := mk_pfrag {
   pmix : nat -> bool;
   pperm : bool }.
 
+Definition no_ax P := notT (projT1 (pgax P)).
+
+Definition atomic_ax P := forall a, Forall_inf atomic (projT2 (pgax P) a).
+
+Definition cut_closed P := forall a b A l1 l2 l3 l4,
+  projT2 (pgax P) a = l1 ++ dual A :: l2 -> projT2 (pgax P) b = l3 ++ A :: l4 ->
+  { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }.
+
 (** Order relation on proof fragments: [P] is more restrictive than [Q]. *)
 Definition le_pfrag P Q :=
   ((Bool.le (pcut P) (pcut Q))
@@ -434,9 +442,9 @@ induction pi using ll_nested_ind'; try now constructor.
 Qed.
 *)
 
-Lemma stronger_pfrag P Q : le_pfrag P Q -> forall l, ll P l -> ll Q l.
+Lemma stronger_pfrag P Q (Hle : le_pfrag P Q) l : ll P l -> ll Q l.
 Proof.
-intros Hle l pi.
+intros pi.
 induction pi using ll_nested_ind; try (constructor; assumption).
 - refine (ex_r _ _ IHpi _).
   apply (PCPermutation_Type_monot (pperm P)), p.
@@ -721,10 +729,10 @@ Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
 
 (** ** Some reversibility statements *)
 
-Lemma bot_rev P : (forall a, notT (In_inf bot (projT2 (pgax P) a))) ->
-  forall l1 l2, ll P (l1 ++ bot :: l2) -> ll P (l1 ++ l2).
+Lemma bot_rev P (Hgax : forall a, notT (In_inf bot (projT2 (pgax P) a))) l1 l2 :
+  ll P (l1 ++ bot :: l2) -> ll P (l1 ++ l2).
 Proof.
-intros Hgax l1 l2 pi.
+intros pi.
 remember (l1 ++ bot :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
   try (destruct l1; inversion Heql; subst; (try assumption);
@@ -772,10 +780,10 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma parr_rev P A B : (forall a, notT (In_inf (parr A B) (projT2 (pgax P) a))) ->
-  forall l1 l2, ll P (l1 ++ parr A B :: l2) -> ll P (l1 ++ A :: B :: l2).
+Lemma parr_rev P A B (Hgax : forall a, notT (In_inf (parr A B) (projT2 (pgax P) a))) l1 l2 :
+  ll P (l1 ++ parr A B :: l2) -> ll P (l1 ++ A :: B :: l2).
 Proof.
-intros Hgax l1 l2 pi.
+intros pi.
 remember (l1 ++ parr A B :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
   try (destruct l1; inversion Heql; subst; (try assumption);
@@ -823,11 +831,10 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma one_rev P : (forall a, notT (In_inf one (projT2 (pgax P) a))) ->
-  forall l0, ll P l0 -> forall l1 l2, ll P (l1 ++ one :: l2) ->
-  ll P (l1 ++ l0 ++ l2).
+Lemma one_rev P (Hgax : forall a, notT (In_inf one (projT2 (pgax P) a))) l0 :
+  ll P l0 -> forall l1 l2, ll P (l1 ++ one :: l2) -> ll P (l1 ++ l0 ++ l2).
 Proof.
-intros Hgax l0 pi0 l1 l2 pi.
+intros pi0 l1 l2 pi.
 remember (l1 ++ one :: l2) as l.
 revert l1 l2 Heql.
 induction pi using ll_nested_ind; intros l1' l2' Heq; subst.
@@ -903,8 +910,7 @@ induction pi using ll_nested_ind; intros l1' l2' Heq; subst.
     list_simpl; rewrite app_comm_cons; apply IHpi2; reflexivity.
   + rewrite <- app_assoc; eapply cut_r; [ assumption | | eassumption ].
     rewrite app_comm_cons; apply IHpi1; reflexivity.
-- exfalso.
-  apply (Hgax a); rewrite Heq; apply in_inf_elt.
+- exfalso. apply (Hgax a). rewrite Heq. apply in_inf_elt.
 Qed.
 
 Lemma tens_one_rev P A :
@@ -992,10 +998,10 @@ induction pi using ll_nested_ind; intros l1' l2' Heq; subst.
   apply in_inf_elt.
 Qed.
 
-Lemma tens_rev P A B : (forall a, notT (projT2 (pgax P) a = tens A B :: nil)) -> pcut P = false ->
+Lemma tens_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = tens A B :: nil)) (Hcut : pcut P = false) :
   ll P (tens A B :: nil) -> (ll P (A :: nil)) * (ll P (B :: nil)).
 Proof.
-intros Hgax Hcut pi.
+intros pi.
 remember (tens A B :: nil) as l eqn:Heql; rewrite Heql in Hgax; revert Heql;
   induction pi using ll_nested_ind; intros Heq; subst; try (now inversion Heq).
 - symmetry in p.
@@ -1025,10 +1031,10 @@ remember (tens A B :: nil) as l eqn:Heql; rewrite Heql in Hgax; revert Heql;
 - exfalso. exact (Hgax a Heq).
 Qed.
 
-Lemma plus_rev P A B : (forall a, notT (projT2 (pgax P) a = aplus A B :: nil)) -> pcut P = false ->
+Lemma plus_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = aplus A B :: nil)) (Hcut : pcut P = false) :
   ll P (aplus A B :: nil) -> (ll P (A :: nil)) + (ll P (B :: nil)).
 Proof.
-intros Hgax Hcut pi.
+intros pi.
 remember (aplus A B :: nil) as l eqn:Heql; rewrite Heql in Hgax; revert Heql;
   induction pi using ll_nested_ind; intros Heq; subst; try (now inversion Heq).
 - symmetry in p.
@@ -1083,26 +1089,24 @@ Inductive munit_smp : formula -> formula -> Type :=
 Lemma munit_smp_id A : munit_smp A A.
 Proof. induction A; constructor; assumption. Qed.
 
-Lemma munit_smp_map_wn : forall l1 l2, Forall2_inf munit_smp (map wn l1) l2 ->
+Lemma munit_smp_map_wn l1 l2 : Forall2_inf munit_smp (map wn l1) l2 ->
   { l & l2 = map wn l & Forall2_inf munit_smp l1 l }.
 Proof.
-induction l1; intros l2 HF; inversion HF; subst.
+induction l1 in l2 |- *; intros HF; inversion HF; subst.
 - exists nil; constructor.
 - inversion X; subst.
-  apply IHl1 in X0.
-  destruct X0 as [ l'' Heq HF' ]; subst.
+  apply IHl1 in X0 as [ l'' -> HF' ].
   exists (B :: l''); constructor; assumption.
 Qed.
 
-Lemma munit_elim P : (forall a, Forall_inf atomic (projT2 (pgax P) a)) ->
-  forall l1, ll P l1 -> forall l2, Forall2_inf munit_smp l1 l2 -> ll P l2.
+Lemma munit_elim P (Hgax : atomic_ax P) l1 : ll P l1 -> forall l2, Forall2_inf munit_smp l1 l2 -> ll P l2.
 Proof.
-intros Hgax l1 pi; induction pi using ll_nested_ind; intros l2' HF;
+intros pi. induction pi using ll_nested_ind; intros l2' HF;
   try now (inversion HF as [ | ? ? ? ? Hm HF' ];
            inversion Hm; subst;
            constructor; apply IHpi; try eassumption;
            constructor; eassumption).
-- inversion HF as [ | C D lc ld Hc' HF']; subst.
+- inversion HF as [ | C D lc ld Hc' HF']. subst.
   inversion HF' as [ | C' D' lc' ld' Hc'' HF'']; subst.
   inversion HF''; subst.
   inversion Hc'; subst.
@@ -1112,16 +1116,16 @@ intros Hgax l1 pi; induction pi using ll_nested_ind; intros l2' HF;
   eapply PCPermutation_Type_Forall2_inf in p as [la HP]; [ | eassumption ].
   symmetry in HP.
   eapply ex_r; [ | apply HP ].
-  apply IHpi; assumption.
-- apply Forall2_inf_app_inv_l in HF as [(l'1, l'2) [HF1 HF2] Heq]; subst.
-  apply Forall2_inf_app_inv_l in HF2 as [(l''1, l''2) [HF2 HF3] Heq]; subst.
+  apply IHpi. assumption.
+- apply Forall2_inf_app_inv_l in HF as [(l'1, l'2) [HF1 HF2] ->].
+  apply Forall2_inf_app_inv_l in HF2 as [(l''1, l''2) [HF2 HF3] ->].
   assert (HF4 := HF2).
-  apply munit_smp_map_wn in HF2 as [ l''' Heq HF2 ]; rewrite_all Heq; clear Heq.
+  apply munit_smp_map_wn in HF2 as [ l''' Heq HF2 ]. rewrite_all Heq. clear Heq.
   symmetry in p.
   apply (Permutation_Type_map wn) in p.
   eapply Permutation_Type_Forall2_inf in p as [la HP]; [ | eassumption ].
   symmetry in HP.
-  apply Permutation_Type_map_inv in HP; destruct HP as [lb Heq HP]; subst.
+  apply Permutation_Type_map_inv in HP as [lb -> HP].
   symmetry in HP.
   eapply ex_wn_r; [ | apply HP ].
   apply IHpi.
@@ -1171,19 +1175,19 @@ intros Hgax l1 pi; induction pi using ll_nested_ind; intros l2' HF;
   inversion_clear Hm.
   destruct (munit_smp_map_wn _ HF') as [ l'' Heq HF'' ]; subst.
   constructor; apply IHpi; constructor; assumption.
-- apply Forall2_inf_app_inv_l in HF as [(l', l'') [HF2 HF1] Heq]; subst.
+- apply Forall2_inf_app_inv_l in HF as [(l', l'') [HF2 HF1] ->].
   eapply cut_r ; [ assumption | apply IHpi1 | apply IHpi2 ] ;
     (apply Forall2_inf_cons ; [ apply munit_smp_id | ]); assumption.
-- specialize Hgax with a.
-  assert (projT2 (pgax P) a = l2') as Heq; subst.
+- assert (Hat := Hgax a).
+  assert (projT2 (pgax P) a = l2') as <-.
   { remember (projT2 (pgax P) a) as l.
-    revert l2' Hgax HF; clear.
-    induction l; intros l2 Hgax HF; inversion_clear HF as [ | ? ? ? ? Hm ]; f_equal.
-    - inversion_clear Hgax as [ | ? ? Hat ].
-      destruct a; inversion_clear Hat; inversion_clear Hm; reflexivity.
-    - inversion Hgax; subst.
+    revert l2' Hat HF. clear.
+    induction l; intros l2 Hat HF; inversion_clear HF as [ | ? ? ? ? Hm ]; f_equal.
+    - inversion_clear Hat as [ | ? ? Hat' ].
+      destruct a; inversion_clear Hat'; inversion_clear Hm; reflexivity.
+    - inversion_clear Hat.
       apply IHl; assumption. }
-  constructor.
+  apply gax_r.
 Qed.
 
 
@@ -1231,11 +1235,10 @@ induction A; cbn.
   list_simpl ; ll_swap.
   apply de_r; assumption.
 - apply de_r in IHA.
-  ll_swap in IHA.
-  ll_swap.
+  ll_swap in IHA. ll_swap.
   change (oc (dual A) :: wn A :: nil)
     with (oc (dual A) :: map wn (A :: nil)).
-  apply oc_r; assumption.
+  apply oc_r. assumption.
 Qed.
 #[global] Arguments ax_exp [P].
 

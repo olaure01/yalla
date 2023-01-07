@@ -11,7 +11,7 @@ Section Atoms.
 
 Context { preiatom : DecType }.
 Context { P : @ipfrag preiatom }.
-Hypothesis P_gax_noN_l : forall a, notT (In_inf N (fst (projT2 (ipgax P) a))).
+Hypothesis P_gax_noN_l : noN_iax P.
 Variable X : option preiatom.
 Hypothesis P_gax_cut : forall b l1 l2,
                             fst (projT2 (ipgax P) b) = l1 ++ ivar X :: l2 ->

@@ -345,23 +345,6 @@ Qed.
 
 (* ** From [tl] to [otl] *)
 
-Ltac Forall_inf_cbn_hyp :=
-  repeat (
-    match goal with
-    | H:Forall_inf _ (_ ++ _) |- _ => let H1 := fresh H in assert (H1 := Forall_inf_app_l _ _ H);
-                                      let H2 := fresh H in assert (H2 := Forall_inf_app_r _ _ H);
-                                      clear H
-    | H:Forall_inf _ (_ :: _) |- _ => inversion H ; clear H
-    end).
-Ltac Forall_inf_solve_rec :=
-  match goal with
-  | |- Forall_inf _ (_ ++ _) => apply Forall_inf_app ; Forall_inf_solve_rec
-  | |- Forall_inf _ (_ :: _) => constructor ; [ assumption | Forall_inf_solve_rec ]
-  | |- Forall_inf _ nil => constructor
-  | _ => try assumption
-  end.
-Ltac Forall_inf_solve := Forall_inf_cbn_hyp; cbn; Forall_inf_solve_rec.
-
 Lemma tl_to_otl_neg l C : tl_ll l C ->
   Forall_inf (fun F => { x & tsubform F (ntrans x) }) l ->
   (forall D, C = Some D -> { x & tsubform D (ntrans x) } ) ->
@@ -431,7 +414,7 @@ induction pi; intros HF HC l1' l2' HP.
   list_simpl; constructor.
   rewrite 2 app_comm_cons, app_assoc.
   apply IHpi; [ | assumption | ].
-  + Forall_inf_solve; Forall_inf_cbn_hyp; subst.
+  + Forall_inf_cbn_hyp. Forall_inf_solve_rec.
     destruct X as [S Hs].
     constructor.
     * exists S.
@@ -463,9 +446,9 @@ induction pi; intros HF HC l1' l2' HP.
         apply Permutation_Type_cons_app; list_simpl; reflexivity ].
     constructor.
     rewrite app_assoc.
-    apply IHpi; [ Forall_inf_solve | Forall_inf_solve | ].
-    * intros D HD; inversion HD; subst.
-      destruct X as [D' HD'].
+    apply IHpi; [ Forall_inf_solve | | ].
+    * intros D HD. inversion HD. subst.
+      Forall_inf_cbn_hyp. destruct X as [D' HD'].
       eexists.
       etransitivity; [ | apply HD'].
       constructor; constructor.
@@ -479,9 +462,9 @@ induction pi; intros HF HC l1' l2' HP.
       [ | list_simpl;
           apply Permutation_Type_app_head, Permutation_Type_app_head, Permutation_Type_app_comm ].
     constructor.
-    apply IHpi; [ Forall_inf_solve | Forall_inf_solve | ].
+    apply IHpi; [ Forall_inf_solve | | ].
     * intros D HD; inversion HD; subst.
-      destruct X as [D' HD'].
+      Forall_inf_cbn_hyp. destruct X as [D' HD'].
       eexists.
       etransitivity; [ | apply HD'].
       constructor; constructor.
@@ -512,8 +495,9 @@ induction pi; intros HF HC l1' l2' HP.
   destruct HP' as [(l1'' & l2'') ->].
   list_simpl.
   constructor; rewrite app_comm_cons, app_assoc.
-  + apply IHpi1; [ Forall_inf_solve | Forall_inf_solve | ].
-    * constructor; [ | assumption ].
+  + apply IHpi1; [ | Forall_inf_solve | ].
+    * Forall_inf_cbn_hyp. Forall_inf_solve_rec.
+      constructor; [ | assumption ].
       destruct X as [D' HD'].
       eexists.
       etransitivity; [ | apply HD'].
@@ -521,8 +505,9 @@ induction pi; intros HF HC l1' l2' HP.
     * list_simpl; list_simpl in HP.
       apply Permutation_Type_app_inv in HP.
       apply Permutation_Type_elt; assumption.
-  + apply IHpi2; [ Forall_inf_solve | Forall_inf_solve | ].
-    * constructor; [ | assumption ].
+  + apply IHpi2; [ | Forall_inf_solve | ].
+    * Forall_inf_cbn_hyp. Forall_inf_solve_rec.
+      constructor; [ | assumption ].
       destruct X as [D' HD'].
       eexists.
       etransitivity; [ | apply HD'].
@@ -558,8 +543,9 @@ induction pi; intros HF HC l1' l2' HP.
   list_simpl.
   apply ex_otr with ((l1'' ++ l2'') ++ map toc (map tneg (B :: l2')));
     [ | list_simpl; apply Permutation_Type_app_head; symmetry; apply Permutation_Type_middle ].
-  apply IHpi; [ Forall_inf_solve | Forall_inf_solve | ].
-  + constructor; [ | assumption ].
+  apply IHpi; [ | Forall_inf_solve | ].
+  + Forall_inf_cbn_hyp. Forall_inf_solve_rec.
+      constructor; [ | assumption ].
     eexists.
     etransitivity; [ | apply HAt ].
     constructor; constructor.

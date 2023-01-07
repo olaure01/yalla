@@ -19,12 +19,12 @@ Context {atom : DecType}.
 Section Cut_Elim_Proof.
 
 Context [P : @pfrag atom].
-Hypothesis P_gax_at : forall a, Forall_inf atomic (projT2 (pgax P) a).
+Hypothesis P_gax_at : atomic_ax P.
 
 Lemma cut_oc_comm (P_cutfree : pcut P = false) A l1 l2 l3 l4 : ll P (l3 ++ oc A :: l4) ->
   (forall lw, ll P (A :: map wn lw) -> ll P (l1 ++ map wn lw ++ l2)) ->
   ll P (l1 ++ l4 ++ l3 ++ l2).
-Proof.
+Proof using P_gax_at.
 intros pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
   induction pi using ll_nested_ind in l3, l4, Heql |- *; try inversion Heql as [Heql']; subst;
   try (destruct l3; inversion Heql'; subst;
@@ -93,7 +93,7 @@ intros pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
   + decomp_map_inf Heq; inversion Heq3.
 - rewrite f in P_cutfree; inversion P_cutfree.
 - exfalso.
-  assert (Hat := P_gax_at a); rewrite Heql' in Hat.
+  assert (Hat := P_gax_at a). rewrite Heql' in Hat.
   apply Forall_inf_app_r in Hat; inversion Hat as [ | ? ? Hat' ]; inversion Hat'.
 Qed.
 Arguments cut_oc_comm : clear implicits.
@@ -102,7 +102,7 @@ Lemma substitution_oc (P_cutfree : pcut P = false) A lw :
   (forall l1 l2, ll P (l1 ++ A :: l2) -> ll P (l1 ++ map wn lw ++ l2)) ->
   forall l' L, ll P (l' ++ flat_map (fun '(p1, p2) => wn_n p1 (wn A) :: p2) L) ->
     ll P (l' ++ flat_map (fun '(_, p2) => app (map wn lw) p2) L).
-Proof.
+Proof using P_gax_at.
 intros IHcut l' L pi;
   remember (l' ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L) as l eqn:Heql; revert l' L Heql;
   induction pi using ll_nested_ind; intros l' L' Heq; try (rename L' into L); subst.
@@ -288,19 +288,15 @@ intros IHcut l' L pi;
 - destruct L; list_simpl in Heq; subst.
   + list_simpl; apply gax_r.
   + exfalso.
-    specialize P_gax_at with a; rewrite Heq in P_gax_at.
-    apply Forall_inf_app_r in P_gax_at.
-    destruct p; inversion P_gax_at as [ | ? ? Hat ].
-    inversion Hat as [ ? Hat' | ? Hat' ]; destruct n; inversion Hat'.
+    assert (Hat := P_gax_at a). rewrite Heq in Hat.
+    apply Forall_inf_app_r in Hat.
+    destruct p. inversion Hat as [ | ? ? Hat' ].
+    inversion Hat' as [ ? Hat'' | ? Hat'' ]; destruct n; inversion Hat''.
 Qed.
 
-
-Hypothesis P_gax_cut : forall a b x l1 l2 l3 l4,
-  projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-  { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }.
-
-Theorem cut_r_gaxat A l1 l2 : ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
-Proof.
+Theorem cut_r_gaxat (P_gax_cut : cut_closed P) A l1 l2 :
+  ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
+Proof using P_gax_at.
 destruct (pcut P) eqn:P_cutfree.
 { intros pi1 pi2. refine (@cut_r _ _ P_cutfree A _ _ pi1 pi2). }
 enough (forall c s A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2)),
@@ -1249,9 +1245,9 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
   rewrite <- (app_nil_r l0), <- app_assoc.
   rewrite <- (bidual A) in Heql.
   apply cut_gax_l with (dual A) a; try assumption.
-  specialize P_gax_at with a; rewrite Heql in P_gax_at.
-  apply Forall_inf_app_r in P_gax_at; inversion P_gax_at as [ | ? ? Hat ].
-  destruct A; inversion Hat; constructor.
+  assert (Hat := P_gax_at a). rewrite Heql in Hat.
+  apply Forall_inf_app_r in Hat. inversion Hat as [ | ? ? Hat' ].
+  destruct A; inversion Hat'; constructor.
 Qed.
 
 End Cut_Elim_Proof.
@@ -1262,14 +1258,9 @@ Context [P : @pfrag atom].
 
 (** If axioms are atomic and closed under cut, then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
-Lemma cut_admissible :
-  (forall a, Forall_inf atomic (projT2 (pgax P) a)) ->
-  (forall a b x l1 l2 l3 l4,
-     projT2 (pgax P) a = (l1 ++ dual x :: l2) -> projT2 (pgax P) b = (l3 ++ x :: l4) ->
-     { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }) ->
-  forall l, ll P l -> ll (cutrm_pfrag P) l.
+Lemma cut_admissible (Hgax_at : atomic_ax P) (Hgax_cut : cut_closed P) l : ll P l -> ll (cutrm_pfrag P) l.
 Proof.
-intros Hgax_at Hgax_cut l pi.
+intros pi.
 induction pi using ll_nested_ind; try (econstructor; eassumption; fail).
 - apply mix_r; cbn; [ assumption | ].
   apply forall_Forall_inf.
@@ -1278,11 +1269,11 @@ induction pi using ll_nested_ind; try (econstructor; eassumption; fail).
   refine (Dependent_Forall_inf_forall_formula _ _ X Hin).
 - eapply cut_r_gaxat; eassumption.
 - assert (pgax P = pgax (cutrm_pfrag P)) as Hcut by reflexivity.
-  revert a; rewrite Hcut; apply gax_r.
+  revert a. rewrite Hcut. apply gax_r.
 Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is valid. *)
-Lemma cut_r_axfree (P_axfree : notT (projT1 (pgax P))) A l1 l2 :
+Lemma cut_r_axfree (P_axfree : no_ax P) A l1 l2 :
   ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
 Proof.
 intros pi1 pi2.
@@ -1292,12 +1283,7 @@ Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
-Lemma cut_admissible_axfree (P_axfree : notT (projT1 (pgax P))) l :
-  ll P l -> ll (cutrm_pfrag P) l.
-Proof.
-intros pi.
-apply cut_admissible; [ | | assumption ].
-all: intros a; destruct (P_axfree a).
-Qed.
+Lemma cut_admissible_axfree (P_axfree : no_ax P) l : ll P l -> ll (cutrm_pfrag P) l.
+Proof. intros pi. apply cut_admissible; [ | | assumption ]. all: intros a; destruct (P_axfree a). Qed.
 
 End Atoms.
