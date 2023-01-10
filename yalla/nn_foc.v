@@ -27,20 +27,17 @@ Notation ill_ll := (@ill_ll preiatom).
 Notation tl2ill := (@tl2ill atom_inf _ _ AtomIAtomTAtom_TAtom).
 Notation trans := (@trans _ _ AtomIAtomTAtom_Atom2IAtom).
 
-Definition a2t X :=
-  proj1_sig (sig_of_sig2 (bijective_inverse TAtom2PreIAtom_bij)) (Atom2PreIAtom X).
+Definition a2t X := proj1_sig (sig_of_sig2 (bijective_inverse TAtom2PreIAtom_bij)) (Atom2PreIAtom X).
 Lemma a2t_inj : injective a2t.
 Proof.
-unfold a2t; apply compose_injective.
+unfold a2t. apply compose_injective.
 - apply bijective_injective, Atom2PreIAtom_bij.
 - destruct (bijective_inverse TAtom2PreIAtom_bij).
-  now apply section_injective with TAtom2PreIAtom.
+  apply section_injective with TAtom2PreIAtom. assumption.
 Qed.
 Lemma a2i_a2i a : t2i (a2t a) = a2i a.
 Proof.
-unfold t2i, a2t, a2i; f_equal.
-destruct (bijective_inverse TAtom2PreIAtom_bij) as [f Hf1 Hf2]; cbn.
-now rewrite Hf1.
+unfold t2i, a2t, a2i. f_equal. destruct (bijective_inverse TAtom2PreIAtom_bij) as [f Hf1 Hf2]. apply Hf1.
 Qed.
 
 
@@ -296,21 +293,21 @@ Inductive otl : list tformula -> option tformula -> Type :=
                         otl (l1 ++ toc A :: l2) C.
 
 Instance otl_perm Pi : Proper ((@Permutation_Type _) ==> arrow) (fun l => otl l Pi).
-Proof. intros l1 l2 HP pi; eapply ex_otr; eassumption. Qed.
+Proof. intros l1 l2 HP pi. eapply ex_otr; eassumption. Qed.
 
 Lemma neg_rev_ot A l : otl l (Some (tneg A)) -> otl (A :: l) None.
 Proof.
 intros pi.
-remember (Some (tneg A)) as Pi.
-revert A HeqPi; induction pi; intros A' HeqPi;
-  try (now (inversion HeqPi)); subst;
+remember (Some (tneg A)) as Pi eqn:HeqPi.
+
+induction pi in A, HeqPi |- *; subst;
+  try (discriminate HeqPi);
   try (now (rewrite app_comm_cons; constructor; rewrite <- app_comm_cons; apply IHpi)).
 - eapply ex_otr.
-  + apply IHpi; reflexivity.
+  + apply IHpi. reflexivity.
   + apply Permutation_Type_cons; [ reflexivity | assumption ].
-- inversion HeqPi; subst; assumption.
-- rewrite app_comm_cons; apply plus_otlr; rewrite <- app_comm_cons;
-    [ apply IHpi1 | apply IHpi2 ]; reflexivity.
+- injection HeqPi as [= ->]. assumption.
+- rewrite app_comm_cons. apply plus_otlr; rewrite <- app_comm_cons; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 Qed.
 
 Lemma tsubform_toc_ntrans A B : tsubform (toc A) (ntrans B) -> { A' | A = tneg A' }.
@@ -326,20 +323,20 @@ revert Hsub; clear; induction B; intros [ Hsub | Hsub ];
               try (apply IHB1; left; assumption);
               try (apply IHB2; left; assumption))).
 - inversion Hsub; inversion X; subst.
-  + eexists; reflexivity.
+  + eexists. reflexivity.
   + inversion X0; subst; apply IHB; left; assumption.
-  + eexists; reflexivity.
+  + eexists. reflexivity.
   + inversion X0; subst; apply IHB; left; assumption.
 - inversion Hsub; subst.
-  + eexists; reflexivity.
+  + eexists. reflexivity.
   + inversion X; subst; apply IHB; left; assumption.
 - inversion Hsub; subst.
-  + eexists; reflexivity.
+  + eexists. reflexivity.
   + inversion X; subst; apply IHB; right; assumption.
 - inversion Hsub; inversion X; subst.
-  + eexists; reflexivity.
+  + eexists. reflexivity.
   + inversion X0; subst; apply IHB; right; assumption.
-  + eexists; reflexivity.
+  + eexists. reflexivity.
   + inversion X0; subst; apply IHB; right; assumption.
 Qed.
 
@@ -828,19 +825,15 @@ intros pi; induction pi; intros l0 Heq;
 Qed.
 
 Theorem tl_to_llfoc (l : list formula) : tl_ll (map ntrans l) None -> llfoc l None.
-Proof. intros pi%tl_to_otl; eapply otl_to_llfoc in pi; [ apply pi | ]; reflexivity. Qed.
+Proof. intros pi%tl_to_otl. eapply otl_to_llfoc in pi; [ apply pi | ]; reflexivity. Qed.
 
 End Focusing.
 
 
 Theorem weak_focusing (l : list formula) : ll_ll l -> llfoc l None.
-Proof. intros pi; apply tl_to_llfoc, ll_to_tl; assumption. Qed.
+Proof. intros pi. apply tl_to_llfoc, ll_to_tl. assumption. Qed.
 
 Theorem focusing (l : list formula) : ll_ll l -> llFoc l None.
-Proof.
-intros pi%weak_focusing.
-refine (fst (fst (llfoc_to_llFoc pi _)) eq_refl).
-unfold lt; reflexivity.
-Qed.
+Proof. intros pi%weak_focusing. refine (fst (fst (llfoc_to_llFoc pi _)) eq_refl). unfold lt. reflexivity. Qed.
 
 End Atoms.

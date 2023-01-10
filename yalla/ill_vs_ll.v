@@ -58,11 +58,11 @@ Qed.
 
 (** Translation of proof fragments *)
 Definition i2pfrag P := {|
-  pcut := ipcut P ;
-  pgax := existT (fun x => x -> list formula) (projT1 (ipgax P))
+  pcut := ipcut P;
+  pgax := existT (fun x => x -> _) _
           (fun a => ill2ll (snd (projT2 (ipgax P) a))
-                    :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a))))) ;
-  pmix := pmix_none ;
+                    :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a)))));
+  pmix := pmix_none;
   pperm := ipperm P |}.
 
 Lemma cutrm_i2pfrag P : cutrm_pfrag (i2pfrag P) = i2pfrag (cutrm_ipfrag P).
@@ -71,20 +71,17 @@ Proof. reflexivity. Qed.
 Proposition ill_to_ll P l C : ill P l C ->
   ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))).
 Proof.
-intros Hill; induction Hill; list_simpl;
+intros Hill. induction Hill; list_simpl;
   try list_simpl in IHHill; try list_simpl in IHHill1; try list_simpl in IHHill2.
-- eapply ex_r, PCPermutation_Type_swap.
-  apply ax_r.
+- eapply ex_r, PCPermutation_Type_swap. apply ax_r.
 - eapply ex_r; [ eassumption | ].
   hyps_GPermutation_Type_unfold; unfold PCPermutation_Type; cbn; destruct ipperm.
   * apply Permutation_Type_cons; [ reflexivity | ].
     do 2 apply Permutation_Type_map.
-    apply Permutation_Type_rev'; assumption.
-  * subst; reflexivity.
-- rewrite_all ill2ll_map_ioc.
-  rewrite_all app_comm_cons.
-  apply Permutation_Type_rev' in p.
-  do 2 eapply Permutation_Type_map in p. 
+    apply Permutation_Type_rev'. assumption.
+  * subst. reflexivity.
+- rewrite_all ill2ll_map_ioc. rewrite_all app_comm_cons.
+  apply Permutation_Type_rev' in p. do 2 eapply Permutation_Type_map in p.
   eapply ex_wn_r; eassumption.
 - apply one_r.
 - rewrite app_comm_cons.
@@ -102,27 +99,26 @@ intros Hill; induction Hill; list_simpl;
   eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
-- apply parr_r; assumption.
+- apply parr_r. assumption.
 - rewrite app_comm_cons, app_assoc.
-  eapply ex_r ; [ | apply PCPermutation_Type_app_comm ].
+  eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite bidual, ? app_assoc, <- ? app_comm_cons.
   apply tens_r; [ assumption | ].
   eapply ex_r; [ eassumption | ].
   rewrite ? app_comm_cons.
   apply PCPermutation_Type_app_comm.
-- apply parr_r; assumption.
+- apply parr_r. assumption.
 - rewrite app_comm_cons.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   list_simpl.
   change (var (i2a atN) :: map dual (map ill2ll (rev l)))
     with ((var (i2a atN) :: nil) ++ map dual (map ill2ll (rev l))).
   apply tens_r.
-  + rewrite bidual; assumption.
+  + rewrite bidual. assumption.
   + apply ax_r.
 - apply parr_r.
   eapply ex_r; [ eassumption | ].
-  symmetry.
-  rewrite (app_comm_cons _ _ (ill2ll B)).
+  symmetry. rewrite (app_comm_cons _ _ (ill2ll B)).
   apply PCPermutation_Type_cons_append.
 - rewrite app_comm_cons.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
@@ -133,8 +129,7 @@ intros Hill; induction Hill; list_simpl;
   apply PCPermutation_Type_app_comm.
 - apply parr_r.
   eapply ex_r; [ eassumption | ].
-  symmetry.
-  rewrite (app_comm_cons _ _ (ill2ll N)).
+  symmetry. rewrite (app_comm_cons _ _ (ill2ll N)).
   apply PCPermutation_Type_cons_append.
 - cons2app.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
@@ -162,8 +157,8 @@ intros Hill; induction Hill; list_simpl;
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
   apply top_r.
-- apply plus_r1; assumption.
-- apply plus_r2; assumption.
+- apply plus_r1. assumption.
+- apply plus_r2. assumption.
 - rewrite ? app_comm_cons.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
@@ -175,7 +170,7 @@ intros Hill; induction Hill; list_simpl;
     rewrite ? app_comm_cons.
     apply PCPermutation_Type_app_comm.
 - rewrite_all ill2ll_map_ioc.
-  apply oc_r; assumption.
+  apply oc_r. assumption.
 - rewrite ? app_comm_cons.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
@@ -207,12 +202,58 @@ intros Hill; induction Hill; list_simpl;
   apply PCPermutation_Type_app_comm.
 - replace (ill2ll (snd (projT2 (ipgax P) a))
    :: map dual (map ill2ll (rev (fst (projT2 (ipgax P) a)))))
-  with (projT2 (pgax (i2pfrag P)) a) by (cbn ; rewrite 2 map_rev ; reflexivity).
+  with (projT2 (pgax (i2pfrag P)) a) by (cbn; rewrite 2 map_rev; reflexivity).
   apply gax_r.
 Qed.
 
 
 (** ** Non conservativity of [ll] over [ill]. *)
+
+Fact no_at_prove_ill x : notT (@ill_ll preiatom nil (ivar x)).
+Proof.
+intros pi.
+remember (ivar x) as C eqn:HeqC. remember nil as l eqn:Heql.
+induction pi in Heql, HeqC |- *; subst;
+  try discriminate;
+  try now (destruct l1; discriminate Heql).
+- symmetry in p.
+  apply PEPermutation_Type_nil in p. now apply IHpi.
+- apply app_eq_nil in Heql as [-> Heql].
+  apply app_eq_nil in Heql as [Heql ->].
+  destruct lw'; inversion Heql; subst.
+  symmetry in p. apply Permutation_Type_nil in p as ->. now apply IHpi.
+- destruct l1; destruct l0; discriminate Heql.
+- destruct l; discriminate Heql.
+- destruct a.
+Qed.
+
+Fact no_biat_prove_ill x y : @ill_ll preiatom (ivar x :: nil) (ivar y) -> x = y.
+Proof.
+intros pi.
+remember (ivar y) as C eqn:HeqC. remember (ivar x :: nil) as l eqn:Heql.
+induction pi in Heql, HeqC |- *; subst;
+  (try now (inversion Heql));
+  (try now (inversion HeqC));
+  try now (destruct l1; inversion Heql; destruct l1; discriminate).
+- injection HeqC as [= ->]. injection Heql as [= ->]. reflexivity.
+- symmetry in p. apply PEPermutation_Type_length_1_inv in p. now apply IHpi.
+- destruct l1; inversion Heql; subst.
+  + destruct lw'; inversion H0.
+    cbn in H. subst.
+    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
+  + apply app_eq_nil in H1 as [-> [Heq ->]%app_eq_nil].
+    destruct lw'; inversion Heq.
+    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
+- destruct l1; destruct l0; inversion Heql;
+    try destruct l0; try destruct l1; discriminate Heql.
+- destruct l; inversion Heql; destruct l; discriminate.
+Qed.
+
+Fact no_biat_map_prove_ill x y : @ill_ll preiatom nil (ilpam (ivar x) (ivar y)) -> x = y.
+Proof.
+intros pi%ilpam_rev_noax; [ | intros Hax; inversion Hax ].
+apply no_biat_prove_ill. assumption.
+Qed.
 
 Section Non_Conservativity_Atoms.
 
@@ -223,155 +264,80 @@ Notation cons_counter_ex :=
   (ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
         (itens (ivar x) (ilpam izero (ivar z)))).
 
-Lemma counter_ll_prove :
-  ll_ll (ill2ll cons_counter_ex :: nil).
+Lemma counter_ll_prove : ll_ll (ill2ll cons_counter_ex :: nil).
 Proof.
-cbn.
-apply parr_r.
-eapply ex_r ; [ | apply PCPermutation_Type_swap ].
-rewrite <- (app_nil_l (tens (var _) _ :: _)).
-apply tens_r.
+cbn. apply parr_r.
+eapply ex_r; [ | apply PCPermutation_Type_swap ].
+rewrite <- (app_nil_l (tens (var _) _ :: _)). apply tens_r.
 - apply parr_r.
-  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
-  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+  eapply ex_r; [ | symmetry; apply Permutation_Type_cons_append ].
+  eapply ex_r; [ | symmetry; apply Permutation_Type_cons_append ].
   apply tens_r.
-  + eapply ex_r ; [ apply ax_r | GPermutation_Type_solve ].
+  + eapply ex_r; [ apply ax_r | apply Permutation_Type_swap ].
   + apply parr_r.
-    eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+    eapply ex_r; [ | symmetry; apply Permutation_Type_cons_append ].
     apply top_r.
 - apply top_r.
 Qed.
 
-Fact no_at_prove_ill i : notT (@ill_ll preiatom nil (ivar i)).
+Fact pre_pre_counter_ex_ill : ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x) -> x = y.
 Proof.
 intros pi.
-remember (ivar i) as C eqn:HeqC.
-remember nil as l eqn:Heql.
-revert Heql HeqC; induction pi; intros Heql HeqC; subst;
-  (try now (inversion Heql));
-  (try now (inversion HeqC));
-  try now (destruct l1; inversion Heql).
+remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l. remember (ivar x) as C.
+induction pi in Heql, HeqC |- *; subst;
+  try discriminate;
+  try now (destruct l1 as [|? l1]; inversion Heql; destruct l1;  discriminate).
 - symmetry in p.
-  apply PEPermutation_Type_nil in p; auto.
-- apply app_eq_nil in Heql as [? Heql]; subst.
-  apply app_eq_nil in Heql as [Heql ?]; subst.
-  destruct lw'; inversion Heql; subst.
-  symmetry in p; apply Permutation_Type_nil in p; subst; auto.
-- destruct l1; destruct l0; inversion Heql.
-- destruct l; inversion Heql.
-Qed.
-
-Fact no_biat_prove_ill i j : i <> j -> notT (@ill_ll preiatom (ivar i :: nil) (ivar j)).
-Proof.
-intros Ha pi.
-remember (ivar j) as C eqn:HeqC.
-remember (ivar i :: nil) as l eqn:Heql.
-revert Heql HeqC; induction pi; intros Heql HeqC; subst;
-  (try now (inversion Heql));
-  (try now (inversion HeqC));
-  try now (destruct l1; inversion Heql; destruct l1; inversion H1).
-- inversion HeqC; inversion Heql; subst; auto.
-- symmetry in p.
-  apply PEPermutation_Type_length_1_inv in p; auto.
+  apply PEPermutation_Type_length_1_inv in p as ->. apply IHpi; reflexivity.
 - destruct l1; inversion Heql; subst.
   + destruct lw'; inversion H0.
-    cbn in H; subst.
-    symmetry in p; apply Permutation_Type_nil in p; subst; auto.
-  + apply app_eq_nil in H1 as [? Heq]; subst.
-    apply app_eq_nil in Heq as [Heq ?]; subst.
+    cbn in H. subst.
+    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
+  + apply app_eq_nil in H1 as [-> [Heq ->]%app_eq_nil].
     destruct lw'; inversion Heq.
-    symmetry in p; apply Permutation_Type_nil in p; subst; auto.
-- destruct l1; destruct l0; inversion Heql;
-    try destruct l0; try destruct l1; inversion Heql.
-- destruct l; inversion Heql; destruct l; inversion H1.
-Qed.
-
-Fact no_biat_map_prove_ill i j : i <> j -> notT (@ill_ll preiatom nil (ilpam (ivar i) (ivar j))).
-Proof.
-intros Ha pi%ilpam_rev_noax; [ | intros Hax; inversion Hax ].
-eapply no_biat_prove_ill; eassumption.
-Qed.
-
-(** We need two distinct atoms *)
-Hypothesis twoat : x <> y.
-
-Fact pre_pre_counter_ex_ill :
-  notT (ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (ivar x)).
-Proof.
-intros pi.
-remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l.
-remember (ivar x) as C.
-revert Heql HeqC.
-induction pi ; intros Heql HeqC ; subst ;
-  (try now (inversion Heql)) ;
-  (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
-- symmetry in p.
-  apply PEPermutation_Type_length_1_inv in p ; subst ; intuition.
-- destruct l1 ; inversion Heql ; subst.
-  + destruct lw' ; inversion H0.
-    cbn in H ; subst.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    intuition.
-  + apply app_eq_nil in H1 ; destruct H1 as [? Heq] ; subst.
-    apply app_eq_nil in Heq ; destruct Heq as [Heq ?] ; subst.
-    destruct lw' ; inversion Heq.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    intuition.
-- destruct l1 ; inversion Heql ; try rewrite app_nil_l in Heql ; subst.
-  + apply app_eq_nil in H2.
-    destruct H2 ; subst.
-    eapply no_biat_map_prove_ill ; eassumption.
-  + destruct l1 ; inversion H1.
-- destruct l1 ; destruct l0 ; inversion Heql ; 
-    try destruct l0 ; try destruct l1 ; inversion H1.
-- destruct l ; inversion Heql ; subst.
-  destruct l ; inversion H1.
+    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
+- destruct l1; inversion Heql; try rewrite app_nil_l in Heql; subst.
+  + apply app_eq_nil in H2 as [-> ->].
+    apply no_biat_map_prove_ill. assumption.
+  + destruct l1; discriminate H1.
+- destruct l1 as [|? l1], l0 as [|? l0]; inversion Heql; try destruct l0; try destruct l1; discriminate.
+- destruct l; inversion Heql. subst.
+  destruct l; discriminate.
+- destruct a.
 Qed.
 
 Fact pre_counter_ex_ill :
-  notT (ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil)
-               (itens (ivar x) (ilpam izero (ivar z)))).
+  ill_ll (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) (itens (ivar x) (ilpam izero (ivar z))) -> x = y.
 Proof.
 intros pi.
 remember (ilpam (ilpam (ivar x) (ivar y)) izero :: nil) as l.
 remember (itens (ivar x) (ilpam izero (ivar z))) as C.
-revert Heql HeqC.
-induction pi ; intros Heql HeqC ; subst ;
-  (try now (inversion Heql)) ;
-  (try now (inversion HeqC)) ;
-  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
+induction pi in Heql, HeqC |- *; subst;
+  try discriminate;
+  try now (destruct l1; inversion Heql; destruct l1; discriminate).
 - symmetry in p.
-  apply PEPermutation_Type_length_1_inv in p ; intuition.
-- destruct l1 ; inversion Heql ; subst.
-  + destruct lw' ; inversion H0.
-    cbn in H ; subst.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    intuition.
-  + apply app_eq_nil in H1 ; destruct H1 as [? Heq] ; subst.
-    apply app_eq_nil in Heq ; destruct Heq as [Heq ?] ; subst.
-    destruct lw' ; inversion Heq.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    intuition.
-- destruct l1 ; inversion Heql ; inversion HeqC ; try rewrite app_nil_l in Heql ; subst.
-  + apply (no_at_prove_ill pi1).
-  + apply app_eq_nil in H1.
-    destruct H1 ; subst.
+  apply PEPermutation_Type_length_1_inv in p. now apply IHpi.
+- destruct l1; inversion Heql; subst.
+  + destruct lw'; inversion H0.
+    cbn in H. subst.
+    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
+  + apply app_eq_nil in H1 as [-> [Heq ->]%app_eq_nil].
+    destruct lw'; inversion Heq.
+    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
+- destruct l1; inversion Heql; inversion HeqC; try rewrite app_nil_l in Heql; subst.
+  + exfalso. apply (no_at_prove_ill pi1).
+  + apply app_eq_nil in H1 as [-> ->].
     apply (pre_pre_counter_ex_ill pi1).
-- destruct l1 ; inversion Heql ; subst.
-  + apply app_eq_nil in H2.
-    destruct H2 ; subst.
-    apply (no_biat_map_prove_ill twoat pi1).
-  + destruct l1; inversion H1.
-- destruct l1, l0; inversion Heql; try destruct l0; try destruct l1; inversion H1.
+- destruct l1; inversion Heql; subst.
+  + apply app_eq_nil in H2 as [-> ->].
+    apply (no_biat_map_prove_ill pi1).
+  + destruct l1; discriminate H1.
+- destruct l1, l0; inversion Heql; try destruct l0; try destruct l1; discriminate.
+- destruct a.
 Qed.
 
-Fact counter_ex_ill : notT (ill_ll nil cons_counter_ex).
-Proof.
-intros pi.
-apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
-apply pre_counter_ex_ill in pi; assumption.
-Qed.
+Fact counter_ex_ill : ill_ll nil cons_counter_ex -> x = y.
+Proof. intros pi. apply ilpam_rev_noax in pi; [ | intros [] ]. apply (pre_counter_ex_ill pi). Qed.
 
 End Non_Conservativity_Atoms.
 
@@ -380,133 +346,100 @@ End Non_Conservativity_Atoms.
 Notation cons_counter_ex_atfree :=
  (ilpam (ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero) ione).
 
-Lemma counter_atfree_ll_prove :
-  ll_ll (ill2ll cons_counter_ex_atfree :: nil).
+Lemma counter_atfree_ll_prove : ll_ll (ill2ll cons_counter_ex_atfree :: nil).
 Proof.
-cbn.
-apply parr_r.
+cbn. apply parr_r.
 eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
 apply tens_r.
 - apply parr_r.
-  eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+  eapply ex_r; [ | symmetry ; apply Permutation_Type_cons_append ].
   apply tens_r.
   + apply parr_r.
-    eapply ex_r ; [ | symmetry ; apply Permutation_Type_cons_append ].
+    eapply ex_r; [ | symmetry ; apply Permutation_Type_cons_append ].
     apply top_r.
-  + apply bot_r.
-    apply one_r.
+  + apply bot_r. apply one_r.
 - apply top_r.
 Qed.
 
 Fact counter_ex_atfree_ill : notT (@ill_ll preiatom nil cons_counter_ex_atfree).
 Proof.
 intros pi.
-apply ilpam_rev_noax in pi; [ | intros Hax; inversion Hax ].
-remember (nil ++ ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero :: nil) as l.
-remember ione as C.
-revert Heql HeqC.
-induction pi ; intros Heql HeqC ; subst ;
-  (try now (inversion Heql)) ;
-  (try now (inversion HeqC)) ;
-  (try now (destruct l1 ; inversion Heql)) ;
-  try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
-- cbn in p ; symmetry in p.
-  apply Permutation_Type_length_1_inv in p ; subst.
+apply ilpam_rev_noax in pi; [ | intros [] ].
+remember (nil ++ ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero :: nil) as l. remember ione as C.
+induction pi in Heql, HeqC |- *; subst;
+  try discriminate;
+  try now (destruct l1; inversion Heql; destruct l1; discriminate).
+- cbn in p. symmetry in p.
+  apply Permutation_Type_length_1_inv in p as ->.
   apply IHpi; reflexivity.
-- apply IHpi; [ | reflexivity ].
-  destruct l1 ; inversion Heql.
-  + destruct lw' ; inversion H0.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst; assumption.
-  + apply app_eq_nil in H1.
-    destruct H1 as [? H1] ; subst.
-    apply app_eq_nil in H1.
-    destruct H1 as [H1 ?] ; subst.
-    destruct lw' ; inversion H1.
-    symmetry in p ; apply Permutation_Type_nil in p ; subst; assumption.
-- destruct l1 ; inversion Heql ; subst.
-  + apply app_eq_nil in H2 ; destruct H2 ; subst.
-    clear - pi1.
-    apply ilpam_rev_noax in pi1; [ | intros Hax; inversion Hax ].
-    remember (nil ++ ilpam (ilpam izero ione) ione :: nil) as l.
-    remember izero as C.
-    revert Heql HeqC.
-    induction pi1 ; intros Heql HeqC ; subst ;
-      (try now (inversion Heql)) ;
-      (try now (inversion HeqC)) ;
-      (try now (destruct l1 ; inversion Heql)) ;
-      try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
-    * cbn in p ; symmetry in p.
-      apply Permutation_Type_length_1_inv in p ; subst.
-      apply IHpi1; reflexivity.
-    * apply IHpi1; [ | reflexivity ].
-      destruct l1 ; inversion Heql.
-      -- destruct lw' ; inversion H0.
-         symmetry in p ; apply Permutation_Type_nil in p ; subst; assumption.
-      -- apply app_eq_nil in H1.
-         destruct H1 as [? H1] ; subst.
-         apply app_eq_nil in H1.
-         destruct H1 as [H1 ?] ; subst.
-         destruct lw' ; inversion H1.
-         symmetry in p ; apply Permutation_Type_nil in p ; subst; assumption.
-    * destruct l1 ; inversion Heql ; subst.
-      -- apply app_eq_nil in H2 ; destruct H2 ; subst.
-         clear - pi1_2.
-         remember (nil ++ ione :: nil) as l.
-         remember izero as C.
-         revert Heql HeqC.
-         induction pi1_2 ; intros Heql HeqC ; subst ;
-           (try now (inversion Heql)) ;
-           (try now (inversion HeqC)) ;
-           (try now (destruct l1 ; inversion Heql)) ;
-           try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
-         ++ cbn in p ; symmetry in p.
-            apply Permutation_Type_length_1_inv in p ; subst.
+- apply IHpi; [ reflexivity | ].
+  destruct l1; inversion Heql.
+  + destruct lw'; inversion H0.
+    symmetry in p. apply Permutation_Type_nil in p as ->. assumption.
+  + apply app_eq_nil in H1 as [-> [H1 ->]%app_eq_nil].
+    destruct lw'; inversion H1.
+    symmetry in p. apply Permutation_Type_nil in p as ->. reflexivity.
+- destruct l1; inversion Heql; subst.
+  + apply app_eq_nil in H2 as [-> ->]. clear - pi1.
+    apply ilpam_rev_noax in pi1; [ | intros [] ].
+    remember (nil ++ ilpam (ilpam izero ione) ione :: nil) as l. remember izero as C.
+    induction pi1 in Heql, HeqC |- *; subst;
+      try discriminate;
+      try now (destruct l1; inversion Heql; destruct l1; discriminate).
+    * cbn in p. symmetry in p.
+      apply Permutation_Type_length_1_inv in p as ->. apply IHpi1; reflexivity.
+    * apply IHpi1; [ reflexivity | ].
+      destruct l1; inversion Heql.
+      -- destruct lw'; inversion H0.
+         symmetry in p. apply Permutation_Type_nil in p as ->. assumption.
+      -- apply app_eq_nil in H1 as [-> [H1 ->]%app_eq_nil].
+         destruct lw'; inversion H1.
+         symmetry in p. apply Permutation_Type_nil in p as ->. reflexivity.
+    * destruct l1; inversion Heql; subst.
+      -- apply app_eq_nil in H2 as [-> ->]. clear - pi1_2.
+         remember (nil ++ ione :: nil) as l. remember izero as C.
+         induction pi1_2 in Heql, HeqC |- *; subst;
+           try discriminate;
+           try now (destruct l1; inversion Heql; destruct l1 ; discriminate).
+         ++ cbn in p. symmetry in p.
+            apply Permutation_Type_length_1_inv in p as ->.
             apply IHpi1_2; reflexivity.
          ++ apply IHpi1_2; [ | reflexivity ].
-            destruct l1 ; inversion Heql.
-            ** destruct lw' ; inversion H0.
-               symmetry in p ; apply Permutation_Type_nil in p ; subst; assumption.
-            ** apply app_eq_nil in H1.
-               destruct H1 as [? H1] ; subst.
-               apply app_eq_nil in H1.
-               destruct H1 as [H1 ?] ; subst.
-               destruct lw' ; inversion H1.
-               symmetry in p ; apply Permutation_Type_nil in p ; subst; assumption.
-         ++ destruct l1 ; inversion Heql ; subst.
+            destruct l1; inversion Heql.
+            ** destruct lw'; inversion H0.
+               symmetry in p. apply Permutation_Type_nil in p as ->. assumption.
+            ** apply app_eq_nil in H1 as [-> [H1 ->]%app_eq_nil].
+               destruct lw'; inversion H1.
+               symmetry in p. apply Permutation_Type_nil in p as ->. reflexivity.
+         ++ destruct l1; inversion Heql; subst.
             ** clear - pi1_2.
-               remember (nil ++ nil) as l.
-               remember izero as C.
-               revert Heql HeqC.
-               induction pi1_2 ; intros Heql HeqC ; subst ;
-                 (try now (inversion Heql)) ;
-                 (try now (inversion HeqC)) ;
-                 (try now (destruct l1 ; inversion Heql)) ;
-                 try now (destruct l1 ; inversion Heql ; destruct l1 ; inversion H1).
-               --- symmetry in p ; apply Permutation_Type_nil in p ; subst.
+               remember (nil ++ nil) as l. remember izero as C.
+               induction pi1_2 in Heql, HeqC |- *; subst;
+                 try discriminate;
+                 try now (destruct l1; inversion Heql; destruct l1; discriminate).
+               --- symmetry in p. apply Permutation_Type_nil in p as ->.
                    apply IHpi1_2; reflexivity.
-               --- apply app_eq_nil in Heql.
-                   destruct Heql as [? Heql] ; subst.
-                   apply app_eq_nil in Heql.
-                   destruct Heql as [Heql ?] ; subst.
-                   destruct lw' ; inversion Heql.
-                   symmetry in p ; apply Permutation_Type_nil in p ; subst.
+               --- apply app_eq_nil in Heql as [-> [Heql ->]%app_eq_nil].
+                   destruct lw'; inversion Heql.
+                   symmetry in p. apply Permutation_Type_nil in p as ->.
                    apply IHpi1_2; reflexivity.
-               --- destruct l1 ; destruct l0 ; inversion Heql.
-            ** destruct l1 ; inversion H1.
-         ++ destruct l1 ; inversion Heql.
-            ** destruct l0 ; inversion H0.
-               destruct l0 ; inversion H2.
-            ** destruct l1 ; destruct l0 ; inversion H1.
-      -- destruct l1 ; inversion H1.
-    * destruct l1 ; inversion Heql.
-      -- destruct l0 ; inversion H0.
-         destruct l0 ; inversion H2.
-      -- destruct l1 ; destruct l0 ; inversion H1.
-  + destruct l1 ; inversion H1.
-- destruct l1 ; inversion Heql.
-  + destruct l0 ; inversion H0.
-    destruct l0 ; inversion H2.
-  + destruct l1 ; destruct l0 ; inversion H1.
+               --- destruct l1, l0; discriminate Heql.
+               --- destruct a.
+            ** destruct l1; discriminate.
+         ++ destruct l1; inversion Heql.
+            ** destruct l0; inversion H0. destruct l0; discriminate.
+            ** destruct l1, l0; discriminate.
+         ++ destruct a.
+      -- destruct l1; discriminate.
+    * destruct l1; inversion Heql.
+      -- destruct l0; inversion H0. destruct l0; discriminate.
+      -- destruct l1, l0; discriminate.
+    * destruct a.
+  + destruct l1; discriminate.
+- destruct l1; inversion Heql.
+  + destruct l0; inversion H0. destruct l0; discriminate.
+  + destruct l1, l0; discriminate.
+- destruct a.
 Qed.
 
 End Atoms.
@@ -528,8 +461,7 @@ Notation i2a_inj := IAtom2Atom_inj.
 
 (** *** Comparisons between [ll] connectives and [ill] *)
 
-Lemma wn_not_idefin A F :
-  ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (oc F :: ill2ll A :: nil) -> False.
+Lemma wn_not_idefin A F : ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (oc F :: ill2ll A :: nil) -> False.
 Proof.
 cut (forall l2,
   ll_mix0 (dual (ill2ll A) :: nil) ->
@@ -553,14 +485,14 @@ revert F; induction A; cbn; intros F l2 pi1 HP2 pi2.
     symmetry in p.
     transitivity l2; assumption.
   + apply IHpi2.
-    apply (Permutation_Type_map wn) in p.
-    Permutation_Type_solve.
+    etransitivity; [ apply HP2 | symmetry ].
+    apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
   + destruct L; try inversion i.
     apply Permutation_Type_sym in HP2.
     apply Permutation_Type_nil_cons in HP2; assumption.
   + apply Permutation_Type_length_2_inv in HP2.
-    destruct HP2 ; inversion e.
-    destruct l ; inversion H1.
+    destruct HP2; inversion e.
+    destruct l; inversion H1.
 - rewrite <- (app_nil_l (parr _ _ :: _)) in pi1.
   eapply parr_rev in pi1 ; [ | intros a; destruct a ].
   list_simpl in pi1.
@@ -571,7 +503,7 @@ revert F; induction A; cbn; intros F l2 pi1 HP2 pi2.
       try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
       try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
     - apply IHpi2.
-      cbn in p ; Permutation_Type_solve.
+      cbn in p. symmetry in p. etransitivity; [ exact HP2 | exact p ].
     - apply IHpi2.
       apply (Permutation_Type_map wn) in p.
       Permutation_Type_solve.
@@ -758,8 +690,7 @@ revert F; induction A; cbn; intros F l2 pi1 HP2 pi2.
     destruct HP2; inversion e; destruct l; inversion H1.
 Qed.
 
-Lemma bot_not_idefin A :
-  ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (one :: ill2ll A :: nil) -> False.
+Lemma bot_not_idefin A : ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (one :: ill2ll A :: nil) -> False.
 Proof.
 intros pi1 pi2.
 eapply cut_mix0_r in pi2.
@@ -981,13 +912,13 @@ Qed.
 
 (** Constraints on the presence of [izero] for conservativity *)
 Inductive zeropos : iformula -> Type :=
-| zp_izero   : zeropos izero
-| zp_itens_l : forall A B, zeropos A -> zeropos (itens A B)
-| zp_itens_r : forall A B, zeropos A -> zeropos (itens B A)
-| zp_iwith_l : forall A B, zeropos A -> zeropos (iwith A B)
-| zp_iwith_r : forall A B, zeropos A -> zeropos (iwith B A)
-| zp_iplus   : forall A B, zeropos A -> zeropos B -> zeropos (iplus A B)
-| zp_ioc     : forall A, zeropos A -> zeropos (ioc A).
+| zp_izero : zeropos izero
+| zp_itens_l A B : zeropos A -> zeropos (itens A B)
+| zp_itens_r A B : zeropos A -> zeropos (itens B A)
+| zp_iwith_l A B : zeropos A -> zeropos (iwith A B)
+| zp_iwith_r A B : zeropos A -> zeropos (iwith B A)
+| zp_iplus A B : zeropos A -> zeropos B -> zeropos (iplus A B)
+| zp_ioc A : zeropos A -> zeropos (ioc A).
 
 Lemma zeropos_ilr P D : zeropos D -> forall l1 l2 C, ill P (l1 ++ D :: l2) C.
 Proof.
@@ -1006,31 +937,27 @@ constructor.
 Qed.
 
 Inductive nonzerospos : iformula -> Type :=
-| nzsp_ivar  : forall x, nonzerospos (ivar x)
-| nzsp_ione  : nonzerospos ione
-| nzsp_itens : forall A B, nonzerospos A -> nonzerospos B -> nonzerospos (itens A B)
-| nzsp_ilpam : forall A B, nonzerospos A -> nonzerospos B ->
-                             notT (zeropos B) -> nonzerospos (ilpam A B)
-| nzsp_igen : forall A, nonzerospos A -> nonzerospos (igen A)
-| nzsp_ilmap : forall A B, nonzerospos A -> nonzerospos B ->
-                             notT (zeropos B) -> nonzerospos (ilmap A B)
-| nzsp_ineg : forall A, nonzerospos A -> nonzerospos (ineg A)
-| nzsp_itop  : nonzerospos itop
-| nzsp_iwith : forall A B, nonzerospos A -> nonzerospos B -> nonzerospos (iwith A B)
+| nzsp_ivar x : nonzerospos (ivar x)
+| nzsp_ione : nonzerospos ione
+| nzsp_itens A B : nonzerospos A -> nonzerospos B -> nonzerospos (itens A B)
+| nzsp_ilpam A B : nonzerospos A -> nonzerospos B -> notT (zeropos B) -> nonzerospos (ilpam A B)
+| nzsp_igen A : nonzerospos A -> nonzerospos (igen A)
+| nzsp_ilmap A B : nonzerospos A -> nonzerospos B -> notT (zeropos B) -> nonzerospos (ilmap A B)
+| nzsp_ineg A : nonzerospos A -> nonzerospos (ineg A)
+| nzsp_itop : nonzerospos itop
+| nzsp_iwith A B : nonzerospos A -> nonzerospos B -> nonzerospos (iwith A B)
 | nzsp_izero : nonzerospos izero
-| nzsp_iplus : forall A B, nonzerospos A -> nonzerospos B -> nonzerospos (iplus A B)
-| nzsp_ioc   : forall A, nonzerospos A -> nonzerospos (ioc A).
+| nzsp_iplus A B : nonzerospos A -> nonzerospos B -> nonzerospos (iplus A B)
+| nzsp_ioc A : nonzerospos A -> nonzerospos (ioc A).
 
 Definition easyipgax_nzeropos P := forall a,
   (forall D, ill2ll (snd (projT2 (ipgax P) a)) = dual (ill2ll D) ->
-     {'(Z, Zl1, Zl2) & zeropos Z
-                     & D :: (fst (projT2 (ipgax P) a)) = Zl1 ++ Z :: Zl2 })
+     {'(Z, Zl1, Zl2) & zeropos Z & D :: (fst (projT2 (ipgax P) a)) = Zl1 ++ Z :: Zl2 })
 * (forall l C,
-     PCPermutation_Type (ipperm P) (ill2ll (snd (projT2 (ipgax P) a))
-                            :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a)))))
-                       (ill2ll C :: rev (map dual (map ill2ll l)))
+     PCPermutation_Type (ipperm P)
+           (ill2ll (snd (projT2 (ipgax P) a)) :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a)))))
+           (ill2ll C :: rev (map dual (map ill2ll l)))
        -> ill P l C)
-(*     -> { b | fst (projT2 (ipgax P) b) = l & snd (projT2 (ipgax P) b) = C })    *)
 * notT (In_inf N (fst (projT2 (ipgax P) a))).
 
 Lemma dual_jfragment_zeropos {P} : ipcut P = false -> easyipgax_nzeropos P -> forall l0,
@@ -1985,9 +1912,9 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
   + destruct C ; inversion H0.
   + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; cbn in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
-    rewrite rev_involutive in H6 ; subst.
-    destruct x0 ; inversion H1 ; subst.
-    list_simpl ; apply co_ilr.
+    rewrite rev_involutive in H6; subst.
+    destruct x0; inversion H1; subst.
+    list_simpl. apply co_ilr.
     apply IHHll.
     * inversion_clear Hnzsp as [ | ? ? ? HF ].
       list_simpl in HF.
@@ -1998,32 +1925,25 @@ intros l Hll; induction Hll; intros l0 C Hnzsp HP.
       apply Forall_inf_app; [ | constructor ]; assumption.
     * apply (@PEPermutation_Type_cons _ _ _ (wn (dual (ill2ll x0))) eq_refl) in HP.
       apply (@PEPermutation_Type_cons _ _ _ (wn (dual (ill2ll x0))) eq_refl) in HP.
-      apply PEPermutation_PCPermutation_Type in HP ; unfold id in HP ; list_simpl in HP.
+      apply PEPermutation_PCPermutation_Type in HP. unfold id in HP.
       etransitivity; try eassumption.
-      GPermutation_Type_solve.
-- cbn in f.
-  rewrite Hcut in f.
-  inversion f.
-- apply (Hgax a); assumption.
+      list_simpl. rewrite ? app_comm_cons. apply PCPermutation_Type_app_comm.
+- cbn in f. rewrite Hcut in f. discriminate f.
+- apply (Hgax a). assumption.
 Qed.
 
-
 (** Axiom-free conservativity *)
-Proposition ll_to_ill_nzeropos_axfree {P} : notT (projT1 (ipgax P)) -> forall l,
-ll (i2pfrag P) l -> forall l0 C, Forall_inf nonzerospos (C :: l0) ->
-  PCPermutation_Type (pperm (i2pfrag P))
-    l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
-  ill P l0 C.
+Proposition ll_to_ill_nzeropos_axfree P (P_axfree : notT (projT1 (ipgax P))) l C :
+  Forall_inf nonzerospos (C :: l) -> ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))) -> ill P l C.
 Proof.
-intros P_axfree l pi l0 C Hnz HP.
+intros Hnz pi.
 apply cut_admissible_axfree in pi; [ | assumption ].
 rewrite cutrm_i2pfrag in pi.
 eapply ll_to_ill_nzeropos_cutfree in pi; try eassumption.
-- eapply (stronger_ipfrag); [ | eassumption ].
-  repeat split; [ | reflexivity ].
-  cbn; intros; exfalso; auto.
+- apply (stronger_ipfrag (cutrm_ipfrag_le P)), pi.
 - reflexivity.
-- intros a; exfalso; auto.
+- intros a. destruct (P_axfree a).
+- reflexivity.
 Qed.
 
 
@@ -2031,34 +1951,33 @@ Qed.
 
 (** Constraints on the left of [ilpam] for conservativity *)
 Inductive oclike : iformula -> Type :=
-| ocl_ivar    : forall X, oclike (ivar X)
-| ocl_ione    : oclike ione
-| ocl_itens   : forall A B, oclike A -> oclike B -> oclike (itens A B)
-| ocl_iwith_l : forall A B, oclike A -> oclike (iwith A B)
-| ocl_iwith_r : forall A B, oclike A -> oclike (iwith B A)
-| ocl_izero   : oclike izero
-| ocl_iplus   : forall A B, oclike A -> oclike B -> oclike (iplus A B)
-| ocl_ioc     : forall A, oclike (ioc A).
+| ocl_ivar X : oclike (ivar X)
+| ocl_ione : oclike ione
+| ocl_itens A B : oclike A -> oclike B -> oclike (itens A B)
+| ocl_iwith_l A B : oclike A -> oclike (iwith A B)
+| ocl_iwith_r A B : oclike A -> oclike (iwith B A)
+| ocl_izero : oclike izero
+| ocl_iplus A B : oclike A -> oclike B -> oclike (iplus A B)
+| ocl_ioc A : oclike (ioc A).
 
 Inductive oclpam : iformula -> Type :=
-| oclm_ivar  : forall x, oclpam (ivar x)
-| oclm_ione  : oclpam ione
-| oclm_itens : forall A B, oclpam A -> oclpam B -> oclpam (itens A B)
-| oclm_ilpam : forall A B, oclike A -> oclpam A -> oclpam B -> oclpam (ilpam A B)
-| oclm_igen  : forall A, oclike A -> oclpam A -> oclpam (igen A)
-| oclm_ilmap : forall A B, oclike A -> oclpam A -> oclpam B -> oclpam (ilmap A B)
-| oclm_ineg  : forall A, oclike A -> oclpam A -> oclpam (ineg A)
-| oclm_itop  : oclpam itop
-| oclm_iwith : forall A B, oclpam A -> oclpam B -> oclpam (iwith A B)
+| oclm_ivar x : oclpam (ivar x)
+| oclm_ione : oclpam ione
+| oclm_itens A B : oclpam A -> oclpam B -> oclpam (itens A B)
+| oclm_ilpam A B : oclike A -> oclpam A -> oclpam B -> oclpam (ilpam A B)
+| oclm_igen A : oclike A -> oclpam A -> oclpam (igen A)
+| oclm_ilmap A B : oclike A -> oclpam A -> oclpam B -> oclpam (ilmap A B)
+| oclm_ineg A : oclike A -> oclpam A -> oclpam (ineg A)
+| oclm_itop : oclpam itop
+| oclm_iwith A B : oclpam A -> oclpam B -> oclpam (iwith A B)
 | oclm_izero : oclpam izero
-| oclm_iplus : forall A B, oclpam A -> oclpam B -> oclpam (iplus A B)
-| oclm_ioc   : forall A, oclpam A -> oclpam (ioc A).
+| oclm_iplus A B : oclpam A -> oclpam B -> oclpam (iplus A B)
+| oclm_ioc A : oclpam A -> oclpam (ioc A).
 
 Definition easyipgax_oclmap P := forall a,
   (forall A,
-     In_inf (dual (ill2ll A)) (map ill2ll (fst (projT2 (ipgax P) a))) ->
-     oclike A -> False)
-* (forall A, ill2ll A = ill2ll (snd (projT2 (ipgax P) a)) -> oclike A -> False)
+     In_inf (dual (ill2ll A)) (map ill2ll (fst (projT2 (ipgax P) a))) -> notT (oclike A))
+* (forall A, ill2ll A = ill2ll (snd (projT2 (ipgax P) a)) -> notT (oclike A))
 * (forall l C,
      PCPermutation_Type (ipperm P) (ill2ll (snd (projT2 (ipgax P) a))
                          :: rev (map dual (map ill2ll (fst (projT2 (ipgax P) a)))))
@@ -2072,8 +1991,7 @@ Theorem ll_to_ill_oclpam_cutfree {P} :
   forall l, ll (i2pfrag P) l -> forall l0 l1 C, Forall_inf oclpam (C :: l0) ->
     Forall_inf oclike l1 ->
     PCPermutation_Type (pperm (i2pfrag P)) l
-                (ill2ll C :: map ill2ll l1
-                  ++ rev (map dual (map ill2ll l0))) ->
+                (ill2ll C :: map ill2ll l1 ++ rev (map dual (map ill2ll l0))) ->
       ill P l0 C
    *  (l1 <> nil -> forall l2, ill P (l0 ++ l2) C).
 Proof.
@@ -3787,23 +3705,19 @@ intros l Hll ; induction Hll ;
       apply in_inf_elt.
 Qed.
 
-Proposition ll_to_ill_oclpam_axfree P : ipperm P = true -> notT (projT1 (ipgax P)) ->
-  forall l, ll (i2pfrag P) l -> forall l0 C, Forall_inf oclpam (C :: l0) ->
-            Permutation_Type l (ill2ll C :: rev (map dual (map ill2ll l0))) ->
-    ill P l0 C.
+Proposition ll_to_ill_oclpam_axfree P (Hperm : ipperm P = true) (P_axfree : notT (projT1 (ipgax P))) l C :
+  Forall_inf oclpam (C :: l) -> ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))) -> ill P l C.
 Proof.
-intros Hperm P_axfree l pi l0 C Hoclm HP.
+intros Hoclm pi .
 apply cut_admissible_axfree in pi; [ | assumption ].
 rewrite cutrm_i2pfrag in pi.
 eapply ll_to_ill_oclpam_cutfree in pi; try eassumption.
 - destruct pi as [pi _].
-  eapply (stronger_ipfrag); [ | eassumption ].
-  repeat split; [ | reflexivity ].
-  intros a; destruct (P_axfree a).
+  apply (stronger_ipfrag (cutrm_ipfrag_le P)), pi.
 - reflexivity.
-- intros a; destruct (P_axfree a).
-- constructor.
-- cbn; rewrite Hperm; cbn; assumption.
+- intros a. destruct (P_axfree a).
+- apply Forall_inf_nil.
+- cbn. rewrite Hperm. reflexivity.
 Qed.
 
 End Conservativity_Atoms.

@@ -42,18 +42,9 @@ match A with
 | igen A | ineg A | ioc A => S (ifsize A)
 end.
 
-Ltac ifsize_auto :=
-  cbn;
-  match goal with
-  | H: ifsize _ < _ |- _ => cbn in H
-  | H: ifsize _ <= _ |- _ => cbn in H
-  | H: ifsize _ = _ |- _ => cbn in H
-  end;
-  lia.
-
 (** Atomic [iformula] *)
 Inductive iatomic : iformula -> Type :=
-| iatomic_var : forall x, iatomic (ivar x).
+| iatomic_var x : iatomic (ivar x).
 
 (* Unused
 Inductive iatomic_Prop : iformula -> Prop :=
@@ -68,29 +59,28 @@ Proof. induction A; intros Hat; try (exfalso; inversion Hat; fail); constructor.
 
 (** First argument is a sub-formula of the second: *)
 Inductive isubform : iformula -> iformula -> Prop :=
-| isub_id : forall A, isubform A A
-| isub_tens_l : forall A B C, isubform A B -> isubform A (itens B C)
-| isub_tens_r : forall A B C, isubform A B -> isubform A (itens C B)
-| isub_lpam_l : forall A B C, isubform A B -> isubform A (ilpam B C)
-| isub_lpam_r : forall A B C, isubform A B -> isubform A (ilpam C B)
-| isub_gen    : forall A B, isubform A B -> isubform A (igen B)
-| isub_gen_N  : forall A, isubform N (igen A)
-| isub_lmap_l : forall A B C, isubform A B -> isubform A (ilmap B C)
-| isub_lmap_r : forall A B C, isubform A B -> isubform A (ilmap C B)
-| isub_neg    : forall A B, isubform A B -> isubform A (ineg B)
-| isub_neg_N  : forall A, isubform N (ineg A)
-| isub_plus_l : forall A B C, isubform A B -> isubform A (iplus B C)
-| isub_plus_r : forall A B C, isubform A B -> isubform A (iplus C B)
-| isub_with_l : forall A B C, isubform A B -> isubform A (iwith B C)
-| isub_with_r : forall A B C, isubform A B -> isubform A (iwith C B)
-| isub_oc : forall A B, isubform A B -> isubform A (ioc B).
+| isub_id A : isubform A A
+| isub_tens_l A B C : isubform A B -> isubform A (itens B C)
+| isub_tens_r A B C : isubform A B -> isubform A (itens C B)
+| isub_lpam_l A B C : isubform A B -> isubform A (ilpam B C)
+| isub_lpam_r A B C : isubform A B -> isubform A (ilpam C B)
+| isub_gen A B : isubform A B -> isubform A (igen B)
+| isub_gen_N A : isubform N (igen A)
+| isub_lmap_l A B C : isubform A B -> isubform A (ilmap B C)
+| isub_lmap_r A B C : isubform A B -> isubform A (ilmap C B)
+| isub_neg A B : isubform A B -> isubform A (ineg B)
+| isub_neg_N A : isubform N (ineg A)
+| isub_plus_l A B C : isubform A B -> isubform A (iplus B C)
+| isub_plus_r A B C : isubform A B -> isubform A (iplus C B)
+| isub_with_l A B C : isubform A B -> isubform A (iwith B C)
+| isub_with_r A B C : isubform A B -> isubform A (iwith C B)
+| isub_oc A B : isubform A B -> isubform A (ioc B).
 
 Lemma isub_trans A B C : isubform A B -> isubform B C -> isubform A C.
 Proof.
-intros Hl Hr; induction Hr in A, Hl |- * ;
-  try (constructor; apply IHHr); try assumption.
-- inversion Hl; apply isub_gen_N.
-- inversion Hl; apply isub_neg_N.
+intros Hl Hr. induction Hr in A, Hl |- * ; try (constructor; apply IHHr); try assumption.
+- inversion_clear Hl. apply isub_gen_N.
+- inversion_clear Hl. apply isub_neg_N.
 Qed.
 
 #[export] Instance isub_po : PreOrder isubform | 50.
@@ -103,22 +93,19 @@ Lemma isub_id_list l l0 : isubform_list l (l0 ++ l).
 Proof.
 induction l in l0 |- *; constructor.
 - induction l0.
-  + constructor.
-    apply isub_id.
-  + apply Exists_cons_tl; assumption.
-- replace (l0 ++ a :: l) with ((l0 ++ a :: nil) ++ l).
-  + apply IHl.
-  + rewrite <- app_assoc; reflexivity.
+  + constructor. apply isub_id.
+  + apply Exists_cons_tl. assumption.
+- replace (l0 ++ a :: l) with ((l0 ++ a :: nil) ++ l) by (rewrite <- app_assoc; reflexivity).
+  apply IHl.
 Qed.
 
-Lemma isub_trans_list l1 l2 l3 :
-  isubform_list l1 l2 -> isubform_list l2 l3 -> isubform_list l1 l3.
+Lemma isub_trans_list l1 l2 l3 : isubform_list l1 l2 -> isubform_list l2 l3 -> isubform_list l1 l3.
 Proof.
 induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
 - inversion Hl; subst.
-  clear - Hr H1; induction l2 in Hr, H1 |-*; inversion H1; subst.
+  clear - Hr H1. induction l2 in Hr, H1 |-*; inversion H1; subst.
   + inversion Hr; subst.
-    clear - H0 H3; induction l3 in H0, H3 |- *; inversion H3; subst.
+    clear - H0 H3. induction l3 in H0, H3 |- *; inversion H3; subst.
     * apply Exists_cons_hd.
       transitivity a0; assumption.
     * apply Exists_cons_tl.
@@ -132,8 +119,8 @@ Qed.
 #[export] Instance isub_list_po : PreOrder isubform_list | 50.
 Proof.
 split.
-- intros l; rewrite <- app_nil_l; apply isub_id_list.
-- intros l1 l2 l3; apply isub_trans_list.
+- intros l. rewrite <- app_nil_l. apply isub_id_list.
+- intros l1 l2 l3. apply isub_trans_list.
 Qed.
 
 (* Unused
@@ -177,8 +164,8 @@ induction A in B |- *; destruct B; (split; [ intros Heqb | intros Heq ]);
   try (apply IHA in H0; subst; reflexivity);
   try (subst; cbn; apply andb_true_iff; split; [ apply IHA1 | apply IHA2 ]; reflexivity);
   try (apply andb_true_iff in H0; destruct H0 as [H1%IHA1 H2%IHA2]; subst; reflexivity).
-- apply (@eqb_eq (option_dectype _)) in H0; subst; reflexivity.
-- subst; cbn; apply (@eqb_eq (option_dectype _)); reflexivity.
+- apply (@eqb_eq (option_dectype _)) in H0 as ->. reflexivity.
+- subst. cbn. apply (@eqb_eq (option_dectype _)). reflexivity.
 Qed.
 
 (* Unused
@@ -390,6 +377,6 @@ Proof. apply isubb_isub_list, isub_id_list. Qed.
 
 Lemma isubb_trans_list l1 l2 l3 :
   is_true (isubformb_list l1 l2) -> is_true (isubformb_list l2 l3) -> is_true (isubformb_list l1 l3).
-Proof. setoid_rewrite isubb_isub_list; apply isub_trans_list. Qed.
+Proof. setoid_rewrite isubb_isub_list. apply isub_trans_list. Qed.
 
 End Atoms.

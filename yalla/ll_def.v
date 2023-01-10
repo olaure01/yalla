@@ -462,9 +462,7 @@ induction pi using ll_nested_ind; try (constructor; assumption).
   destruct Hle as (Hcut & _ & _ & _).
   eapply implb_true_iff, f.
   apply le_implb, Hcut.
-- destruct Hle as (_ & Hgax & _ & _).
-  destruct (Hgax a) as [b ->].
-  apply gax_r.
+- destruct Hle as (_ & Hgax & _ & _), (Hgax a) as [b ->]. apply gax_r.
 Defined.
 #[global] Arguments stronger_pfrag : clear implicits.
 
@@ -473,28 +471,19 @@ Defined.
 
 Fixpoint Forall_sequent P PS l (pi : ll P l) : Type :=
 match pi with
-| ax_r X => PS (covar X :: var X :: nil)
-| ex_r _ l2 pi1 _ => Forall_sequent PS pi1 * PS l2
-| ex_wn_r l1 _ lw' l2 pi1 _ => Forall_sequent PS pi1 * PS (l1 ++ map wn lw' ++ l2)
+| ax_r _ | gax_r _ => PS l
+| ex_r _ _ pi1 _ | ex_wn_r _ _ _ _ pi1 _ => Forall_sequent PS pi1 * PS l
 | @mix_r _ L _ PL => ((fix Forall_sequent_Forall P L (PL : Forall_inf (ll P) L) {struct PL} : Type :=
        match PL with
        | Forall_inf_nil _ => True
        | @Forall_inf_cons _ _ l L Pl PL => (Forall_sequent PS Pl * Forall_sequent_Forall P L PL)%type
-       end) P L PL) * PS (concat L)
-| one_r => PS (one :: nil)
-| @bot_r _ l pi1 => Forall_sequent PS pi1 * PS (bot :: l)
-| @tens_r _ A B l1 l2 pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS (tens A B :: l2 ++ l1)
-| @parr_r _ A B l pi1 => Forall_sequent PS pi1 * PS (parr A B :: l)
-| top_r l => PS (top :: l)
-| @plus_r1 _ A B l pi1 => Forall_sequent PS pi1 * PS (aplus A B :: l)
-| @plus_r2 _ A B l pi1 => Forall_sequent PS pi1 * PS (aplus B A :: l)
-| @with_r _ A B l pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS (awith A B :: l)
-| @oc_r _ A l pi1 => Forall_sequent PS pi1 * PS (oc A :: map wn l)
-| @de_r _ A l pi1 => Forall_sequent PS pi1 * PS (wn A :: l)
-| @wk_r _ A l pi1 => Forall_sequent PS pi1 * PS (wn A :: l)
-| @co_r _ A l pi1 => Forall_sequent PS pi1 * PS (wn A :: l)
-| @cut_r _ _ A l1 l2 pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS (l2 ++ l1)
-| gax_r a => PS (projT2 (pgax P) a)
+       end) P L PL) * PS l
+| one_r | top_r _ => PS l
+| bot_r pi1 | parr_r pi1 => Forall_sequent PS pi1 * PS l
+| tens_r pi1 pi2 | cut_r _ pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS l
+| plus_r1 _ pi1 | plus_r2 _ pi1 => Forall_sequent PS pi1 * PS l
+| with_r pi1 pi2 => Forall_sequent PS pi1 * Forall_sequent PS pi2 * PS l
+| oc_r pi1 | de_r pi1 | wk_r _ pi1 | co_r pi1 => Forall_sequent PS pi1 * PS l
 end.
 
 Definition Forall_formula P FS := @Forall_sequent P (Forall_inf FS).
@@ -512,10 +501,7 @@ induction pi using ll_nested_ind;
 cbn. clear eqpmix. intros [HFS HPS].
 split; [ clear HPS | exact (HPQ _ HPS) ].
 induction PL; [ exact I | ].
-unfold Forall_Proofs in X. Dependent_Forall_inversion X.
-split.
-- apply X1, HFS.
-- apply (IHPL X2), HFS.
+unfold Forall_Proofs in X. Dependent_Forall_inversion X. tauto.
 Qed.
 
 Lemma Forall_sequent_stronger_pfrag P Q (Hfrag : le_pfrag P Q) PS l (pi : ll P l) :

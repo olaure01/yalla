@@ -56,7 +56,7 @@ match n with
 end.
 
 Lemma oc_n_oc n A : oc_n n (oc A) = oc_n (S n) A.
-Proof. induction n; [ | cbn in *; rewrite IHn ]; reflexivity. Qed.
+Proof. induction n; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
 
 (** Orthogonal / dual of a [formula] *)
@@ -79,13 +79,13 @@ match A with
 end.
 
 Lemma bidual A : dual (dual A) = A.
-Proof. now induction A; cbn; rewrite ? IHA1, ? IHA2, ? IHA. Qed.
+Proof. induction A; cbn; rewrite ? IHA1, ? IHA2, ? IHA; reflexivity. Qed.
 
 Lemma codual A B : dual A = B <-> A = dual B.
-Proof. now split; intro H; rewrite <- (bidual A), <- (bidual B), H, ? bidual. Qed.
+Proof. split; intro H; rewrite <- (bidual A), <- (bidual B), H, ? bidual; reflexivity. Qed.
 
 Lemma dual_inj : injective dual.
-Proof. now intros A B H; rewrite <- (bidual A), <- (bidual B), H. Qed.
+Proof. intros A B H. rewrite <- (bidual A), <- (bidual B), H. reflexivity. Qed.
 
 Lemma dual_tens_n n A : dual (tens_n n A) = parr_n n (dual A).
 Proof. induction n as [|[|n] IHn]; [ | | cbn in *; rewrite <- IHn ]; reflexivity. Qed.
@@ -120,18 +120,10 @@ Proof. induction n; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 Lemma fsize_oc_n n A : fsize (oc_n n A) = n + fsize A.
 Proof. induction n; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
-Ltac fsize_auto :=
-cbn; repeat rewrite fsize_dual; cbn;
-match goal with
-| H: fsize _ < _ |- _ => cbn in H
-| H: fsize _ <= _ |- _ => cbn in H
-| H: fsize _ = _ |- _ => cbn in H
-end; lia.
-
 (** Atomic [formula] *)
 Inductive atomic : formula -> Type :=
-| atomic_var : forall x, atomic (var x)
-| atomic_covar : forall x, atomic (covar x).
+| atomic_var x : atomic (var x)
+| atomic_covar x : atomic (covar x).
 
 (* Unused
 Inductive atomic_Prop : formula -> Prop :=
@@ -151,23 +143,20 @@ Qed.
 
 (** First argument is a sub-formula of the second: *)
 Inductive subform : formula -> formula -> Prop :=
-| sub_id : forall A, subform A A
-| sub_tens_l : forall A B C, subform A B -> subform A (tens B C)
-| sub_tens_r : forall A B C, subform A B -> subform A (tens C B)
-| sub_parr_l : forall A B C, subform A B -> subform A (parr B C)
-| sub_parr_r : forall A B C, subform A B -> subform A (parr C B)
-| sub_plus_l : forall A B C, subform A B -> subform A (aplus B C)
-| sub_plus_r : forall A B C, subform A B -> subform A (aplus C B)
-| sub_with_l : forall A B C, subform A B -> subform A (awith B C)
-| sub_with_r : forall A B C, subform A B -> subform A (awith C B)
-| sub_oc : forall A B, subform A B -> subform A (oc B)
-| sub_wn : forall A B, subform A B -> subform A (wn B).
+| sub_id A : subform A A
+| sub_tens_l A B C : subform A B -> subform A (tens B C)
+| sub_tens_r A B C : subform A B -> subform A (tens C B)
+| sub_parr_l A B C : subform A B -> subform A (parr B C)
+| sub_parr_r A B C : subform A B -> subform A (parr C B)
+| sub_plus_l A B C : subform A B -> subform A (aplus B C)
+| sub_plus_r A B C : subform A B -> subform A (aplus C B)
+| sub_with_l A B C : subform A B -> subform A (awith B C)
+| sub_with_r A B C : subform A B -> subform A (awith C B)
+| sub_oc A B : subform A B -> subform A (oc B)
+| sub_wn A B : subform A B -> subform A (wn B).
 
 Lemma sub_trans A B C : subform A B -> subform B C -> subform A C.
-Proof.
-intros Hl Hr; revert A Hl; induction Hr; intros A' Hl;
-  try (constructor; apply IHHr); assumption.
-Qed.
+Proof. intros Hl Hr. induction Hr in A, Hl |- *; try (constructor; apply IHHr); assumption. Qed.
 
 #[export] Instance sub_po : PreOrder subform | 50.
 Proof. split; repeat intro; [ apply sub_id | eapply sub_trans; eassumption ]. Qed.
@@ -177,18 +166,17 @@ Definition subform_list l1 l2 := Forall (fun A => Exists (subform A) l2) l1.
 
 Lemma sub_id_list l l0 : subform_list l (l0 ++ l).
 Proof.
-revert l0; induction l; intros l0; constructor.
+induction l in l0 |- *; constructor.
 - induction l0.
-  + constructor; apply sub_id.
-  + apply Exists_cons_tl; assumption.
+  + constructor. apply sub_id.
+  + apply Exists_cons_tl. assumption.
 - replace (l0 ++ a :: l) with ((l0 ++ a :: nil) ++ l) by (rewrite <- app_assoc; reflexivity).
   apply IHl.
 Qed.
 
-Lemma sub_trans_list l1 l2 l3 :
-  subform_list l1 l2 -> subform_list l2 l3 -> subform_list l1 l3.
+Lemma sub_trans_list l1 l2 l3 : subform_list l1 l2 -> subform_list l2 l3 -> subform_list l1 l3.
 Proof.
-revert l2 l3; induction l1; intros l2 l3 Hl Hr; constructor.
+induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
 - inversion Hl; subst.
   revert Hr H1; clear; induction l2; intros Hr Hl; inversion Hl; subst.
   + inversion Hr; subst.
@@ -199,7 +187,7 @@ revert l2 l3; induction l1; intros l2 l3 Hl Hr; constructor.
       revert H; clear - H0; induction l; intro H; inversion H; subst.
       -- apply Exists_cons_hd.
          transitivity a0; assumption.
-      -- apply Exists_cons_tl, IHl; assumption.
+      -- apply Exists_cons_tl, IHl. assumption.
   + inversion Hr; subst.
     apply IHl2; assumption.
 - inversion Hl; subst.
@@ -209,11 +197,8 @@ Qed.
 Instance sub_list_po : PreOrder subform_list.
 Proof.
 split.
-- intros l.
-  rewrite <- app_nil_l.
-  apply sub_id_list.
-- intros l1 l2 l3.
-  apply sub_trans_list.
+- intros l. rewrite <- app_nil_l. apply sub_id_list.
+- intros l1 l2 l3. apply sub_trans_list.
 Qed.
 
 (* Unused
@@ -436,6 +421,6 @@ Proof. apply subb_sub_list, sub_id_list. Qed.
 
 Lemma subb_trans_list l1 l2 l3 :
   is_true (subformb_list l1 l2) -> is_true (subformb_list l2 l3) -> is_true (subformb_list l1 l3).
-Proof. setoid_rewrite subb_sub_list; apply sub_trans_list. Qed.
+Proof. setoid_rewrite subb_sub_list. apply sub_trans_list. Qed.
 
 End Atoms.

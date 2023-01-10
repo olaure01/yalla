@@ -167,44 +167,26 @@ induction pi; try (constructor; assumption).
   destruct Hfrag as [_ [_ Hp]]. apply (PEPermutation_Type_monot (ipperm P) _ Hp), p.
 - apply (ex_oc_ir _ lw); assumption.
 - destruct Hfrag as [Hcut _]. rewrite f in Hcut. apply (@cut_ir _ Hcut A); assumption.
-- destruct Hfrag as [_ [Hgax _]]. destruct (Hgax a) as [b ->]. apply gax_ir.
+- destruct Hfrag as [_ [Hgax _]], (Hgax a) as [b ->]. apply gax_ir.
 Defined.
 
 (** Proofs with sequent satisfying a given predicate *)
 
 Fixpoint Forall_isequent P PS l A (pi : ill P l A) : Type :=
 match pi with
-| ax_ir X => PS (ivar X :: nil) (ivar X)
-| ex_ir _ l2 A pi1 _ => Forall_isequent PS pi1 * PS l2 A
-| ex_oc_ir l1 _ lw' l2 A pi1 _ => Forall_isequent PS pi1 * PS (l1 ++ map ioc lw' ++ l2) A
-| one_irr => PS nil ione
-| one_ilr l1 l2 A pi1 => Forall_isequent PS pi1 * PS (l1 ++ ione :: l2) A
-| tens_irr A B l1 l2 pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS (l1 ++ l2) (itens A B)
-| tens_ilr A B l1 l2 C pi1 => Forall_isequent PS pi1 * PS (l1 ++ itens A B :: l2) C
-| lpam_irr A B l pi1 =>  Forall_isequent PS pi1 * PS l (ilpam A B)
-| lpam_ilr A B l0 l1 l2 C pi1 pi2 =>
-    Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS (l1 ++ ilpam A B :: l0 ++ l2) C
-| gen_irr A l pi1 => Forall_isequent PS pi1 * PS l (igen A)
-| gen_ilr A l pi1 => Forall_isequent PS pi1 * PS (igen A :: l) N
-| lmap_irr A B l pi1 =>  Forall_isequent PS pi1 * PS l (ilmap A B)
-| lmap_ilr A B l0 l1 l2 C pi1 pi2 =>
-    Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS (l1 ++ l0 ++ ilmap A B :: l2) C
-| neg_irr A l pi1 => Forall_isequent PS pi1 * PS l (ineg A)
-| neg_ilr A l pi1 => Forall_isequent PS pi1 * PS (l ++ ineg A :: nil) N
-| top_irr l => PS l itop
-| with_irr A B l pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS l (iwith A B)
-| with_ilr1 A B l1 l2 C pi1 => Forall_isequent PS pi1 * PS (l1 ++ iwith A B :: l2) C
-| with_ilr2 A B l1 l2 C pi1 => Forall_isequent PS pi1 * PS (l1 ++ iwith B A :: l2) C
-| zero_ilr l1 l2 C => PS (l1 ++ izero :: l2) C
-| plus_irr1 A B l pi1 => Forall_isequent PS pi1 * PS l (iplus A B)
-| plus_irr2 A B l pi1 => Forall_isequent PS pi1 * PS l (iplus B A)
-| plus_ilr A B l1 l2 C pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS (l1 ++ iplus A B :: l2) C
-| @oc_irr _ A l pi1 => Forall_isequent PS pi1 * PS (map ioc l) (ioc A)
-| de_ilr A l1 l2 C pi1 => Forall_isequent PS pi1 * PS (l1 ++ ioc A :: l2) C
-| wk_ilr A l1 l2 C pi1 => Forall_isequent PS pi1 * PS (l1 ++ ioc A :: l2) C
-| co_ilr A l1 l2 C pi1 => Forall_isequent PS pi1 * PS (l1 ++ ioc A :: l2) C
-| @cut_ir _ _ A l0 l1 l2 C pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS (l1 ++ l0 ++ l2) C
-| gax_ir a => PS (fst (projT2 (ipgax P) a)) (snd (projT2 (ipgax P) a))
+| ax_ir _ | gax_ir _ => PS l A
+| ex_ir _ _ _ pi1 _ | ex_oc_ir _ _ _ _ _ pi1 _ => Forall_isequent PS pi1 * PS l A
+| one_irr => PS l A
+| one_ilr _ _ _ pi1 | tens_ilr _ _ _ _ _ pi1 | lpam_irr _ _ _ pi1 | gen_irr _ _ pi1 | gen_ilr _ _ pi1
+| lmap_irr _ _ _ pi1 | neg_irr _ _ pi1 | neg_ilr _ _ pi1 =>  Forall_isequent PS pi1 * PS l A
+| tens_irr _ _ _ _ pi1 pi2 | lpam_ilr _ _ _ _ _ _ pi1 pi2 | lmap_ilr _ _ _ _ _ _ pi1 pi2 =>
+    Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS l A
+| top_irr _ | zero_ilr _ _ _ => PS l A
+| with_ilr1 _ _ _ _ _ pi1 | with_ilr2 _ _ _ _ _ pi1 | plus_irr1 _ _ _ pi1 | plus_irr2 _ _ _ pi1
+   => Forall_isequent PS pi1 * PS l A
+| with_irr _ _ _ pi1 pi2 | plus_ilr _ _ _ _ _ pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS l A
+| oc_irr pi1 | de_ilr _ _ _ _ pi1 | wk_ilr _ _ _ _ pi1 | co_ilr _ _ _ _ pi1 => Forall_isequent PS pi1 * PS l A
+| cut_ir _ _ pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS l A
 end.
 
 Definition Forall_iformula P FS := @Forall_isequent P (fun l A => (Forall_inf FS (A :: l))%type).

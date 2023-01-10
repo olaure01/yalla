@@ -301,18 +301,15 @@ Lemma llfrag2lj_cbv l A :
 Proof.
 intros pi.
 apply (@illfrag2lj_cbv atom).
-apply ill_vs_ll.ll_to_ill_oclpam_axfree
-  with (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
+apply ill_vs_ll.ll_to_ill_oclpam_axfree.
 - reflexivity.
-- intros H; inversion H.
-- eapply ll_def.stronger_pfrag; [ | apply pi ].
-  split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
-  intros a; inversion a.
+- intros [].
 - constructor; [  constructor; apply lj2ill_cbv_oclpam | ].
-  clear pi; induction l; constructor.
+  clear pi. induction l; constructor.
   + constructor; apply lj2ill_cbv_oclpam.
   + apply IHl.
-- reflexivity.
+- eapply ll_def.stronger_pfrag; [ | apply pi ].
+  split; [ | split ; [ | split ] ]; try (intros; cbn; constructor). intros [].
 Qed.
 
 (** ** 5 define embedding into [iformulas.iformula] by call-by-name Girard's translation with top and with *)
@@ -442,18 +439,15 @@ Lemma llfrag2lj_cbn l A :
 Proof.
 intros pi.
 apply illfrag2lj_cbn.
-apply ill_vs_ll.ll_to_ill_oclpam_axfree
-  with (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
+apply ill_vs_ll.ll_to_ill_oclpam_axfree.
 - reflexivity.
-- intros H; inversion H.
-- eapply ll_def.stronger_pfrag; [ | apply pi ].
-  split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
-  intros a; inversion a.
+- intros [].
 - constructor; [ apply lj2ill_cbn_oclpam | ].
-  clear pi; induction l; constructor.
+  clear pi. induction l; constructor.
   + constructor; apply lj2ill_cbn_oclpam.
   + apply IHl.
-- reflexivity.
+- eapply ll_def.stronger_pfrag; [ | apply pi ].
+  split; [ | split ; [ | split ] ]; try (intros; cbn; constructor). intros [].
 Qed.
 
 
@@ -479,7 +473,7 @@ Qed.
 Lemma disjunction_property (A B : iformula) : lj nil (ior A B) -> lj nil A + lj nil B.
 Proof.
   intros pi.
-  remember nil as l; remember (ior A B) as C.
+  remember nil as l. remember (ior A B) as C.
   induction pi; inversion Heql; inversion HeqC; subst; [ | left; assumption | right; assumption ].
   assert (l1 = nil) as -> by (symmetry in p; apply Permutation_Type_nil, p).
   apply IHpi; reflexivity.
