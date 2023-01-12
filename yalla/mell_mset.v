@@ -23,14 +23,10 @@ Context { Atoms : AtomType_into_nat atom }.
 (** ** 1. define formulas *)
 
 Inductive formula :=
-| var : atom -> formula
-| covar : atom -> formula
-| one : formula
-| bot : formula
-| tens : formula -> formula -> formula
-| parr : formula -> formula -> formula
-| oc : formula -> formula
-| wn : formula -> formula.
+| var (_ : atom) | covar (_ : atom)
+| one | bot
+| tens (_ _ : formula) | parr (_ _ : formula)
+| oc (_ : formula) | wn (_ : formula).
 
 Fixpoint dual A :=
 match A with
@@ -61,7 +57,7 @@ end.
 
 Lemma mell2ll_inj : injective mell2ll.
 Proof.
-intros A; induction A; intros B Heq; destruct B; inversion Heq;
+intros A. induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 
@@ -71,7 +67,7 @@ eapply (@border_inj _ border_nat).
 eapply compose_injective ; [ | eapply compose_injective ].
 - apply mell2ll_inj.
 - eapply section_injective.
-  intros A; apply fmformulas.form_nattree_section.
+  intros A. apply fmformulas.form_nattree_section.
 - apply nattree2nat_inj.
 Defined.
 
@@ -85,68 +81,53 @@ Lemma mell2ll_map_wn_inv l1 l2 : Permutation_Type (map formulas.wn l1) (map mell
   {'(l1', l2') & l1 = map mell2ll l1' /\ l2 = map wn l2' & Permutation_Type l1' l2' }.
 Proof.
 induction l1 in l2 |- *; intros Heq; destruct l2 as [ | f l2 ].
-- exists (nil, nil); repeat split; reflexivity.
-- apply Permutation_Type_nil in Heq.
-  inversion Heq.
+- exists (nil, nil); [ repeat split | reflexivity ].
+- apply Permutation_Type_nil in Heq as [=].
 - symmetry in Heq.
-  apply Permutation_Type_nil in Heq.
-  inversion Heq.
+  apply Permutation_Type_nil in Heq as [=].
 - assert (HP := Heq).
   symmetry in Heq.
   apply Permutation_Type_vs_cons_inv in Heq as [(l0, l3) Heq].
   destruct l0 as [ | f0 l0 ].
-  + cbn in Heq, HP; inversion Heq; subst.
+  + cbn in Heq, HP. inversion Heq; subst.
     rewrite H0 in HP.
     apply Permutation_Type_cons_inv in HP.
     apply IHl1 in HP as [(l1', l2') [-> ->] HP].
     destruct f; inversion H0.
-    exists (f :: l1', f :: l2'); repeat split.
+    exists (f :: l1', f :: l2'); [ repeat split | ].
     apply Permutation_Type_cons; [ reflexivity | assumption ].
   + inversion Heq.
-    cbn in HP; rewrite H1, app_comm_cons in HP.
-    apply Permutation_Type_cons_app_inv in HP.
-    decomp_map_inf H1; subst; cbn in HP.
+    cbn in HP. rewrite H1, app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP.
+    decomp_map_inf H1. subst. cbn in HP.
     replace (mell2ll f :: map mell2ll l4 ++ map mell2ll l6)
       with (map mell2ll ((f :: l4) ++ l6))
       in HP by (list_simpl; reflexivity).
     apply IHl1 in HP as [(l1', l2') [-> Heq2] HP].
     destruct x; inversion H1.
-    symmetry in Heq2; decomp_map_inf Heq2; subst.
-    exists (x :: l1', x0 :: l2 ++ x :: l1); repeat split.
-    * list_simpl; reflexivity.
-    * rewrite app_comm_cons.
-      apply Permutation_Type_cons_app; assumption.
+    symmetry in Heq2. decomp_map_inf Heq2. subst.
+    exists (x :: l1', x0 :: l2 ++ x :: l1); [ repeat split | ].
+    * list_simpl. reflexivity.
+    * rewrite app_comm_cons. apply Permutation_Type_cons_app; assumption.
 Qed.
 
 
 (** *** 2bis. sequents *)
 
-Instance fmset_formula : FinMultiset (SortedList _) formula :=
-  FMConstr_slist border_formula.
+Instance fmset_formula : FinMultiset (SortedList _) formula := FMConstr_slist border_formula.
 
 
 (** ** 3. define proofs *)
 
 Inductive mell : SortedList border_formula -> Prop :=
-| ax_r : forall X, mell (add (covar X) (add (var X) empty))
+| ax_r X : mell (add (covar X) (add (var X) empty))
 | one_r : mell (add one empty)
-| bot_r : forall m, mell m -> mell (add bot m)
-| tens_r : forall A B m1 m2,
-              mell (add A m1) -> mell (add B m2) ->
-              mell (add (tens A B) (sum m1 m2))
-| parr_r : forall A B m,
-              mell (add A (add B m)) ->
-              mell (add (parr A B) m)
-| oc_r : forall A m,
-              mell (add A (fmmap wn m)) ->
-              mell (add (oc A) (fmmap wn m))
-| de_r : forall A m,
-              mell (add A m) -> mell (add (wn A) m)
-| wk_r : forall A m,
-              mell m -> mell (add (wn A) m)
-| co_r : forall A m,
-              mell (add (wn A) (add (wn A) m)) ->
-              mell (add (wn A) m).
+| bot_r m : mell m -> mell (add bot m)
+| tens_r A B m1 m2 : mell (add A m1) -> mell (add B m2) -> mell (add (tens A B) (sum m1 m2))
+| parr_r A B m : mell (add A (add B m)) -> mell (add (parr A B) m)
+| oc_r A m : mell (add A (fmmap wn m)) -> mell (add (oc A) (fmmap wn m))
+| de_r A m : mell (add A m) -> mell (add (wn A) m)
+| wk_r A m : mell m -> mell (add (wn A) m)
+| co_r A m : mell (add (wn A) (add (wn A) m)) -> mell (add (wn A) m).
 
 
 (** ** 4. characterize corresponding [ll] fragment *)
@@ -177,94 +158,86 @@ Definition pfrag_mell := @ll_def.mk_pfrag atom  false ll_def.NoAxioms (fun n => 
 
 Lemma mell2mellfrag m : mell m -> inhabited (ll_def.ll pfrag_mell (map mell2ll (elts m))).
 Proof.
-intros pi; induction pi;
+intros pi. induction pi;
   try (destruct IHpi as [IHpi]); try (destruct IHpi1 as [IHpi1]); try (destruct IHpi2 as [IHpi2]);
   constructor.
-- cbn; match goal with |- context[if ?b then _ else _] => destruct b end.
+- cbn. match goal with |- context[if ?b then _ else _] => destruct b end.
   + apply ll_def.ax_r.
   + apply (ll_def.ex_r (map mell2ll (covar X :: var X :: nil))); [ apply ll_def.ax_r | ].
     apply Permutation_Type_swap.
 - apply ll_def.one_r.
 - eapply ll_def.ex_r.
-  + apply ll_def.bot_r; eassumption.
-  + change (formulas.bot :: map mell2ll (elts m))
-      with (map mell2ll (bot :: elts m)).
+  + apply ll_def.bot_r. eassumption.
+  + change (formulas.bot :: map mell2ll (elts m)) with (map mell2ll (bot :: elts m)).
     apply Permutation_Type_map.
-    symmetry; apply elts_add.
+    symmetry. apply elts_add.
 - eapply ll_def.ex_r.
   + apply ll_def.tens_r.
     * assert (Helt := Permutation_Type_map mell2ll (elts_add A m1)).
       apply (ll_def.ex_r _ _ IHpi1) in Helt.
-      cbn in Helt; eassumption.
+      cbn in Helt. eassumption.
     * assert (Helt := Permutation_Type_map mell2ll (elts_add B m2)).
       apply (ll_def.ex_r _ _ IHpi2) in Helt.
-      cbn in Helt; eassumption.
+      cbn in Helt. eassumption.
   + rewrite <- map_app.
-    change (formulas.tens (mell2ll A) (mell2ll B)
-              :: map mell2ll (proj1_sig m2 ++ proj1_sig m1))
+    change (formulas.tens (mell2ll A) (mell2ll B) :: map mell2ll (proj1_sig m2 ++ proj1_sig m1))
       with (map mell2ll (tens A B :: elts m2 ++ elts m1)).
     apply Permutation_Type_map.
     etransitivity; [ apply Permutation_Type_cons;
                       [ reflexivity | apply Permutation_Type_app_comm ] | ].
     etransitivity; [ apply Permutation_Type_cons;
                       [ reflexivity | symmetry; apply elts_sum ] | ].
-    symmetry; apply elts_add.
+    symmetry. apply elts_add.
 - eapply ll_def.ex_r.
   + apply ll_def.parr_r.
     assert (Permutation_Type (elts (add A (add B m))) (A :: B :: elts m))
       as Helt%(Permutation_Type_map mell2ll).
     { etransitivity; [ apply elts_add | ].
-      apply Permutation_Type_cons, elts_add; reflexivity. }
-    apply (ll_def.ex_r _ _ IHpi) in Helt.
-    cbn in Helt; eassumption.
+      apply Permutation_Type_cons, elts_add. reflexivity. }
+    apply (ll_def.ex_r _ _ IHpi) in Helt. cbn in Helt. eassumption.
   + change (formulas.parr (mell2ll A) (mell2ll B) :: map mell2ll (proj1_sig m))
       with (map mell2ll (parr A B :: elts m)).
     apply Permutation_Type_map.
-    symmetry; apply elts_add.
+    symmetry. apply elts_add.
 - eapply ll_def.ex_r.
   + apply ll_def.oc_r.
     assert (Permutation_Type (elts (add A (fmmap wn m))) (A :: map wn (elts m)))
       as Helt%(Permutation_Type_map  mell2ll).
     { etransitivity; [ apply elts_add | ].
-      apply Permutation_Type_cons, elts_fmmap; reflexivity. }
+      apply Permutation_Type_cons, elts_fmmap. reflexivity. }
     apply (ll_def.ex_r _ _ IHpi) in Helt.
     eapply ll_def.ex_r; [ apply Helt | ].
-    cbn; apply Permutation_Type_cons; [ reflexivity | ].
-    rewrite mell2ll_map_wn; apply Permutation_Type_map; reflexivity.
+    cbn. apply Permutation_Type_cons; [ reflexivity | ].
+    rewrite mell2ll_map_wn. apply Permutation_Type_map. reflexivity.
   + rewrite <- mell2ll_map_wn.
     change (formulas.oc (mell2ll A) :: map mell2ll (map wn (proj1_sig m)))
       with (map mell2ll (oc A :: map wn (elts m))).
     apply Permutation_Type_map.
-    symmetry; etransitivity; [ apply elts_add | ].
-    apply Permutation_Type_cons, elts_fmmap; reflexivity.
+    symmetry. etransitivity; [ apply elts_add | ].
+    apply Permutation_Type_cons, elts_fmmap. reflexivity.
 - eapply ll_def.ex_r.
   + apply ll_def.de_r.
     assert (Helt := Permutation_Type_map mell2ll (elts_add A m)).
     apply (ll_def.ex_r _ _ IHpi) in Helt.
-    cbn in Helt; eassumption.
-  + change (formulas.wn (mell2ll A) :: map mell2ll (proj1_sig m))
-      with (map mell2ll (wn A :: elts m)).
+    cbn in Helt. eassumption.
+  + change (formulas.wn (mell2ll A) :: map mell2ll (proj1_sig m)) with (map mell2ll (wn A :: elts m)).
     apply Permutation_Type_map.
-    symmetry; apply elts_add.
+    symmetry. apply elts_add.
 - eapply ll_def.ex_r.
   + apply (ll_def.wk_r (mell2ll A)); eassumption.
-  + change (formulas.wn (mell2ll A) :: map mell2ll (elts m))
-      with (map mell2ll (wn A :: elts m)).
+  + change (formulas.wn (mell2ll A) :: map mell2ll (elts m)) with (map mell2ll (wn A :: elts m)).
     apply Permutation_Type_map.
-    symmetry; apply elts_add.
+    symmetry. apply elts_add.
 - eapply ll_def.ex_r.
   + apply ll_def.co_r.
-    assert (Permutation_Type (elts (add (wn A) (add (wn A) m)))
-                             (wn A :: wn A :: elts m))
+    assert (Permutation_Type (elts (add (wn A) (add (wn A) m))) (wn A :: wn A :: elts m))
       as Helt%(Permutation_Type_map mell2ll).
     { etransitivity; [ apply elts_add | ].
-      apply Permutation_Type_cons, elts_add; reflexivity. }
-    apply (ll_def.ex_r _ _ IHpi) in Helt.
-    cbn in Helt; eassumption.
-  + change (formulas.wn (mell2ll A) :: map mell2ll (proj1_sig m))
-      with (map mell2ll (wn A :: elts m)).
+      apply Permutation_Type_cons, elts_add. reflexivity. }
+    apply (ll_def.ex_r _ _ IHpi) in Helt. cbn in Helt. eassumption.
+  + change (formulas.wn (mell2ll A) :: map mell2ll (proj1_sig m)) with (map mell2ll (wn A :: elts m)).
     apply Permutation_Type_map.
-    symmetry; apply elts_add.
+    symmetry. apply elts_add.
 Qed.
 
 Lemma mellfrag2mell m : ll_def.ll pfrag_mell (map mell2ll (elts m)) -> mell m.
@@ -274,15 +247,15 @@ remember (map mell2ll (elts m)) as l.
 assert (Permutation_Type l (map mell2ll (elts m))) as HP by now subst.
 clear Heql.
 induction pi in m, HP |- *; subst;
-  try (now inversion f);
+  try discriminate;
   try (now (apply Permutation_Type_image in HP as [Z Heq];
-            destruct Z; inversion Heq)).
+            destruct Z; discriminate Heq)).
 - apply Permutation_Type_length_2_inv in HP as [HP | HP]; decomp_map HP; subst.
   + destruct l1; inversion HP4.
     destruct x; inversion HP1; subst.
     destruct x0; inversion HP3; subst.
     apply (f_equal (fold_right add empty)) in HP.
-    rewrite elts_retract in HP; subst.
+    rewrite elts_retract in HP. subst.
     apply ax_r.
   + destruct l1; inversion HP4.
     destruct x; inversion HP1; subst.
@@ -496,8 +469,7 @@ induction pi in m, HP |- *; subst;
   unfold fmmap in HP2.
   eapply Permutation_Type_trans in HP2; [ | symmetry; apply elts_perm ].
   eapply Permutation_Type_trans in HP2; [ | symmetry; apply Permutation_Type_map, elts_perm ].
-  list_simpl in HP2.
-  list_simpl.
+  list_simpl in HP2. list_simpl.
   apply Permutation_Type_cons_app.
   symmetry.
   apply HP2.
@@ -512,10 +484,9 @@ Qed.
 Lemma ax_gen_r A : mell (add (dual A) (add A empty)).
 Proof.
 apply mellfrag2mell.
-eapply ll_def.ex_r ; [ apply (ll_def.ax_exp (mell2ll (dual A))) | ].
+eapply ll_def.ex_r; [ apply (ll_def.ax_exp (mell2ll (dual A))) | ].
 rewrite <- mell2ll_dual, formulas.bidual, mell2ll_dual.
-change (mell2ll (dual A) :: mell2ll A :: nil)
-  with (map mell2ll (dual A :: A :: nil)).
+change (mell2ll (dual A) :: mell2ll A :: nil) with (map mell2ll (dual A :: A :: nil)).
 apply Permutation_Type_map.
 etransitivity; [ | symmetry; apply elts_add ]; reflexivity.
 Qed.
@@ -525,20 +496,17 @@ Qed.
 
 Lemma cut_r A m1 m2 : mell (add A m1) -> mell (add (dual A) m2) -> mell (sum m1 m2).
 Proof.
-intros pi1%mell2mellfrag pi2%mell2mellfrag.
-destruct pi1 as [pi1]; destruct pi2 as [pi2].
+intros [pi1]%mell2mellfrag [pi2]%mell2mellfrag.
 apply mellfrag2mell.
 eapply ll_def.ex_r; [ | apply Permutation_Type_map; symmetry; apply elts_sum ].
 rewrite map_app.
 eapply ll_cut.cut_r_axfree.
-- intros a; destruct a.
-- assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
-                           (map mell2ll (dual A :: elts m2)))
+- intros [].
+- assert (Permutation_Type (map mell2ll (elts (add (dual A) m2))) (map mell2ll (dual A :: elts m2)))
     as Helt2 by apply Permutation_Type_map, elts_add.
-  cbn in Helt2; rewrite <- mell2ll_dual in Helt2.
+  cbn in Helt2. rewrite <- mell2ll_dual in Helt2.
   eapply ll_def.ex_r; [ | apply Helt2 ]; assumption.
-- assert (Permutation_Type (map mell2ll (elts (add A m1)))
-                           (map mell2ll (A :: elts m1)))
+- assert (Permutation_Type (map mell2ll (elts (add A m1))) (map mell2ll (A :: elts m1)))
     as Helt by apply Permutation_Type_map, elts_add.
   eapply ll_def.ex_r; [ | apply Helt ]; eassumption.
 Qed.

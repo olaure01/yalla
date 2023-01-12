@@ -3,8 +3,7 @@
 
 (** * Study of Linear Logic enriched with [bot = oc bot] *)
 
-From OLlibs Require Import infinite List_more
-                           Permutation_Type_more Permutation_Type_solve Dependent_Forall_Type.
+From OLlibs Require Import infinite List_more Permutation_Type_more Dependent_Forall_Type.
 From Yalla Require Import ll_fragments.
 
 Set Implicit Arguments.
@@ -48,7 +47,7 @@ induction l in l' |- *; intros; [ assumption | ].
 apply (ex_bbb_r (map wn l ++ wn a :: l')); [ | symmetry; apply Permutation_Type_middle ].
 apply IHl.
 apply (ex_bbb_r (wn a :: map wn l ++ map wn l ++ l'));
-  [ |rewrite ? app_assoc; apply Permutation_Type_middle ].
+  [ | rewrite ? app_assoc; apply Permutation_Type_middle ].
 apply co_bbb_r.
 eapply ex_bbb_r; [ eassumption | ].
 apply Permutation_Type_cons; [ reflexivity | ].
@@ -141,12 +140,13 @@ Proof.
 intros pi. induction pi;
   (try now (apply wk_r; constructor));
   try now (eapply ex_r; [ | apply Permutation_Type_swap ];
-           constructor; eapply ex_r; [ eassumption | cbn; Permutation_Type_solve ]).
+           constructor; eapply ex_r; [ eassumption | try apply Permutation_Type_swap ]).
 - eapply ex_r; [ eassumption | now cbn; apply Permutation_Type_cons ].
 - apply co_r, co_r, de_r.
   apply (ex_r (tens (wn one) bot :: (wn (tens (wn one) bot) :: l1)
-                                 ++ (wn (tens (wn one) bot) :: l2)));
-    [ | cbn; Permutation_Type_solve ].
+                                 ++ (wn (tens (wn one) bot) :: l2))).
+  2:{ cbn. do 2 (apply Permutation_Type_cons; [ reflexivity | ]).
+      symmetry. apply Permutation_Type_cons_app, Permutation_Type_app_comm. }
   apply tens_r.
   + apply mix02_to_ll'' with true true true; [ reflexivity | ].
     apply stronger_pfrag with (pfrag_mix02); [ | assumption ].
@@ -156,10 +156,16 @@ intros pi. induction pi;
   + apply bot_r. assumption.
 - apply co_r.
   apply (ex_r (tens A B :: (wn (tens (wn one) bot) :: l2)
-                        ++ (wn (tens (wn one) bot) :: l1)));
-    [ | cbn; Permutation_Type_solve ].
-  apply tens_r; eapply ex_r; [ apply IHpi1 | | apply IHpi2 | ];
-    cbn; Permutation_Type_solve.
+                        ++ (wn (tens (wn one) bot) :: l1))).
+  2:{ cbn. etransitivity; [ apply Permutation_Type_swap | ].
+      apply Permutation_Type_cons; [ reflexivity | ].
+      cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail. cbn.
+      rewrite app_comm_cons. etransitivity; [ apply Permutation_Type_app_comm | reflexivity ]. }
+  apply tens_r; eapply ex_r; [ apply IHpi1 | | apply IHpi2 | ]; apply Permutation_Type_swap.
+- eapply ex_r; [ | apply Permutation_Type_swap ].
+  apply parr_r.
+  eapply ex_r; [ eassumption | ].
+  cons2app. rewrite ? app_assoc. apply Permutation_Type_middle.
 - eapply ex_r; [ | apply Permutation_Type_swap ].
   apply with_r.
   + eapply ex_r; [ apply IHpi1 | cbn; apply Permutation_Type_swap ].
@@ -168,6 +174,10 @@ intros pi. induction pi;
     [ | cbn; apply Permutation_Type_swap ].
   apply oc_r.
   eapply ex_r; [ eassumption | cbn; apply Permutation_Type_swap ].
+- eapply ex_r; [ | apply Permutation_Type_swap ].
+  apply co_r.
+  eapply ex_r; [ eassumption | ].
+  cons2app. rewrite ? app_assoc. apply Permutation_Type_middle.
 Qed.
 
 Lemma ll_to_bbb l : ll_ll l ->
@@ -279,14 +289,19 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
       rewrite <- Heql4b in HP2b, HP4b.
       clear Heql1b Heql2b Heql3b Heql4b.
       apply (ex_r _ (repeat (tens (wn one) bot) (length l3b) ++ 
-                     l2a ++ wn one :: repeat (wn (tens (wn one) bot)) (length l4b))) in pi1;
-        [ | cbn; Permutation_Type_solve ].
+                     l2a ++ wn one :: repeat (wn (tens (wn one) bot)) (length l4b))) in pi1.
+      2:{ cbn. etransitivity; [ apply Permutation_Type_cons; [ reflexivity | apply HP2 ] | ].
+          rewrite app_comm_cons. etransitivity; [ apply Permutation_Type_app_head, HP4b | ].
+          cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail. cbn.
+          etransitivity; [ | apply Permutation_Type_cons_append ].
+          apply Permutation_Type_cons; [ reflexivity | apply Permutation_Type_app_comm ]. }
       assert (ll pfrag_ll (l2a ++ wn one :: repeat (wn (tens (wn one) bot)) (length l3b + length l4b)))
         as pi1'.
       { rewrite repeat_app.
         apply (ex_r (repeat (wn (tens (wn one) bot)) (length l3b) ++ 
-                     l2a ++ wn one :: repeat (wn (tens (wn one) bot)) (length l4b)));
-          [ | cbn; Permutation_Type_solve ].
+                     l2a ++ wn one :: repeat (wn (tens (wn one) bot)) (length l4b))).
+      2:{ cbn. cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
+          rewrite <- app_assoc. apply Permutation_Type_app_comm. }
         remember (l2a ++ wn one :: repeat (wn (tens (wn one) bot)) (length l4b)) as ld eqn:Heqld.
         remember (length l3b) as p eqn:Heqp.
         clear - pi1. induction p as [|p IHp] in ld, pi1 |- *; [ assumption | ].
@@ -424,9 +439,10 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
       apply (@Permutation_Type_cons _ (tens (wn one) bot) _ eq_refl) in HP.
       assert (Permutation_Type (tens (wn one) bot :: l)
                                (l' ++ repeat (tens (wn one) bot) (S n)
-                                   ++ repeat (wn (tens (wn one) bot)) (length l2 + length l'r))) as HP'
-        by (etransitivity; [ apply HP | rewrite repeat_app; Permutation_Type_solve ]).
-      apply IHpi in HP'. assumption.
+                                   ++ repeat (wn (tens (wn one) bot)) (length l2 + length l'r))) as HP'.
+      { etransitivity; [ apply HP | ].
+        cbn. rewrite repeat_app. apply Permutation_Type_cons_app. list_simpl. reflexivity. }
+      exact (IHpi _ _ _ HP').
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP' as [[l'l l'r] Heq].
@@ -464,8 +480,12 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
       assert (Permutation_Type (wn (tens (wn one) bot) :: wn (tens (wn one) bot) :: l)
          (l' ++ repeat (tens (wn one) bot) n ++
                 repeat (wn (tens (wn one) bot)) (S (S (length l2 + length l'r)))))
-        as HP' by (etransitivity; [ apply HP | Permutation_Type_solve ]).
-      apply IHpi in HP'; assumption.
+        as HP'.
+      { etransitivity; [ apply HP | ].
+        cbn. cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
+        list_simpl. cons2app. rewrite app_assoc. etransitivity; [ apply Permutation_Type_app_comm | ].
+        list_simpl. reflexivity. }
+      exact (IHpi _ _ _ HP').
 - discriminate f.
 - destruct a.
 Qed.

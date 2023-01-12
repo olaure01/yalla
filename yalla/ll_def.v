@@ -21,16 +21,15 @@ Context {atom : DecType}.
 Notation formula := (@formula atom).
 
 Notation Dependent_Forall_inf_forall_formula :=
-  (Dependent_Forall_inf_forall
-    (@list_eq_dec _ (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
-                                            (fun x y => proj2 (eqb_eq x y)))).
+  (Dependent_Forall_inf_forall (@list_eq_dec _ (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
+                                                                       (fun x y => proj2 (eqb_eq x y)))).
 
 (* TODO generalize into OLlibs.Dependent_Forall_Type *)
 (* TODO dealing with issue coq/coq#12394 *)
 (* Example:
   [ old code
-         apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
-         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec; apply list_eq_dec; apply (@eq_dt_dec formulas_dectype)].
+         apply inj_pair2_eq_dec in H2; [ | apply list_eq_dec, (@eq_dt_dec formulas_dectype)].
+         apply inj_pair2_eq_dec in H3; [ | apply list_eq_dec, list_eq_dec (@eq_dt_dec formulas_dectype)].
          subst.
     new code should be cbnified or old code back once coq/coq#12394 solved
          apply inj_pair2_eq_dec in H2;
@@ -113,9 +112,7 @@ Lemma le_pfrag_trans P Q R : le_pfrag P Q -> le_pfrag Q R -> le_pfrag P R.
 Proof.
 intros (Hc1 & Ha1 & Hm1 & Hp1) (Hc2 & Ha2 & Hm2 & Hp2).
 repeat split; try (eapply BoolOrder.le_trans; eassumption).
-- intros a.
-  destruct (Ha1 a) as [b Heq].
-  destruct (Ha2 b) as [c Heq2].
+- intros a. destruct (Ha1 a) as [b Heq]. destruct (Ha2 b) as [c Heq2].
   exists c. etransitivity; eassumption.
 - intros n.
   apply BoolOrder.le_trans with (pmix Q n); [ apply Hm1 | apply Hm2 ].
@@ -126,7 +123,7 @@ Proof.
 split.
 - repeat split; try reflexivity.
   intros a. exists a. reflexivity.
-- intros P Q R. apply le_pfrag_trans.
+- intro. apply le_pfrag_trans.
 Qed.
 
 (* Unused
@@ -208,8 +205,7 @@ Lemma pmixupd_point_comm P n1 n2 b1 b2 : n1 <> n2 ->
           = pmix (pmixupd_point_pfrag (pmixupd_point_pfrag P n2 b2) n1 b1) k.
 Proof.
 intros Hneq k.
-destruct (k =? n1) eqn:Heq1; destruct (k =? n2) eqn:Heq2; cbn;
-  rewrite Heq1, Heq2; try reflexivity.
+destruct (k =? n1) eqn:Heq1, (k =? n2) eqn:Heq2; cbn; rewrite Heq1, Heq2; try reflexivity.
 contradiction Hneq.
 transitivity k.
 - symmetry. apply Nat.eqb_eq, Heq1.
@@ -317,13 +313,15 @@ Section ll_ind.
                top_case plus_case1 plus_case2 with_case oc_case de_case wk_case co_case cut_case gax_case =>
       let rec_call {l : list formula} (pi : ll P l) :=
         (pre_ll_nested_ind pi ax_case ex_case ex_wn_case mix_case one_case bot_case tens_case parr_case
-                              top_case plus_case1 plus_case2 with_case oc_case de_case wk_case co_case cut_case gax_case) in
+                              top_case plus_case1 plus_case2 with_case oc_case de_case wk_case co_case
+                              cut_case gax_case) in
     match pi with
     | ax_r X => ax_case X
     | ex_r l1 l2 pi p => ex_case l1 l2 pi p (rec_call pi)
     | ex_wn_r l1 lw lw' l2 pi p => ex_wn_case l1 lw lw' l2 pi p (rec_call pi)
     | @mix_r _ L eqpmix PL => mix_case L eqpmix PL (
-                (fix ll_nested_ind_aux (L : list (list formula)) (PL : Forall_inf (ll P) L) : Forall_Proofs Pred PL :=
+                (fix ll_nested_ind_aux (L : list (list formula))
+                                       (PL : Forall_inf (ll P) L) : Forall_Proofs Pred PL :=
                    match PL with
                    | Forall_inf_nil _ => Dependent_Forall_inf_nil _ Pred
                    | @Forall_inf_cons _ _ l L Pil PiL => Dependent_Forall_inf_cons _ Pil (rec_call Pil)
@@ -555,8 +553,8 @@ Lemma psize_inf_mix P L eq (FL : Forall_inf (ll P) L) l (pi : ll P l) :
 Proof.
 intros Hin. cbn. clear eq.
 induction FL; inversion Hin.
-- inversion H. subst.
-  apply inj_pair2_eq_dec in H2; [ lia | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ].
+- inversion H as [[Heq H']]. subst.
+  apply inj_pair2_eq_dec in H'; [ lia | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ].
 - specialize (IHFL X). lia.
 Qed.
 
@@ -1415,9 +1413,8 @@ Arguments ll_nested_ind : clear implicits.
 Arguments ll_nested_ind' : clear implicits.
 
 Notation Dependent_Forall_inf_forall_formula :=
-  (Dependent_Forall_inf_forall
-    (@list_eq_dec _ (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
-                                            (fun x y => proj2 (eqb_eq x y)))).
+  (Dependent_Forall_inf_forall (@list_eq_dec _ (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
+                                                                       (fun x y => proj2 (eqb_eq x y)))).
 
 Ltac destruct_ll H f X l Hl Hr HP FL a :=
   match type of H with
@@ -1438,7 +1435,7 @@ Ltac destruct_ll H f X l Hl Hr HP FL a :=
                             | ? ? Hl
                             | ? ? Hl
                             | f ? ? ? Hl Hr
-                            | a ] ; subst
+                            | a ]; subst
   end.
 
 Ltac ll_swap :=
