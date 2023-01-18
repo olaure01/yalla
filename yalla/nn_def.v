@@ -2,8 +2,7 @@
 
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type
-                           Permutation_Type GPermutation_Type.
+From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type Permutation_Type GPermutation_Type.
 From Yalla Require Import subs isubs.
 From Yalla Require Export ill_vs_ll.
 
@@ -38,28 +37,28 @@ Lemma a2a_i : retract i2a a2i.
 Proof. intros a. unfold i2a, a2i. apply (proj3_sig (bijective_inverse Atom2PreIAtom_bij)). Qed.
 Lemma i2i_not_atN a : a <> atN -> a2i (i2a a) = a.
 Proof.
-intros Heq; unfold i2a, a2i.
-destruct a; [ | now contradiction Heq ].
-now f_equal; destruct (bijective_inverse Atom2PreIAtom_bij).
+intros Heq. unfold i2a, a2i.
+destruct a; [ | contradiction Heq; reflexivity ].
+f_equal. destruct (bijective_inverse Atom2PreIAtom_bij). trivial.
 Qed.
 Lemma i2a_inv_atN [i] : i2a i = i2a atN -> {i = atN} + {i = a2i (i2a atN)}.
 Proof.
-intros Heq; destruct i.
+intros Heq. destruct i.
 - right.
-  enough (a2i (i2a (Some c)) = Some c) as Heqc by now rewrite <- Heqc; f_equal.
+  enough (a2i (i2a (Some c)) = Some c) as Heqc by (rewrite <- Heqc; f_equal; assumption).
   apply i2i_not_atN. intros [=].
 - left. reflexivity.
 Qed.
 Lemma ateq_a2i (a b : atom_inf) : ateq a b = true <-> iateq (a2i a) (a2i b) = true.
 Proof.
-unfold ateq, iateq; rewrite ? eqb_eq; split; intros Heq.
-- now subst.
+unfold ateq, iateq. rewrite ? eqb_eq. split; intros Heq.
+- subst. reflexivity.
 - apply section_injective with (g := i2a) in Heq; [ assumption | ].
-  apply a2a_i.
+  exact a2a_i.
 Qed.
 Lemma i2a_fin a : { l & forall i, iffT (a = i2a i) (In_inf i l) }.
 Proof.
-destruct (eq_dt_dec a Na) as [->|Hneq].
+destruct (eq_dt_dec a Na) as [ -> | Hneq ].
 - exists (atN :: a2i (i2a atN) :: nil). intros i. split.
   + cbn. intros ->. destruct i.
     * right. left. rewrite i2i_not_atN; [ reflexivity | intros [=] ].
@@ -79,16 +78,13 @@ Definition i2ac a :=
   end.
 Lemma i2ac_inj : injective i2ac.
 Proof.
-intros a b; destruct a, b; intros Heq; inversion Heq as [Heq']; subst.
+intros a b. destruct a, b; intros Heq; inversion Heq as [Heq']; subst.
 - f_equal.
   apply atom2atom_inj in Heq'.
-  now apply (section_injective (proj2_sig (sig_of_sig2
-                                 ((bijective_inverse Atom2PreIAtom_bij))))).
-- exfalso.
-  symmetry in Heq'.
-  now apply (proj2_sig (projT3 Atom_self_inj)) in Heq'.
-- exfalso.
-  now apply (proj2_sig (projT3 Atom_self_inj)) in Heq'.
+  apply (section_injective (proj2_sig (sig_of_sig2 ((bijective_inverse Atom2PreIAtom_bij))))).
+  assumption.
+- exfalso. symmetry in Heq'. apply (proj2_sig (projT3 Atom_self_inj)) in Heq' as [].
+- exfalso. apply (proj2_sig (projT3 Atom_self_inj)) in Heq' as [].
 - reflexivity.
 Qed.
 
@@ -109,12 +105,11 @@ Variable R : iformula.
 Definition negR A := ilmap A R.
 
 Lemma negR_irr P A l : ill P (A :: l) R -> ill P l (negR A).
-Proof. intros pi; apply lmap_irr; assumption. Qed.
+Proof. intros pi. apply lmap_irr. assumption. Qed.
 
-Lemma negR_ilr P : ipperm P = true -> ill P (R :: nil) R ->
-  forall A l, ill P l A -> ill P (negR A :: l) R.
+Lemma negR_ilr P (Hperm : ipperm P = true) (HR : ill P (R :: nil) R) A l : ill P l A -> ill P (negR A :: l) R.
 Proof.
-intros Hperm HR A l pi.
+intros pi.
 rewrite <- (app_nil_r _), <- app_comm_cons.
 eapply ex_ir; [ | symmetry; rewrite Hperm; apply Permutation_Type_middle ].
 rewrite <- (app_nil_l _).
@@ -140,19 +135,16 @@ end.
 
 Lemma trans_inj : injective trans.
 Proof.
-intros a; induction a; intros b Heq; destruct b; inversion Heq;
-  (try apply IHa in H0) ;
-  (try apply IHa1 in H0) ;
-  (try apply IHa2 in H1) ; subst; try reflexivity.
-- now f_equal; apply Atom2PreIAtom_inj.
-- now f_equal; apply Atom2PreIAtom_inj.
-- apply IHa1 in H1 as ->.
-  apply IHa2 in H0 as ->.
-  reflexivity.
+intros a. induction a; intros b Heq; destruct b; inversion Heq;
+  (try apply IHa in H0 as ->);
+  (try apply IHa1 in H0 as ->);
+  (try apply IHa2 in H1 as ->); try reflexivity.
+- f_equal. apply Atom2PreIAtom_inj. assumption.
+- f_equal. apply Atom2PreIAtom_inj. assumption.
+- apply IHa1 in H1 as ->. apply IHa2 in H0 as ->. reflexivity.
 Qed.
 
-Lemma trans_wn l :
-   map trans (map wn l) = map ioc (map (fun x => (negR (negR (trans x)))) l).
+Lemma trans_wn l : map trans (map wn l) = map ioc (map (fun x => (negR (negR (trans x)))) l).
 Proof. induction l as [ | a l IHl ]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 
 Lemma neg_tens_propag P (Hperm : ipperm P = true) (Hcut : full_icut P) A1 A2 B1 B2 :
@@ -164,12 +156,10 @@ cons2app. rewrite <- (app_nil_l _).
 apply (cut_ir (itens (negR (negR A2)) (negR (negR B2))) (Hcut _)).
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
-  list_simpl; cons2app.
-  apply tens_irr; apply lmap_irr.
+  list_simpl. cons2app. apply tens_irr; apply lmap_irr.
   + eapply ex_ir; [ apply pi1 | rewrite Hperm; apply Permutation_Type_swap ].
   + eapply ex_ir; [ apply pi2 | rewrite Hperm; apply Permutation_Type_swap ].
-- list_simpl.
-  rewrite <- (app_nil_l _).
+- list_simpl. rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl.
   rewrite <- (app_nil_l (negR (itens _ _) :: _)), 2 app_comm_cons, <- (app_nil_l _).
@@ -180,15 +170,12 @@ apply (cut_ir (itens (negR (negR A2)) (negR (negR B2))) (Hcut _)).
     apply negR_ilr; [ assumption | | ].
     * apply ax_exp_ill.
     * apply negR_irr.
-      cons2app.
-      rewrite app_assoc.
+      cons2app. rewrite app_assoc.
       eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_middle ].
-      list_simpl.
-      apply negR_ilr; [ assumption | | ].
+      list_simpl. apply negR_ilr; [ assumption | | ].
       -- apply ax_exp_ill.
       -- eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
-         cons2app.
-         apply tens_irr; apply ax_exp_ill.
+         cons2app. apply tens_irr; apply ax_exp_ill.
 Qed.
 
 Lemma neg_plus_propag P (Hperm : ipperm P = true) (Hcut : full_icut P) A1 A2 B1 B2 :
@@ -198,26 +185,21 @@ Proof.
 intros pi1 pi2.
 cons2app. rewrite <- (app_nil_l _).
 apply (cut_ir (iplus (negR (negR A2)) (negR (negR B2))) (Hcut _)).
-- rewrite <- (app_nil_l _).
-  apply plus_ilr.
-  + list_simpl.
-    apply plus_irr1, negR_irr.
+- rewrite <- (app_nil_l _). apply plus_ilr.
+  + list_simpl. apply plus_irr1, negR_irr.
     eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ]; assumption.
-  + list_simpl.
-    apply plus_irr2, negR_irr.
+  + list_simpl. apply plus_irr2, negR_irr.
     eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ]; assumption.
-- list_simpl; rewrite <- (app_nil_l _).
+- list_simpl. rewrite <- (app_nil_l _).
   apply plus_ilr.
-  + list_simpl.
-    apply negR_ilr; [ assumption | | ].
+  + list_simpl. apply negR_ilr; [ assumption | | ].
     * apply ax_exp_ill.
     * apply negR_irr.
       eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
       apply negR_ilr; [ assumption | | ].
       -- apply ax_exp_ill.
       -- apply plus_irr1, ax_exp_ill.
-  + list_simpl.
-    apply negR_ilr; [ assumption | | ].
+  + list_simpl. apply negR_ilr; [ assumption | | ].
     * apply ax_exp_ill.
     * apply negR_irr.
       eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
@@ -239,7 +221,7 @@ induction A; cbn.
 - apply (neg_tens_propag Hperm Hcut IHA1) in IHA2.
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   apply negR_irr.
-  cons2app; rewrite <- (app_nil_l _).
+  cons2app. rewrite <- (app_nil_l _).
   eapply cut_ir; [ exact (Hcut _) | | apply IHA2 ].
   apply ax_exp_ill.
 - eapply ex_ir in IHA1; [ | rewrite Hperm; apply Permutation_Type_swap ].
@@ -248,7 +230,7 @@ induction A; cbn.
   eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   apply negR_irr.
-  cons2app; rewrite <- (app_nil_l _).
+  cons2app. rewrite <- (app_nil_l _).
   eapply cut_ir; [ exact (Hcut _) | | apply IHA1 ].
   apply ax_exp_ill.
 - apply negR_ilr; [ assumption | | ]; apply ax_exp_ill.
@@ -257,7 +239,7 @@ induction A; cbn.
 - apply (neg_plus_propag Hperm Hcut IHA1) in IHA2.
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   apply negR_irr.
-  cons2app; rewrite <- (app_nil_l _).
+  cons2app. rewrite <- (app_nil_l _).
   eapply cut_ir; [ exact (Hcut _) | | apply IHA2 ].
   apply ax_exp_ill.
 - eapply ex_ir in IHA1; [ | rewrite Hperm; apply Permutation_Type_swap ].
@@ -266,15 +248,14 @@ induction A; cbn.
   eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   apply negR_irr.
-  cons2app; rewrite <- (app_nil_l _).
+  cons2app. rewrite <- (app_nil_l _).
   eapply cut_ir; [ exact (Hcut _) | | apply IHA2 ].
   apply ax_exp_ill.
 - apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   apply negR_irr.
   eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
-  change (ioc (negR (trans A)) :: nil)
-    with (map ioc (negR (trans A) :: nil)).
+  change (ioc (negR (trans A)) :: nil) with (map ioc (negR (trans A) :: nil)).
   apply oc_irr.
   rewrite <- (app_nil_l _).
   apply de_ilr, negR_irr.
@@ -284,8 +265,7 @@ induction A; cbn.
   apply negR_irr.
   eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
-  change (ioc (negR (trans (dual A))) :: nil)
-    with (map ioc (negR (trans (dual A)) :: nil)).
+  change (ioc (negR (trans (dual A))) :: nil) with (map ioc (negR (trans (dual A)) :: nil)).
   apply oc_irr.
   rewrite <- (app_nil_l _).
   apply de_ilr, negR_irr; assumption.
@@ -293,38 +273,29 @@ Qed.
 
 Lemma trans_subs P (Hperm : ipperm P = true) (Hcut : full_icut P) (A B : formula) x :
   (isubs (negR (trans B)) (a2i x) R = R) ->
-  ill P (isubs (negR (trans B)) (a2i x) (trans A)
-             :: negR (trans (subs B x A)):: nil) R.
+  ill P (isubs (negR (trans B)) (a2i x) (trans A) :: negR (trans (subs B x A)):: nil) R.
 Proof.
 intros HR. induction A; cbn; rewrite ? HR.
-- case_eq (ateq c x); intros Hateq.
+- destruct (ateq c x) eqn:Hateq.
   + cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
     assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i; assumption).
-    unfold repl_iat; rewrite Hiateq; cbn.
+    unfold repl_iat. rewrite Hiateq.
     apply negR_ilr; [ assumption | | ]; apply ax_exp_ill.
-  + case_eq (iateq (a2i c) (a2i x)); intros Hiateq.
-    * exfalso.
-      rewrite <- ateq_a2i in Hiateq.
-      rewrite Hiateq in Hateq.
-      inversion Hateq.
-    * cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
-      unfold repl_iat; rewrite Hiateq; cbn.
+  + destruct (iateq (a2i c) (a2i x)) eqn:Hiateq.
+    * exfalso. rewrite <- ateq_a2i in Hiateq. rewrite Hiateq in Hateq. discriminate Hateq.
+    * cbn in Hateq. unfold repl_at. rewrite Hateq. cbn. unfold repl_iat. rewrite Hiateq.
       eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
       apply negR_ilr; [ assumption | | ]; apply ax_exp_ill.
-- case_eq (ateq c x); intros Hateq.
-  + cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
+- destruct (ateq c x) eqn:Hateq.
+  + cbn in Hateq. unfold repl_at. rewrite Hateq. cbn.
     assert (iateq (a2i c) (a2i x) = true) as Hiateq
       by (rewrite <- ateq_a2i ; assumption).
-    unfold repl_iat; rewrite Hiateq; cbn.
+    unfold repl_iat. rewrite Hiateq. cbn.
     apply trans_dual; assumption.
-  + case_eq (iateq (a2i c) (a2i x)); intros Hiateq.
-    * exfalso.
-      rewrite <- ateq_a2i in Hiateq.
-      rewrite Hiateq in Hateq.
-      inversion Hateq.
-    * cbn in Hateq; unfold repl_at; rewrite Hateq; cbn.
-      unfold repl_iat; rewrite Hiateq; cbn.
+  + destruct (iateq (a2i c) (a2i x)) eqn:Hiateq.
+    * exfalso. rewrite <- ateq_a2i in Hiateq. rewrite Hiateq in Hateq. discriminate Hateq.
+    * cbn in Hateq. unfold repl_at. rewrite Hateq. cbn. unfold repl_iat. rewrite Hiateq. cbn.
       eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
       apply negR_ilr; [ assumption | | ]; apply ax_exp_ill.
 - eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
@@ -338,13 +309,12 @@ intros HR. induction A; cbn; rewrite ? HR.
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   rewrite <- (app_nil_l _).
   apply tens_ilr.
-  list_simpl; cons2app.
+  list_simpl. cons2app.
   apply tens_irr; apply negR_irr; assumption.
 - apply neg_tens_propag; assumption.
 - eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | | ]; apply ax_exp_ill.
-- rewrite <- (app_nil_l _).
-  apply zero_ilr.
+- rewrite <- (app_nil_l _). apply zero_ilr.
 - eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   apply negR_irr.
@@ -352,8 +322,8 @@ intros HR. induction A; cbn; rewrite ? HR.
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   rewrite <- (app_nil_l _).
   apply plus_ilr; list_simpl.
-  + apply plus_irr1, negR_irr; assumption.
-  + apply plus_irr2, negR_irr; assumption.
+  + apply plus_irr1, negR_irr. assumption.
+  + apply plus_irr2, negR_irr. assumption.
 - apply neg_plus_propag; assumption.
 - eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
@@ -364,7 +334,7 @@ intros HR. induction A; cbn; rewrite ? HR.
     with (map ioc (negR (trans (subs B x A)) :: nil)).
   apply oc_irr.
   rewrite <- (app_nil_l _).
-  apply de_ilr, negR_irr; assumption.
+  apply de_ilr, negR_irr. assumption.
 - eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
   change (ioc (ilmap (ilmap (isubs (negR (trans B)) (a2i x) (trans A)) R) R) :: nil)
@@ -375,7 +345,7 @@ intros HR. induction A; cbn; rewrite ? HR.
   list_simpl.
   eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
   apply negR_ilr; [ assumption | apply ax_exp_ill | ].
-  apply negR_irr; assumption.
+  apply negR_irr. assumption.
 Qed.
 
 
@@ -384,7 +354,7 @@ Qed.
 Definition p2ipfrag P := {|
   ipcut := ipcut_all;
   ipgax := existT (fun x => x -> list iformula * iformula) (projT1 (pgax P))
-             (fun a => (map trans (projT2 (pgax P) a), R));
+                  (fun a => (map trans (projT2 (pgax P) a), R));
   ipperm := pperm P |}.
 
 Context { P : @pfrag atom }.

@@ -1,7 +1,7 @@
 From OLlibs Require Import funtheory List_Type.
 From OLlibs Require Export infinite.
 
-(* TODO find appropriate place *)
+(* TODO find appropriate place in OLlibs (?) *)
 Definition iffT (A B : Type) := ((A -> B) * (B -> A))%type.
 
 

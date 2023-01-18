@@ -2,7 +2,7 @@
 
 (** * Example of a concrete use of the yalla library: the intuitionistic logic with call-by-value translation  *)
 
-From OLlibs Require Import funtheory infinite List_more Permutation_Type_more Permutation_Type_solve.
+From OLlibs Require Import funtheory infinite List_more Permutation_Type_more.
 
 
 (** ** 0. load the [ill] library *)
@@ -47,9 +47,13 @@ Lemma co_list_lr l l0 A : lj (l ++ l ++ l0) A -> lj (l ++ l0) A.
 Proof.
 induction l as [|a l IHl] in l0, A |- *; intro p; [ exact p | ].
 cbn. apply co_lr.
-apply ex_r with (l ++ a :: a :: l0); [ | Permutation_Type_solve ].
+apply ex_r with (l ++ a :: a :: l0);
+  [ | symmetry; rewrite app_comm_cons; apply Permutation_Type_cons_app, Permutation_Type_middle ].
 apply IHl.
-eapply ex_r; [ eassumption | Permutation_Type_solve ].
+eapply ex_r; [ eassumption | ].
+list_simpl. etransitivity; [ apply Permutation_Type_middle | ].
+apply Permutation_Type_app_head.
+rewrite app_comm_cons; apply Permutation_Type_cons_app, Permutation_Type_middle.
 Qed.
 
 Lemma wk_list_lr l0 l A : lj l A -> lj (l0 ++ l) A.
@@ -75,9 +79,13 @@ Lemma mco_list_lr l l0 A : lj_mul (l ++ l ++ l0) A -> lj_mul (l ++ l0) A.
 Proof.
 induction l as [|a l IHl] in l0, A |- *; cbn; intro p; [ exact p | ].
 apply mco_lr.
-apply mex_r with (l ++ a :: a :: l0); [ | Permutation_Type_solve ].
+apply mex_r with (l ++ a :: a :: l0);
+  [ | symmetry; rewrite app_comm_cons; apply Permutation_Type_cons_app, Permutation_Type_middle ].
 apply IHl.
-eapply mex_r; [ eassumption | Permutation_Type_solve ].
+eapply mex_r; [ eassumption | ].
+list_simpl. etransitivity; [ apply Permutation_Type_middle | ].
+apply Permutation_Type_app_head.
+rewrite app_comm_cons; apply Permutation_Type_cons_app, Permutation_Type_middle.
 Qed.
 
 Lemma mwk_list_lr l l0 A : lj_mul l0 A -> lj_mul (l ++ l0) A.
@@ -143,35 +151,44 @@ Lemma skeleton l A : ill_cut.ill_ll l A -> lj (map ill2lj l) (ill2lj A).
 Proof.
 intros pi. induction pi; cbn;
   try (eapply ex_r with (map ill2lj (_ :: l1 ++ l2));
-        [ cbn | apply Permutation_Type_map; Permutation_Type_solve]);
-  try (now constructor);
-  try now (constructor; eapply ex_r; [ eassumption | Permutation_Type_solve ]).
+        [ cbn | apply Permutation_Type_map, Permutation_Type_middle ]);
+  try (constructor; assumption);
+  try (constructor; eapply ex_r; [ eassumption | rewrite ? map_app; symmetry; apply Permutation_Type_middle ]).
 - apply ex_r with (map ill2lj l1); [ | apply Permutation_Type_map ]; assumption.
 - eapply ex_r; [ eassumption | ].
   apply Permutation_Type_map, Permutation_Type_app_head,
         Permutation_Type_app_tail, Permutation_Type_map; assumption.
-- list_simpl; apply and_rr.
+- list_simpl. apply and_rr.
   + apply ex_r with (map ill2lj l2 ++ map ill2lj l1); [ | apply Permutation_Type_app_comm ].
-    apply wk_list_lr; assumption.
-  + apply wk_list_lr; assumption.
+    apply wk_list_lr. assumption.
+  + apply wk_list_lr. assumption.
 - apply co_lr.
   apply and_lr2.
   apply ex_r with (iand (ill2lj A) (ill2lj B) :: ill2lj B :: map ill2lj (l1 ++ l2));
     [ | apply Permutation_Type_swap ].
   apply and_lr1.
-  eapply ex_r; [ eassumption | Permutation_Type_solve ].
-- apply ex_r with (map ill2lj (iformulas.ilpam A B :: l0 ++ l1 ++ l2)); [ | Permutation_Type_solve ].
+  eapply ex_r; [ eassumption | ].
+  list_simpl. symmetry. apply Permutation_Type_cons_app, Permutation_Type_middle.
+- constructor. eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply Permutation_Type_cons_append.
+- apply ex_r with (map ill2lj (iformulas.ilpam A B :: l0 ++ l1 ++ l2));
+    [ | list_simpl; rewrite app_comm_cons; apply Permutation_Type_app_swap_app ].
   cbn. apply map_lr.
-  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | Permutation_Type_solve ].
+  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | list_simpl; symmetry; apply Permutation_Type_app_rot ].
     rewrite map_app. apply wk_list_lr. assumption.
-  + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2)); [ | Permutation_Type_solve ].
+  + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2));
+      [ | list_simpl; symmetry; rewrite ? app_assoc; apply Permutation_Type_middle ].
     rewrite map_app. apply wk_list_lr. assumption.
+- constructor. eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply Permutation_Type_cons_append.
 - apply map_lr; [ assumption | apply ax_r ].
-- apply ex_r with (map ill2lj (iformulas.ilmap A B :: l0 ++ l1 ++ l2)); [ | Permutation_Type_solve ].
+- apply ex_r with (map ill2lj (iformulas.ilmap A B :: l0 ++ l1 ++ l2)).
+  2:{ list_simpl. cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
+      list_simpl. etransitivity; [ apply Permutation_Type_cons_append | ].
+      list_simpl. apply Permutation_Type_app_swap_app. }
   cbn. apply map_lr.
-  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | Permutation_Type_solve ].
+  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | list_simpl; symmetry; apply Permutation_Type_app_rot ].
     rewrite map_app. apply wk_list_lr. assumption.
-  + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2)); [ | Permutation_Type_solve ].
+  + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2));
+      [ | list_simpl; symmetry; rewrite ? app_assoc; apply Permutation_Type_middle ].
     rewrite map_app. apply wk_list_lr. assumption.
 - apply ex_r with (map ill2lj (iformulas.ineg A :: l)); [ | list_simpl; apply Permutation_Type_cons_append ].
   apply map_lr; [ assumption | apply ax_r ].
@@ -181,8 +198,9 @@ intros pi. induction pi; cbn;
   + eapply ex_r; [ apply IHpi2 | ].
     rewrite <- map_cons. list_simpl. symmetry. apply Permutation_Type_middle.
 - assumption.
-- eapply ex_r; [ eassumption | ].
-  list_simpl. symmetry. apply Permutation_Type_middle.
+- eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply Permutation_Type_middle.
+- constructor. eapply ex_r; [ eassumption | ].
+  list_simpl. symmetry. apply Permutation_Type_cons_app, Permutation_Type_middle.
 - discriminate f.
 - destruct a.
 Qed.
@@ -260,7 +278,6 @@ Section Atoms_inj.
 Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_retract atom preiatom }.
 
 Notation iformula := (@iformula preiatom).
-Notation i2ac := IAtom2Atom.
 Notation ill2ll := ill_vs_ll.ill2ll.
 
 Lemma lj2ill_cbv_oclpam (A : iformula) : ill_vs_ll.oclpam (lj2ill_cbv A).
@@ -269,7 +286,7 @@ Proof. induction A; (try now constructor); cbn; constructor; try constructor; as
 Lemma lj2llfrag_cbv l A : lj l A ->
   ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
 Proof.
-intros pi%(@lj2illfrag_cbv atom).
+intros pi%lj2illfrag_cbv.
 eapply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
 split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
@@ -284,8 +301,7 @@ Lemma llfrag2lj_cbv l A :
   lj l A.
 Proof.
 intros pi.
-apply (@illfrag2lj_cbv atom).
-apply ill_vs_ll.ll_to_ill_oclpam_axfree.
+apply illfrag2lj_cbv, ill_vs_ll.ll_to_ill_oclpam_axfree.
 - reflexivity.
 - intros [].
 - constructor; [ constructor; apply lj2ill_cbv_oclpam | ].
@@ -293,7 +309,7 @@ apply ill_vs_ll.ll_to_ill_oclpam_axfree.
   + constructor. apply lj2ill_cbv_oclpam.
   + apply IHl.
 - eapply ll_def.stronger_pfrag; [ | apply pi ].
-  split; [ | split ; [ | split ] ]; try (intros; cbn; constructor). intros [].
+  repeat split. intros [].
 Qed.
 
 (** ** 5 define embedding into [iformulas.iformula] by call-by-name Girard's translation with top and with *)
@@ -388,7 +404,7 @@ Qed.
 
 Lemma illfrag2lj_cbn l A :   ill_cut.ill_ll (map oc_lj2ill_cbn l) (lj2ill_cbn A) -> lj l A.
 Proof.
-intros pi%(@skeleton atom).
+intros pi%skeleton.
 cbn in pi. rewrite ill2lj_lj2ill_cbn_id in pi.
 replace l with (map ill2lj (map oc_lj2ill_cbn l)); [ assumption | ].
 rewrite map_map. rewrite <- (map_id l) at 2.
@@ -396,7 +412,7 @@ apply map_ext, ill2lj_lj2ill_cbn_id.
 Qed.
 
 Lemma lj2ill_cbn_oclpam A : ill_vs_ll.oclpam (lj2ill_cbn A).
-Proof. induction A; (try now constructor); cbn; constructor; try constructor; assumption. Qed.
+Proof. induction A; constructor; try constructor; assumption. Qed.
 
 Lemma lj2llfrag_cbn l A : lj l A ->
   ll_fragments.ll_ll (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
@@ -404,7 +420,7 @@ Proof.
 intros pi%lj2illfrag_cbn.
 apply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
-split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
+repeat split.
 - intros C. cbn. destruct (ill_vs_ll.ill2ll_inv C) as [x _], (existsb ill_def.ipcut_none (fst x)) eqn:Hb.
   + exfalso. apply existsb_exists in Hb as [z [_ Hz]]. discriminate Hz.
   + apply BoolOrder.false_le.
@@ -420,23 +436,23 @@ apply illfrag2lj_cbn, ill_vs_ll.ll_to_ill_oclpam_axfree.
 - reflexivity.
 - intros [].
 - constructor; [ apply lj2ill_cbn_oclpam | ].
-  clear pi. induction l; constructor.
+  clear pi. induction l as [|C l IHl]; constructor.
   + constructor. apply lj2ill_cbn_oclpam.
   + apply IHl.
 - eapply ll_def.stronger_pfrag; [ | apply pi ].
-  split; [ | split ; [ | split ] ]; try (intros; cbn; constructor). intros [].
+  repeat split. intros [].
 Qed.
 
 
 (** ** 6 Import properties *)
 
 Lemma ax_gen_r (A : iformula) : lj (A :: nil) A.
-Proof. apply (@illfrag2lj_cbv atom), ill_def.ax_exp_ill. Qed.
+Proof. apply illfrag2lj_cbv, ill_def.ax_exp_ill. Qed.
 
 Lemma cut_ir (A : iformula) l1 l2 C : lj l1 A -> lj (A :: l2) C -> lj (l1 ++ l2) C.
 Proof.
-intros pi1%(@lj2illfrag_cbv atom) pi2%(@lj2illfrag_cbv atom).
-apply (@illfrag2lj_cbv atom).
+intros pi1%lj2illfrag_cbv pi2%lj2illfrag_cbv.
+apply illfrag2lj_cbv.
 list_simpl. rewrite <- (app_nil_l _). list_simpl in pi2. rewrite <- (app_nil_l _) in pi2.
 apply ill_cut.cut_ll_ir with (oc_lj2ill_cbv A); assumption.
 Qed.
