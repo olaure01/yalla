@@ -211,7 +211,7 @@ Inductive ll P : list formula -> Type :=
 | ax_r X : ll P (covar X :: var X :: nil)
 | ex_r l1 l2 : ll P l1 -> PCPermutation_Type (pperm P) l1 l2 -> ll P l2
 | ex_wn_r l1 lw lw' l2 : ll P (l1 ++ map wn lw ++ l2) -> Permutation_Type lw lw' -> ll P (l1 ++ map wn lw' ++ l2)
-| mix_r L : is_true (pmix P (length L)) -> Forall_inf (ll P) L -> ll P (concat L)
+| mix_r L (f : is_true (pmix P (length L))) : Forall_inf (ll P) L -> ll P (concat L)
 | one_r : ll P (one :: nil)
 | bot_r l : ll P l -> ll P (bot :: l)
 | tens_r A B l1 l2 : ll P (A :: l1) -> ll P (B :: l2) -> ll P (tens A B :: l2 ++ l1)
@@ -423,13 +423,12 @@ induction pi using ll_nested_ind; try (constructor; assumption).
     specialize (Hmix (length L)).
     eapply implb_true_iff, eqpmix.
     apply le_implb, Hmix.
-  + clear eqpmix. induction L; constructor; inversion X; subst.
+  + clear eqpmix. induction L as [|l L IHL]; constructor; inversion X; subst.
     * apply X0.
     * eapply IHL, X1.
 - refine (cut_r _ _ IHpi1 IHpi2).
   destruct Hle as (Hcut & _ & _ & _).
-  eapply implb_true_iff, f.
-  apply le_implb, Hcut.
+  eapply implb_true_iff, f. apply le_implb, Hcut.
 - destruct Hle as (_ & Hgax & _ & _), (Hgax a) as [b ->]. apply gax_r.
 Defined.
 #[global] Arguments stronger_pfrag : clear implicits.
@@ -463,7 +462,7 @@ Lemma Forall_sequent_impl P PS QS (HPQ : forall x, PS x -> QS x) l (pi : ll P l)
   Forall_sequent PS pi -> Forall_sequent QS pi.
 Proof.
 induction pi using ll_nested_ind;
-  try (now cbn; apply HPQ);
+  try (cbn; apply HPQ; assumption);
   try (now cbn; intros [IH H]; split; auto);
   try (now cbn; intros [[IH1 IH2] H]; split; auto).
 cbn. clear eqpmix. intros [HFS HPS].
@@ -549,12 +548,10 @@ Lemma gax_elts_mix P L eq (FL : Forall_inf (ll P) L) l (pi : ll P l) : In_Forall
   forall ax, In_inf ax (gax_elts pi) -> In_inf ax (gax_elts (mix_r eq FL)).
 Proof.
 cbn. clear eq. induction FL in l, pi |- *; intros Hin; inversion Hin.
-- inversion H; subst.
+- inversion H. subst.
   apply inj_pair2_eq_dec in H2; [ | apply (@list_eq_dec _ (@eqb formulas_dectype)); apply eqb_eq ]; subst.
-  intros ax Hin_ax.
-  apply in_inf_or_app. left. assumption.
-- intros ax Hin_ax.
-  apply in_inf_or_app. right.
+  intros ax Hin_ax. apply in_inf_or_app. left. assumption.
+- intros ax Hin_ax. apply in_inf_or_app. right.
   apply IHFL with l pi; assumption.
 Qed.
 
@@ -563,7 +560,7 @@ Qed.
 
 (** Weakening on a list of formulas *)
 Lemma wk_list_r P l l' : ll P l' -> ll P (map wn l ++ l').
-Proof. induction l in l' |- *; intros pi; [ | apply wk_r, IHl ]; assumption. Qed.
+Proof. induction l as [|a l IHl] in l' |- *; intros pi; [ | apply wk_r, IHl ]; assumption. Qed.
 
 (** Contraction on a list of formulas *)
 Lemma co_list_r P l l' : ll P (map wn l ++ map wn l ++ l') -> ll P (map wn l ++ l').
@@ -624,11 +621,10 @@ apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L).
 - apply IHL.
   now apply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L);
     [ | rewrite P_perm; cbn; symmetry; apply Permutation_Type_cons_app; rewrite app_assoc ].
-- rewrite P_perm; cbn.
-  cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail.
-  list_simpl.
-  etransitivity; [ apply Permutation_Type_middle | ].
-  apply Permutation_Type_app_head, Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
+- rewrite P_perm. cbn.
+  cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
+  list_simpl. etransitivity; [ apply Permutation_Type_middle | ].
+  apply Permutation_Type_app_head, Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
 Qed.
 
 
@@ -636,7 +632,7 @@ Qed.
 Lemma tens_n_r P L A : Forall_inf (ll P) (map (cons A) L) ->
   ll P (tens_n (length L) A :: concat L).
 Proof.
-induction L; intros FL.
+induction L as [|l L IHL]; intros FL.
 - apply one_r.
 - destruct L; list_simpl; inversion FL; [ assumption | subst ].
   apply tens_r; [ apply IHL | ]; assumption.
@@ -645,13 +641,13 @@ Qed.
 Lemma parr_n_r P l n A : ll P (repeat A n ++ l) -> ll P (parr_n n A :: l).
 Proof.
 induction n in l |- *; intros pi.
-- apply bot_r; assumption.
+- apply bot_r. assumption.
 - destruct n; [ assumption | ].
   apply parr_r.
   apply ex_r with (parr_n (S n) A :: (l ++ (A :: nil)));
      [ | symmetry; rewrite PCPermutation_Type_cons_append; reflexivity ].
   apply IHn, (ex_r _ _ pi).
-  rewrite app_assoc, <- PCPermutation_Type_cons_append; reflexivity.
+  rewrite app_assoc. apply PCPermutation_Type_cons_append.
 Qed.
 
 (** Permutation on mix *)
@@ -952,8 +948,8 @@ induction pi using ll_nested_ind; intros l1' l2' Heq; subst.
   apply in_inf_elt.
 Qed.
 
-Lemma tens_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = tens A B :: nil)) (Hcut : forall C, pcut P C = false) :
-  ll P (tens A B :: nil) -> (ll P (A :: nil)) * (ll P (B :: nil)).
+Lemma tens_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = tens A B :: nil))
+  (Hcut : forall C, pcut P C = false) : ll P (tens A B :: nil) -> (ll P (A :: nil)) * (ll P (B :: nil)).
 Proof.
 intros pi.
 remember (tens A B :: nil) as l eqn:Heql; rewrite Heql in Hgax; revert Heql;
@@ -985,8 +981,8 @@ remember (tens A B :: nil) as l eqn:Heql; rewrite Heql in Hgax; revert Heql;
 - exfalso. exact (Hgax a Heq).
 Qed.
 
-Lemma plus_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = aplus A B :: nil)) (Hcut : forall C, pcut P C = false) :
-  ll P (aplus A B :: nil) -> (ll P (A :: nil)) + (ll P (B :: nil)).
+Lemma plus_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = aplus A B :: nil))
+  (Hcut : forall C, pcut P C = false) : ll P (aplus A B :: nil) -> (ll P (A :: nil)) + (ll P (B :: nil)).
 Proof.
 intros pi.
 remember (aplus A B :: nil) as l eqn:Heql; rewrite Heql in Hgax; revert Heql;
@@ -1151,47 +1147,29 @@ Qed.
 Lemma ax_exp P A : ll P (A :: dual A :: nil).
 Proof.
 induction A; cbn.
-- ll_swap.
-  apply ax_r.
+- ll_swap. apply ax_r.
 - apply ax_r.
-- ll_swap.
-  apply bot_r.
-  apply one_r.
-- apply bot_r.
-  apply one_r.
-- ll_swap.
-  apply parr_r.
-  cons2app ; eapply ex_r ; [ | apply PCPermutation_Type_app_rot ].
-  rewrite app_assoc.
-  apply tens_r; assumption.
+- ll_swap. apply bot_r, one_r.
+- apply bot_r, one_r.
+- ll_swap. apply parr_r.
+  cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
+  rewrite app_assoc. apply tens_r; assumption.
 - apply parr_r.
-  ll_swap in IHA1.
-  ll_swap in IHA2.
-  cons2app ; eapply ex_r ; [ | apply PCPermutation_Type_app_rot ].
-  rewrite app_assoc.
-  apply tens_r; assumption.
-- ll_swap.
-  apply top_r.
+  ll_swap in IHA1. ll_swap in IHA2.
+  cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
+  rewrite app_assoc. apply tens_r; assumption.
+- ll_swap. apply top_r.
 - apply top_r.
-- eapply plus_r1 in IHA1.
-  ll_swap in IHA1.
-  eapply plus_r2 in IHA2.
-  ll_swap in IHA2.
-  ll_swap.
-  apply with_r; eassumption.
-- apply with_r ; ll_swap.
-  + apply plus_r1 ; ll_swap; assumption.
-  + apply plus_r2 ; ll_swap; assumption.
-- change (oc A :: wn (dual A) :: nil)
-    with (oc A :: map wn (dual A :: nil)).
+- eapply plus_r1 in IHA1. ll_swap in IHA1.
+  eapply plus_r2 in IHA2. ll_swap in IHA2.
+  ll_swap. apply with_r; eassumption.
+- apply with_r; ll_swap; [ apply plus_r1 | apply plus_r2 ]; ll_swap; assumption.
+- ll_swap in IHA.
+  change (oc A :: wn (dual A) :: nil) with (oc A :: map wn (dual A :: nil)).
   apply oc_r.
-  ll_swap in IHA.
-  list_simpl ; ll_swap.
-  apply de_r; assumption.
-- apply de_r in IHA.
-  ll_swap in IHA. ll_swap.
-  change (oc (dual A) :: wn A :: nil)
-    with (oc (dual A) :: map wn (A :: nil)).
+  list_simpl. ll_swap. apply de_r. assumption.
+- apply de_r in IHA. ll_swap in IHA. ll_swap.
+  change (oc (dual A) :: wn A :: nil) with (oc (dual A) :: map wn (A :: nil)).
   apply oc_r. assumption.
 Qed.
 #[global] Arguments ax_exp [P].
@@ -1262,9 +1240,7 @@ apply (@ax_gen (axupd_pfrag P (existT (fun x => x -> _) _ (fun a => match a with
                                                                     | inl x => projT2 (pgax P) x
                                                                     | inr x => x :: dual x :: nil
                                                                     end)))); try reflexivity.
-- cbn. intros [].
-  + apply gax_r.
-  + apply ax_exp.
+- cbn. intros [|]; [ apply gax_r | apply ax_exp ].
 - eapply stronger_pfrag; eassumption.
 Qed.
 
@@ -1392,7 +1368,7 @@ Ltac destruct_ll H f X l Hl Hr HP FL a :=
                             | l ? Hl HP
                             | l ? ? ? Hl HP
                             | ? f FL
-                            | 
+                            |
                             | ? Hl
                             | ? ? ? ? Hl Hr
                             | ? ? ? Hl

@@ -766,62 +766,56 @@ Notation i2a_inj := (section_injective IAtom2Atom_retract).
 
 Lemma wn_not_idefin A F : ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (oc F :: ill2ll A :: nil) -> False.
 Proof.
-cut (forall l2,
-  ll_mix0 (dual (ill2ll A) :: nil) ->
-  Permutation_Type (oc F :: ill2ll A :: nil) l2 -> ll_mix0 l2 -> False).
+cut (forall l2, ll_mix0 (dual (ill2ll A) :: nil) ->
+  Permutation_Type (oc F :: ill2ll A :: nil) l2 -> notT (ll_mix0 l2)).
 { intros H pi1 pi2. eapply H; [ eassumption | reflexivity | eassumption ]. }
-revert F. induction A; cbn; intros F l2 pi1 HP2 pi2.
+induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
 - remember (covar (i2a i) :: nil) as l1. revert Heql1. clear - pi1.
   induction pi1; intros Heql1; try (now inversion Heql1); subst.
   + symmetry in p; apply Permutation_Type_length_1_inv in p.
     apply IHpi1; assumption.
-  + destruct l1 ; inversion Heql1 ; destruct lw' ; inversion H0.
-    * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    * destruct l1 ; inversion H1.
-  + destruct L; try inversion Heql1; try inversion i0.
-- revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-    try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
-    try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
+  + destruct l1; inversion Heql1; destruct lw'; inversion H0.
+    * symmetry in p. now apply Permutation_Type_nil in p as ->.
+    * symmetry in p. now apply Permutation_Type_nil in p as ->.
+    * destruct l1; discriminate H1.
+  + destruct L; try inversion Heql1; discriminate f.
+- revert HP2. clear - pi2. induction pi2; intros HP2;
+    try (apply Permutation_Type_length in HP2; discriminate HP2);
+    try now apply Permutation_Type_length_2_inv in HP2 as [ | ].
   + apply IHpi2.
-    symmetry in p.
-    transitivity l2; assumption.
+    symmetry in p. transitivity l2; assumption.
   + apply IHpi2.
     etransitivity; [ apply HP2 | symmetry ].
     apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-  + destruct L; try inversion i.
-    apply Permutation_Type_sym in HP2.
-    apply Permutation_Type_nil_cons in HP2; assumption.
+  + destruct L; [ | discriminate f ].
+    apply Permutation_Type_sym, Permutation_Type_nil_cons in HP2 as [].
   + apply Permutation_Type_length_2_inv in HP2.
     destruct HP2; inversion e.
-    destruct l; inversion H1.
+    destruct l; discriminate H1.
 - rewrite <- (app_nil_l (parr _ _ :: _)) in pi1.
   eapply parr_rev in pi1 ; [ | intros [] ].
   rewrite app_nil_l in pi1.
   assert ((ll_mix0 (oc F :: ill2ll A1 :: nil) * ll_mix0 (ill2ll A2 :: nil))
         + (ll_mix0 (ill2ll A1 :: nil) * ll_mix0 (oc F :: ill2ll A2 :: nil)))
     as [[pi2' pi2''] | [pi2' pi2'']].
-  { revert HP2; clear - pi2; induction pi2; intros HP2 ;
-      try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
-      try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
+  { revert HP2. clear - pi2; induction pi2; intros HP2;
+      try (apply Permutation_Type_length in HP2; discriminate HP2) ;
+      try now apply Permutation_Type_length_2_inv in HP2 as [ | ].
     - apply IHpi2.
       cbn in p. symmetry in p. etransitivity; [ exact HP2 | exact p ].
     - apply IHpi2.
       etransitivity; [ exact HP2 | ].
-      symmetry in p.
-      apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-    - destruct L; inversion i.
-      apply Permutation_Type_sym in HP2.
-      apply Permutation_Type_nil_cons in HP2.
-      inversion HP2.
+      symmetry in p. apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
+    - destruct L; [ | discriminate f ].
+      apply Permutation_Type_sym, Permutation_Type_nil_cons in HP2 as [].
     - apply Permutation_Type_length_2_inv in HP2.
-      destruct HP2; inversion e ; subst.
-      destruct l2; inversion H2 ; subst.
-      + destruct l1; inversion H2 ; subst.
-        left; split; [ | assumption ].
+      destruct HP2; inversion e; subst.
+      destruct l2; inversion H2; subst.
+      + destruct l1; inversion H2; subst.
+        left. split; [ | assumption ].
         eapply ex_r; [ apply pi2_1 | apply Permutation_Type_swap ].
-      + apply app_eq_nil in H1 ; destruct H1 ; subst.
-        right; split; [ assumption | ].
+      + apply app_eq_nil in H1 as [-> ->].
+        right. split; [ assumption | ].
         eapply ex_r; [ apply pi2_2 | apply Permutation_Type_swap ].
     - apply Permutation_Type_length_2_inv in HP2.
       destruct HP2; inversion e.
@@ -863,140 +857,116 @@ revert F. induction A; cbn; intros F l2 pi1 HP2 pi2.
   + apply IHpi1'.
     symmetry in p. etransitivity; [ exact HP | ].
     apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-  + destruct L; inversion i.
-    apply Permutation_Type_sym in HP.
-    apply Permutation_Type_nil_cons in HP; assumption.
-- eapply tens_rev in pi1 ; [ | intros a; destruct a | reflexivity ].
+  + destruct L; [ | discriminate f ].
+    apply Permutation_Type_sym, Permutation_Type_nil_cons in HP as [].
+- eapply tens_rev in pi1 ; [ | intros [] | reflexivity ].
   cons2app in HP2.
   assert (Heq2 := HP2).
-  symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
-  destruct Heq2 as ((l' & l'') & Heq2) ; subst.
-  eapply parr_rev in pi2 ; [ | intros a; destruct a ].
-  destruct pi1 as [pi1' pi1''].
-  rewrite bidual in pi1''.
+  symmetry in Heq2. apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
+  eapply parr_rev in pi2 ; [ | intros [] ].
+  destruct pi1 as [pi1' pi1'']. rewrite bidual in pi1''.
   eapply (@cut_mix0_r _ _ (l' ++ ill2ll A2 :: l'')) in pi1'' ;
     [ | eapply ex_r ; [ apply pi2 | symmetry; apply Permutation_Type_middle ]].
   eapply IHA2.
   + eassumption.
-  + apply Permutation_Type_app_inv in HP2 ; cbn in HP2.
-    apply Permutation_Type_swap.
+  + apply Permutation_Type_swap.
   + eapply ex_r ; [ apply pi1'' | ].
-    list_simpl in HP2; cons2app in HP2; apply Permutation_Type_app_inv in HP2.
-    list_simpl; etransitivity; [ symmetry; apply Permutation_Type_middle | ].
-    symmetry; apply Permutation_Type_cons, HP2; reflexivity.
-- eapply tens_rev in pi1 ; [ | intros a; destruct a | reflexivity ].
-  destruct pi1 as [pi1' _].
-  clear - pi1'.
+    list_simpl in HP2. cons2app in HP2. apply Permutation_Type_app_inv in HP2.
+    list_simpl. etransitivity; [ symmetry; apply Permutation_Type_middle | ].
+    symmetry. apply Permutation_Type_cons, HP2; reflexivity.
+- eapply tens_rev in pi1 ; [ | intros [] | reflexivity ].
+  destruct pi1 as [pi1' _]. clear - pi1'.
   assert ({ l & Permutation_Type (covar (i2a atN) :: nil) l })
-    as [l HP] by (eexists ; reflexivity).
-  eapply ex_r in pi1' ; [ | apply HP ].
-  revert HP ; induction pi1' ; intros HP ;
-    try (now (apply Permutation_Type_length in HP ; inversion HP)) ;
-    try (now (apply Permutation_Type_length_1_inv in HP ; inversion HP)).
+    as [l HP] by (eexists; reflexivity).
+  eapply ex_r in pi1'; [ | apply HP ].
+  induction pi1' in HP |- *;
+    try (apply Permutation_Type_length in HP; discriminate HP) ;
+    try now apply Permutation_Type_length_1_inv in HP.
   + apply IHpi1'.
     symmetry in p. etransitivity; [ exact HP | exact p ].
   + apply IHpi1'.
     symmetry in p. etransitivity; [ exact HP | ].
     apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-  + destruct L; inversion i.
-    apply Permutation_Type_sym in HP.
-    apply Permutation_Type_nil_cons in HP; assumption.
-- remember (zero :: nil) as l1 ; revert Heql1 ;
-    clear - pi1 ; induction pi1 ; intros Heql1 ;
-    try (now inversion Heql1) ; subst.
-  + symmetry in p ; apply Permutation_Type_length_1_inv in p.
-    apply IHpi1; assumption.
-  + destruct l1 ; inversion Heql1 ; destruct lw' ; inversion H0.
-    * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    * now symmetry in p ; apply Permutation_Type_nil in p ; subst.
-    * destruct l1 ; inversion H1.
-  + destruct L; inversion i; inversion Heql1.
-- eapply plus_rev in pi1 ; [ | intros a; destruct a | reflexivity ].
+  + destruct L; [ | discriminate f ].
+    apply Permutation_Type_sym, Permutation_Type_nil_cons in HP as [].
+- remember (zero :: nil) as l1. revert Heql1. clear - pi1.
+  induction pi1; intros Heql1; try (now inversion Heql1); subst.
+  + symmetry in p. apply Permutation_Type_length_1_inv in p.
+    apply IHpi1. assumption.
+  + destruct l1; inversion Heql1; destruct lw'; inversion H0.
+    * symmetry in p. now apply Permutation_Type_nil in p as ->.
+    * symmetry in p. now apply Permutation_Type_nil in p as ->.
+    * destruct l1; discriminate H1.
+  + destruct L; discriminate.
+- eapply plus_rev in pi1; [ | intros [] | reflexivity ].
   destruct pi1 as [ pi1 | pi1 ].
   + cons2app in HP2.
     assert (Heq2 := HP2).
-    symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
-    destruct Heq2 as ((l' & l'') & Heq2) ; subst.
-    eapply with_rev1_noax in pi2 ; [ | intros a; destruct a ].
+    symmetry in Heq2. apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
+    eapply with_rev1_noax in pi2; [ | intros [] ].
     eapply IHA1.
     * eassumption.
-    * apply Permutation_Type_app_inv in HP2 ; cbn in HP2.
-      apply Permutation_Type_swap.
-    * eapply ex_r ; [ apply pi2 | ].
-      list_simpl in HP2; cons2app in HP2; apply Permutation_Type_app_inv in HP2.
-      list_simpl; etransitivity; [ symmetry; apply Permutation_Type_middle | ].
-      symmetry; apply Permutation_Type_cons, HP2; reflexivity.
+    * apply Permutation_Type_swap.
+    * eapply ex_r; [ apply pi2 | ].
+      list_simpl in HP2. cons2app in HP2. apply Permutation_Type_app_inv in HP2.
+      list_simpl. etransitivity; [ symmetry; apply Permutation_Type_middle | ].
+      symmetry. apply Permutation_Type_cons, HP2. reflexivity.
   + cons2app in HP2.
     assert (Heq2 := HP2).
-    symmetry in Heq2 ; apply Permutation_Type_vs_elt_inv in Heq2.
-    destruct Heq2 as ((l' & l'') & Heq2) ; subst.
-    eapply with_rev2_noax in pi2 ; [ | intros a; destruct a ].
+    symmetry in Heq2. apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
+    eapply with_rev2_noax in pi2; [ | intros [] ].
     eapply IHA2.
     * eassumption.
-    * apply Permutation_Type_app_inv in HP2 ; cbn in HP2.
-      apply Permutation_Type_swap.
-    * eapply ex_r ; [ apply pi2 | ].
-      list_simpl in HP2; cons2app in HP2; apply Permutation_Type_app_inv in HP2.
-      list_simpl; etransitivity; [ symmetry; apply Permutation_Type_middle | ].
-      symmetry; apply Permutation_Type_cons, HP2; reflexivity.
-- revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-    try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
-    try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
+    * apply Permutation_Type_swap.
+    * eapply ex_r; [ apply pi2 | ].
+      list_simpl in HP2. cons2app in HP2. apply Permutation_Type_app_inv in HP2.
+      list_simpl. etransitivity; [ symmetry; apply Permutation_Type_middle | ].
+      symmetry. apply Permutation_Type_cons, HP2. reflexivity.
+- revert HP2. clear - pi2. induction pi2; intros HP2;
+    try (apply Permutation_Type_length in HP2; discriminate HP2) ;
+    try now apply Permutation_Type_length_2_inv in HP2 as [ | ].
   + apply IHpi2.
     symmetry in p. etransitivity; [ exact HP2 | exact p ].
   + apply IHpi2.
     symmetry in p. etransitivity; [ exact HP2 | ].
     apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-  + destruct L; inversion i.
-    apply Permutation_Type_sym in HP2.
-    apply Permutation_Type_nil_cons in HP2; assumption.
-  + apply Permutation_Type_length_2_inv in HP2.
-    destruct HP2 ; inversion e.
-    destruct l ; inversion H1.
+  + destruct L; [ | discriminate f ].
+    apply Permutation_Type_sym, Permutation_Type_nil_cons in HP2 as [].
+  + apply Permutation_Type_length_2_inv in HP2 as [ | ]; inversion e.
+    destruct l; discriminate H1.
 - assert (pi0 := pi1).
-  rewrite <- (app_nil_l _) in pi1; eapply with_rev1_noax in pi1; [ | intros a; destruct a ].
-  rewrite <- (app_nil_l _) in pi0; eapply with_rev2_noax in pi0; [ | intros a; destruct a ].
-  assert (ll_mix0 (oc F :: ill2ll A1 :: nil)
-        + ll_mix0 (oc F :: ill2ll A2 :: nil))
-    as [ pi2' | pi2' ].
-  { revert HP2 ; clear - pi2 ; induction pi2 ; intros HP2 ;
-      try (now (apply Permutation_Type_length in HP2 ; inversion HP2)) ;
-      try (now (apply Permutation_Type_length_2_inv in HP2 ; inversion HP2)).
+  rewrite <- (app_nil_l _) in pi1; eapply with_rev1_noax in pi1; [ | intros [] ].
+  rewrite <- (app_nil_l _) in pi0; eapply with_rev2_noax in pi0; [ | intros [] ].
+  assert (ll_mix0 (oc F :: ill2ll A1 :: nil) + ll_mix0 (oc F :: ill2ll A2 :: nil)) as [ pi2' | pi2' ].
+  { revert HP2. clear - pi2. induction pi2; intros HP2;
+      try (apply Permutation_Type_length in HP2; discriminate HP2) ;
+      try now apply Permutation_Type_length_2_inv in HP2 as [ | ].
     - apply IHpi2.
       symmetry in p. etransitivity; [ exact HP2 | exact p ].
     - apply IHpi2.
       symmetry in p. etransitivity; [ exact HP2 | ].
       apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-    - destruct L; inversion i.
-      apply Permutation_Type_sym in HP2.
-      apply Permutation_Type_nil_cons in HP2.
-      inversion HP2.
-    - apply Permutation_Type_length_2_inv in HP2.
-      destruct HP2; inversion e. subst.
-      left.
-      eapply ex_r; [ apply pi2 | ]. cons2app. apply PCPermutation_Type_app_comm.
-    - apply Permutation_Type_length_2_inv in HP2.
-      destruct HP2; inversion e. subst.
-      right.
-      eapply ex_r; [ apply pi2 | ]. cons2app. apply PCPermutation_Type_app_comm.
-    - apply Permutation_Type_length_2_inv in HP2.
-      destruct HP2; inversion e.
+    - destruct L; [ | discriminate f ].
+      apply Permutation_Type_sym, Permutation_Type_nil_cons in HP2 as [].
+    - apply Permutation_Type_length_2_inv in HP2 as [ | ]; inversion e. subst.
+      left. eapply ex_r; [ apply pi2 | ]. cons2app. apply PCPermutation_Type_app_comm.
+    - apply Permutation_Type_length_2_inv in HP2 as [ | ]; inversion e. subst.
+      right. eapply ex_r; [ apply pi2 | ]. cons2app. apply PCPermutation_Type_app_comm.
+    - apply Permutation_Type_length_2_inv in HP2 as [ | ]; inversion e.
       destruct l; discriminate H1. }
   + eapply IHA1; try eassumption; reflexivity.
   + eapply IHA2; try eassumption; reflexivity.
 - revert HP2. clear - pi2. induction pi2; intros HP2;
     try (apply Permutation_Type_length in HP2; discriminate HP2) ;
-    try (now (apply Permutation_Type_length_2_inv in HP2; inversion HP2)).
+    try now apply Permutation_Type_length_2_inv in HP2 as [ | ].
   + apply IHpi2.
     symmetry in p. etransitivity; [ exact HP2 | exact p ].
   + apply IHpi2.
     symmetry in p. etransitivity; [ exact HP2 | ].
     apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-  + destruct L; inversion i.
-    apply Permutation_Type_sym in HP2.
-    apply Permutation_Type_nil_cons in HP2 as [].
-  + apply Permutation_Type_length_2_inv in HP2.
-    destruct HP2; inversion e; destruct l; discriminate H1.
+  + destruct L; [ | discriminate f ].
+    apply Permutation_Type_sym, Permutation_Type_nil_cons in HP2 as [].
+  + apply Permutation_Type_length_2_inv in HP2 as [ | ]; inversion e; destruct l; discriminate H1.
 Qed.
 
 Lemma bot_not_idefin A : ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (one :: ill2ll A :: nil) -> False.
@@ -1172,44 +1142,43 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
   + apply IHX.
     symmetry in p. etransitivity; [ exact HP | ].
     apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-  + destruct L; inversion i.
-    apply Permutation_Type_sym in HP.
-    apply Permutation_Type_nil_cons in HP; assumption.
+  + destruct L; [ | discriminate f ].
+    apply Permutation_Type_sym, Permutation_Type_nil_cons in HP as [].
 - destruct l'; inversion Heq.
-  destruct i; inversion H0; subst.
-  inversion HF; subst.
-  cbn in X; rewrite <- (app_nil_l (awith _ _ :: _)) in X.
+  destruct i; inversion H0. subst.
+  inversion HF. subst.
+  cbn in X. rewrite <- (app_nil_l (awith _ _ :: _)) in X.
   eapply with_rev1_noax in X; [ | intros a; destruct a ].
   apply (IHpi (i1 :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
-  destruct i; inversion H0; subst.
-  inversion HF; subst.
-  cbn in X; rewrite <- (app_nil_l (awith _ _ :: _)) in X.
+  destruct i; inversion H0. subst.
+  inversion HF. subst.
+  cbn in X. rewrite <- (app_nil_l (awith _ _ :: _)) in X.
   eapply with_rev2_noax in X; [ | intros a; destruct a ].
   apply (IHpi (i2 :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
-  destruct i; inversion H0; subst.
-  inversion HF; subst.
-  cbn in X; eapply plus_rev in X; [ | intros a; destruct a | reflexivity ].
+  destruct i; inversion H0. subst.
+  inversion HF. subst.
+  cbn in X. eapply plus_rev in X; [ | intros a; destruct a | reflexivity ].
   destruct X as [pi | pi].
   + apply (IHpi1 (i1 :: l')); constructor; assumption.
   + apply (IHpi2 (i2 :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
-  destruct i; inversion H0.
+  destruct i; discriminate H0.
 - destruct l'; inversion Heq.
-  destruct i; inversion H0; subst.
-  inversion HF; subst.
-  cbn in X; rewrite <- (app_nil_l (oc _ :: _)) in X.
+  destruct i; inversion H0. subst.
+  inversion HF. subst.
+  cbn in X. rewrite <- (app_nil_l (oc _ :: _)) in X.
   eapply oc_rev_noax in X; [ | intros a; destruct a ].
   apply (IHpi (i :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
-  destruct i; inversion H0; subst.
-  inversion HF; subst.
-  cbn in X; rewrite <- (app_nil_l (oc _ :: _)) in X.
+  destruct i; inversion H0. subst.
+  inversion HF. subst.
+  cbn in X. rewrite <- (app_nil_l (oc _ :: _)) in X.
   eapply oc_rev_noax in X; [ | intros a; destruct a ].
   apply (IHpi l'); [ reflexivity | assumption ].
 - destruct l'; inversion Heq.
-  destruct i; inversion H0; subst.
+  destruct i; inversion H0. subst.
   apply (IHpi (ioc i :: ioc i :: l')); [ reflexivity | ].
   inversion HF; constructor; assumption.
 - destruct a.
@@ -1318,9 +1287,9 @@ induction Hll ; intros l0 Hnzsp HP.
       exists (C, l1 ++ llw1, llw2 ++ l8); [ assumption | reflexivity ].
     * rewrite 2 app_assoc.
       exists (C, (l1 ++ map ioc lw'') ++ l3, l2'); [ assumption | reflexivity ].
-- inversion i.
+- discriminate f.
 - destruct l0; inversion HP.
-  destruct i; inversion H0.
+  destruct i; discriminate H0.
 - rewrite map_map in HP.
   symmetry in HP; decomp_map_inf HP ; subst.
   rewrite <- map_map in IHHll.
@@ -1608,7 +1577,7 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
       rewrite ill2ll_map_ioc.
       symmetry. rewrite app_comm_cons. etransitivity; [ apply PCPermutation_Type_app_comm | ].
       list_simpl. reflexivity.
-- discriminate i.
+- discriminate f.
 - apply PCPermutation_Type_length_1_inv in HP. inversion HP.
   destruct C; inversion H0.
   destruct l0 using rev_rect; list_simpl in H1; inversion H1.
@@ -2140,11 +2109,9 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
   + destruct C ; inversion H0.
   + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; cbn in H3, H5, H7; subst.
     apply (f_equal (@rev _)) in H6.
-    rewrite rev_involutive in H6 ; subst.
-    destruct x0 ; inversion H1 ; subst.
-    list_simpl.
-    apply de_ilr.
-    apply IHHll.
+    rewrite rev_involutive in H6. subst.
+    destruct x0; inversion H1. subst.
+    list_simpl. apply de_ilr, IHHll.
     * inversion Hnzsp as [ | ? ? ? HF ].
       constructor; [ assumption | ].
       list_simpl in HF.
@@ -2153,18 +2120,17 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
       inversion H3r as [ | ? ? Hnzsp' ].
       inversion_clear Hnzsp'.
       apply Forall_inf_app; [ | constructor ]; assumption.
-    * list_simpl. rewrite HP. rewrite ? app_comm_cons. apply PCPermutation_Type_app_comm.
+    * list_simpl. rewrite HP, ? app_comm_cons. apply PCPermutation_Type_app_comm.
 - list_simpl in HP. symmetry in HP.
   apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
-  destruct l' ; inversion Heq ; subst.
-  + destruct C ; inversion H0.
-  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; cbn in H3, H5, H7 ; subst.
+  destruct l'; inversion Heq; subst.
+  + destruct C; discriminate H0.
+  + decomp_map_inf H1. symmetry in H3. decomp_map_inf H3. subst.
     apply (f_equal (@rev _)) in H6.
-    rewrite rev_involutive in H6 ; subst.
-    destruct x0 ; inversion H1 ; subst.
+    rewrite rev_involutive in H6. subst.
+    destruct x0; inversion H1. subst.
     list_simpl.
-    apply wk_ilr.
-    apply IHHll.
+    apply wk_ilr, IHHll.
     * inversion Hnzsp as [ | ? ? ? HF ].
       constructor; [ assumption | ].
       list_simpl in HF.
@@ -2176,22 +2142,20 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
     * list_simpl.
       apply PEPermutation_PCPermutation_Type in HP. unfold id in HP.
       etransitivity; [ exact HP | rewrite app_comm_cons; apply PCPermutation_Type_app_comm ].
-- list_simpl in HP.
-  symmetry in HP.
+- list_simpl in HP. symmetry in HP.
   apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l'; inversion Heq; subst.
-  + destruct C ; inversion H0.
-  + decomp_map_inf H1; symmetry in H3; decomp_map_inf H3; cbn in H3, H5, H7; subst.
+  + destruct C; discriminate H0.
+  + decomp_map_inf H1. symmetry in H3. decomp_map_inf H3. subst.
     apply (f_equal (@rev _)) in H6.
-    rewrite rev_involutive in H6; subst.
-    destruct x0; inversion H1; subst.
-    list_simpl. apply co_ilr.
-    apply IHHll.
+    rewrite rev_involutive in H6. subst.
+    destruct x0; inversion H1. subst.
+    list_simpl. apply co_ilr, IHHll.
     * inversion_clear Hnzsp as [ | ? ? ? HF ].
       list_simpl in HF.
       assert (HF1 := Forall_inf_app_l _ _ HF).
       assert (HF2 := Forall_inf_app_r _ _ HF).
-      inversion HF2; subst.
+      inversion HF2. subst.
       constructor; [ assumption | ].
       apply Forall_inf_app; [ | constructor ]; assumption.
     * apply (@PEPermutation_Type_cons _ _ _ (wn (dual (ill2ll x0))) eq_refl) in HP.
@@ -2216,7 +2180,7 @@ apply (stronger_pfrag _ _ (cutrm_i2pfrag P)) in pi.
 eapply ll_to_ill_nzeropos_cutfree in pi; [ | | | eassumption | reflexivity ].
 - apply (stronger_ipfrag (cutrm_ipfrag_le P)), pi.
 - apply noicut_cutrm.
-- intros a. destruct (P_axfree a).
+- intro. contradiction P_axfree.
 Qed.
 
 

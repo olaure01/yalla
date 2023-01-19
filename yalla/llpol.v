@@ -412,7 +412,7 @@ revert l Heql0; induction pi; intros l' Heql0; subst;
   + rewrite <- llpol2ll_map_wn in IHpi.
     apply IHpi. rewrite <- ? map_app. reflexivity.
   + symmetry. apply Permutation_Type_app_head, Permutation_Type_app_tail. assumption.
-- discriminate i.
+- discriminate f.
 - destruct l'; inversion Heql0.
   destruct f; inversion H0; [ destruct p | destruct n ]; inversion H0.
   destruct l'; inversion H1.
@@ -424,10 +424,10 @@ revert l Heql0; induction pi; intros l' Heql0; subst;
   + apply IHpi2. reflexivity.
   + apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
 - destruct l'; inversion Heql0.
-  destruct f; inversion H0 ; [ destruct p | destruct n ]; inversion H0; subst.
+  destruct f; inversion H0 ; [ destruct p | destruct n ]; inversion H0. subst.
   apply with_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 - destruct l'; inversion Heql0.
-  destruct f; inversion H0; [destruct p | destruct n ]; inversion H0; subst.
+  destruct f; inversion H0; [destruct p | destruct n ]; inversion H0. subst.
   apply llpol2ll_map_wn_inv in H1 as [l'' -> ->].
   apply oc_r, IHpi.
   cbn. rewrite llpol2ll_map_wn. reflexivity.

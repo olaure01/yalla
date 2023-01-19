@@ -138,6 +138,15 @@ induction A; intros Hat;
 Qed.
 *)
 
+(** Atoms in a formula *)
+Fixpoint atom_list A : list atom :=
+match A with
+| var x | covar x => x :: nil
+| one | bot | zero | top => nil
+| tens B C | parr B C | aplus B C | awith B C => atom_list B ++ atom_list C
+| oc B | wn B => atom_list B
+end.
+
 
 (** ** Sub-formulas *)
 

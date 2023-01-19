@@ -54,6 +54,16 @@ Lemma iatomic_Prop_iatomic A : iatomic_Prop A -> iatomic A.
 Proof. induction A; intros Hat; try (exfalso; inversion Hat; fail); constructor. Qed.
 *)
 
+(** Atoms in a formula *)
+Fixpoint iatom_list A : list iatom :=
+match A with
+| ivar x => x :: nil
+| ione | izero | itop => nil
+| itens B C | ilpam B C | ilmap B C | iplus B C | iwith B C => iatom_list B ++ iatom_list C
+| igen B | ineg B => atN :: iatom_list B
+| ioc B => iatom_list B
+end.
+
 
 (** ** Sub-formulas *)
 

@@ -536,11 +536,11 @@ Qed.
 
 Theorem bb_to_bbb l : llR (oc bot) l -> ll_bbb l.
 Proof.
-intros pi. induction pi; try (now constructor).
+intros pi. induction pi; try (constructor; assumption).
 - econstructor; eassumption.
 - eapply ex_bbb_r; [ eassumption | ].
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-- discriminate i.
+- discriminate f.
 - eapply cut_bbb_r; eassumption.
 - destruct a; cbn.
   + apply de_bbb_r, one_bbb_r.
@@ -718,7 +718,7 @@ intros pi. induction pi; intro HP;
             ** apply app_eq_nil in H2 as [-> [Heq2 ->]%app_eq_nil].
                destruct lw'; inversion Heq2. subst.
                symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi. reflexivity.
-         ++ repeat (destruct L; inversion i; try discriminate).
+         ++ repeat (destruct L; inversion f; try discriminate).
          ++ rewrite_all H1. clear - pi.
             remember (tens (parr one one) bot :: nil) as l.
             induction pi in Heql |- *; inversion Heql; subst.
@@ -730,7 +730,7 @@ intros pi. induction pi; intro HP;
                --- apply app_eq_nil in H2 as [-> [Heq2 ->]%app_eq_nil].
                    destruct lw'; inversion Heq2. subst.
                    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi. reflexivity.
-            ** repeat (destruct L; inversion i; try discriminate).
+            ** repeat (destruct L; inversion f; try discriminate).
             ** apply app_eq_nil in H2 as [-> ->].
                clear - pi1.
                remember (parr one one :: nil) as l.
@@ -744,7 +744,7 @@ intros pi. induction pi; intro HP;
                    +++ apply app_eq_nil in H2 as [-> [Heq2 ->]%app_eq_nil].
                        destruct lw'; inversion Heq2. subst.
                        symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi1. reflexivity.
-               --- repeat (destruct L; inversion i; try discriminate).
+               --- repeat (destruct L; inversion f; try discriminate).
                --- assumption.
                --- discriminate f.
                --- destruct a.

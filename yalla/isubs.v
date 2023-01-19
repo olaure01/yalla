@@ -23,18 +23,13 @@ Definition iateq_eq := @eqb_eq (option_dectype preiatom).
 Definition repl_iat x y A := if iateq x y then A else ivar x.
 
 Lemma repl_iat_eq x y A : x = y -> repl_iat x y A = A.
-Proof.
-intros ->; unfold repl_iat.
-rewrite (proj2 (iateq_eq _ _) (eq_refl _)); reflexivity.
-Qed.
+Proof. intros ->. unfold repl_iat. rewrite (proj2 (iateq_eq _ _) (eq_refl _)). reflexivity. Qed.
 
 Lemma repl_iat_neq x y A : x <> y -> repl_iat x y A = ivar x.
 Proof.
-intros Hneq; unfold repl_iat.
-case_eq (iateq x y); intros Heqb; [ | reflexivity ].
-exfalso.
-rewrite iateq_eq in Heqb; 
-contradiction Heqb.
+intros Hneq. unfold repl_iat.
+destruct (iateq x y) eqn:Heqb; [ | reflexivity ].
+exfalso. rewrite iateq_eq in Heqb. contradiction Heqb.
 Qed.
 
 (** Substitution in [iformula]: substitutes [x] by [C] in [A] *)
@@ -55,86 +50,70 @@ match A with
 end.
 
 (** Substitution in proofs *)
-Lemma subs_ill P A x l C : iateq atN x = false ->
-  (forall D, ipcut P D = true -> ipcut P (isubs A x D) = true) ->
+Lemma subs_ill P A x l C (HN : iateq atN x = false) :
+  (forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) ->
   ill P l C ->
     ill (axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
             (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
                        isubs A x (snd (projT2 (ipgax P) a))))))
         (map (isubs A x) l) (isubs A x C).
 Proof.
-intros HN Hcut pi.
+intros Hcut pi.
 assert (forall l, map (isubs A x) (map ioc l) = map ioc (map (isubs A x) l)) as Hmapioc
   by (clear; induction l; [ | cbn; rewrite IHl ]; reflexivity).
-induction pi; list_simpl;
-  try (list_simpl in IHpi);
-  try (list_simpl in IHpi1);
-  try (list_simpl in IHpi2);
-  try (now constructor);
-  try (unfold repl_iat; rewrite HN; constructor; assumption);
-  try (unfold repl_iat in IHpi; rewrite HN in IHpi; constructor; assumption).
+induction pi; cbn; rewrite ? map_app;
+  try (cbn in IHpi; rewrite ? map_app in IHpi);
+  try (cbn in IHpi1; rewrite ? map_app in IHpi1);
+  try (cbn in IHpi2; rewrite ? map_app in IHpi2);
+  try (constructor; assumption).
 - apply ax_exp_ill.
 - eapply PEPermutation_Type_map in p.
   eapply ex_ir; eassumption.
-- rewrite ? map_app, Hmapioc in IHpi; rewrite Hmapioc.
+- rewrite ? map_app, Hmapioc in IHpi. rewrite Hmapioc.
   eapply Permutation_Type_map in p.
   eapply ex_oc_ir; eassumption.
+- list_simpl. apply lpam_ilr; assumption.
+- unfold repl_iat in IHpi. rewrite HN in IHpi. apply gen_irr. assumption.
+- unfold repl_iat. rewrite HN. apply gen_ilr. assumption.
+- unfold repl_iat in IHpi. rewrite HN in IHpi. apply neg_irr. assumption.
+- unfold repl_iat. rewrite HN. apply neg_ilr. assumption.
 - specialize Hmapioc with l.
-  rewrite Hmapioc.
-  apply oc_irr.
-  rewrite <- Hmapioc; assumption.
-- refine (cut_ir (isubs A x A0) _ _ _ ); cbn; try assumption.
-  apply Hcut; assumption.
-- apply (@gax_ir _ ((axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
-            (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
-                       isubs A x (snd (projT2 (ipgax P) a))))))) a).
+  rewrite Hmapioc. apply oc_irr. rewrite <- Hmapioc. assumption.
+- refine (cut_ir (isubs A x A0) _ _ _ ); [ | assumption | assumption ].
+  specialize (Hcut A0).
+  eapply Bool.implb_true_iff, f. apply Bool.le_implb, Hcut.
+- apply (@gax_ir _ ((axupd_ipfrag P (existT (fun x => x -> _) _
+                                            (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
+                                                       isubs A x (snd (projT2 (ipgax P) a))))))) a).
 Qed.
 
-Lemma subs_ill_axfree P : (projT1 (ipgax P) -> False) -> forall A x,
-  (forall D, ipcut P D = true -> ipcut P (isubs A x D) = true) ->
+Lemma subs_ill_axfree P (P_axfree : notT (projT1 (ipgax P))) A x :
+  (forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) ->
   forall l C, iateq atN x = false -> ill P l C ->
   ill P (map (isubs A x) l) (isubs A x C).
 Proof.
-intros P_axfree A x Hcut l C HN pi.
+intros Hcut l C HN pi.
 apply (subs_ill A x) in pi; [ | assumption | assumption ].
 eapply stronger_ipfrag; [ | eassumption ].
 repeat split; [ reflexivity | | reflexivity ].
-intros a. destruct (P_axfree a).
+intro. contradiction P_axfree.
 Qed.
 
 (** Substitution of axioms *)
-Lemma subs_ill_axioms P :
- forall (gax : { iptypgax : Type & iptypgax -> list iformula * iformula }) l C,
+Lemma subs_ill_axioms P (gax : { _ &  _ }) l C :
   (forall a, ill P (fst (projT2 gax a)) (snd (projT2 gax a))) ->
   ill (axupd_ipfrag P gax) l C -> @ill preiatom P l C.
 Proof.
-intros gax l C Hgax pi.
+intros Hgax pi.
 induction pi; try now constructor.
-- cbn in p.
-  eapply ex_ir; [ apply IHpi | assumption ].
+- cbn in p. eapply ex_ir; [ apply IHpi | assumption ].
 - eapply ex_oc_ir; eassumption.
-- cbn in f; eapply (cut_ir _ f); eassumption.
+- cbn in f. eapply (cut_ir _ f); eassumption.
 - apply Hgax.
 Qed.
 
 
 (** ** Fresh atoms and associated properties *)
-
-Fixpoint iatom_list A : list iatom :=
-match A with
-| ivar x    => x :: nil
-| ione      => nil
-| itens B C => iatom_list B ++ iatom_list C
-| ilpam B C => iatom_list B ++ iatom_list C
-| igen B => atN :: iatom_list B
-| ilmap B C => iatom_list B ++ iatom_list C
-| ineg B => atN :: iatom_list B
-| izero     => nil
-| itop      => nil
-| iplus B C => iatom_list B ++ iatom_list C
-| iwith B C => iatom_list B ++ iatom_list C
-| ioc B     => iatom_list B
-end.
 
 (** Provide an [Atom] which is fresh for [A] *)
 Definition ifresh_of A := @fresh (option_infdectype preiatom) (iatom_list A).
@@ -151,7 +130,7 @@ induction A; cbn; intros Hincl;
   cbn; trivial;
   (try now apply incl_app_inv in Hincl);
   try now apply incl_cons_inv in Hincl.
-rewrite repl_iat_neq; auto.
+rewrite repl_iat_neq; [ reflexivity | ].
 intros ->.
 apply (@fresh_prop (option_infdectype preiatom) lat),
       (Hincl (@fresh (option_infdectype preiatom) lat)).
@@ -159,7 +138,7 @@ left. reflexivity.
 Qed.
 
 Lemma subs_ifresh C A : isubs C (ifresh_of A) A = A.
-Proof. now intros; apply subs_ifresh_incl. Qed.
+Proof. apply subs_ifresh_incl. intro. exact id. Qed.
 
 (** Provide an [Atom] which is fresh for all elements of [l] *)
 Definition ifresh_of_list l := @fresh (option_infdectype preiatom) (flat_map iatom_list l).
@@ -170,12 +149,12 @@ Proof.
 induction l; cbn; intros Hincl; auto.
 apply incl_app_inv in Hincl.
 change (proj1_sig (nat_injective_choice (option_dectype preiatom)
-            (nat_injective_option infinite_nat_injective)) lat)
+                  (nat_injective_option infinite_nat_injective)) lat)
   with (@fresh (option_infdectype preiatom) lat).
 now rewrite subs_ifresh_incl; [ rewrite IHl | ].
 Qed.
 
 Lemma subs_ifresh_list C l : map (isubs C (ifresh_of_list l)) l = l.
-Proof. now intros; apply subs_ifresh_list_incl. Qed.
+Proof. apply subs_ifresh_list_incl. intro. exact id. Qed.
 
 End Atoms.
