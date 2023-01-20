@@ -1,5 +1,3 @@
-(* llfoc library for yalla *)
-
 (** * Focusing in Linear Logic *)
 
 From Coq Require Import CMorphisms Wf_nat Lia.
@@ -32,22 +30,21 @@ Inductive aformula : formula -> Type :=
 | nwn A : aformula (wn A).
 
 Lemma polarity A : sformula A + aformula A.
-Proof. induction A; now (left + right; constructor). Defined.
+Proof. destruct A; (left + right; constructor). Defined.
 
 Lemma disj_polarity A : sformula A -> aformula A -> False.
-Proof. induction A; intros Hp Hn; inversion Hp; inversion Hn. Qed.
+Proof. destruct A; intros Hp Hn; inversion Hp; inversion Hn. Qed.
 
 Lemma sformula_dual A : sformula (dual A) -> aformula A.
-Proof. intros Hp; destruct A; inversion Hp; constructor. Qed.
+Proof. intros Hp. destruct A; inversion Hp; constructor. Qed.
 
 Lemma aformula_dual A : aformula (dual A) -> sformula A.
-Proof. intros Hn; destruct A; inversion Hn; constructor. Qed.
+Proof. intros Hn. destruct A; inversion Hn; constructor. Qed.
 
 
 (** ** The weakly focused system [llfoc] *)
 
-Definition tFoc x :=
-  (sformula x + { X | x = covar X } + { y | x = wn y } + (x = top))%type.
+Definition tFoc x := (sformula x + { X | x = covar X } + { y | x = wn y } + (x = top))%type.
 
 Lemma tFoc_dec x : tFoc x + notT (tFoc x).
 Proof.
@@ -62,27 +59,24 @@ Qed.
 Lemma tFocl_dec l : Forall_inf tFoc l + notT (Forall_inf tFoc l).
 Proof.
 induction l.
-- left; constructor.
+- left. constructor.
 - destruct (tFoc_dec a).
   + destruct IHl.
-    * left; constructor; assumption.
-    * right; intros H.
-      inversion_clear H; auto.
-  + right; intros H.
-    inversion_clear H; auto.
+    * left. constructor; assumption.
+    * right. intros H. now inversion_clear H.
+  + right. intros H. now inversion_clear H.
 Qed.
 
-Lemma not_tFoc x : notT (tFoc x) ->
-  (x = bot) + {'(y1, y2) | x = parr y1 y2 } + {'(y1, y2) | x = awith y1 y2 }.
+Lemma not_tFoc x : notT (tFoc x) -> (x = bot) + {'(y1, y2) | x = parr y1 y2 } + {'(y1, y2) | x = awith y1 y2 }.
 Proof.
 destruct x; intros HnF;
   try (now (exfalso; apply HnF; left; left; left; constructor));
   try (now (exfalso; apply HnF; left; left; right; eexists; reflexivity));
   try (now (exfalso; apply HnF; left; right; eexists; reflexivity));
   try (now (exfalso; apply HnF; right; reflexivity)).
-- left; left; reflexivity.
-- left; right; exists (x1, x2); reflexivity.
-- right; exists (x1, x2); reflexivity.
+- left. left. reflexivity.
+- left. right. exists (x1, x2). reflexivity.
+- right. exists (x1, x2). reflexivity.
 Qed.
 
 Lemma not_tFocl l : notT (Forall_inf tFoc l) ->
@@ -91,12 +85,12 @@ Lemma not_tFocl l : notT (Forall_inf tFoc l) ->
                              + {'(A1, A2) | A = awith A1 A2 })%type }.
 Proof.
 intros HnF%Forall_inf_neg_Exists_inf.
-- induction l; inversion HnF; subst.
+- induction l as [|a l IHl]; inversion HnF; subst.
   + exists (a, nil, l); [ reflexivity | ].
     apply (not_tFoc H0).
-  + apply IHl in X as [[[b l1] l2] Heq Hf]; subst.
+  + apply IHl in X as [[[b l1] l2] -> Hf].
     now exists (b, a :: l1, l2).
-- intros x; destruct (tFoc_dec x); auto.
+- exact tFoc_dec.
 Qed.
 
 Definition polcont l A :=
@@ -111,80 +105,57 @@ match polarity A with
 end.
 Lemma polconts A l : sformula A -> polcont l A = l.
 Proof.
-intros; unfold polcont; destruct (polarity A); auto.
-exfalso; eapply disj_polarity; eassumption.
+intros. unfold polcont. destruct (polarity A); [ reflexivity | ].
+exfalso. eapply disj_polarity; eassumption.
 Qed.
 Lemma polconta A l : aformula A -> polcont l A = A :: l.
 Proof.
-intros; unfold polcont; destruct (polarity A); auto.
-exfalso; eapply disj_polarity; eassumption.
+intros. unfold polcont. destruct (polarity A); [ | reflexivity ].
+exfalso. eapply disj_polarity; eassumption.
 Qed.
 Lemma polfocs A : sformula A -> polfoc A = Some A.
 Proof.
-intros; unfold polfoc; destruct (polarity A); auto.
-exfalso; eapply disj_polarity; eassumption.
+intros. unfold polfoc. destruct (polarity A); [ reflexivity | ].
+exfalso. eapply disj_polarity; eassumption.
 Qed.
 Lemma polfoca A : aformula A -> polfoc A = None.
 Proof.
-intros; unfold polfoc; destruct (polarity A); auto.
-exfalso; eapply disj_polarity; eassumption.
+intros. unfold polfoc. destruct (polarity A); [ | reflexivity ].
+exfalso. eapply disj_polarity; eassumption.
 Qed.
 
 Lemma Permutation_Type_middle_polcont l1 l2 A B :
   Permutation_Type (B :: polcont (l1 ++ l2) A) (polcont (l1 ++ B :: l2) A).
 Proof.
-unfold polcont; destruct (polarity A) as [Hs | Ha];
-  [ | rewrite 2 (app_comm_cons _ _ A)]; apply Permutation_Type_middle.
+unfold polcont.
+destruct (polarity A) as [Hs | Ha]; [ | rewrite 2 (app_comm_cons _ _ A)]; apply Permutation_Type_middle.
 Qed.
 
 Inductive llfoc : list formula -> option formula -> Type :=
-| ax_fr : forall X, llfoc (covar X :: nil) (Some (var X))
-| ex_fr : forall l1 l2 Pi, llfoc l1 Pi -> Permutation_Type l1 l2 ->
-                           llfoc l2 Pi
-| foc_fr : forall A l, llfoc l (Some A) -> llfoc (A :: l) None
+| ax_fr X : llfoc (covar X :: nil) (Some (var X))
+| ex_fr l1 l2 Pi : llfoc l1 Pi -> Permutation_Type l1 l2 -> llfoc l2 Pi
+| foc_fr A l : llfoc l (Some A) -> llfoc (A :: l) None
 | one_fr : llfoc nil (Some one)
-| bot_fr : forall l Pi, llfoc l Pi ->
-                          llfoc (bot :: l) Pi
-| tens_fr : forall A B l1 l2,
-                    llfoc (polcont l1 A) (polfoc A) ->
-                    llfoc (polcont l2 B) (polfoc B) ->
-                    llfoc (l1 ++ l2) (Some (tens A B))
-| parr_fr : forall A B l Pi,
-                    llfoc (A :: B :: l) Pi ->
-                    llfoc (parr A B :: l) Pi
-| top_fr : forall l Pi, option_testT sformula Pi -> Forall_inf tFoc l ->
-                    llfoc (top :: l) Pi
-| plus_fr1 : forall A B l, llfoc (polcont l A) (polfoc A) ->
-                             llfoc l (Some (aplus A B))
-| plus_fr2 : forall A B l, llfoc (polcont l A) (polfoc A) ->
-                             llfoc l (Some (aplus B A))
-| with_fr : forall A B l Pi, llfoc (A :: l) Pi -> llfoc (B :: l) Pi ->
-                        llfoc (awith A B :: l) Pi
-| oc_fr : forall A l, llfoc (A :: map wn l) None ->
-                        llfoc (map wn l) (Some (oc A))
-| de_fr : forall A l, llfoc (polcont l A) (polfoc A) ->
-                         llfoc (wn A :: l) None
-| wk_fr : forall A l Pi, llfoc l Pi -> llfoc (wn A :: l) Pi
-| co_fr : forall A l Pi, llfoc (wn A :: wn A :: l) Pi ->
-                           llfoc (wn A :: l) Pi.
+| bot_fr l Pi : llfoc l Pi -> llfoc (bot :: l) Pi
+| tens_fr A B l1 l2 : llfoc (polcont l1 A) (polfoc A) -> llfoc (polcont l2 B) (polfoc B) ->
+                      llfoc (l1 ++ l2) (Some (tens A B))
+| parr_fr A B l Pi : llfoc (A :: B :: l) Pi -> llfoc (parr A B :: l) Pi
+| top_fr l Pi : option_testT sformula Pi -> Forall_inf tFoc l -> llfoc (top :: l) Pi
+| plus_fr1 A B l : llfoc (polcont l A) (polfoc A) -> llfoc l (Some (aplus A B))
+| plus_fr2 A B l : llfoc (polcont l A) (polfoc A) -> llfoc l (Some (aplus B A))
+| with_fr A B l Pi : llfoc (A :: l) Pi -> llfoc (B :: l) Pi -> llfoc (awith A B :: l) Pi
+| oc_fr A l : llfoc (A :: map wn l) None -> llfoc (map wn l) (Some (oc A))
+| de_fr A l : llfoc (polcont l A) (polfoc A) -> llfoc (wn A :: l) None
+| wk_fr A l Pi : llfoc l Pi -> llfoc (wn A :: l) Pi
+| co_fr A l Pi : llfoc (wn A :: wn A :: l) Pi -> llfoc (wn A :: l) Pi.
 
 Fixpoint fpsize l Pi (pi : llfoc l Pi) :=
 match pi with
-| ax_fr _ => 1
-| ex_fr pi0 _ => S (fpsize pi0)
-| foc_fr pi0 => S (fpsize pi0)
-| one_fr => 1
-| bot_fr pi0 => S (fpsize pi0)
+| ax_fr _ | one_fr | top_fr _ _ _ => 1
+| ex_fr pi0 _ | foc_fr pi0 | bot_fr pi0 | parr_fr pi0 | plus_fr1 _ _ _ pi0 | plus_fr2 _ _ _ pi0
+| oc_fr _ pi0 | de_fr _ _ pi0 | wk_fr _ pi0 | co_fr pi0 => S (fpsize pi0)
 | tens_fr _ _ _ _ pi1 pi2 => S (fpsize pi1 + fpsize pi2)
-| parr_fr pi0 => S (fpsize pi0)
-| top_fr _ _ _ => 1
-| plus_fr1 _ _ _ pi0 => S (fpsize pi0)
-| plus_fr2 _ _ _ pi0 => S (fpsize pi0)
 | with_fr pi1 pi2 => S (max (fpsize pi1) (fpsize pi2))
-| oc_fr _ pi0 => S (fpsize pi0)
-| de_fr _ _ pi0 => S (fpsize pi0)
-| wk_fr _ pi0 => S (fpsize pi0)
-| co_fr pi0 => S (fpsize pi0)
 end.
 
 Lemma top_gen_fr l Pi : option_testT sformula Pi -> llfoc (top :: l) Pi.
@@ -229,11 +200,10 @@ remember (Some A) as Pi eqn:HeqPi; revert HeqPi; induction pi; intros HeqPi;
 Qed.
 
 Lemma llfoc_foc_is_llfoc_foc l A : llfoc l (Some A) -> llfoc (polcont l A) (polfoc A).
-Proof. now intros pi; assert (Hs := sync_focus pi); rewrite (polconts _ Hs), (polfocs Hs). Qed.
+Proof. intros pi. assert (Hs := sync_focus pi). rewrite (polconts _ Hs), (polfocs Hs). assumption. Qed.
 
-Lemma llfoc_cont_is_llfoc_cont l A : aformula A ->
-  llfoc (A :: l) None -> llfoc (polcont l A) (polfoc A).
-Proof. intros Ha pi; rewrite (polconta _ Ha), (polfoca Ha); apply pi. Qed.
+Lemma llfoc_cont_is_llfoc_cont l A : aformula A -> llfoc (A :: l) None -> llfoc (polcont l A) (polfoc A).
+Proof. intros Ha pi. rewrite (polconta _ Ha), (polfoca Ha). apply pi. Qed.
 
 Lemma bot_rev_f l Pi (pi : llfoc l Pi) l1 l2 : l = l1 ++ bot :: l2 ->
   { pi' : llfoc (l1 ++ l2) Pi | fpsize pi' < fpsize pi }.
@@ -241,7 +211,7 @@ Proof.
 revert l1 l2; induction pi ; intros l1' l2' Heq; subst.
 - exfalso.
   destruct l1'; inversion Heq.
-  destruct l1'; inversion H1.
+  destruct l1'; discriminate H1.
 - assert (HP := p).
   cbn; apply Permutation_Type_vs_elt_inv in p as ((l3 & l4) & ->).
   cbn in IHpi, HP; cbn.
@@ -249,24 +219,21 @@ revert l1 l2; induction pi ; intros l1' l2' Heq; subst.
   cbn in HP; apply Permutation_Type_app_inv in HP.
   exists (ex_fr pi0 HP); cbn; lia.
 - destruct l1'; inversion Heq; subst.
-  + exfalso.
-    clear IHpi; apply sync_focus in pi.
-    inversion pi.
+  + exfalso. clear IHpi. apply sync_focus in pi. inversion pi.
   + destruct (IHpi _ _ eq_refl) as [pi0 Hs].
-    exists (foc_fr pi0); cbn; lia.
-- exfalso.
-  destruct l1'; inversion Heq.
+    exists (foc_fr pi0). cbn. lia.
+- exfalso. destruct l1'; discriminate Heq.
 - destruct l1'; inversion Heq; subst.
-  + exists pi; cbn; lia.
+  + exists pi. cbn. lia.
   + destruct (IHpi _ _ eq_refl) as [pi0 Hs].
-    exists (bot_fr pi0); cbn; lia.
+    exists (bot_fr pi0). cbn. lia.
 - dichot_elt_app_inf_exec Heq; subst.
   + destruct (polarity A) as [Hs | Ha].
     * assert (H1 := IHpi1 _ _ (polconts _ Hs)).
       rewrite <- (polconts (l1' ++ l) Hs) in H1.
       destruct H1 as [pi1' Hs1].
       rewrite app_assoc.
-      exists (tens_fr _ _ _ _ pi1' pi2); cbn; lia.
+      exists (tens_fr _ _ _ _ pi1' pi2). cbn. lia.
     * assert (polcont (l1' ++ bot :: l) A = (A :: l1') ++ bot :: l) as Hpa
         by (rewrite (polconta _ Ha), app_comm_cons; reflexivity).
       assert (H1 := IHpi1 _ _ Hpa).
@@ -2033,10 +2000,10 @@ intros pi; induction pi; (try now inversion f); (try now constructor).
   + change (wn A :: l) with ((wn A :: nil) ++ l).
     apply (reversing (A :: nil)); auto.
     clear l IHpi; intros l Hf pi.
-    apply de_Fr; auto.
-    now rewrite (polconta _ a), (polfoca a).
-- apply wk_gen_Fr; assumption.
-- apply co_gen_Fr; assumption.
+    apply de_Fr; [ | assumption ].
+    rewrite (polconta _ a), (polfoca a). assumption.
+- apply wk_gen_Fr. assumption.
+- apply co_gen_Fr. assumption.
 - destruct a.
 Qed.
 

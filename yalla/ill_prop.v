@@ -10,24 +10,6 @@ From Yalla Require Export ill_cut.
 
 Set Implicit Arguments.
 
-(* TODO add to OLlibs *)
-Ltac Forall_inf_cbn_hyp :=
-  repeat (
-    match goal with
-    | H:Forall_inf _ (_ ++ _) |- _ => let H1 := fresh H in assert (H1 := Forall_inf_app_l _ _ H);
-                                      let H2 := fresh H in assert (H2 := Forall_inf_app_r _ _ H);
-                                      clear H
-    | H:Forall_inf _ (_ :: _) |- _ => inversion H; clear H
-    end).
-Ltac Forall_inf_solve_rec :=
-  match goal with
-  | |- Forall_inf _ (_ ++ _) => apply Forall_inf_app ; Forall_inf_solve_rec
-  | |- Forall_inf _ (_ :: _) => constructor; [ assumption | Forall_inf_solve_rec ]
-  | |- Forall_inf _ nil => constructor
-  | _ => try assumption
-  end.
-Ltac Forall_inf_solve := Forall_inf_cbn_hyp; cbn; Forall_inf_solve_rec; fail.
-
 
 Section Atoms.
 

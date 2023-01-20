@@ -1,9 +1,6 @@
-(* ill_vs_ll library for yalla *)
-
 (** * Comparison between Intuitionistic Linear Logic and Linear Logic *)
 
-From OLlibs Require Import funtheory infinite List_more
-                           Permutation_Type_more CPermutation_Type GPermutation_Type.
+From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Import ll_fragments.
 From Yalla Require Export ill_prop.
 
@@ -374,11 +371,8 @@ intros Hill. induction Hill; list_simpl;
   try list_simpl in IHHill; try list_simpl in IHHill1; try list_simpl in IHHill2.
 - eapply ex_r, PCPermutation_Type_swap. apply ax_r.
 - eapply ex_r; [ eassumption | ].
-  hyps_GPermutation_Type_unfold; unfold PCPermutation_Type; cbn; destruct ipperm.
-  * apply Permutation_Type_cons; [ reflexivity | ].
-    do 2 apply Permutation_Type_map.
-    apply Permutation_Type_rev'. assumption.
-  * subst. reflexivity.
+  apply PEPermutation_PCPermutation_Type_cons; [ reflexivity | ].
+  apply PEPermutation_Type_map, PEPermutation_Type_map, PEPermutation_Type_rev, p.
 - rewrite_all ill2ll_map_ioc. rewrite_all app_comm_cons.
   apply Permutation_Type_rev' in p. do 2 eapply Permutation_Type_map in p.
   eapply ex_wn_r; eassumption.

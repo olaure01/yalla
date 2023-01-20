@@ -5,7 +5,7 @@
 
 From Coq Require Import PeanoNat Lia.
 From OLlibs Require Import infinite funtheory List_more Dependent_Forall_Type
-                           CPermutation_Type Permutation_Type_more GPermutation_Type.
+                           Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ll_prop.
 From Yalla Require Import subs.
 

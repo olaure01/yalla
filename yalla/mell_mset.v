@@ -1,5 +1,3 @@
-(* mell_mset example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: multi-set based MELL *)
 
 From OLlibs Require Import funtheory dectype List_more Permutation_more Permutation_Type_more
@@ -17,8 +15,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : DecType }.
-Context { Atoms : AtomType_into_nat atom }.
+Context { atom : DecType } { Atoms : AtomType_into_nat atom }.
 
 (** ** 1. define formulas *)
 
@@ -66,8 +63,7 @@ Proof.
 eapply (@border_inj _ border_nat).
 eapply compose_injective ; [ | eapply compose_injective ].
 - apply mell2ll_inj.
-- eapply section_injective.
-  intros A. apply fmformulas.form_nattree_section.
+- eapply section_injective. intro. apply fmformulas.form_nattree_section.
 - apply nattree2nat_inj.
 Defined.
 

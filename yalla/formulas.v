@@ -1,5 +1,3 @@
-(* formulas library for yalla *)
-
 From Coq Require Import Bool List EqNat RelationClasses Lia.
 From OLlibs Require Import funtheory dectype.
 From Yalla Require Export atoms.
@@ -47,7 +45,7 @@ match n with
 end.
 
 Lemma wn_n_wn n A : wn_n n (wn A) = wn_n (S n) A.
-Proof. induction n; [ | cbn in *; rewrite IHn ]; reflexivity. Qed.
+Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
 Fixpoint oc_n n A :=
 match n with
@@ -56,7 +54,7 @@ match n with
 end.
 
 Lemma oc_n_oc n A : oc_n n (oc A) = oc_n (S n) A.
-Proof. induction n; [ | cbn; rewrite IHn ]; reflexivity. Qed.
+Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
 
 (** Orthogonal / dual of a [formula] *)
@@ -94,15 +92,15 @@ Lemma dual_parr_n n A : dual (parr_n n A) = tens_n n (dual A).
 Proof. induction n as [|[|n] IHn]; [ | | cbn in *; rewrite <- IHn ]; reflexivity. Qed.
 
 Lemma dual_wn_n n A : dual (wn_n n A) = oc_n n (dual A).
-Proof. induction n as [|[|n] IHn]; [ | | cbn in *; rewrite <- IHn ]; reflexivity. Qed.
+Proof. induction n as [|n IHn]; [ | cbn; rewrite <- IHn ]; reflexivity. Qed.
 
 Lemma dual_oc_n n A : dual (oc_n n A) = wn_n n (dual A).
-Proof. induction n as [|[|n] IHn]; [ | | cbn in *; rewrite <- IHn ]; reflexivity. Qed.
+Proof. induction n as [|n IHn]; [ | cbn; rewrite <- IHn ]; reflexivity. Qed.
 
 (** Size of a [formula] as its number of symbols *)
 Fixpoint fsize A :=
 match A with
-| var X | covar X => 1
+| var _ | covar _ => 1
 | one | bot | zero | top => 1
 | tens A B | parr A B | aplus A B | awith A B => S (fsize A + fsize B)
 | oc A | wn A => S (fsize A)
@@ -115,10 +113,10 @@ Lemma fsize_dual A : fsize (dual A) = fsize A.
 Proof. induction A; cbn; rewrite ? IHA1, ? IHA2; lia. Qed.
 
 Lemma fsize_wn_n n A : fsize (wn_n n A) = n + fsize A.
-Proof. induction n; [ | cbn; rewrite IHn ]; reflexivity. Qed.
+Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
 Lemma fsize_oc_n n A : fsize (oc_n n A) = n + fsize A.
-Proof. induction n; [ | cbn; rewrite IHn ]; reflexivity. Qed.
+Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
 (** Atomic [formula] *)
 Inductive atomic : formula -> Type :=
@@ -185,7 +183,7 @@ Qed.
 Lemma sub_trans_list l1 l2 l3 : subform_list l1 l2 -> subform_list l2 l3 -> subform_list l1 l3.
 Proof.
 induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
-- inversion Hl; subst.
+- inversion Hl. subst.
   revert Hr H1; clear; induction l2; intros Hr Hl; inversion Hl; subst.
   + inversion Hr. subst.
     inversion H2; subst.
@@ -203,11 +201,7 @@ induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
 Qed.
 
 Instance sub_list_po : PreOrder subform_list.
-Proof.
-split.
-- intros l. rewrite <- app_nil_l. apply sub_id_list.
-- intro. apply sub_trans_list.
-Qed.
+Proof. split; intro; [ rewrite <- app_nil_l; apply sub_id_list | apply sub_trans_list ]. Qed.
 
 (* Unused
 From OLlibs Require Import GPermutation_Type.

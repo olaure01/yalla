@@ -1,11 +1,8 @@
-(* ll_prop library for yalla *)
-
 (** * Properties relying on cut admissibility *)
 
 From Coq Require Import Bool.
-From OLlibs Require Import dectype List_more
-                           Permutation_Type_more CPermutation_Type GPermutation_Type
-                           Dependent_Forall_Type flat_map_more.
+From OLlibs Require Import dectype List_more Dependent_Forall_Type flat_map_more
+                           Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ll_cut.
 
 Set Implicit Arguments.
@@ -13,7 +10,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context {atom : DecType}.
+Context { atom : DecType }.
 Notation formula := (@formula atom).
 Notation ll := (@ll atom).
 
@@ -122,11 +119,9 @@ induction pi using ll_nested_ind; cbn; intros HFS; try split; try now (inversion
   eapply IHpi, (PCPermutation_Type_Forall_inf true), HFS.
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
 - apply Forall_Proofs_to_Forall_inf in X. clear - X HFS.
-  induction PL in X, HFS |- *; [ exact I | split; inversion X; subst ].
-  + apply X0. cbn.
-    exact (Forall_inf_app_l _ _ HFS).
-  + apply IHPL; [ apply X1 | ].
-    exact (Forall_inf_app_r _ _ HFS).
+  induction PL in X, HFS |- *; [ constructor | split; inversion X; subst ].
+  + apply X0. cbn. exact (Forall_inf_app_l _ _ HFS).
+  + apply IHPL; [ apply X1 | exact (Forall_inf_app_r _ _ HFS) ].
 - inversion_clear HFS. split.
   + apply IHpi1.
     constructor; [ | exact (Forall_inf_app_r _ _ X0) ].

@@ -47,7 +47,7 @@ induction A; simpl; rewrite ? bidual.
   + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r, ax_r.
-- destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite Hr2.
+- destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 ->].
   apply (ex_r (covar c :: var c :: nil)); [ | apply Permutation_Type_swap ].
   apply ax_r.
 - apply parr_r, bot_r.

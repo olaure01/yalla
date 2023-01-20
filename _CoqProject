@@ -1,8 +1,6 @@
 -R microyalla Yalla.MicroYalla
 -R yalla Yalla
 
-yalla/issue12394.v
-
 microyalla/microill.v
 microyalla/microll.v
 microyalla/micro_macro_ill.v

@@ -7,27 +7,26 @@ From Yalla Require Import ll_fragments llfoc.
 Set Implicit Arguments.
 
 
-(* TODO move to Permutation_Type and add Prop version in stdlib
-  and other places of stdlib *)
+(* TODO move to OLlibs and appropriate places of stdlib with Prop versions *)
 Lemma reflect_neg P b : reflect P b -> reflect (not P) (negb b).
-Proof. now intros H; inversion H; constructor. Qed.
+Proof. intros H. now inversion H; constructor. Qed.
 
 Inductive reflectT (P : Type) : bool -> Type :=
   | ReflectTT : P -> reflectT P true
   | ReflectTF : notT P -> reflectT P false.
 #[global] Hint Constructors reflectT : bool.
 
-Lemma reflectT_iffT : forall P b, reflectT P b -> (CRelationClasses.iffT P (b = true)).
+Lemma reflectT_iffT P b : reflectT P b -> (iffT P (b = true)).
 Proof. now destruct 1; split; [ | | | discriminate ]. Qed.
 
 Lemma reflectT_neg P b : reflectT P b -> reflectT (notT P) (negb b).
-Proof. now intros H; inversion H; constructor. Qed.
+Proof. intros H. now inversion H; constructor. Qed.
 
 Lemma filter_idem A f (l : list A) : filter f (filter f l) = filter f l.
 Proof.
 induction l as [|a l IHl]; cbn.
 - reflexivity.
-- case_eq (f a); cbn; intros Hfa; rewrite ? Hfa, IHl; reflexivity.
+- destruct (f a) eqn:Hfa; cbn; rewrite ? Hfa, IHl; reflexivity.
 Qed.
 
 Lemma filter_negb_filter A f (l : list A) : filter (fun x => negb (f x)) (filter f l) = nil.

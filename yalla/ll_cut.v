@@ -133,22 +133,13 @@ intros Hgax IHcut l' L pi;
   + exfalso.
     destruct p; destruct l'; inversion Heq; destruct n; cbn in H0; inversion H0;
       destruct l'; inversion H1; destruct l'; discriminate.
-- destruct (pperm P) eqn:Hperm. cbn in p.
-  + destruct (@Permutation_Type_app_flat_map _ _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p)
-      as [[L' l''] (Hnil' & HeqL' & HPL')];
-      cbn in Hnil', HeqL', HPL'; subst.
-    eapply ex_r; [ | rewrite Hperm; cbn; apply HPL' ].
-    apply IHpi. reflexivity.
-  + destruct (@CPermutation_Type_app_flat_map _ _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p)
-      as [(L', l'') (Hnil' & HeqL' & HPL')];
-      cbn in Hnil', HeqL', HPL'; subst.
-    eapply ex_r; [ | rewrite Hperm; cbn; apply HPL' ].
+- destruct (PCPermutation_Type_app_flat_map _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p)
+      as [[L' l''] (Hnil' & -> & HPL')].
+    eapply ex_r; [ | apply HPL' ].
     apply IHpi. reflexivity.
 - assert (injective (@wn atom)) as Hinj by (intros x y Hxy; inversion Hxy; reflexivity).
-  destruct (@Permutation_Type_flat_map_cons_flat_map_app _ _ _
-              (fun p => wn_n p (wn A)) wn Hinj lw _ _ _ _ _ _ p Heq)
-    as [(((((lw1', lw2'), l1'), l2'), l''), L') HH];
-    cbn in HH; destruct HH as (H1 & H2 & H3 & <-).
+  destruct (Permutation_Type_flat_map_cons_flat_map_app (fun p => wn_n p (wn A)) Hinj lw _ _ _ _ p Heq)
+    as [(((((lw1', lw2'), l1'), l2'), l''), L') (H1 & H2 & H3 & <-)].
   apply (ex_wn_r _ lw1'); [ | assumption ].
   rewrite H3. apply IHpi. assumption.
 - assert ({L0 & ((concat L0 = l' ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L')
@@ -157,7 +148,7 @@ intros Hgax IHcut l' L pi;
                    {'(l0, L0) & (l = l0 ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L0)
                           * (In_inf (l0 ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L0) L)})
                    L0)))%type})
-    as (L0 & (Heq' & (Heql & FL))).
+    as (L0 & (<- & (Heql & FL))).
   { clear - Heq.
     induction L in lw, L', l', Heq |- *.
     - exists nil. repeat split.
@@ -202,14 +193,11 @@ intros Hgax IHcut l' L pi;
                 intros l0 Hin.
                 destruct (Forall_inf_forall FL l0 Hin) as [(l0', L0') [Heq' Hin']].
                 exists (l0', L0'). split; [ | right ]; assumption. }
-  rewrite <- Heq'.
   apply mix_r.
   + rewrite Heql. assumption.
   + apply forall_Forall_inf.
     intros l0 Hin.
-    destruct (Forall_inf_forall FL l0 Hin) as [(l0', L0') [Heq0' Hin0]].
-    apply (In_Forall_inf_in _ PL) in Hin0 as [pi0 Hin0'].
-    rewrite Heq0'.
+    destruct (Forall_inf_forall FL l0 Hin) as [(l0', L0') [-> [pi0 Hin0']%(In_Forall_inf_in _ PL)]].
     refine (Dependent_Forall_inf_forall_formula _ _ X Hin0' l0' L0' eq_refl).
 - destruct L; list_simpl in Heq; subst.
   + list_simpl. apply one_r.
@@ -1617,7 +1605,7 @@ Qed.
 
 End Cut_Elim_Proof.
 
-Context [P : @pfrag atom].
+Context {P : @pfrag atom}.
 
 (** ** Variants on cut admissibility *)
 
@@ -1626,7 +1614,7 @@ provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible (Hgax_at : atomic_ax P) (Hgax_cut : cut_closed P) l : ll P l -> ll (cutrm_pfrag P) l.
 Proof.
 intros pi.
-induction pi using ll_nested_ind; try (econstructor; eassumption; fail).
+induction pi using ll_nested_ind; try (econstructor; eassumption).
 - apply mix_r; cbn; [ assumption | ].
   apply forall_Forall_inf.
   intros x Hin.
@@ -1643,20 +1631,11 @@ Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is valid. *)
 Lemma cut_r_axfree (P_axfree : no_ax P) A l1 l2 : ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
-Proof.
-intros pi1 pi2.
-apply cut_r_gax with A; [ | assumption | assumption ].
-intros a. destruct (P_axfree a).
-Qed.
+Proof. apply cut_r_gax. intro. contradiction P_axfree. Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible_axfree (P_axfree : no_ax P) l : ll P l -> ll (cutrm_pfrag P) l.
-Proof.
-intros pi.
-apply cut_admissible; [ | | assumption ].
-- intros a. destruct (P_axfree a).
-- intros ? a. destruct (P_axfree a).
-Qed.
+Proof. apply cut_admissible; [ intro | intros ? ? ]; contradiction P_axfree. Qed.
 
 End Atoms.

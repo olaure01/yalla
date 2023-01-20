@@ -1,6 +1,3 @@
-(* iformulas library for yalla *)
-
-
 (** * Intuitionistic Linear Logic formulas *)
 
 From Coq Require Import Bool RelationClasses Lia.

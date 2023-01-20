@@ -1,6 +1,3 @@
-(* ill library for yalla *)
-
-
 (** * Intuitionistic Linear Logic *)
 (* no results about cuts here, see ill_cut.v for cut admissibility, and ill_prop.v for other properties *)
 

@@ -1,6 +1,3 @@
-(* isubs library for yalla *)
-
-
 (** * Substitutions in Intuitionistic Linear Logic formulas and proofs *)
 
 From OLlibs Require Import infinite List_more Permutation_Type GPermutation_Type.
@@ -50,17 +47,17 @@ match A with
 end.
 
 (** Substitution in proofs *)
-Lemma subs_ill P A x l C (HN : iateq atN x = false) :
-  (forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) ->
+Lemma subs_ill P A x l C (HN : x <> atN) (Hcut : forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) :
   ill P l C ->
-    ill (axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
-            (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
-                       isubs A x (snd (projT2 (ipgax P) a))))))
-        (map (isubs A x) l) (isubs A x C).
+  ill (axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
+                              (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
+                                             isubs A x (snd (projT2 (ipgax P) a))))))
+      (map (isubs A x) l) (isubs A x C).
 Proof.
-intros Hcut pi.
+apply <- (@eqb_neq (option_dectype preiatom)) in HN. rewrite eqb_sym in HN. fold iateq in HN.
+intros pi.
 assert (forall l, map (isubs A x) (map ioc l) = map ioc (map (isubs A x) l)) as Hmapioc
-  by (clear; induction l; [ | cbn; rewrite IHl ]; reflexivity).
+  by (clear; induction l as [|a l IHl]; [ | cbn; rewrite IHl ]; reflexivity).
 induction pi; cbn; rewrite ? map_app;
   try (cbn in IHpi; rewrite ? map_app in IHpi);
   try (cbn in IHpi1; rewrite ? map_app in IHpi1);
@@ -79,38 +76,28 @@ induction pi; cbn; rewrite ? map_app;
 - unfold repl_iat. rewrite HN. apply neg_ilr. assumption.
 - specialize Hmapioc with l.
   rewrite Hmapioc. apply oc_irr. rewrite <- Hmapioc. assumption.
-- refine (cut_ir (isubs A x A0) _ _ _ ); [ | assumption | assumption ].
+- refine (cut_ir (isubs A x A0) _ IHpi1 IHpi2).
   specialize (Hcut A0).
   eapply Bool.implb_true_iff, f. apply Bool.le_implb, Hcut.
-- apply (@gax_ir _ ((axupd_ipfrag P (existT (fun x => x -> _) _
-                                            (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
-                                                       isubs A x (snd (projT2 (ipgax P) a))))))) a).
+- refine (gax_ir _).
 Qed.
 
-Lemma subs_ill_axfree P (P_axfree : notT (projT1 (ipgax P))) A x :
-  (forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) ->
-  forall l C, iateq atN x = false -> ill P l C ->
-  ill P (map (isubs A x) l) (isubs A x C).
+Lemma subs_ill_axfree P (P_axfree : notT (projT1 (ipgax P))) A x
+  (Hcut : forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) l C (HN : x <> atN) :
+  ill P l C -> ill P (map (isubs A x) l) (isubs A x C).
 Proof.
-intros Hcut l C HN pi.
-apply (subs_ill A x) in pi; [ | assumption | assumption ].
+intros pi.
+apply (subs_ill A HN) in pi; [ | assumption ].
 eapply stronger_ipfrag; [ | eassumption ].
 repeat split; [ reflexivity | | reflexivity ].
 intro. contradiction P_axfree.
 Qed.
 
 (** Substitution of axioms *)
-Lemma subs_ill_axioms P (gax : { _ &  _ }) l C :
-  (forall a, ill P (fst (projT2 gax a)) (snd (projT2 gax a))) ->
+Lemma subs_ill_axioms P (gax : { _ &  _ }) l C
+  (Hgax : forall a, ill P (fst (projT2 gax a)) (snd (projT2 gax a))) :
   ill (axupd_ipfrag P gax) l C -> @ill preiatom P l C.
-Proof.
-intros Hgax pi.
-induction pi; try now constructor.
-- cbn in p. eapply ex_ir; [ apply IHpi | assumption ].
-- eapply ex_oc_ir; eassumption.
-- cbn in f. eapply (cut_ir _ f); eassumption.
-- apply Hgax.
-Qed.
+Proof. intros pi. induction pi; try (econstructor; eassumption). apply Hgax. Qed.
 
 
 (** ** Fresh atoms and associated properties *)
@@ -124,16 +111,12 @@ Proof.
 induction A; cbn; intros Hincl;
   change (proj1_sig (nat_injective_choice (option_dectype preiatom)
             (nat_injective_option infinite_nat_injective)) lat)
-  with (@fresh (option_infdectype preiatom) lat);
-  try rewrite IHA;
-  try (rewrite IHA2; [ rewrite IHA1 | ]);
-  cbn; trivial;
-  (try now apply incl_app_inv in Hincl);
-  try now apply incl_cons_inv in Hincl.
+    with (@fresh (option_infdectype preiatom) lat);
+  rewrite ? IHA, ? IHA1, ? IHA2; cbn; trivial;
+  try (now apply incl_app_inv in Hincl); try now apply incl_cons_inv in Hincl.
 rewrite repl_iat_neq; [ reflexivity | ].
 intros ->.
-apply (@fresh_prop (option_infdectype preiatom) lat),
-      (Hincl (@fresh (option_infdectype preiatom) lat)).
+apply (@fresh_prop (option_infdectype preiatom) lat), (Hincl (@fresh (option_infdectype preiatom) lat)).
 left. reflexivity.
 Qed.
 

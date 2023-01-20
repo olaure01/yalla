@@ -1,5 +1,3 @@
-(* fmformulas library for yalla *)
-
 (** * Order structure and finite multiset structure on formulas *)
 
 From OLlibs Require Import funtheory infinite nattree fmsetlist_Type BOrders.
@@ -10,8 +8,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : DecType }.
-Context { Atoms : AtomType_into_nat atom }.
+Context { atom : DecType } { Atoms : AtomType_into_nat atom }.
 
 (** ** Encoding of [formula] into [nat]-labelled trees for ordering *)
 
@@ -56,7 +53,7 @@ match t with
 end.
 
 Lemma form_nattree_section : retract nattree2form form2nattree.
-Proof. now intros A; induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n. Qed.
+Proof. intros A. induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n; reflexivity. Qed.
 
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
@@ -64,16 +61,14 @@ Proof. now intros A; induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n. Qed.
 #[export] Instance border_formula : BOrder | 50.
 Proof.
 eapply border_inj, compose_injective.
-- eapply section_injective.
-  intro; apply form_nattree_section.
+- eapply section_injective. intro. apply form_nattree_section.
 - apply nattree2nat_inj.
 Defined.
 
 
 (** ** Finite multi-sets over [formula] *)
 
-#[export] Instance fmset_formula :
-  FinMultiset (SortedList border_formula) formula | 50
+#[export] Instance fmset_formula : FinMultiset (SortedList border_formula) formula | 50
   := FMConstr_slist border_formula.
 
 End Atoms.
