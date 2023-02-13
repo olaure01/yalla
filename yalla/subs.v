@@ -206,7 +206,7 @@ induction A; cbn; intros Hincl;
   cbn; trivial;
   try now apply incl_app_inv in Hincl.
 all: rewrite repl_at_neq; [ reflexivity | intros -> ].
-all: apply (fresh_prop lat), (Hincl (fresh lat)).
+all: apply (fresh_spec lat), (Hincl (fresh lat)).
 all: left; reflexivity.
 Qed.
 

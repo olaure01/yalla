@@ -9,7 +9,7 @@ Class AtomType_self (A : DecType) := Atom_self_inj : self_injective A.
 Definition AtomType_self_InfDecType (A : DecType) (As : AtomType_self A) := {|
   infcar := A;
   fresh := proj1_sig (nat_injective_choice _ (self_injective_nat _ Atom_self_inj));
-  fresh_prop := proj2_sig (nat_injective_choice _ (self_injective_nat _ Atom_self_inj)) |}.
+  fresh_spec := proj2_sig (nat_injective_choice _ (self_injective_nat _ Atom_self_inj)) |}.
 
 Class AtomType_into_nat (A : DecType) := Atom_into_nat : embedding A nat.
 

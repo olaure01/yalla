@@ -116,7 +116,7 @@ induction A; cbn; intros Hincl;
   try (now apply incl_app_inv in Hincl); try now apply incl_cons_inv in Hincl.
 rewrite repl_iat_neq; [ reflexivity | ].
 intros ->.
-apply (@fresh_prop (option_infdectype preiatom) lat), (Hincl (@fresh (option_infdectype preiatom) lat)).
+apply (@fresh_spec (option_infdectype preiatom) lat), (Hincl (@fresh (option_infdectype preiatom) lat)).
 left. reflexivity.
 Qed.
 
