@@ -458,21 +458,17 @@ induction pi;
   + apply IHpi2; list_simpl; reflexivity.
 - cbn in Heql; cbn in HeqA.
   case_eq (snd (projT2 (tpgax P) a)).
-  + intros A Heq.
-    rewrite_all Heq.
+  + intros A Heq. rewrite Heq in HeqA.
     apply tl2ill_inj in HeqA; subst.
     rewrite <- Heq.
     apply map_injective in Heql; [ | apply tl2ill_inj ]; subst.
     apply gax_tr.
-  + intros Heq; exfalso.
-    rewrite_all Heq.
-    destruct A''; inversion HeqA.
+  + intros Heq. exfalso. rewrite Heq in HeqA. destruct A''; inversion HeqA.
 - cbn in Heql. cbn in HeqN.
   case_eq (snd (projT2 (tpgax P) a)).
-  + intros A Heq. exfalso.
-    rewrite_all Heq. destruct A; discriminate HeqN.
-  + intros Heq. rewrite_all Heq. rewrite <- Heq.
-    apply map_injective in Heql; [ | apply tl2ill_inj ]; subst.
+  + intros A Heq. exfalso. rewrite Heq in HeqN. destruct A; discriminate HeqN.
+  + intros Heq. rewrite Heq in HeqN. rewrite <- Heq.
+    apply map_injective in Heql as <-; [ | apply tl2ill_inj ].
     apply gax_tr.
 Qed.
 

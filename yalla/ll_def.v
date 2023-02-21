@@ -439,7 +439,7 @@ induction pi using ll_nested_ind; intros HFS; try (cbn in HFS; cbn; tauto).
     * exact (X1 Hp).
     * exact (IHPL X2 HFS).
 - cbn. cbn in HFS. destruct Hfrag as (_ & ? & _ & _), (s a) as [b H].
-  rewrite_all H. cbn. assumption.
+  rewrite ? H in *. assumption.
 Qed.
 
 
@@ -1011,7 +1011,7 @@ intros pi. induction pi using ll_nested_ind; intros l2' HF;
 - apply Forall2_inf_app_inv_l in HF as [(l'1, l'2) [HF1 HF2] ->].
   apply Forall2_inf_app_inv_l in HF2 as [(l''1, l''2) [HF2 HF3] ->].
   assert (HF4 := HF2).
-  apply munit_smp_map_wn in HF2 as [ l''' Heq HF2 ]. rewrite_all Heq. clear Heq.
+  apply munit_smp_map_wn in HF2 as [ l''' -> HF2 ].
   symmetry in p.
   apply (Permutation_Type_map wn) in p.
   eapply Permutation_Type_Forall2_inf in p as [la HP]; [ | eassumption ].

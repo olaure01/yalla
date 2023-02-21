@@ -373,7 +373,7 @@ intros Hill. induction Hill; list_simpl;
 - eapply ex_r; [ eassumption | ].
   apply PEPermutation_PCPermutation_Type_cons; [ reflexivity | ].
   apply PEPermutation_Type_map, PEPermutation_Type_map, PEPermutation_Type_rev, p.
-- rewrite_all ill2ll_map_ioc. rewrite_all app_comm_cons.
+- rewrite ? ill2ll_map_ioc, ? app_comm_cons in *.
   apply Permutation_Type_rev' in p. do 2 eapply Permutation_Type_map in p.
   eapply ex_wn_r; eassumption.
 - apply one_r.
@@ -462,8 +462,7 @@ intros Hill. induction Hill; list_simpl;
   + eapply ex_r; [ apply IHHill2 | ].
     rewrite ? app_comm_cons.
     apply PCPermutation_Type_app_comm.
-- rewrite_all ill2ll_map_ioc.
-  apply oc_r. assumption.
+- rewrite ? ill2ll_map_ioc in *. apply oc_r. assumption.
 - rewrite ? app_comm_cons.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
   rewrite <- ? app_comm_cons.
@@ -1633,7 +1632,7 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
                          ++ ill2ll C :: map dual (map ill2ll lr) /\
        (ipperm P = false -> l8 = ll /\ l6 = lr) }) as [(ll & lr) HP0 (Heq' & HPeq)].
     { clear - HP.
-      case_eq (ipperm P) ; intros Hperm ; rewrite_all Hperm.
+      case_eq (ipperm P); intros Hperm; rewrite Hperm in HP.
       - apply PEPermutation_Type_vs_elt_inv in HP.
         destruct HP as [(ll & lr) HP0 Heq] ; cbn in HP0.
         rewrite <- 2 map_app in HP0.
@@ -1706,7 +1705,7 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
                    apply Forall_inf_app; [ assumption | constructor ]; try assumption.
                    constructor.
                --- list_simpl. rewrite ? app_comm_cons. apply PCPermutation_Type_app_comm.
-         ++ destruct (ipperm P) eqn:Hperm. rewrite_all Hperm.
+         ++ destruct (ipperm P) eqn:Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
                list_simpl in HP0. list_simpl.
@@ -1811,7 +1810,7 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
                    apply Forall_inf_app; [ assumption | ].
                    constructor; assumption.
                --- list_simpl. rewrite ? app_comm_cons. apply PCPermutation_Type_app_comm.
-         ++ destruct (ipperm P) eqn:Hperm. rewrite_all Hperm.
+         ++ destruct (ipperm P) eqn:Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
                list_simpl in HP0. list_simpl. rewrite app_assoc.
@@ -1843,7 +1842,7 @@ intros Hll; induction Hll; intros l0 C Hnzsp HP.
                    apply Forall_inf_app; [ assumption | ].
                    constructor; [ constructor | assumption ].
                --- list_simpl. rewrite ? app_comm_cons. apply PCPermutation_Type_app_comm.
-         ++ destruct (ipperm P) eqn:Hperm. rewrite_all Hperm.
+         ++ destruct (ipperm P) eqn:Hperm.
             ** clear - HP0.
                apply Permutation_Type_rev' in HP0.
                list_simpl in HP0. list_simpl. rewrite app_assoc.

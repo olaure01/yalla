@@ -676,7 +676,7 @@ intros pi. induction pi; intro HP;
          ++ apply app_eq_unit in Heql as [[-> ->] | [-> ->]].
             ** apply IHpi. reflexivity.
             ** apply mix0_bbb0_false. assumption.
-         ++ rewrite_all H1. clear - pi.
+         ++ rewrite ? H1 in *. clear - pi.
             remember (tens (parr one one) bot :: nil) as l.
             induction pi in Heql |- *; inversion Heql; subst.
             ** symmetry in p.
@@ -719,7 +719,7 @@ intros pi. induction pi; intro HP;
                destruct lw'; inversion Heq2. subst.
                symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi. reflexivity.
          ++ repeat (destruct L; inversion f; try discriminate).
-         ++ rewrite_all H1. clear - pi.
+         ++ rewrite ? H1 in *. clear - pi.
             remember (tens (parr one one) bot :: nil) as l.
             induction pi in Heql |- *; inversion Heql; subst.
             ** symmetry in p. cbn in p.
