@@ -15,8 +15,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : InfDecType } { preiatom tatom : DecType } { Atoms : TLAtomType atom preiatom tatom }.
-
+Context {atom : InfDecType} {preiatom tatom : DecType} {Atoms : TLAtomType atom preiatom tatom}.
 
 (** ** 1. define formulas *)
 

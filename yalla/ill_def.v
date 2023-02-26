@@ -11,12 +11,12 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { preiatom : DecType }.
+Context {preiatom : DecType}.
 Notation iformula := (@iformula preiatom).
 
 (** ** Intuitionistic fragments for proofs *)
 
-Definition NoIAxioms := (existT (fun x => x -> list iformula * iformula) _ Empty_fun).
+Definition NoIAxioms := existT (fun x => x -> list iformula * iformula) _ Empty_fun.
 
 Definition ipcut_none (A : iformula) := false.
 Definition ipcut_all (A : iformula) := true.
@@ -78,9 +78,9 @@ Proof. intro. reflexivity. Qed.
 
 Lemma cutupd_ipfrag_true P : le_ipfrag P (cutupd_ipfrag P ipcut_all).
 Proof.
-repeat split; try reflexivity.
-- intro. apply BoolOrder.le_true.
-- intros a. exists a. reflexivity.
+repeat split; try reflexivity; intro a.
+- apply BoolOrder.le_true.
+- exists a. reflexivity.
 Qed.
 
 Lemma cutrm_ipfrag_le P : le_ipfrag (cutrm_ipfrag P) P.
@@ -222,7 +222,7 @@ Qed.
 
 (** Generalized weakening for lists *)
 Lemma wk_list_ilr P l l1 l2 C : ill P (l1 ++ l2) C -> ill P (l1 ++ map ioc l ++ l2) C.
-Proof. induction l in l1, l2, C |- *; intros pi; try assumption. apply wk_ilr, IHl, pi. Qed.
+Proof. induction l in l1, l2, C |- *; intro pi; [ assumption | apply wk_ilr, IHl, pi ]. Qed.
 
 (** Generalized contraction for lists *)
 Lemma co_list_ilr P l l1 l2 C : ill P (l1 ++ map ioc l ++ map ioc l ++ l2) C -> ill P (l1 ++ map ioc l ++ l2) C.

@@ -8,8 +8,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_fin atom preiatom }.
-
+Context {atom : InfDecType} {preiatom : DecType} {Atoms : IAtom2AtomType_fin atom preiatom}.
 Notation iatom := (option preiatom).
 Notation formula := (@formula atom).
 Notation iformula := (@iformula preiatom).
@@ -43,9 +42,9 @@ Proof. induction l as [ | a l IHl ]; [ | list_simpl; cbn in IHl; rewrite IHl ]; 
 Lemma ill2ll_map_ioc_inv l1 l2 : map wn l1 = map dual (map ill2ll l2) ->
   { l2' | l2 = map ioc l2' & l1 = map dual (map ill2ll l2') }.
 Proof.
-induction l2 in l1 |- *; intros Heq; destruct l1; inversion Heq as [[Heq' Heq'']].
+induction l2 as [|a l2 IHl2] in l1 |- *; intros Heq; destruct l1; inversion Heq as [[Heq' Heq'']].
 - exists nil; reflexivity.
-- destruct a; inversion Heq'.
+- destruct a; inversion_clear Heq'.
   apply IHl2 in Heq'' as [l0 -> ->].
   exists (a :: l0); reflexivity.
 Qed.
@@ -503,7 +502,7 @@ Qed.
 
 (** ** Non conservativity of [ll] over [ill]. *)
 
-Fact no_at_prove_ill x : notT (@ill_ll preiatom nil (ivar x)).
+Fact no_at_prove_ill (x : iatom) : notT (ill_ll nil (ivar x)).
 Proof.
 intros pi.
 remember (ivar x) as C eqn:HeqC. remember nil as l eqn:Heql.
@@ -512,16 +511,14 @@ induction pi in Heql, HeqC |- *; subst;
   try now (destruct l1; discriminate Heql).
 - symmetry in p.
   apply PEPermutation_Type_nil in p. now apply IHpi.
-- apply app_eq_nil in Heql as [-> Heql].
-  apply app_eq_nil in Heql as [Heql ->].
-  destruct lw'; inversion Heql; subst.
-  symmetry in p. apply Permutation_Type_nil in p as ->. now apply IHpi.
-- destruct l1; destruct l0; discriminate Heql.
-- destruct l; discriminate Heql.
+- apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
+  symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
+- apply app_eq_nil in Heql as [_ [_ [=]]%app_eq_nil].
+- apply app_eq_nil in Heql as [_ [=]].
 - destruct a.
 Qed.
 
-Fact no_biat_prove_ill x y : @ill_ll preiatom (ivar x :: nil) (ivar y) -> x = y.
+Fact no_biat_prove_ill (x y : iatom) : ill_ll (ivar x :: nil) (ivar y) -> x = y.
 Proof.
 intros pi.
 remember (ivar y) as C eqn:HeqC. remember (ivar x :: nil) as l eqn:Heql.
@@ -535,28 +532,22 @@ induction pi in Heql, HeqC |- *; subst;
   + destruct lw'; inversion H0.
     cbn in H. subst.
     symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
-  + apply app_eq_nil in H1 as [-> [Heq ->]%app_eq_nil].
-    destruct lw'; inversion Heq.
+  + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
     symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
-- destruct l1; destruct l0; inversion Heql;
-    try destruct l0; try destruct l1; discriminate Heql.
+- destruct l1 as [|? l1], l0 as [|? l0]; inversion Heql; try destruct l0; try destruct l1; discriminate Heql.
 - destruct l; inversion Heql; destruct l; discriminate.
 Qed.
 
-Fact no_biat_map_prove_ill x y : @ill_ll preiatom nil (ilpam (ivar x) (ivar y)) -> x = y.
-Proof.
-intros pi%ilpam_rev_noax; [ | intros Hax; inversion Hax ].
-apply no_biat_prove_ill. assumption.
-Qed.
+Fact no_biat_map_prove_ill (x y : iatom) : ill_ll nil (ilpam (ivar x) (ivar y)) -> x = y.
+Proof. intros pi%ilpam_rev_noax; [ | intros []]. apply no_biat_prove_ill, pi. Qed.
 
 Section Non_Conservativity_Atoms.
 
 Variable x y z : iatom.
 
 (** Counter example from Harold Schellinx *)
-Notation cons_counter_ex :=
-  (ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
-        (itens (ivar x) (ilpam izero (ivar z)))).
+Notation cons_counter_ex := (ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
+                                   (itens (ivar x) (ilpam izero (ivar z)))).
 
 Lemma counter_ll_prove : ll_ll (ill2ll cons_counter_ex :: nil).
 Proof.
@@ -587,16 +578,14 @@ induction pi in Heql, HeqC |- *; subst;
   + destruct lw'; inversion H0.
     cbn in H. subst.
     symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
-  + apply app_eq_nil in H1 as [-> [Heq ->]%app_eq_nil].
-    destruct lw'; inversion Heq.
+  + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
     symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
 - destruct l1; inversion Heql; try rewrite app_nil_l in Heql; subst.
   + apply app_eq_nil in H2 as [-> ->].
     apply no_biat_map_prove_ill. assumption.
-  + destruct l1; discriminate H1.
+  + apply app_eq_nil in H1 as [_ [=]].
 - destruct l1 as [|? l1], l0 as [|? l0]; inversion Heql; try destruct l0; try destruct l1; discriminate.
-- destruct l; inversion Heql. subst.
-  destruct l; discriminate.
+- destruct l; inversion Heql. destruct l; discriminate.
 - destruct a.
 Qed.
 
@@ -626,7 +615,7 @@ induction pi in Heql, HeqC |- *; subst;
   + apply app_eq_nil in H2 as [-> ->].
     apply (no_biat_map_prove_ill pi1).
   + destruct l1; discriminate H1.
-- destruct l1, l0; inversion Heql; try destruct l0; try destruct l1; discriminate.
+- destruct l1 as [|? l1], l0 as [|? l0]; inversion Heql; try destruct l0; try destruct l1; discriminate.
 - destruct a.
 Qed.
 
@@ -637,8 +626,7 @@ End Non_Conservativity_Atoms.
 
 
 (** Counter example from Jui-Hsuan Wu *)
-Notation cons_counter_ex_atfree :=
- (ilpam (ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero) ione).
+Notation cons_counter_ex_atfree := (ilpam (ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero) ione).
 
 Lemma counter_atfree_ll_prove : ll_ll (ill2ll cons_counter_ex_atfree :: nil).
 Proof.
@@ -721,17 +709,17 @@ induction pi in Heql, HeqC |- *; subst;
                --- destruct a.
             ** destruct l1; discriminate.
          ++ destruct l1; inversion Heql.
-            ** destruct l0; inversion H0. destruct l0; discriminate.
+            ** destruct l0 as [|? l0]; inversion H0. destruct l0; discriminate.
             ** destruct l1, l0; discriminate.
          ++ destruct a.
       -- destruct l1; discriminate.
     * destruct l1; inversion Heql.
-      -- destruct l0; inversion H0. destruct l0; discriminate.
+      -- destruct l0 as [|? l0]; inversion H0. destruct l0; discriminate.
       -- destruct l1, l0; discriminate.
     * destruct a.
   + destruct l1; discriminate.
 - destruct l1; inversion Heql.
-  + destruct l0; inversion H0. destruct l0; discriminate.
+  + destruct l0 as [|? l0]; inversion H0. destruct l0; discriminate.
   + destruct l1, l0; discriminate.
 - destruct a.
 Qed.
@@ -745,11 +733,7 @@ Section Conservativity_Atoms.
 
 (** Embedding of [IAtom] into [Atom] *)
 
-Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_retract atom preiatom }.
-
-(*
-Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_inj atom preiatom }.
-*)
+Context {atom : InfDecType} {preiatom : DecType} {Atoms : IAtom2AtomType_retract atom preiatom}.
 Notation formula := (@formula atom).
 Notation iformula := (@iformula preiatom).
 Notation i2a := IAtom2Atom_retract_base.
@@ -757,11 +741,11 @@ Notation i2a_inj := (section_injective IAtom2Atom_retract).
 
 (** *** Comparisons between [ll] connectives and [ill] *)
 
-Lemma wn_not_idefin A F : ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (oc F :: ill2ll A :: nil) -> False.
+Lemma wn_not_idefin A F : notT (ll_mix0 (dual (ill2ll A) :: nil) * ll_mix0 (oc F :: ill2ll A :: nil)).
 Proof.
 cut (forall l2, ll_mix0 (dual (ill2ll A) :: nil) ->
   Permutation_Type (oc F :: ill2ll A :: nil) l2 -> notT (ll_mix0 l2)).
-{ intros H pi1 pi2. eapply H; [ eassumption | reflexivity | eassumption ]. }
+{ intros H [pi1 pi2]. eapply H; [ eassumption | reflexivity | eassumption ]. }
 induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
 - remember (covar (i2a i) :: nil) as l1. revert Heql1. clear - pi1.
   induction pi1; intros Heql1; try (now inversion Heql1); subst.
@@ -962,25 +946,25 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
   + apply Permutation_Type_length_2_inv in HP2 as [ | ]; inversion e; destruct l; discriminate H1.
 Qed.
 
-Lemma bot_not_idefin A : ll_mix0 (dual (ill2ll A) :: nil) -> ll_mix0 (one :: ill2ll A :: nil) -> False.
+Lemma bot_not_idefin A : notT (ll_mix0 (dual (ill2ll A) :: nil) * ll_mix0 (one :: ill2ll A :: nil)).
 Proof.
-intros pi1 pi2.
+intros [pi1 pi2].
 eapply cut_mix0_r in pi2.
 - list_simpl in pi2.
   eapply ex_r in pi2; [ | apply Permutation_Type_swap ].
-  eapply wn_not_idefin; eassumption.
+  eapply wn_not_idefin. split; eassumption.
 - apply bot_r.
   change nil with (map (@wn atom) nil).
   apply oc_r, one_r.
 Qed.
 
 Lemma wn_one_not_idefin A :
-  ll_mix0 (wn one :: dual (ill2ll A) :: nil) -> ll_mix0 (oc bot :: ill2ll A :: nil) -> False.
+  notT (ll_mix0 (wn one :: dual (ill2ll A) :: nil) * ll_mix0 (oc bot :: ill2ll A :: nil)).
 Proof.
-intros pi1 pi2.
+intros [pi1 pi2].
 eapply cut_mix0_r in pi1.
 - list_simpl in pi1.
-  eapply wn_not_idefin; eassumption.
+  eapply wn_not_idefin. split; eassumption.
 - change nil with (map (@wn atom) nil).
   apply oc_r, bot_r.
   change (map wn nil) with (concat (@nil (list formula))).
@@ -988,12 +972,12 @@ eapply cut_mix0_r in pi1.
 Qed.
 
 Lemma oc_bot_not_idefin A :
-  ll_ll (oc bot :: dual (ill2ll A) :: nil) -> ll_mix0 (wn one :: ill2ll A :: nil) -> False.
+  notT (ll_ll (oc bot :: dual (ill2ll A) :: nil) * ll_mix0 (wn one :: ill2ll A :: nil)).
 Proof.
 enough (forall l, ll_ll (map dual (map ill2ll l)) ->
           (Forall_inf (fun F => ll_mix0 (ill2ll F :: nil)) l) -> False)
   as Hgen.
-{ intros pi1 pi2.
+{ intros [pi1 pi2].
   eapply cut_ll_r in pi1.
   eapply cut_mix0_r in pi2.
   - change (dual (ill2ll A) :: nil)
@@ -1194,18 +1178,15 @@ Inductive zeropos : iformula -> Type :=
 
 Lemma zeropos_ilr P D : zeropos D -> forall l1 l2 C, ill P (l1 ++ D :: l2) C.
 Proof.
-intros Hzp; induction Hzp; intros l1 l2 C; try now constructor.
-apply tens_ilr.
-cons2app; rewrite app_assoc; apply IHHzp.
+intros Hzp. induction Hzp; intros l1 l2 C; try now constructor.
+apply tens_ilr. cons2app. rewrite app_assoc. apply IHHzp.
 Qed.
 
 Lemma ill2ll_zeropos C D : zeropos C -> ill2ll C = ill2ll D -> zeropos D.
 Proof.
-intros Hz; revert D; induction Hz; intros D Heq; destruct D; inversion Heq;
+intros Hz. induction Hz in D |- *; intros Heq; destruct D; inversion Heq;
   try apply IHHz in H0; try apply IHHz in H1; try now constructor.
-constructor.
-- apply IHHz1 in H0; assumption.
-- apply IHHz2 in H1; assumption.
+constructor; [ exact (IHHz1 _ H0) | exact (IHHz2 _ H1) ].
 Qed.
 
 Inductive nonzerospos : iformula -> Type :=

@@ -1,5 +1,4 @@
-(** * Intuitionistic Linear Logic *)
-(* Atomic cut admissibility *)
+(** * Atomic cut admissibility for Intuitionistic Linear Logic *)
 
 From OLlibs Require Import dectype List_more GPermutation_Type.
 From Yalla Require Export ill_def.
@@ -9,8 +8,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { preiatom : DecType }.
-Context { P : @ipfrag preiatom }.
+Context {preiatom : DecType} {P : @ipfrag preiatom}.
 Hypothesis P_gax_noN_l : noN_iax P.
 Variable X : option preiatom.
 Hypothesis P_gax_cut : forall b l1 l2,

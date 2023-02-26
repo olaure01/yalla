@@ -8,7 +8,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : DecType }.
+Context {atom : DecType}.
 Notation formula := (@formula atom).
 
 Definition ateq := @eqb atom.
@@ -193,7 +193,7 @@ End Atoms.
 
 Section InfAtoms.
 
-Context { atom : InfDecType }.
+Context {atom : InfDecType}.
 Notation formula := (@formula atom).
 
 (** Provide an [Atom] which is fresh for [A] *)
@@ -219,9 +219,8 @@ Definition fresh_of_list (l : list formula) := fresh (flat_map atom_list l).
 Lemma subs_fresh_list_incl C lat (l : list formula) :
   incl (flat_map atom_list l) lat -> map (subs C (fresh lat)) l = l.
 Proof.
-induction l as [|a l IHl]; cbn; intros Hincl; [ reflexivity | ].
-apply incl_app_inv in Hincl.
-now rewrite subs_fresh_incl; [ rewrite IHl | ].
+induction l as [|a l IHl]; cbn; [ reflexivity | intros Hincl%incl_app_inv ].
+now rewrite subs_fresh_incl, IHl.
 Qed.
 
 Lemma subs_fresh_list C l : map (subs C (fresh_of_list l)) l = l.

@@ -1,5 +1,3 @@
-(* ll_cut_at library for yalla *)
-
 (** * Cut admissibility for atomic cut-formula for [ll] *)
 
 From Coq Require Import Wf_nat Lia.

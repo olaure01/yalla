@@ -1,5 +1,3 @@
-(* llpol example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: polarized linear logic LLpol *)
 
 From Coq Require Import CMorphisms.
@@ -183,7 +181,7 @@ Proof. intros l1 l2 HP pi. eapply ex_r; eassumption. Qed.
 (*
 From Yalla Require ll_prop.
 
-Lemma llpol2ll_dec A : {B | A = llpol2ll B} + (forall B, A = llpol2ll B -> False).
+Lemma llpol2ll_dec A : {B | A = llpol2ll B} + (forall B, A <> llpol2ll B).
 Proof.
 induction A.
 - left; eexists (pos (var _)); reflexivity.
@@ -296,69 +294,69 @@ unfold llpol_fragment in HfA;
 (destruct (llpol2ll_dec A);
   [ destruct s as [A' Heq]; subst;
     unfold llpol_fragment; destruct (llpol2ll_dec (llpol2ll A'));
-    [ | exfalso; eapply f ]
+    [ | now exfalso; eapply n ]
   | ]); try reflexivity.
 - inversion HfA.
 - destruct (llpol2ll_dec (formulas.tens B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p1));
-    [ | exfalso; apply (f0 (pos p1)) ]; reflexivity.
+    [ | exfalso; apply (n0 (pos p1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.tens C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p2));
-    [ | exfalso ; apply (f0 (pos p2)) ]; reflexivity.
+    [ | exfalso ; apply (n0 (pos p2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.parr B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
-  unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n1));
-    [ | exfalso; apply (f0 (neg n1)) ]; reflexivity.
+  unfold llpol_fragment.
+  destruct (llpol2ll_dec (nllpol2ll n0_1)); [ | exfalso; apply (n0 (neg n0_1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.parr C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
-  unfold llpol_fragment ; destruct (llpol2ll_dec (nllpol2ll n2));
-    [ | exfalso ; apply (f0 (neg n2)) ]; reflexivity.
+  unfold llpol_fragment.
+  destruct (llpol2ll_dec (nllpol2ll n0_2)); [ | exfalso ; apply (n0 (neg n0_2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.aplus B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p1));
-    [ | exfalso ; apply (f0 (pos p1)) ]; reflexivity.
+    [ | exfalso ; apply (n0 (pos p1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.aplus C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p2));
-    [ | exfalso; apply (f0 (pos p2)) ]; reflexivity.
+    [ | exfalso; apply (n0 (pos p2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.awith B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
-  unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n1));
-    [ | exfalso; apply (f0 (neg n1)) ]; reflexivity.
+  unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n0_1));
+    [ | exfalso; apply (n0 (neg n0_1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.awith C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
-  unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n2));
-    [ | exfalso; apply (f0 (neg n2)) ]; reflexivity.
+  unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n0_2));
+    [ | exfalso; apply (n0 (neg n0_2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.oc B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
-  unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n));
-    [ | exfalso; apply (f0 (neg n)) ]; reflexivity.
+  unfold llpol_fragment.
+  destruct (llpol2ll_dec (nllpol2ll n0)); [ | exfalso; apply (n1 (neg n0)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.wn B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
-  unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p));
-    [ | exfalso; apply (f0 (pos p)) ]; reflexivity.
+  unfold llpol_fragment.
+  destruct (llpol2ll_dec (pllpol2ll p)); [ | exfalso; apply (n0 (pos p)) ]; reflexivity.
 Qed.
 *)
 

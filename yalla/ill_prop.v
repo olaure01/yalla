@@ -1,7 +1,4 @@
- (* ill_prop library for yalla *)
-
-
-(** * Intuitionistic Linear Logic *)
+(** * Properties of Intuitionistic Linear Logic *)
 (* Properties depending on cut admissibility *)
 
 From Coq Require Import Bool.
@@ -13,7 +10,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { preiatom : DecType }.
+Context {preiatom : DecType}.
 Notation iformula := (@iformula preiatom).
 Notation ill := (@ill preiatom).
 

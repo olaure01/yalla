@@ -1,5 +1,3 @@
-(* nn_def library for yalla *)
-
 (** * Parametric negative translation from [ll] into [ill]. *)
 
 From OLlibs Require Import Datatypes_more funtheory infinite List_more Dependent_Forall_Type

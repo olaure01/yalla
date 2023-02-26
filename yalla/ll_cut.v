@@ -1,5 +1,3 @@
-(* ll_cut library for yalla *)
-
 (** * Cut admissibility for [ll] *)
 
 From Coq Require Import Wf_nat Lia.
@@ -301,10 +299,9 @@ intros Hgax IHcut l' L pi;
 - assert (ll P (l' ++ flat_map (fun '(p1, p2) => wn_n p1 (wn A) :: p2) L)) as pi
     by (rewrite <- Heq; apply gax_r).
   assert (L <> nil -> ll P (oc (dual A) :: map wn lw)) as Hoc.
-  { intros HL; destruct L as [|(p, l) L].
-    - exfalso; apply HL; reflexivity.
-    - cbn in Heq; rewrite wn_n_wn in Heq.
-      eapply (Hgax a); eassumption. }
+  { intros HL. destruct L as [|(p, l) L].
+    - contradiction HL. reflexivity.
+    - cbn in Heq. rewrite wn_n_wn in Heq. eapply (Hgax a). eassumption. }
   assert (Forall_inf (fun '(p,_) => pcut P (wn_n (S p) A) = true) L) as HcutL.
   { clear - Heq Hgax.
     induction L as [| (k, l) L IHL] in l', Heq |- *; constructor; cbn; cbn in Heq.

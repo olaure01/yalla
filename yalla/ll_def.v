@@ -745,9 +745,9 @@ induction pi using ll_nested_ind; intros l1' l2' Heq; subst.
   + rewrite 2 app_assoc; eapply ex_wn_r; [ | eassumption ].
     list_simpl; apply IHpi; list_simpl; reflexivity.
   + dichot_elt_app_inf_exec Heq1; subst.
-    * exfalso; symmetry in Heq0; decomp_map Heq0; inversion Heq0.
-    * list_simpl; eapply ex_wn_r; [ | eassumption ].
-      rewrite 2 app_assoc; apply IHpi; list_simpl; reflexivity.
+    * exfalso. symmetry in Heq0. decomp_map Heq0. inversion Heq0.
+    * list_simpl. eapply ex_wn_r; [ | eassumption ].
+      rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_vs_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
   replace ((concat L1 ++ l1) ++ l0 ++ l2 ++ concat L2) with (concat (L1 ++ (l1 ++ l0 ++ l2) :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
@@ -830,9 +830,9 @@ induction pi using ll_nested_ind; intros l1' l2' Heq; subst.
     eapply ex_wn_r; [ | eassumption ].
     list_simpl; apply IHpi; list_simpl; reflexivity.
   + dichot_elt_app_inf_exec Heq1; subst.
-    * exfalso; symmetry in Heq0; decomp_map Heq0; inversion Heq0.
-    * list_simpl; eapply ex_wn_r; [ | eassumption ].
-      rewrite 2 app_assoc; apply IHpi; list_simpl; reflexivity.
+    * exfalso. symmetry in Heq0. decomp_map Heq0. inversion Heq0.
+    * list_simpl. eapply ex_wn_r; [ | eassumption ].
+      rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_vs_elt in Heq as ((((L1 & L2) & l1) & l2) & eqb & eqt & eq); subst.
   replace ((concat L1 ++ l1) ++ A :: l2 ++ concat L2) with (concat (L1 ++ (l1 ++ A :: l2) :: L2)) ;
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons; rewrite ? app_assoc; reflexivity].

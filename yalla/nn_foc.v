@@ -1,5 +1,3 @@
-(* nn_foc file for yalla library *)
-
 (** * Focusing by Polarized Translation *)
 
 From Coq Require Import CMorphisms.
@@ -224,7 +222,7 @@ assert (forall l1 l2, ill_ll (map (trans N) l1 ++ map tl2ill (map ntrans l2)) N
   list_simpl in pi.
   assert (Ha := ntrans_to_trans a).
   eapply ex_ir in pi ; [ | apply Permutation_Type_middle ].
-  assert (projT1 (@ipgax preiatom ipfrag_ill) -> False) as Hgax by (intros x; destruct x).
+  assert (notT (projT1 (@ipgax preiatom ipfrag_ill))) as Hgax by intros [].
   eapply (cut_ir_axfree Hgax _ _ Ha) in pi.
   list_simpl in pi.
   change (tl2ill (ntrans a) :: map tl2ill (map ntrans l2))
@@ -691,7 +689,7 @@ intros pi; induction pi; intros l0 Heq;
   + apply (@Permutation_Type_middle_polcont atom_inf).
 - polfoccont_cbn.
   destruct (polarity D) as [Hs | Ha].
-  + exfalso; destruct D; inversion H0; inversion Hs.
+  + exfalso. destruct D; inversion H0; inversion Hs.
   + apply IHpi; [ | reflexivity ].
     destruct D; inversion H0; reflexivity.
 - symmetry in Heq; decomp_map_inf Heq; subst.

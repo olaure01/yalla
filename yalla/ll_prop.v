@@ -10,7 +10,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : DecType }.
+Context {atom : DecType}.
 Notation formula := (@formula atom).
 Notation ll := (@ll atom).
 

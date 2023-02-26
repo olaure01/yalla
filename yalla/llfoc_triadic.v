@@ -483,9 +483,9 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
   assert (Hs := (inl : _ -> Foc _) (sync_focus_F pi)).
   assert (HF := wFoc_context pi).
   assert (is_wn A = false) as Hwn
-    by now destruct (wn_spec A); [ exfalso; apply (Foc_not_wn Hs) | ].
-  cbn in Hp1; rewrite Hwn in Hp1.
-  remember (partition is_wn l) as p; destruct p as [p1 p2].
+    by now destruct (wn_spec A) as [Hw | Hnw]; [ exfalso; apply (Foc_not_wn (Hs, Hw)) | ].
+  cbn in Hp1. rewrite Hwn in Hp1.
+  remember (partition is_wn l) as p. destruct p as [p1 p2].
   assert (Forall_inf Foc p2) as Hlsa.
   { apply (Forall_inf_arrow _ (fun A => (uncurry (@wFoc_not_wn_Foc _ A)))).
     apply Forall_inf_prod.

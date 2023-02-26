@@ -1,6 +1,3 @@
-(* nn_prop library for yalla *)
-
-
 (** * Parametric negative translation from [ll] into [ill]. *)
 (** Properties relying on cut admissibility *)
 

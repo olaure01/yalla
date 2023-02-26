@@ -32,8 +32,8 @@ Inductive aformula : formula -> Type :=
 Lemma polarity A : sformula A + aformula A.
 Proof. destruct A; (left + right; constructor). Defined.
 
-Lemma disj_polarity A : sformula A -> aformula A -> False.
-Proof. destruct A; intros Hp Hn; inversion Hp; inversion Hn. Qed.
+Lemma disj_polarity A : notT (sformula A * aformula A).
+Proof. destruct A; intros [Hp Hn]; inversion Hp; inversion Hn. Qed.
 
 Lemma sformula_dual A : sformula (dual A) -> aformula A.
 Proof. intros Hp. destruct A; inversion Hp; constructor. Qed.
@@ -52,8 +52,8 @@ Definition is_Foc (A : formula) :=
 Lemma Foc_spec A : reflectT (Foc A) (is_Foc A).
 Proof. destruct A; cbn; constructor; try (now repeat constructor); intros [H|H]; inversion H. Qed.
 
-Lemma Foc_not_wn A : Foc A -> wn_formula A -> False.
-Proof. intros [Hf|Hf] Hwn; inversion Hwn; subst; inversion Hf. Qed.
+Lemma Foc_not_wn A : notT (Foc A * wn_formula A).
+Proof. intros [[Hf|Hf] Hwn]; inversion Hwn; subst; inversion Hf. Qed.
 
 Definition wFoc x := (Foc x + wn_formula x)%type.
 
@@ -169,22 +169,22 @@ end.
 Lemma polconts A l : sformula A -> polcont l A = l.
 Proof.
 intros. unfold polcont. destruct (polarity A); [ reflexivity | ].
-exfalso. eapply disj_polarity; eassumption.
+exfalso. eapply disj_polarity. split; eassumption.
 Qed.
 Lemma polconta A l : aformula A -> polcont l A = A :: l.
 Proof.
 intros. unfold polcont. destruct (polarity A); [ | reflexivity ].
-exfalso. eapply disj_polarity; eassumption.
+exfalso. eapply disj_polarity. split; eassumption.
 Qed.
 Lemma polfocs A : sformula A -> polfoc A = Some A.
 Proof.
 intros. unfold polfoc. destruct (polarity A); [ reflexivity | ].
-exfalso. eapply disj_polarity; eassumption.
+exfalso. eapply disj_polarity. split; eassumption.
 Qed.
 Lemma polfoca A : aformula A -> polfoc A = None.
 Proof.
 intros. unfold polfoc. destruct (polarity A); [ | reflexivity ].
-exfalso. eapply disj_polarity; eassumption.
+exfalso. eapply disj_polarity. split; eassumption.
 Qed.
 
 Ltac pol_simpl :=
@@ -1103,7 +1103,7 @@ Theorem llfoc_to_llFoc s l Pi (pi : llfoc l Pi) : fpsize pi < s ->
        { l' & { lw1 & { lw2 & prod (Permutation_Type l (map wn lw1 ++ l'))
                              (prod (incl_inf lw2 lw1)
                                    (llFoc (map wn lw2 ++ l') (Some C))) }}})
- * (forall C, Pi = Some C -> (Forall_inf wFoc l -> False) ->
+ * (forall C, Pi = Some C -> notT (Forall_inf wFoc l) ->
       (llFoc (C :: l) None) * llFoc (wn C :: l) None).
 Proof.
   revert l Pi pi; induction s using lt_wf_rect;
@@ -1559,9 +1559,9 @@ Proof.
                    +++ intros ? [].
                --- pol_simpl. exact (wFoc_context pi2').
                --- pol_simpl. exact (wFoc_context pi1').
-         ++ assert (Forall_inf wFoc (l1 ++ C' :: l2) -> False) as HF2.
+         ++ assert (notT (Forall_inf wFoc (l1 ++ C' :: l2))) as HF2.
             { intros HF0; apply Forall_inf_app_r in HF0; inversion HF0; subst.
-              apply HnFC; assumption. }
+              apply HnFC. assumption. }
             eapply (snd Hs2') in HF2; [ | reflexivity ].
             destruct HF2 as [pi2' pi2'']; split.
             ** eapply ex_Fr; [ apply with_Fr | ].
@@ -1597,9 +1597,9 @@ Proof.
                --- eapply ex_Fr; [ apply pi2'' | ].
                    rewrite app_comm_cons. symmetry. apply Permutation_Type_middle.
                --- rewrite (app_comm_cons _ _ (wn C)). apply Permutation_Type_middle.
-      -- assert (Forall_inf wFoc (l1 ++ B' :: l2) -> False) as HF1.
+      -- assert (notT (Forall_inf wFoc (l1 ++ B' :: l2))) as HF1.
          { intros HF0; apply Forall_inf_app_r in HF0; inversion HF0; subst.
-           apply HnFB; assumption. }
+           apply HnFB. assumption. }
          eapply (snd Hs1') in HF1; [ | reflexivity ].
          destruct HF1 as [pi1' pi1''].
          destruct (wFoc_dec C') as [HFC | HnFC].
@@ -1637,9 +1637,9 @@ Proof.
                        *** rewrite (app_comm_cons _ (awith _ _ :: _) (wn C)). apply Permutation_Type_middle.
                    +++ apply Permutation_Type_middle.
                --- pol_simpl. exact (wFoc_context pi2').
-         ++ assert (Forall_inf wFoc (l1 ++ C' :: l2) -> False) as HF2.
+         ++ assert (notT (Forall_inf wFoc (l1 ++ C' :: l2))) as HF2.
             { intros HF0; apply Forall_inf_app_r in HF0; inversion HF0; subst.
-              apply HnFC; assumption. }
+              apply HnFC. assumption. }
             eapply (snd Hs2') in HF2; [ | reflexivity ].
             destruct HF2 as [pi2' pi2'']; split.
             ** eapply ex_Fr; [ apply with_Fr | ].
@@ -1654,20 +1654,18 @@ Proof.
                --- eapply ex_Fr; [ apply pi2'' | ].
                    rewrite app_comm_cons. symmetry. apply Permutation_Type_middle.
                --- rewrite (app_comm_cons _ _ (wn C)). apply Permutation_Type_middle.
-    * assert (Forall_inf wFoc (l1 ++ B' :: l2) -> False) as HF1.
+    * assert (notT (Forall_inf wFoc (l1 ++ B' :: l2))) as HF1.
       { intros HF0.
         assert (HF'1 := Forall_inf_app_l _ _ HF0).
         assert (HF'2 := Forall_inf_app_r _ _ HF0).
         inversion HF'2.
-        apply HnF.
-        apply Forall_inf_app; assumption. }
-      assert (Forall_inf wFoc (l1 ++ C' :: l2) -> False) as HF2.
+        apply HnF. apply Forall_inf_app; assumption. }
+      assert (notT (Forall_inf wFoc (l1 ++ C' :: l2))) as HF2.
       { intros HF0.
         assert (HF'1 := Forall_inf_app_l _ _ HF0).
         assert (HF'2 := Forall_inf_app_r _ _ HF0).
         inversion HF'2.
-        apply HnF.
-        apply Forall_inf_app; assumption. }
+        apply HnF. apply Forall_inf_app; assumption. }
       eapply (snd Hs1') in HF1; [ | reflexivity ].
       destruct HF1 as [pi1' pi1''].
       eapply (snd Hs2') in HF2; [ | reflexivity ].
@@ -1766,7 +1764,7 @@ induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
   + rewrite app_comm_cons, 2 app_assoc, <- (app_assoc _ _ l); apply tens_Fr; auto.
     * unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi1 A0);
         auto; unfold polcont; destruct (polarity A); auto;
-        exfalso; eapply disj_polarity; eassumption.
+        exfalso; eapply disj_polarity; split; eassumption.
     * apply Forall_inf_app.
       -- apply (Forall_inf_app_l _ _ f).
       -- apply Forall_inf_app; auto.
@@ -1774,7 +1772,7 @@ induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
   + rewrite <- app_assoc; apply tens_Fr; auto.
     * unfold polcont; destruct (polarity B); [ | rewrite app_comm_cons ]; apply (IHpi2 A0);
       auto; unfold polcont; destruct (polarity B); auto;
-      exfalso; eapply disj_polarity; eassumption.
+      exfalso; eapply disj_polarity; split; eassumption.
     * apply Forall_inf_app.
       -- apply (Forall_inf_app_l _ _ f0).
       -- rewrite app_comm_cons; apply Forall_inf_app; auto.
@@ -1786,7 +1784,7 @@ induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
 - apply plus_Fr1.
   + unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi A0);
       auto; unfold polcont; destruct (polarity A); auto;
-      exfalso; eapply disj_polarity; eassumption.
+      exfalso; eapply disj_polarity; split; eassumption.
   + apply Forall_inf_app.
     * apply (Forall_inf_app_l _ _ f).
     * rewrite app_comm_cons; apply Forall_inf_app; auto.
@@ -1794,7 +1792,7 @@ induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
 - apply plus_Fr2.
   + unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi A0);
       auto; unfold polcont; destruct (polarity A); auto;
-      exfalso; eapply disj_polarity; eassumption.
+      exfalso; eapply disj_polarity; split; eassumption.
   + apply Forall_inf_app.
     * apply (Forall_inf_app_l _ _ f).
     * rewrite app_comm_cons; apply Forall_inf_app; auto.
@@ -1806,7 +1804,7 @@ induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
   cbn; apply de_Fr.
   + unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi A0);
       auto; unfold polcont; destruct (polarity A); auto;
-      exfalso; eapply disj_polarity; eassumption.
+      exfalso; eapply disj_polarity; split; eassumption.
   + apply Forall_inf_app; [ apply Forall_inf_app_l in f | apply Forall_inf_app_r in f ]; auto.
     inversion f; inversion HF; constructor; [ | apply Forall_inf_app ]; auto.
 - destruct l1'; inversion Heql; subst; [ exfalso; inversion Hs | ].

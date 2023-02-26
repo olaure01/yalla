@@ -1,6 +1,3 @@
-(* ll_fragments library for yalla *)
-
-
 (** * Definitions of various Linear Logic fragments *)
 
 From Coq Require Import PeanoNat Lia.
@@ -331,8 +328,8 @@ Qed.
 Lemma mix_2_to_mix_k_r P : P.(pmix) 2 = true ->
   forall L, 2 <= length L -> Forall_inf (ll P) L -> ll P (concat L).
 Proof.
-intro Hpmix; induction L; intros H FL.
-- exfalso; inversion H.
+intro Hpmix. induction L; intros H FL.
+- exfalso. inversion H.
 - destruct L; [ | destruct L ].
   + exfalso; inversion H; inversion H1.
   + apply mix_r; assumption.

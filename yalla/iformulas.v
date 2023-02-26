@@ -9,7 +9,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { preiatom : DecType }.
+Context {preiatom : DecType}.
 
 (** ** Definition and main properties of formulas *)
 
@@ -85,9 +85,9 @@ Inductive isubform : iformula -> iformula -> Prop :=
 
 Lemma isub_trans A B C : isubform A B -> isubform B C -> isubform A C.
 Proof.
-intros Hl Hr. induction Hr in A, Hl |- * ; try (constructor; apply IHHr); try assumption.
-- inversion_clear Hl. apply isub_gen_N.
-- inversion_clear Hl. apply isub_neg_N.
+intros Hl Hr. induction Hr in A, Hl |- * ; try (constructor; apply IHHr); try assumption; inversion_clear Hl.
+- apply isub_gen_N.
+- apply isub_neg_N.
 Qed.
 
 #[export] Instance isub_po : PreOrder isubform | 50.
@@ -178,6 +178,5 @@ Definition iformulas_dectype := {|
   car := iformula;
   eqb := eqb_iform;
   eqb_eq := eqb_eq_iform |}.
-
 
 End Atoms.

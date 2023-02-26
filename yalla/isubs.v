@@ -8,8 +8,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { preiatom : InfDecType }.
-
+Context {preiatom : InfDecType}.
 Notation atN := (@atN preiatom).
 Definition iateq := @eqb (option_dectype preiatom).
 Definition iateq_eq := @eqb_eq (option_dectype preiatom).
@@ -25,8 +24,8 @@ Proof. intros ->. unfold repl_iat. rewrite (proj2 (iateq_eq _ _) (eq_refl _)). r
 Lemma repl_iat_neq x y A : x <> y -> repl_iat x y A = ivar x.
 Proof.
 intros Hneq. unfold repl_iat.
-destruct (iateq x y) eqn:Heqb; [ | reflexivity ].
-exfalso. rewrite iateq_eq in Heqb. contradiction Heqb.
+destruct (iateq x y) eqn:Heqb; [ exfalso | reflexivity ].
+rewrite iateq_eq in Heqb. contradiction Heqb.
 Qed.
 
 (** Substitution in [iformula]: substitutes [x] by [C] in [A] *)
@@ -129,12 +128,11 @@ Definition ifresh_of_list l := @fresh (option_infdectype preiatom) (flat_map iat
 Lemma subs_ifresh_list_incl C lat l :
   incl (flat_map iatom_list l) lat -> map (isubs C (@fresh (option_infdectype preiatom) lat)) l = l.
 Proof.
-induction l; cbn; intros Hincl; auto.
-apply incl_app_inv in Hincl.
+induction l as [|a l IHl]; [ reflexivity | cbn; intros Hincl%incl_app_inv ].
 change (proj1_sig (nat_injective_choice (option_dectype preiatom)
                   (nat_injective_option infinite_nat_injective)) lat)
   with (@fresh (option_infdectype preiatom) lat).
-now rewrite subs_ifresh_incl; [ rewrite IHl | ].
+now rewrite subs_ifresh_incl, IHl.
 Qed.
 
 Lemma subs_ifresh_list C l : map (isubs C (ifresh_of_list l)) l = l.

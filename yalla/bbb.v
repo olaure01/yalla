@@ -1,6 +1,3 @@
-(* bbb library for yalla *)
-
-
 (** * Study of Linear Logic enriched with [bot = oc bot] *)
 
 From OLlibs Require Import infinite List_more Permutation_Type_more Dependent_Forall_Type.
@@ -46,8 +43,7 @@ Proof.
 induction l in l' |- *; intros; [ assumption | ].
 apply (ex_bbb_r (map wn l ++ wn a :: l')); [ | symmetry; apply Permutation_Type_middle ].
 apply IHl.
-apply (ex_bbb_r (wn a :: map wn l ++ map wn l ++ l'));
-  [ | rewrite ? app_assoc; apply Permutation_Type_middle ].
+apply (ex_bbb_r (wn a :: map wn l ++ map wn l ++ l')); [ | rewrite ? app_assoc; apply Permutation_Type_middle ].
 apply co_bbb_r.
 eapply ex_bbb_r; [ eassumption | ].
 apply Permutation_Type_cons; [ reflexivity | ].
@@ -55,41 +51,30 @@ symmetry. apply Permutation_Type_middle.
 Qed.
 
 (** Reversibility of [bot] in [ll_bbb] *)
-Lemma bot_rev_bbb l : ll_bbb l ->
-  forall l1 l2, l = l1 ++ bot :: l2 -> ll_bbb (l1 ++ l2).
+Lemma bot_rev_bbb l : ll_bbb l -> forall l1 l2, l = l1 ++ bot :: l2 -> ll_bbb (l1 ++ l2).
 Proof.
 intros pi. induction pi; intros l1' l2' Heq; subst;
   try (destruct l1'; inversion Heq; subst;
        list_simpl; constructor;
        rewrite ? app_comm_cons; apply IHpi; reflexivity).
-- exfalso.
-  destruct l1'; inversion Heq.
-  destruct l1'; inversion H1.
-  destruct l1'; discriminate.
-- assert (HP := p).
-  apply Permutation_Type_vs_elt_inv in p as [(l3, l4) ->].
-  apply Permutation_Type_app_inv in HP.
-  eapply ex_bbb_r; [ | apply HP ].
+- exfalso. destruct l1' as [|? [|? [|? l1']]]; discriminate Heq.
+- destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l3, l4) ->].
+  apply Permutation_Type_app_inv in p.
+  eapply ex_bbb_r, p.
   apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc. apply mix2_bbb_r; [ assumption | ].
-    apply bot_rev; [ | assumption ].
-    intros [].
+    apply bot_rev; [ intros [] | assumption ].
   + rewrite <- app_assoc. apply mix2_bbb_r; [ | assumption ].
     apply IHpi. reflexivity.
-- exfalso.
-  destruct l1'; inversion Heq.
-  destruct l1'; discriminate.
+- exfalso. destruct l1' as [|? [|? [|? l1']]]; discriminate Heq.
 - destruct l1'; inversion Heq ; subst; [ assumption | ].
-  list_simpl. apply bot_bbb_r.
-  apply IHpi. reflexivity.
+  list_simpl. apply bot_bbb_r, IHpi. reflexivity.
 - rewrite app_comm_cons in Heq. dichot_elt_app_inf_exec Heq; subst.
   + destruct l1'; inversion Heq0; subst.
-    list_simpl.
-    rewrite app_assoc. apply tens_bbb_r; [ assumption | ].
+    list_simpl. rewrite app_assoc. apply tens_bbb_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
-  + list_simpl.
-    apply tens_bbb_r; [ | assumption ].
+  + list_simpl. apply tens_bbb_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
 - destruct l1'; inversion Heq; subst.
   list_simpl. apply with_bbb_r; rewrite app_comm_cons; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
@@ -513,8 +498,7 @@ intros pi1 pi2.
 assert (forall C, pcut (pfrag_llR (oc bot : formula)) C = true) as Hcut by reflexivity.
 apply (cut_r one (Hcut _)).
 - apply bot_r. assumption.
-- cons2app.
-  apply (cut_r (oc bot) (Hcut _)).
+- cons2app. apply (cut_r (oc bot) (Hcut _)).
   + apply wk_r. assumption.
   + apply (@gax_r _ (pfrag_llR (oc bot)) false).
 Qed.
@@ -564,23 +548,19 @@ change (one :: oc (parr one one) :: nil)
 apply mix2_bbb_r.
 - change nil with (map wn nil : list formula).
   apply oc_bbb_r, parr_bbb_r.
-  cbn.
-  change (one :: one :: nil) with ((one :: nil) ++ one :: nil : list formula).
-  apply mix2_bbb_r.
-  + apply one_bbb_r.
-  + apply one_r.
+  cbn. change (one :: one :: nil) with ((one :: nil) ++ one :: nil : list formula).
+  apply mix2_bbb_r; [ apply one_bbb_r | apply one_r ].
 - apply one_r.
 Qed.
 
 Goal llR (oc bot) (one :: oc (parr one one) :: nil).
 Proof.
-assert (llR (oc bot) ((one :: nil) ++ one :: nil))
-  as Hr by (eapply mix2_bb_r; apply one_r).
+assert (llR (oc bot) ((one :: nil) ++ one :: nil)) as Hr by (eapply mix2_bb_r; apply one_r).
 change (one :: oc (parr one one) :: nil)
   with ((one :: nil) ++ oc (parr one one) :: nil : list formula).
 apply mix2_bb_r.
 - change nil with (map wn nil : list formula).
-  apply oc_r, parr_r; assumption.
+  apply oc_r, parr_r. assumption.
 - apply one_r.
 Qed.
 *)
@@ -589,16 +569,15 @@ Example bbb_ex : ll_bbb (one :: oc (tens (parr one one) bot) :: nil).
 Proof.
 change (one :: oc (tens (parr one one) bot) :: nil)
   with ((@one atom :: nil) ++ (oc (tens (parr one one) bot) :: nil)).
-apply (ex_bbb_r ((oc (tens (parr one one) bot) :: nil) ++ one :: nil));
-  [ | apply Permutation_Type_swap ].
+apply (ex_bbb_r ((oc (tens (parr one one) bot) :: nil) ++ one :: nil)); [ | apply Permutation_Type_swap ].
 apply mix2_bbb_r.
 - apply one_bbb_r.
 - change (oc (tens (parr one one) bot) :: nil)
     with (@oc atom (tens (parr one one) bot) :: map wn (nil ++ nil)).
   apply oc_r.
   rewrite map_app. apply tens_r.
-  + apply parr_r. cbn.
-    change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
+  + apply parr_r.
+    cbn. change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r; [ reflexivity | ].
     repeat constructor.
   + apply bot_r.
@@ -609,10 +588,8 @@ Qed.
 Example bb_ex : llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
 Proof.
 assert (Hax := @gax_r _ (@pfrag_llR atom (oc bot)) false); cbn in Hax.
-assert (llR (oc bot) ((one :: nil) ++ one :: nil))
-  as Hr by (eapply mix2_bb_r ; apply one_r).
-eapply (@cut_r _ (pfrag_llR _)) in Hax.
-- apply Hax.
+assert (llR (oc bot) ((one :: nil) ++ one :: nil)) as Hr by (eapply mix2_bb_r; apply one_r).
+refine (cut_r _ _ _ Hax).
 - reflexivity.
 - eapply ex_r; [ | apply Permutation_Type_swap ].
   cbn. change (wn one :: nil) with (map (@wn atom) (one :: nil)).
@@ -647,14 +624,12 @@ Inductive ll_bbb0 : list formula -> Type :=
 Lemma mix0_bbb0_false : notT (ll_bbb0 nil).
 Proof.
 intros pi.
-remember nil as l eqn:Heql.
-induction pi in Heql |- *; inversion Heql; subst.
+remember nil as l eqn:Heql. induction pi in Heql |- *; inversion Heql; subst.
 - symmetry in p. now apply Permutation_Type_nil in p.
 - now apply app_eq_nil in Heql as [-> ->].
 Qed.
 
-Lemma ex_implies_mix2_mix02 l :
-  ll_bbb0 l -> Permutation_Type l (one :: oc (tens (parr one one) bot) :: nil) ->
+Lemma ex_implies_mix2_mix02 l : ll_bbb0 l -> Permutation_Type l (one :: oc (tens (parr one one) bot) :: nil) ->
   @ll_mix0 atom (one :: one :: nil).
 Proof.
 intros pi. induction pi; intro HP;
@@ -686,8 +661,7 @@ intros pi. induction pi; intro HP;
                --- apply IHpi. reflexivity.
                --- apply mix0_bbb0_false. assumption.
             ** apply app_eq_nil in H2 as [-> ->].
-               clear - pi2.
-               remember (bot :: nil) as l.
+               clear - pi2. remember (bot :: nil) as l.
                induction pi2 in Heql |- *; inversion Heql; subst.
                --- symmetry in p.
                    apply Permutation_Type_length_1_inv in p as ->.
@@ -696,16 +670,13 @@ intros pi. induction pi; intro HP;
                    +++ apply IHpi2. reflexivity.
                    +++ apply mix0_bbb0_false. assumption.
                --- apply mix0_bbb0_false. assumption.
-      -- exfalso.
-         apply mix0_bbb0_false. assumption.
-    * symmetry in HP0.
-      apply app_eq_nil in HP0 as [-> ->].
+      -- exfalso. apply mix0_bbb0_false. assumption.
+    * symmetry in HP0. apply app_eq_nil in HP0 as [-> ->].
       apply IHpi. reflexivity.
   + symmetry in HP.
     rewrite <- (app_nil_l (oc _::_)) in HP.
     dichot_elt_app_inf_exec HP; subst.
-    * symmetry in HP1.
-      apply app_eq_unit_inf in HP1 as [[-> ->] | [-> ->]].
+    * symmetry in HP1. apply app_eq_unit_inf in HP1 as [[-> ->] | [-> ->]].
       -- clear - l. rename l into pi. cbn in pi.
          remember (oc (tens (parr one one) bot) :: nil) as l.
          induction pi in Heql |- *; inversion Heql; subst.
@@ -787,8 +758,7 @@ intros pi. induction pi; (try discriminate); try now constructor.
 - eapply cut_bbb0_r; eassumption.
 - destruct a; cbn.
   + apply de_bbb0_r, one_bbb0_r.
-  + rewrite <- (app_nil_l (one :: _)), app_comm_cons.
-    apply mix2_bbb0_r.
+  + rewrite <- (app_nil_l (one :: _)), app_comm_cons. apply mix2_bbb0_r.
     * apply one_bbb0_r.
     * change nil with (map (@wn atom) nil).
       apply oc_r, bot_r.
