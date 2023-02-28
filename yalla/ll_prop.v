@@ -61,46 +61,6 @@ remember (zero :: nil) as l. induction pi using ll_nested_ind in Heql |- *; inve
 Qed.
 
 
-(** Some additional reversibility statements *)
-(* TODO atomic gax should be enough, induction on cut-free proof, see ll_def *)
-
-Lemma with_rev1_noax P (Hgax : no_ax P) A B l1 l2 : ll P (l1 ++ awith A B :: l2) -> ll P (l1 ++ A :: l2).
-Proof.
-intros pi.
-assert (ll P (dual (awith A B) :: A :: nil)) as pi'
-  by (eapply plus_r1, ex_r; [ apply ax_exp | apply PCPermutation_Type_swap ]).
-eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
-- eapply cut_r_axfree; [ assumption | eassumption | ].
-  eapply ex_r; [ apply pi | ].
-  rewrite app_comm_cons. apply PCPermutation_Type_app_comm.
-- list_simpl. cons2app. rewrite (app_assoc l1). apply PCPermutation_Type_app_comm.
-Qed.
-
-Lemma with_rev2_noax P (Hgax : no_ax P) A B l1 l2 : ll P (l1 ++ awith B A :: l2) -> ll P (l1 ++ A :: l2).
-Proof.
-intros pi.
-assert (ll P (dual (awith B A) :: A :: nil)) as pi'
-  by (eapply plus_r2, ex_r; [ apply ax_exp | apply PCPermutation_Type_swap ]).
-eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
-- eapply cut_r_axfree; [ assumption | eassumption | ].
-  eapply ex_r; [ apply pi | ].
-  rewrite app_comm_cons. apply PCPermutation_Type_app_comm.
-- list_simpl. cons2app. rewrite (app_assoc l1). apply PCPermutation_Type_app_comm.
-Qed.
-
-Lemma oc_rev_noax P (Hgax : no_ax P) A l1 l2 : ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
-Proof.
-intros pi.
-assert (ll P (dual (oc A) :: A :: nil)) as pi'
-  by (eapply de_r, ex_r; [ apply ax_exp | apply PCPermutation_Type_swap ]).
-eapply (ex_r ((l2 ++ l1) ++ A :: nil)).
-- eapply cut_r_axfree; try eassumption.
-  eapply ex_r; [ apply pi | ].
-  rewrite app_comm_cons. apply PCPermutation_Type_app_comm.
-- list_simpl. cons2app. rewrite (app_assoc l1). apply PCPermutation_Type_app_comm.
-Qed.
-
-
 (** ** Subformula Property *)
 
 (** A fragment is a subset of formulas closed under subformula. *)

@@ -802,7 +802,7 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
   + eapply ex_r in pi1; [ | apply Permutation_Type_swap ].
     eapply cut_mix0_r in pi1; [ | rewrite bidual; eassumption ].
     eapply IHA2; [ apply pi1 | reflexivity | eassumption ].
-- eapply tens_rev in pi1; [ | intros [] | reflexivity ].
+- eapply tens_rev in pi1; [ | intros [] | intro; reflexivity ].
   cons2app in HP2.
   assert (Heq2 := HP2).
   symmetry in Heq2; apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
@@ -821,7 +821,7 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
     list_simpl in HP2; cons2app in HP2; apply Permutation_Type_app_inv in HP2.
     list_simpl; etransitivity; [ symmetry; apply Permutation_Type_middle | ].
     symmetry; apply Permutation_Type_cons, HP2; reflexivity.
-- eapply tens_rev in pi1 ; [ | intros [] | reflexivity ].
+- eapply tens_rev in pi1 ; [ | intros [] | intro; reflexivity ].
   destruct pi1 as [_ pi1'].
   clear - pi1'.
   assert ({ l & Permutation_Type (covar (i2a atN) :: nil) l }) as [l HP] by (eexists; reflexivity).
@@ -836,7 +836,7 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
     apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
   + destruct L; [ | discriminate f ].
     apply Permutation_Type_sym, Permutation_Type_nil_cons in HP as [].
-- eapply tens_rev in pi1 ; [ | intros [] | reflexivity ].
+- eapply tens_rev in pi1 ; [ | intros [] | intro; reflexivity ].
   cons2app in HP2.
   assert (Heq2 := HP2).
   symmetry in Heq2. apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
@@ -851,7 +851,7 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
     list_simpl in HP2. cons2app in HP2. apply Permutation_Type_app_inv in HP2.
     list_simpl. etransitivity; [ symmetry; apply Permutation_Type_middle | ].
     symmetry. apply Permutation_Type_cons, HP2; reflexivity.
-- eapply tens_rev in pi1 ; [ | intros [] | reflexivity ].
+- eapply tens_rev in pi1 ; [ | intros [] | intro; reflexivity ].
   destruct pi1 as [pi1' _]. clear - pi1'.
   assert ({ l & Permutation_Type (covar (i2a atN) :: nil) l })
     as [l HP] by (eexists; reflexivity).
@@ -875,12 +875,12 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
     * symmetry in p. now apply Permutation_Type_nil in p as ->.
     * destruct l1; discriminate H1.
   + destruct L; discriminate.
-- eapply plus_rev in pi1; [ | intros [] | reflexivity ].
+- eapply plus_rev in pi1; [ | intros [] | intro; reflexivity ].
   destruct pi1 as [ pi1 | pi1 ].
   + cons2app in HP2.
     assert (Heq2 := HP2).
     symmetry in Heq2. apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
-    eapply with_rev1_noax in pi2; [ | intros [] ].
+    eapply with_rev1 in pi2; [ | intros [] ].
     eapply IHA1.
     * eassumption.
     * apply Permutation_Type_swap.
@@ -891,7 +891,7 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
   + cons2app in HP2.
     assert (Heq2 := HP2).
     symmetry in Heq2. apply Permutation_Type_vs_elt_inv in Heq2 as [(l', l'') ->].
-    eapply with_rev2_noax in pi2; [ | intros [] ].
+    eapply with_rev2 in pi2; [ | intros [] ].
     eapply IHA2.
     * eassumption.
     * apply Permutation_Type_swap.
@@ -912,8 +912,8 @@ induction A in F |- *; cbn; intros l2 pi1 HP2 pi2.
   + apply Permutation_Type_length_2_inv in HP2 as [ | ]; inversion e.
     destruct l; discriminate H1.
 - assert (pi0 := pi1).
-  rewrite <- (app_nil_l _) in pi1; eapply with_rev1_noax in pi1; [ | intros [] ].
-  rewrite <- (app_nil_l _) in pi0; eapply with_rev2_noax in pi0; [ | intros [] ].
+  rewrite <- (app_nil_l _) in pi1; eapply with_rev1 in pi1; [ | intros [] ].
+  rewrite <- (app_nil_l _) in pi0; eapply with_rev2 in pi0; [ | intros [] ].
   assert (ll_mix0 (oc F :: ill2ll A1 :: nil) + ll_mix0 (oc F :: ill2ll A2 :: nil)) as [ pi2' | pi2' ].
   { revert HP2. clear - pi2. induction pi2; intros HP2;
       try (apply Permutation_Type_length in HP2; discriminate HP2) ;
@@ -1099,9 +1099,7 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
 - destruct l'; inversion Heq.
   destruct i; inversion H0; subst.
   inversion HF; subst.
-  cbn in X.
-  eapply tens_rev in X; [ | intros a; destruct a | reflexivity ].
-  destruct X as [pi1 pi2].
+  cbn in X. eapply tens_rev in X as [pi1 pi2]; [ | intros [] | intro; reflexivity ].
   apply (IHpi (i2 :: i1 :: l')); constructor; [ assumption | ].
   constructor; assumption.
 - destruct l'; inversion Heq.
@@ -1125,19 +1123,18 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
   destruct i; inversion H0. subst.
   inversion HF. subst.
   cbn in X. rewrite <- (app_nil_l (awith _ _ :: _)) in X.
-  eapply with_rev1_noax in X; [ | intros a; destruct a ].
+  eapply with_rev1 in X; [ | intros [] ].
   apply (IHpi (i1 :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
   destruct i; inversion H0. subst.
   inversion HF. subst.
   cbn in X. rewrite <- (app_nil_l (awith _ _ :: _)) in X.
-  eapply with_rev2_noax in X; [ | intros a; destruct a ].
+  eapply with_rev2 in X; [ | intros [] ].
   apply (IHpi (i2 :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
   destruct i; inversion H0. subst.
   inversion HF. subst.
-  cbn in X. eapply plus_rev in X; [ | intros a; destruct a | reflexivity ].
-  destruct X as [pi | pi].
+  cbn in X. eapply plus_rev in X as [pi | pi]; [ | | intros [] | intro; reflexivity ].
   + apply (IHpi1 (i1 :: l')); constructor; assumption.
   + apply (IHpi2 (i2 :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
@@ -1146,13 +1143,13 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
   destruct i; inversion H0. subst.
   inversion HF. subst.
   cbn in X. rewrite <- (app_nil_l (oc _ :: _)) in X.
-  eapply oc_rev_noax in X; [ | intros a; destruct a ].
+  eapply oc_rev in X; [ | intros [] ].
   apply (IHpi (i :: l')); constructor; assumption.
 - destruct l'; inversion Heq.
   destruct i; inversion H0. subst.
   inversion HF. subst.
   cbn in X. rewrite <- (app_nil_l (oc _ :: _)) in X.
-  eapply oc_rev_noax in X; [ | intros a; destruct a ].
+  eapply oc_rev in X; [ | intros [] ].
   apply (IHpi l'); [ reflexivity | assumption ].
 - destruct l'; inversion Heq.
   destruct i; inversion H0. subst.
@@ -1176,10 +1173,10 @@ Inductive zeropos : iformula -> Type :=
 | zp_iplus A B : zeropos A -> zeropos B -> zeropos (iplus A B)
 | zp_ioc A : zeropos A -> zeropos (ioc A).
 
-Lemma zeropos_ilr P D : zeropos D -> forall l1 l2 C, ill P (l1 ++ D :: l2) C.
+Lemma zeropos_ilr P D (Hz : zeropos D) l1 l2 C : ill P (l1 ++ D :: l2) C.
 Proof.
-intros Hzp. induction Hzp; intros l1 l2 C; try now constructor.
-apply tens_ilr. cons2app. rewrite app_assoc. apply IHHzp.
+induction Hz in l1, l2 |- *; try now constructor.
+apply tens_ilr. cons2app. rewrite app_assoc. apply IHHz.
 Qed.
 
 Lemma ill2ll_zeropos C D : zeropos C -> ill2ll C = ill2ll D -> zeropos D.
@@ -1213,7 +1210,7 @@ Definition easyipgax_nzeropos P := forall a,
        -> ill P l C)
 * notT (In_inf N (fst (projT2 (ipgax P) a))).
 
-Lemma dual_jfragment_zeropos {P} (Hcut : no_icut P) (Hgax : easyipgax_nzeropos P) l0 :
+Lemma dual_jfragment_zeropos P (Hcut : no_icut P) (Hgax : easyipgax_nzeropos P) l0 :
   Forall_inf nonzerospos l0 -> ll (i2pfrag P) (map dual (map ill2ll l0)) ->
   {'(C, Cl1, Cl2) & zeropos C & l0 = Cl1 ++ C :: Cl2 }.
 Proof.
