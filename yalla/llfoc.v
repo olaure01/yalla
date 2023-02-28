@@ -4,12 +4,13 @@ From Coq Require Import CMorphisms Wf_nat Lia.
 From OLlibs Require Import infinite funtheory Bool_more List_more Permutation_Type_more.
 From Yalla Require Import ll_fragments.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
 Section Atoms.
 
-Context { atom : InfDecType }.
+Context {atom : InfDecType}.
 Notation formula := (@formula atom).
 
 (** ** Synchronous and asynchronous formulas *)
@@ -1097,7 +1098,7 @@ induction lw as [|A lw IHlw] in l, l0, la |- *; intros pi HP Hsub Hsubd Ha.
     cbn. rewrite ? app_assoc. apply Permutation_Type_middle.
 Qed.
 
-Theorem llfoc_to_llFoc s l Pi (pi : llfoc l Pi) : fpsize pi < s ->
+Lemma llfoc_to_llFoc s l Pi (pi : llfoc l Pi) : fpsize pi < s ->
    (Pi = None -> llFoc l None)
  * (forall C, Pi = Some C -> Forall_inf wFoc l ->
        { l' & { lw1 & { lw2 & prod (Permutation_Type l (map wn lw1 ++ l'))

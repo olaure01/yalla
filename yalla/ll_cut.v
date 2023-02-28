@@ -6,6 +6,7 @@ From OLlibs Require Import dectype funtheory List_more Permutation_Type_more GPe
 From Yalla Require Import ll_cut_at.
 From Yalla Require Export ll_def.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -325,20 +326,20 @@ intros Hgax IHcut l' L pi;
     * intros _; apply Hoc; intros Heq; inversion Heq.
 Qed.
 
-Hypothesis P_gax_cut : forall a C l1 l2,
+Variable P_gax_cut : forall a C l1 l2,
   projT2 (pgax P) a = l1 ++ C :: l2 -> pcut P C = false ->
     atomic C
   * forall b l3 l4, projT2 (pgax P) b = l3 ++ dual C :: l4 -> { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }.
 
 Lemma oc_notin_gax A (Hcut : pcut P (oc A) = false) a l1 l2 : projT2 (pgax P) a <> l1 ++ oc A :: l2.
-Proof.
+Proof using P_gax_cut.
 intros Ha. specialize (P_gax_cut _ _ _ _ Ha).
 destruct (pcut P (oc A)); [ discriminate Hcut | ].
 destruct (P_gax_cut eq_refl) as [Hgax _]. inversion Hgax.
 Qed.
 
-Theorem cut_r_gax A l1 l2 : ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
-Proof.
+Lemma cut_r_gax A l1 l2 : ll P (dual A :: l1) -> ll P (A :: l2) -> ll P (l2 ++ l1).
+Proof using P_gax_cut.
 enough (forall c s A l0 l1 l2 (pi1 : ll P (dual A :: l0)) (pi2 : ll P (l1 ++ A :: l2)),
           s = psize pi1 + psize pi2 -> fsize A = c -> ll P (l1 ++ l0 ++ l2)) as IH.
 { intros pi1 pi2.

@@ -45,14 +45,10 @@ Proof. apply lmap_irr. cons2app. apply neg_ilr, ax_exp_ill. Qed.
 Lemma neg_map_rule P (Hgax : noN_iax P) l0 l1 l2 C D :
   ill P l0 C -> ill P (l1 ++ N :: l2) D -> ill P (l1 ++ l0 ++ ineg C :: l2) D.
 Proof.
-intros pi0 pi.
-replace (l1 ++ l0 ++ ineg C :: l2) with (l1 ++ (l0 ++ ineg C :: nil) ++ l2)
-  by (list_simpl; reflexivity).
-apply cut_at_ir_gax with atN; [ | | apply neg_ilr | ]; try assumption.
-intros b l l' Heq.
-exfalso.
-apply (Hgax b).
-rewrite Heq. apply in_inf_elt.
+intros pi0 pi. cons2app. rewrite (app_assoc l0).
+refine (cut_at_ir_gax Hgax _ _ _ (neg_ilr _ _ pi0) pi).
+intros b l l' Heq. exfalso.
+apply (Hgax b). rewrite Heq. apply in_inf_elt.
 Qed.
 
 Lemma ilpam_to_igen P A : ill P (ilpam A N :: nil) (igen A).
@@ -67,14 +63,10 @@ Proof. apply lpam_irr, gen_ilr, ax_exp_ill. Qed.
 Lemma gen_pam_rule P (Hgax : noN_iax P) l0 l1 l2 C D :
   ill P l0 C -> ill P (l1 ++ N :: l2) D -> ill P (l1 ++ igen C :: l0 ++ l2) D.
 Proof.
-intros pi0 pi.
-rewrite app_comm_cons.
-apply cut_at_ir_gax with atN; [ | | apply gen_ilr | ]; try assumption.
-intros b l l' Heq.
-exfalso.
-apply (Hgax b).
-rewrite Heq.
-apply in_inf_elt.
+intros pi0 pi. rewrite app_comm_cons.
+refine (cut_at_ir_gax Hgax _ _ _ (gen_ilr _ _ pi0) pi).
+intros b l l' Heq. exfalso.
+apply (Hgax b). rewrite Heq. apply in_inf_elt.
 Qed.
 
 
@@ -82,16 +74,14 @@ Qed.
 (** axiom-free cases *)
 
 Lemma ione_rev_noax P (Hgax : no_iax P) l1 l2 C : ill P (l1 ++ ione :: l2) C -> ill P (l1 ++ l2) C.
-Proof. intros pi. rewrite <- (app_nil_l l2). apply cut_ir_axfree with ione; try assumption. apply one_irr. Qed.
+Proof. intros pi. rewrite <- (app_nil_l l2). apply cut_ir_axfree with ione; (assumption + apply one_irr). Qed.
 
 Lemma itens_rev_noax P (Hgax : no_iax P) l1 l2 A B C :
   ill P (l1 ++ itens A B :: l2) C -> ill P (l1 ++ A :: B :: l2) C.
 Proof.
 intros pi.
-assert (ill P (A :: B :: nil) (itens A B)) as Hax
-  by (cons2app; apply tens_irr ;apply ax_exp_ill).
-rewrite <- (app_nil_l l2), 2 app_comm_cons.
-eapply cut_ir_axfree; eassumption.
+assert (ill P (A :: B :: nil) (itens A B)) as Hax by (cons2app; apply tens_irr ;apply ax_exp_ill).
+rewrite <- (app_nil_l l2), 2 app_comm_cons. eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma ilpam_rev_noax P (Hgax : no_iax P) l A B : ill P l (ilpam A B) -> ill P (l ++ A :: nil) B.
@@ -100,53 +90,44 @@ intros pi.
 assert (ill P (ilpam A B :: A :: nil) B) as Hax.
 { rewrite <- (app_nil_r _), <- app_comm_cons, <- (app_nil_l _).
   apply lpam_ilr; apply ax_exp_ill. }
-rewrite <- (app_nil_l _).
-eapply cut_ir_axfree; eassumption.
+rewrite <- (app_nil_l _). eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma igen_rev_noax P (Hgax : no_iax P) l A : ill P l (igen A) -> ill P (l ++ A :: nil) N.
 Proof.
 intros pi.
 assert (ill P (igen A :: A :: nil) N) as Hax by (apply gen_ilr; apply ax_exp_ill).
-rewrite <- (app_nil_l _).
-eapply cut_ir_axfree; eassumption.
+rewrite <- (app_nil_l _). eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma ilmap_rev_noax P (Hgax : no_iax P) l A B : ill P l (ilmap A B) -> ill P (A :: l) B.
 Proof.
 intros pi.
 assert (ill P (A :: ilmap A B :: nil) B) as Hax.
-{ cons2app.
-  rewrite <- (app_nil_l (A :: _)), <- app_assoc.
+{ cons2app. rewrite <- (app_nil_l (A :: _)), <- app_assoc.
   apply lmap_ilr; apply ax_exp_ill. }
-rewrite <- (app_nil_r _), <- (app_nil_l l), app_comm_cons, <- app_assoc.
-eapply cut_ir_axfree; eassumption.
+rewrite <- (app_nil_r _), <- (app_nil_l l), app_comm_cons, <- app_assoc. eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma ineg_rev_noax P (Hgax : no_iax P) l A : ill P l (ineg A) -> ill P (A :: l) N.
 Proof.
 intros pi.
 assert (ill P (A :: ineg A :: nil) N) as Hax by (cons2app; apply neg_ilr; apply ax_exp_ill).
-rewrite <- (app_nil_r _), <- (app_nil_l l), app_comm_cons, <- app_assoc.
-eapply cut_ir_axfree; eassumption.
+rewrite <- (app_nil_r _), <- (app_nil_l l), app_comm_cons, <- app_assoc. eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma iwith_rev1_noax P (Hgax : no_iax P) l A B : ill P l (iwith A B) -> ill P l A.
 Proof.
 intros pi.
-assert (ill P (iwith A B :: nil) A) as Hax
-  by (rewrite <- (app_nil_l _); apply with_ilr1; apply ax_exp_ill).
-rewrite <- (app_nil_r _), <- (app_nil_l _).
-eapply cut_ir_axfree; eassumption.
+assert (ill P (iwith A B :: nil) A) as Hax by (rewrite <- (app_nil_l _); apply with_ilr1; apply ax_exp_ill).
+rewrite <- (app_nil_r _), <- (app_nil_l _). eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma iwith_rev2_noax P (Hgax : no_iax P) l A B : ill P l (iwith B A) -> ill P l A.
 Proof.
 intros pi.
-assert (ill P (iwith B A :: nil) A) as Hax
-  by (rewrite <- (app_nil_l _); apply with_ilr2; apply ax_exp_ill).
-rewrite <- (app_nil_r _), <- (app_nil_l _).
-eapply cut_ir_axfree; eassumption.
+assert (ill P (iwith B A :: nil) A) as Hax by (rewrite <- (app_nil_l _); apply with_ilr2; apply ax_exp_ill).
+rewrite <- (app_nil_r _), <- (app_nil_l _). eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma iplus_rev1_noax P (Hgax : no_iax P) l1 l2 A B C :
@@ -154,8 +135,7 @@ Lemma iplus_rev1_noax P (Hgax : no_iax P) l1 l2 A B C :
 Proof.
 intros pi.
 assert (ill P (A :: nil) (iplus A B)) as Hax by (apply plus_irr1; apply ax_exp_ill).
-rewrite <- (app_nil_l l2), app_comm_cons.
-eapply cut_ir_axfree; eassumption.
+rewrite <- (app_nil_l l2), app_comm_cons. eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma iplus_rev2_noax P (Hgax : no_iax P) l1 l2 A B C :
@@ -163,23 +143,18 @@ Lemma iplus_rev2_noax P (Hgax : no_iax P) l1 l2 A B C :
 Proof.
 intros pi.
 assert (ill P (A :: nil) (iplus B A)) as Hax by (apply plus_irr2; apply ax_exp_ill).
-rewrite <- (app_nil_l l2), app_comm_cons.
-eapply cut_ir_axfree; eassumption.
+rewrite <- (app_nil_l l2), app_comm_cons. eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma ioc_rev_noax P (Hgax : no_iax P) l A : ill P l (ioc A) -> ill P l A.
 Proof.
 intros pi.
-assert (ill P (ioc A :: nil) A) as Hax
-  by (rewrite <- (app_nil_l _); apply de_ilr, ax_exp_ill).
-rewrite <- (app_nil_r _), <- (app_nil_l _).
-eapply cut_ir_axfree; eassumption.
+assert (ill P (ioc A :: nil) A) as Hax by (rewrite <- (app_nil_l _); apply de_ilr, ax_exp_ill).
+rewrite <- (app_nil_r _), <- (app_nil_l _). eapply cut_ir_axfree; eassumption.
 Qed.
 
 
 (** ** Fragments of [ill] *)
-
-Section Fragments.
 
 (** A fragment is a subset stable under sub-formula *)
 Definition ifragment FS := forall A : iformula, FS A -> forall B, isubform B A -> FS B.
@@ -209,7 +184,7 @@ induction pi; cbn; intros HFS; inversion HFS as [|D l' Hhd Htl]; subst; repeat s
 Qed.
 
 (** Sub-formula property *)
-Proposition isubformula_cutfree P (P_cutfree : no_icut P) l A (pi : ill P l A) :
+Lemma isubformula_cutfree P (P_cutfree : no_icut P) l A (pi : ill P l A) :
   Forall_iformula (fun x => Exists (isubform x) (A :: l)) pi.
 Proof.
 apply (iconservativity P_cutfree).
@@ -230,8 +205,7 @@ Proof.
 intros HFS.
 apply cut_admissible_ill_axfree in pi; [ | assumption ].
 exists (stronger_ipfrag (cutrm_ipfrag_le P) pi).
-apply Forall_isequent_stronger_ipfrag.
-apply iconservativity; trivial.
+apply Forall_isequent_stronger_ipfrag, iconservativity; [ | assumption | assumption ].
 apply noicut_cutrm.
 Qed.
 
@@ -244,7 +218,7 @@ apply iconservativity_axfree; [ assumption | assumption | | ].
 - apply (Forall_isequent_is _ _ HFS).
 Qed.
 
-Proposition subformula P (P_axfree : no_iax P) l A (pi : ill P l A) :
+Lemma subformula P (P_axfree : no_iax P) l A (pi : ill P l A) :
   { pi': ill P l A & Forall_iformula (fun x => Exists (isubform x) (A :: l)) pi' }.
 Proof.
 refine (iconservativity_axfree P_axfree _ pi _).
@@ -258,7 +232,5 @@ refine (iconservativity_axfree P_axfree _ pi _).
   + eapply Forall_inf_arrow, IHl.
     intros B Hl. right. exact Hl.
 Qed.
-
-End Fragments.
 
 End Atoms.

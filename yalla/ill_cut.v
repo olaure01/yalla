@@ -5,6 +5,7 @@ From Coq Require Import PeanoNat Wf_nat List Lia.
 From OLlibs Require Import funtheory dectype List_more flat_map_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ill_cut_at.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -15,14 +16,13 @@ Context {preiatom : DecType}.
 Section Cut_Elim_Proof.
 
 Context {P : @ipfrag preiatom}.
-
-Hypothesis P_gax_noN_l : noN_iax P.
-Hypothesis P_gax_cut_r : forall a, ipcut P (snd (projT2 (ipgax P) a)) = false ->
+Variable P_gax_noN_l : noN_iax P.
+Variable P_gax_cut_r : forall a, ipcut P (snd (projT2 (ipgax P) a)) = false ->
     iatomic (snd (projT2 (ipgax P) a))
   * forall b l1 l2, fst (projT2 (ipgax P) b) = l1 ++ snd (projT2 (ipgax P) a) :: l2 ->
                           { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
                               & snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }.
-Hypothesis P_gax_cut_l : forall b A l1 l2,
+Variable P_gax_cut_l : forall b A l1 l2,
   fst (projT2 (ipgax P) b) = l1 ++ A :: l2 -> ipcut P A = false ->
     iatomic A
   * forall a, snd (projT2 (ipgax P) a) = A ->
@@ -32,7 +32,7 @@ Hypothesis P_gax_cut_l : forall b A l1 l2,
 Lemma cut_oc_comm_left A C l1 l2 l0 : ill P l0 (ioc A) ->
   (forall lw, ill P (map ioc lw) A -> ill P (l1 ++ map ioc lw ++ l2) C) ->
   ill P (l1 ++ l0 ++ l2) C.
-Proof.
+Proof using P_gax_cut_r.
 intros pi IH; remember (ioc A) as B eqn:HeqB; induction pi in HeqB |- *; inversion HeqB; subst;
   try specialize (IHpi eq_refl); try specialize (IHpi1 eq_refl); try specialize (IHpi2 eq_refl);
   try (list_simpl; rewrite app_assoc; constructor;
@@ -59,7 +59,7 @@ Lemma substitution_ioc A lw :
   (forall l1 l2 C, ill P (l1 ++ A :: l2) C -> ill P (l1 ++ map ioc lw ++ l2) C) ->
   forall l' L C, ill P (l' ++ flat_map (cons (ioc A)) L) C ->
     ill P (l' ++ flat_map (app (map ioc lw)) L) C.
-Proof.
+Proof using P_gax_cut_l.
 intros Hoc IHcut l' L C pi.
 remember (l' ++ flat_map (cons (ioc A)) L) as l eqn:Heq.
 induction pi in l', L, Heq |- *;
@@ -431,8 +431,8 @@ induction pi in l', L, Heq |- *;
   apply Hoc, Hcut'.
 Qed.
 
-Theorem cut_ir_gax A l0 l1 l2 C : ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
-Proof.
+Lemma cut_ir_gax A l0 l1 l2 C : ill P l0 A -> ill P (l1 ++ A :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
+Proof using P_gax_noN_l P_gax_cut_r P_gax_cut_l.
 revert A l0 l1 l2 C.
 enough (forall c A, ifsize A = c ->
         forall s l0 l1 l2 C (pi1 : ill P l0 A) (pi2 : ill P (l1 ++ A :: l2) C),

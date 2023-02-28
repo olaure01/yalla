@@ -1,5 +1,3 @@
-(* tl example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
 From Coq Require Import CMorphisms.
@@ -10,6 +8,7 @@ From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GP
 
 From Yalla Require Import ll_def ill_vs_ll.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -52,18 +51,17 @@ Lemma TAtom2PreIAtom_inj : injective TAtom2PreIAtom.
 Proof. apply bijective_injective, TAtom2PreIAtom_bij. Qed.
 Definition i2ac := IAtom2Atom.
 Definition i2ac_inj : injective i2ac := section_injective IAtom2Atom_retract.
-Definition t2i := fun x => Some (TAtom2PreIAtom x).
+Definition t2i x := Some (TAtom2PreIAtom x).
 Lemma t2i_inj : injective t2i.
 Proof. intros x y Heq. apply TAtom2PreIAtom_inj. injection Heq as [=]. assumption. Qed.
 Lemma atN_or_t2i x : (atN = x) + { y | x = t2i y }.
 Proof.
 destruct x as [c|]; [ right | left; reflexivity ].
 unfold t2i.
-destruct (bijective_surjective TAtom2PreIAtom_bij c) as [y ->].
-exists y. reflexivity.
+destruct (bijective_surjective TAtom2PreIAtom_bij c) as [y ->]. exists y. reflexivity.
 Qed.
 Lemma notatN x : atN <> t2i x.
-Proof. unfold t2i. intros Heq. discriminate Heq. Qed.
+Proof. unfold t2i. intros [=]. Qed.
 Definition iateq := @eqb (option_dectype preiatom).
 Definition iateq_eq := @eqb_eq (option_dectype preiatom).
 
@@ -113,14 +111,12 @@ Proof. exact (section_injective tl2ill_section). Qed.
 Lemma tl2ll_inj : injective (fun x => ill2ll (tl2ill x)).
 Proof.
 intro A. induction A; intros [] Heq;
- try (now inversion Heq; try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst).
-- cbn in Heq.
-  f_equal. apply t2i_inj, i2ac_inj.
-  unfold t2i, i2ac in Heq. injection Heq as [=].
-  apply i2ac_inj, t2i_inj in H as ->. reflexivity.
-- inversion Heq.
-  apply formulas.dual_inj in H0.
-  apply IHA in H0 as ->. reflexivity.
+  try (now inversion Heq; try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst).
+- f_equal. apply t2i_inj, i2ac_inj.
+  cbn in Heq. unfold t2i, i2ac in Heq. injection Heq as [= Heq].
+  apply i2ac_inj, t2i_inj in Heq as ->. reflexivity.
+- inversion Heq as [Heq'].
+  apply formulas.dual_inj in Heq' as ->%IHA. reflexivity.
 Qed.
 
 Lemma N_not_tl2ill A : N <> tl2ill A.
@@ -494,13 +490,13 @@ Qed.
 (** *** axiom expansion *)
 
 Lemma ax_gen_r P A : tl P (A :: nil) (Some A).
-Proof. apply (stronger_tpfrag (cutrm_tpfrag_le P)), tlfrag2tl, ax_exp_ill. Qed.
+Proof using Atoms. apply (stronger_tpfrag (cutrm_tpfrag_le P)), tlfrag2tl, ax_exp_ill. Qed.
 
 (** *** cut admissibility *)
 
 Lemma cut_tl_r_axfree P (Hgax : no_tax P) A l0 l1 l2 C :
   tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C -> tl P (l1 ++ l0 ++ l2) C.
-Proof.
+Proof using Atoms.
 intros pi1 pi2.
 destruct (tl2tlfrag pi1) as [pi1' _].
 assert (pi1'' := pi1' _ eq_refl).
@@ -519,7 +515,7 @@ destruct (tpcut P A) eqn:Hcut.
 Qed.
 
 Lemma cut_admissible_tl_axfree P (Hgax : no_tax P) l Pi : tl P l Pi -> tl (cutrm_tpfrag P) l Pi.
-Proof.
+Proof using Atoms.
 intros pi. induction pi; try (econstructor; eassumption).
 - eapply cut_tl_r_axfree; eassumption.
 - contradiction (Hgax a).
@@ -633,7 +629,7 @@ split; [ split | ]; cbn.
   eapply N_not_tl2ill. exact Heq3.
 Qed.
 
-Theorem ll_is_tl_cutfree P (Hcut : no_tcut P) (Hgax : easytpgax P) l :
+Lemma ll_is_tl_cutfree P (Hcut : no_tcut P) (Hgax : easytpgax P) l :
   (forall A, tl P l (Some A)
          -> ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
                           rev (map dual (map ill2ll (map tl2ill l)))))
@@ -677,7 +673,7 @@ split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
     apply tl2ill_nz.
 Qed.
 
-Theorem ll_is_tl_axfree P (Hgax : no_tax P) l :
+Lemma ll_is_tl_axfree P (Hgax : no_tax P) l :
    (forall A, tl P l (Some A)
            -> ll (i2pfrag (t2ipfrag P)) (ill2ll (tl2ill A) ::
                            rev (map dual (map ill2ll (map tl2ill l)))))

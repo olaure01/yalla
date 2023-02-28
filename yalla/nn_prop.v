@@ -6,6 +6,7 @@ From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type
 From Yalla Require Import subs ll_fragments bbb.
 From Yalla Require Export nn_def.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -238,7 +239,7 @@ Qed.
 Lemma ie_dual_diag  A : ielem A -> ill_ll (trans A (dual (unill A)) :: nil) A.
 Proof. apply ie_dual. Qed.
 
-Proposition llR_ie_to_ill_trans R l : ielem R -> llR (unill R) l -> ill_ll (map (trans R) l) R.
+Lemma llR_ie_to_ill_trans R l : ielem R -> llR (unill R) l -> ill_ll (map (trans R) l) R.
 Proof.
 intros Hie Hll.
 assert (Hax := @ax_exp_ill _ ipfrag_ill R). rewrite <- (app_nil_l (R :: _)) in Hax.
@@ -319,7 +320,7 @@ Qed.
  - the sequent is provable in [ll].
 *)
 
-Theorem ill_trans_to_llR_bot (l : list formula) : (forall R, ill_ll (map (trans R) l) R) -> llR bot l.
+Lemma ill_trans_to_llR_bot (l : list formula) : (forall R, ill_ll (map (trans R) l) R) -> llR bot l.
 Proof.
 intros Hill.
 remember (fresh_of_list l) as z.
@@ -334,7 +335,7 @@ rewrite repl_at_eq in Hill.
 - apply a2a_i.
 Qed.
 
-Theorem llR_bot_to_ll (l : list formula) : llR bot l -> ll_ll l.
+Lemma llR_bot_to_ll (l : list formula) : llR bot l -> ll_ll l.
 Proof.
 intros HR. induction HR; try discriminate f;
   try (constructor; assumption); try (econstructor; eassumption).
@@ -342,7 +343,7 @@ intros HR. induction HR; try discriminate f;
 - destruct a; [ | apply bot_r ]; apply one_r.
 Qed.
 
-Theorem ll_ll_to_ill_trans R (l : list formula) : ll_ll l -> ill_ll (map (trans R) l) R.
+Lemma ll_ll_to_ill_trans R (l : list formula) : ll_ll l -> ill_ll (map (trans R) l) R.
 Proof.
 intros Hll%(ll_to_ill_trans R).
 - apply cut_ll_admissible.
@@ -364,7 +365,7 @@ Qed.
 Lemma ill_trans_to_llR_one (l : list formula) : ill_ll (map (trans ione) l) ione -> llR one l.
 Proof. apply ill_trans_to_llR. Qed.
 
-Theorem llR_one_to_ll_mix02 (l : list formula) : llR one l -> ll_mix02 l.
+Lemma llR_one_to_ll_mix02 (l : list formula) : llR one l -> ll_mix02 l.
 Proof.
 intros pi. induction pi; try (econstructor; eassumption).
 - discriminate f.
@@ -379,7 +380,7 @@ intros pi. induction pi; try (econstructor; eassumption).
     apply Forall_inf_nil.
 Qed.
 
-Theorem ll_mix02_to_ill_trans (l : list formula) : ll_mix02 l -> ill_ll (map (trans ione) l) ione.
+Lemma ll_mix02_to_ill_trans (l : list formula) : ll_mix02 l -> ill_ll (map (trans ione) l) ione.
 Proof.
 intros Hll%(ll_to_ill_trans ione).
 - apply cut_ll_admissible.
@@ -401,7 +402,7 @@ intros Hll%(ll_to_ill_trans ione).
     refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
   rewrite map_app, <- (app_nil_l (map _ l0 ++ map _ l1)), <- (app_nil_r (map _ l0 ++ map _ l1)).
   eapply cut_ir_axfree.
-  + intros a; destruct a.
+  + intros [].
   + apply tens_irr; eassumption.
   + apply tens_ilr, one_ilr, one_ilr, one_irr.
 Qed.
@@ -425,8 +426,7 @@ Lemma aff_to_ill_trans l A : ill_ll (map (trans izero) l) izero ->
 Proof.
 intros Hll. cbn. cons2app.
 rewrite <- (app_nil_r (map _ _)).
-eapply cut_ir_axfree; [ intros a; destruct a | eassumption | ].
-apply zero_ilr.
+eapply cut_ir_axfree, zero_ilr; [ intros [] | eassumption ].
 Qed.
 
 
@@ -438,7 +438,7 @@ Qed.
  - the sequent is provable in [ll_mix0].
 *)
 
-Theorem ill_trans_to_llR_wn_one (l : list formula) :
+Lemma ill_trans_to_llR_wn_one (l : list formula) :
   (forall R, ill_ll nil R -> ill_ll (map (trans R) l) R) -> llR (wn one) l.
 Proof.
 intros Hill.
@@ -467,7 +467,7 @@ eapply (@llR1_R2 _ _ (wn one)) in Hz2.
   apply ax_exp.
 Qed.
 
-Theorem llR_wn_one_to_ll_mix0 (l : list formula) : llR (wn one) l -> ll_mix0 l.
+Lemma llR_wn_one_to_ll_mix0 (l : list formula) : llR (wn one) l -> ll_mix0 l.
 Proof.
 intros pi. induction pi; (try now constructor); try (econstructor; eassumption).
 - eapply cut_mix0_r; eassumption.
@@ -479,12 +479,12 @@ intros pi. induction pi; (try now constructor); try (econstructor; eassumption).
   + apply wk_r, one_r.
 Qed.
 
-Theorem ll_mix0_to_ill_trans R (l : list formula) : ill_ll nil R -> ll_mix0 l -> ill_ll (map (trans R) l) R.
+Lemma ll_mix0_to_ill_trans R (l : list formula) : ill_ll nil R -> ll_mix0 l -> ill_ll (map (trans R) l) R.
 Proof.
 intros HR Hll%(stronger_pfrag _ (cutupd_pfrag pfrag_mix0 pcut_all)).
 - apply (ll_to_ill_trans R) in Hll.
   + unfold ill_ll. change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
-    apply cut_admissible_ill_axfree; [ intros a; destruct a | ].
+    apply cut_admissible_ill_axfree; [ intros [] | ].
     eapply stronger_ipfrag; [ | apply Hll ].
     repeat split. intros [].
   + reflexivity.
@@ -503,7 +503,7 @@ Qed.
  - the sequent is provable in [ll_bbb].
 *)
 
-Theorem ill_trans_to_llR_oc_bot (l : list formula) : (forall R, ill_ll (map (trans (ioc R)) l) (ioc R)) ->
+Lemma ill_trans_to_llR_oc_bot (l : list formula) : (forall R, ill_ll (map (trans (ioc R)) l) (ioc R)) ->
   llR (oc bot) l.
 Proof.
 intros Hill.
@@ -519,7 +519,7 @@ change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_
 rewrite (@subs_fresh_list atom_inf) in Hill. assumption.
 Qed.
 
-Theorem llR_oc_bot_to_ll_bbb (l : list formula) : llR (oc bot) l -> ll_bbb l.
+Lemma llR_oc_bot_to_ll_bbb (l : list formula) : llR (oc bot) l -> ll_bbb l.
 Proof. apply bb_to_bbb. Qed.
 
 Lemma ll_mix02_to_ill_trans_gen R (l : list formula) : ll_mix02 l ->
@@ -534,8 +534,7 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 pcut_all)) in Hll.
   + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
     apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
     eapply stronger_ipfrag ; [ | apply Hll ].
-    repeat split.
-    intros a; destruct a.
+    repeat split. intros [].
   + intros L eqpmix FL FLind.
     destruct L; [ intros; apply ax_exp_ill | ].
     destruct L; [ discriminate eqpmix | ].
@@ -565,7 +564,7 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 pcut_all)) in Hll.
 - now repeat split.
 Qed.
 
-Theorem ll_bbb_to_ill_trans R (l : list formula) : ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
+Lemma ll_bbb_to_ill_trans R (l : list formula) : ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
 Proof.
 intros Hll. induction Hll; (try now (inversion f)); cbn.
 - cons2app. rewrite <- (app_nil_l _).
@@ -577,7 +576,7 @@ intros Hll. induction Hll; (try now (inversion f)); cbn.
   rewrite <- (app_nil_l (ioc _ :: _)) in l.
   rewrite map_app.
   rewrite <- (app_nil_r (map _ l1)).
-  eapply (cut_ir_axfree); [ intros a; destruct a | eassumption | ].
+  eapply (cut_ir_axfree); [ intros [] | eassumption | ].
   eapply ex_ir; [ | apply Permutation_Type_app_comm ]; assumption.
 - apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
   apply one_irr.
@@ -615,7 +614,7 @@ Qed.
 
 (** The following result is the converse of [bb_to_bbb] proved in the [bbb] library *)
 
-Theorem bbb_to_bb (l : list formula) : ll_bbb l -> llR (oc bot) l.
+Lemma bbb_to_bb (l : list formula) : ll_bbb l -> llR (oc bot) l.
 Proof. intros pi. apply ill_trans_to_llR_oc_bot. intros R. apply ll_bbb_to_ill_trans. assumption. Qed.
 
 End Atoms.

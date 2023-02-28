@@ -3,23 +3,23 @@
 From OLlibs Require Import dectype List_more GPermutation_Type.
 From Yalla Require Export ill_def.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
 Section Atoms.
 
 Context {preiatom : DecType} {P : @ipfrag preiatom}.
-Hypothesis P_gax_noN_l : noN_iax P.
+Variable P_gax_noN_l : noN_iax P.
 Variable X : option preiatom.
-Hypothesis P_gax_cut : forall b l1 l2,
-                            fst (projT2 (ipgax P) b) = l1 ++ ivar X :: l2 ->
-                            forall a, snd (projT2 (ipgax P) a) = ivar X ->
-                          { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
-                              & snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }.
+Variable P_gax_cut : forall b l1 l2, fst (projT2 (ipgax P) b) = l1 ++ ivar X :: l2 ->
+  forall a, snd (projT2 (ipgax P) a) = ivar X ->
+  { c | l1 ++ fst (projT2 (ipgax P) a) ++ l2 = fst (projT2 (ipgax P) c)
+      & snd (projT2 (ipgax P) b) = snd (projT2 (ipgax P) c) }.
 
 Lemma subs_gax_l l0 l1 l2 b : fst (projT2 (ipgax P) b) = l1 ++ ivar X :: l2 ->
   ill P l0 (ivar X) -> ill P (l1 ++ l0 ++ l2) (snd (projT2 (ipgax P) b)).
-Proof.
+Proof using P_gax_noN_l P_gax_cut.
 intros Hb pi.
 remember (ivar X) as A eqn:HeqX.
 induction pi; inversion HeqX; subst;
@@ -60,9 +60,9 @@ induction pi; inversion HeqX; subst;
   apply gax_ir.
 Qed.
 
-Theorem cut_at_ir_gax l0 l1 l2 C :
+Lemma cut_at_ir_gax l0 l1 l2 C :
   ill P l0 (ivar X) -> ill P (l1 ++ ivar X :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
-Proof.
+Proof using P_gax_noN_l P_gax_cut.
 intros pi1 pi2.
 remember (l1 ++ ivar X :: l2) as l eqn:Heql; induction pi2 in l1, l2, Heql |- *; subst;
   try (constructor; list_simpl; rewrite ? app_comm_cons; apply IHpi2; list_simpl; reflexivity);

@@ -5,6 +5,7 @@ From OLlibs Require Import dectype List_more Dependent_Forall_Type flat_map_more
                            Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ll_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -96,7 +97,7 @@ Qed.
 
 (** Cut-free subformula property:
 cut-free proofs only use subformulas of the conclusion. *)
-Proposition subformula_cutfree P (P_cutfree : no_cut P) l (pi : ll P l) :
+Lemma subformula_cutfree P (P_cutfree : no_cut P) l (pi : ll P l) :
   Forall_formula (fun x => Exists (subform x) l) pi.
 Proof.
 apply (conservativity P_cutfree).
@@ -136,7 +137,7 @@ Qed.
 
 (** Subformula property:
 any provable sequent is provable by a proof containing only subformulas of this sequent. *)
-Proposition subformula l (pi : ll P l) : { pi': ll P l & Forall_formula (fun x => Exists (subform x) l) pi' }.
+Lemma subformula l (pi : ll P l) : { pi': ll P l & Forall_formula (fun x => Exists (subform x) l) pi' }.
 Proof using P_axfree.
 refine (conservativity_axfree P_axfree _ pi _).
 - intros A Hf B Hs.
@@ -240,7 +241,7 @@ Qed.
 Lemma deduction lax l :
   ll (axupd_pfrag P (existT (fun x => x -> _) { k | k < length lax }
                             (fun a => nth (proj1_sig a) lax one :: nil))) l ->
-  ll (cutrm_pfrag P) (l ++ (map wn (map dual lax))).
+  ll (cutrm_pfrag P) (l ++ map wn (map dual lax)).
 Proof using P_perm P_cut P_axfree.
 intros pi.
 apply (cut_admissible_axfree P_axfree).
@@ -251,16 +252,15 @@ intros a. exists (inr a). reflexivity.
 Qed.
 
 Lemma deduction_inv lax l :
-  ll (cutrm_pfrag P) (l ++ (map wn (map dual lax))) ->
+  ll (cutrm_pfrag P) (l ++ map wn (map dual lax)) ->
   ll (axupd_pfrag P (existT (fun x => x -> _) { k | k < length lax }
                             (fun a => nth (proj1_sig a) lax one :: nil))) l.
 Proof using P_perm P_cut P_axfree.
 intros pi.
-assert (ll P (l ++ (map wn (map dual lax)))) as pi'.
+assert (ll P (l ++ map wn (map dual lax))) as pi'%deduction_list_inv.
 { eapply stronger_pfrag, pi.
   repeat split; try reflexivity.
   intros a. exists a. reflexivity. }
-apply deduction_list_inv in pi'.
 eapply stronger_pfrag, pi'.
 repeat split; try reflexivity.
 cbn. intros [? | s].

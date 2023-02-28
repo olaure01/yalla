@@ -10,12 +10,13 @@ Import FMSetNotations.
 From Yalla Require Import atoms fmformulas.
 From Yalla Require ll_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
 Section Atoms.
 
-Context { atom : DecType } { Atoms : AtomType_into_nat atom }.
+Context {atom : DecType} {Atoms : AtomType_into_nat atom}.
 
 (** ** 1. define formulas *)
 
@@ -59,7 +60,7 @@ intros A. induction A; intros B Heq; destruct B; inversion Heq;
 Qed.
 
 Instance border_formula : BOrder.
-Proof.
+Proof using Atoms.
 eapply (@border_inj _ border_nat).
 eapply compose_injective ; [ | eapply compose_injective ].
 - apply mell2ll_inj.

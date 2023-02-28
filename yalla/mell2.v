@@ -1,5 +1,3 @@
-(* mell2 example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: unit-free MELL with mix2 rule *)
 
 From Coq Require Import CMorphisms.
@@ -11,6 +9,7 @@ From OLlibs Require Import funtheory dectype List_more Permutation_Type_more Dep
 From Yalla Require Import atoms.
 From Yalla Require ll_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -193,11 +192,9 @@ Qed.
 Lemma cut_r A l1 l2 : mell (A :: l1) -> mell (dual A :: l2) -> mell (l1 ++ l2).
 Proof.
 intros pi1%mell2mellfrag pi2%mell2mellfrag.
+cbn in pi2. rewrite <- mell2ll_dual in pi2.
 apply mellfrag2mell.
-rewrite map_app.
-cbn in pi2; rewrite <- mell2ll_dual in pi2.
-eapply ll_cut.cut_r_axfree; [ | eassumption | eassumption ].
-intros a; destruct a.
+rewrite map_app. refine (ll_cut.cut_r_axfree _ pi2 pi1). intros [].
 Qed.
 
 End Atoms.

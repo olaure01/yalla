@@ -8,6 +8,7 @@ From OLlibs Require Import funtheory dectype List_more Permutation_Type Permutat
 
 From Yalla Require ll_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -947,7 +948,7 @@ induction pi in P', Q', l' |- *; intros HP.
     * now exists (N', l0, l5 ++ neg (wn P) :: l3); list_simpl.
 Qed.
 
-Theorem llpol_is_ll_polsequent l (pi : llpol l) : polsequent l ->
+Lemma llpol_is_ll_polsequent l (pi : llpol l) : polsequent l ->
   { pi' : llpol l & Forall_sequent polsequent pi' }.
 Proof.
 induction pi; cbn; intros Hpol.
@@ -1047,7 +1048,7 @@ Instance llpolt_perm : Proper ((@Permutation_Type _) ==> arrow) llpolt.
 Proof. intros l1 l2 HP pi. eapply ex_rt; eassumption. Qed.
 
 (** For polarized sequents, [llpol] corresponds to [top] rule with at most one positive formula. *)
-Theorem llpol_llpolt l : polsequent l -> llpol l -> llpolt l.
+Lemma llpol_llpolt l : polsequent l -> llpol l -> llpolt l.
 Proof.
 intros Hpol [pi Hpol']%llpol_is_ll_polsequent; [ | assumption ].
 clear Hpol; induction pi;
@@ -1059,7 +1060,7 @@ clear Hpol; induction pi;
   apply polsequent_neg_rem in Hpol'. assumption.
 Qed.
 
-Theorem llpolt_llpol l : llpolt l -> (polsequent l * llpol l).
+Lemma llpolt_llpol l : llpolt l -> (polsequent l * llpol l).
 Proof.
 intros pi. induction pi; split;
   try (destruct IHpi as [Hpol pi']);

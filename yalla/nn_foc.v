@@ -4,14 +4,14 @@ From Coq Require Import CMorphisms.
 From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Import ll_fragments llfoc tl nn_prop.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
 Section Atoms.
 
-Context { atom : DecType } { preiatom : InfDecType } { tatom : DecType }.
-Context { Atoms : AtomIAtomTAtomType atom preiatom tatom }.
-
+Context {atom : DecType} {preiatom : InfDecType} {tatom : DecType}
+        {Atoms : AtomIAtomTAtomType atom preiatom tatom }.
 Notation atom_inf := (@atom_inf _ _ AtomIAtomTAtom_Atom2IAtom).
 Notation formula := (@formula atom_inf).
 Notation iformula := (@iformula preiatom).
@@ -211,7 +211,7 @@ Definition tpfrag_tl := @mk_tpfrag tatom tpcut_none NoTAxioms true.
 (*                                 atoms cut        axioms    perm  *)
 Definition tl_ll := tl tpfrag_tl.
 
-Proposition ll_to_tl (l : list formula) : ll_ll l -> tl_ll (map ntrans l) None.
+Lemma ll_to_tl (l : list formula) : ll_ll l -> tl_ll (map ntrans l) None.
 Proof.
 intros pi.
 apply (@ll_ll_to_ill_trans _ _ AtomIAtomTAtom_Atom2IAtom N) in pi.
@@ -230,17 +230,14 @@ assert (forall l1 l2, ill_ll (map (trans N) l1 ++ map tl2ill (map ntrans l2)) N
   apply IHl1 in pi.
   eapply ex_ir;
     [ eassumption | list_simpl; symmetry; apply Permutation_Type_middle ]. }
-rewrite <- (app_nil_r _) in pi.
-change nil with (map tl2ill (map ntrans nil)) in pi.
-apply IH in pi.
-list_simpl in pi.
-apply cut_admissible_ill in pi; try now (intros a; destruct a).
+rewrite <- (app_nil_r _) in pi. change nil with (map tl2ill (map ntrans nil)) in pi.
+apply IH in pi. list_simpl in pi.
+apply cut_admissible_ill in pi; try now intros [].
 eapply (@stronger_tpfrag _ (cutrm_tpfrag tpfrag_tl)).
-- repeat split.
-  intros a; destruct a.
+- repeat split. intros [].
 - eapply tlfrag2tl.
   apply (stronger_ipfrag (@cutrm_t2ipfrag_le atom_inf _ _ _ tpfrag_tl)).
-  eapply stronger_ipfrag; [ | apply pi].
+  eapply stronger_ipfrag; [ | apply pi ].
   repeat split. intros [].
 Qed.
 
@@ -578,7 +575,7 @@ induction pi; intros HF HC l1' l2' HP.
 - destruct a.
 Qed.
 
-Proposition tl_to_otl l : tl_ll (map ntrans l) None -> otl (map ntrans l) None.
+Lemma tl_to_otl l : tl_ll (map ntrans l) None -> otl (map ntrans l) None.
 Proof.
 intros pi.
 replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
@@ -603,7 +600,7 @@ Ltac splitIHpi H :=
 
 Ltac polfoccont_cbn := unfold polfoc, polcont; cbn.
 
-Theorem otl_to_llfoc l Pi : otl l Pi ->
+Lemma otl_to_llfoc l Pi : otl l Pi ->
   forall l0 : list formula, l = map ntrans l0 ->
     (Pi = None -> llfoc l0 None)
   * (forall D : formula, Pi = Some (ptrans D) -> llfoc (polcont l0 D) (polfoc D)).
@@ -818,16 +815,16 @@ intros pi; induction pi; intros l0 Heq;
   cons2app; rewrite ? app_assoc; apply Permutation_Type_cons_app; list_simpl; assumption.
 Qed.
 
-Theorem tl_to_llfoc (l : list formula) : tl_ll (map ntrans l) None -> llfoc l None.
+Lemma tl_to_llfoc (l : list formula) : tl_ll (map ntrans l) None -> llfoc l None.
 Proof. intros pi%tl_to_otl. eapply otl_to_llfoc in pi; [ apply pi | ]; reflexivity. Qed.
 
 End Focusing.
 
 
-Theorem weak_focusing (l : list formula) : ll_ll l -> llfoc l None.
+Lemma weak_focusing (l : list formula) : ll_ll l -> llfoc l None.
 Proof. intros pi. apply tl_to_llfoc, ll_to_tl. assumption. Qed.
 
-Theorem focusing (l : list formula) : ll_ll l -> llFoc l None.
+Lemma focusing (l : list formula) : ll_ll l -> llFoc l None.
 Proof. intros pi%weak_focusing. refine (fst (fst (llfoc_to_llFoc pi _)) eq_refl). unfold lt. reflexivity. Qed.
 
 End Atoms.

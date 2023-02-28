@@ -1,5 +1,3 @@
-(* mell_prop example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: unit-free MELL *)
 
 From Coq Require Import Morphisms.
@@ -11,6 +9,7 @@ From OLlibs Require Import funtheory dectype List_more Permutation_more Permutat
 From Yalla Require Import atoms.
 From Yalla Require ll_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 

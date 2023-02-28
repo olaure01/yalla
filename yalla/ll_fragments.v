@@ -6,6 +6,7 @@ From OLlibs Require Import infinite funtheory List_more Dependent_Forall_Type
 From Yalla Require Export ll_prop.
 From Yalla Require Import subs.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -59,15 +60,14 @@ Lemma mix_to_ll P (fp : pperm P = true) n bn l :
   ll (pmixupd_point_pfrag P n bn) l -> ll P (wn (tens_n n bot) :: l).
 Proof.
 intros pi.
-eapply (ext_wn_param fp ((tens_n n bot) :: nil)) in pi.
-- eapply ex_r; [ eassumption | symmetry; rewrite fp; apply Permutation_Type_cons_append ].
-- now intros Hcut.
+eapply ex_r; [ | symmetry; rewrite fp; apply Permutation_Type_cons_append ].
+refine (ext_wn_param fp _ ((tens_n n bot) :: nil) _ _ pi).
+- reflexivity.
 - cbn. intros a.
   eapply ex_r; [ | rewrite fp; apply Permutation_Type_cons_append ].
   apply wk_r, gax_r.
 - intros.
-  remember (length L) as nL.
-  destruct (nL =? n) eqn:Heq.
+  remember (length L) as nL. destruct (nL =? n) eqn:Heq.
   + cbn in H. rewrite Heq in H.
     apply ex_r with (map wn (tens_n n bot :: nil) ++ concat L);
       [ cbn | rewrite fp; apply Permutation_Type_app_comm ].
@@ -95,8 +95,7 @@ eapply (ext_wn_param fp ((tens_n n bot) :: nil)) in pi.
         with ((fun l0 => l0 ++ map wn (tens_n n bot :: nil)) l').
       apply in_inf_map. assumption.
     * symmetry. rewrite fp. apply Permutation_Type_cons_append.
-  + exfalso.
-    cbn in H. rewrite Heq, H0 in H. discriminate H.
+  + exfalso. cbn in H. rewrite Heq, H0 in H. discriminate H.
 Qed.
 
 Lemma parr_n_to_mix P n l : full_cut P ->
@@ -446,11 +445,7 @@ Definition pfrag_ll :=  @mk_pfrag atom  pcut_none NoAxioms pmix_none true.
 Definition ll_ll := ll pfrag_ll.
 
 Lemma cut_ll_r A l1 l2 : ll_ll (dual A :: l1) -> ll_ll (A :: l2) -> ll_ll (l2 ++ l1).
-Proof.
-intros pi1 pi2.
-eapply cut_r_axfree; try eassumption.
-intros a; destruct a.
-Qed.
+Proof. intros pi1 pi2. refine (cut_r_axfree _ pi1 pi2). intros []. Qed.
 
 Lemma cut_ll_admissible l : ll (cutupd_pfrag pfrag_ll pcut_all) l -> ll_ll l.
 Proof.
@@ -705,8 +700,7 @@ remember (axupd_pfrag P (existT (fun x => x -> _) _
                                    | inr tt => parr one one :: parr bot bot :: nil
                                    end))) as P'.
 apply (@ax_gen _ P') ; (try now (rewrite HeqP'; cbn)); [ | assumption ].
-clear - HeqP'; cbn; intros a.
-revert a; rewrite HeqP'; intros a; destruct a; cbn.
+clear - HeqP'. cbn. rewrite HeqP'. intros []; cbn.
 - assert ({ b | projT2 (pgax P) p =
                 projT2 (pgax (axupd_pfrag P (existT (fun x => x -> _) _
                        (fun a => match a with
@@ -743,7 +737,7 @@ apply (stronger_pfrag _
                                     | inr (A,B) => parr (dual B) (dual A) :: parr A B :: nil
                                     end)))) in pi.
 - eapply ax_gen; try eassumption; try reflexivity.
-  clear - HeqP'; cbn; intros a; destruct a.
+  clear - HeqP'. cbn. intros [].
   + assert ({ b | projT2 (pgax P) p = projT2 (pgax P') b })
       as [b ->] by (now rewrite HeqP'; exists p).
     apply gax_r.
@@ -757,13 +751,13 @@ apply (stronger_pfrag _
     change ((B :: dual B :: nil) ++ dual A :: A :: nil)
       with (concat ((B :: dual B :: nil) :: (dual A :: A :: nil) :: nil)).
     apply mix_r.
-    * rewrite HeqP'; reflexivity.
+    * rewrite HeqP'. reflexivity.
     * apply Forall_inf_cons.
       -- apply ax_exp.
       -- apply Forall_inf_cons; [ | apply Forall_inf_nil].
          apply ex_r with (A :: dual A :: nil); [ apply ax_exp | apply PCPermutation_Type_swap ].
-- rewrite HeqP'; repeat split; cbn; intros; try reflexivity.
-  + exists a; reflexivity.
+- rewrite HeqP'. repeat split; cbn; intros; try reflexivity.
+  + exists a. reflexivity.
   + repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
 Qed.
 
@@ -850,15 +844,13 @@ Lemma mix02_to_ll P (fp : pperm P = true) b1 b2 bp l :
   ll P (wn (tens (wn one) (wn one)) :: l).
 Proof.
 intros pi.
-eapply (ext_wn_param fp (tens (wn one) (wn one) :: nil)) in pi.
-- eapply ex_r; [ eassumption | ].
-  symmetry. apply PCPermutation_Type_cons_append.
-- now intros Hcut.
+eapply ex_r; [ | symmetry; apply PCPermutation_Type_cons_append ].
+refine (ext_wn_param fp _ (tens (wn one) (wn one) :: nil) _ _ pi).
+- reflexivity.
 - cbn. intros a.
   eapply ex_r; [ | apply PCPermutation_Type_cons_append ].
   apply wk_r, gax_r.
-- intros L Hpmix eqpmix FL.
-  destruct L.
+- intros L Hpmix eqpmix FL. destruct L.
   + apply de_r.
     change nil with (@nil formula ++ nil).
     apply tens_r; apply de_r, one_r.
@@ -941,13 +933,14 @@ Lemma mix02_to_ll'' P (fp : pperm P = true) b0 b2 bp l :
   ll P (wn one :: wn (tens (wn one) bot) :: l).
 Proof.
 intros pi.
-eapply (@ext_wn_param _ _ _ fp _ (one :: tens (wn one) bot :: nil)) in pi.
-- eapply ex_r; [ eassumption | rewrite fp; cbn ].
-  symmetry; etransitivity; [ apply Permutation_Type_swap | ].
-  etransitivity; [ apply Permutation_Type_cons_append | ].
-  cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
-  apply Permutation_Type_cons_append.
-- now intros Hcut.
+apply (ex_r (l ++ map wn (one :: tens (wn one) bot :: nil))).
+2:{ rewrite fp. cbn.
+    symmetry. etransitivity; [ apply Permutation_Type_swap | ].
+    etransitivity; [ apply Permutation_Type_cons_append | ].
+    cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
+    apply Permutation_Type_cons_append. }
+refine (ext_wn_param fp _ (one :: tens (wn one) bot :: nil) _ _ pi).
+- reflexivity.
 - cbn. intros a.
   eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
   apply wk_r, wk_r, gax_r.

@@ -5,6 +5,7 @@ From OLlibs Require Import Datatypes_more funtheory infinite List_more Dependent
 From Yalla Require Import subs isubs.
 From Yalla Require Export ill_vs_ll.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -31,7 +32,7 @@ Definition i2a a :=
   | None => Na
   | Some x => p2a x
   end.
-Definition a2i := fun a => Some (Atom2PreIAtom a).
+Definition a2i a := Some (Atom2PreIAtom a).
 Lemma a2a_i : retract i2a a2i.
 Proof. intros a. unfold i2a, a2i. apply (proj3_sig (bijective_inverse Atom2PreIAtom_bij)). Qed.
 Lemma i2i_not_atN a : a <> atN -> a2i (i2a a) = a.
@@ -42,18 +43,15 @@ f_equal. destruct (bijective_inverse Atom2PreIAtom_bij). trivial.
 Qed.
 Lemma i2a_inv_atN [i] : i2a i = i2a atN -> {i = atN} + {i = a2i (i2a atN)}.
 Proof.
-intros Heq. destruct i.
-- right.
-  enough (a2i (i2a (Some c)) = Some c) as Heqc by (rewrite <- Heqc; f_equal; assumption).
-  apply i2i_not_atN. intros [=].
-- left. reflexivity.
+intros Heq. destruct i; [ right | left; reflexivity ].
+enough (a2i (i2a (Some c)) = Some c) as Heqc by (rewrite <- Heqc; f_equal; assumption).
+apply i2i_not_atN. intros [=].
 Qed.
 Lemma ateq_a2i (a b : atom_inf) : ateq a b = true <-> iateq (a2i a) (a2i b) = true.
 Proof.
 unfold ateq, iateq. rewrite ? eqb_eq. split; intros Heq.
-- subst. reflexivity.
-- apply section_injective with (g := i2a) in Heq; [ assumption | ].
-  exact a2a_i.
+- rewrite Heq. reflexivity.
+- exact (section_injective a2a_i _ _ Heq).
 Qed.
 Lemma i2a_fin a : { l & forall i, iffT (a = i2a i) (In_inf i l) }.
 Proof.
@@ -78,8 +76,7 @@ Definition i2ac a :=
 Lemma i2ac_inj : injective i2ac.
 Proof.
 intros a b. destruct a, b; intros Heq; inversion Heq as [Heq']; subst.
-- f_equal.
-  apply atom2atom_inj in Heq'.
+- f_equal. apply atom2atom_inj in Heq'.
   apply (section_injective (proj2_sig (sig_of_sig2 ((bijective_inverse Atom2PreIAtom_bij))))).
   assumption.
 - exfalso. symmetry in Heq'. apply (proj2_sig (projT3 Atom_self_inj)) in Heq' as [].
@@ -111,8 +108,7 @@ Proof.
 intros pi.
 rewrite <- (app_nil_r _), <- app_comm_cons.
 eapply ex_ir; [ | symmetry; rewrite Hperm; apply Permutation_Type_middle ].
-rewrite <- (app_nil_l _).
-apply lmap_ilr; assumption.
+rewrite <- (app_nil_l _). apply lmap_ilr; assumption.
 Qed.
 
 (** Definition of the translation of formulas *)
@@ -356,8 +352,8 @@ Definition p2ipfrag P := {|
                   (fun a => (map trans (projT2 (pgax P) a), R));
   ipperm := pperm P |}.
 
-Context { P : @pfrag atom }.
-Hypothesis P_perm : pperm P = true.
+Context {P : @pfrag atom}.
+Variable P_perm : pperm P = true.
 
 
 (** The translation maps [ll] proofs into [ill] proofs
@@ -369,7 +365,7 @@ Lemma ll_to_ill_trans_gen l l0 :
                Forall_Proofs (fun l pi => ill (p2ipfrag P) (map ioc l0 ++ map trans l) R) FL ->
                ill (p2ipfrag P) (map ioc l0 ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map ioc l0 ++ map trans l) R.
-Proof.
+Proof using P_perm.
 intros Hmix Hll.
 assert (Hax := @ax_exp_ill _ (p2ipfrag P) R).
 rewrite <- (app_nil_l (R :: _)) in Hax.
@@ -480,18 +476,16 @@ induction Hll using ll_nested_ind.
   apply (gax_ir a).
 Qed.
 
-Theorem ll_to_ill_trans l :
+Lemma ll_to_ill_trans l :
   (forall L : list (list formula),
      pmix P (length L) = true ->
      forall FL : Forall_inf (ll P) L,
        Forall_Proofs (fun l0 (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
        ill (p2ipfrag P) (map ioc nil ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map trans l) R.
-Proof.
-intros Hmix Hll.
-rewrite <- (app_nil_l (map _ _)).
-change nil with (map (@ioc preiatom) nil).
-apply ll_to_ill_trans_gen; assumption.
+Proof using P_perm.
+intros Hmix Hll. rewrite <- (app_nil_l (map _ _)).
+change nil with (map (@ioc preiatom) nil). apply ll_to_ill_trans_gen; assumption.
 Qed.
 
 End RTranslation.

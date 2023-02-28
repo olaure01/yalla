@@ -1,8 +1,11 @@
+(** * Various structures on atoms required in the Yalla library *)
+(** and consistency checks *)
+
 From OLlibs Require Import Datatypes_more funtheory List_Type.
 From OLlibs Require Export infinite.
 
 
-(** * Classes containing constraints on atom sets *)
+(** ** Classes containing constraints on atom sets *)
 
 Class AtomType_self (A : DecType) := Atom_self_inj : self_injective A.
 
@@ -63,9 +66,9 @@ Class AtomIAtomTAtomType (A : DecType) (I : DecType) (T : DecType) := {
   AtomIAtomTAtom_TAtom :> TLAtomType A I T }.
 
 
-(** * Consistency checks *)
+(** ** Consistency checks *)
 
-(** ** A global class containing all required constraints *)
+(** *** A global class containing all required constraints *)
 
 Class FullAtoms := {
   FAtom : InfDecType;
@@ -81,7 +84,7 @@ Class FullAtoms := {
   FTAtom2PreIAtom : FTAtom -> FPreIAtom;
   FTAtom2PreIAtom_bij : bijective FTAtom2PreIAtom }.
 
-(** ** Instances for all previous classes from the global one *)
+(** *** Instances for all previous classes from the global one *)
 
 #[local] Instance FAtomType_self (C : FullAtoms) : AtomType_self FAtom | 50 := FAtom_self.
 #[local] Instance FAtomType_into_nat (C : FullAtoms) : AtomType_into_nat FAtom | 50 := FAtom2nat.
@@ -112,7 +115,7 @@ Class FullAtoms := {
   AtomIAtomTAtom_Atom2IAtom := FAtom2IAtomType_self C;
   AtomIAtomTAtom_TAtom := FTLAtomType C |}.
 
-(** ** Consistency by concrete instance based on [nat] *)
+(** *** Consistency by concrete instance based on [nat] *)
 
 Definition option_nat_to_nat := option_eval_default 0 S.
 

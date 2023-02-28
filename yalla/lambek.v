@@ -1,5 +1,3 @@
-(* lambek example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: a variant of the Lambek calculus
   tensor-free Lambek calculus with additive conjunction and its unit *)
 
@@ -10,12 +8,13 @@ From OLlibs Require Import dectype funtheory List_more Permutation_Type.
 
 From Yalla Require ill_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
 Section Atoms.
 
-Context { preiatom : DecType }.
+Context {preiatom : DecType}.
 
 (** ** 1. define formulas *)
 
@@ -132,7 +131,7 @@ intros pi1%l2illfrag pi2%l2illfrag.
 apply illfrag2l.
 rewrite 2 map_app.
 rewrite map_app in pi2.
-eapply ill_cut.cut_ir_axfree; [ intros a; destruct a | | ]; eassumption.
+eapply ill_cut.cut_ir_axfree; [ intros [] | | ]; eassumption.
 Qed.
 
 End Atoms.

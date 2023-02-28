@@ -138,7 +138,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
 - apply (Hcut a0), Heq.
 Qed.
 
-Theorem cut_at At P X (P_gax_cut : cut_closed_form P (var X)) l1 l2 l3 l4 :
+Lemma cut_at At P X (P_gax_cut : cut_closed_form P (var X)) l1 l2 l3 l4 :
   ll P (l1 ++ var X :: l2) -> ll P (l3 ++ covar X :: l4) -> @ll At P (l1 ++ l4 ++ l3 ++ l2).
 Proof.
 enough (forall s A l0 l1 l2 (pi1: ll P (A :: l0)) (pi2 : ll P (l1 ++ dual A :: l2)),

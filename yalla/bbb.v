@@ -3,6 +3,7 @@
 From OLlibs Require Import infinite List_more Permutation_Type_more Dependent_Forall_Type.
 From Yalla Require Import ll_fragments.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -477,7 +478,7 @@ Qed.
 
 (** ** Cut admissibility for [ll_bbb] *)
 
-Theorem cut_bbb_r A l1 l2 : ll_bbb (dual A :: l1) -> ll_bbb (A :: l2) -> ll_bbb (l2 ++ l1).
+Lemma cut_bbb_r A l1 l2 : ll_bbb (dual A :: l1) -> ll_bbb (A :: l2) -> ll_bbb (l2 ++ l1).
 Proof.
 intros pi1%bbb_to_ll pi2%bbb_to_ll.
 eapply ex_r in pi1; [ | apply Permutation_Type_swap ].
@@ -518,7 +519,7 @@ apply mix2_bb_r.
   apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
 Qed.
 
-Theorem bb_to_bbb l : llR (oc bot) l -> ll_bbb l.
+Lemma bb_to_bbb l : llR (oc bot) l -> ll_bbb l.
 Proof.
 intros pi. induction pi; try (constructor; assumption).
 - econstructor; eassumption.
@@ -565,7 +566,7 @@ apply mix2_bb_r.
 Qed.
 *)
 
-Example bbb_ex : ll_bbb (one :: oc (tens (parr one one) bot) :: nil).
+Lemma bbb_ex : ll_bbb (one :: oc (tens (parr one one) bot) :: nil).
 Proof.
 change (one :: oc (tens (parr one one) bot) :: nil)
   with ((@one atom :: nil) ++ (oc (tens (parr one one) bot) :: nil)).
@@ -585,7 +586,7 @@ apply mix2_bbb_r.
     apply mix_r; constructor.
 Qed.
 
-Example bb_ex : llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
+Lemma bb_ex : llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
 Proof.
 assert (Hax := @gax_r _ (@pfrag_llR atom (oc bot)) false); cbn in Hax.
 assert (llR (oc bot) ((one :: nil) ++ one :: nil)) as Hr by (eapply mix2_bb_r; apply one_r).
@@ -749,8 +750,8 @@ Section bbb0_with_cut.
 
 Variable cut_bbb0_r : forall A l1 l2, ll_bbb0 (dual A :: l1) -> ll_bbb0 (A :: l2) -> ll_bbb0 (l2 ++ l1).
 
-Theorem llR_oc_bot_to_bbb0_cut l : llR (oc bot) l -> ll_bbb0 l.
-Proof.
+Lemma llR_oc_bot_to_bbb0_cut l : llR (oc bot) l -> ll_bbb0 l.
+Proof using cut_bbb0_r.
 intros pi. induction pi; (try discriminate); try now constructor.
 - eapply ex_bbb0_r; eassumption.
 - eapply ex_bbb0_r; [ eassumption | ].
@@ -766,8 +767,8 @@ intros pi. induction pi; (try discriminate); try now constructor.
       apply mix_r; constructor.
 Qed.
 
-Example bbb0_cut_ex : ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil).
-Proof. apply llR_oc_bot_to_bbb0_cut, bb_ex. Qed.
+Lemma bbb0_cut_ex : ll_bbb0 (one :: oc (tens (parr one one) bot) :: nil).
+Proof using cut_bbb0_r. apply llR_oc_bot_to_bbb0_cut, bb_ex. Qed.
 
 End bbb0_with_cut.
 

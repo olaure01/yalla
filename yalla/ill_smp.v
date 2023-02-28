@@ -263,7 +263,7 @@ Proof.
 intros pi1%ill2illfrag pi2%ill2illfrag.
 apply illfrag2ill.
 rewrite map_app, <- (app_nil_l _).
-eapply ill_cut.cut_ir_axfree; [ intros a; destruct a | | ]; eassumption.
+eapply ill_cut.cut_ir_axfree; [ intros [] | | ]; eassumption.
 Qed.
 
 End Atoms.

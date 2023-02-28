@@ -1,5 +1,3 @@
-(* mell_msetoid example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 
 From Coq Require Import CMorphisms.
@@ -10,6 +8,7 @@ From OLlibs Require Import funtheory dectype fmsetoidlist_Type List_more Permuta
 
 From Yalla Require ll_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -20,14 +19,10 @@ Context {atom : DecType}.
 (** ** 1. define formulas *)
 
 Inductive formula :=
-| var : atom -> formula
-| covar : atom -> formula
-| one : formula
-| bot : formula
-| tens : formula -> formula -> formula
-| parr : formula -> formula -> formula
-| oc : formula -> formula
-| wn : formula -> formula.
+| var (_ : atom) | covar (_ : atom)
+| one | bot
+| tens (_ _ : formula) | parr (_ _ : formula)
+| oc (_ : formula) | wn (_ : formula).
 
 Fixpoint dual A :=
 match A with
@@ -267,13 +262,13 @@ destruct pi1 as [pi1]; destruct pi2 as [pi2]; cbn in pi1, pi2.
 apply mellfrag2mell.
 eapply ll_def.ex_r; [ | apply Permutation_Type_map; symmetry; apply elts_sum ].
 rewrite map_app.
-eapply ll_cut.cut_r_axfree; [ intros a; destruct a | | eassumption ].
+eapply ll_cut.cut_r_axfree; [ intros [] | | eassumption ].
 assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
                          (map mell2ll (dual A :: elts m2)))
   as Helt2 by apply Permutation_Type_map, elts_add.
 cbn in Helt2; rewrite <- mell2ll_dual in Helt2.
 rewrite <- mell2ll_dual in pi2.
-eapply ll_def.ex_r; [ | apply Helt2 ]; assumption.
+eapply ll_def.ex_r; [ | apply Helt2 ]. assumption.
 Qed.
 
 End Atoms.

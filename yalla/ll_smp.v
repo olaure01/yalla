@@ -1,5 +1,3 @@
-(* ll example file for yalla library *)
-
 (** * Example of a concrete use of the yalla library: LL *)
 
 From Coq Require Import CMorphisms.
@@ -11,6 +9,7 @@ From OLlibs Require Import funtheory infinite List_more Permutation_Type_more.
 From Yalla Require Import atoms.
 From Yalla Require ll_fragments.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -194,11 +193,9 @@ Qed.
 Lemma cut_r A l1 l2 : ll (A :: l1) -> ll (dual A :: l2) -> ll (l1 ++ l2).
 Proof.
 intros pi1%ll2llfrag pi2%ll2llfrag.
+cbn in pi2. rewrite <- ll2ll_dual in pi2.
 apply llfrag2ll.
-rewrite map_app. eapply ll_cut.cut_r_axfree.
-- intros [].
-- cbn in pi2. rewrite <- ll2ll_dual in pi2. eassumption.
-- assumption.
+rewrite map_app. refine (ll_cut.cut_r_axfree _ pi2 pi1). intros [].
 Qed.
 
 End Atoms.
