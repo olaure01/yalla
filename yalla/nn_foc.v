@@ -103,36 +103,24 @@ Lemma pntrans_to_trans (A : formula) : ill_ll (tl2ill (ntrans A) :: nil) (trans 
 Proof.
 intros pi.
 destruct (polarity A).
-- apply negR_ilr; [ reflexivity | | ].
-  + apply ax_ir.
-  + rewrite <- (proj2 (pntrans_neg _)); assumption.
+- apply negR_ilr_head; [ reflexivity | ].
+  rewrite <- (proj2 (pntrans_neg _)); assumption.
 - rewrite (proj1 (pntrans_neg _)); [ | assumption ].
-  cons2app.
-  apply neg_ilr, neg_irr.
-  eapply ex_ir; [ | apply Permutation_Type_swap ].
-  apply negR_ilr; [ reflexivity | | assumption ].
-  apply ax_ir.
+  cons2app. apply neg_ilr, neg_irr.
+  cons2app. apply negR_ilr, pi.
 Qed.
 
 Lemma ntrans_to_trans A : ill_ll (tl2ill (ntrans A) :: nil) (trans N A).
 Proof.
 induction A; simpl.
 - apply negR_irr.
-  cons2app.
-  apply neg_ilr.
-  rewrite a2i_a2i.
-  apply ax_ir.
-- rewrite a2i_a2i.
-  apply ax_ir.
+  cons2app. apply neg_ilr.
+  rewrite a2i_a2i. apply ax_ir.
+- rewrite a2i_a2i. apply ax_ir.
 - apply negR_irr.
-  cons2app.
-  apply neg_ilr.
-  rewrite <- (app_nil_l _).
-  apply one_ilr.
-  apply one_irr.
-- rewrite <- (app_nil_l _).
-  apply one_ilr.
-  apply one_irr.
+  cons2app. apply neg_ilr.
+  rewrite <- (app_nil_l _). apply one_ilr, one_irr.
+- rewrite <- (app_nil_l _). apply one_ilr, one_irr.
 - apply negR_irr.
   assert (H' := @ineg_to_ilmap _ ipfrag_ill
                   (itens (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
@@ -153,16 +141,11 @@ induction A; simpl.
     apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in H2.
     apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHA2.
     refine (cut_ir _ _ H2 IHA2); reflexivity.
-- rewrite <- (app_nil_l _).
-  apply tens_ilr.
-  list_simpl.
-  cons2app.
-  apply tens_irr; assumption.
+- rewrite <- (app_nil_l _). apply tens_ilr.
+  list_simpl. cons2app. apply tens_irr; assumption.
 - apply negR_irr.
-  rewrite <- (app_nil_l _).
-  apply zero_ilr.
-- rewrite <- (app_nil_l _).
-  apply zero_ilr.
+  rewrite <- (app_nil_l _). apply zero_ilr.
+- rewrite <- (app_nil_l _). apply zero_ilr.
 - apply negR_irr.
   assert (H' := @ineg_to_ilmap _ ipfrag_ill
                   (iplus (tl2ill (ptrans A1)) (tl2ill (ptrans A2)))).
@@ -183,28 +166,18 @@ induction A; simpl.
     apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in H2.
     apply (@stronger_ipfrag _ _ (cutupd_ipfrag ipfrag_ill ipcut_all) (cutupd_ipfrag_true _)) in IHA2.
     refine (cut_ir _ _ H2 IHA2); reflexivity.
-- rewrite <- (app_nil_l _).
-  apply plus_ilr ; list_simpl.
-  + apply plus_irr1; assumption.
-  + apply plus_irr2; assumption.
+- rewrite <- (app_nil_l _). apply plus_ilr; list_simpl; [ apply plus_irr1 | apply plus_irr2 ]; assumption.
 - apply negR_irr.
-  cons2app.
-  apply neg_ilr.
+  cons2app. apply neg_ilr.
   change (ioc (negR N (trans N A)) :: nil)
     with (map ioc (negR N (trans N A) :: nil)).
   apply oc_irr.
-  rewrite <- (app_nil_l _).
-  apply de_ilr.
-  apply neg_irr.
-  eapply ex_ir ; [ | apply Permutation_Type_swap ].
-  apply negR_ilr; [ reflexivity | | assumption ].
-  apply ax_ir.
+  rewrite <- (app_nil_l _). apply de_ilr, neg_irr. cons2app. apply negR_ilr. assumption.
 - apply pntrans_to_trans in IHA.
   change (ioc (ineg (tl2ill (ptrans A))) :: nil)
     with (map ioc (ineg (tl2ill (ptrans A)) :: nil)).
   apply oc_irr.
-  rewrite <- (app_nil_l _).
-  apply de_ilr, negR_irr; assumption.
+  rewrite <- (app_nil_l _). apply de_ilr, negR_irr. assumption.
 Qed.
 
 Definition tpfrag_tl := @mk_tpfrag tatom tpcut_none NoTAxioms true.
@@ -246,42 +219,22 @@ Qed.
 Section Focusing.
 
 Inductive otl : list tformula -> option tformula -> Type :=
-| ax_otr : forall X, otl (tvar X :: nil) (Some (tvar X))
-| ex_otr : forall l1 l2 A, otl l1 A -> Permutation_Type l1 l2 ->
-                           otl l2 A
+| ax_otr X : otl (tvar X :: nil) (Some (tvar X))
+| ex_otr l1 l2 A : otl l1 A -> Permutation_Type l1 l2 -> otl l2 A
 | one_otrr : otl nil (Some tone)
-| one_otlr : forall l1 l2 A, otl (l1 ++ l2) A ->
-                             otl (l1 ++ tone :: l2) A
-| tens_otrr : forall A B l1 l2,
-                    otl l1 (Some A) -> otl l2 (Some B) ->
-                    otl (l1 ++ l2) (Some (ttens A B))
-| tens_otlr : forall A B l1 l2 C,
-                    otl (l1 ++ A :: B :: l2) C ->
-                    otl (l1 ++ ttens A B :: l2) C
-| neg_otrr : forall A l,
-                    otl (A :: l) None ->
-                    otl l (Some (tneg A))
-| neg_otlr : forall A l, otl l (Some A) ->
-                         otl (l ++ tneg A :: nil) None
-| zero_otlr : forall l1 l2 C, otl (l1 ++ tzero :: l2) C
-| plus_otrr1 : forall A B l, otl l (Some A) ->
-                             otl l (Some (tplus A B))
-| plus_otrr2 : forall A B l, otl l (Some A) ->
-                             otl l (Some (tplus B A))
-| plus_otlr : forall A B l1 l2 C,
-                        otl (l1 ++ A :: l2) C ->
-                        otl (l1 ++ B :: l2) C ->
-                        otl (l1 ++ tplus A B :: l2) C
-| oc_otrr : forall A l, otl (A :: map toc l) None ->
-                        otl (map toc l) (Some (toc (tneg A)))
-| de_otlr : forall A l, otl l (Some A) ->
-                        otl (l ++ toc (tneg A) :: nil) None
-| wk_otlr : forall A l1 l2 C,
-                        otl (l1 ++ l2) C ->
-                        otl (l1 ++ toc A :: l2) C
-| co_otlr : forall A l1 l2 C,
-                        otl (l1 ++ toc A :: toc A :: l2) C ->
-                        otl (l1 ++ toc A :: l2) C.
+| one_otlr l1 l2 A : otl (l1 ++ l2) A -> otl (l1 ++ tone :: l2) A
+| tens_otrr A B l1 l2 : otl l1 (Some A) -> otl l2 (Some B) -> otl (l1 ++ l2) (Some (ttens A B))
+| tens_otlr A B l1 l2 C : otl (l1 ++ A :: B :: l2) C -> otl (l1 ++ ttens A B :: l2) C
+| neg_otrr A l : otl (A :: l) None -> otl l (Some (tneg A))
+| neg_otlr A l : otl l (Some A) -> otl (l ++ tneg A :: nil) None
+| zero_otlr l1 l2 C : otl (l1 ++ tzero :: l2) C
+| plus_otrr1 A B l : otl l (Some A) -> otl l (Some (tplus A B))
+| plus_otrr2 A B l : otl l (Some A) -> otl l (Some (tplus B A))
+| plus_otlr A B l1 l2 C : otl (l1 ++ A :: l2) C -> otl (l1 ++ B :: l2) C -> otl (l1 ++ tplus A B :: l2) C
+| oc_otrr A l : otl (A :: map toc l) None -> otl (map toc l) (Some (toc (tneg A)))
+| de_otlr A l : otl l (Some A) -> otl (l ++ toc (tneg A) :: nil) None
+| wk_otlr A l1 l2 C : otl (l1 ++ l2) C -> otl (l1 ++ toc A :: l2) C
+| co_otlr A l1 l2 C : otl (l1 ++ toc A :: toc A :: l2) C -> otl (l1 ++ toc A :: l2) C.
 
 Instance otl_perm Pi : Proper ((@Permutation_Type _) ==> arrow) (fun l => otl l Pi).
 Proof. intros l1 l2 HP pi. eapply ex_otr; eassumption. Qed.
@@ -580,9 +533,9 @@ Proof.
 intros pi.
 replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
 eapply tl_to_otl_neg; [ eassumption | | | list_simpl; reflexivity ].
-+ clear; induction l; constructor; [ | assumption ].
-  eexists; reflexivity.
-+ intros D HD; inversion HD.
++ clear. induction l; constructor; [ | assumption ].
+  eexists. reflexivity.
++ intros D [=].
 Qed.
 
 (* ** From [tl] to [llfoc] *)
@@ -809,10 +762,10 @@ intros pi; induction pi; intros l0 Heq;
   eapply ex_fr; [ apply co_fr | apply (@Permutation_Type_middle_polcont atom_inf) ].
   eapply ex_fr; [ apply HpiP0 | ].
   assert (Permutation_Type (l3 ++ wn x :: wn x :: l5) (wn x :: wn x :: l3 ++ l5)) as HP.
-  { cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail.
-    list_simpl; etransitivity; [ apply Permutation_Type_app_comm | reflexivity ]. }
-  polfoccont_cbn; destruct (polarity D); [ assumption | ].
-  cons2app; rewrite ? app_assoc; apply Permutation_Type_cons_app; list_simpl; assumption.
+  { cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
+    list_simpl. etransitivity; [ apply Permutation_Type_app_comm | reflexivity ]. }
+  polfoccont_cbn. destruct (polarity D); [ assumption | ].
+  cons2app. rewrite ? app_assoc. apply Permutation_Type_cons_app. list_simpl. assumption.
 Qed.
 
 Lemma tl_to_llfoc (l : list formula) : tl_ll (map ntrans l) None -> llfoc l None.
@@ -822,7 +775,7 @@ End Focusing.
 
 
 Lemma weak_focusing (l : list formula) : ll_ll l -> llfoc l None.
-Proof. intros pi. apply tl_to_llfoc, ll_to_tl. assumption. Qed.
+Proof. intros pi. apply tl_to_llfoc, ll_to_tl, pi. Qed.
 
 Lemma focusing (l : list formula) : ll_ll l -> llFoc l None.
 Proof. intros pi%weak_focusing. refine (fst (fst (llfoc_to_llFoc pi _)) eq_refl). unfold lt. reflexivity. Qed.

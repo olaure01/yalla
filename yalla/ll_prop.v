@@ -21,7 +21,7 @@ Lemma weak_consistency_axfree P (Hgax : no_ax P) (Hmix0 : pmix P 0 = false) : no
 Proof.
 intros pi.
 apply cut_admissible_axfree in pi; [ | assumption ].
-remember nil as l. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
+remember nil as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
 - symmetry in p.
   apply IHpi, (PCPermutation_Type_nil _ _ p).
 - apply IHpi.
@@ -39,7 +39,7 @@ Lemma strong_consistency_axfree P (Hgax : no_ax P) : notT (ll P (zero :: nil)).
 Proof.
 intros pi.
 apply cut_admissible_axfree in pi; [ | assumption ].
-remember (zero :: nil) as l. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
+remember (zero :: nil) as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
 - symmetry in p.
   apply IHpi, (PCPermutation_Type_length_1_inv _ _ _ p).
 - apply IHpi.
@@ -106,7 +106,7 @@ apply (conservativity P_cutfree).
   intros C HAC.
   transitivity A; assumption.
 - clear. induction l as [|A l IHl]; constructor.
-  + constructor; constructor.
+  + constructor. constructor.
   + eapply Forall_inf_arrow, IHl.
     intros B Hl. right. exact Hl.
 Qed.
@@ -132,7 +132,7 @@ Proof using P_axfree.
 intros HFS.
 apply conservativity_axfree; [ assumption | assumption | | ].
 - apply cut_admissible_axfree; assumption.
-- apply (Forall_sequent_is _ _ HFS).
+- exact (Forall_sequent_is _ _ HFS).
 Qed.
 
 (** Subformula property:
@@ -142,12 +142,10 @@ Proof using P_axfree.
 refine (conservativity_axfree P_axfree _ pi _).
 - intros A Hf B Hs.
   eapply Exists_impl, Hf.
-  intros C HAC.
-  transitivity A; assumption.
-- clear. induction l; constructor.
-  + constructor; constructor.
-  + eapply Forall_inf_arrow, IHl. clear. cbn.
-    intros A Hl. right. exact Hl.
+  intros C HAC. transitivity A; assumption.
+- clear. induction l as [|a l IHl]; constructor.
+  + constructor. constructor.
+  + eapply Forall_inf_arrow, IHl. intros A Hl. right. exact Hl.
 Qed.
 
 

@@ -8,7 +8,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { preiatom : DecType } { IAtoms : IAtomType_into_nat preiatom }.
+Context {preiatom : DecType} {IAtoms : IAtomType_into_nat preiatom}.
 
 (** ** Encoding of [iformula] into [nat]-labelled trees for ordering *)
 

@@ -40,12 +40,10 @@ match A with
 end.
 
 (** Atomic [iformula] *)
-Inductive iatomic : iformula -> Type :=
-| iatomic_var x : iatomic (ivar x).
+Variant iatomic : iformula -> Type := | iatomic_var x : iatomic (ivar x).
 
 (* Unused
-Inductive iatomic_Prop : iformula -> Prop :=
-| iatomic_Prop_var : forall x, iatomic_Prop (ivar x).
+Variant iatomic_Prop : iformula -> Prop := | iatomic_Prop_var : forall x, iatomic_Prop (ivar x).
 
 Lemma iatomic_Prop_iatomic A : iatomic_Prop A -> iatomic A.
 Proof. induction A; intros Hat; try (exfalso; inversion Hat; fail); constructor. Qed.

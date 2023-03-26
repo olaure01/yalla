@@ -14,7 +14,7 @@ Context {atom : InfDecType}.
 Notation formula := (@formula atom).
 
 (** ** Synchronous and asynchronous formulas *)
-Inductive sformula : formula -> Type :=
+Variant sformula : formula -> Type :=
 | pvar x : sformula (var x)
 | pone : sformula one
 | ptens A B : sformula (tens A B)
@@ -22,7 +22,7 @@ Inductive sformula : formula -> Type :=
 | pplus A B : sformula (aplus A B)
 | poc A : sformula (oc A).
 
-Inductive aformula : formula -> Type :=
+Variant aformula : formula -> Type :=
 | ncovar x : aformula (covar x)
 | nbot : aformula bot
 | nparr A B : aformula (parr A B)

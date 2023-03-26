@@ -193,19 +193,18 @@ Lemma ie_ie A : ielem A -> ill_ll (A :: nil) (negR R (trans R (unill A))).
 Proof.
 induction A; intros Hgfn; inversion Hgfn; cbn; unfold trans.
 - unfold IAtom2Atom; rewrite (i2i_not_atN H0).
-  apply negR_irr, negR_ilr; [ reflexivity | | ]; apply ax_exp_ill.
-- apply negR_irr, negR_ilr; [ reflexivity | | ]; apply ax_exp_ill.
+  apply negR_irr, negR_ilr_head, ax_exp_ill. reflexivity.
+- apply negR_irr, negR_ilr_head, ax_exp_ill. reflexivity.
 - apply IHA1 in X.
   apply IHA2 in X0.
-  apply negR_irr, negR_ilr; [ reflexivity | apply ax_exp_ill | ].
+  apply negR_irr, negR_ilr_head; [ reflexivity | ].
   rewrite <- (app_nil_l _). apply tens_ilr.
   list_simpl. cons2app. apply tens_irr; assumption.
-- apply negR_irr.
-  rewrite <- (app_nil_l _). apply zero_ilr.
+- apply negR_irr. rewrite <- (app_nil_l _). apply zero_ilr.
 - rewrite <- (app_nil_l _). apply zero_ilr.
 - apply IHA1 in X.
   apply IHA2 in X0.
-  apply negR_irr, negR_ilr; [ reflexivity | apply ax_exp_ill | ].
+  apply negR_irr, negR_ilr_head; [ reflexivity | ].
   rewrite <- (app_nil_l _). apply plus_ilr; constructor; assumption.
 Qed.
 
@@ -233,7 +232,7 @@ eapply ex_ir; [ | apply Permutation_Type_swap ].
 cons2app. rewrite <- (app_nil_l _). eapply cut_ir_axfree.
 - intros [].
 - apply ie_ie. assumption.
-- apply negR_ilr; [ reflexivity | | ]; apply ax_exp_ill.
+- apply negR_ilr_head; [ reflexivity | ]. apply ax_exp_ill.
 Qed.
 
 Lemma ie_dual_diag  A : ielem A -> ill_ll (trans A (dual (unill A)) :: nil) A.
@@ -281,11 +280,8 @@ induction Hll; cbn.
 - cbn in IHHll. rewrite map_map in IHHll. cbn in IHHll. rewrite <- map_map in IHHll.
   apply negR_irr, oc_irr in IHHll.
   list_simpl in IHHll. rewrite ? map_map in IHHll.
-  apply negR_ilr; [ reflexivity | assumption | rewrite ? map_map; assumption ].
-- rewrite <- (app_nil_l (ioc _ :: _)). apply de_ilr.
-  eapply ex_ir; [ | apply Permutation_Type_middle ].
-  apply negR_ilr; [ reflexivity | assumption | ].
-  apply negR_irr; assumption.
+  apply negR_ilr_head; [ reflexivity | rewrite ? map_map; assumption ].
+- rewrite <- (app_nil_l (ioc _ :: _)). apply de_ilr, negR_ilr_head, negR_irr, IHHll. reflexivity.
 - rewrite <- (app_nil_l (ioc _ :: _)). apply wk_ilr. assumption.
 - rewrite <- (app_nil_l (ioc _ :: _)).
   change nil with (map (@ioc preiatom) nil). rewrite <- (app_nil_l (map _ _ ++ _)).
@@ -327,12 +323,11 @@ remember (fresh_of_list l) as z.
 specialize Hill with (ivar (a2i z)).
 apply ill_trans_to_llR in Hill.
 apply (subs_llR bot z) in Hill. subst. simpl subs in Hill.
-rewrite repl_at_eq in Hill.
-- change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
+change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
                     (flat_map atom_list l))
     with (fresh_of_list l) in Hill.
-  rewrite (@subs_fresh_list atom_inf) in Hill. assumption.
-- apply a2a_i.
+destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite Hr2 in Hill.
+rewrite repl_at_eq, (@subs_fresh_list atom_inf) in Hill. assumption.
 Qed.
 
 Lemma llR_bot_to_ll (l : list formula) : llR bot l -> ll_ll l.
@@ -450,21 +445,19 @@ assert (Hz2 := Hz).
 apply Hill in Hz2. clear Hill.
 apply ill_trans_to_llR in Hz2.
 apply (subs_llR bot z) in Hz2. subst.
-simpl in Hz2. destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].
-rewrite Hr2, repl_at_eq in Hz2; [ | reflexivity ].
-eapply (@llR1_R2 _ _ (wn one)) in Hz2.
-- change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
+simpl subs in Hz2. destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite Hr2, repl_at_eq in Hz2.
+change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
                     (flat_map atom_list l))
    with  (fresh_of_list l) in Hz2.
-  rewrite (@subs_fresh_list atom_inf) in Hz2. assumption.
+eapply (@llR1_R2 _ _ (wn one)) in Hz2.
+- rewrite (@subs_fresh_list atom_inf) in Hz2. assumption.
 - cbn. rewrite <- (app_nil_l (wn _ :: _)). apply tens_r.
   + change (wn one :: nil) with (map (@wn atom) (one :: nil)).
     apply oc_r, bot_r, de_r, one_r.
   + apply one_r.
 - apply (ex_r (parr bot (wn one) :: oc bot :: nil)); [ | apply Permutation_Type_swap ].
   apply parr_r, bot_r.
-  change (oc bot) with (@dual atom (wn one)).
-  apply ax_exp.
+  change (oc bot) with (@dual atom (wn one)). apply ax_exp.
 Qed.
 
 Lemma llR_wn_one_to_ll_mix0 (l : list formula) : llR (wn one) l -> ll_mix0 l.
@@ -472,10 +465,8 @@ Proof.
 intros pi. induction pi; (try now constructor); try (econstructor; eassumption).
 - eapply cut_mix0_r; eassumption.
 - destruct a; cbn.
-  + change nil with (map (@wn atom) nil).
-    apply oc_r, bot_r.
-    change (map wn nil) with (concat (@nil (list formula))).
-    apply mix_r; constructor.
+  + change nil with (map (@wn atom) nil). apply oc_r, bot_r.
+    change (map wn nil) with (concat (@nil (list formula))). apply mix_r; constructor.
   + apply wk_r, one_r.
 Qed.
 
@@ -510,9 +501,9 @@ intros Hill.
 remember (fresh_of_list l) as z.
 specialize Hill with (ivar (a2i z)).
 apply ill_trans_to_llR in Hill.
-apply (subs_llR bot z) in Hill ; subst.
-simpl in Hill. destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].
-rewrite Hr2, repl_at_eq in Hill; [ | reflexivity ].
+apply (subs_llR bot z) in Hill. subst.
+simpl subs in Hill. destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].
+rewrite Hr2, repl_at_eq in Hill.
 change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
                   (flat_map atom_list l))
    with  (fresh_of_list l) in Hill.
@@ -578,43 +569,35 @@ intros Hll. induction Hll; (try now (inversion f)); cbn.
   rewrite <- (app_nil_r (map _ l1)).
   eapply (cut_ir_axfree); [ intros [] | eassumption | ].
   eapply ex_ir; [ | apply Permutation_Type_app_comm ]; assumption.
-- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
-  apply one_irr.
-- rewrite <- (app_nil_l (ione :: _)).
-  apply one_ilr; assumption.
-- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
-  list_simpl.
-  eapply ex_ir; [ | apply Permutation_Type_app_comm ].
-  list_simpl in IHHll1; list_simpl in IHHll2.
+- apply negR_ilr_head, one_irr. reflexivity.
+- rewrite <- (app_nil_l (ione :: _)). apply one_ilr. assumption.
+- apply negR_ilr_head; [ reflexivity | ].
+  list_simpl. eapply ex_ir; [ | apply Permutation_Type_app_comm ].
+  list_simpl in IHHll1. list_simpl in IHHll2.
   apply tens_irr; apply negR_irr; assumption.
 - rewrite <- (app_nil_l (itens _ _ :: _)).
   apply tens_ilr.
   eapply ex_ir; [ eassumption | apply Permutation_Type_swap ].
 - rewrite <- (app_nil_l (izero :: _)).
   apply zero_ilr.
-- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
-  apply plus_irr1, negR_irr. assumption.
-- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
-  apply plus_irr2, negR_irr. assumption.
+- apply negR_ilr_head, plus_irr1, negR_irr, IHHll. reflexivity.
+- apply negR_ilr_head, plus_irr2, negR_irr, IHHll. reflexivity.
 - rewrite <- (app_nil_r (map _ _)), <- (app_nil_l (iplus _ _ :: _)).
-  list_simpl in IHHll1; list_simpl in IHHll2.
+  list_simpl in IHHll1. list_simpl in IHHll2.
   apply plus_ilr; list_simpl; [ apply IHHll1 | apply IHHll2 ].
-- apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
-  rewrite map_map; cbn; rewrite <- map_map.
-  cbn in IHHll; rewrite map_map in IHHll.
-  cbn in IHHll; rewrite <- map_map in IHHll.
+- apply negR_ilr_head; [ reflexivity | ].
+  rewrite map_map. cbn. rewrite <- map_map.
+  cbn in IHHll. rewrite map_map in IHHll. cbn in IHHll. rewrite <- map_map in IHHll.
   apply oc_irr, negR_irr. assumption.
 - rewrite <- (app_nil_l (ioc _ :: _)). apply de_ilr.
-  list_simpl. apply negR_ilr; [ reflexivity | apply ax_exp_ill | ].
-  apply negR_irr. assumption.
+  list_simpl. apply negR_ilr_head, negR_irr, IHHll. reflexivity.
 - rewrite <- (app_nil_l (ioc _ :: _)). apply wk_ilr. assumption.
-- rewrite <- 2 (app_nil_l (ioc _ :: _)). change nil with (map (@ioc preiatom) nil).
-  apply co_ilr. assumption.
+- rewrite <- 2 (app_nil_l (ioc _ :: _)). change nil with (map (@ioc preiatom) nil). apply co_ilr. assumption.
 Qed.
 
-(** The following result is the converse of [bb_to_bbb] proved in the [bbb] library *)
+(** The following result is the converse of [bb_to_bbb] proved in bbb.v *)
 
 Lemma bbb_to_bb (l : list formula) : ll_bbb l -> llR (oc bot) l.
-Proof. intros pi. apply ill_trans_to_llR_oc_bot. intros R. apply ll_bbb_to_ill_trans. assumption. Qed.
+Proof. intros pi. apply ill_trans_to_llR_oc_bot. intros R. apply ll_bbb_to_ill_trans, pi. Qed.
 
 End Atoms.

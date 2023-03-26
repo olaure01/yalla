@@ -20,27 +20,15 @@ Context {atom : DecType}.
 
 (** Positive and negative formulas *)
 Inductive pformula :=
-| var : atom -> pformula
-| one : pformula
-| tens : pformula -> pformula -> pformula
-| zero : pformula
-| aplus : pformula -> pformula -> pformula
-| oc : nformula -> pformula
+| var (_ : atom) | one | tens (_ _ : pformula) | zero | aplus (_ _: pformula) | oc (_ : nformula)
 with nformula :=
-| covar : atom -> nformula
-| bot : nformula
-| parr : nformula -> nformula -> nformula
-| top : nformula
-| awith : nformula -> nformula -> nformula
-| wn : pformula -> nformula.
+| covar (_ : atom) | bot | parr (_ _ : nformula) | top | awith (_ _ : nformula) | wn (_ : pformula).
 
 Scheme pform_ind := Induction for pformula Sort Prop
   with nform_ind := Induction for nformula Sort Prop.
 Combined Scheme polform_ind from pform_ind, nform_ind.
 
-Inductive formula :=
-| pos : pformula -> formula
-| neg : nformula -> formula.
+Variant formula := | pos (_ : pformula) | neg (_ : nformula).
 
 Coercion pos : pformula >-> formula.
 Coercion neg : nformula >-> formula.

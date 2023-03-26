@@ -54,7 +54,7 @@ intros A. induction A; intros B Heq; destruct B; inversion Heq ;
 Qed.
 
 Lemma mell2ll_dual A : formulas.dual (mell2ll A) = mell2ll (dual A).
-Proof. induction A; cbn; rewrite ? IHA, ? IHA1 ,? IHA2; reflexivity. Qed.
+Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2; reflexivity. Qed.
 
 Lemma mell2ll_map_wn l : map mell2ll (map wn l) = map formulas.wn (map mell2ll l).
 Proof. induction l as [ | a l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
@@ -63,11 +63,11 @@ Lemma mell2ll_map_wn_inv l1 l2 : map formulas.wn l1 = map mell2ll l2 ->
   exists l2', l2 = map wn l2' /\ l1 = map mell2ll l2'.
 Proof.
 induction l1 as [|a l1 IHl1] in l2 |- *; intros Heq; destruct l2; inversion Heq.
-- exists nil; split; reflexivity.
+- exists nil. split; reflexivity.
 - apply IHl1 in H1.
   destruct f; inversion H0. subst.
   destruct H1 as (l2' & -> & ->).
-  exists (f :: l2'); split; reflexivity.
+  exists (f :: l2'). split; reflexivity.
 Qed.
 
 
@@ -182,7 +182,7 @@ Lemma inhmellfrag2mell l : inhabited (ll_def.ll pfrag_mell (map mell2ll l)) -> m
 Proof.
 assert (inhabited (ll_def.ll pfrag_mell (map mell2ll l)) -> inhabited (mell l)) as Hi
   by apply inhabited_covariant, mellfrag2mell.
-intros [H]%Hi. assumption.
+intros [H]%Hi. exact H.
 Qed.
 
 

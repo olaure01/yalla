@@ -18,11 +18,7 @@ Context {preiatom : DecType}.
 
 (** ** 1. define formulas *)
 
-Inductive lform :=
-| lvar  : @iformulas.iatom preiatom -> lform
-| ltop  : lform
-| lwith : lform -> lform -> lform
-| lpam  : lform -> lform -> lform.
+Inductive lform := | lvar (_ : @iformulas.iatom preiatom) | ltop | lwith (_ _: lform) | lpam (_ _ : lform).
 
 
 (** ** 2. define embedding into [iformulas.iformula] *)
@@ -53,8 +49,7 @@ Inductive lprove : list lform -> lform -> Type :=
 | with_llr1 A B C l1 l2 : lprove (l1 ++ A :: l2) C -> lprove (l1 ++ lwith A B :: l2) C
 | with_llr2 A B C l1 l2 : lprove (l1 ++ A :: l2) C -> lprove (l1 ++ lwith B A :: l2) C
 | lpam_lrr A B l : lprove (l ++ A :: nil) B -> lprove l (lpam A B)
-| lpam_llr A B C l1 l2 l3 : lprove l2 A -> lprove (l1 ++ B :: l3) C ->
-                            lprove (l1 ++ lpam A B :: l2 ++ l3) C.
+| lpam_llr A B C l1 l2 l3 : lprove l2 A -> lprove (l1 ++ B :: l3) C -> lprove (l1 ++ lpam A B :: l2 ++ l3) C.
 
 
 (** ** 4. characterize corresponding [ill] fragment *)
@@ -80,39 +75,37 @@ Lemma illfrag2l l A : ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A) -> lprov
 Proof.
 intros pi.
 remember (map l2ill l) as l0 eqn:Heql0; remember (l2ill A) as A0 eqn:HeqA0.
-revert l A Heql0 HeqA0; induction pi; intros l' A' Heql0 HeqA0; subst;
-  (try now (destruct A'; inversion HeqA0));
-  (try now (symmetry in Heql0; decomp_map_inf Heql0; destruct x; inversion Heql0));
-  (try now (symmetry in Heql0; decomp_map_inf Heql0; destruct x; inversion Heql3)).
-- destruct A'; inversion HeqA0 as [H0].
-  destruct l'; inversion Heql0 as [[H1 H2]]; destruct l'; inversion H2.
-  destruct l; inversion H1; subst.
+induction pi in l, A, Heql0, HeqA0 |- *;
+  (try now (destruct A; inversion HeqA0));
+  (try now (symmetry in Heql0; decomp_map_inf Heql0; destruct x; inversion Heql0)); subst.
+- destruct A; inversion HeqA0 as [H0].
+  destruct l as [|B l]; inversion Heql0 as [[H1 H2]]; destruct l; inversion H2.
+  destruct B; inversion H1. subst.
   apply ax_lr.
 - apply IHpi; [ assumption | reflexivity ].
-- symmetry in Heql0; decomp_map_inf Heql0; subst.
-  destruct l4; inversion Heql0; destruct lw'; inversion H0.
-  + symmetry in p; apply Permutation_Type.Permutation_Type_nil in p; subst.
+- symmetry in Heql0. decomp_map_inf Heql0. subst.
+  destruct l5; inversion Heql0; destruct lw'; inversion H0.
+  + symmetry in p. apply Permutation_Type.Permutation_Type_nil in p as ->.
     apply IHpi; [ list_simpl | ]; reflexivity.
-  + destruct l; inversion H1.
-- destruct A'; inversion HeqA0; subst.
+  + destruct l; discriminate H1.
+- destruct A; inversion HeqA0; subst.
   apply lpam_lrr.
   apply IHpi; [ rewrite map_last | ]; reflexivity.
-- symmetry in Heql0; decomp_map_inf Heql0; subst.
+- symmetry in Heql0. decomp_map_inf Heql0. subst.
   destruct x; inversion Heql0; subst.
   apply lpam_llr; [ apply IHpi1 | apply IHpi2]; list_simpl; reflexivity.
-- destruct A'; inversion HeqA0; subst.
+- destruct A; inversion HeqA0; subst.
   apply top_lrr.
-- destruct A'; inversion HeqA0; subst.
+- destruct A; inversion HeqA0; subst.
   apply with_lrr; [ apply IHpi1 | apply IHpi2]; reflexivity.
-- symmetry in Heql0; decomp_map_inf Heql0; subst.
+- symmetry in Heql0. decomp_map_inf Heql0. subst.
   destruct x; inversion Heql0; subst.
   apply with_llr1.
   apply IHpi; [ list_simpl | ]; reflexivity.
-- symmetry in Heql0; decomp_map_inf Heql0; subst.
+- symmetry in Heql0. decomp_map_inf Heql0. subst.
   destruct x; inversion Heql0; subst.
   apply with_llr2.
   apply IHpi; [ list_simpl | ]; reflexivity.
-- inversion f.
 Qed.
 
 
@@ -129,9 +122,9 @@ Lemma cut_r A l0 l1 l2 C : lprove l0 A -> lprove (l1 ++ A :: l2) C -> lprove (l1
 Proof.
 intros pi1%l2illfrag pi2%l2illfrag.
 apply illfrag2l.
-rewrite 2 map_app.
-rewrite map_app in pi2.
-eapply ill_cut.cut_ir_axfree; [ intros [] | | ]; eassumption.
+rewrite 2 map_app. rewrite map_app in pi2.
+refine (ill_cut.cut_ir_axfree _ _ _ pi1 pi2).
+intros [].
 Qed.
 
 End Atoms.

@@ -22,9 +22,9 @@ Inductive formula :=
 | aplus (_ _ : formula) | awith (_ _ : formula)
 | oc (_ : formula) | wn (_ : formula).
 
-Variant var_formula : formula -> Type := isvar : forall X, var_formula (var X).
-Variant covar_formula : formula -> Type := iscovar X : covar_formula (covar X).
-Variant wn_formula : formula -> Type := iswn A : wn_formula (wn A).
+Variant var_formula : formula -> Type := | isvar : forall X, var_formula (var X).
+Variant covar_formula : formula -> Type := | iscovar X : covar_formula (covar X).
+Variant wn_formula : formula -> Type := | iswn A : wn_formula (wn A).
 
 Definition is_var (A : formula) :=
   match A with

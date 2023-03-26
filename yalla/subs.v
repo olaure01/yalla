@@ -11,9 +11,6 @@ Section Atoms.
 Context {atom : DecType}.
 Notation formula := (@formula atom).
 
-Definition ateq := @eqb atom.
-Definition ateq_eq := @eqb_eq atom.
-
 (** ** Substitutions *)
 
 (** Parallel substitution in [formula] with distinguished substitution for positive and negative atoms *)
@@ -48,24 +45,16 @@ Lemma psubs2_comp rl rr sl sr A :
 Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? psubs2_dual; reflexivity. Qed.
 
 (** basic operation for substitution of atoms *)
-Definition repl_at x y A := if ateq x y then A else var x.
+Definition repl_at (x y : atom) A := if (eq_dt_dec x y) then A else var x.
 
-Lemma repl_at_eq x y A : x = y -> repl_at x y A = A.
-Proof. intros ->. unfold repl_at. rewrite (proj2 (ateq_eq _ _) (eq_refl _)). reflexivity. Qed.
+Lemma repl_at_eq x A : repl_at x x A = A.
+Proof. unfold repl_at. rewrite if_eq_dt_dec_refl. reflexivity. Qed.
 
 Lemma repl_at_neq x y A : x <> y -> repl_at x y A = var x.
-Proof.
-intros Hneq. unfold repl_at.
-destruct (ateq x y) eqn:Heqb; [ | reflexivity ].
-exfalso. rewrite ateq_eq in Heqb. contradiction Heqb.
-Qed.
+Proof. intros Hneq. unfold repl_at. rewrite (if_eq_dt_dec_neq _ Hneq). reflexivity. Qed.
 
 Lemma repl_at_diag x y : repl_at x y (var y) = var x.
-Proof.
-unfold repl_at.
-destruct (ateq x y) eqn:Heqb; [ | reflexivity ].
-rewrite ateq_eq in Heqb. subst. reflexivity.
-Qed.
+Proof. unfold repl_at. destruct (eq_dt_dec x y); subst; reflexivity. Qed.
 
 (** Substitution in [formula]: substitutes [x] by [C] in [A] *)
 Fixpoint subs C x A :=
