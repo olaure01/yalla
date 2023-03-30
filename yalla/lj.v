@@ -1,6 +1,4 @@
-(* intuitionistic logic example file for yalla library *)
-
-(** * Example of a concrete use of the yalla library: the intuitionistic logic with call-by-value translation  *)
+(** * Example of a concrete use of the yalla library: intuitionistic logic*)
 
 From OLlibs Require Import funtheory infinite List_more Permutation_Type_more.
 
@@ -15,7 +13,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : DecType } { preiatom : DecType }.
+Context {atom : DecType} {preiatom : DecType}.
 
 (** ** 1. define formulas *)
 
@@ -275,13 +273,13 @@ End Atoms.
 
 Section Atoms_inj.
 
-Context { atom : InfDecType } { preiatom : DecType } { Atoms : IAtom2AtomType_retract atom preiatom }.
+Context {atom : InfDecType} {preiatom : DecType} {Atoms : IAtom2AtomType_retract atom preiatom}.
 
 Notation iformula := (@iformula preiatom).
 Notation ill2ll := ill_vs_ll.ill2ll.
 
 Lemma lj2ill_cbv_oclpam (A : iformula) : ill_vs_ll.oclpam (lj2ill_cbv A).
-Proof. induction A; (try now constructor); cbn; constructor; try constructor; assumption. Qed.
+Proof. induction A; (try now constructor); cbn; repeat constructor; assumption. Qed.
 
 Lemma lj2llfrag_cbv l A : lj l A ->
   ll_fragments.ll_ll (ill2ll (oc_lj2ill_cbv A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbv l)))).
@@ -412,7 +410,7 @@ apply map_ext, ill2lj_lj2ill_cbn_id.
 Qed.
 
 Lemma lj2ill_cbn_oclpam A : ill_vs_ll.oclpam (lj2ill_cbn A).
-Proof. induction A; constructor; try constructor; assumption. Qed.
+Proof. induction A; repeat constructor; assumption. Qed.
 
 Lemma lj2llfrag_cbn l A : lj l A ->
   ll_fragments.ll_ll (ill2ll (lj2ill_cbn A) :: rev (map formulas.dual (map ill2ll (map oc_lj2ill_cbn l)))).
@@ -463,9 +461,9 @@ Qed.
 Lemma disjunction_property (A B : iformula) : lj nil (ior A B) -> lj nil A + lj nil B.
 Proof.
 intros pi.
-remember nil as l. remember (ior A B) as C.
+remember nil as l eqn:Heql. remember (ior A B) as C eqn:HeqC.
 induction pi; inversion Heql; inversion HeqC; subst; [ | left; assumption | right; assumption ].
-assert (l1 = nil) as -> by (symmetry in p; apply Permutation_Type_nil, p).
+symmetry in p. apply Permutation_Type_nil in p as ->.
 apply IHpi; reflexivity.
 Qed.
 

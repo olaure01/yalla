@@ -74,7 +74,7 @@ induction pi; cbn; rewrite ? map_app;
 - refine (gax_ir _).
 Qed.
 
-Lemma subs_ill_axfree P (P_axfree : notT (projT1 (ipgax P))) A x
+Lemma subs_ill_axfree P (P_axfree : no_iax P) A x
   (Hcut : forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) l C (HN : atN <> x) :
   ill P l C -> ill P (map (isubs A x) l) (isubs A x C).
 Proof.

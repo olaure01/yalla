@@ -4,7 +4,7 @@ From Coq Require Import Morphisms.
 From OLlibs Require Import funtheory dectype List_more Permutation_more Permutation_Type_more.
 
 
-(** ** 0. load the [ll] library *)
+(** ** 0. load the [yalla] library *)
 
 From Yalla Require Import atoms.
 From Yalla Require ll_cut.
@@ -26,12 +26,12 @@ Inductive formula :=
 
 Fixpoint dual A :=
 match A with
-| var x     => covar x
-| covar x   => var x
-| tens A B  => parr (dual B) (dual A)
-| parr A B  => tens (dual B) (dual A)
-| oc A      => wn (dual A)
-| wn A      => oc (dual A)
+| var x    => covar x
+| covar x  => var x
+| tens A B => parr (dual B) (dual A)
+| parr A B => tens (dual B) (dual A)
+| oc A     => wn (dual A)
+| wn A     => oc (dual A)
 end.
 
 
@@ -84,7 +84,7 @@ Inductive mell : list formula -> Prop :=
 | co_r A l : mell (wn A :: wn A :: l) -> mell (wn A :: l).
 
 Instance mell_perm : Proper ((@Permutation _) ==> Basics.impl) mell.
-Proof. intros l1 l2 HP pi. eapply ex_r; eassumption. Qed.
+Proof. intros l1 ? ? ?. apply ex_r with l1; assumption. Qed.
 
 
 (** ** 4. characterize corresponding [ll] fragment *)

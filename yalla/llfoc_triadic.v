@@ -9,7 +9,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context { atom : InfDecType }.
+Context {atom : InfDecType}.
 Notation formula := (@formula atom).
 Notation aformula := (@aformula atom).
 Notation sformula := (@sformula atom).
@@ -49,16 +49,14 @@ Lemma tsync_context :
 * (forall lw ls A, strifoc lw ls A -> Forall_inf Foc ls).
 Proof.
 apply trifoc_rect; try now intuition constructor.
-- intros A lw ls1 ls2 Hs pi HF.
-  apply (inl : _ -> Foc _) in Hs.
+- intros A lw ls1 ls2 Hs%(inl : _ -> Foc _) pi HF.
   apply Forall_inf_app; [ | constructor; [ assumption | ] ].
   + exact (Forall_inf_app_l _ _ HF).
   + exact (Forall_inf_app_r _ _ HF).
 - intros A lw ls1 ls2 _ _ HF.
   inversion HF. assumption.
 - intros X _.
-  constructor; [ | constructor ].
-  right. constructor.
+  constructor; [ right | ]; constructor.
 - intros A lw ls1 ls2 pi HF HP.
   eapply Permutation_Type_Forall_inf; eassumption.
 - intros A B lw ls1 ls2 pi1 HF1 pi2 HF2.
@@ -72,7 +70,7 @@ Proof.
 apply trifoc_rect;
   try now (intros; try specialize (X lw0); try (intuition (list_simpl; constructor; assumption))).
 - intros A lw1 lw2 ls Hnc pi IHpi lw0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
+  symmetry in HP. destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
   apply focd_tfr, IHpi; [ | symmetry ]; assumption.
 - intros A B lw ls l pi1 IHpi1 pi2 IHpi2 lw0 HP.
   apply with_tfr; [ apply IHpi1 | apply IHpi2 ]; assumption.
@@ -913,7 +911,7 @@ Qed.
 Lemma mon_tri_equiv l lw lsa ls la : partition is_wn l = (map wn lw, lsa) -> partition is_Foc lsa = (ls, la) ->
   iffT (llFoc l None) (atrifoc lw ls la).
 Proof.
-intros Hp1 Hp2. split; intros pi.
+intros Hp1 Hp2. split; intro pi.
 - eapply mon_to_tri; [ | reflexivity | | ]; eassumption.
 - apply tri_to_mon in pi.
   eapply ex_Fr; [ exact pi | ].

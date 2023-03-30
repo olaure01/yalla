@@ -20,21 +20,18 @@ Context {atom : DecType}.
 (** ** 1. define formulas *)
 
 Inductive formula :=
-| var : atom -> formula
-| covar : atom -> formula
-| tens : formula -> formula -> formula
-| parr : formula -> formula -> formula
-| oc : formula -> formula
-| wn : formula -> formula.
+| var (_ : atom) | covar (_ : atom)
+| tens (_ _ : formula) | parr (_ _ : formula)
+| oc (_ : formula) | wn (_ : formula).
 
 Fixpoint dual A :=
 match A with
-| var x => covar x
-| covar x => var x
+| var x    => covar x
+| covar x  => var x
 | tens A B => parr (dual B) (dual A)
 | parr A B => tens (dual B) (dual A)
-| oc A => wn (dual A)
-| wn A => oc (dual A)
+| oc A     => wn (dual A)
+| wn A     => oc (dual A)
 end.
 
 
@@ -42,18 +39,17 @@ end.
 
 Fixpoint mell2ll A :=
 match A with
-| var x => formulas.var x
-| covar x => formulas.covar x
+| var x    => formulas.var x
+| covar x  => formulas.covar x
 | tens A B => formulas.tens (mell2ll A) (mell2ll B)
 | parr A B => formulas.parr (mell2ll A) (mell2ll B)
-| oc A => formulas.oc (mell2ll A)
-| wn A => formulas.wn (mell2ll A)
+| oc A     => formulas.oc (mell2ll A)
+| wn A     => formulas.wn (mell2ll A)
 end.
 
 Lemma mell2ll_inj : injective mell2ll.
 Proof.
-intros A.
-induction A; intros B Heq; destruct B; inversion Heq ;
+intro A. induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 
@@ -61,7 +57,7 @@ Lemma mell2ll_dual A : formulas.dual (mell2ll A) = mell2ll (dual A).
 Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2; reflexivity. Qed.
 
 Lemma mell2ll_map_wn l : map mell2ll (map wn l) = map formulas.wn (map mell2ll l).
-Proof. induction l; [ reflexivity | cbn; f_equal; apply IHl ]. Qed.
+Proof. induction l as [ | A l IHl ]; [ reflexivity | cbn; f_equal; apply IHl ]. Qed.
 
 Lemma mell2ll_map_wn_inv l1 l2 : map formulas.wn l1 = map mell2ll l2 ->
   { l2' | l2 = map wn l2' & l1 = map mell2ll l2' }.
@@ -171,7 +167,7 @@ revert l Heql0; induction pi using ll_def.ll_nested_ind; intros l' Heql0; subst;
 - destruct l'; inversion Heql0.
   destruct f; inversion H0; subst.
   apply co_r, IHpi; reflexivity.
-- inversion f.
+- discriminate f.
 - destruct a.
 Qed.
 
@@ -183,7 +179,7 @@ Qed.
 Lemma ax_gen_r A : mell (dual A :: A :: nil).
 Proof.
 apply mellfrag2mell.
-cbn; rewrite <- mell2ll_dual.
+cbn. rewrite <- mell2ll_dual.
 eapply ll_def.ex_r; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
 Qed.
 

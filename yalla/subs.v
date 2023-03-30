@@ -166,7 +166,7 @@ induction pi using ll_nested_ind; list_simpl; try (constructor; assumption).
 - refine (gax_r _).
 Qed.
 
-Lemma subs_ll_axfree P (P_axfree : notT (projT1 (pgax P))) A x l
+Lemma subs_ll_axfree P (P_axfree : no_ax P) A x l
   (Hcut : forall C, Bool.le (pcut P C) (pcut P (subs A x C))) : ll P l -> ll P (map (subs A x) l).
 Proof.
 intros pi.
