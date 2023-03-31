@@ -57,7 +57,7 @@ end.
 Lemma bipndual :
      (forall P, ndual (pdual P) = P)
   /\ (forall N, pdual (ndual N) = N).
-Proof. apply polform_ind; intros; cbn; try rewrite H; try rewrite H0; reflexivity. Qed.
+Proof. apply polform_ind; intros; cbn; rewrite ? H, ? H0; reflexivity. Qed.
 
 Definition dual A : formula :=
 match A with
@@ -297,7 +297,7 @@ unfold llpol_fragment in HfA;
   destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p2));
-    [ | exfalso ; apply (n0 (pos p2)) ]; reflexivity.
+    [ | exfalso; apply (n0 (pos p2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.parr B C)); try now inversion HfA.
   destruct s as [B' Heq].
   destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
@@ -309,13 +309,13 @@ unfold llpol_fragment in HfA;
   destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
   unfold llpol_fragment.
-  destruct (llpol2ll_dec (nllpol2ll n0_2)); [ | exfalso ; apply (n0 (neg n0_2)) ]; reflexivity.
+  destruct (llpol2ll_dec (nllpol2ll n0_2)); [ | exfalso; apply (n0 (neg n0_2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.aplus B C)); try now inversion HfA.
   destruct s as [B' Heq].
   destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p1));
-    [ | exfalso ; apply (n0 (pos p1)) ]; reflexivity.
+    [ | exfalso; apply (n0 (pos p1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.aplus C B)); try now inversion HfA.
   destruct s as [B' Heq].
   destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
@@ -411,7 +411,7 @@ revert l Heql0; induction pi; intros l' Heql0; subst;
   + apply IHpi2. reflexivity.
   + apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
 - destruct l'; inversion Heql0.
-  destruct f; inversion H0 ; [ destruct p | destruct n ]; inversion H0. subst.
+  destruct f; inversion H0; [ destruct p | destruct n ]; inversion H0. subst.
   apply with_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 - destruct l'; inversion Heql0.
   destruct f; inversion H0; [destruct p | destruct n ]; inversion H0. subst.
@@ -696,7 +696,7 @@ induction pi in P', Q', l' |- *; intros HP.
       list_simpl in HP.
       destruct (Permutation_Type_vs_cons_inv HP) as [(l4, l5) Heq'].
       dichot_app_inf_exec Heq';
-        [ | destruct l0 ; inversion Heq'1 ; list_simpl in Heq'1 ]; subst.
+        [ | destruct l0; inversion Heq'1; list_simpl in Heq'1 ]; subst.
       -- symmetry in HP.
          rewrite app_assoc in HP.
          apply Permutation_Type_cons_app_inv in HP.

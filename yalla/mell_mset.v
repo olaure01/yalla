@@ -55,14 +55,14 @@ end.
 
 Lemma mell2ll_inj : injective mell2ll.
 Proof.
-intros A. induction A; intros B Heq; destruct B; inversion Heq;
+intro A. induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 
 Instance border_formula : BOrder.
 Proof using Atoms.
 eapply (@border_inj _ border_nat).
-eapply compose_injective ; [ | eapply compose_injective ].
+eapply compose_injective, compose_injective.
 - apply mell2ll_inj.
 - eapply section_injective. intro. apply fmformulas.form_nattree_section.
 - apply nattree2nat_inj.
@@ -138,7 +138,7 @@ Proof.
 intros A HfA B Hsf.
 induction Hsf;
   try (apply IHHsf;
-       destruct HfA as [B0 HfA] ;
+       destruct HfA as [B0 HfA];
        destruct B0; inversion HfA; subst;
        eexists; reflexivity).
 assumption.
@@ -285,7 +285,7 @@ induction pi in m, HP |- *; subst;
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP. subst. rewrite list2fm_elt.
   apply bot_r, IHpi.
-  etransitivity ; [ | apply elts_fmmap ].
+  etransitivity; [ | apply elts_fmmap ].
   unfold fmmap.
   etransitivity; [ | symmetry; apply elts_perm ].
   etransitivity; [ | symmetry; apply Permutation_Type_map, elts_perm ].
@@ -304,7 +304,7 @@ induction pi in m, HP |- *; subst;
   eapply Permutation_Type_trans in HP2; [ | apply elts_fmmap ].
   unfold fmmap in HP2.
   eapply Permutation_Type_trans in HP2; [ | symmetry; apply elts_perm ].
-  eapply Permutation_Type_trans in HP2; [ | symmetry ; apply Permutation_Type_map, elts_perm ].
+  eapply Permutation_Type_trans in HP2; [ | symmetry; apply Permutation_Type_map, elts_perm ].
   list_simpl in HP2. symmetry in HP2. apply Permutation_Type_cons_app_inv in HP2.
   rewrite <- map_app in HP2. apply Permutation_Type_map_inv in HP2 as [l Heq HP].
   rewrite list2fm_elt. eapply list2fm_perm in HP. rewrite HP.
@@ -313,7 +313,7 @@ induction pi in m, HP |- *; subst;
   + apply IHpi1.
     eapply Permutation_Type_trans; [ | apply elts_fmmap ].
     unfold fmmap.
-    eapply Permutation_Type_trans; [ | symmetry ; apply elts_perm ].
+    eapply Permutation_Type_trans; [ | symmetry; apply elts_perm ].
     change (mell2ll x1 :: map mell2ll l7) with (map mell2ll (x1 :: l7)).
     apply Permutation_Type_map.
     symmetry. etransitivity.
@@ -384,7 +384,7 @@ induction pi in m, HP |- *; subst;
   unfold fmmap.
   etransitivity; [ | symmetry; apply elts_perm ].
   rewrite <- list2fm_elt.
-  etransitivity ; [ | symmetry; apply Permutation_Type_map, elts_perm ].
+  etransitivity; [ | symmetry; apply Permutation_Type_map, elts_perm ].
   eapply Permutation_Type_trans in HP2; [ | apply elts_fmmap ].
   unfold fmmap in HP2.
   eapply Permutation_Type_trans in HP2; [ | symmetry; apply elts_perm ].

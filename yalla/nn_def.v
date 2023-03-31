@@ -400,8 +400,7 @@ induction Hll using ll_nested_ind.
   assert (pi0 := trans_dual Hperm Hcut A).
   rewrite <- (app_nil_l _) in pi0.
   eapply (@cut_ir _ _ _ (Hcut _) _ _ _ _ IHHll2) in pi0.
-  list_simpl in pi0 ; rewrite app_assoc in pi0.
-  eapply (@cut_ir _ _ _ (Hcut _) _ _ _ _ IHHll1) in pi0.
+  list_simpl in pi0. rewrite app_assoc in pi0. eapply (@cut_ir _ _ _ (Hcut _) _ _ _ _ IHHll1) in pi0.
   rewrite <- (app_nil_l (map ioc _ ++ _)).
   apply co_list_ilr.
   eapply ex_ir; [ eassumption | ].

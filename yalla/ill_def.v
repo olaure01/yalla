@@ -271,7 +271,7 @@ Ltac destruct_ill H f X l Hl Hr HP a :=
                                | ? ? ? ? Hl
                                | ? ? ? ? Hl
                                | ? f ? ? ? ? Hl Hr
-                               | a ] ; subst
+                               | a ]; subst
   end.
 
 

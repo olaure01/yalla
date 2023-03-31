@@ -69,7 +69,7 @@ intros pi. induction pi; intros l1' l2' Heq; subst;
   + rewrite <- app_assoc. apply mix2_bbb_r; [ | assumption ].
     apply IHpi. reflexivity.
 - exfalso. destruct l1' as [|? [|? [|? l1']]]; discriminate Heq.
-- destruct l1'; inversion Heq ; subst; [ assumption | ].
+- destruct l1'; inversion Heq; subst; [ assumption | ].
   list_simpl. apply bot_bbb_r, IHpi. reflexivity.
 - rewrite app_comm_cons in Heq. dichot_elt_app_inf_exec Heq; subst.
   + destruct l1'; inversion Heq0; subst.
@@ -127,7 +127,7 @@ intros pi. induction pi;
   (try now (apply wk_r; constructor));
   try now (eapply ex_r; [ | apply Permutation_Type_swap ];
            constructor; eapply ex_r; [ eassumption | try apply Permutation_Type_swap ]).
-- eapply ex_r; [ eassumption | now cbn; apply Permutation_Type_cons ].
+- eapply ex_r; [ eassumption | now apply Permutation_Type_cons ].
 - apply co_r, co_r, de_r.
   apply (ex_r (tens (wn one) bot :: (wn (tens (wn one) bot) :: l1)
                                  ++ (wn (tens (wn one) bot) :: l2))).
@@ -156,8 +156,7 @@ intros pi. induction pi;
   apply with_r.
   + eapply ex_r; [ apply IHpi1 | cbn; apply Permutation_Type_swap ].
   + eapply ex_r; [ apply IHpi2 | cbn; apply Permutation_Type_swap ].
-- apply (ex_r (oc A :: map wn (tens (wn one) bot :: l)));
-    [ | cbn; apply Permutation_Type_swap ].
+- apply (ex_r (oc A :: map wn (tens (wn one) bot :: l))); [ | apply Permutation_Type_swap ].
   apply oc_r.
   eapply ex_r; [ eassumption | cbn; apply Permutation_Type_swap ].
 - eapply ex_r; [ | apply Permutation_Type_swap ].
@@ -166,9 +165,8 @@ intros pi. induction pi;
   cons2app. rewrite ? app_assoc. apply Permutation_Type_middle.
 Qed.
 
-Lemma ll_to_bbb l : ll_ll l ->
-  forall l' n m,
-    Permutation_Type l (l' ++ repeat (tens (wn one) bot) n ++ repeat (wn (tens (wn one) bot)) m) -> ll_bbb l'.
+Lemma ll_to_bbb l : ll_ll l -> forall l' n m,
+  Permutation_Type l (l' ++ repeat (tens (wn one) bot) n ++ repeat (wn (tens (wn one) bot)) m) -> ll_bbb l'.
 Proof.
 intros pi. induction pi using ll_nested_ind; intros l' n m HP.
 - assert (HP' := HP).
@@ -307,7 +305,7 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
       eapply ex_bbb_r; [ apply mix2_bbb_r | apply HP' ].
       -- rewrite <- app_nil_l.
          eapply bot_rev_bbb; [ eassumption | reflexivity ].
-      -- apply (stronger_pfrag (pmixupd_point_pfrag (pmixupd_point_pfrag pfrag_ll 0 true) 2 true)) ;
+      -- apply (stronger_pfrag (pmixupd_point_pfrag (pmixupd_point_pfrag pfrag_ll 0 true) 2 true));
            [ | eapply ll_to_mix02'''_axcut ]; try reflexivity.
          ++ repeat split .
             ** intros a. exists a. reflexivity.
@@ -588,7 +586,7 @@ Qed.
 
 Lemma bb_ex : llR (oc bot) (one :: oc (tens (parr one one) bot) :: nil).
 Proof.
-assert (Hax := @gax_r _ (@pfrag_llR atom (oc bot)) false); cbn in Hax.
+assert (Hax := @gax_r _ (@pfrag_llR atom (oc bot)) false). cbn in Hax.
 assert (llR (oc bot) ((one :: nil) ++ one :: nil)) as Hr by (eapply mix2_bb_r; apply one_r).
 refine (cut_r _ _ _ Hax).
 - reflexivity.
@@ -627,7 +625,7 @@ Proof.
 intros pi.
 remember nil as l eqn:Heql. induction pi in Heql |- *; inversion Heql; subst.
 - symmetry in p. now apply Permutation_Type_nil in p.
-- now apply app_eq_nil in Heql as [-> ->].
+- apply app_eq_nil in Heql as [-> ->]. exact (IHpi eq_refl).
 Qed.
 
 Lemma ex_implies_mix2_mix02 l : ll_bbb0 l -> Permutation_Type l (one :: oc (tens (parr one one) bot) :: nil) ->
@@ -728,8 +726,7 @@ intros pi. induction pi; intro HP;
     * symmetry in HP0.
       apply app_eq_nil in HP0 as [-> ->].
       apply IHpi, Permutation_Type_swap.
-- symmetry in HP.
-  apply Permutation_Type_length_2_inv in HP as [HP | HP] ; inversion HP.
+- symmetry in HP. apply Permutation_Type_length_2_inv in HP as [HP | HP]; inversion HP.
   destruct l; discriminate H1.
 Qed.
 

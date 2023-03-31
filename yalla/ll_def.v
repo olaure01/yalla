@@ -1193,25 +1193,24 @@ intros pi. induction pi using ll_nested_ind; intros l2' HF;
     rewrite <- (app_nil_l _) in HF1; eapply (one_rev Hgax1 HF2) in HF1; assumption.
 - inversion_clear HF as [ | ? ? ? ? Hm HF' ].
   inversion Hm; subst.
-  + constructor ; apply IHpi ; constructor ; try constructor; assumption.
-  + apply (Forall2_inf_cons bot bot) in HF' ; [ | constructor ].
+  + constructor; apply IHpi; constructor; try constructor; assumption.
+  + apply (Forall2_inf_cons bot bot) in HF'; [ | constructor ].
     apply (Forall2_inf_cons A y) in HF'; [ | assumption ].
     apply IHpi in HF'.
-    rewrite <- (app_nil_l l') ; rewrite app_comm_cons.
+    rewrite <- (app_nil_l l'), app_comm_cons.
     eapply bot_rev; [ | assumption ].
     intros a Hbot.
     eapply Forall_inf_forall in Hbot; [ | apply Hgax].
     inversion Hbot.
-- inversion_clear HF as [ | ? ? ? ? Hm HF' ].
-  inversion_clear Hm.
+- inversion_clear HF as [ | ? ? ? ? Hm HF' ]. inversion_clear Hm.
   constructor; [ apply IHpi1 | apply IHpi2 ]; constructor; assumption.
 - inversion_clear HF as [ | ? ? ? ? Hm HF' ].
   inversion_clear Hm.
   destruct (munit_smp_map_wn _ HF') as [ l'' Heq HF'' ]; subst.
   constructor; apply IHpi; constructor; assumption.
 - apply Forall2_inf_app_inv_l in HF as [(l', l'') [HF2 HF1] ->].
-  eapply cut_r; [ eassumption | apply IHpi1 | apply IHpi2 ] ;
-    (apply Forall2_inf_cons ; [ apply munit_smp_id | ]); assumption.
+  eapply cut_r; [ eassumption | apply IHpi1 | apply IHpi2 ];
+    (apply Forall2_inf_cons; [ apply munit_smp_id | ]); assumption.
 - assert (Hat := Hgax a).
   assert (projT2 (pgax P) a = l2') as <-.
   { remember (projT2 (pgax P) a) as l.

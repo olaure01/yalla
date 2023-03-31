@@ -48,7 +48,7 @@ Lemma tsync_context :
   (forall lw ls l, atrifoc lw ls l -> Forall_inf Foc ls)
 * (forall lw ls A, strifoc lw ls A -> Forall_inf Foc ls).
 Proof.
-apply trifoc_rect; try now intuition constructor.
+apply trifoc_rect; auto.
 - intros A lw ls1 ls2 Hs%(inl : _ -> Foc _) pi HF.
   apply Forall_inf_app; [ | constructor; [ assumption | ] ].
   + exact (Forall_inf_app_l _ _ HF).
@@ -67,13 +67,10 @@ Lemma exw_tfr :
   (forall lw ls l, atrifoc lw ls l -> forall lw0, Permutation_Type lw lw0 -> atrifoc lw0 ls l)
 * (forall lw ls A, strifoc lw ls A -> forall lw0, Permutation_Type lw lw0 -> strifoc lw0 ls A).
 Proof.
-apply trifoc_rect;
-  try now (intros; try specialize (X lw0); try (intuition (list_simpl; constructor; assumption))).
+apply trifoc_rect; try now intros; try (specialize (X lw0)); try constructor; try apply X; auto.
 - intros A lw1 lw2 ls Hnc pi IHpi lw0 HP.
   symmetry in HP. destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
   apply focd_tfr, IHpi; [ | symmetry ]; assumption.
-- intros A B lw ls l pi1 IHpi1 pi2 IHpi2 lw0 HP.
-  apply with_tfr; [ apply IHpi1 | apply IHpi2 ]; assumption.
 - intros A lw ls l pi IHpi lw0 HP.
   apply wn_tfr, IHpi, Permutation_Type_cons; [ reflexivity | assumption ].
 - intros X lw1 lw2 lw0 HP.
@@ -82,8 +79,6 @@ apply trifoc_rect;
 - intros A lw ls1 ls2 pi IHpi HP' lw0 HP.
   eapply exs_tfr; [ | eassumption ].
   apply IHpi, HP.
-- intros A B lw ls1 ls2 pi1 IHpi1 pi2 IHpi2 lw0 HP.
-  apply tens_tfr; [ apply IHpi1 | apply IHpi2 ]; apply HP.
 Qed.
 
 Lemma ex_tfr :
@@ -121,7 +116,11 @@ Qed.
 Lemma wk_list_tfr lw0 :
   (forall lw ls l, atrifoc lw ls l -> atrifoc (lw ++ lw0) ls l)
 * (forall lw ls A, strifoc lw ls A -> strifoc (lw ++ lw0) ls A).
-Proof. apply trifoc_rect; intuition (list_simpl; econstructor; eassumption). Qed.
+Proof.
+apply trifoc_rect; try (intros; list_simpl; econstructor; eassumption).
+intros ? ? ? ? ? _ pi2. list_simpl in pi2. list_simpl. constructor; assumption.
+
+Qed.
 
 Lemma wk_tfr C lw ls :
   (forall l, atrifoc lw ls l -> atrifoc (C :: lw) ls l)
@@ -375,8 +374,7 @@ Lemma exa_tfr lw ls l : atrifoc lw ls l -> forall l0, Permutation_Type l l0 -> a
 Proof.
 revert lw ls l.
 apply (astrifoc_rect (fun lw ls l _ => forall l0, Permutation_Type l l0 -> atrifoc lw ls l0)
-                     (fun _ _ _ _ => unit));
-  try now intuition constructor.
+                     (fun _ _ _ _ => unit)); try now constructor.
 - intros A lw ls1 ls2 Hs pi _ l0 HP.
   apply Permutation_Type_nil in HP; subst.
   apply foc_tfr, pi; assumption.
@@ -417,7 +415,7 @@ Lemma trifoc_set:
   (forall lw ls l, atrifoc lw ls l -> atrifoc (nodup (@eq_dt_dec formulas_dectype) lw) ls l)
 * (forall lw ls A, strifoc lw ls A -> strifoc (nodup (@eq_dt_dec formulas_dectype) lw) ls A).
 Proof.
-apply trifoc_rect; try (now intuition constructor); try (now econstructor; eassumption).
+apply trifoc_rect; try (now constructor); try (now econstructor; eassumption).
 - intros A lw1 lw2 ls pi IHpi.
   assert (In_inf A (nodup (@eq_dt_dec formulas_dectype) (lw1 ++ A :: lw2))) as Hin
     by apply (in_in_inf (@eq_dt_dec formulas_dectype)), nodup_In, in_elt.

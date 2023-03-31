@@ -1,8 +1,7 @@
 (** * Parametric negative translation from [ll] into [ill]. *)
 (** Properties relying on cut admissibility *)
 
-From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type
-                           Permutation_Type GPermutation_Type.
+From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type Permutation_Type GPermutation_Type.
 From Yalla Require Import subs ll_fragments bbb.
 From Yalla Require Export nn_def.
 
@@ -522,9 +521,9 @@ change (ioc R :: map (trans _) l)
 apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 pcut_all)) in Hll.
 - assert (@pperm atom_inf (cutupd_pfrag pfrag_mix02 pcut_all) = true) as Hperm by reflexivity.
   apply (ll_to_ill_trans_gen (ioc R) Hperm (R :: nil)) in Hll.
-  + unfold ill_ll; change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
-    apply cut_admissible_ill_axfree ; [ intros a ; destruct a | ].
-    eapply stronger_ipfrag ; [ | apply Hll ].
+  + unfold ill_ll. change ipfrag_ill with (@cutrm_ipfrag preiatom (cutupd_ipfrag ipfrag_ill ipcut_all)).
+    apply cut_admissible_ill_axfree; [ intros [] | ].
+    eapply stronger_ipfrag; [ | apply Hll ].
     repeat split. intros [].
   + intros L eqpmix FL FLind.
     destruct L; [ intros; apply ax_exp_ill | ].

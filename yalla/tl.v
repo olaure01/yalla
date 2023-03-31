@@ -26,8 +26,7 @@ Inductive tformula :=
 | tzero | tplus (_ _ : tformula)
 | toc (_ : tformula).
 
-Variant tatomic : tformula -> Type :=
-| tatomic_var x : tatomic (tvar x).
+Variant tatomic : tformula -> Type := | tatomic_var x : tatomic (tvar x).
 
 Inductive tsubform : tformula -> tformula -> Type :=
 | tsub_id A : tsubform A A
@@ -258,7 +257,7 @@ induction Hsf; unfold tl_fragment in HfA.
   destruct B'; inversion Heq.
 - unfold tl_fragment; destruct (tl2ill_dec N); [ reflexivity | ].
   exfalso; apply (snd p); reflexivity.
-- destruct (tl2ill_dec (ilmap B C)) ; try now inversion HfA.
+- destruct (tl2ill_dec (ilmap B C)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
 - destruct (tl2ill_dec (ilmap C B)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
@@ -420,9 +419,8 @@ induction pi;
 - symmetry in Heql. decomp_map_inf Heql.
   destruct x; inversion Heql3; subst.
   apply plus_tlr; [ apply IHpi1 | apply IHpi2 ]; list_simpl; reflexivity.
-- apply tl2ill_map_ioc_inv in Heql.
-  destruct Heql as [l0' Heq Heq']; subst.
-  destruct A'' ; inversion HeqA; subst.
+- apply tl2ill_map_ioc_inv in Heql as [l0' -> ->].
+  destruct A''; inversion HeqA. subst.
   apply oc_trr, IHpi; [ rewrite tl2ill_map_ioc | ]; reflexivity.
 - cbn in f. destruct (tl2ill_dec A) as [[[B ->]|]|]; [ | discriminate f | discriminate f].
   symmetry in Heql. decomp_map_inf Heql. subst.
@@ -605,8 +603,7 @@ split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
 - eapply (@ll_to_ill_nzeropos_cutfree _ _ _ (t2ipfrag P) (notcut_t2ipfrag Hcut)
               (easytpgax_easyipgax Hgax)
             (ill2ll (tl2ill A)
-              :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
-    [ | | reflexivity ].
+              :: rev (map dual (map ill2ll (map tl2ill l))))) in pi; [ | | reflexivity ].
   + exact (fst (tlfrag2tl _ _) _ pi).
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
     apply forall_Forall_inf.
@@ -616,8 +613,7 @@ split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
   apply ill_to_ll, (snd pi (eq_refl _)).
 - eapply (@ll_to_ill_nzeropos_cutfree _ _ _ (t2ipfrag P) (notcut_t2ipfrag Hcut)
            (easytpgax_easyipgax Hgax)
-           (ill2ll N :: rev (map dual (map ill2ll (map tl2ill l))))) in pi ;
-    [ | | reflexivity ].
+           (ill2ll N :: rev (map dual (map ill2ll (map tl2ill l))))) in pi; [ | | reflexivity ].
   + exact (snd (tlfrag2tl _ _) pi).
   + constructor; [ constructor | ].
     apply forall_Forall_inf.

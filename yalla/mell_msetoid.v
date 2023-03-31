@@ -53,7 +53,7 @@ end.
 
 Lemma mell2ll_inj : injective mell2ll.
 Proof.
-intros A; induction A; intros B Heq; destruct B; inversion Heq ;
+intro A. induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 
@@ -84,32 +84,20 @@ Instance fmsetoid_formula : FinMultisetoid (list _) formula :=
 (** ** 3. define proofs *)
 
 Inductive mell : list formula -> Prop :=
-| ax_r : forall X, mell (add (covar X) (add (var X) empty))
-| ex_r : forall m1 m2, mell m1 -> meq m1 m2 -> mell m2
+| ax_r X : mell (add (covar X) (add (var X) empty))
+| ex_r m1 m2 : mell m1 -> meq m1 m2 -> mell m2
 | one_r : mell (add one empty)
-| bot_r : forall l, mell l -> mell (add bot l)
-| tens_r : forall A B l1 l2,
-              mell (add A l1) -> mell (add B l2) ->
-              mell (add (tens A B) (sum l1 l2))
-| parr_r : forall A B l,
-             mell (add A (add B l)) ->
-             mell (add (parr A B) l)
-| oc_r : forall A l,
-           mell (add A (fmmap wn l)) ->
-           mell (add (oc A) (fmmap wn l))
-| de_r : forall A l,
-           mell (add A l) ->
-           mell (add (wn A) l)
-| wk_r : forall A l,
-           mell l ->
-           mell (add (wn A) l)
-| co_r : forall A l,
-           mell (add (wn A) (add (wn A) l)) ->
-           mell (add (wn A) l).
+| bot_r l : mell l -> mell (add bot l)
+| tens_r A B l1 l2 : mell (add A l1) -> mell (add B l2) -> mell (add (tens A B) (sum l1 l2))
+| parr_r A B l : mell (add A (add B l)) -> mell (add (parr A B) l)
+| oc_r A l : mell (add A (fmmap wn l)) -> mell (add (oc A) (fmmap wn l))
+| de_r A l : mell (add A l) -> mell (add (wn A) l)
+| wk_r A l : mell l -> mell (add (wn A) l)
+| co_r A l : mell (add (wn A) (add (wn A) l)) -> mell (add (wn A) l).
 
 Instance mell_meq : Proper (meq ==> iff) mell.
 Proof.
-intros m1 m2 Heq; split; intros Hmell.
+intros m1 m2 Heq. split; intros Hmell.
 - apply ex_r in Heq; assumption.
 - symmetry in Heq; apply ex_r in Heq; assumption.
 Qed.
@@ -143,7 +131,7 @@ Definition pfrag_mell :=  @ll_def.mk_pfrag atom  ll_def.pcut_none ll_def.NoAxiom
 
 Lemma mell2mellfrag m : mell m -> inhabited (ll_def.ll pfrag_mell (map mell2ll (elts m))).
 Proof.
-intros pi; induction pi;
+intros pi. induction pi;
   try destruct IHpi as [IHpi]; try destruct IHpi1 as [IHpi1]; try destruct IHpi2 as [IHpi2];
   constructor; cbn; rewrite ? map_app;
   try now (constructor; eassumption).
@@ -173,29 +161,25 @@ Qed.
 
 Lemma mellfrag2mell m : ll_def.ll pfrag_mell (map mell2ll (elts m)) -> mell m.
 Proof.
-intros pi.
-remember (map mell2ll (elts m)) as l.
-induction pi in m, Heql |- *;
-  try (now (destruct m; inversion Heql; destruct f; inversion H0)); try (now inversion f).
+intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
+  try (now (destruct m; inversion Heql; destruct f; inversion H0)); try discriminate f.
 - destruct m; inversion Heql.
   destruct m; inversion H1.
   destruct f; inversion H0; subst.
   destruct f0; inversion H2; subst.
   destruct m; inversion H3.
   apply ax_r.
-- subst.
-  cbn in p.
-  apply Permutation_Type_map_inv in p as [l' -> HP].
+- subst. cbn in p. apply Permutation_Type_map_inv in p as [l' -> HP].
   eapply ex_r.
-  + apply IHpi; reflexivity.
-  + symmetry; assumption.
-- symmetry in Heql; decomp_map Heql; subst; symmetry in Heql3.
-  apply mell2ll_map_wn_inv in Heql3; destruct Heql3 as (l & -> & ->).
+  + apply IHpi. reflexivity.
+  + symmetry. assumption.
+- symmetry in Heql. decomp_map Heql. subst.
+  symmetry in Heql3. apply mell2ll_map_wn_inv in Heql3 as [l [-> ->]].
   apply Permutation_Type_map_inv in p as [l' -> HP].
-  cbn in Heql; unfold id in Heql; subst.
+  cbn in Heql. unfold id in Heql. subst.
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ? map_app; reflexivity | ].
   symmetry in HP.
-  apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map; assumption.
+  apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map. assumption.
 - destruct m; inversion Heql.
   destruct f; inversion H0; subst.
   destruct m; inversion H1.
@@ -211,8 +195,7 @@ induction pi in m, Heql |- *;
   + apply tens_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
   + unfold sum, list2fm, add; cbn.
     apply Permutation_Type_cons; [ reflexivity | ].
-    rewrite fold_id.
-    apply Permutation_Type_app_comm.
+    rewrite fold_id. apply Permutation_Type_app_comm.
 - destruct m; inversion Heql.
   destruct f; inversion H0; subst.
   apply parr_r, IHpi; reflexivity.
@@ -223,20 +206,18 @@ induction pi in m, Heql |- *;
   replace (oc f :: map wn m')
      with (add (oc f) (fmmap wn m')).
   + apply oc_r, IHpi.
-    unfold add, fmmap, list2fm; cbn.
-    rewrite fold_id, mell2ll_map_wn; reflexivity.
-  + unfold fmmap, list2fm, add; cbn.
-    rewrite fold_id; reflexivity.
+    unfold add, fmmap, list2fm. cbn. rewrite fold_id, mell2ll_map_wn. reflexivity.
+  + unfold fmmap, list2fm, add. cbn. rewrite fold_id. reflexivity.
 - destruct m; inversion Heql.
   destruct f; inversion H0; subst.
-  apply de_r, IHpi; reflexivity.
+  apply de_r, IHpi. reflexivity.
 - destruct m; inversion Heql.
   destruct f; inversion H0; subst.
-  apply wk_r, IHpi; reflexivity.
+  apply wk_r, IHpi. reflexivity.
 - destruct m; inversion Heql.
   destruct f; inversion H0; subst.
-  apply co_r, IHpi; reflexivity.
-- inversion a.
+  apply co_r, IHpi. reflexivity.
+- destruct a.
 Qed.
 
 
@@ -247,9 +228,8 @@ Qed.
 Lemma ax_gen_r A : mell (add (dual A) (add A empty)).
 Proof.
 apply mellfrag2mell.
-eapply ll_def.ex_r ; [ apply ll_def.ax_exp | ].
-rewrite mell2ll_dual.
-apply Permutation_Type_swap.
+eapply ll_def.ex_r; [ apply ll_def.ax_exp | ].
+rewrite mell2ll_dual. apply Permutation_Type_swap.
 Qed.
 
 

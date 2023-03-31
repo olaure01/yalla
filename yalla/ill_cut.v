@@ -153,7 +153,7 @@ induction pi in l', L, Heq |- *;
          replace (flat_map (app (map ioc lw)) L0 ++ map ioc lw ++ l ++ B :: l4
                                                  ++ flat_map (app (map ioc lw)) L2)
             with (flat_map (app (map ioc lw)) (L0 ++ (l ++ B :: l4) :: L2))
-           by (list_simpl ; reflexivity).
+           by (list_simpl; reflexivity).
          apply IHpi2. list_simpl. reflexivity.
     * list_simpl. rewrite (app_assoc l3), 3 app_assoc. apply lpam_ilr.
       -- apply (IHpi1 _ _ eq_refl).
@@ -325,7 +325,7 @@ induction pi in l', L, Heq |- *;
     rewrite app_assoc. apply IHpi. list_simpl. reflexivity.
   + list_simpl. rewrite 3 app_assoc. apply wk_ilr. rewrite <- 3 app_assoc.
     replace (map ioc lw ++ l ++ l0 ++ flat_map (app (map ioc lw)) L1)
-      with (flat_map (app (map ioc lw)) ((l ++ l0) :: L1)) by (list_simpl ; reflexivity).
+      with (flat_map (app (map ioc lw)) ((l ++ l0) :: L1)) by (list_simpl; reflexivity).
     rewrite <- flat_map_app. apply IHpi. list_simpl. reflexivity.
   + injection HeqA as [= ->].
     induction L0 as [ | B L0 _] using rev_rect.
@@ -463,12 +463,12 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
   refine (IHsize _ _ _ _ pi1 Hl _); lia.
 - (* ex_oc_ir *)
   cbn in IHsize.
-  dichot_elt_app_inf_exec Heql ; subst.
+  dichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_assoc.
     eapply ex_oc_ir; [ | eassumption ].
-    revert Hl IHsize ; list_simpl ; intros Hl IHsize.
+    revert Hl IHsize. list_simpl. intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
-  + dichot_elt_app_inf_exec Heql1 ; subst.
+  + dichot_elt_app_inf_exec Heql1; subst.
     * symmetry in Heql0; decomp_map_inf Heql0; subst.
       apply cut_oc_comm_left with x; try assumption.
       intros.
@@ -571,15 +571,15 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
     revert Hl IHsize; list_simpl; intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
 - (* lpam_ilr *)
-  cbn in IHsize; trichot_elt_elt_inf_exec Heql.
-  + dichot_elt_app_inf_exec Heql1 ; subst.
-    * list_simpl; rewrite 2 app_assoc.
+  cbn in IHsize. trichot_elt_elt_inf_exec Heql.
+  + dichot_elt_app_inf_exec Heql1; subst.
+    * list_simpl. rewrite 2 app_assoc.
       apply lpam_ilr; [ | assumption ].
-      list_simpl; refine (IHsize _ _ _ _ pi1 Hl _); lia.
-    * list_simpl; apply lpam_ilr; [ assumption | ].
-      revert Hr IHsize; rewrite app_comm_cons, app_assoc; intros Hr IHsize.
+      list_simpl. refine (IHsize _ _ _ _ pi1 Hl _). lia.
+    * list_simpl. apply lpam_ilr; [ assumption | ].
+      revert Hr IHsize. rewrite app_comm_cons, app_assoc. intros Hr IHsize.
       rewrite app_comm_cons, app_assoc.
-      refine (IHsize _ _ _ _ pi1 Hr _); lia.
+      refine (IHsize _ _ _ _ pi1 Hr _). lia.
   + change (S (ipsize Hl + ipsize Hr)) with (ipsize (lpam_ilr _ _ _ _ _ _ Hl Hr)) in IHsize.
     remember (lpam_ilr _ _ _ _ _ _ Hl Hr) as Hlpam eqn:HeqHlpam; clear HeqHlpam.
     remember (ilpam A0 B) as D; destruct_ill pi1 f X l Hl2 Hr2 HP a; try inversion HeqD;
@@ -587,34 +587,34 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            list_simpl; rewrite ? app_comm_cons, (app_assoc l1);
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlpam _); lia).
     * apply (ex_ir (l4 ++ l ++ l3 ++ l5)).
-      -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlpam _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
-    * list_simpl; rewrite app_assoc ; eapply ex_oc_ir; [ | eassumption ].
-      list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
-      cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlpam _); lia.
-    * rewrite app_assoc; subst.
+      -- cbn in IHsize. refine (IHsize _ _ _ _ Hl2 Hlpam _). lia.
+      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail. assumption.
+    * list_simpl. rewrite app_assoc. eapply ex_oc_ir; [ | eassumption ].
+      list_simpl. rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
+      cbn in IHsize. refine (IHsize _ _ _ _ Hl2 Hlpam _). lia.
+    * rewrite app_assoc. subst.
       refine (IHcut _ _ _ _ _ _ Hl _); [ cbn; lia | ].
-      list_simpl; change (A0 :: l5) with ((A0 :: nil) ++ l5); rewrite (app_assoc l).
-      refine (IHcut _ _ _ _ _ _ Hl2 Hr); cbn; lia.
-    * list_simpl; rewrite app_assoc ; apply lpam_ilr; [ assumption | ].
-      list_simpl; rewrite app_comm_cons, (app_assoc l1).
-      cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hlpam _); lia.
-    * list_simpl; rewrite app_assoc; apply lmap_ilr; [ assumption | ].
-      list_simpl; rewrite app_comm_cons, (app_assoc l1).
-      cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hlpam _); lia.
-    * list_simpl; rewrite app_assoc; apply plus_ilr.
-      -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
-         cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlpam _); lia.
-      -- list_simpl; rewrite app_comm_cons, (app_assoc l1).
-         cbn in IHsize; refine (IHsize _ _ _ _ Hr2 Hlpam _); lia.
-    * list_simpl; rewrite app_assoc; apply (cut_ir _ f); [ assumption | ].
-      list_simpl; rewrite app_comm_cons, (app_assoc l1); apply (IHsize _ _ _ _ Hr2 Hlpam); cbn; lia.
+      list_simpl. change (A0 :: l5) with ((A0 :: nil) ++ l5); rewrite (app_assoc l).
+      refine (IHcut _ _ _ _ _ _ Hl2 Hr). cbn. lia.
+    * list_simpl. rewrite app_assoc. apply lpam_ilr; [ assumption | ].
+      list_simpl. rewrite app_comm_cons, (app_assoc l1).
+      cbn in IHsize. refine (IHsize _ _ _ _ Hr2 Hlpam _). lia.
+    * list_simpl. rewrite app_assoc. apply lmap_ilr; [ assumption | ].
+      list_simpl. rewrite app_comm_cons, (app_assoc l1).
+      cbn in IHsize. refine (IHsize _ _ _ _ Hr2 Hlpam _). lia.
+    * list_simpl. rewrite app_assoc. apply plus_ilr.
+      -- list_simpl. rewrite app_comm_cons, (app_assoc l1).
+         cbn in IHsize. refine (IHsize _ _ _ _ Hl2 Hlpam _). lia.
+      -- list_simpl. rewrite app_comm_cons, (app_assoc l1).
+         cbn in IHsize. refine (IHsize _ _ _ _ Hr2 Hlpam _). lia.
+    * list_simpl. rewrite app_assoc. apply (cut_ir _ f); [ assumption | ].
+      list_simpl. rewrite app_comm_cons, (app_assoc l1). apply (IHsize _ _ _ _ Hr2 Hlpam). cbn. lia.
     * case_eq (ipcut P (snd (projT2 (ipgax P) a))); intros Hcut.
       -- apply (cut_ir _ Hcut); [ apply gax_ir | assumption ].
-      -- specialize (P_gax_cut_r a Hcut) as [Hat _]; rewrite HeqD in Hat; inversion Hat.
-  + rewrite 2 app_assoc; apply lpam_ilr; [ assumption | ].
-    revert Hr IHsize; list_simpl; intros Hr IHsize.
-    refine (IHsize _ _ _ _ pi1 Hr _); lia.
+      -- specialize (P_gax_cut_r a Hcut) as [Hat _]. rewrite HeqD in Hat. inversion Hat.
+  + rewrite 2 app_assoc. apply lpam_ilr; [ assumption | ].
+    revert Hr IHsize. list_simpl. intros Hr IHsize.
+    refine (IHsize _ _ _ _ pi1 Hr _). lia.
 - (* gen_ilr *)
   destruct l1; inversion Heql; subst.
   + remember (gen_ilr _ _ Hl) as Hgen eqn:HeqHgen; clear HeqHgen.

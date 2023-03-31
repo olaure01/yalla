@@ -83,7 +83,7 @@ Inductive isubform : iformula -> iformula -> Prop :=
 
 Lemma isub_trans A B C : isubform A B -> isubform B C -> isubform A C.
 Proof.
-intros Hl Hr. induction Hr in A, Hl |- * ; try (constructor; apply IHHr); try assumption; inversion_clear Hl.
+intros Hl Hr. induction Hr in A, Hl |- *; try (constructor; apply IHHr); try assumption; inversion_clear Hl.
 - apply isub_gen_N.
 - apply isub_neg_N.
 Qed.

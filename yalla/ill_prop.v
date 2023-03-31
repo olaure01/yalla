@@ -80,7 +80,7 @@ Lemma itens_rev_noax P (Hgax : no_iax P) l1 l2 A B C :
   ill P (l1 ++ itens A B :: l2) C -> ill P (l1 ++ A :: B :: l2) C.
 Proof.
 intros pi.
-assert (ill P (A :: B :: nil) (itens A B)) as Hax by (cons2app; apply tens_irr ;apply ax_exp_ill).
+assert (ill P (A :: B :: nil) (itens A B)) as Hax by (cons2app; apply tens_irr; apply ax_exp_ill).
 rewrite <- (app_nil_l l2), 2 app_comm_cons. eapply cut_ir_axfree; eassumption.
 Qed.
 

@@ -287,9 +287,9 @@ Proof.
 intros pi%lj2illfrag_cbv.
 eapply ill_vs_ll.ill_to_ll in pi.
 eapply ll_def.stronger_pfrag; [ | apply pi ].
-split; [ | split ; [ | split ] ]; try (intros; cbn; constructor).
+repeat split.
 - intros C. cbn. destruct (ill_vs_ll.ill2ll_inv C) as [x _], (existsb ill_def.ipcut_none (fst x)) eqn:Hb.
-  + exfalso. apply existsb_exists in Hb as [z [_ Hz]]. discriminate Hz.
+  + exfalso. apply existsb_exists in Hb as [z [_ [=]]].
   + apply BoolOrder.false_le.
 - intros [].
 Qed.

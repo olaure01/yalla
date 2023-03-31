@@ -339,9 +339,9 @@ intro Hpmix. induction L; intros H FL.
       by (cbn; rewrite <- ? app_assoc; rewrite app_nil_r; reflexivity).
     apply mix_r; [ assumption | ].
     apply Forall_inf_cons; [ assumption | ].
-    apply Forall_inf_cons ; [ | apply Forall_inf_nil].
+    apply Forall_inf_cons; [ | apply Forall_inf_nil].
     apply IHL; [ | assumption ].
-    cbn; cbn in H; lia.
+    cbn. cbn in H. lia.
 Qed.
 
 Lemma mix_2_to_mix_k_admissible P : P.(pmix) 2 = true ->
@@ -528,7 +528,7 @@ eapply stronger_pfrag in pi.
       apply (cut_r bot (fc' _)).
       - apply one_r.
       - assert ({ b | bot :: bot :: nil = projT2 (pgax P') b }) as [b ->]
-          by (rewrite HeqP' ; now (exists (inr tt))).
+          by (rewrite HeqP'; now exists (inr tt)).
         apply gax_r. }
     apply oc_r in pi'.
     rewrite <- (app_nil_l l).
@@ -699,7 +699,7 @@ remember (axupd_pfrag P (existT (fun x => x -> _) _
                                    | inl x => projT2 (pgax P) x
                                    | inr tt => parr one one :: parr bot bot :: nil
                                    end))) as P'.
-apply (@ax_gen _ P') ; (try now (rewrite HeqP'; cbn)); [ | assumption ].
+apply (@ax_gen _ P'); (try now (rewrite HeqP'; cbn)); [ | assumption ].
 clear - HeqP'. cbn. rewrite HeqP'. intros []; cbn.
 - assert ({ b | projT2 (pgax P) p =
                 projT2 (pgax (axupd_pfrag P (existT (fun x => x -> _) _
@@ -743,8 +743,8 @@ apply (stronger_pfrag _
     apply gax_r.
   + destruct p as [A B].
     apply parr_r.
-    apply (ex_r (parr A B :: (dual B :: nil) ++ (dual A) :: nil)) ;
-      [ |etransitivity ; [ apply PCPermutation_Type_cons_append | reflexivity ] ].
+    apply (ex_r (parr A B :: (dual B :: nil) ++ (dual A) :: nil));
+      [ |etransitivity; [ apply PCPermutation_Type_cons_append | reflexivity ] ].
     apply parr_r.
     eapply ex_r; [ | symmetry; apply PCPermutation_Type_cons_append ].
     list_simpl; rewrite <- (app_nil_l (dual A :: _)), 2 app_comm_cons.
@@ -865,7 +865,7 @@ refine (ext_wn_param fp _ (tens (wn one) (wn one) :: nil) _ _ pi).
          clear FL X0 X2.
          apply co_r, co_r.
          apply ex_r with (wn (tens (wn one) (wn one)) :: ((l0 ++ wn (tens (wn one) (wn one)) :: nil)
-                                                              ++ (l1 ++ wn (tens (wn one) (wn one)) :: nil))) ;
+                                                              ++ (l1 ++ wn (tens (wn one) (wn one)) :: nil)));
            [ apply de_r, tens_r; apply wk_r; assumption | rewrite fp; cbn ].
          apply Permutation_Type_cons; [ reflexivity | ].
          symmetry; etransitivity; [ apply Permutation_Type_cons_append | ].
@@ -956,7 +956,7 @@ refine (ext_wn_param fp _ (one :: tens (wn one) bot :: nil) _ _ pi).
   intros _ _ FL. cbn.
   inversion FL; inversion X0; subst; clear FL X0 X2;
     rename X into pi1; rename X1 into pi2; rename l1 into l2; rename l0 into l1.
-  apply (ex_r (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)) ; [ | rewrite fp; cbn ].
+  apply (ex_r (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)); [ | rewrite fp; cbn ].
   2:{ etransitivity; [ apply Permutation_Type_cons_append | ].
       cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
       etransitivity; [ | rewrite app_assoc; apply Permutation_Type_cons_append ].
@@ -1231,7 +1231,7 @@ replace (wn R :: wn (tens (dual R) bot) :: nil)
    with (map wn (map dual (dual R :: parr one R :: nil)))
   by (cbn; rewrite bidual; reflexivity).
 apply deduction_list; try reflexivity.
-eapply ax_gen ; [ | | | | apply pi ]; try reflexivity.
+eapply ax_gen; [ | | | | apply pi ]; try reflexivity.
 intros [|]; cbn.
 - assert ({ b | dual R :: nil = projT2 (pgax (axupd_pfrag (cutupd_pfrag pfrag_ll pcut_all)
     (existT (fun x => x -> list formula) (sum _ {k : nat | k < 2})
@@ -1278,7 +1278,7 @@ Qed.
 Lemma llwnR_to_ll R l : llR (wn R) l -> ll_ll (l ++ wn R :: nil).
 Proof.
 intros pi%llR_to_ll.
-eapply (ex_r _ (wn (tens (dual (wn R)) bot) :: l ++ wn (wn R) :: nil)) in pi ;
+eapply (ex_r _ (wn (tens (dual (wn R)) bot) :: l ++ wn (wn R) :: nil)) in pi;
   [ | symmetry; cons2app; rewrite ? app_assoc; apply Permutation_Type_cons_append ].
 eapply (@cut_ll_r _ nil) in pi.
 - eapply cut_ll_r with (wn (wn R)).

@@ -49,7 +49,7 @@ end.
 
 Lemma mell2ll_inj : injective mell2ll.
 Proof.
-intros A. induction A; intros B Heq; destruct B; inversion Heq ;
+intros A. induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 
@@ -98,8 +98,8 @@ Lemma mell_is_fragment : ll_prop.fragment mell_fragment.
 Proof.
 intros A HfA B Hsf.
 induction Hsf;
-  try (apply IHHsf ;
-       destruct HfA as [B0 HfA] ;
+  try (apply IHHsf;
+       destruct HfA as [B0 HfA];
        destruct B0; inversion HfA; subst;
        eexists; reflexivity).
 assumption.

@@ -64,8 +64,7 @@ end.
 
 Lemma ll2ll_inj : injective ll2ll.
 Proof.
-intros A. induction A; intros B Heq;
-  destruct B; inversion Heq;
+intros A. induction A; intros B Heq; destruct B; inversion Heq;
   try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 
@@ -168,7 +167,7 @@ induction pi in l, Heql0 |- *; subst; try discriminate f.
   apply ll2ll_map_wn_inv in H1 as [l'' -> ->].
   apply oc_r, IHpi.
   cbn. rewrite ll2ll_map_wn. reflexivity.
-- destruct l; inversion Heql0. destruct f ; inversion H0. subst.
+- destruct l; inversion Heql0. destruct f; inversion H0. subst.
   apply de_r, IHpi. reflexivity.
 - destruct l; inversion Heql0. destruct f; inversion H0. subst.
   apply wk_r, IHpi. reflexivity.
