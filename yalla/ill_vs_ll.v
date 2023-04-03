@@ -740,6 +740,7 @@ Notation iformula := (@iformula preiatom).
 Notation i2a := IAtom2Atom_retract_base.
 Notation i2a_inj := (section_injective IAtom2Atom_retract).
 
+
 (** *** Comparisons between [ll] connectives and [ill] *)
 
 Lemma wn_not_idefin A F : notT (ll_mix0 (dual (ill2ll A) :: nil) * ll_mix0 (oc F :: ill2ll A :: nil)).
@@ -993,7 +994,7 @@ enough (forall l, ll_ll (map dual (map ill2ll l)) ->
   - apply de_r, one_r. }
 intros l pi.
 remember (map dual (map ill2ll l)) as l0.
-revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
+revert l Heql0; induction pi; intros l' Heq HF; subst; try discriminate f.
 - destruct l'; inversion Heq.
   destruct l'; inversion Heq.
   destruct i0; inversion H3.
@@ -1002,12 +1003,10 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
   apply PCPermutation_Type_map_inv in HP as [ l1'' -> HP ].
   eapply IHpi; [ reflexivity | ].
   eapply Permutation_Type_Forall_inf; [ apply HP | eassumption ].
-- symmetry in Heq; decomp_map Heq; subst.
-  symmetry in Heq; decomp_map Heq; subst.
-  symmetry in Heq3.
-  destruct (ill2ll_map_ioc_inv _ _ Heq3) as [l' -> ->].
-  rewrite map_map in p.
-  apply Permutation_Type_map_inv in p as [l'' -> p].
+- symmetry in Heq. decomp_map Heq. subst.
+  symmetry in Heq. decomp_map Heq. subst.
+  symmetry in Heq3. destruct (ill2ll_map_ioc_inv _ _ Heq3) as [l' -> ->].
+  rewrite map_map in p. apply Permutation_Type_map_inv in p as [l'' -> p].
   rewrite <- (map_map _ _ l''), <- ill2ll_map_ioc, <- ? map_app in IHpi.
   eapply IHpi; [ reflexivity | ].
   assert (HF1 := Forall_inf_app_l _ _ HF).
@@ -1024,10 +1023,10 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
   inversion HF.
   eapply IHpi; [ reflexivity | eassumption ].
 - destruct l'; inversion Heq.
-  symmetry in H1; decomp_map H1; symmetry in H1; decomp_map H1; subst.
-  destruct i; inversion H0; subst.
-  + inversion HF; subst.
-    cbn in X; rewrite <- (app_nil_l _) in X; eapply parr_rev in X; [ | intros [] ].
+  symmetry in H1. decomp_map H1. symmetry in H1. decomp_map H1. subst.
+  destruct i; inversion H0. subst.
+  + inversion HF. subst.
+    cbn in X. rewrite <- (app_nil_l _) in X. eapply parr_rev in X; [ | intros [] ].
     list_simpl in X.
     assert (X1 := Forall_inf_app_l _ _ X0).
     assert (X2 := Forall_inf_app_r _ _ X0).
@@ -1043,8 +1042,8 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try (now inversion f).
     eapply ex_r in X; [ | apply Permutation_Type_swap ].
     apply (cut_mix0_r X) in pi0.
     apply (IHpi2 (i2 :: l4)); constructor; assumption.
-  + inversion HF; subst.
-    cbn in X; rewrite <- (app_nil_l _) in X; eapply parr_rev in X; [ | intros [] ].
+  + inversion HF. subst.
+    cbn in X. rewrite <- (app_nil_l _) in X; eapply parr_rev in X; [ | intros [] ].
     list_simpl in X.
     assert (X1 := Forall_inf_app_l _ _ X0).
     assert (X2 := Forall_inf_app_r _ _ X0).

@@ -271,7 +271,7 @@ Qed.
 Lemma sync_focus l A : llfoc l (Some A) -> sformula A.
 Proof.
 intros pi.
-remember (Some A) as Pi eqn:HeqPi. revert HeqPi. induction pi; intros HeqPi;
+remember (Some A) as Pi eqn:HeqPi. induction pi in HeqPi |- *;
   inversion HeqPi; subst;
   try (now constructor); try apply IHpi; try apply IHpi1; assumption.
 Qed.
@@ -339,9 +339,8 @@ revert l1 l2. induction pi; intros l1' l2' Heq; subst.
   destruct H0 as [pi0 Hs].
   exists (parr_fr pi0); cbn; lia.
 - exfalso.
-  destruct l1'; inversion Heq; subst.
-  apply Forall_inf_app_r in f.
-  inversion f; subst.
+  destruct l1'; inversion Heq. subst.
+  apply Forall_inf_app_r in f. inversion f. subst.
   inversion X as [[[Ht | Ht] | Ht] | Ht]; now inversion Ht.
 - destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ (polconts _ Hs)).
@@ -1060,7 +1059,7 @@ Proof. intros pi. induction lw; [ | apply wk_gen_Fr ];  assumption. Qed.
 Lemma co_gen_Fr A l : llFoc (wn A :: wn A :: l) None -> llFoc (wn A :: l) None.
 Proof.
 rewrite <- (app_nil_l l), ? app_comm_cons. apply reversing.
-clear l. cbn. intros l Hf pi. now apply co_Fr.
+clear l. cbn. intros l Hf pi. apply co_Fr; assumption.
 Qed.
 
 
@@ -1678,7 +1677,7 @@ Qed.
 Lemma llFoc_to_ll l Pi : llFoc l Pi ->
   (Pi = None -> ll_ll l) * (forall C, Pi = Some C -> ll_ll (C :: l)).
 Proof.
-intros pi; induction pi;
+intros pi. induction pi;
   (split; [ intros HN; inversion HN | intros D HD; inversion HD ]); subst;
   try (destruct IHpi as [IHpiN IHpiS]);
   try (destruct IHpi1 as [IHpi1N IHpi1S]);
@@ -1804,7 +1803,7 @@ Qed.
 
 Lemma focusing l : ll_ll l -> llFoc l None.
 Proof.
-intros pi; induction pi; (try now inversion f); (try now constructor).
+intros pi; induction pi; (try discriminate f); (try now constructor).
 - apply ex_Fr with (var X :: covar X :: nil); [ | apply Permutation_Type_swap ].
   apply foc_Fr, ax_Fr.
 - now apply ex_Fr with l1.

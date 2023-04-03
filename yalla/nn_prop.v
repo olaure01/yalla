@@ -556,16 +556,14 @@ Qed.
 
 Lemma ll_bbb_to_ill_trans R (l : list formula) : ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
 Proof.
-intros Hll. induction Hll; (try now (inversion f)); cbn.
-- cons2app. rewrite <- (app_nil_l _).
-  apply lmap_ilr.
+intros Hll. induction Hll; try discriminate f; cbn.
+- cons2app. rewrite <- (app_nil_l _). apply lmap_ilr.
   + apply (ax_ir (a2i X)).
   + rewrite app_nil_l. apply ax_exp_ill.
 - eapply ex_ir; [ eassumption | apply Permutation_Type_map; assumption ].
 - apply (ll_mix02_to_ill_trans_gen R) in l.
   rewrite <- (app_nil_l (ioc _ :: _)) in l.
-  rewrite map_app.
-  rewrite <- (app_nil_r (map _ l1)).
+  rewrite map_app, <- (app_nil_r (map _ l1)).
   eapply (cut_ir_axfree); [ intros [] | eassumption | ].
   eapply ex_ir; [ | apply Permutation_Type_app_comm ]; assumption.
 - apply negR_ilr_head, one_irr. reflexivity.
@@ -574,11 +572,9 @@ intros Hll. induction Hll; (try now (inversion f)); cbn.
   list_simpl. eapply ex_ir; [ | apply Permutation_Type_app_comm ].
   list_simpl in IHHll1. list_simpl in IHHll2.
   apply tens_irr; apply negR_irr; assumption.
-- rewrite <- (app_nil_l (itens _ _ :: _)).
-  apply tens_ilr.
+- rewrite <- (app_nil_l (itens _ _ :: _)). apply tens_ilr.
   eapply ex_ir; [ eassumption | apply Permutation_Type_swap ].
-- rewrite <- (app_nil_l (izero :: _)).
-  apply zero_ilr.
+- rewrite <- (app_nil_l (izero :: _)). apply zero_ilr.
 - apply negR_ilr_head, plus_irr1, negR_irr, IHHll. reflexivity.
 - apply negR_ilr_head, plus_irr2, negR_irr, IHHll. reflexivity.
 - rewrite <- (app_nil_r (map _ _)), <- (app_nil_l (iplus _ _ :: _)).

@@ -112,7 +112,7 @@ Proof.
 intros pi.
 remember (map ill2ill l) as l0 eqn:Heql0. remember (ill2ill A) as A0 eqn:HeqA0.
 revert l Heql0 A HeqA0; induction pi; intros l' Heql0 A' HeqA0; subst;
-  try (now inversion f);
+  try discriminate f;
   try (now destruct A'; inversion HeqA0; subst;
          try (symmetry in Heql0; decomp_map_inf Heql0; subst); constructor;
          try (now apply IHpi); try (now apply IHpi1); try (now apply IHpi2)).

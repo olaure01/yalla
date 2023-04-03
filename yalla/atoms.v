@@ -9,7 +9,7 @@ From OLlibs Require Export infinite.
 
 Class AtomType_self (A : DecType) := Atom_self_inj : self_injective A.
 
-Definition AtomType_self_InfDecType (A : DecType) (As : AtomType_self A) := {|
+Definition AtomType_self_InfDecType A (As : AtomType_self A) := {|
   infcar := A;
   fresh := proj1_sig (nat_injective_choice _ (self_injective_nat _ Atom_self_inj));
   fresh_spec := proj2_sig (nat_injective_choice _ (self_injective_nat _ Atom_self_inj)) |}.
@@ -20,50 +20,54 @@ Class IAtomType_into_nat (I : DecType) := IAtom_into_nat : embedding (option I) 
 
 Class IAtom2AtomType (A : DecType) (I : DecType) := IAtom2Atom : option I -> A.
 
-Class IAtom2AtomType_fin (A : DecType) (I : DecType) := {
+Class IAtom2AtomType_fin A I := {
   IAtom2Atom_fin_base :> IAtom2AtomType A I;
   IAtom2Atom_fin x : { l & forall i, iffT (x = IAtom2Atom i) (In_inf i l) } }.
 
-Class IAtom2AtomType_retract (A : DecType) (I : DecType) := {
+Class IAtom2AtomType_retract A I := {
   IAtom2Atom_retract_base :> IAtom2AtomType A I;
   IAtom2Atom_retract_base_inv : A -> option I;
   IAtom2Atom_retract : retract IAtom2Atom_retract_base_inv IAtom2Atom }.
 
-Lemma retract_fin (A : Type) (B : DecType) (f : A -> B) g : retract g f ->
-  forall x, { l & forall i, iffT (x = f i) (In_inf i l) }.
-Proof.
-intros Hr b.
-destruct (eq_dt_dec b (f (g b))) as [Heq | Hneq].
-- exists (g b :: nil). intros a. split.
-  + intros ->. rewrite Hr. left. reflexivity.
-  + intros [<-|[]]. assumption.
-- exists nil. intros a. split.
-  + intros ->. apply Hneq. rewrite Hr. reflexivity.
-  + intros [].
-Qed.
-
-#[export] Instance IAtom2AtomType_retract_fin (A I : DecType) :
-  IAtom2AtomType_retract A I -> IAtom2AtomType_fin A I | 50 := fun C => {|
-  IAtom2Atom_fin_base := IAtom2Atom_retract_base;
-  IAtom2Atom_fin := retract_fin _ _ _ _ (@IAtom2Atom_retract A I C) |}.
-
-Class Atom2IAtomType_self (A : DecType) (I : DecType) := {
+Class Atom2IAtomType_self (A I : DecType) := {
   Atom2IAtom_Atom_self :> AtomType_self A;
   Atom2PreIAtom : A -> I;
   Atom2PreIAtom_bij : bijective Atom2PreIAtom }.
 
-Class TAtom2IAtomType (I : DecType) (T : DecType) := {
+Class TAtom2IAtomType (I T : DecType) := {
   TAtom2PreIAtom : T -> I;
   TAtom2PreIAtom_bij : bijective TAtom2PreIAtom }.
 
-Class TLAtomType (A : DecType) (I : DecType) (T : DecType) := {
+Class TLAtomType A I T := {
   TLAtom_base :> IAtom2AtomType_retract A I;
   TLAtom_TAtom :> TAtom2IAtomType I T }.
 
-Class AtomIAtomTAtomType (A : DecType) (I : DecType) (T : DecType) := {
+Class AtomIAtomTAtomType A I T := {
   AtomIAtomTAtom_IAtom2Atom :> IAtom2AtomType_retract A I;
   AtomIAtomTAtom_Atom2IAtom :> Atom2IAtomType_self A I;
   AtomIAtomTAtom_TAtom :> TLAtomType A I T }.
+
+
+(** *** Construction of derived classes *)
+
+Lemma section_coimage_fin A (B : DecType) (f : A -> B) g : retract g f ->
+  forall y, { l & forall x, iffT (y = f x) (In_inf x l) }.
+Proof.
+intros Hr y.
+destruct (section_coimage_option _ Hr y) as [[x|] Hx].
+- exists (x :: nil). intro x'. split.
+  + intros ->. left. symmetry.
+    apply (section_injective Hr), Hx. reflexivity.
+  + intros [<-|[]]. apply Hx. reflexivity.
+- exists nil. intros x. split.
+  + intros ->. discriminate (proj2 (Hx x) eq_refl).
+  + intros [].
+Qed.
+
+#[export] Instance IAtom2AtomType_retract_fin A I :
+  IAtom2AtomType_retract A I -> IAtom2AtomType_fin A I | 50 := fun C => {|
+  IAtom2Atom_fin_base := IAtom2Atom_retract_base;
+  IAtom2Atom_fin := section_coimage_fin _ _ _ _ (@IAtom2Atom_retract A I C) |}.
 
 
 (** ** Consistency checks *)
@@ -95,11 +99,8 @@ Class FullAtoms := {
   IAtom2Atom_retract_base := FIAtom2AtomType C;
   IAtom2Atom_retract_base_inv := g;
   IAtom2Atom_retract := Hr |}.
-(*
-#[local] Instance FIAtom2AtomType_fin (C : FullAtoms) : IAtom2AtomType_fin FAtom FPreIAtom | 50 := {|
-  IAtom2Atom_fin_base := FIAtom2AtomType C;
-  IAtom2Atom_fin := let (g, Hr) := FIAtom2Atom_retract in retract_fin _ _ _ _ Hr |}.
-*)
+#[local] Instance FIAtom2AtomType_fin (C : FullAtoms) : IAtom2AtomType_fin FAtom FPreIAtom | 50 := 
+  IAtom2AtomType_retract_fin _ _ (FIAtom2AtomType_retract C).
 #[local] Instance FAtom2IAtomType_self (C : FullAtoms) : Atom2IAtomType_self FAtom FPreIAtom | 50 := {|
   Atom2IAtom_Atom_self := FAtomType_self C;
   Atom2PreIAtom := FAtom2PreIAtom;
@@ -133,7 +134,6 @@ Proof. destruct section_option_nat_to_nat as [g Hr]. exists (g, option_nat_to_na
 
 Lemma nat_bijective_nat : nat_bijective nat.
 Proof. exists id. apply id_bijective. Qed.
-
 
 Definition Nat_FullAtoms := {|
   FAtom := nat_infdectype;

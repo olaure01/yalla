@@ -23,9 +23,8 @@ Proof.
 intros FL. induction FL as [|l0 [|l L] pi FL IHFL].
 - apply one_r.
 - apply bot_r.
-  cbn; rewrite app_nil_r; assumption.
-- apply tens_r; [ assumption | ].
-  apply bot_r; assumption.
+  cbn. rewrite app_nil_r. assumption.
+- apply tens_r, bot_r; assumption.
 Qed.
 
 (** Provability in [P + mix_n] by adding [wn (tens_n n bot)], and provability in [P + cut + ax : parr_n n bot] are equivalent *)

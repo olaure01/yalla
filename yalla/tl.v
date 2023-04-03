@@ -503,7 +503,7 @@ intros Hgax a. split; [ split | ].
   apply i2ac_inj in H0 as ->. reflexivity.
 - destruct (Hgax a) as [_ Hat].
   intros A C Hin Heq.
-  eapply Forall_inf_forall in Hat; try eassumption.
+  eapply Forall_inf_forall in Hat; [ | eassumption ].
   destruct A; inversion Hat; subst.
   destruct C; inversion Heq.
   apply i2ac_inj in H0 as ->. reflexivity.

@@ -48,7 +48,7 @@ Lemma tsync_context :
   (forall lw ls l, atrifoc lw ls l -> Forall_inf Foc ls)
 * (forall lw ls A, strifoc lw ls A -> Forall_inf Foc ls).
 Proof.
-apply trifoc_rect; auto.
+apply trifoc_rect; try now intros; assumption + constructor.
 - intros A lw ls1 ls2 Hs%(inl : _ -> Foc _) pi HF.
   apply Forall_inf_app; [ | constructor; [ assumption | ] ].
   + exact (Forall_inf_app_l _ _ HF).
@@ -67,7 +67,7 @@ Lemma exw_tfr :
   (forall lw ls l, atrifoc lw ls l -> forall lw0, Permutation_Type lw lw0 -> atrifoc lw0 ls l)
 * (forall lw ls A, strifoc lw ls A -> forall lw0, Permutation_Type lw lw0 -> strifoc lw0 ls A).
 Proof.
-apply trifoc_rect; try now intros; try (specialize (X lw0)); try constructor; try apply X; auto.
+apply trifoc_rect; try now intros; constructor; try apply X; try apply X0.
 - intros A lw1 lw2 ls Hnc pi IHpi lw0 HP.
   symmetry in HP. destruct (Permutation_Type_vs_elt_inv _ _ _ HP) as [(l1, l2) ->].
   apply focd_tfr, IHpi; [ | symmetry ]; assumption.
@@ -119,7 +119,6 @@ Lemma wk_list_tfr lw0 :
 Proof.
 apply trifoc_rect; try (intros; list_simpl; econstructor; eassumption).
 intros ? ? ? ? ? _ pi2. list_simpl in pi2. list_simpl. constructor; assumption.
-
 Qed.
 
 Lemma wk_tfr C lw ls :
@@ -138,20 +137,19 @@ Proof.
 apply trifoc_rect; intros; subst; try now (econstructor; eauto).
 - assert (pi := X _ _ H).
   assert (In_inf A (lw0 ++ C :: lw3)) as [(l1, l2) HA]%in_inf_split.
-  { enough (incl_inf (lw0 ++ C :: C :: lw3) (lw0 ++ C :: lw3)) as Hi.
-    { apply Hi. rewrite <- H. apply in_inf_elt. }
+  { enough (incl_inf (lw0 ++ C :: C :: lw3) (lw0 ++ C :: lw3)) as Hi
+      by (apply Hi; rewrite <- H; apply in_inf_elt).
     apply incl_inf_app_app; [ apply incl_inf_refl | ].
     now intros D [->|HD]; [ left | ]. }
   rewrite ? HA in *.
   apply focd_tfr; assumption.
 - apply wn_tfr.
   rewrite app_comm_cons. apply X. reflexivity.
-- assert (In_inf (covar X) (lw0 ++ C :: lw3)) as [(l1, l2) HX]%in_inf_split.
-  { enough (incl_inf (lw0 ++ C :: C :: lw3) (lw0 ++ C :: lw3)) as Hi.
-    { apply Hi. rewrite <- H. apply in_inf_elt. }
+- assert (In_inf (covar X) (lw0 ++ C :: lw3)) as [(l1, l2) ->]%in_inf_split.
+  { enough (incl_inf (lw0 ++ C :: C :: lw3) (lw0 ++ C :: lw3)) as Hi
+      by (apply Hi; rewrite <- H; apply in_inf_elt).
     apply incl_inf_app_app; [ apply incl_inf_refl | ].
     now intros D [->|HD]; [ left | ]. }
-  rewrite ? HX in *.
   apply axd_tfr.
 Qed.
 
@@ -192,14 +190,13 @@ Qed.
 
 Lemma bot_gen_tfr lw ls l1 l2 : atrifoc lw ls (l1 ++ l2) -> atrifoc lw ls (l1 ++ bot :: l2).
 Proof.
-remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi.
-destruct l1.
+remember (list_sum (map fsize l1)) as n eqn:Heqn.
+revert lw ls l1 Heqn; induction n using lt_wf_rect; intros lw ls [|C l1] -> pi.
 - apply bot_tfr. assumption.
-- list_simpl; destruct f;
+- list_simpl. destruct C;
     try (inversion pi; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; assumption).
-  + inversion pi; subst.
+  + inversion pi. subst.
     apply as_tfr; [ right; constructor | ].
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
@@ -207,13 +204,13 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply parr_tfr; rewrite 2 app_comm_cons.
-    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); cbn; try lia; assumption.
+    apply X with (list_sum (map fsize (C1 :: C2 :: l1))); cbn; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply top_tfr. assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
-    * apply X with (list_sum (map fsize (f1 :: l1))); cbn; try lia; assumption.
-    * apply X with (list_sum (map fsize (f2 :: l1))); cbn; try lia; assumption.
+    * apply X with (list_sum (map fsize (C1 :: l1))); cbn; try lia; assumption.
+    * apply X with (list_sum (map fsize (C2 :: l1))); cbn; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply wn_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
@@ -221,14 +218,13 @@ Qed.
 
 Lemma parr_gen_tfr A B lw ls l1 l2 : atrifoc lw ls (l1 ++ A :: B :: l2) -> atrifoc lw ls (l1 ++ parr A B :: l2).
 Proof.
-remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi.
-destruct l1.
+remember (list_sum (map fsize l1)) as n eqn:Heqn.
+revert lw ls l1 Heqn; induction n using lt_wf_rect; intros lw ls [|C l1] -> pi.
 - apply parr_tfr. assumption.
-- list_simpl; destruct f;
+- list_simpl. destruct C;
     try (inversion pi; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; assumption).
-  + inversion pi; subst.
+  + inversion pi. subst.
     apply as_tfr; [ right; constructor | ].
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
@@ -236,13 +232,13 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply parr_tfr. rewrite 2 app_comm_cons.
-    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
+    apply X with (list_sum (map fsize (C1 :: C2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply top_tfr. assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
-    * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
-    * apply X with (list_sum (map fsize (f2 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C1 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply wn_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
@@ -250,11 +246,10 @@ Qed.
 
 Lemma top_gen_tfr lw ls l1 l2 : Forall_inf Foc ls -> atrifoc lw ls (l1 ++ top :: l2).
 Proof.
-remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> HF.
-destruct l1.
-- apply top_tfr; assumption.
-- list_simpl; destruct f;
+remember (list_sum (map fsize l1)) as n eqn:Heqn.
+revert lw ls l1 Heqn; induction n using lt_wf_rect; intros lw ls [|C l1] -> HF.
+- apply top_tfr. assumption.
+- list_simpl. destruct C;
     try (apply as_tfr; [ left; constructor | ];
     apply X with (list_sum (map fsize l1)); simpl; try lia;
     constructor; [ left; constructor | assumption ]).
@@ -264,11 +259,11 @@ destruct l1.
   + apply bot_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + apply parr_tfr. rewrite 2 app_comm_cons.
-    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
+    apply X with (list_sum (map fsize (C1 :: C2 :: l1))); simpl; try lia; assumption.
   + apply top_tfr. assumption.
   + apply with_tfr; rewrite app_comm_cons.
-    * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
-    * apply X with (list_sum (map fsize (f2 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C1 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C2 :: l1))); simpl; try lia; assumption.
   + apply wn_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
 Qed.
@@ -276,14 +271,13 @@ Qed.
 Lemma with_gen_tfr A B lw ls l1 l2 : atrifoc lw ls (l1 ++ A :: l2) -> atrifoc lw ls (l1 ++ B :: l2) ->
   atrifoc lw ls (l1 ++ awith A B :: l2).
 Proof.
-remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi1 pi2.
-destruct l1.
+remember (list_sum (map fsize l1)) as n eqn:Heqn.
+revert lw ls l1 Heqn; induction n using lt_wf_rect; intros lw ls [|C l1] -> pi1 pi2.
 - apply with_tfr; assumption.
-- list_simpl; destruct f;
+- list_simpl. destruct C;
     try (inversion pi1; inversion pi2; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; assumption).
-  + inversion pi1; inversion pi2; subst.
+  + inversion pi1. inversion pi2. subst.
     apply as_tfr; [ right; constructor | ].
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
@@ -293,15 +287,15 @@ destruct l1.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
     inversion pi2; subst; [ | inversion X1; inversion X3; inversion H ].
     apply parr_tfr. rewrite 2 app_comm_cons.
-    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
+    apply X with (list_sum (map fsize (C1 :: C2 :: l1))); simpl; try lia; assumption.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
     inversion pi2; subst; [ | inversion X1; inversion X3; inversion H ].
     apply top_tfr. assumption.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
     inversion pi2; subst; [ | inversion X2; inversion X4; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
-    * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
-    * apply X with (list_sum (map fsize (f2 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C1 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C2 :: l1))); simpl; try lia; assumption.
   + inversion pi1; subst; [ | inversion X0; inversion X2; inversion H ].
     inversion pi2; subst; [ | inversion X1; inversion X3; inversion H ].
     apply wn_tfr.
@@ -310,14 +304,13 @@ Qed.
 
 Lemma wn_gen_tfr A lw ls l1 l2 : atrifoc (A :: lw) ls (l1 ++ l2) -> atrifoc lw ls (l1 ++ wn A :: l2).
 Proof.
-remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> pi.
-destruct l1.
+remember (list_sum (map fsize l1)) as n eqn:Heqn.
+revert lw ls l1 Heqn; induction n using lt_wf_rect; intros lw ls [|C l1] -> pi.
 - apply wn_tfr. assumption.
-- list_simpl; destruct f;
+- list_simpl. destruct C;
     try (inversion pi; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; assumption).
-  + inversion pi; subst.
+  + inversion pi. subst.
     apply as_tfr; [ right; constructor | ].
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
@@ -325,30 +318,29 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply parr_tfr. rewrite 2 app_comm_cons.
-    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
+    apply X with (list_sum (map fsize (C1 :: C2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply top_tfr. assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
-    * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
-    * apply X with (list_sum (map fsize (f2 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C1 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply wn_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia.
-    apply exw_tfr with (f :: A :: lw); [ assumption | apply Permutation_Type_swap ].
+    apply exw_tfr with (C :: A :: lw); [ assumption | apply Permutation_Type_swap ].
 Qed.
 
 Lemma unfoc_gen_tfr A lw ls l1 l2 : Foc A -> atrifoc lw (A :: ls) (l1 ++ l2) -> atrifoc lw ls (l1 ++ A :: l2).
 Proof.
-remember (list_sum (map fsize l1)) as n; revert lw ls l1 Heqn; induction n using lt_wf_rect;
-  intros lw ls l1 -> HF pi.
-destruct l1.
+remember (list_sum (map fsize l1)) as n eqn:Heqn.
+revert lw ls l1 Heqn; induction n using lt_wf_rect; intros lw ls [|C l1] -> HF pi.
 - apply as_tfr; assumption.
-- list_simpl; destruct f;
+- list_simpl. destruct C;
     try (inversion pi; subst; apply as_tfr; [ left; constructor | ];
          apply X with (list_sum (map fsize l1)); simpl; try lia; [ assumption | ];
          eapply ex_tfr; [ eassumption | apply Permutation_Type_swap ]).
-  + inversion pi; subst.
+  + inversion pi. subst.
     apply as_tfr; [ right; constructor | ].
     apply X with (list_sum (map fsize l1)); simpl; try lia; [ assumption | ].
     eapply ex_tfr; [ eassumption | apply Permutation_Type_swap ].
@@ -357,14 +349,14 @@ destruct l1.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply parr_tfr. rewrite 2 app_comm_cons.
-    apply X with (list_sum (map fsize (f1 :: f2 :: l1))); simpl; try lia; assumption.
+    apply X with (list_sum (map fsize (C1 :: C2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply top_tfr.
     inversion X0; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply with_tfr; rewrite app_comm_cons.
-    * apply X with (list_sum (map fsize (f1 :: l1))); simpl; try lia; assumption.
-    * apply X with (list_sum (map fsize (f2 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C1 :: l1))); simpl; try lia; assumption.
+    * apply X with (list_sum (map fsize (C2 :: l1))); simpl; try lia; assumption.
   + inversion pi; subst; [ | inversion X0; inversion X2; inversion H ].
     apply wn_tfr.
     apply X with (list_sum (map fsize l1)); simpl; try lia; assumption.
@@ -375,36 +367,34 @@ Proof.
 revert lw ls l.
 apply (astrifoc_rect (fun lw ls l _ => forall l0, Permutation_Type l l0 -> atrifoc lw ls l0)
                      (fun _ _ _ _ => unit)); try now constructor.
-- intros A lw ls1 ls2 Hs pi _ l0 HP.
-  apply Permutation_Type_nil in HP; subst.
-  apply foc_tfr, pi; assumption.
-- intros A lw1 lw2 ls Hnc pi _ ls0 HP.
-  apply Permutation_Type_nil in HP; subst.
+- intros A lw ls1 ls2 Hs pi _ l0 ->%Permutation_Type_nil.
+  apply foc_tfr, pi. assumption.
+- intros A lw1 lw2 ls Hnc pi _ ls0 ->%Permutation_Type_nil.
   apply focd_tfr, pi. assumption.
 - intros lw ls l pi IHpi l0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
-  symmetry in HP; apply Permutation_Type_cons_app_inv in HP.
-  apply bot_gen_tfr, IHpi; assumption.
+  symmetry in HP. destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
+  symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
+  apply bot_gen_tfr, IHpi. assumption.
 - intros A B lw ls l pi IHpi l0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
-  symmetry in HP; apply Permutation_Type_cons_app_inv in HP.
+  symmetry in HP. destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
+  symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
   apply parr_gen_tfr, IHpi.
-  do 2 apply Permutation_Type_cons_app; assumption.
+  do 2 apply Permutation_Type_cons_app. assumption.
 - intros lw ls l HF l0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
-  symmetry in HP; apply Permutation_Type_cons_app_inv in HP.
-  apply top_gen_tfr; assumption.
+  symmetry in HP. destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
+  symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
+  apply top_gen_tfr. assumption.
 - intros A B lw ls l pi1 IHpi1 pi2 IHpi2 l0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
-  symmetry in HP; apply Permutation_Type_cons_app_inv in HP.
+  symmetry in HP. destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
+  symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
   apply with_gen_tfr; [ apply IHpi1 | apply IHpi2]; apply Permutation_Type_cons_app; assumption.
 - intros A lw ls l pi IHpi l0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
-  symmetry in HP; apply Permutation_Type_cons_app_inv in HP.
-  apply wn_gen_tfr, IHpi; assumption.
+  symmetry in HP. destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
+  symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
+  apply wn_gen_tfr, IHpi. assumption.
 - intros A lw ls l Hf pi IHpi ls0 HP.
-  symmetry in HP; destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
-  symmetry in HP; apply Permutation_Type_cons_app_inv in HP.
+  symmetry in HP. destruct (Permutation_Type_vs_cons_inv HP) as [(l1, l2) ->].
+  symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
   apply unfoc_gen_tfr, IHpi; assumption.
 Qed.
 
@@ -419,13 +409,13 @@ apply trifoc_rect; try (now constructor); try (now econstructor; eassumption).
 - intros A lw1 lw2 ls pi IHpi.
   assert (In_inf A (nodup (@eq_dt_dec formulas_dectype) (lw1 ++ A :: lw2))) as Hin
     by apply (in_in_inf (@eq_dt_dec formulas_dectype)), nodup_In, in_elt.
-  apply in_inf_split in Hin as [(l1, l2) Hin]. rewrite ? Hin in *.
+  apply in_inf_split in Hin as [(l1, l2) ->].
   apply focd_tfr. assumption.
 - intros A lw ls l pi IHpi.
   apply wn_tfr.
-  cbn in IHpi; destruct (in_dec _ A lw) as [Hin|Hnin]; [ | assumption ].
+  cbn in IHpi. destruct (in_dec _ A lw) as [Hin|Hnin]; [ | assumption ].
   eapply exw_tfr; [ | symmetry; apply Permutation_Type_cons_append ].
-  apply wk_list_tfr; assumption.
+  apply wk_list_tfr. assumption.
 - intros X lw1 lw2.
   assert (In_inf (covar X) (nodup (@eq_dt_dec formulas_dectype) (lw1 ++ covar X :: lw2))) as Hin
     by apply (in_in_inf (@eq_dt_dec formulas_dectype)), nodup_In, in_elt.
@@ -441,8 +431,8 @@ Lemma wFoc_wn_Foc_partition l lw ls : Forall_inf wFoc l -> partition is_wn l = (
 Proof.
 intros HF Hp.
 apply forallb_true_partition.
-rewrite partition_filter in Hp. inversion Hp.
-clear - HF. induction l as [|a l IHl]; [ reflexivity | ].
+rewrite partition_filter in Hp. injection Hp as [= _ <-].
+induction l as [|a l IHl]; [ reflexivity | ].
 cbn. inversion_clear HF.
 destruct (wn_spec a) as [Hwn|Hnwn]; [ inversion Hwn; subst | cbn; apply andb_true_iff ]; cbn; rewrite IHl; auto.
 split; [ | reflexivity ].

@@ -127,15 +127,14 @@ Qed.
 Lemma llfrag2ll l : ll_fragments.ll_ll (map ll2ll l) -> ll l.
 Proof.
 intros pi.
-remember (map ll2ll l) as l0.
+remember (map ll2ll l) as l0 eqn:Heql0.
 induction pi in l, Heql0 |- *; subst; try discriminate f.
 - symmetry in Heql0. decomp_map_inf Heql0. subst.
   destruct l2; inversion Heql4.
   destruct x; inversion Heql2.
   destruct x0; inversion Heql0.
   apply ax_r.
-- cbn in p.
-  apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
+- cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
   eapply ex_r; [ apply IHpi | ]; eassumption.
 - symmetry in Heql0. decomp_map_inf Heql0. subst. symmetry in Heql0.
   cbn in Heql0. apply ll2ll_map_wn_inv in Heql0 as [l -> ->].

@@ -42,13 +42,6 @@ end.
 (** Atomic [iformula] *)
 Variant iatomic : iformula -> Type := | iatomic_var x : iatomic (ivar x).
 
-(* Unused
-Variant iatomic_Prop : iformula -> Prop := | iatomic_Prop_var : forall x, iatomic_Prop (ivar x).
-
-Lemma iatomic_Prop_iatomic A : iatomic_Prop A -> iatomic A.
-Proof. induction A; intros Hat; try (exfalso; inversion Hat; fail); constructor. Qed.
-*)
-
 (** Atoms in a formula *)
 Fixpoint iatom_list A : list iatom :=
 match A with

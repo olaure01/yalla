@@ -77,33 +77,30 @@ Proof. induction l as [ | a l IHl ]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma mell2ll_map_wn_inv l1 l2 : Permutation_Type (map formulas.wn l1) (map mell2ll l2) ->
   {'(l1', l2') & l1 = map mell2ll l1' /\ l2 = map wn l2' & Permutation_Type l1' l2' }.
 Proof.
-induction l1 in l2 |- *; intros Heq; destruct l2 as [ | f l2 ].
+induction l1 as [|A l1 IHl1] in l2 |- *; intros Heq; destruct l2 as [ | B l2 ].
 - exists (nil, nil); [ repeat split | reflexivity ].
 - apply Permutation_Type_nil in Heq as [=].
-- symmetry in Heq.
-  apply Permutation_Type_nil in Heq as [=].
+- symmetry in Heq. apply Permutation_Type_nil in Heq as [=].
 - assert (HP := Heq).
-  symmetry in Heq.
-  apply Permutation_Type_vs_cons_inv in Heq as [([|f0 l0], l3) Heq].
+  symmetry in Heq. apply Permutation_Type_vs_cons_inv in Heq as [([|C l0], l3) Heq].
   + cbn in Heq, HP. injection Heq as [= Heq <-].
-    rewrite Heq in HP.
-    apply Permutation_Type_cons_inv in HP.
+    rewrite Heq in HP. apply Permutation_Type_cons_inv in HP.
     apply IHl1 in HP as [(l1', l2') [-> ->] HP].
-    destruct f; inversion Heq.
-    exists (f :: l1', f :: l2'); [ repeat split | ].
+    destruct B; inversion Heq.
+    exists (B :: l1', B :: l2'); [ repeat split | ].
     apply Permutation_Type_cons; [ reflexivity | assumption ].
   + injection Heq as [= <- Heq].
     cbn in HP. rewrite Heq, app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP.
     decomp_map_inf Heq. subst. cbn in HP.
-    replace (mell2ll f :: map mell2ll l4 ++ map mell2ll l6)
-       with (map mell2ll ((f :: l4) ++ l6))
-      in HP by (list_simpl; reflexivity).
+    replace (mell2ll B :: map mell2ll l4 ++ map mell2ll l6)
+       with (map mell2ll ((B :: l4) ++ l6)) in HP
+      by (list_simpl; reflexivity).
     apply IHl1 in HP as [(l1', l2') [-> Heq2] HP].
     destruct x; inversion Heq3.
     symmetry in Heq2. decomp_map_inf Heq2. subst.
     exists (x :: l1', x0 :: l2 ++ x :: l1); [ repeat split | ].
     * list_simpl. reflexivity.
-    * rewrite app_comm_cons. apply Permutation_Type_cons_app; assumption.
+    * rewrite app_comm_cons. apply Permutation_Type_cons_app. assumption.
 Qed.
 
 
@@ -240,8 +237,7 @@ Lemma mellfrag2mell m : ll_def.ll pfrag_mell (map mell2ll (elts m)) -> mell m.
 Proof.
 intros pi.
 remember (map mell2ll (elts m)) as l eqn:Heql.
-assert (Permutation_Type l (map mell2ll (elts m))) as HP by now subst.
-clear Heql.
+assert (Permutation_Type l (map mell2ll (elts m))) as HP by now subst. clear Heql.
 induction pi in m, HP |- *; subst;
   try discriminate;
   try (now (apply Permutation_Type_image in HP as [Z Heq];
@@ -281,7 +277,7 @@ induction pi in m, HP |- *; subst;
   assert (HP2 := HP).
   apply Permutation_Type_vs_cons_inv in HP as ((l1 & l2) & HP).
   decomp_map HP. subst.
-  destruct x; inversion HP4; subst.
+  destruct x; inversion HP4. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP. subst. rewrite list2fm_elt.
   apply bot_r, IHpi.

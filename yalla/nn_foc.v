@@ -11,7 +11,7 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : DecType} {preiatom : InfDecType} {tatom : DecType}
-        {Atoms : AtomIAtomTAtomType atom preiatom tatom }.
+        {Atoms : AtomIAtomTAtomType atom preiatom tatom}.
 Notation atom_inf := (@atom_inf _ _ AtomIAtomTAtom_Atom2IAtom).
 Notation formula := (@formula atom_inf).
 Notation iformula := (@iformula preiatom).
@@ -239,9 +239,7 @@ Proof. intros l1 l2 HP pi. eapply ex_otr; eassumption. Qed.
 Lemma neg_rev_ot A l : otl l (Some (tneg A)) -> otl (A :: l) None.
 Proof.
 intros pi.
-remember (Some (tneg A)) as Pi eqn:HeqPi.
-
-induction pi in A, HeqPi |- *; subst;
+remember (Some (tneg A)) as Pi eqn:HeqPi. induction pi in A, HeqPi |- *; subst;
   try (discriminate HeqPi);
   try (now (rewrite app_comm_cons; constructor; rewrite <- app_comm_cons; apply IHpi)).
 - eapply ex_otr.
@@ -499,7 +497,7 @@ replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil)) by (list_si
 eapply tl_to_otl_neg; [ eassumption | | | list_simpl; reflexivity ].
 + clear. induction l; constructor; [ | assumption ].
   eexists. reflexivity.
-+ intros D [=].
++ intros ? [=].
 Qed.
 
 (* ** From [tl] to [llfoc] *)

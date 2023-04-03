@@ -54,23 +54,7 @@ Lemma wn_spec A : reflectT (wn_formula A) (is_wn A).
 Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
 
 (** Atomic [formula] *)
-Variant atomic : formula -> Type :=
-| atomic_var x : atomic (var x)
-| atomic_covar x : atomic (covar x).
-
-(* Unused
-Variant atomic_Prop : formula -> Prop :=
-| atomic_Prop_var : forall x, atomic_Prop (var x)
-| atomic_Prop_covar : forall x, atomic_Prop (covar x).
-
-Lemma atomic_Prop_atomic A : atomic_Prop A -> atomic A.
-Proof.
-induction A; intros Hat;
-  try (now exfalso; inversion Hat);
-  now constructor.
-Qed.
-*)
-
+Variant atomic : formula -> Type := | atomic_var x : atomic (var x) | atomic_covar x : atomic (covar x).
 
 (** n-ary operators *)
 

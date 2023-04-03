@@ -36,15 +36,15 @@ Arguments ex_bbb_r _ [_].
 
 (** Generalized weakening for lists *)
 Lemma wk_list_bbb_r l l' : ll_bbb l' -> ll_bbb (map wn l ++ l').
-Proof. induction l; intros; [ | cbn; apply wk_bbb_r, IHl ]; assumption. Qed.
+Proof. induction l as [|A l IHl]; intros; [ | cbn; apply wk_bbb_r, IHl ]; assumption. Qed.
 
 (** Generalized contraction for lists *)
 Lemma co_list_bbb_r l l' : ll_bbb (map wn l ++ map wn l ++ l') -> ll_bbb (map wn l ++ l').
 Proof.
-induction l in l' |- *; intros; [ assumption | ].
-apply (ex_bbb_r (map wn l ++ wn a :: l')); [ | symmetry; apply Permutation_Type_middle ].
+induction l as [|A l IHl] in l' |- *; intros; [ assumption | ].
+apply (ex_bbb_r (map wn l ++ wn A :: l')); [ | symmetry; apply Permutation_Type_middle ].
 apply IHl.
-apply (ex_bbb_r (wn a :: map wn l ++ map wn l ++ l')); [ | rewrite ? app_assoc; apply Permutation_Type_middle ].
+apply (ex_bbb_r (wn A :: map wn l ++ map wn l ++ l')); [ | rewrite ? app_assoc; apply Permutation_Type_middle ].
 apply co_bbb_r.
 eapply ex_bbb_r; [ eassumption | ].
 apply Permutation_Type_cons; [ reflexivity | ].
@@ -58,7 +58,7 @@ intros pi. induction pi; intros l1' l2' Heq; subst;
   try (destruct l1'; inversion Heq; subst;
        list_simpl; constructor;
        rewrite ? app_comm_cons; apply IHpi; reflexivity).
-- exfalso. destruct l1' as [|? [|? [|? l1']]]; discriminate Heq.
+- exfalso. destruct l1' as [|? [|? [|? ?]]]; discriminate Heq.
 - destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l3, l4) ->].
   apply Permutation_Type_app_inv in p.
   eapply ex_bbb_r, p.
@@ -68,7 +68,7 @@ intros pi. induction pi; intros l1' l2' Heq; subst;
     apply bot_rev; [ intros [] | assumption ].
   + rewrite <- app_assoc. apply mix2_bbb_r; [ | assumption ].
     apply IHpi. reflexivity.
-- exfalso. destruct l1' as [|? [|? [|? l1']]]; discriminate Heq.
+- exfalso. destruct l1' as [|? [|? [|? ?]]]; discriminate Heq.
 - destruct l1'; inversion Heq; subst; [ assumption | ].
   list_simpl. apply bot_bbb_r, IHpi. reflexivity.
 - rewrite app_comm_cons in Heq. dichot_elt_app_inf_exec Heq; subst.
@@ -77,11 +77,11 @@ intros pi. induction pi; intros l1' l2' Heq; subst;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_bbb_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- destruct l1'; inversion Heq; subst.
+- destruct l1'; inversion Heq. subst.
   list_simpl. apply with_bbb_r; rewrite app_comm_cons; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 - exfalso.
   destruct l1'; inversion Heq.
-  decomp_map H1; discriminate.
+  decomp_map H1. discriminate.
 Qed.
 
 (** [ll_mix2] is contained in [ll_bbb] *)
