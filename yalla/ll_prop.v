@@ -374,7 +374,7 @@ induction lax ; intros l pi.
       apply wk_r.
       assert ({ b | nth k lax one :: nil = projT2 (pgax Q) b}) as [b Hgax].
       { subst ; simpl ; clear - Hlen.
-        apply Lt.lt_S_n in Hlen.
+        apply PeanoNat.Nat.succ_lt_mono in Hlen.
         exists (inr (exist _ k Hlen))... }
       rewrite Hgax.
       apply gax_r.
@@ -424,7 +424,7 @@ induction lax ; intros l pi.
     destruct a'.
     * exists (inl p)...
     * destruct s as [k Hlen] ; simpl.
-      apply Lt.lt_n_S in Hlen.
+      apply PeanoNat.Nat.succ_lt_mono in Hlen.
       exists (inr (exist _ (S k) Hlen))...
 Unshelve. assumption.
 Qed.
