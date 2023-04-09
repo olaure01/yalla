@@ -3,12 +3,14 @@
 -R yalla Yalla
 
 ollibs/AFC.v
+ollibs/Bool_more.v
 ollibs/BOrders.v
 ollibs/ComparisonOrder.v
 ollibs/CPermutation_more.v
 ollibs/CPermutation_solve.v
 ollibs/CPermutation_Type_solve.v
 ollibs/CPermutation_Type.v
+ollibs/Datatypes_more.v
 ollibs/dectype.v
 ollibs/Dependent_Forall_Type.v
 ollibs/flat_map_more.v
@@ -20,6 +22,8 @@ ollibs/funtheory.v
 ollibs/GPermutation_Type.v
 ollibs/GPermutation.v
 ollibs/infinite.v
+ollibs/inhabited_Type.v
+ollibs/issue12394.v
 ollibs/List_assoc.v
 ollibs/List_more.v
 ollibs/List_Type.v
@@ -31,7 +35,7 @@ ollibs/Permutation_Type_more.v
 ollibs/Permutation_Type_solve.v
 ollibs/Permutation_Type.v
 ollibs/transp_perm.v
-ollibs/wf_prod.v
+ollibs/Wf_nat_more.v
 
 microyalla/ill.v
 microyalla/ll.v

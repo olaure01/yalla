@@ -3,7 +3,7 @@
 (** * Some tactics for tentative automatic solving of [Permutation_Type] goals
 The main tactic is [Permutation_Type_solve] which fails is the goal is not solved. *)
 
-From OLlibs Require Import List_more Permutation_Type_more.
+From Yalla.OLlibs Require Import List_more Permutation_Type_more.
 
 
 Ltac pre_simpl_hyp_perm_Type H :=

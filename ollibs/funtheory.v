@@ -1,7 +1,7 @@
 (** Properties of functions *)
 
 From Coq Require Import Program.Basics Relation_Definitions RelationClasses List.
-From OLlibs Require Import inhabited_Type.
+From Yalla.OLlibs Require Import inhabited_Type.
 
 Set Implicit Arguments.
 Set Default Proof Using "Type".

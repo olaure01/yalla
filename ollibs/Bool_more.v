@@ -1,7 +1,7 @@
 (* TODO submit to stdlib, except part already in ssreflect *)
 
 From Coq Require Export Bool.
-From OLlibs Require Import Datatypes_more.
+From Yalla.OLlibs Require Import Datatypes_more.
 
 Lemma reflect_neg P b : reflect P b -> reflect (not P) (negb b).
 Proof. intros H. now inversion H; constructor. Qed.

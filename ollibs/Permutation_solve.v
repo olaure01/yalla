@@ -4,7 +4,7 @@
 The main tactic is [Permutation_solve] which fails is the goal is not solved. *)
 
 From Coq Require Import Permutation.
-From OLlibs Require Import List_more.
+From Yalla.OLlibs Require Import List_more.
 
 
 Ltac pre_simpl_hyp_perm H :=

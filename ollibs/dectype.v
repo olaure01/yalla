@@ -3,8 +3,8 @@ this is based on records rather than modules (as opposed to stdlib) *)
 
 From Coq Require Import Bool PeanoNat Equalities.
 From Coq Require Eqdep_dec.
-From OLlibs Require Export inhabited_Type.
-From OLlibs Require Import funtheory.
+From Yalla.OLlibs Require Export inhabited_Type.
+From Yalla.OLlibs Require Import funtheory.
 
 Set Implicit Arguments.
 Set Default Proof Using "Type".

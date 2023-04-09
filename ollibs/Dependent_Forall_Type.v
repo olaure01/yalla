@@ -2,7 +2,7 @@
 
 From Coq Require Export Eqdep_dec.
 From Coq Require Import PeanoNat List.
-From OLlibs Require Import List_Type.
+From Yalla.OLlibs Require Import List_Type.
 
 Set Implicit Arguments.
 Set Default Proof Using "Type".
@@ -172,8 +172,8 @@ Section Eq_Dec.
 End Eq_Dec.
 
 
-From OLlibs Require Import dectype.
-From OLlibs Require issue12394. (* TODO remove when issue #12394 solved *)
+From Yalla.OLlibs Require Import dectype.
+From Yalla.OLlibs Require issue12394. (* TODO remove when issue #12394 solved *)
 
 (* TODO dealing with issue coq/coq#12394 *)
 (* Example:

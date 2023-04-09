@@ -2,8 +2,8 @@
 Usefull properties apparently missing in the Permutation_Type library. *)
 
 From Coq Require Import PeanoNat Permutation CMorphisms.
-From OLlibs Require Import List_more funtheory.
-From OLlibs Require Export Permutation_Type.
+From Yalla.OLlibs Require Import List_more funtheory.
+From Yalla.OLlibs Require Export Permutation_Type.
 
 Set Implicit Arguments.
 

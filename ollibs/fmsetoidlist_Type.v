@@ -6,7 +6,7 @@ An implementation of the axioms is provided for every type
 by lists up to permutation (with output in [Type]. *)
 
 From Coq Require Import CMorphisms List.
-From OLlibs Require Import Permutation_Type.
+From Yalla.OLlibs Require Import Permutation_Type.
 
 Set Implicit Arguments.
 Set Default Proof Using "Type".

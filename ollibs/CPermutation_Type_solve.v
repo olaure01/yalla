@@ -3,7 +3,7 @@
 (** * Some tactics for tentative automatic solving of [CPermutation] goals
 The main tactic is [cperm_solve] which fails is the goal is not solved. *)
 
-From OLlibs Require Import List_more CPermutation_Type.
+From Yalla.OLlibs Require Import List_more CPermutation_Type.
 
 
 Ltac cperm_Type_rot :=

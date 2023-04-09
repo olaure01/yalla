@@ -6,7 +6,7 @@ An implementation of the axioms is provided by sorted lists
 for every type equiped with a Boolean-valued total order relation. *)
 
 From Coq Require Import Bool List Permutation Morphisms.
-From OLlibs Require Import BOrders.
+From Yalla.OLlibs Require Import BOrders.
 
 Set Implicit Arguments.
 Set Default Proof Using "Type".

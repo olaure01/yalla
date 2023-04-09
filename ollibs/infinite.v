@@ -1,8 +1,8 @@
 (** Infinite Types *)
 
 From Coq Require Import Bool PeanoNat Lia List.
-From OLlibs Require Import funtheory List_Type.
-From OLlibs Require Export inhabited_Type dectype.
+From Yalla.OLlibs Require Import funtheory List_Type.
+From Yalla.OLlibs Require Export inhabited_Type dectype.
 
 Set Implicit Arguments.
 Set Default Proof Using "Type".
