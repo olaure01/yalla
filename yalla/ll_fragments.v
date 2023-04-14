@@ -251,14 +251,12 @@ intros Hpmixn Hpmixm L Heq FL. destruct n; [ destruct m | ].
     change nil with (concat (@nil (list formula))).
     apply mix_r; [ assumption | constructor ].
 - cbn in Heq. rewrite Nat.sub_0_r in Heq.
-  destruct (decomp_length_plus L n m Heq) as ((l1 & l2) & (Heql1 & (Heql2 & HeqL))).
-  rewrite HeqL, concat_app.
-  replace (concat l1 ++ concat l2) with (concat (l1 ++ ((concat l2) :: nil)))
-    by (rewrite concat_app; cbn; rewrite app_nil_r; reflexivity).
+  destruct (decomp_length_add L n m Heq) as [(l1, l2) [<- <-] ->].
+  replace (concat (l1 ++ l2)) with (concat (l1 ++ ((concat l2) :: nil)))
+    by (rewrite ! concat_app; cbn; rewrite app_nil_r; reflexivity).
   apply mix_r.
-  + rewrite app_length, Nat.add_comm, Heql1. assumption.
-  + rewrite HeqL in FL.
-    assert (FL1 := Forall_inf_app_l _ _ FL).
+  + rewrite app_length, Nat.add_comm. assumption.
+  + assert (FL1 := Forall_inf_app_l _ _ FL).
     assert (FL2 := Forall_inf_app_r _ _ FL).
     apply forall_Forall_inf.
     intros l' Hin.
@@ -266,7 +264,7 @@ intros Hpmixn Hpmixm L Heq FL. destruct n; [ destruct m | ].
     * apply Forall_inf_forall with l1; assumption.
     * inversion Hin; [ | inversion X ].
       rewrite <- H.
-      apply mix_r; [ rewrite Heql2 | ]; assumption.
+      apply mix_r; assumption.
 Qed.
 
 Lemma mix_conservativity P Q : (forall C, Bool.le (pcut P C) (pcut Q C)) -> Bool.le (pperm P) (pperm Q) ->

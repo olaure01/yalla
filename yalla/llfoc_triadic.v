@@ -431,7 +431,7 @@ Lemma wFoc_wn_Foc_partition l lw ls : Forall_inf wFoc l -> partition is_wn l = (
 Proof.
 intros HF Hp.
 apply forallb_true_partition.
-rewrite partition_filter in Hp. injection Hp as [= _ <-].
+rewrite partition_as_filter in Hp. injection Hp as [= _ <-].
 induction l as [|a l IHl]; [ reflexivity | ].
 cbn. inversion_clear HF.
 destruct (wn_spec a) as [Hwn|Hnwn]; [ inversion Hwn; subst | cbn; apply andb_true_iff ]; cbn; rewrite IHl; auto.
@@ -478,15 +478,15 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     - assert (Hincl := partition_incl2_inf is_wn l).
       rewrite <- Heqp in Hincl. cbn in Hincl.
       apply (incl_inf_Forall_inf Hincl). assumption.
-    - rewrite partition_filter in Heqp. injection Heqp as [= -> ->].
+    - rewrite partition_as_filter in Heqp. injection Heqp as [= -> ->].
       apply (reflectT_iffT _ _  (Forall_inf_forallb_reflectT _ _ _ (fun D => (reflectT_neg _ _ (wn_spec D))))),
             forallb_filter. }
   assert (forall x, In_inf x lsa -> is_Foc x = true) as Hlsa'.
   { injection Hp1 as [= -> <-].
     clear - Hs Hlsa. intros B [->|Hin]; destruct (Foc_spec B); auto.
     exfalso. apply n. apply Forall_inf_forall with p2; assumption. }
-  apply forallb_forall_inf, forallb_true_filter in Hlsa'.
-  rewrite <- Hlsa', partition_filter, filter_negb_filter in Hp2.
+  apply forallb_forall_inf, forallb_filter_id in Hlsa'.
+  rewrite <- Hlsa', partition_as_filter, filter_negb_filter in Hp2.
   injection Hp2 as [= <- <-]. injection Hp1 as [= -> <-]. rewrite 2 Hlsa'.
   rewrite <- (app_nil_l (A :: _)). apply foc_tfr; [ apply (sync_focus_F pi) | ].
   apply IHpi; [ reflexivity | f_equal ].
@@ -628,7 +628,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
 - intros lw lsa ls la Hp1 Hp2.
   cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= -> <-].
   assert (Forall_inf Foc ls) as Htt.
-  { rewrite partition_filter in Hp2. injection Hp2 as [= <- <-].
+  { rewrite partition_as_filter in Hp2. injection Hp2 as [= <- <-].
     apply forall_Forall_inf.
     intros C [_ HC]%filter_In_inf_inv.
     apply (reflectT_iffT _ _ (Foc_spec _)), HC. }
