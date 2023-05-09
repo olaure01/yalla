@@ -33,7 +33,8 @@ Lemma cut_oc_comm_left A C l1 l2 l0 : ill P l0 (ioc A) ->
   (forall lw, ill P (map ioc lw) A -> ill P (l1 ++ map ioc lw ++ l2) C) ->
   ill P (l1 ++ l0 ++ l2) C.
 Proof using P_gax_cut_r.
-intros pi IH; remember (ioc A) as B eqn:HeqB; induction pi in HeqB |- *; inversion HeqB; subst;
+intros pi IH. remember (ioc A) as B eqn:HeqB.
+induction pi in HeqB |- *; inversion HeqB; subst;
   try specialize (IHpi eq_refl); try specialize (IHpi1 eq_refl); try specialize (IHpi2 eq_refl);
   try (list_simpl; rewrite app_assoc; constructor;
        list_simpl; rewrite ? app_comm_cons, ? (app_assoc l0), ? (app_assoc l3); assumption).
@@ -44,8 +45,7 @@ intros pi IH; remember (ioc A) as B eqn:HeqB; induction pi in HeqB |- *; inversi
 - apply IH, pi.
 - list_simpl in IHpi2. list_simpl. rewrite app_assoc. apply (cut_ir _ f); list_simpl; assumption.
 - assert (ipcut P (ioc A) = true) as Hcut.
-  { specialize (P_gax_cut_r a).
-    rewrite HeqB in P_gax_cut_r.
+  { specialize (P_gax_cut_r a). rewrite HeqB in P_gax_cut_r.
     destruct (ipcut P (ioc A)); [ reflexivity | exfalso ].
     specialize (P_gax_cut_r eq_refl) as [Hat _]. inversion Hat. }
   apply (cut_ir _ Hcut).
@@ -60,8 +60,7 @@ Lemma substitution_ioc A lw :
   forall l' L C, ill P (l' ++ flat_map (cons (ioc A)) L) C ->
     ill P (l' ++ flat_map (app (map ioc lw)) L) C.
 Proof using P_gax_cut_l.
-intros Hoc IHcut l' L C pi.
-remember (l' ++ flat_map (cons (ioc A)) L) as l eqn:Heq.
+intros Hoc IHcut l' L C pi. remember (l' ++ flat_map (cons (ioc A)) L) as l eqn:Heq.
 induction pi in l', L, Heq |- *;
   try (constructor; rewrite ? app_comm_cons; apply IHpi; subst; list_simpl; reflexivity).
 - destruct l', L; inversion Heq as [[H1 H2]]; destruct l'; inversion H2; list_simpl.
@@ -419,14 +418,14 @@ induction pi in l', L, Heq |- *;
 - assert (ill P (l' ++ flat_map (cons (ioc A)) L) (snd (projT2 (ipgax P) a))) as pi
     by (rewrite <- Heq; apply gax_ir).
   assert (L <> nil -> ipcut P (ioc A) = true) as Hcut.
-  { destruct L; intros HL; [ exfalso; apply HL; reflexivity | ].
+  { intros HL. destruct L as [|l L]; [ exfalso; apply HL; reflexivity | ].
     specialize (P_gax_cut_l a (ioc A)). rewrite Heq in P_gax_cut_l.
     destruct (ipcut P (ioc A)); [ reflexivity | exfalso ].
     specialize (P_gax_cut_l _ _ eq_refl eq_refl) as [Hat _]. inversion Hat. }
   clear - Hoc Hcut pi.
   induction L as [|l L IHL] in l', Hcut, pi |- *; [ assumption | cbn ].
   assert (ipcut P (ioc A) = true) as Hcut' by (apply Hcut; intros [=]).
-  rewrite app_assoc. apply IHL; list_simpl; [ | intros _; apply Hcut' ].
+  rewrite app_assoc. apply IHL; list_simpl; [ | intro; apply Hcut' ].
   apply (cut_ir _ Hcut'); [ | assumption ].
   apply Hoc, Hcut'.
 Qed.
@@ -950,8 +949,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
   + rewrite 2 app_assoc; apply (cut_ir _ f); [ assumption | ].
     revert Hr IHsize; list_simpl; intros Hr IHsize.
     apply (IHsize _ _ _ _ pi1 Hr); lia.
-  + destruct Heql1; subst.
-    list_simpl; rewrite (app_assoc l), (app_assoc _ l6); apply (cut_ir _ f); [ | assumption ].
+  + list_simpl; rewrite (app_assoc l), (app_assoc _ l6); apply (cut_ir _ f); [ | assumption ].
     list_simpl; apply (IHsize _ _ _ _ pi1 Hl); cbn; lia.
   + list_simpl; apply (cut_ir _ f); [ assumption | ].
     revert Hr IHsize; cbn; rewrite app_comm_cons, app_assoc; intros Hr IHsize.
@@ -976,15 +974,14 @@ Lemma cut_admissible_ill P (HatN : noN_iax P) (Hat : atomic_iax P) (Hcut : icut_
   ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
 Proof.
 intros pi. induction pi; try (econstructor; eassumption).
-- eapply cut_ir_gax; try eassumption.
+- eapply cut_ir_gax; [ assumption | | | eassumption .. ].
   + intros a Hcut'. split.
     * apply Hat.
-    * intros b l3 l4 Hb. apply Hcut; assumption.
+    * intros b l3 l4 Hb. apply Hcut. assumption.
   + intros a D l3 l4 Ha Hcut'. split.
     * cbn in Ha. assert (Hatl := fst (Hat a)). rewrite Ha in Hatl.
-      apply (Forall_inf_elt _ _ _ Hatl).
-    * intros a' Ha'.
-      apply Hcut.
+      exact (Forall_inf_elt _ _ _ Hatl).
+    * intros a' Ha'. apply Hcut.
       cbn in Ha, Ha'. rewrite Ha, Ha'. reflexivity.
 - revert a. change (ipgax P) with (ipgax (cutrm_ipfrag P)). apply gax_ir.
 Qed.
@@ -992,19 +989,12 @@ Qed.
 (** If there are no axioms (except the identity rule), then the cut rule is valid. *)
 Lemma cut_ir_axfree P (P_axfree : no_iax P) A l0 l1 l2 C :
   ill P l0 A -> ill P (l1 ++ A :: l2) C -> @ill preiatom P (l1 ++ l0 ++ l2) C.
-Proof.
-intros pi1 pi2.
-apply cut_ir_gax with A; try assumption.
-all: intros a; contradiction (P_axfree a).
-Qed.
+Proof. intros pi1 pi2. apply cut_ir_gax with A; [ intro; contradiction P_axfree .. | | ]; assumption. Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is admissible:
 provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible_ill_axfree P (P_axfree : no_iax P) l C : ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
-Proof.
-intros pi. apply cut_admissible_ill; [ | | | assumption ].
-all: intros a; contradiction (P_axfree a).
-Qed.
+Proof. intro pi. apply cut_admissible_ill; [ intro; contradiction P_axfree .. | assumption ]. Qed.
 
 
 (** ** Standard intuitionistic linear logic: [ill_ll] (no axiom, commutative) *)
@@ -1014,13 +1004,13 @@ Definition ipfrag_ill := @mk_ipfrag preiatom ipcut_none NoIAxioms true.
 (*                                  atoms    cut        axioms    perm  *)
 Definition ill_ll := @ill preiatom ipfrag_ill.
 
-Lemma cut_ll_ir A l0 l1 l2 C : ill_ll l0 A -> ill_ll (l1 ++ A :: l2) C -> ill_ll (l1 ++ l0 ++ l2) C.
+Lemma cut_ill_ir A l0 l1 l2 C : ill_ll l0 A -> ill_ll (l1 ++ A :: l2) C -> ill_ll (l1 ++ l0 ++ l2) C.
 Proof. now intros pi1 pi2; apply cut_ir_axfree with A. Qed.
 
-Lemma cut_ll_admissible l C : ill (cutupd_ipfrag ipfrag_ill ipcut_all) l C -> ill_ll l C.
+Lemma cut_ill_admissible l C : ill (cutupd_ipfrag ipfrag_ill ipcut_all) l C -> ill_ll l C.
 Proof.
 intros pi. induction pi; try (econstructor; eassumption).
-- apply cut_ll_ir with A; assumption.
+- apply cut_ill_ir with A; assumption.
 - destruct a.
 Qed.
 

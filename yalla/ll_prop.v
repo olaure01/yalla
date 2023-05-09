@@ -19,43 +19,36 @@ Notation ll := (@ll atom).
 
 Lemma weak_consistency_axfree P (Hgax : no_ax P) (Hmix0 : pmix P 0 = false) : notT (ll P nil).
 Proof.
-intros pi.
-apply cut_admissible_axfree in pi; [ | assumption ].
-remember nil as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
-- symmetry in p.
-  apply IHpi, (PCPermutation_Type_nil _ _ p).
-- apply IHpi.
-  destruct l1, lw', l2; try discriminate Heql.
-  symmetry in p. apply Permutation_Type_nil in p as ->. reflexivity.
+intros pi%(cut_admissible_axfree Hgax).
+remember nil as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; try discriminate Heql; subst.
+- symmetry in p. apply IHpi, (PCPermutation_Type_nil _ _ p).
+- symmetry in p. apply IHpi.
+  apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
+  apply Permutation_Type_nil in p as ->. reflexivity.
 - destruct L; [ | inversion Heql as [ HeqL ] ].
   + cbn in eqpmix. rewrite Hmix0 in eqpmix. discriminate eqpmix.
-  + inversion_clear X as [ | ? ? ? ? Hnil ].
-    apply Hnil. destruct l; [ reflexivity | discriminate HeqL ].
+  + apply app_eq_nil in HeqL as [-> _].
+    rename X into HPL. inversion_clear HPL as [ | ? ? ? ? Hnil ].
+    apply Hnil. reflexivity.
 - discriminate f.
 - exact (Hgax a).
 Qed.
 
 Lemma strong_consistency_axfree P (Hgax : no_ax P) : notT (ll P (zero :: nil)).
 Proof.
-intros pi.
-apply cut_admissible_axfree in pi; [ | assumption ].
-remember (zero :: nil) as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; inversion Heql; subst.
-- symmetry in p.
-  apply IHpi, (PCPermutation_Type_length_1_inv _ _ _ p).
-- apply IHpi.
+intros pi%(cut_admissible_axfree Hgax).
+remember (zero :: nil) as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; try discriminate Heql; subst.
+- symmetry in p. apply IHpi, (PCPermutation_Type_length_1_inv _ _ _ p).
+- symmetry in p. apply IHpi.
   destruct l1; inversion Heql.
   + destruct lw'; inversion Heql.
-    symmetry in p. apply Permutation_Type_nil in p as ->.
-    destruct l2; inversion_clear H. reflexivity.
-  + apply app_eq_nil in H2 as [-> H2].
-    apply app_eq_nil in H2 as [H2 ->].
-    destruct lw'; inversion H2.
-    symmetry in p. apply Permutation_Type_nil in p as ->. reflexivity.
+    apply Permutation_Type_nil in p as ->. reflexivity.
+  + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
+    apply Permutation_Type_nil in p as ->. reflexivity.
 - rename X into HPL. clear - PL HPL Heql. induction L in PL, HPL, Heql |- *; [ discriminate Heql | ].
-  inversion HPL as [ | ? ? ? ? Heq ]. destruct a; subst.
+  inversion HPL as [ | ? ? ? ? Heq ]. destruct a.
   + apply IHL with Fl; assumption.
-  + injection Heql as [= -> Heq'].
-    destruct a; [ | discriminate Heq' ].
+  + injection Heql as [= -> [-> _]%app_eq_nil].
     apply Heq. reflexivity.
 - discriminate f.
 - exact (Hgax a).
@@ -101,14 +94,10 @@ Lemma subformula_cutfree P (P_cutfree : no_cut P) l (pi : ll P l) :
   Forall_formula (fun x => Exists (subform x) l) pi.
 Proof.
 apply (conservativity P_cutfree).
-- intros A Hf B Hs.
-  eapply Exists_impl, Hf.
-  intros C HAC.
-  transitivity A; assumption.
-- clear. induction l as [|A l IHl]; constructor.
-  + constructor. constructor.
-  + eapply Forall_inf_arrow, IHl.
-    intros B Hl. right. exact Hl.
+- intros A Hf B Hs. eapply Exists_impl, Hf.
+  intros C HAC. transitivity A; assumption.
+- clear. induction l as [|A l IHl]; repeat constructor.
+  eapply Forall_inf_arrow, IHl. intros B Hl. right. exact Hl.
 Qed.
 
 (** Linear logic (with no axioms) is conservative over its fragments. *)
@@ -140,12 +129,10 @@ any provable sequent is provable by a proof containing only subformulas of this 
 Lemma subformula l (pi : ll P l) : { pi': ll P l & Forall_formula (fun x => Exists (subform x) l) pi' }.
 Proof using P_axfree.
 refine (conservativity_axfree P_axfree _ pi _).
-- intros A Hf B Hs.
-  eapply Exists_impl, Hf.
+- intros A Hf B Hs. eapply Exists_impl, Hf.
   intros C HAC. transitivity A; assumption.
-- clear. induction l as [|a l IHl]; constructor.
-  + constructor. constructor.
-  + eapply Forall_inf_arrow, IHl. intros A Hl. right. exact Hl.
+- clear. induction l as [|a l IHl]; repeat constructor.
+  eapply Forall_inf_arrow, IHl. intros A Hl. right. exact Hl.
 Qed.
 
 
@@ -164,8 +151,7 @@ Lemma deduction_list lax l :
   ll P (l ++ map wn (map dual lax)).
 Proof using P_perm.
 induction lax as [ | A lax IHlax ] in l |- *; intros pi.
-- list_simpl.
-  eapply stronger_pfrag, pi.
+- list_simpl. eapply stronger_pfrag, pi.
   repeat split; try reflexivity.
   cbn. intros [a | [k Hlt]].
   + exists a. reflexivity.
@@ -242,8 +228,7 @@ Lemma deduction lax l :
   ll (cutrm_pfrag P) (l ++ map wn (map dual lax)).
 Proof using P_perm P_cut P_axfree.
 intros pi.
-apply (cut_admissible_axfree P_axfree).
-apply deduction_list.
+apply (cut_admissible_axfree P_axfree), deduction_list.
 eapply stronger_pfrag, pi.
 repeat split; try reflexivity.
 intros a. exists (inr a). reflexivity.

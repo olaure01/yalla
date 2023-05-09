@@ -20,7 +20,7 @@ Lemma repl_iat_eq x A : repl_iat x x A = A.
 Proof. unfold repl_iat. rewrite if_eq_dt_dec_refl. reflexivity. Qed.
 
 Lemma repl_iat_neq x y A : x <> y -> repl_iat x y A = ivar x.
-Proof. intros Hneq. unfold repl_iat. rewrite (if_eq_dt_dec_neq _ Hneq). reflexivity. Qed.
+Proof. intro Hneq. unfold repl_iat. rewrite (if_eq_dt_dec_neq _ Hneq). reflexivity. Qed.
 
 (** Substitution in [iformula]: substitutes [x] by [C] in [A] *)
 Fixpoint isubs C x A :=
@@ -39,6 +39,9 @@ match A with
 | ioc A     => ioc (isubs C x A)
 end.
 
+Lemma isubs_ioc A x l : map (isubs A x) (map ioc l) = map ioc (map (isubs A x) l).
+Proof. induction l as [|a l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
+
 (** Substitution in proofs *)
 Lemma subs_ill P A x l C (HN : atN <> x) (Hcut : forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) :
   ill P l C ->
@@ -47,10 +50,7 @@ Lemma subs_ill P A x l C (HN : atN <> x) (Hcut : forall D, Bool.le (ipcut P D) (
                                              isubs A x (snd (projT2 (ipgax P) a))))))
       (map (isubs A x) l) (isubs A x C).
 Proof.
-intros pi.
-assert (forall l, map (isubs A x) (map ioc l) = map ioc (map (isubs A x) l)) as Hmapioc
-  by (clear; induction l as [|a l IHl]; [ | cbn; rewrite IHl ]; reflexivity).
-induction pi; cbn; rewrite ? map_app;
+intro pi. induction pi; cbn; rewrite ? map_app;
   try (cbn in IHpi; rewrite ? map_app in IHpi);
   try (cbn in IHpi1; rewrite ? map_app in IHpi1);
   try (cbn in IHpi2; rewrite ? map_app in IHpi2);
@@ -58,7 +58,7 @@ induction pi; cbn; rewrite ? map_app;
 - apply ax_exp_ill.
 - eapply PEPermutation_Type_map in p.
   eapply ex_ir; eassumption.
-- rewrite ? map_app, Hmapioc in IHpi. rewrite Hmapioc.
+- rewrite isubs_ioc in *.
   eapply Permutation_Type_map in p.
   eapply ex_oc_ir; eassumption.
 - list_simpl. apply lpam_ilr; assumption.
@@ -66,10 +66,8 @@ induction pi; cbn; rewrite ? map_app;
 - unfold repl_iat. rewrite if_eq_dt_dec_neq by exact HN. apply gen_ilr, IHpi.
 - unfold repl_iat in IHpi. rewrite if_eq_dt_dec_neq in IHpi by exact HN. apply neg_irr, IHpi.
 - unfold repl_iat. rewrite if_eq_dt_dec_neq by exact HN. apply neg_ilr, IHpi.
-- specialize Hmapioc with l.
-  rewrite Hmapioc. apply oc_irr. rewrite <- Hmapioc. assumption.
+- rewrite isubs_ioc in *. apply oc_irr. assumption.
 - refine (cut_ir (isubs A x A0) _ IHpi1 IHpi2).
-  specialize (Hcut A0).
   eapply Bool.implb_true_iff, f. apply Bool.le_implb, Hcut.
 - refine (gax_ir _).
 Qed.
@@ -78,8 +76,7 @@ Lemma subs_ill_axfree P (P_axfree : no_iax P) A x
   (Hcut : forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) l C (HN : atN <> x) :
   ill P l C -> ill P (map (isubs A x) l) (isubs A x C).
 Proof.
-intros pi.
-apply (subs_ill A HN) in pi; [ | assumption ].
+intros pi%(subs_ill A HN); [ | assumption ].
 eapply stronger_ipfrag; [ | eassumption ].
 repeat split; [ reflexivity | | reflexivity ].
 intro. contradiction P_axfree.
@@ -89,10 +86,16 @@ Qed.
 Lemma subs_ill_axioms P (gax : { _ &  _ }) l C
   (Hgax : forall a, ill P (fst (projT2 gax a)) (snd (projT2 gax a))) :
   ill (axupd_ipfrag P gax) l C -> @ill preiatom P l C.
-Proof. intros pi. induction pi; try (econstructor; eassumption). apply Hgax. Qed.
+Proof. intro pi. induction pi; try (econstructor; eassumption). apply Hgax. Qed.
+
+End Atoms.
 
 
 (** ** Fresh atoms and associated properties *)
+
+Section InfAtoms.
+
+Context {preiatom : InfDecType}.
 
 (** Provide an [Atom] which is fresh for [A] *)
 Definition ifresh_of A := @fresh (option_infdectype preiatom) (iatom_list A).
@@ -131,4 +134,4 @@ Qed.
 Lemma subs_ifresh_list C l : map (isubs C (ifresh_of_list l)) l = l.
 Proof. apply subs_ifresh_list_incl. intro. exact id. Qed.
 
-End Atoms.
+End InfAtoms.

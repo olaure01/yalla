@@ -35,16 +35,16 @@ Variable R : iformula.
   [A] is implied by the dual of its translation. *)
 Lemma back_to_llR A : llR (unill R) (unill (trans R A) :: A :: nil).
 Proof.
-induction A; simpl; rewrite ? bidual.
+induction A; cbn; rewrite ? bidual.
 - apply parr_r.
-  destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite Hr2.
+  destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite (Hr2 c).
   apply (ex_r ((covar c :: var c :: nil) ++ unill R :: nil));
     [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
   eapply (@cut_r _ (pfrag_llR (unill R)) (dual one) eq_refl).
   + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r, ax_r.
-- destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 ->].
+- destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].  rewrite (Hr2 c).
   apply (ex_r (covar c :: var c :: nil)); [ | apply Permutation_Type_swap ].
   apply ax_r.
 - apply parr_r, bot_r.
@@ -142,36 +142,28 @@ Qed.
 (** A sequent whose translation is provable in [ill] was provable in [llR]. *)
 Lemma ill_trans_to_llR l : ill_ll (map (trans R) l) R -> llR (unill R) l.
 Proof.
-intros Hill%(@ill_to_ll _ _ iatom2atom_fin).
-apply (stronger_pfrag _ (mk_pfrag pcut_all NoAxioms pmix_none true)) in Hill.
-- eapply cut_admissible_axfree in Hill.
-  + apply (ll_to_llR (unill R)) in Hill.
-    assert (forall C, pcut (pfrag_llR (unill R)) C = true) as Hcut by (intro; reflexivity).
-    assert (forall l',
-      llR (unill R) (l' ++ map dual (map unill (map (trans R) (rev l))))
-        -> llR (unill R) (l' ++ rev l)) as Hll.
-    { clear - Hcut.
-      induction l using rev_rect; intros; [ assumption | ].
-      assert (Hb := back_to_llR x).
-      rewrite rev_unit in X.
-      apply (ex_r _ (dual (unill (trans R x))
-               :: l' ++ map dual (map unill (map (trans R) (rev l))))) in X;
-        [ | symmetry; apply Permutation_Type_middle ].
-      apply (cut_r _ (Hcut _) X) in Hb.
-      rewrite rev_unit.
-      change (x :: rev l) with ((x :: nil) ++ rev l).
-      rewrite app_assoc.
-      apply IHl.
-      eapply ex_r; [ eassumption | list_simpl; apply Permutation_Type_middle ]. }
-    assert (llR (unill R) (dual (unill R) :: nil)) as HR by apply (@gax_r _ (pfrag_llR (unill R)) true).
-    apply (cut_r _ (Hcut _) HR) in Hill.
-    rewrite app_nil_r, <- (app_nil_l (rev _)), <- ? map_rev in Hill.
-    apply Hll in Hill.
-    eapply ex_r; [ apply Hill | symmetry; apply Permutation_Type_rev ].
-  + intros Hax; inversion Hax.
-- repeat split.
-  + intro. apply BoolOrder.le_true.
-  + intros [].
+intros Hill%(@ill_to_ll _ _ iatom2atom_fin)%cut_admissible_axfree; [ | intros [] ].
+apply (stronger_pfrag _ pfrag_ll) in Hill; [ | repeat split; intros [] ].
+apply (ll_to_llR (unill R)) in Hill.
+assert (forall C, pcut (pfrag_llR (unill R)) C = true) as Hcut by (intro; reflexivity).
+assert (forall l',
+  llR (unill R) (l' ++ map dual (map unill (map (trans R) (rev l))))
+    -> llR (unill R) (l' ++ rev l)) as Hll.
+{ clear - Hcut.
+  induction l using rev_rect; intros; [ assumption | ].
+  assert (Hb := back_to_llR x).
+  rewrite rev_unit in X.
+  apply (ex_r _ (dual (unill (trans R x))
+           :: l' ++ map dual (map unill (map (trans R) (rev l))))) in X;
+    [ | symmetry; apply Permutation_Type_middle ].
+  apply (cut_r _ (Hcut _) X) in Hb.
+  rewrite rev_unit. change (x :: rev l) with ((x :: nil) ++ rev l). rewrite app_assoc.
+  apply IHl.
+  eapply ex_r; [ eassumption | list_simpl; apply Permutation_Type_middle ]. }
+assert (llR (unill R) (dual (unill R) :: nil)) as HR by apply (@gax_r _ (pfrag_llR (unill R)) true).
+apply (cut_r _ (Hcut _) HR) in Hill.
+rewrite app_nil_r, <- (app_nil_l (rev _)), <- ? map_rev in Hill. apply Hll in Hill.
+eapply ex_r; [ apply Hill | symmetry; apply Permutation_Type_rev ].
 Qed.
 
 
@@ -245,7 +237,7 @@ induction Hll; cbn.
 - cons2app. rewrite <- (app_nil_l _).
   apply lmap_ilr; [ apply (ax_ir (a2i X)) | assumption ].
 - eapply ex_ir; [ eassumption | ].
-  apply Permutation_Type_map; assumption.
+  apply Permutation_Type_map. assumption.
 - list_simpl in IHHll. rewrite trans_wn in IHHll.
   list_simpl. rewrite trans_wn.
   eapply Permutation_Type_map in p.
@@ -317,22 +309,20 @@ Qed.
 
 Lemma ill_trans_to_llR_bot (l : list formula) : (forall R, ill_ll (map (trans R) l) R) -> llR bot l.
 Proof.
-intros Hill.
-remember (fresh_of_list l) as z.
+intro Hill. remember (fresh_of_list l) as z eqn:Heqz.
 specialize Hill with (ivar (a2i z)).
 apply ill_trans_to_llR in Hill.
-apply (subs_llR bot z) in Hill. subst. simpl subs in Hill.
+apply (subs_llR bot z) in Hill. simpl subs in Hill.
 change (proj1_sig (nat_injective_choice atom (self_injective_nat atom Atom_self_inj))
                     (flat_map atom_list l))
     with (fresh_of_list l) in Hill.
-destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite Hr2 in Hill.
+destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite (Hr2 z), Heqz in Hill.
 rewrite repl_at_eq, (@subs_fresh_list atom_inf) in Hill. assumption.
 Qed.
 
 Lemma llR_bot_to_ll (l : list formula) : llR bot l -> ll_ll l.
 Proof.
-intros HR. induction HR; try discriminate f;
-  try (constructor; assumption); try (econstructor; eassumption).
+intro HR. induction HR; try discriminate f; try (constructor; assumption); try (econstructor; eassumption).
 - eapply cut_ll_r; eassumption.
 - destruct a; [ | apply bot_r ]; apply one_r.
 Qed.
@@ -340,7 +330,7 @@ Qed.
 Lemma ll_ll_to_ill_trans R (l : list formula) : ll_ll l -> ill_ll (map (trans R) l) R.
 Proof.
 intros Hll%(ll_to_ill_trans R).
-- apply cut_ll_admissible.
+- apply cut_ill_admissible.
   eapply stronger_ipfrag; [ | apply Hll ].
   repeat split. intros [].
 - reflexivity.
@@ -377,7 +367,7 @@ Qed.
 Lemma ll_mix02_to_ill_trans (l : list formula) : ll_mix02 l -> ill_ll (map (trans ione) l) ione.
 Proof.
 intros Hll%(ll_to_ill_trans ione).
-- apply cut_ll_admissible.
+- apply cut_ill_admissible.
   eapply stronger_ipfrag; [ | apply Hll ].
   repeat split. intros [].
 - reflexivity.
@@ -556,7 +546,7 @@ Qed.
 
 Lemma ll_bbb_to_ill_trans R (l : list formula) : ll_bbb l -> ill_ll (map (trans (ioc R)) l) (ioc R).
 Proof.
-intros Hll. induction Hll; try discriminate f; cbn.
+intro Hll. induction Hll; try discriminate f; cbn.
 - cons2app. rewrite <- (app_nil_l _). apply lmap_ilr.
   + apply (ax_ir (a2i X)).
   + rewrite app_nil_l. apply ax_exp_ill.
@@ -593,6 +583,6 @@ Qed.
 (** The following result is the converse of [bb_to_bbb] proved in bbb.v *)
 
 Lemma bbb_to_bb (l : list formula) : ll_bbb l -> llR (oc bot) l.
-Proof. intros pi. apply ill_trans_to_llR_oc_bot. intros R. apply ll_bbb_to_ill_trans, pi. Qed.
+Proof. intro pi. apply ill_trans_to_llR_oc_bot. intro. apply ll_bbb_to_ill_trans, pi. Qed.
 
 End Atoms.

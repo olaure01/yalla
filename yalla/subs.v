@@ -32,10 +32,10 @@ end.
 
 Lemma psubs2_ext sl1 sr1 sl2 sr2 A : (forall x, sl1 x = sl2 x) -> (forall x, sr1 x = sr2 x) ->
   psubs2 sl1 sr1 A = psubs2 sl2 sr2 A.
-Proof. intros He1 He2. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? He1, ?He2; reflexivity. Qed.
+Proof. intros He1 He2. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? He1, ? He2; reflexivity. Qed.
 
 Lemma psubs2_dual sl sr A : psubs2 sr sl (dual A) = dual (psubs2 sl sr A).
-Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ?bidual; reflexivity. Qed.
+Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? bidual; reflexivity. Qed.
 
 Lemma psubs2_var A : psubs2 var var A = A.
 Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2; reflexivity. Qed.
@@ -51,10 +51,10 @@ Lemma repl_at_eq x A : repl_at x x A = A.
 Proof. unfold repl_at. rewrite if_eq_dt_dec_refl. reflexivity. Qed.
 
 Lemma repl_at_neq x y A : x <> y -> repl_at x y A = var x.
-Proof. intros Hneq. unfold repl_at. rewrite (if_eq_dt_dec_neq _ Hneq). reflexivity. Qed.
+Proof. intro Hneq. unfold repl_at. rewrite (if_eq_dt_dec_neq _ Hneq). reflexivity. Qed.
 
 Lemma repl_at_diag x y : repl_at x y (var y) = var x.
-Proof. unfold repl_at. destruct (eq_dt_dec x y); subst; reflexivity. Qed.
+Proof. unfold repl_at. destruct (eq_dt_dec x y) as [-> | _]; reflexivity. Qed.
 
 (** Substitution in [formula]: substitutes [x] by [C] in [A] *)
 Fixpoint subs C x A :=
@@ -82,6 +82,9 @@ Proof. rewrite subs_psubs2, (psubs2_ext _ _ var var); [ apply psubs2_var | | ]; 
 Lemma subs_dual A C x : subs C x (dual A) = dual (subs C x A).
 Proof. rewrite ? subs_psubs2, psubs2_dual. reflexivity. Qed.
 
+Lemma subs_wn A x l : map (subs A x) (map wn l) = map wn (map (subs A x) l).
+Proof. induction l as [|a l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
+
 
 (** Monotony of connectives *)
 
@@ -97,9 +100,9 @@ induction A; cbn; intros Hfv.
 - ll_swap. apply parr_r.
   cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
   rewrite app_assoc. apply tens_r.
-  + apply Forall_inf_app_l in Hfv.
-    apply IHA1. assumption.
   + apply Forall_inf_app_r in Hfv.
+    apply IHA1. assumption.
+  + apply Forall_inf_app_l in Hfv.
     apply IHA2. assumption.
 - apply parr_r.
   cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
@@ -141,27 +144,21 @@ Lemma subs_ll P A x l (Hcut : forall C, Bool.le (pcut P C) (pcut P (subs A x C))
                               (fun a => map (subs A x) (projT2 (pgax P) a))))
        (map (subs A x) l).
 Proof.
-intros pi.
-assert (forall l, map (subs A x) (map wn l) = map wn (map (subs A x) l)) as Hmapwn
-  by (clear; induction l as [|a l IHl]; [ | cbn; rewrite IHl ]; reflexivity).
-induction pi using ll_nested_ind; list_simpl; try (constructor; assumption).
+intros pi. induction pi using ll_nested_ind; list_simpl; try (constructor; assumption).
 - ll_swap. apply ax_exp.
 - eapply PCPermutation_Type_map in p.
   eapply ex_r; eassumption.
-- rewrite ? map_app, Hmapwn in IHpi. rewrite Hmapwn.
+- rewrite ! map_app in IHpi. rewrite subs_wn in *.
   eapply Permutation_Type_map in p.
   eapply ex_wn_r; eassumption.
 - rewrite concat_map. apply mix_r.
   + cbn. rewrite map_length. assumption.
   + apply forall_Forall_inf.
     intros l' Hin.
-    destruct (in_inf_map_inv (map (subs A x)) L l' Hin) as [l0 <- Hin'].
-    apply (In_Forall_inf_in _ PL) in Hin' as [pi' Hin'].
+    destruct (in_inf_map_inv (map (subs A x)) L l' Hin) as [l0 <- [pi' Hin']%(In_Forall_inf_in _ PL)].
     refine (Dependent_Forall_inf_forall_formula _ _ X Hin').
-- specialize Hmapwn with l.
-  rewrite Hmapwn. apply oc_r. rewrite <- Hmapwn. assumption.
+- cbn in IHpi. rewrite subs_wn in *. apply oc_r. assumption.
 - refine (cut_r (subs A x A0) _ _ _); [ | rewrite <- subs_dual; assumption | assumption ].
-  specialize (Hcut A0).
   eapply Bool.implb_true_iff, f. apply Bool.le_implb, Hcut.
 - refine (gax_r _).
 Qed.

@@ -49,7 +49,7 @@ intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
     list_simpl. rewrite (app_assoc l), (app_assoc _ l5).
     apply IHpi; [ list_simpl; reflexivity | ].
     intros ? pi' Hs. apply (IH _ pi'); lia.
-  + destruct Heql'1 as [H2 H3]; cbn in H2; symmetry in H2; decomp_map_inf H2. discriminate H2.
+  + symmetry in Heql'1. decomp_map_inf Heql'1. discriminate Heql'1.
   + list_simpl. rewrite 2 app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. rewrite (app_assoc l0), (app_assoc _ l6).
@@ -370,8 +370,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
   + rewrite 2 app_assoc. eapply ex_wn_r, HP. rewrite <- 2 app_assoc.
     revert Hl IHsize. list_simpl. intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _ _); lia.
-  + destruct Heql1 as [Heql1 ->].
-    cbn in Heql1. symmetry in Heql1. decomp_map_inf Heql1; subst; cbn; cbn in HP, pi1.
+  + symmetry in Heql1. decomp_map_inf Heql1. subst. cbn in pi1.
     rewrite <- (app_nil_l (map wn l7 ++ l3)).
     case_eq (pcut P (oc (dual x))); intros Hcut.
     * eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
@@ -1578,14 +1577,13 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* gax_r *)
   destruct (pcut P A) eqn:Hcut.
   + rewrite app_assoc. eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; rewrite app_assoc.
-    apply (cut_r _ Hcut); [ assumption | ].
-    rewrite app_comm_cons; eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
-    rewrite <- Heql; apply gax_r.
+    apply (cut_r _ Hcut pi1).
+    rewrite app_comm_cons. eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
+    rewrite <- Heql. apply gax_r.
   + destruct (P_gax_cut _ _ _ _ Heql Hcut) as [Hat Hgax].
-    rewrite <- (app_nil_r l0), <- app_assoc.
-    rewrite <- (bidual A) in Heql.
-    apply cut_gax_l with (dual A) a; try assumption.
-    * destruct A; inversion Hat; constructor.
+    rewrite <- (app_nil_r l0), <- app_assoc. rewrite <- (bidual A) in Heql.
+    refine (cut_gax_l a _ _ nil _ _ Heql _ pi1).
+    * apply atomic_dual in Hat. exact Hat.
     * intros b l l' [c Hc]%Hgax.
       apply (ex_r (l ++ l2 ++ l1 ++ l'));
         [ | rewrite app_assoc, (app_assoc l1); apply PCPermutation_Type_app_comm].
@@ -1613,9 +1611,8 @@ induction pi using ll_nested_ind; try (econstructor; eassumption).
   clear - Hgax_at Hgax_cut. intros a C l1 l2 Ha Hcut. split.
   + cbn in Ha. specialize (Hgax_at a). rewrite Ha in Hgax_at.
     apply (Forall_inf_elt _ _ _ Hgax_at).
-  + intros b l3 l4 Hb. eapply (Hgax_cut C); rewrite ? bidual; eassumption.
-- assert (pgax P = pgax (cutrm_pfrag P)) as Hcut by reflexivity.
-  revert a. rewrite Hcut. apply gax_r.
+  + intros b l3 l4 Hb. eapply (Hgax_cut C); eassumption.
+- revert a. change (pgax P) with (pgax (cutrm_pfrag P)). apply gax_r.
 Qed.
 
 (** If there are no axioms (except the identity rule), then the cut rule is valid. *)

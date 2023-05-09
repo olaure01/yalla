@@ -51,10 +51,8 @@ Lemma le_ipfrag_trans P Q R : le_ipfrag P Q -> le_ipfrag Q R -> le_ipfrag P R.
 Proof.
 intros [Hc1 [Ha1 Hp1]] [Hc2 [Ha2 Hp2]].
 repeat split.
-- intros A. now apply (BoolOrder.le_trans _ (ipcut Q A)).
-- intros a.
-  destruct (Ha1 a) as [b Heq].
-  destruct (Ha2 b) as [c Heq2].
+- intro A. now apply (BoolOrder.le_trans _ (ipcut Q A)).
+- intro a. destruct (Ha1 a) as [b Heq], (Ha2 b) as [c Heq2].
   exists c. transitivity (projT2 (ipgax Q) b); assumption.
 - apply (BoolOrder.le_trans _ (ipperm Q)); assumption.
 Qed.
@@ -62,8 +60,8 @@ Qed.
 Instance le_ipfrag_po : PreOrder le_ipfrag.
 Proof.
 split.
-- repeat split; try reflexivity.
-  intros a. exists a. reflexivity.
+- repeat split; [ reflexivity | | reflexivity ].
+  intro a. exists a. reflexivity.
 - intros P Q R. apply le_ipfrag_trans.
 Qed.
 
@@ -78,13 +76,13 @@ Proof. intro. reflexivity. Qed.
 
 Lemma cutupd_ipfrag_true P : le_ipfrag P (cutupd_ipfrag P ipcut_all).
 Proof.
-repeat split; try reflexivity; intro a.
-- apply BoolOrder.le_true.
-- exists a. reflexivity.
+repeat split; [ | | reflexivity ].
+- intro. apply BoolOrder.le_true.
+- intro a. exists a. reflexivity.
 Qed.
 
 Lemma cutrm_ipfrag_le P : le_ipfrag (cutrm_ipfrag P) P.
-Proof. repeat split; try reflexivity. intros a. exists a. reflexivity. Qed.
+Proof. repeat split; [ | reflexivity ]. intro a. exists a. reflexivity. Qed.
 
 
 (** ** Rules *)
@@ -168,8 +166,7 @@ end.
 
 Lemma stronger_ipfrag P Q (Hfrag : le_ipfrag P Q) l A : ill P l A -> ill Q l A.
 Proof.
-intros pi.
-induction pi; try (constructor; assumption).
+intro pi. induction pi; try (constructor; assumption).
 - apply (ex_ir l1); [ assumption | ].
   destruct Hfrag as [_ [_ Hp]]. apply (PEPermutation_Type_monot (ipperm P) _ Hp), p.
 - apply (ex_oc_ir _ lw); assumption.

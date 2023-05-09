@@ -80,7 +80,7 @@ Proof.
 induction l1 in l2 |- *; intro Heq; destruct l2; inversion Heq.
 - exists nil; reflexivity.
 - apply IHl1 in H1.
-  destruct f; inversion H0; subst.
+  destruct f; inversion H0. subst.
   destruct H1 as [l2' -> ->].
   exists (f :: l2'); reflexivity.
 Qed.
@@ -105,7 +105,7 @@ Inductive ll : list formula -> Type :=
 | co_r A l : ll (wn A :: wn A :: l) -> ll (wn A :: l).
 
 Instance ll_perm : Proper ((@Permutation_Type _) ==> arrow) ll.
-Proof. intros l1 l2 HP pi. eapply ex_r; eassumption. Qed.
+Proof. intros l1 ? ? ?. apply ex_r with l1; assumption. Qed.
 
 (** ** 4. characterize corresponding [ll] fragment *)
 
@@ -115,20 +115,19 @@ Proof. intros l1 l2 HP pi. eapply ex_r; eassumption. Qed.
 
 Lemma ll2llfrag l : ll l -> ll_fragments.ll_ll (map ll2ll l).
 Proof.
-intros pi. induction pi; try (constructor; assumption); rewrite ? map_app.
+intro pi. induction pi; try (constructor; assumption).
 - eapply ll_def.ex_r; [ eassumption | ].
   apply Permutation_Type_map. assumption.
 - eapply ll_def.ex_r.
-  + apply (ll_def.tens_r IHpi1 IHpi2).
+  + exact (ll_def.tens_r IHpi1 IHpi2).
   + list_simpl. apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
 - cbn. rewrite ll2ll_map_wn. apply ll_def.oc_r. rewrite <- ll2ll_map_wn. assumption.
 Qed.
 
 Lemma llfrag2ll l : ll_fragments.ll_ll (map ll2ll l) -> ll l.
 Proof.
-intros pi.
-remember (map ll2ll l) as l0 eqn:Heql0.
-induction pi in l, Heql0 |- *; subst; try discriminate f.
+intro pi. remember (map ll2ll l) as l0 eqn:Heql0.
+induction pi in l, Heql0 |- *; subst.
 - symmetry in Heql0. decomp_map_inf Heql0. subst.
   destruct l2; inversion Heql4.
   destruct x; inversion Heql2.
@@ -137,41 +136,43 @@ induction pi in l, Heql0 |- *; subst; try discriminate f.
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
   eapply ex_r; [ apply IHpi | ]; eassumption.
 - symmetry in Heql0. decomp_map_inf Heql0. subst. symmetry in Heql0.
-  cbn in Heql0. apply ll2ll_map_wn_inv in Heql0 as [l -> ->].
+  apply ll2ll_map_wn_inv in Heql0 as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP].
-  eapply ex_r; [ apply IHpi; rewrite <- ll2ll_map_wn, <- ? map_app; reflexivity | ].
+  eapply ex_r; [ apply IHpi; rewrite <- ll2ll_map_wn, <- ! map_app; reflexivity | ].
   symmetry in HP.
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map. assumption.
-- destruct l; inversion Heql0. destruct f; inversion H0. destruct l; inversion H1.
+- discriminate f.
+- destruct l as [|f []]; inversion Heql0 as [Heq]. destruct f; inversion Heq.
   apply one_r.
-- destruct l; inversion Heql0. destruct f; inversion H0.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq.
   apply bot_r, IHpi. assumption.
 - symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql2; subst.
+  destruct x; inversion Heql2. subst.
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1. reflexivity.
   + apply IHpi2. reflexivity.
-  + apply Permutation_Type_cons; [ reflexivity | apply Permutation_Type_app_comm ].
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
+  + apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq. subst.
   apply parr_r, IHpi. reflexivity.
-- destruct l; inversion Heql0. destruct f; inversion H0.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq.
   apply top_r.
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq. subst.
   apply plus_r1, IHpi. reflexivity.
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq. subst.
   apply plus_r2, IHpi. reflexivity.
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq. subst.
   apply with_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
-  apply ll2ll_map_wn_inv in H1 as [l'' -> ->].
+- destruct l as [|f l]; inversion Heql0 as [[Heq Hwn]]. destruct f; inversion Heq. subst.
+  apply ll2ll_map_wn_inv in Hwn as [l'' -> ->].
   apply oc_r, IHpi.
   cbn. rewrite ll2ll_map_wn. reflexivity.
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq. subst.
   apply de_r, IHpi. reflexivity.
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq. subst.
   apply wk_r, IHpi. reflexivity.
-- destruct l; inversion Heql0. destruct f; inversion H0. subst.
+- destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq. subst.
   apply co_r, IHpi. reflexivity.
+- discriminate f.
 - destruct a.
 Qed.
 

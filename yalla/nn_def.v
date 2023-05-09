@@ -242,7 +242,7 @@ Lemma trans_subs P (Hperm : ipperm P = true) (Hcut : full_icut P) (A B : formula
   (isubs (negR (trans B)) (a2i x) R = R) ->
   ill P (isubs (negR (trans B)) (a2i x) (trans A) :: negR (trans (subs B x A)):: nil) R.
 Proof.
-intros HR. induction A; cbn; rewrite ? HR.
+intro HR. induction A; cbn; rewrite ? HR.
 - destruct (eq_dt_dec c x) as [->|Hatneq].
   + rewrite repl_iat_eq, repl_at_eq. apply negR_ilr_head, ax_exp_ill. assumption.
   + rewrite (repl_at_neq _ Hatneq).
@@ -427,31 +427,31 @@ End RTranslation.
 Lemma munit_trans A (x : atom_inf) : ~ In x (atom_list A) ->
   munit_smp (subs bot x (dual (unill (trans (ivar (a2i x)) A)))) A.
 Proof.
-induction A; simpl; intros Hnin; rewrite ? a2a_i; try apply munit_smp_id;
+induction A; cbn; intro Hnin; rewrite ? a2a_i; try apply munit_smp_id;
   destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].
-- rewrite ? Hr2, repl_at_eq. apply musmp_to.
-  rewrite repl_at_neq by (intros Heq; apply Hnin; left; exact Heq). apply munit_smp_id.
-- rewrite repl_at_neq, Hr2; [ apply munit_smp_id | ].
-  intros Heq. apply Hnin. left. rewrite Hr2 in Heq. assumption.
-- rewrite Hr2, repl_at_eq. apply musmp_to, munit_smp_id.
-- rewrite Hr2, repl_at_eq, ? bidual. apply musmp_to.
+- rewrite ! (Hr2 x), repl_at_eq. apply musmp_to.
+  rewrite (Hr2 c), repl_at_neq by (intros Heq; apply Hnin; left; exact Heq). apply munit_smp_id.
+- rewrite repl_at_neq, (Hr2 c); [ apply munit_smp_id | ].
+  intros Heq. apply Hnin. left. rewrite (Hr2 c) in Heq. assumption.
+- rewrite (Hr2 x), repl_at_eq. apply musmp_to, munit_smp_id.
+- rewrite (Hr2 x), repl_at_eq, ! bidual. apply musmp_to.
   apply musmp_tens; apply musmp_pb; [ apply IHA1 | apply IHA2 ].
-  + intros Hin. apply Hnin, in_or_app. left. assumption.
   + intros Hin. apply Hnin, in_or_app. right. assumption.
+  + intros Hin. apply Hnin, in_or_app. left. assumption.
 - apply musmp_parr; [ apply IHA1 | apply IHA2 ].
   + intros Hin. apply Hnin, in_or_app. left. assumption.
   + intros Hin. apply Hnin, in_or_app. right. assumption.
-- rewrite Hr2, repl_at_eq. apply musmp_to, munit_smp_id.
-- rewrite Hr2, repl_at_eq, ? bidual. apply musmp_to.
+- rewrite (Hr2 x), repl_at_eq. apply musmp_to, munit_smp_id.
+- rewrite (Hr2 x), repl_at_eq, ! bidual. apply musmp_to.
   apply musmp_plus; apply musmp_pb; [ apply IHA1 | apply IHA2 ].
   + intros Hin. apply Hnin, in_or_app. left. assumption.
   + intros Hin. apply Hnin, in_or_app. right. assumption.
 - apply musmp_with; [ apply IHA1 | apply IHA2 ].
   + intros Hin. apply Hnin, in_or_app. left. assumption.
   + intros Hin. apply Hnin, in_or_app. right. assumption.
-- rewrite Hr2, repl_at_eq, ? bidual. apply musmp_to.
+- rewrite (Hr2 x), repl_at_eq, ! bidual. apply musmp_to.
   apply musmp_oc, musmp_pb, IHA, Hnin.
-- rewrite Hr2, repl_at_eq, ? bidual.
+- rewrite (Hr2 x), repl_at_eq, ! bidual.
   apply musmp_wn, musmp_to, musmp_pb, IHA, Hnin.
 Qed.
 

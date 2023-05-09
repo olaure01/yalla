@@ -1,5 +1,5 @@
 From Coq Require Import List EqNat RelationClasses Lia.
-From OLlibs Require Import funtheory dectype Bool_more.
+From OLlibs Require Import Datatypes_more Bool_more funtheory dectype.
 From Yalla Require Export atoms.
 
 Set Implicit Arguments.
@@ -90,6 +90,13 @@ end.
 Lemma oc_n_oc n A : oc_n n (oc A) = oc_n (S n) A.
 Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
+(** Exponential modalities *)
+
+(* lists of Booleans with false = oc and true = wn *)
+Definition exp_mod := list bool.
+
+Definition exp (m : exp_mod) A := fold_right (fun b : bool => if b then wn else oc) A m.
+
 
 (** Orthogonal / dual of a [formula] *)
 
@@ -118,6 +125,9 @@ Proof. split; intro H; rewrite <- (bidual A), <- (bidual B), H, ? bidual; reflex
 
 Lemma dual_inj : injective dual.
 Proof. intros A B H. rewrite <- (bidual A), <- (bidual B), H. reflexivity. Qed.
+
+Lemma atomic_dual A : iffT (atomic A) (atomic (dual A)).
+Proof. destruct A; split; intros Hat; inversion Hat; constructor. Qed.
 
 Lemma dual_tens_n n A : dual (tens_n n A) = parr_n n (dual A).
 Proof. induction n as [|[|n] IHn]; [ | | cbn in *; rewrite <- IHn ]; reflexivity. Qed.
@@ -159,9 +169,13 @@ Fixpoint atom_list A : list atom :=
 match A with
 | var x | covar x => x :: nil
 | one | bot | zero | top => nil
-| tens B C | parr B C | aplus B C | awith B C => atom_list B ++ atom_list C
+| parr B C | aplus B C | awith B C => atom_list B ++ atom_list C
+| tens B C => atom_list C ++ atom_list B
 | oc B | wn B => atom_list B
 end.
+
+Lemma atom_list_dual A : atom_list (dual A) = atom_list A.
+Proof. now induction A; cbn; rewrite ? IHA1, ? IHA2. Qed.
 
 
 (** ** Sub-formulas *)

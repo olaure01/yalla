@@ -8,7 +8,6 @@ From OLlibs Require Import dectype funtheory List_more Permutation_Type.
 
 From Yalla Require ill_cut.
 
-Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -63,7 +62,7 @@ Definition ipfrag_lambek := @ill_def.mk_ipfrag preiatom ill_def.ipcut_none ill_d
 
 Lemma l2illfrag l A : lprove l A -> ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A).
 Proof.
-intros pi; induction pi;
+intro pi. induction pi;
   try (cbn in IHpi; rewrite ? map_app in IHpi);
   try (cbn in IHpi1; rewrite ? map_app in IHpi1);
   try (cbn in IHpi2; rewrite ? map_app in IHpi2);
@@ -73,8 +72,7 @@ Qed.
 
 Lemma illfrag2l l A : ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A) -> lprove l A.
 Proof.
-intros pi.
-remember (map l2ill l) as l0 eqn:Heql0; remember (l2ill A) as A0 eqn:HeqA0.
+intro pi. remember (map l2ill l) as l0 eqn:Heql0. remember (l2ill A) as A0 eqn:HeqA0.
 induction pi in l, A, Heql0, HeqA0 |- *;
   (try now (destruct A; inversion HeqA0));
   (try now (symmetry in Heql0; decomp_map_inf Heql0; destruct x; inversion Heql0)); subst.
@@ -88,22 +86,22 @@ induction pi in l, A, Heql0, HeqA0 |- *;
   + symmetry in p. apply Permutation_Type.Permutation_Type_nil in p as ->.
     apply IHpi; [ list_simpl | ]; reflexivity.
   + destruct l; discriminate H1.
-- destruct A; inversion HeqA0; subst.
+- destruct A; inversion HeqA0. subst.
   apply lpam_lrr.
   apply IHpi; [ rewrite map_last | ]; reflexivity.
 - symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0; subst.
+  destruct x; inversion Heql0. subst.
   apply lpam_llr; [ apply IHpi1 | apply IHpi2]; list_simpl; reflexivity.
-- destruct A; inversion HeqA0; subst.
+- destruct A; inversion HeqA0.
   apply top_lrr.
-- destruct A; inversion HeqA0; subst.
+- destruct A; inversion HeqA0. subst.
   apply with_lrr; [ apply IHpi1 | apply IHpi2]; reflexivity.
 - symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0; subst.
+  destruct x; inversion Heql0. subst.
   apply with_llr1.
   apply IHpi; [ list_simpl | ]; reflexivity.
 - symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0; subst.
+  destruct x; inversion Heql0. subst.
   apply with_llr2.
   apply IHpi; [ list_simpl | ]; reflexivity.
 Qed.
@@ -122,8 +120,7 @@ Lemma cut_r A l0 l1 l2 C : lprove l0 A -> lprove (l1 ++ A :: l2) C -> lprove (l1
 Proof.
 intros pi1%l2illfrag pi2%l2illfrag.
 apply illfrag2l.
-rewrite 2 map_app. rewrite map_app in pi2.
-refine (ill_cut.cut_ir_axfree _ _ _ pi1 pi2).
+rewrite ? map_app in *. refine (ill_cut.cut_ir_axfree _ _ _ pi1 pi2).
 intros [].
 Qed.
 
