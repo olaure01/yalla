@@ -16,6 +16,7 @@ Context {atom : DecType} {preiatom : InfDecType} {Atoms : Atom2IAtomType_self at
 Notation atom_inf := (@atom_inf _ _ Atoms).
 Notation formula := (@formula atom_inf).
 Notation iformula := (@iformula preiatom).
+Notation ill2ll := (@ill2ll _ _ iatom2atom_fin).
 Notation unill := (@unill _ _ Atoms).
 Notation trans := (@trans _ _ Atoms).
 Notation i2a := (@i2a _ _ Atoms).
@@ -331,10 +332,44 @@ Lemma ll_ll_to_ill_trans R (l : list formula) : ll_ll l -> ill_ll (map (trans R)
 Proof.
 intros Hll%(ll_to_ill_trans R).
 - apply cut_ill_admissible.
-  eapply stronger_ipfrag; [ | apply Hll ].
+  eapply stronger_ipfrag, Hll.
   repeat split. intros [].
 - reflexivity.
 - intros ? [=].
+Qed.
+
+Lemma cut_admissible_ll_from_ill (l : list formula) : ll ((cutupd_pfrag pfrag_ll pcut_all)) l -> ll_ll l.
+Proof.
+remember (fresh (flat_map atom_list l)) as x eqn:Heqx. intro pi.
+apply (ex_r (rev l)); [ |  symmetry; apply Permutation_Type_rev ].
+rewrite <- app_nil_l. apply bot_rev; [ intros [] | ]. rewrite app_nil_l.
+apply munit_elim
+  with (l1 := map (subs bot x)
+                (ill2ll (ivar (a2i x)) :: rev (map dual (map ill2ll (map (trans (ivar (a2i x))) l))))).
+- intros [].
+- eapply (stronger_pfrag (axupd_pfrag pfrag_ll _)), subs_ll.
+  + repeat split. intros [].
+  + reflexivity.
+  + eapply stronger_pfrag; [ eapply i2pfrag_ill_ll | ].
+    apply ill_to_ll, cut_ill_admissible.
+    apply (@stronger_ipfrag _ (p2ipfrag (ivar (a2i x)) (cutupd_pfrag (@pfrag_ll atom_inf) pcut_all))).
+    { repeat split. intros []. }
+    apply (ll_to_ill_trans (ivar (a2i x))), pi.
+    * reflexivity.
+    * intros ? [=].
+- cbn. constructor.
+  + destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite (Hr2 x), repl_at_eq.
+    apply musmp_bot.
+  + clear pi. rewrite map_rev. apply Forall2_inf_rev.
+    assert (Forall (fun A => ~ In x (atom_list A)) l) as Hf.
+    { assert (Hf := fresh_spec (flat_map atom_list l)). rewrite <- Heqx in Hf.
+      clear Heqx. induction l as [|A l IHl]; constructor.
+      - intro Hin. apply Hf. apply in_or_app. left. assumption.
+      - apply IHl. intro Hin. apply Hf. cbn. apply in_or_app. right. assumption. }
+    clear Heqx. rewrite ? map_map.
+    induction l as [|C l IHl]; constructor.
+    * apply munit_trans. inversion Hf. assumption.
+    * apply IHl. inversion Hf. assumption.
 Qed.
 
 

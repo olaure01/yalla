@@ -366,6 +366,15 @@ Definition i2pfrag P := {|
 Lemma cutrm_i2pfrag P : le_pfrag (cutrm_pfrag (i2pfrag P)) (i2pfrag (cutrm_ipfrag P)).
 Proof. repeat split; [ intro a; exists a | ]; reflexivity. Qed.
 
+Lemma i2pfrag_ill_ll : le_pfrag (i2pfrag (ipfrag_ill)) pfrag_ll.
+Proof.
+repeat split.
+- intro A. cbn.
+  remember (fst (let (a, _, _) := ill2ll_inv A in a)) as l.
+  clear. now induction l as [|C l IHl]; cbn.
+- intros [].
+Qed.
+
 Lemma ill_to_ll P l C : ill P l C -> ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))).
 Proof.
 intros Hill. induction Hill; list_simpl;

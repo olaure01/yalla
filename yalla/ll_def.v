@@ -605,8 +605,7 @@ Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
 Lemma bot_rev P (Hgax : forall a, notT (In_inf bot (projT2 (pgax P) a))) l1 l2 :
   ll P (l1 ++ bot :: l2) -> ll P (l1 ++ l2).
 Proof.
-intros pi.
-remember (l1 ++ bot :: l2) as l eqn:Heql.
+intro pi. remember (l1 ++ bot :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
   try (destruct l1; inversion Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -655,8 +654,7 @@ Qed.
 Lemma parr_rev P A B (Hgax : forall a, notT (In_inf (parr A B) (projT2 (pgax P) a))) l1 l2 :
   ll P (l1 ++ parr A B :: l2) -> ll P (l1 ++ A :: B :: l2).
 Proof.
-intros pi.
-remember (l1 ++ parr A B :: l2) as l eqn:Heql.
+intro pi. remember (l1 ++ parr A B :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
   try (destruct l1; inversion Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -706,8 +704,7 @@ Qed.
 Lemma with_rev1 P A B (Hgax : forall a, notT (In_inf (awith A B) (projT2 (pgax P) a))) l1 l2 :
   ll P (l1 ++ awith A B :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
-intros pi.
-remember (l1 ++ awith A B :: l2) as l eqn:Heql.
+intro pi. remember (l1 ++ awith A B :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
   try (destruct l1; inversion Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -756,8 +753,7 @@ Qed.
 Lemma with_rev2 P A B (Hgax : forall a, notT (In_inf (awith B A) (projT2 (pgax P) a))) l1 l2 :
   ll P (l1 ++ awith B A :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
-intros pi.
-remember (l1 ++ awith B A :: l2) as l eqn:Heql.
+intro pi. remember (l1 ++ awith B A :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
   try (destruct l1; inversion Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -806,8 +802,7 @@ Qed.
 Lemma oc_rev P A (Hgax : forall a, notT (In_inf (oc A) (projT2 (pgax P) a))) l1 l2 :
   ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
-intros pi.
-remember (l1 ++ oc A :: l2) as l eqn:Heql.
+intro pi. remember (l1 ++ oc A :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
   try (destruct l1; inversion Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -856,7 +851,7 @@ Qed.
 Lemma one_rev P (Hgax : forall a, notT (In_inf one (projT2 (pgax P) a))) l0 (pi0 : ll P l0) l1 l2 :
   ll P (l1 ++ one :: l2) -> ll P (l1 ++ l0 ++ l2).
 Proof.
-intros pi. remember (l1 ++ one :: l2) as l eqn:Heql.
+intro pi. remember (l1 ++ one :: l2) as l eqn:Heql.
 induction pi in l1, l2, Heql |- * using ll_nested_ind;
   try (destruct l1; inversion Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -908,7 +903,7 @@ Qed.
 Lemma zero_rev P (Hgax : forall a, notT (In_inf zero (projT2 (pgax P) a))) l1 l2 :
   ll P (l1 ++ zero :: l2) -> forall l0, ll P (l1 ++ l0 ++ l2).
 Proof.
-intros pi. remember (l1 ++ zero :: l2) as l eqn:Heql. intros l'.
+intro pi. remember (l1 ++ zero :: l2) as l eqn:Heql. intro l'.
 induction pi in l1, l2, Heql |- * using ll_nested_ind;
   try (destruct l1; inversion Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -1035,7 +1030,7 @@ Qed.
 Lemma plus_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = aplus A B :: nil)) (Hcut : no_cut P) :
   ll P (aplus A B :: nil) -> (ll P (A :: nil)) + (ll P (B :: nil)).
 Proof.
-intros pi. remember (aplus A B :: nil) as l eqn:Heq. rewrite Heq in Hgax.
+intro pi. remember (aplus A B :: nil) as l eqn:Heq. rewrite Heq in Hgax.
 induction pi in Heq |- * using ll_nested_ind; subst; try (now inversion Heq).
 - symmetry in p. apply PCPermutation_Type_length_1_inv in p as ->.
   apply IHpi. reflexivity.
@@ -1062,9 +1057,8 @@ Qed.
 Lemma wn_n_rev P A n (Hgax : forall a k, notT (projT2 (pgax P) a = repeat (wn A) k)) (Hcut : no_cut P) :
   ll P (repeat (wn A) n) -> (ll P (A :: wn A :: nil)) + (pmix P 0 = true).
 Proof.
-intros pi.
-remember (repeat (wn A) n) as l eqn:Heql;
-  induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; inversion Heql); subst.
+intro pi. remember (repeat (wn A) n) as l eqn:Heql.
+induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; inversion Heql); subst.
 - assert (l1 = (repeat (wn A) n)) as ->
     by eapply Permutation.Permutation_repeat, Permutation_Type_Permutation, PCPermutation_Permutation_Type, p.
   apply (IHpi _ eq_refl).
@@ -1099,7 +1093,7 @@ Qed.
 
 Lemma wn_rev P A (Hgax : forall a k, notT (projT2 (pgax P) a = repeat (wn A) k)) (Hcut : no_cut P) :
   ll P (wn A :: nil) -> (ll P (A :: wn A :: nil)) + (pmix P 0 = true).
-Proof. intros pi. apply (wn_n_rev _ 1); assumption. Qed.
+Proof. intro pi. apply (wn_n_rev _ 1); assumption. Qed.
 
 
 (** *** Tensor-One Par-Bottom simplifications *)
