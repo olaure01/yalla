@@ -190,10 +190,9 @@ Proof.
 induction A; cbn; intros Hincl;
   rewrite ? IHA, ? IHA1, ? IHA2;
   cbn; trivial;
-  try now apply incl_app_inv in Hincl.
-all: rewrite repl_at_neq; [ reflexivity | intros -> ].
-all: apply (fresh_spec lat), (Hincl (fresh lat)).
-all: left; reflexivity.
+  try (now apply incl_app_inv in Hincl);
+  (rewrite repl_at_neq; [ reflexivity | intros -> ]);
+  apply (fresh_spec lat), (Hincl (fresh lat)), in_eq.
 Qed.
 
 Lemma subs_fresh C A : subs C (fresh_of A) A = A.

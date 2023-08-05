@@ -509,12 +509,10 @@ intros pi. induction pi using ll_nested_ind;
 repeat (destruct L; try now discriminate eqpmix).
 cbn. rewrite app_nil_r.
 apply mix2_bb_r.
-- assert (In_inf l0 (l :: l0 :: nil)) as Hin by (right; left; reflexivity).
-  apply (In_Forall_inf_in _ PL) in Hin as [pi Hin].
-  apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
-- assert (In_inf l (l :: l0 :: nil)) as Hin by now left.
-  apply (In_Forall_inf_in _ PL) in Hin as [pi Hin].
-  apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
+- assert (In_inf l0 (l :: l0 :: nil)) as [pi Hin]%(In_Forall_inf_in _ PL) by (right; apply in_inf_eq).
+  exact (Dependent_Forall_inf_forall_formula _ _ X Hin).
+- assert (In_inf l (l :: l0 :: nil)) as [p Hin]%(In_Forall_inf_in _ PL) by apply in_inf_eq.
+  exact (Dependent_Forall_inf_forall_formula _ _ X Hin).
 Qed.
 
 Lemma bb_to_bbb l : llR (oc bot) l -> ll_bbb l.

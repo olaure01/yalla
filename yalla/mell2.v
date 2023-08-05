@@ -136,9 +136,9 @@ revert l Heql0. induction pi using ll_def.ll_nested_ind; intros l' Heql0; subst;
   cbn in Heql0. symmetry in Heql0. decomp_map_inf Heql0. subst.
   apply map_eq_nil in Heql4 as ->. rewrite app_nil_r.
   apply mix_r.
-  + destruct (In_Forall_inf_in (map mell2ll l2) PL); [ left; reflexivity | ].
+  + destruct (In_Forall_inf_in (map mell2ll l2) PL); [ apply in_inf_eq | ].
     exact (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
-  + destruct (In_Forall_inf_in (map mell2ll l4) PL); [ right; left; reflexivity | ].
+  + destruct (In_Forall_inf_in (map mell2ll l4) PL); [ right; apply in_inf_eq | ].
     exact (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
 - symmetry in Heql0. decomp_map_inf Heql0. subst.
   destruct x; inversion Heql2. subst.

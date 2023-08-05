@@ -568,7 +568,7 @@ split; [ split | ]; cbn.
                by (intros x H; apply Hin, in_inf_cons; assumption).
              cbn. rewrite (IHl _ Hin' H1). f_equal.
              symmetry. eapply (snd (Hgax _)); [ | assumption ].
-             apply Hin. left. reflexivity.
+             apply Hin, in_inf_eq.
     - exfalso.
       apply PEPermutation_Type_vs_elt_inv in HP as [[l1' l2'] _ Heq']. clear - Hgax Heq'.
       apply (f_equal (@rev _)) in Heq'. rewrite rev_involutive in Heq'. list_simpl in Heq'.

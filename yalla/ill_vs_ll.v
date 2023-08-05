@@ -75,14 +75,14 @@ induction A.
     destruct B; inversion Himg as [Himg']. subst.
     cbn. f_equal. apply Hc. assumption.
 - exists (ione :: nil, nil); intros B; split; intros Himg.
-  + destruct B; inversion Himg. left. reflexivity.
+  + destruct B; inversion Himg. apply in_inf_eq.
   + destruct Himg as [<-|[]]; reflexivity.
   + destruct B; discriminate Himg.
   + destruct Himg.
 - exists (nil, ione :: nil); intros B; split; intros Himg.
   + destruct B; discriminate Himg.
   + destruct Himg.
-  + destruct B; inversion Himg. left. reflexivity.
+  + destruct B; inversion Himg. apply in_inf_eq.
   + destruct Himg as [<-|[]]; reflexivity.
 - destruct IHA1 as [(l1, l1op) H1 H1op].
   destruct IHA2 as [(l2, l2op) H2 H2op].
@@ -126,7 +126,7 @@ induction A.
     * destruct B; inversion Himg as [[Himg1 Himg2]].
       -- subst. destruct B2; inversion Himg2 as [Hi].
          apply HlN in Hi.
-         apply in_inf_or_app; left.
+         apply in_inf_or_app. left.
          change (ilpam B1 (ivar i)) with ((fun '(x, y) => ilpam x (ivar y)) (B1, i)).
          apply in_inf_map, in_inf_prod; [ apply H1, bidual | apply Hi ].
       -- inversion Himg1 as [Hi]. rewrite bidual in Hi.
@@ -268,14 +268,14 @@ induction A.
       -- apply H1op. assumption.
       -- apply H2op. assumption.
 - exists (izero :: nil, itop :: nil); intros B; split; intros Himg.
-  + destruct B; inversion Himg. left. reflexivity.
+  + destruct B; inversion Himg. apply in_inf_eq.
   + destruct Himg as [<-|[]]. reflexivity.
-  + destruct B; inversion Himg. left. reflexivity.
+  + destruct B; inversion Himg. apply in_inf_eq.
   + destruct Himg as [<-|[]]. reflexivity.
 - exists (itop :: nil, izero :: nil); intros B; split; intros Himg.
-  + destruct B; inversion Himg. left. reflexivity.
+  + destruct B; inversion Himg. apply in_inf_eq.
   + destruct Himg as [<-|[]]. reflexivity.
-  + destruct B; inversion Himg. left. reflexivity.
+  + destruct B; inversion Himg. apply in_inf_eq.
   + destruct Himg as [<-|[]]. reflexivity.
 - destruct IHA1 as [(l1, l1op) H1 H1op].
   destruct IHA2 as [(l2, l2op) H2 H2op].
@@ -350,7 +350,7 @@ Lemma ill2ll_dec A : {B | A = ill2ll B} + (forall B, A <> ill2ll B).
 Proof.
 destruct (ill2ll_inv A) as [([|B l], _) HB _].
 - right. intros B ->. destruct (fst (HB B) eq_refl).
-- left. exists B. apply HB. left. reflexivity.
+- left. exists B. apply HB, in_inf_eq.
 Qed.
 
 

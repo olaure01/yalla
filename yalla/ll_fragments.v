@@ -774,7 +774,7 @@ induction pi in Heql using ll_nested_ind; subst; try now inversion Heql.
 - destruct L as [|? [|? [|? L]]]; try discriminate eqpmix.
   cbn in Heql. rewrite app_nil_r in Heql. apply app_eq_nil in Heql as [-> ->].
   destruct (In_Forall_inf_in nil PL) as [pi Hin].
-  + left. reflexivity.
+  + apply in_inf_eq.
   + apply (Dependent_Forall_inf_forall_formula _ _ X Hin eq_refl).
 Qed.
 

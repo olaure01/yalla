@@ -412,11 +412,11 @@ intros Hll%(ll_to_ill_trans ione).
   destruct L; [ | inversion eqpmix ].
   cbn; rewrite app_nil_r.
   assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l0) ione).
-  { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by (left; reflexivity).
+  { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by apply in_inf_eq.
     apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
     refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
   assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l1) ione).
-  { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; left; reflexivity).
+  { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; apply in_inf_eq).
     apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
     refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
   rewrite map_app, <- (app_nil_l (map _ l0 ++ map _ l1)), <- (app_nil_r (map _ l0 ++ map _ l1)).
@@ -556,12 +556,12 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 pcut_all)) in Hll.
     destruct L; [ | discriminate eqpmix ].
     assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all))
                 (map ioc (R :: nil) ++ map (trans (ioc R)) l0) (ioc R)).
-    { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by (left; reflexivity).
+    { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by apply in_inf_eq.
       apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
       apply (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
     assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all))
                 (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
-    { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; left; reflexivity).
+    { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; apply in_inf_eq).
       apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
       apply (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
     cbn. rewrite app_nil_r, map_app, <- (app_nil_l (ioc R :: _)), <- (app_nil_r (map _ l1)).
