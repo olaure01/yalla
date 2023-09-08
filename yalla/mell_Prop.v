@@ -2,7 +2,7 @@
 
 
 
-(* output in Type *)
+(* output in Prop *)
 
 
 (** * Example of a concrete use of the yalla library: unit-free MELL *)

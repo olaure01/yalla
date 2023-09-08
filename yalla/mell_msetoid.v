@@ -1,8 +1,6 @@
 (* mell_msetoid example file for yalla library *)
 
 
-(* output in Type *)
-
 
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 

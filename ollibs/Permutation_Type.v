@@ -477,7 +477,7 @@ Implicit Type l : list A.
 Let adapt f n :=
  let m := f (S n) in if le_lt_dec m (f 0) then m else pred m.
 
-Let adapt_injective f : Injective f -> Injective (adapt f).
+#[local] Definition adapt_injective f : Injective f -> Injective (adapt f).
 Proof.
  unfold adapt. intros Hf x y EQ.
  destruct le_lt_dec as [LE|LT]; destruct le_lt_dec as [LE'|LT'].
@@ -494,9 +494,9 @@ Proof.
    elim (proj1 (PeanoNat.Nat.lt_nge _ _) LT LT').
  - apply eq_add_S, Hf.
    now rewrite <- (PeanoNat.Nat.lt_succ_pred _ _ LT), <- (PeanoNat.Nat.lt_succ_pred _ _ LT'), EQ.
-Qed.
+Defined.
 
-Let adapt_ok a l1 l2 f : Injective f -> length l1 = f 0 ->
+#[local] Definition adapt_ok a l1 l2 f : Injective f -> length l1 = f 0 ->
  forall n, nth_error (l1++a::l2) (f (S n)) = nth_error (l1++l2) (adapt f n).
 Proof.
  unfold adapt. intros Hf E n.
@@ -509,7 +509,7 @@ Proof.
    rewrite <- E, <- (PeanoNat.Nat.lt_succ_pred _ _ LT) in LT.
    rewrite 2 nth_error_app2; auto with arith.
    rewrite PeanoNat.Nat.sub_succ_l; auto with arith.
-Qed.
+Defined.
 
 Lemma Permutation_Type_nth_error l l' :
  Permutation_Type l l' ->

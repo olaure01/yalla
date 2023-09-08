@@ -409,14 +409,14 @@ Qed.
 *)
 
 (** cut / axioms / mix0 / mix2 / permutation *)
-Definition pfrag_mell := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
-(*                                       cut   axioms          mix0  mix2  perm  *)
+Definition pfrag_ll := ll_def.mk_pfrag false ll_def.NoAxioms false false true.
+(*                                     cut   axioms          mix0  mix2  perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
 Lemma llpol2llpolfrag : forall l, llpol l ->
-  ll_def.ll pfrag_mell (map llpol2ll l).
+  ll_def.ll pfrag_ll (map llpol2ll l).
 Proof with try eassumption ; try reflexivity.
 intros l pi ; induction pi ; try now (constructor ; intuition).
 - eapply ll_def.ex_r...
@@ -431,7 +431,7 @@ intros l pi ; induction pi ; try now (constructor ; intuition).
 Qed.
 
 Lemma llpolfrag2llpol : forall l,
-  ll_def.ll pfrag_mell (map llpol2ll l) -> llpol l.
+  ll_def.ll pfrag_ll (map llpol2ll l) -> llpol l.
 Proof with try reflexivity.
 intros l pi.
 remember (map llpol2ll l) as l0.
