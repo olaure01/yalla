@@ -111,12 +111,12 @@ intro A. induction A; intros [] Heq;
 - f_equal. apply t2i_inj, i2ac_inj.
   cbn in Heq. unfold t2i, i2ac in Heq. injection Heq as [= Heq].
   apply i2ac_inj, t2i_inj in Heq as ->. reflexivity.
-- inversion Heq as [Heq'].
-  apply formulas.dual_inj in Heq' as ->%IHA. reflexivity.
+- injection Heq as [= Heq].
+  apply formulas.dual_inj in Heq as ->%IHA. reflexivity.
 Qed.
 
 Lemma N_not_tl2ill A : N <> tl2ill A.
-Proof. intros Heq. destruct A; discriminate Heq. Qed.
+Proof. intro Heq. destruct A; discriminate Heq. Qed.
 
 Lemma tl2ill_nz A : nonzerospos (tl2ill A).
 Proof. induction A; constructor; assumption. Qed.
@@ -127,10 +127,10 @@ Proof. induction l as [ | ? l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma tl2ill_map_ioc_inv l1 l2 : map ioc l1 = map tl2ill l2 ->
   { l2' | l2 = map toc l2' & l1 = map tl2ill l2' }.
 Proof.
-induction l1 in l2 |- *; intros Heq; destruct l2; inversion Heq.
+revert l2. induction l1 as [|a l1 IHl1]; intros [|t l2] [=].
 - exists nil; reflexivity.
 - apply IHl1 in H1 as [l2' -> ->].
-  destruct t; inversion Heq.
+  destruct t; inversion H0.
   exists (t :: l2'); reflexivity.
 Qed.
 
@@ -460,21 +460,20 @@ Lemma cut_tl_r_axfree P (Hgax : no_tax P) A l0 l1 l2 C :
   tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C -> tl P (l1 ++ l0 ++ l2) C.
 Proof using Atoms.
 intros pi1 pi2.
-destruct (tl2tlfrag pi1) as [pi1' _].
-assert (pi1'' := pi1' _ eq_refl).
-destruct (tl2tlfrag pi2) as [pi2' pi2''].
 destruct (tpcut P A) eqn:Hcut.
 - eapply cut_tr; eassumption.
-- destruct C eqn:HeqC; apply tlfrag2tl.
+- apply tl2tlfrag in pi1 as [pi1' _]. specialize (pi1' _ eq_refl).
+  apply tl2tlfrag in pi2 as [pi2' pi2''].
+  destruct C eqn:HeqC; apply tlfrag2tl.
   + specialize (pi2' _ eq_refl). list_simpl in pi2'.
     list_simpl. eapply cut_ir_axfree; eassumption.
-  + specialize (pi2'' eq_refl). list_simpl in pi2''. rewrite <- ? map_app in pi2''.
+  + specialize (pi2'' eq_refl). list_simpl in pi2''.
     list_simpl. eapply cut_ir_axfree; eassumption.
 Qed.
 
 Lemma cut_admissible_tl_axfree P (Hgax : no_tax P) l Pi : tl P l Pi -> tl (cutrm_tpfrag P) l Pi.
 Proof using Atoms.
-intros pi. induction pi; try (econstructor; eassumption).
+intro pi. induction pi; try (econstructor; eassumption).
 - eapply cut_tl_r_axfree; eassumption.
 - contradiction (Hgax a).
 Qed.
@@ -511,7 +510,7 @@ Qed.
 
 Lemma easytpgax_easyipgax P : easytpgax P -> easyipgax_nzeropos (t2ipfrag P).
 Proof.
-intros Hgax.
+intro Hgax.
 split; [ split | ]; cbn.
 - intros D Heq. exfalso.
   remember (snd (projT2 (tpgax P) a)) as C eqn:HeqC; destruct C.
@@ -597,7 +596,7 @@ Lemma ll_is_tl_cutfree P (Hcut : no_tcut P) (Hgax : easytpgax P) l :
                  rev (map dual (map ill2ll (map tl2ill l)))) 
         -> tl P l None).
 Proof.
-split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
+split; [ split; [ split | ] | ]; (intros A pi + intros pi).
 - apply tl2tlfrag in pi.
   apply ill_to_ll, (fst pi _ (eq_refl _)).
 - eapply (@ll_to_ill_nzeropos_cutfree _ _ _ (t2ipfrag P) (notcut_t2ipfrag Hcut)
@@ -635,12 +634,12 @@ Lemma ll_is_tl_axfree P (Hgax : no_tax P) l :
                           rev (map dual (map ill2ll (map tl2ill l))))
            -> tl P l None).
 Proof.
-split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
+split; [ split; [ split | ] | ]; intros A pi + intros pi.
 - apply tl2tlfrag in pi.
   apply ill_to_ll, pi. reflexivity.
 - apply ll_to_ill_nzeropos_axfree in pi.
   + apply tlfrag2tl. assumption.
-  + intro a. destruct (Hgax a).
+  + intro a. contradiction (Hgax a).
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
     remember (A :: l) as l0. clear.
     induction l0; cbn; constructor; [ apply tl2ill_nz | assumption ].
@@ -648,7 +647,7 @@ split; [ split; [ split | ] | ]; (try intros A pi); try intros pi.
   apply ill_to_ll, pi. reflexivity.
 - apply ll_to_ill_nzeropos_axfree in pi.
   + apply tlfrag2tl. assumption.
-  + intro a. destruct (Hgax a).
+  + intro a. contradiction (Hgax a).
   + constructor; [ constructor | clear ].
     induction l; cbn; constructor; [ apply tl2ill_nz | assumption ].
 Qed.

@@ -38,7 +38,7 @@ Lemma cut_N_ir P (Hgax : noN_iax P) l0 l1 l2 C :
   ill P l0 N -> ill P (l1 ++ N :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
 Proof.
 intros pi1 pi2. refine (cut_at_ir_gax Hgax _ _ _ pi1 pi2).
-intros b l l' Heq. exfalso. apply (Hgax b). rewrite Heq. apply in_inf_elt.
+intros b l l' Heq. contradiction (Hgax b). rewrite Heq. apply in_inf_elt.
 Qed.
 
 Lemma ilmap_to_ineg P A : ill P (ilmap A N :: nil) (ineg A).

@@ -17,39 +17,39 @@ Notation ll := (@ll atom).
 
 (** Consistency statements *)
 
-Lemma weak_consistency_axfree P (Hgax : no_ax P) (Hmix0 : pmix P 0 = false) : notT (ll P nil).
+Lemma strong_consistency_axfree P (Hgax : no_ax P) (Hmix0 : pmix P 0 = false) : notT (ll P nil).
 Proof.
 intros pi%(cut_admissible_axfree Hgax).
-remember nil as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; try discriminate Heql; subst.
+remember nil as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; (discriminate Heql + subst).
 - symmetry in p. apply IHpi, (PCPermutation_Type_nil _ _ p).
 - symmetry in p. apply IHpi.
   apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
   apply Permutation_Type_nil in p as ->. reflexivity.
-- destruct L; [ | inversion Heql as [ HeqL ] ].
+- destruct L; [ | inversion Heql as [HeqL] ].
   + cbn in eqpmix. rewrite Hmix0 in eqpmix. discriminate eqpmix.
   + apply app_eq_nil in HeqL as [-> _].
     rename X into HPL. inversion_clear HPL as [ | ? ? ? ? Hnil ].
-    apply Hnil. reflexivity.
+    exact (Hnil eq_refl).
 - discriminate f.
 - exact (Hgax a).
 Qed.
 
-Lemma strong_consistency_axfree P (Hgax : no_ax P) : notT (ll P (zero :: nil)).
+Lemma weak_consistency_axfree P (Hgax : no_ax P) : notT (ll P (zero :: nil)).
 Proof.
 intros pi%(cut_admissible_axfree Hgax).
-remember (zero :: nil) as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; try discriminate Heql; subst.
+remember (zero :: nil) as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; (discriminate Heql + subst).
 - symmetry in p. apply IHpi, (PCPermutation_Type_length_1_inv _ _ _ p).
-- symmetry in p. apply IHpi.
-  destruct l1; inversion Heql.
-  + destruct lw'; inversion Heql.
-    apply Permutation_Type_nil in p as ->. reflexivity.
-  + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
-    apply Permutation_Type_nil in p as ->. reflexivity.
+- enough (lw' = nil) as ->
+    by (symmetry in p; apply Permutation_Type_nil in p as ->; exact (IHpi Heql)).
+  destruct l1.
+  + destruct lw'; (discriminate Heql + reflexivity).
+  + injection Heql as [= _ [-> [->%map_eq_nil ->]%app_eq_nil]%app_eq_nil].
+    reflexivity.
 - rename X into HPL. clear - PL HPL Heql. induction L in PL, HPL, Heql |- *; [ discriminate Heql | ].
   inversion HPL as [ | ? ? ? ? Heq ]. destruct a.
   + apply IHL with Fl; assumption.
   + injection Heql as [= -> [-> _]%app_eq_nil].
-    apply Heq. reflexivity.
+    exact (Heq eq_refl).
 - discriminate f.
 - exact (Hgax a).
 Qed.
@@ -191,11 +191,11 @@ Lemma deduction_list_inv lax l :
                                       | inr x => nth (proj1_sig x) lax one :: nil
                                       end))) l.
 Proof using P_perm P_cut.
-induction lax as [|A lax IHlax] in l |- *; intros pi.
+induction lax as [|A lax IHlax] in l |- *; intro pi.
 - list_simpl in pi.
   eapply stronger_pfrag, pi.
-  repeat split; try reflexivity.
-  cbn. intros a. exists (inl a). reflexivity.
+  repeat split; [ reflexivity | cbn | reflexivity .. ].
+  intro a. exists (inl a). reflexivity.
 - list_simpl in pi. cons2app in pi. rewrite app_assoc in pi.
   apply IHlax in pi.
   rewrite <- (app_nil_r l). refine (cut_r (wn (dual A)) _ _ _); [ cbn; apply P_cut | | ].
@@ -215,8 +215,8 @@ induction lax as [|A lax IHlax] in l |- *; intros pi.
     rewrite Hgax. apply gax_r.
   + eapply ex_r; [ | apply PCPermutation_Type_sym, PCPermutation_Type_cons_append ].
     eapply stronger_pfrag, pi.
-    repeat split; try reflexivity.
-    cbn. intros [p | [k Hlen]].
+    repeat split; [ reflexivity | cbn | reflexivity .. ].
+    intros [p | [k Hlen]].
     * exists (inl p). reflexivity.
     * cbn. apply -> PeanoNat.Nat.succ_lt_mono in Hlen.
       exists (inr (exist _ (S k) Hlen)). reflexivity.
@@ -227,11 +227,11 @@ Lemma deduction lax l :
                             (fun a => nth (proj1_sig a) lax one :: nil))) l ->
   ll (cutrm_pfrag P) (l ++ map wn (map dual lax)).
 Proof using P_perm P_cut P_axfree.
-intros pi.
+intro pi.
 apply (cut_admissible_axfree P_axfree), deduction_list.
 eapply stronger_pfrag, pi.
-repeat split; try reflexivity.
-intros a. exists (inr a). reflexivity.
+repeat split; [ reflexivity | | reflexivity .. ].
+intro a. exists (inr a). reflexivity.
 Qed.
 
 Lemma deduction_inv lax l :
@@ -239,14 +239,14 @@ Lemma deduction_inv lax l :
   ll (axupd_pfrag P (existT (fun x => x -> _) { k | k < length lax }
                             (fun a => nth (proj1_sig a) lax one :: nil))) l.
 Proof using P_perm P_cut P_axfree.
-intros pi.
+intro pi.
 assert (ll P (l ++ map wn (map dual lax))) as pi'%deduction_list_inv.
 { eapply stronger_pfrag, pi.
   repeat split; try reflexivity.
   intros a. exists a. reflexivity. }
 eapply stronger_pfrag, pi'.
-repeat split; try reflexivity.
-cbn. intros [? | s].
+repeat split; [ reflexivity | cbn | reflexivity .. ].
+intros [? | s].
 - contradiction P_axfree.
 - exists s. reflexivity.
 Qed.

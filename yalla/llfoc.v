@@ -37,10 +37,10 @@ Lemma disj_polarity A : notT (sformula A * aformula A).
 Proof. destruct A; intros [Hp Hn]; inversion Hp; inversion Hn. Qed.
 
 Lemma sformula_dual A : sformula (dual A) -> aformula A.
-Proof. intros Hp. destruct A; inversion Hp; constructor. Qed.
+Proof. intro Hp. destruct A; inversion Hp; constructor. Qed.
 
 Lemma aformula_dual A : aformula (dual A) -> sformula A.
-Proof. intros Hn. destruct A; inversion Hn; constructor. Qed.
+Proof. intro Hn. destruct A; inversion Hn; constructor. Qed.
 
 Definition Foc x := (sformula x + covar_formula x)%type.
 
@@ -71,8 +71,8 @@ induction l as [|a l IHl].
 - destruct (wFoc_dec a).
   + destruct IHl.
     * left. constructor; assumption.
-    * right. intros H. now inversion H.
-  + right. intros H. now inversion H.
+    * right. intro H. now inversion H.
+  + right. intro H. now inversion H.
 Qed.
 
 Lemma not_wFoc x : notT (wFoc x) ->
@@ -123,8 +123,8 @@ induction l as [| a l IHl].
 - destruct (wtFoc_dec a).
   + destruct IHl.
     * left. constructor; assumption.
-    * right. intros H. now inversion H.
-  + right. intros H. now inversion H.
+    * right. intro H. now inversion H.
+  + right. intro H. now inversion H.
 Qed.
 
 Lemma not_wtFoc x : notT (wtFoc x) ->
@@ -204,8 +204,7 @@ Proof. intro HP. now destruct (polarity A); pol_simpl; [ | apply Permutation_Typ
 Lemma Permutation_Type_middle_polcont l1 l2 A B :
   Permutation_Type (B :: polcont (l1 ++ l2) A) (polcont (l1 ++ B :: l2) A).
 Proof.
-unfold polcont.
-destruct (polarity A) as [Hs | Ha]; [ | rewrite 2 (app_comm_cons _ _ A)]; apply Permutation_Type_middle.
+unfold polcont. destruct (polarity A); [ | rewrite 2 (app_comm_cons _ _ A)]; apply Permutation_Type_middle.
 Qed.
 
 Inductive llfoc : list formula -> option formula -> Type :=
@@ -234,6 +233,9 @@ match pi with
 | tens_fr _ _ _ _ pi1 pi2 => S (fpsize pi1 + fpsize pi2)
 | with_fr pi1 pi2 => S (max (fpsize pi1) (fpsize pi2))
 end.
+
+Lemma foc_gen_fr l A : llfoc (polcont l A) (polfoc A) -> llfoc (A :: l) None.
+Proof. destruct (polarity A); pol_simpl; intro pi; [ apply foc_fr | ]; assumption. Qed.
 
 Lemma top_gen_fr l Pi : option_testT sformula Pi -> llfoc (top :: l) Pi.
 Proof.
@@ -270,14 +272,12 @@ Qed.
 
 Lemma sync_focus l A : llfoc l (Some A) -> sformula A.
 Proof.
-intros pi.
-remember (Some A) as Pi eqn:HeqPi. induction pi in HeqPi |- *;
-  inversion HeqPi; subst;
-  try (now constructor); try apply IHpi; try apply IHpi1; assumption.
+intro pi. remember (Some A) as Pi eqn:HeqPi.
+induction pi in HeqPi |- *; inversion HeqPi; subst; try (constructor; fail); try (now apply IHpi); auto.
 Qed.
 
 Lemma llfoc_foc_is_llfoc_foc l A : llfoc l (Some A) -> llfoc (polcont l A) (polfoc A).
-Proof. intros pi. assert (Hs := sync_focus pi). pol_simpl. exact pi. Qed.
+Proof. intro pi. assert (Hs := sync_focus pi). pol_simpl. exact pi. Qed.
 
 Lemma llfoc_cont_is_llfoc_cont l A : aformula A -> llfoc (A :: l) None -> llfoc (polcont l A) (polfoc A).
 Proof. intros Ha pi. pol_simpl. exact pi. Qed.
@@ -665,71 +665,35 @@ Qed.
 
 Lemma with_rev1_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ awith A B :: l2 ->
   { pi' : llfoc (l1 ++ A :: l2) Pi | fpsize pi' < fpsize pi }.
-Proof. intros Heq%(with_rev_f pi); apply Heq. Qed.
+Proof. intros [pi' _]%(with_rev_f pi). exact pi'. Qed.
 
 Lemma with_rev2_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ awith A B :: l2 ->
   { pi' : llfoc (l1 ++ B :: l2) Pi | fpsize pi' < fpsize pi }.
-Proof. intros Heq%(with_rev_f pi); apply Heq. Qed.
+Proof. intros [_ pi']%(with_rev_f pi). exact pi'. Qed.
+
+Lemma unfoc_sequent l A :
+  match polfoc A with Some C => C :: nil | None => nil end ++ polcont l A = A :: l.
+Proof. destruct (polarity A) as [HsA | HaA]; pol_simpl; reflexivity. Qed.
 
 Lemma llfoc_to_ll l Pi : llfoc l Pi ->
-   (Pi = None -> ll_ll l)
- * (forall C, Pi = Some C -> ll_ll (C :: l)).
+  ll_ll (match Pi with Some C => C :: nil | None => nil end ++ l).
 Proof.
-intros pi; induction pi;
-  (split; [ intros HN; inversion HN; subst
-          | intros D HD; inversion HD; subst ]);
-  try (destruct IHpi as [IHpiN IHpiS]);
-  try (destruct IHpi1 as [IHpi1N IHpi1S]);
-  try (destruct IHpi2 as [IHpi2N IHpi2S]);
-  try (assert (pi0' := IHpiS _ eq_refl));
-  try (assert (pi1' := IHpi1S _ eq_refl));
-  try (assert (pi2' := IHpi2S _ eq_refl));
-  try (assert (pi0' := IHpiN eq_refl));
-  try (assert (pi1' := IHpi1N eq_refl));
-  try (assert (pi2' := IHpi2N eq_refl));
-  try (now constructor);
-  try (now (eapply ex_r; [ | apply Permutation_Type_swap ]; constructor)).
-- eapply ex_r; eassumption.
+intro pi. induction pi; rewrite ? unfoc_sequent in *;
+  try (now try destruct Pi; (constructor + (eapply ex_r; [ | apply Permutation_Type_swap ]; constructor))).
 - eapply ex_r; [ eassumption | ].
-  apply Permutation_Type_cons; [ reflexivity | assumption ].
+  apply Permutation_Type_app; [ reflexivity | assumption ].
 - assumption.
-- destruct (polarity A) as [HsA | HaA]; pol_simpl.
-  + assert (pi1' := IHpi1S _ eq_refl).
-    destruct (polarity B) as [HsB | HaB]; pol_simpl.
-    * assert (pi2' := IHpi2S _ eq_refl).
-      eapply ex_r; [ apply tens_r; [ eapply pi1' | eapply pi2' ] | ].
-      apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-    * assert (pi2' := IHpi2N eq_refl).
-      eapply ex_r; [ apply tens_r; [ eapply pi1' | eapply pi2' ] | ].
-      apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-  + assert (pi1' := IHpi1N eq_refl).
-    destruct (polarity B) as [HsB | HaB]; pol_simpl.
-    * assert (pi2' := IHpi2S _ eq_refl).
-      eapply ex_r; [ apply tens_r; [ eapply pi1' | eapply pi2' ] | ].
-      apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-    * assert (pi2' := IHpi2N eq_refl).
-      eapply ex_r; [ apply tens_r; [ eapply pi1' | eapply pi2' ] | ].
-      apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-- eapply ex_r; [ apply parr_r | apply Permutation_Type_swap ].
+- eapply ex_r; [ apply tens_r; [ apply IHpi1 | apply IHpi2 ] | ].
+  apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
+- eapply ex_r; [ apply parr_r | apply Permutation_Type_middle ].
   eapply ex_r; [ eassumption | ].
-  change (A :: B :: D :: l) with ((A :: B :: nil) ++ D :: l).
-  apply Permutation_Type_cons_app; reflexivity.
-- destruct (polarity A) as [Hs | Ha]; pol_simpl; apply plus_r1.
-  + apply IHpiS. reflexivity.
-  + apply IHpiN. reflexivity.
-- destruct (polarity A) as [Hs | Ha]; pol_simpl; apply plus_r2.
-  + apply IHpiS. reflexivity.
-  + apply IHpiN. reflexivity.
-- eapply ex_r; [ apply with_r | apply Permutation_Type_swap ].
-  + eapply ex_r; [ apply pi1' | apply Permutation_Type_swap ].
-  + eapply ex_r; [ apply pi2' | apply Permutation_Type_swap ].
-- destruct (polarity A) as [Hs | Ha]; pol_simpl; apply de_r.
-  + apply IHpiS. reflexivity.
-  + apply IHpiN. reflexivity.
-- eapply ex_r; [ apply co_r | apply Permutation_Type_swap ].
+  cons2app. rewrite ? (app_assoc (A :: nil)). apply Permutation_Type_app_swap_app.
+- eapply ex_r; [ apply with_r | apply Permutation_Type_middle ].
+  + eapply ex_r; [ apply IHpi1 | symmetry; apply Permutation_Type_middle ].
+  + eapply ex_r; [ apply IHpi2 | symmetry; apply Permutation_Type_middle ].
+- eapply ex_r; [ apply co_r | apply Permutation_Type_middle ].
   eapply ex_r; [ eassumption | ].
-  change (wn A :: wn A :: D :: l) with ((wn A :: wn A :: nil) ++ D :: l).
-  apply Permutation_Type_cons_app. reflexivity.
+  cons2app. rewrite ? (app_assoc (wn A :: nil)). apply Permutation_Type_app_swap_app.
 Qed.
 
 
@@ -758,22 +722,23 @@ Proof. intros l1 l2 HP pi. apply ex_Fr with l1; assumption. Qed.
 
 Lemma top_gen_Fr l : llFoc (top :: l) None.
 Proof.
-remember (list_sum (map fsize l)) as n. revert l Heqn. induction n using lt_wf_rect; intros l ->.
+remember (list_sum (map fsize l)) as n eqn:Heqn.
+revert l Heqn. induction n using lt_wf_rect; intros l ->.
 destruct (wtFocl_dec l).
-- apply top_Fr; assumption.
+- apply top_Fr. assumption.
 - apply not_wtFocl in n as [ [[A l1] l2] -> [[-> | [[B C] ->]] | [[B C] ->]] ].
   + rewrite app_comm_cons.
     eapply ex_Fr; [ apply bot_Fr | apply Permutation_Type_middle ].
-    list_simpl; eapply X; [ | reflexivity ].
-    cbn; rewrite 2 map_app, 2 list_sum_app; simpl; lia.
+    list_simpl. eapply X; [ | reflexivity ].
+    rewrite 2 map_app, 2 list_sum_app. simpl. lia.
   + rewrite app_comm_cons.
     eapply ex_Fr; [ apply parr_Fr | apply Permutation_Type_middle ].
-    list_simpl; eapply ex_Fr;
+    list_simpl. eapply ex_Fr;
     [ eapply X; trivial
     | etransitivity; [ apply Permutation_Type_swap
                      | apply (Permutation_Type_cons eq_refl);
                        etransitivity; [ apply Permutation_Type_swap | reflexivity ]]].
-    cbn; rewrite 2 map_app, 2 list_sum_app; simpl; lia.
+    cbn. rewrite 2 map_app, 2 list_sum_app. simpl. lia.
   + rewrite app_comm_cons.
     eapply ex_Fr; [ apply with_Fr | apply Permutation_Type_middle ].
     * list_simpl. eapply ex_Fr;
@@ -790,37 +755,35 @@ Qed.
 
 Lemma sync_focus_F l A : llFoc l (Some A) -> sformula A.
 Proof.
-intros pi.
-remember (Some A) as Pi; revert HeqPi; induction pi; intros HeqPi; inversion HeqPi; subst;
-  try (now constructor).
-exact (IHpi eq_refl).
+intro pi. remember (Some A) as Pi eqn:HeqPi.
+induction pi in HeqPi |- *; inversion HeqPi; subst; (now constructor + exact (IHpi eq_refl)).
 Qed.
 
 Lemma wFoc_context l A : llFoc l (Some A) -> Forall_inf wFoc l.
 Proof.
-intros pi.
-remember (Some A) as Pi; revert A HeqPi; induction pi; intros P HeqPi; subst;
+intro pi. remember (Some A) as Pi eqn:HeqPi.
+induction pi in A, HeqPi |- *; subst;
   try (now inversion HeqPi).
 - now repeat constructor.
-- specialize (IHpi P eq_refl).
+- specialize (IHpi A eq_refl).
   apply (Permutation_Type_Forall_inf p IHpi).
 - apply Forall_inf_app; assumption.
-- clear; remember (map wn l) as l0; revert l Heql0; induction l0 as [|A l0 IHl0]; intros [|B l] Heql0;
-    inversion Heql0; subst; constructor.
+- clear. remember (map wn l) as l0 eqn:Heql0.
+  induction l0 as [|A l0 IHl0] in l, Heql0 |- *; destruct l as [|B l]; destr_eq Heql0; subst; constructor.
   + right. constructor.
-  + apply (IHl0 l). reflexivity.
+  + exact (IHl0 l eq_refl).
 Qed.
 
 Lemma llFoc_foc_is_llFoc_foc l A : llFoc l (Some A) -> llFoc (polcont l A) (polfoc A).
-Proof. intros pi. assert (Hs := sync_focus_F pi). pol_simpl. exact pi. Qed.
+Proof. intro pi. assert (Hs := sync_focus_F pi). pol_simpl. exact pi. Qed.
 
 
 (** ** Reversing *)
 
 Lemma bot_rev_F l1 l2 Pi : llFoc (l1 ++ bot :: l2) Pi -> llFoc (l1 ++ l2) Pi.
 Proof.
-intros pi; remember (l1 ++ bot :: l2) as l; revert l1 l2 Heql.
-induction pi; intros l1' l2' Heql; subst.
+intro pi. remember (l1 ++ bot :: l2) as l eqn:Heql.
+revert l1 l2 Heql; induction pi; intros l1' l2' Heql; subst.
 - destruct l1'; inversion Heql.
   destruct l1'; inversion H1.
 - destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1p, l2p) ->].
@@ -874,8 +837,8 @@ Qed.
 Lemma parr_rev_F A1 A2 l1 l2 Pi :
   llFoc (l1 ++ parr A1 A2 :: l2) Pi -> llFoc (l1 ++ A1 :: A2 :: l2) Pi.
 Proof.
-intros pi; remember (l1 ++ parr A1 A2 :: l2) as l; revert A1 A2 l1 l2 Heql.
-induction pi; intros A1 A2 l1' l2' Heql; subst.
+intro pi. remember (l1 ++ parr A1 A2 :: l2) as l eqn:Heql.
+revert A1 A2 l1 l2 Heql; induction pi; intros A1 A2 l1' l2' Heql; subst.
 - destruct l1'; inversion Heql.
   destruct l1'; inversion H1.
 - destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1p, l2p) ->].
@@ -929,8 +892,8 @@ Qed.
 Lemma with_rev_F A1 A2 l1 l2 Pi :
   llFoc (l1 ++ awith A1 A2 :: l2) Pi -> llFoc (l1 ++ A1 :: l2) Pi * llFoc (l1 ++ A2 :: l2) Pi.
 Proof.
-intros pi; remember (l1 ++ awith A1 A2 :: l2) as l; revert A1 A2 l1 l2 Heql.
-induction pi; intros A1 A2 l1' l2' Heql; subst.
+intro pi. remember (l1 ++ awith A1 A2 :: l2) as l eqn:Heql.
+revert A1 A2 l1 l2 Heql; induction pi; intros A1 A2 l1' l2' Heql; subst.
 - destruct l1'; inversion Heql.
   destruct l1'; inversion H1.
 - destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1p, l2p) ->].
@@ -994,9 +957,9 @@ enough (forall l l1 l2 l0 lf,
   Forall_inf wFoc lf -> Permutation_Type l (l1 ++ lf ++ l0) ->
   llFoc l None -> llFoc (l2 ++ lf ++ l0) None) as Hgen
   by (intros; rewrite <- (app_nil_l l0); apply Hgen with (l1 ++ l0) l1; auto).
-clear l1 l2 l0; intros l l1 l2 l0 lf.
-remember (list_sum (map fsize l0)) as n; revert l0 lf l Heqn.
-induction n using lt_wf_rect; intros [|A l0] lf l -> HFoc HF HP pi.
+clear l1 l2 l0. intros l l1 l2 l0 lf.
+remember (list_sum (map fsize l0)) as n eqn:Heqn.
+revert l0 lf l Heqn; induction n using lt_wf_rect; intros [|A l0] lf l -> HFoc HF HP pi.
 - apply HFoc, (ex_Fr pi HP); now rewrite app_nil_r.
 - destruct (wFoc_dec A).
   + replace (l2 ++ lf ++ A :: l0) with (l2 ++ (lf ++ A :: nil) ++ l0) by now rewrite <- app_assoc.
@@ -1043,7 +1006,7 @@ Qed.
 
 Lemma dea_gen_Fr A l : aformula A -> llFoc (A :: l) None -> llFoc (wn A :: l) None.
 Proof.
-intros Ha. cons2app. apply reversing.
+intro Ha. cons2app. apply reversing.
 clear l. cbn. intros l Hf pi. apply de_Fr; [ pol_simpl | ]; assumption.
 Qed.
 
@@ -1054,7 +1017,7 @@ clear l. cbn. intros l Hf pi. now apply wk_Fr.
 Qed.
 
 Lemma wk_gen_list_Fr lw l : llFoc l None -> llFoc (map wn lw ++ l) None.
-Proof. intros pi. induction lw; [ | apply wk_gen_Fr ];  assumption. Qed.
+Proof. intro pi. induction lw; [ | apply wk_gen_Fr ];  assumption. Qed.
 
 Lemma co_gen_Fr A l : llFoc (wn A :: wn A :: l) None -> llFoc (wn A :: l) None.
 Proof.
@@ -1105,11 +1068,11 @@ Lemma llfoc_to_llFoc s l Pi (pi : llfoc l Pi) : fpsize pi < s ->
  * (forall C, Pi = Some C -> notT (Forall_inf wFoc l) ->
       (llFoc (C :: l) None) * llFoc (wn C :: l) None).
 Proof.
-  revert l Pi pi; induction s using lt_wf_rect;
-    intros l Pi pi; split; [ split | ];
-    [ intros Heq; destruct pi; inversion Heq; subst; cbn in H
-    | intros PPi Heq HF; destruct pi; inversion Heq; subst; cbn in H
-    | intros C Heq HnF ].
+revert l Pi pi; induction s using lt_wf_rect; intros l Pi pi; split; [ split | ];
+  [ intro Heq; destruct pi; inversion Heq; subst; cbn in H
+  | intros PPi Heq HF; destruct pi; inversion Heq; subst; cbn in H;
+      try (exfalso; inversion HF; subst; destruct X0 as [[H'|H']|H']; inversion H'; fail)
+  | intros C Heq HnF ].
 (* first conjunct *)
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
@@ -1118,10 +1081,8 @@ Proof.
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   destruct (wFocl_dec l).
-  + eapply (snd (fst H)) in f; [ | reflexivity ].
-    destruct f as (l1 & lw & lw' & HP & Hi & IH).
-    apply (Permutation_Type_cons_app _ _ A) in HP.
-    symmetry in HP.
+  + eapply (snd (fst H)) in f as (l1 & lw & lw' & HP & Hi & IH); [ | reflexivity ].
+    apply (Permutation_Type_cons_app _ _ A) in HP. symmetry in HP.
     eapply ex_Fr; [ | eassumption ].
     eapply incl_Foc with (la := nil); [ | reflexivity | eassumption | intros ? [] | constructor ].
     eapply ex_Fr; [ apply foc_Fr; eassumption | apply Permutation_Type_middle ].
@@ -1129,12 +1090,12 @@ Proof.
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   apply H in H0.
-  apply bot_Fr; assumption.
+  apply bot_Fr. assumption.
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   apply H in H0.
-  apply parr_Fr; assumption.
-- apply top_Fr; assumption.
+  apply parr_Fr. assumption.
+- apply top_Fr. assumption.
 - assert (X' := X).
   assert (H' := H).
   assert (H0' := H0).
@@ -1149,10 +1110,8 @@ Proof.
   apply X in H; [ | lia ].
   destruct (polarity A) as [Hs | Ha]; pol_simpl.
   + destruct (wFocl_dec l).
-    * eapply (snd (fst H)) in f; [ | reflexivity ].
-      destruct f as (l1 & lw & lw' & HP & Hi & IH).
-      apply (Permutation_Type_cons_app _ _ (wn A)) in HP.
-      symmetry in HP.
+    * eapply (snd (fst H)) in f as (l1 & lw & lw' & HP & Hi & IH); [ | reflexivity ].
+      apply (Permutation_Type_cons_app _ _ (wn A)) in HP. symmetry in HP.
       eapply ex_Fr; [ | eassumption ].
       eapply incl_Foc with (la := nil); [ | reflexivity | eassumption | intros ? [] | constructor ].
       apply ex_Fr with (wn A :: map wn lw' ++ l1); [ apply de_Fr | ].
@@ -1162,8 +1121,8 @@ Proof.
     * apply (snd H _ eq_refl n).
   + apply H in Heq.
     change (wn A :: l) with ((wn A :: nil) ++ l).
-    apply (reversing (A :: nil)); auto.
-    clear - Ha; cbn; intros l Hf pi.
+    apply (reversing (A :: nil)); [ | assumption ].
+    clear - Ha. cbn. intros l Hf pi.
     apply de_Fr; [ pol_simpl | ]; assumption.
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
@@ -1172,7 +1131,7 @@ Proof.
   apply X in H; [ | lia ].
   apply co_gen_Fr, H. reflexivity.
 (* second conjunct *)
-- exists (covar X0 :: nil), nil, nil; repeat split.
+- exists (covar X0 :: nil), nil, nil. repeat split.
   + reflexivity.
   + apply incl_inf_nil_l.
   + apply ax_Fr.
@@ -1180,16 +1139,13 @@ Proof.
   specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   apply (snd (fst H)) in H0 as (l0 & lw & lw' & HP & Hi & IH).
-  + exists l0, lw, lw'; repeat split; try assumption.
+  + exists l0, lw, lw'. repeat split; [ | assumption .. ].
     etransitivity; eassumption.
-  + apply (Permutation_Type_Forall_inf p); assumption.
-- exists nil, nil, nil; repeat split.
+  + apply (Permutation_Type_Forall_inf p). assumption.
+- exists nil, nil, nil. repeat split.
   + reflexivity.
   + apply incl_inf_nil_l.
   + apply one_Fr.
-- exfalso.
-  inversion HF; subst.
-  destruct X0 as [[H'|H']|H']; inversion H'.
 - assert (HF1 := Forall_inf_app_l _ _ HF).
   assert (HF2 := Forall_inf_app_r _ _ HF).
   assert (X':=X).
@@ -1200,213 +1156,164 @@ Proof.
   specialize X' with (S (fpsize pi1 + fpsize pi2)) _ _ pi2.
   apply X' in H'; [ | lia ].
   destruct (polarity A) as [HsA | HaA], (polarity B) as [HsB | HaB]; pol_simpl.
-  + eapply (snd (fst H)) in HF1; [ | reflexivity ].
-    eapply (snd (fst H')) in HF2; [ | reflexivity ].
-    destruct HF1 as (l01 & lw1 & lw1' & HP1 & Hi1 & pi1').
-    destruct HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2').
-    exists (l01 ++ l02), (lw1 ++ lw2), (lw1' ++ lw2'); repeat split.
+  + eapply (snd (fst H)) in HF1 as (l01 & lw1 & lw1' & HP1 & Hi1 & pi1'); [ | reflexivity ].
+    eapply (snd (fst H')) in HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2'); [ | reflexivity ].
+    exists (l01 ++ l02), (lw1 ++ lw2), (lw1' ++ lw2'). repeat split.
     * etransitivity; [ apply (Permutation_Type_app HP1 HP2) | ].
       list_simpl. apply Permutation_Type_app_head.
       rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_comm.
     * apply incl_inf_app_app; assumption.
     * eapply ex_Fr; [ apply tens_Fr | ].
-      -- rewrite (polconts _ HsA), (polfocs  HsA); eassumption.
-      -- rewrite (polconts _ HsB), (polfocs HsB); eassumption.
+      -- rewrite (polconts _ HsA), (polfocs  HsA). eassumption.
+      -- rewrite (polconts _ HsB), (polfocs HsB). eassumption.
       -- apply wFoc_context in pi1'. assumption.
       -- apply wFoc_context in pi2'. assumption.
       -- list_simpl. apply Permutation_Type_app_head.
          rewrite 2 app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_comm.
-  + eapply (snd (fst H)) in HF1; [ | reflexivity ].
-    destruct HF1 as (l01 & lw1 & lw1' & HP1 & Hi1 & pi1').
+  + eapply (snd (fst H)) in HF1 as (l01 & lw1 & lw1' & HP1 & Hi1 & pi1'); [ | reflexivity ].
     assert (pi2' := fst (fst H') eq_refl).
     exists (l01 ++ l2), lw1, lw1'; repeat split.
     * etransitivity; [ apply (Permutation_Type_app_tail _ HP1) | ].
-      rewrite <- app_assoc; reflexivity.
+      rewrite <- app_assoc. reflexivity.
     * assumption.
     * eapply ex_Fr; [ apply tens_Fr | ].
-      -- rewrite (polconts _ HsA), (polfocs HsA); eassumption.
-      -- rewrite (polconta _ HaB), (polfoca HaB); eassumption.
-      -- apply wFoc_context in pi1'; assumption.
+      -- rewrite (polconts _ HsA), (polfocs HsA). eassumption.
+      -- rewrite (polconta _ HaB), (polfoca HaB). eassumption.
+      -- apply wFoc_context in pi1'. assumption.
       -- assumption.
-      -- rewrite <- app_assoc; reflexivity.
+      -- rewrite <- app_assoc. reflexivity.
   + assert (pi1' := fst (fst H) eq_refl).
-    eapply (snd (fst H')) in HF2; [ | reflexivity ].
-    destruct HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2').
-    exists (l1 ++ l02), lw2, lw2'; repeat split.
+    eapply (snd (fst H')) in HF2 as (l02 & lw2 & lw2' & HP2 & Hi2 & pi2'); [ | reflexivity ].
+    exists (l1 ++ l02), lw2, lw2'. repeat split.
     * etransitivity; [ apply (Permutation_Type_app_head _ HP2) | ].
-      rewrite 2 app_assoc.
-      apply Permutation_Type_app_tail, Permutation_Type_app_comm.
+      rewrite 2 app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_comm.
     * assumption.
     * eapply ex_Fr; [ apply tens_Fr | ].
-      -- rewrite (polconta _ HaA), (polfoca HaA); eassumption.
-      -- rewrite (polconts _ HsB), (polfocs HsB); eassumption.
+      -- rewrite (polconta _ HaA), (polfoca HaA). eassumption.
+      -- rewrite (polconts _ HsB), (polfocs HsB). eassumption.
       -- assumption.
-      -- apply wFoc_context in pi2'; assumption.
-      -- rewrite 2 app_assoc.
-         apply Permutation_Type_app_tail, Permutation_Type_app_comm.
+      -- apply wFoc_context in pi2'. assumption.
+      -- rewrite 2 app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_comm.
   + assert (pi1' := fst (fst H) eq_refl).
     assert (pi2' := fst (fst H') eq_refl).
-    exists (l1 ++ l2), nil, nil; repeat split.
+    exists (l1 ++ l2), nil, nil. repeat split.
     * reflexivity.
     * apply incl_inf_nil_l.
-    * cbn; apply tens_Fr; try assumption.
-      -- rewrite (polconta _ HaA), (polfoca HaA); assumption.
-      -- rewrite (polconta _ HaB), (polfoca HaB); assumption.
-- exfalso.
-  inversion HF; subst.
-  destruct X0 as [[H'|H']|H']; inversion H'.
-- exfalso.
-  inversion HF; subst.
-  destruct X0 as [[H'|H']|H']; inversion H'.
+    * cbn. apply tens_Fr; [ | | assumption .. ].
+      -- rewrite (polconta _ HaA), (polfoca HaA). assumption.
+      -- rewrite (polconta _ HaB), (polfoca HaB). assumption.
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   destruct (polarity A) as [HsA | HaA]; pol_simpl.
-  + eapply (snd (fst H)) in HF; [ | reflexivity ].
-    destruct HF as (l0 & lw & lw' & HP & Hi & pi').
-    exists l0, lw, lw'; repeat split; try assumption.
+  + eapply (snd (fst H)) in HF as (l0 & lw & lw' & HP & Hi & pi'); [ | reflexivity ].
+    exists l0, lw, lw'. repeat split; [ assumption .. | ].
     apply plus_Fr1.
     * pol_simpl. assumption.
     * apply wFoc_context in pi'. assumption.
   + assert (pi' := fst (fst H) eq_refl).
-    exists l, nil, nil; repeat split.
+    exists l, nil, nil. repeat split.
     * reflexivity.
     * apply incl_inf_nil_l.
     * apply plus_Fr1; [ pol_simpl | ]; assumption.
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   destruct (polarity A) as [HsA | HaA]; pol_simpl.
-  + eapply (snd (fst H)) in HF; [ | reflexivity ].
-    destruct HF as (l0 & lw & lw' & HP & Hi & pi').
-    exists l0, lw, lw'; repeat split; try assumption.
+  + eapply (snd (fst H)) in HF as (l0 & lw & lw' & HP & Hi & pi'); [ | reflexivity ].
+    exists l0, lw, lw'. repeat split; [ assumption .. | ].
     apply plus_Fr2.
     * pol_simpl. assumption.
     * apply wFoc_context in pi'. assumption.
   + assert (pi' := fst (fst H) eq_refl).
-    exists l, nil, nil; repeat split.
+    exists l, nil, nil. repeat split.
     * reflexivity.
     * apply incl_inf_nil_l.
     * apply plus_Fr2; [ pol_simpl | ]; assumption.
-- exfalso.
-  inversion HF; subst.
-  destruct X0 as [[H'|H']|H']; inversion H'.
 - specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
   assert (pi' := fst (fst H) eq_refl).
-  exists (map wn l), nil, nil; repeat split.
+  exists (map wn l), nil, nil. repeat split.
   * reflexivity.
   * apply incl_inf_nil_l.
-  * apply oc_Fr; assumption.
-- inversion HF; subst.
+  * apply oc_Fr. assumption.
+- inversion HF. subst.
   specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
-  eapply (snd (fst H)) in X1; [ | reflexivity ].
-  destruct X1 as (l0 & lw & lw' & HP & Hi & pi').
-  exists l0, (A :: lw), lw'; repeat split.
-  + list_simpl; apply Permutation_Type_cons; [ reflexivity | assumption ].
-  + apply incl_inf_tl; assumption.
+  eapply (snd (fst H)) in X1 as (l0 & lw & lw' & HP & Hi & pi'); [ | reflexivity ].
+  exists l0, (A :: lw), lw'. repeat split.
+  + list_simpl. apply Permutation_Type_cons; [ reflexivity | assumption ].
+  + apply incl_inf_tl. assumption.
   + assumption.
-- inversion HF; subst.
+- inversion HF. subst.
   assert (Forall_inf wFoc (wn A :: wn A :: l)) as HF'
     by (constructor; assumption).
   specialize X with (S (fpsize pi)) _ _ pi.
   apply X in H; [ | lia ].
-  eapply (snd (fst H)) in HF'; [ | reflexivity ].
-  destruct HF' as (l0 & lw & lw' & HP & Hi & pi').
-  symmetry in HP.
-  assert (HP' := HP).
-  apply Permutation_Type_vs_cons_inv in HP' as ((l1' & l2') & Heq).
+  eapply (snd (fst H)) in HF' as (l0 & lw & lw' & HP & Hi & pi'); [ | reflexivity ].
+  symmetry in HP. assert (HP' := HP).
+  apply Permutation_Type_vs_cons_inv in HP' as [(l1', l2') Heq].
   dichot_elt_app_inf_exec Heq; subst.
-  + symmetry in Heq0; decomp_map_inf Heq0; subst.
-    inversion Heq0; subst.
+  + symmetry in Heq0. decomp_map_inf Heq0. inversion Heq0. subst.
     assert (HP' := HP).
-    list_simpl in HP'.
-    symmetry in HP'.
-    apply Permutation_Type_cons_app_inv in HP'.
-    symmetry in HP'.
-    apply Permutation_Type_vs_cons_inv in HP' as ((l1' & l2') & Heq).
-    rewrite app_assoc in Heq.
-    dichot_elt_app_inf_exec Heq; subst.
+    list_simpl in HP'. symmetry in HP'. apply Permutation_Type_cons_app_inv in HP'. symmetry in HP'.
+    apply Permutation_Type_vs_cons_inv in HP' as [(l1', l2') Heq].
+    rewrite app_assoc in Heq. dichot_elt_app_inf_exec Heq; subst.
     * rewrite <- map_app in Heq1.
-      symmetry in Heq1; decomp_map_inf Heq1; subst.
-      inversion Heq1; subst.
-      exists l0, (l3 ++ l5), lw'; repeat split.
-      -- symmetry in HP.
-         list_simpl in HP.
-         apply Permutation_Type_cons_app_inv in HP.
-         list_simpl; assumption.
+      symmetry in Heq1. decomp_map_inf Heq1. inversion Heq1. subst.
+      exists l0, (l3 ++ l5), lw'. repeat split.
+      -- symmetry in HP. list_simpl in HP. apply Permutation_Type_cons_app_inv in HP.
+         list_simpl. assumption.
       -- revert Hi Heq4; clear; induction lw'; intros Hi Heq.
          ++ apply incl_inf_nil_l.
          ++ destruct (incl_inf_cons_inv Hi) as [Hin Hi'].
             assert (HP := Permutation_Type_middle l3 l5 A).
-            symmetry in HP; apply (Permutation_Type_in_inf _ HP) in Hin.
+            symmetry in HP. apply (Permutation_Type_in_inf _ HP) in Hin.
             inversion Hin; subst.
             ** apply incl_inf_cons.
-               --- rewrite <- Heq.
-                   apply in_inf_elt.
+               --- rewrite <- Heq. apply in_inf_elt.
                --- apply IHlw'; assumption.
             ** apply incl_inf_cons, IHlw'; assumption.
       -- assumption.
-    * exists (l2 ++ l2'), (l3 ++ A :: l5), (A :: lw'); repeat split.
-      -- symmetry in HP.
-         list_simpl in HP.
-         apply Permutation_Type_cons_app_inv in HP.
-         list_simpl.
-         etransitivity; [ apply HP | ].
-         rewrite ? app_assoc.
-         apply Permutation_Type_elt.
-         list_simpl; reflexivity.
+    * exists (l2 ++ l2'), (l3 ++ A :: l5), (A :: lw'). repeat split.
+      -- symmetry in HP. list_simpl in HP. apply Permutation_Type_cons_app_inv in HP.
+         list_simpl. etransitivity; [ apply HP | ].
+         rewrite ? app_assoc. apply Permutation_Type_elt.
+         list_simpl. reflexivity.
       -- apply incl_inf_cons; [ apply in_inf_elt | assumption ].
       -- eapply ex_Fr; [ eassumption | ].
-         symmetry.
-         rewrite ? app_assoc.
-         apply Permutation_Type_middle.
+         symmetry. rewrite ? app_assoc. apply Permutation_Type_middle.
   + assert (HP' := HP).
-    list_simpl in HP'.
-    symmetry in HP'.
-    rewrite app_assoc in HP'.
-    apply Permutation_Type_cons_app_inv in HP'.
-    symmetry in HP'.
-    apply Permutation_Type_vs_cons_inv in HP' as ((l1'' & l2'') & Heq).
-    rewrite <- app_assoc in Heq.
-    dichot_elt_app_inf_exec Heq; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; subst.
-      inversion Heq0; subst.
-      exists (l2 ++ l2'), (l3 ++ A :: l5), (A :: lw'); repeat split.
-      -- symmetry in HP.
-         list_simpl in HP.
-         apply Permutation_Type_cons_app_inv in HP.
-         list_simpl.
-         etransitivity; [ apply HP | ].
-         rewrite ? app_assoc.
-         apply Permutation_Type_elt.
-         list_simpl; reflexivity.
+    list_simpl in HP'. symmetry in HP'. rewrite app_assoc in HP'. apply Permutation_Type_cons_app_inv in HP'.
+    symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l1'', l2'') Heq].
+    rewrite <- app_assoc in Heq. dichot_elt_app_inf_exec Heq; subst.
+    * symmetry in Heq0. decomp_map_inf Heq0. inversion Heq0. subst.
+      exists (l2 ++ l2'), (l3 ++ A :: l5), (A :: lw'). repeat split.
+      -- symmetry in HP. list_simpl in HP. apply Permutation_Type_cons_app_inv in HP.
+         list_simpl. etransitivity; [ apply HP | ].
+         rewrite ? app_assoc. apply Permutation_Type_elt.
+         list_simpl. reflexivity.
       -- apply incl_inf_cons; [ apply in_inf_elt | assumption ].
       -- eapply ex_Fr; [ eassumption | ].
-         symmetry.
-         rewrite ? app_assoc.
-         apply Permutation_Type_middle.
-    * exists (l1 ++ l2''), (A :: lw), (A :: A :: lw'); repeat split.
+         symmetry. rewrite ? app_assoc. apply Permutation_Type_middle.
+    * exists (l1 ++ l2''), (A :: lw), (A :: A :: lw'). repeat split.
       -- symmetry in HP. rewrite app_assoc in HP. apply Permutation_Type_cons_app_inv in HP.
          list_simpl. etransitivity; [ apply HP | ].
          list_simpl. rewrite <- Heq1. symmetry. rewrite ? app_assoc.
-         apply Permutation_Type_cons_app, reflexivity.
+         apply Permutation_Type_cons_app. reflexivity.
       -- apply incl_inf_cons, incl_inf_cons.
-         ++ constructor; reflexivity.
-         ++ constructor; reflexivity.
-         ++ apply incl_inf_tl; assumption.
+         ++ constructor. reflexivity.
+         ++ constructor. reflexivity.
+         ++ apply incl_inf_tl. assumption.
       -- eapply ex_Fr; [ eassumption | ].
          symmetry. rewrite ? app_assoc. apply Permutation_Type_cons_app.
          list_simpl. rewrite <- Heq1, ? app_assoc. apply Permutation_Type_middle.
 (* third conjunct *)
-- apply not_wFocl in HnF as [[[A l1] l2] -> [[[-> | ([B' C'] & Hp)] | Ht ] | ([B' C'] & Hw)]]; subst.
+- apply not_wFocl in HnF as [[[A l1] l2] -> [[[-> | [[B' C'] Hp]] | Ht ] | [[B' C'] Hw]]]; subst.
   + destruct (bot_rev_f pi _ _ eq_refl) as [pi' Hs].
     specialize X with (S (fpsize pi')) _ _ pi'.
     assert (S (fpsize pi') < s) as Hs' by lia.
     apply X in Hs'; [ | lia ].
     destruct (wFocl_dec (l1 ++ l2)) as [HF | HnF].
-    * eapply (snd (fst Hs')) in HF; [ | reflexivity ].
-      destruct HF as (l0 & lw & lw' & HP & Hi & pi'').
-      split.
+    * eapply (snd (fst Hs')) in HF as (l0 & lw & lw' & HP & Hi & pi''); [ | reflexivity ]. split.
       -- apply foc_Fr in pi''.
          eapply (incl_Foc (C :: l0)) with (la := nil) in pi''; [ | | eassumption | intros ? [] | constructor ].
          ++ eapply ex_Fr; [ apply bot_Fr; eassumption | ].
@@ -1675,54 +1582,15 @@ Qed.
 (** ** Unfocusing *)
 
 Lemma llFoc_to_ll l Pi : llFoc l Pi ->
-  (Pi = None -> ll_ll l) * (forall C, Pi = Some C -> ll_ll (C :: l)).
+  ll_ll (match Pi with Some C => C :: nil | None => nil end ++ l).
 Proof.
-intros pi. induction pi;
-  (split; [ intros HN; inversion HN | intros D HD; inversion HD ]); subst;
-  try (destruct IHpi as [IHpiN IHpiS]);
-  try (destruct IHpi1 as [IHpi1N IHpi1S]);
-  try (destruct IHpi2 as [IHpi2N IHpi2S]);
-  try (assert (pi0' := IHpiS _ eq_refl));
-  try (assert (pi0' := IHpiN eq_refl));
-  try (assert (pi1' := IHpi1N eq_refl));
-  try (assert (pi2' := IHpi2N eq_refl));
-  try (now constructor);
-  try (now eapply ex_r; try eassumption).
-- eapply ex_r; [ apply ax_r | apply Permutation_Type_swap ].
+intro pi. induction pi; rewrite ? unfoc_sequent in *;
+  try (now try destruct Pi; (constructor + (eapply ex_r; [ | apply Permutation_Type_swap ]; constructor))).
 - eapply ex_r; [ eassumption | ].
-  apply Permutation_Type_cons; [ reflexivity | assumption ].
-- destruct (polarity A) as [HsA | HaA], (polarity B) as [HsB | HaB]; pol_simpl.
-  + assert (pi1' := IHpi1S _ eq_refl).
-    assert (pi2' := IHpi2S _ eq_refl).
-    eapply ex_r; [ apply tens_r; [ apply pi1' | apply pi2' ] | ].
-    apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-  + assert (pi1' := IHpi1S _ eq_refl).
-    assert (pi2' := IHpi2N eq_refl).
-    eapply ex_r; [ apply tens_r; [ apply pi1' | apply pi2' ] | ].
-    apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-  + assert (pi1' := IHpi1N eq_refl).
-    assert (pi2' := IHpi2S _ eq_refl).
-    eapply ex_r; [ apply tens_r; [ apply pi1' | apply pi2' ] | ].
-    apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-  + assert (pi1' := IHpi1N eq_refl).
-    assert (pi2' := IHpi2N eq_refl).
-    eapply ex_r; [ apply tens_r; [ apply pi1' | apply pi2' ] | ].
-    apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
-- destruct (polarity A) as [HsA | HaA]; pol_simpl.
-  + assert (pi' := IHpiS _ eq_refl).
-    apply plus_r1, pi'.
-  + assert (pi' := IHpiN eq_refl).
-    apply plus_r1, pi'.
-- destruct (polarity A) as [HsA | HaA]; pol_simpl.
-  + assert (pi' := IHpiS _ eq_refl).
-    apply plus_r2, pi'.
-  + assert (pi' := IHpiN eq_refl).
-    apply plus_r2, pi'.
-- destruct (polarity A) as [HsA | HaA]; pol_simpl.
-  + assert (pi' := IHpiS _ eq_refl).
-    apply de_r, pi'.
-  + assert (pi' := IHpiN eq_refl).
-    apply de_r, pi'.
+  apply Permutation_Type_app; [ reflexivity | assumption ].
+- assumption.
+- eapply ex_r; [ apply tens_r; [ apply IHpi1 | apply IHpi2 ] | ].
+  apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
 Qed.
 
 
@@ -1803,15 +1671,14 @@ Qed.
 
 Lemma focusing l : ll_ll l -> llFoc l None.
 Proof.
-intros pi; induction pi; (try discriminate f); (try now constructor).
+intro pi. induction pi; (try discriminate f); (try now constructor).
 - apply ex_Fr with (var X :: covar X :: nil); [ | apply Permutation_Type_swap ].
   apply foc_Fr, ax_Fr.
 - now apply ex_Fr with l1.
 - apply ex_Fr with (l1 ++ List.map wn lw ++ l2); auto.
   now apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map.
 - apply foc_Fr, one_Fr.
-- clear pi1 pi2.
-  destruct (polarity A).
+- clear pi1 pi2. destruct (polarity A).
   + apply ex_Fr with (tens A B :: l1 ++ l2);
       [ | apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity ].
     rewrite app_comm_cons; apply reversing with (B :: nil); auto.
@@ -1861,8 +1728,7 @@ intros pi; induction pi; (try discriminate f); (try now constructor).
       clear l2 IHpi2; intros l2 HF2 pi2; cbn in pi2; cbn.
       apply foc_Fr, tens_Fr; pol_simpl; assumption.
 - apply top_gen_Fr.
-- clear pi.
-  destruct (polarity A).
+- clear pi. destruct (polarity A).
   + rewrite <- (app_nil_l _), <- (app_nil_l l).
     eapply unary_focusing; [ eassumption | | | assumption ].
     * constructor; try left; try left; constructor.
@@ -1873,8 +1739,7 @@ intros pi; induction pi; (try discriminate f); (try now constructor).
   + change (aplus A B :: l) with ((aplus A B :: nil) ++ l).
     apply reversing with (A :: nil); auto.
     intros; apply foc_Fr, plus_Fr1; pol_simpl; assumption.
-- clear pi.
-  destruct (polarity A).
+- clear pi. destruct (polarity A).
   + rewrite <- (app_nil_l _), <- (app_nil_l l).
     eapply unary_focusing; [ eassumption | | | assumption ].
     * constructor; try left; try left; constructor.
@@ -1886,8 +1751,7 @@ intros pi; induction pi; (try discriminate f); (try now constructor).
     apply reversing with (A :: nil); auto.
     intros; apply foc_Fr, plus_Fr2; pol_simpl; assumption.
 - apply foc_Fr, oc_Fr. assumption.
-- clear pi.
-  destruct (polarity A).
+- clear pi. destruct (polarity A).
   + rewrite <- (app_nil_l _), <- (app_nil_l l).
     eapply unary_focusing; [ eassumption | | | assumption ].
     * now repeat constructor.

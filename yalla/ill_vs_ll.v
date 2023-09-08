@@ -618,7 +618,7 @@ induction pi in Heql, HeqC |- *; subst;
     destruct lw'; inversion Heq.
     symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi; reflexivity.
 - destruct l1; inversion Heql; inversion HeqC; try rewrite app_nil_l in Heql; subst.
-  + exfalso. apply (no_at_prove_ill pi1).
+  + contradiction (no_at_prove_ill pi1).
   + apply app_eq_nil in H1 as [-> ->].
     apply (pre_pre_counter_ex_ill pi1).
 - destruct l1; inversion Heql; subst.
@@ -630,7 +630,7 @@ induction pi in Heql, HeqC |- *; subst;
 Qed.
 
 Lemma counter_ex_ill : ill_ll nil cons_counter_ex -> x = y.
-Proof. intros pi. apply ilpam_rev_noax in pi; [ | intros [] ]. apply (pre_counter_ex_ill pi). Qed.
+Proof. intro pi. apply ilpam_rev_noax in pi; [ | intros [] ]. apply (pre_counter_ex_ill pi). Qed.
 
 End Non_Conservativity_Atoms.
 
@@ -2165,11 +2165,11 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
          list_simpl in HP2.
          rewrite P_perm. cbn. symmetry. assumption.
       -- intros Hnil lw.
-         destruct lo; [ exfalso; apply Hnil; reflexivity | ].
-         symmetry in HP1. apply Permutation_Type_vs_cons_inv in HP1 as [(ll & lr) Heq3].
+         destruct lo; [ contradiction Hnil; reflexivity | ].
+         symmetry in HP1. apply Permutation_Type_vs_cons_inv in HP1 as [(ll, lr) Heq3].
          dichot_elt_app_inf_exec Heq3; subst.
          ++ assert (ll ++ i :: l <> nil) as Hnil2
-              by (clear; intros H; destruct ll; inversion H).
+              by (clear; intro H; destruct ll; inversion H).
             assert (IH := IH4 Hnil2 lw).
             eapply ex_ir; [apply tens_irr; eassumption | ].
             list_simpl in HP2.
@@ -3361,20 +3361,16 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
       cbn in H3; cbn in H5; subst.
     * exfalso.
       apply Forall_inf_app_r in Hocl.
-      inversion Hocl as [ | ? ? Hocl'].
-      inversion Hocl'.
+      inversion Hocl as [ | ? ? Hocl']. inversion Hocl'.
     * exfalso.
       apply Forall_inf_app_r in Hocl.
-      inversion Hocl as [ | ? ? Hocl'].
-      inversion Hocl'.
+      inversion Hocl as [ | ? ? Hocl']. inversion Hocl'.
     * exfalso.
       apply Forall_inf_app_r in Hocl.
-      inversion Hocl as [ | ? ? Hocl'].
-      inversion Hocl'.
+      inversion Hocl as [ | ? ? Hocl']. inversion Hocl'.
     * exfalso.
       apply Forall_inf_app_r in Hocl.
-      inversion Hocl as [ | ? ? Hocl'].
-      inversion Hocl'.
+      inversion Hocl as [ | ? ? Hocl']. inversion Hocl'.
     * apply (f_equal (@rev _)) in H6. list_simpl in H6. subst.
       apply (PEPermutation_Type_cons _ (eq_refl (dual (ill2ll x0_1)))) in HP.
       apply (PEPermutation_Type_cons _ (eq_refl (dual (ill2ll x0_2)))) in HP.
@@ -3395,7 +3391,7 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
          inversion Hr as [ | ? ? Hr' ].
          inversion Hr'.
          constructor; [ | constructor ]; assumption.
-- symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
+- symmetry in HP. apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].
   destruct l'; inversion Heq; [ destruct C; inversion H0 | ]; subst.
   + split; intros; apply top_irr.
   + symmetry in H1. dichot_elt_app_inf_exec H1; subst;
@@ -3403,8 +3399,7 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
       | list_simpl in H2; symmetry in H2; decomp_map_inf H2; symmetry in H3; decomp_map_inf H3;
                           destruct x; inversion H2; destruct x0; inversion H3 ]; subst.
     * exfalso.
-      apply Forall_inf_app_r in Hocl; inversion Hocl as [ | ? ?  Hocl' ].
-      inversion Hocl'.
+      apply Forall_inf_app_r in Hocl. inversion Hocl as [ | ? ?  Hocl' ]. inversion Hocl'.
     * apply (f_equal (@rev _)) in H6. list_simpl in H6. subst.
       split; intros; list_simpl; apply zero_ilr.
 - symmetry in HP; apply PCPermutation_Type_vs_cons_inv in HP as [(l', l'') HP Heq].

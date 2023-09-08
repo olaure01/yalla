@@ -418,7 +418,7 @@ induction pi in l', L, Heq |- *;
 - assert (ill P (l' ++ flat_map (cons (ioc A)) L) (snd (projT2 (ipgax P) a))) as pi
     by (rewrite <- Heq; apply gax_ir).
   assert (L <> nil -> ipcut P (ioc A) = true) as Hcut.
-  { intros HL. destruct L as [|l L]; [ exfalso; apply HL; reflexivity | ].
+  { intro HL. destruct L as [|l L]; [ contradiction HL; reflexivity | ].
     specialize (P_gax_cut_l a (ioc A)). rewrite Heq in P_gax_cut_l.
     destruct (ipcut P (ioc A)); [ reflexivity | exfalso ].
     specialize (P_gax_cut_l _ _ eq_refl eq_refl) as [Hat _]. inversion Hat. }

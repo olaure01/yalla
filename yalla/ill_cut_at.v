@@ -32,10 +32,10 @@ induction pi; inversion HeqX; subst;
   list_simpl. rewrite (app_assoc l0), (app_assoc _ l3), <- (app_assoc l0). apply IHpi; assumption.
 - list_simpl. rewrite app_assoc. apply lpam_ilr; [ assumption | ].
   list_simpl. rewrite ? app_comm_cons, (app_assoc l3). apply IHpi2; assumption.
-- exfalso. apply (P_gax_noN_l b). rewrite Hb. apply in_inf_elt.
+- contradiction (P_gax_noN_l b). rewrite Hb. apply in_inf_elt.
 - list_simpl. rewrite app_assoc. apply lmap_ilr; [ assumption | ].
   list_simpl. rewrite app_comm_cons, (app_assoc l3). apply IHpi2; assumption.
-- exfalso. apply (P_gax_noN_l b). rewrite Hb. apply in_inf_elt.
+- contradiction (P_gax_noN_l b). rewrite Hb. apply in_inf_elt.
 - list_simpl. rewrite app_assoc.
   apply plus_ilr; list_simpl; rewrite app_comm_cons, (app_assoc l0); [ apply IHpi1 | apply IHpi2 ]; assumption.
 - list_simpl. rewrite app_assoc. apply cut_ir with A; [ assumption .. | ].

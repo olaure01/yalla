@@ -54,7 +54,7 @@ Qed.
 (** Reversibility of [bot] in [ll_bbb] *)
 Lemma bot_rev_bbb l : ll_bbb l -> forall l1 l2, l = l1 ++ bot :: l2 -> ll_bbb (l1 ++ l2).
 Proof.
-intros pi. induction pi; intros l1' l2' Heq; subst;
+intro pi. induction pi; intros l1' l2' Heq; subst;
   try (destruct l1'; inversion Heq; subst;
        list_simpl; constructor;
        rewrite ? app_comm_cons; apply IHpi; reflexivity).
@@ -79,15 +79,13 @@ intros pi. induction pi; intros l1' l2' Heq; subst;
     rewrite app_comm_cons. apply IHpi1. reflexivity.
 - destruct l1'; inversion Heq. subst.
   list_simpl. apply with_bbb_r; rewrite app_comm_cons; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
-- exfalso.
-  destruct l1'; inversion Heq.
-  decomp_map H1. discriminate.
+- exfalso. destruct l1'; inversion Heq. decomp_map H1. discriminate.
 Qed.
 
 (** [ll_mix2] is contained in [ll_bbb] *)
 Lemma mix2_to_bbb l : ll_mix2 l -> ll_bbb l.
 Proof.
-intros pi. induction pi using ll_nested_ind; try now constructor.
+intro pi. induction pi using ll_nested_ind; try now constructor.
 - apply (ex_bbb_r l1); assumption.
 - apply (Permutation_Type_map wn) in p.
   eapply ex_bbb_r; [ eassumption | ].
@@ -639,11 +637,10 @@ intros pi. induction pi; intro HP;
     dichot_elt_app_inf_exec HP; subst.
     * apply eq_sym in HP1.
       apply app_eq_unit_inf in HP1 as [[-> ->] | [-> ->]].
-      -- clear - pi. exfalso.
+      -- exfalso. clear - pi.
          remember (oc (tens (parr one one) bot) :: nil) as l.
          induction pi in Heql |- *; inversion Heql; subst.
-         ++ symmetry in p.
-            apply Permutation_Type_length_1_inv in p.
+         ++ symmetry in p. apply Permutation_Type_length_1_inv in p.
             apply IHpi. assumption.
          ++ apply app_eq_unit in Heql as [[-> ->] | [-> ->]].
             ** apply IHpi. reflexivity.
@@ -667,7 +664,7 @@ intros pi. induction pi; intro HP;
                    +++ apply IHpi2. reflexivity.
                    +++ apply mix0_bbb0_false. assumption.
                --- apply mix0_bbb0_false. assumption.
-      -- exfalso. apply mix0_bbb0_false. assumption.
+      -- contradiction mix0_bbb0_false.
     * symmetry in HP0. apply app_eq_nil in HP0 as [-> ->].
       apply IHpi. reflexivity.
   + symmetry in HP.
@@ -720,9 +717,8 @@ intros pi. induction pi; intro HP;
             ** destruct a.
          ++ discriminate f.
          ++ destruct a.
-      -- exfalso. apply mix0_bbb0_false. assumption.
-    * symmetry in HP0.
-      apply app_eq_nil in HP0 as [-> ->].
+      -- contradiction mix0_bbb0_false.
+    * symmetry in HP0. apply app_eq_nil in HP0 as [-> ->].
       apply IHpi, Permutation_Type_swap.
 - symmetry in HP. apply Permutation_Type_length_2_inv in HP as [HP | HP]; inversion HP.
   destruct l; discriminate H1.

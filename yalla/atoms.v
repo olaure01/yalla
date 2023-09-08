@@ -59,7 +59,7 @@ destruct (section_coimage_option _ Hr y) as [[x|] Hx].
   + intros ->. left. symmetry.
     apply (section_injective Hr), Hx. reflexivity.
   + intros [<-|[]]. apply Hx. reflexivity.
-- exists nil. intros x. split.
+- exists nil. intro x. split.
   + intros ->. discriminate (proj2 (Hx x) eq_refl).
   + intros [].
 Qed.

@@ -53,7 +53,7 @@ end.
 
 Lemma mell2ll_inj : injective mell2ll.
 Proof.
-intro A. induction A; intros B Heq; destruct B; inversion Heq;
+intro A. induction A; intros [] [=];
   try apply IHA in H0; try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 
@@ -66,19 +66,18 @@ Proof. induction l as [ | a l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma mell2ll_map_wn_inv l1 l2 : map formulas.wn l1 = map mell2ll l2 ->
   exists l2', l2 = map wn l2' /\ l1 = map mell2ll l2'.
 Proof.
-induction l1 in l2 |-*; intros Heq; destruct l2; inversion Heq.
-- exists nil; split; reflexivity.
+induction l1 in l2 |-*; destruct l2 as [|f l2]; intros [=].
+- exists nil. split; reflexivity.
 - apply IHl1 in H1.
-  destruct f; inversion H0; subst.
-  destruct H1 as (l2' & Heq1 & H1); subst.
-  exists (f :: l2'); split; reflexivity.
+  destruct f; destr_eq H0. subst.
+  destruct H1 as [l2' [-> ->]].
+  exists (f :: l2'). split; reflexivity.
 Qed.
 
 
 (** *** 2bis. sequents *)
 
-Instance fmsetoid_formula : FinMultisetoid (list _) formula :=
-  FMoidConstr_list formula.
+Instance fmsetoid_formula : FinMultisetoid (list _) formula := FMoidConstr_list formula.
 
 
 (** ** 3. define proofs *)
@@ -96,11 +95,7 @@ Inductive mell : list formula -> Prop :=
 | co_r A l : mell (add (wn A) (add (wn A) l)) -> mell (add (wn A) l).
 
 Instance mell_meq : Proper (meq ==> iff) mell.
-Proof.
-intros m1 m2 Heq. split; intros Hmell.
-- apply ex_r in Heq; assumption.
-- symmetry in Heq; apply ex_r in Heq; assumption.
-Qed.
+Proof. intros m1 m2 Heq. split; intro; [ | symmetry in Heq ]; apply ex_r in Heq; assumption. Qed.
 
 
 (** ** 4. characterize corresponding [ll] fragment *)
@@ -131,7 +126,7 @@ Definition pfrag_mell :=  @ll_def.mk_pfrag atom  ll_def.pcut_none ll_def.NoAxiom
 
 Lemma mell2mellfrag m : mell m -> inhabited (ll_def.ll pfrag_mell (map mell2ll (elts m))).
 Proof.
-intros pi. induction pi;
+intro pi. induction pi;
   try destruct IHpi as [IHpi]; try destruct IHpi1 as [IHpi1]; try destruct IHpi2 as [IHpi2];
   constructor; cbn; rewrite ? map_app;
   try now (constructor; eassumption).
@@ -152,22 +147,19 @@ intros pi. induction pi;
     unfold sum, list2fm.
     cbn; rewrite fold_id.
     apply Permutation_Type_app_comm.
-- rewrite fold_id.
-  rewrite mell2ll_map_wn.
-  unfold elts, add, fmmap, list2fm in IHpi; cbn in IHpi.
+- rewrite fold_id, mell2ll_map_wn.
+  unfold elts, add, fmmap, list2fm in IHpi. cbn in IHpi.
   rewrite fold_id, mell2ll_map_wn in IHpi.
-  apply ll_def.oc_r; assumption.
+  apply ll_def.oc_r. assumption.
 Qed.
 
 Lemma mellfrag2mell m : ll_def.ll pfrag_mell (map mell2ll (elts m)) -> mell m.
 Proof.
 intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
-  try (now (destruct m; inversion Heql; destruct f; inversion H0)); try discriminate f.
-- destruct m; inversion Heql.
-  destruct m; inversion H1.
-  destruct f; inversion H0; subst.
-  destruct f0; inversion H2; subst.
-  destruct m; inversion H3.
+  try (destruct m; destr_eq Heql; destruct f; destr_eq Heql; subst; constructor; apply IHpi; reflexivity);
+  try discriminate f.
+- destruct m; destr_eq Heql. destruct m; destr_eq H. symmetry in H0. rewrite (map_eq_nil _ _ H0).
+  destruct f; destr_eq Heql. destruct f0; destr_eq H. subst.
   apply ax_r.
 - subst. cbn in p. apply Permutation_Type_map_inv in p as [l' -> HP].
   eapply ex_r.
@@ -180,43 +172,25 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ? map_app; reflexivity | ].
   symmetry in HP.
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map. assumption.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  destruct m; inversion H1.
+- destruct m; destr_eq Heql. symmetry in H. rewrite (map_eq_nil _ _ H).
+  destruct f; destr_eq Heql.
   apply one_r.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  apply bot_r, IHpi; reflexivity.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  assert (Heq := H1).
-  symmetry in H1; decomp_map H1; subst.
+- destruct m; destr_eq Heql.
+  destruct f; destr_eq Heql. subst.
+  assert (Heq := H).
+  symmetry in H. decomp_map H. subst.
   apply (@ex_r (add (tens f1 f2) (sum l3 l0))).
   + apply tens_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
   + unfold sum, list2fm, add; cbn.
     apply Permutation_Type_cons; [ reflexivity | ].
     rewrite fold_id. apply Permutation_Type_app_comm.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  apply parr_r, IHpi; reflexivity.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  apply mell2ll_map_wn_inv in H1.
-  destruct H1 as (m' & -> & ->).
+- destruct m; destr_eq Heql.
+  destruct f; destr_eq Heql. subst.
+  apply mell2ll_map_wn_inv in H as [m' [-> ->]].
   replace (oc f :: map wn m')
-     with (add (oc f) (fmmap wn m')).
-  + apply oc_r, IHpi.
-    unfold add, fmmap, list2fm. cbn. rewrite fold_id, mell2ll_map_wn. reflexivity.
-  + unfold fmmap, list2fm, add. cbn. rewrite fold_id. reflexivity.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  apply de_r, IHpi. reflexivity.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  apply wk_r, IHpi. reflexivity.
-- destruct m; inversion Heql.
-  destruct f; inversion H0; subst.
-  apply co_r, IHpi. reflexivity.
+     with (add (oc f) (fmmap wn m')) by (cbn; rewrite fold_id; reflexivity).
+  apply oc_r, IHpi.
+  cbn. rewrite fold_id, mell2ll_map_wn. reflexivity.
 - destruct a.
 Qed.
 
@@ -237,18 +211,11 @@ Qed.
 
 Lemma cut_r A m1 m2 : mell (add A m1) -> mell (add (dual A) m2) -> mell (sum m1 m2).
 Proof.
-intros pi1%mell2mellfrag pi2%mell2mellfrag.
-destruct pi1 as [pi1]; destruct pi2 as [pi2]; cbn in pi1, pi2.
-apply mellfrag2mell.
+intros [pi1]%mell2mellfrag [pi2]%mell2mellfrag. apply mellfrag2mell.
 eapply ll_def.ex_r; [ | apply Permutation_Type_map; symmetry; apply elts_sum ].
-rewrite map_app.
-eapply ll_cut.cut_r_axfree; [ intros [] | | eassumption ].
-assert (Permutation_Type (map mell2ll (elts (add (dual A) m2)))
-                         (map mell2ll (dual A :: elts m2)))
-  as Helt2 by apply Permutation_Type_map, elts_add.
-cbn in Helt2; rewrite <- mell2ll_dual in Helt2.
-rewrite <- mell2ll_dual in pi2.
-eapply ll_def.ex_r; [ | apply Helt2 ]. assumption.
+cbn in pi2. rewrite <- mell2ll_dual in pi2. rewrite map_app.
+refine (ll_cut.cut_r_axfree _ pi2 pi1).
+intros [].
 Qed.
 
 End Atoms.

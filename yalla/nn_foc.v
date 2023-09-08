@@ -90,7 +90,7 @@ Proof. induction l as [ | a l IHl ]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma ntrans_map_toc_inv l1 l2 : map toc l1 = map ntrans l2 ->
   { l2' | l2 = map wn l2' & l1 = map tneg (map ptrans l2') }.
 Proof.
-induction l1 in l2 |- *; intros Heq; destruct l2; inversion Heq.
+induction l1 in l2 |- *; intro Heq; destruct l2; inversion Heq.
 - exists nil; reflexivity.
 - apply IHl1 in H1.
   destruct f; inversion H0.
@@ -101,8 +101,7 @@ Qed.
 Lemma pntrans_to_trans (A : formula) : ill_ll (tl2ill (ntrans A) :: nil) (trans N A) ->
   ill_ll (negR N (trans N A) :: tl2ill (tneg (ptrans A)) :: nil) N.
 Proof.
-intros pi.
-destruct (polarity A).
+intro pi. destruct (polarity A).
 - apply negR_ilr_head; [ reflexivity | ].
   rewrite <- (proj2 (pntrans_neg _)); assumption.
 - rewrite (proj1 (pntrans_neg _)); [ | assumption ].
@@ -183,13 +182,11 @@ Definition tl_ll := tl tpfrag_tl.
 
 Lemma ll_to_tl (l : list formula) : ll_ll l -> tl_ll (map ntrans l) None.
 Proof.
-intros pi.
-apply (@ll_ll_to_ill_trans _ _ AtomIAtomTAtom_Atom2IAtom N) in pi.
+intros pi%(@ll_ll_to_ill_trans _ _ AtomIAtomTAtom_Atom2IAtom N).
 assert (forall l1 l2, ill_ll (map (trans N) l1 ++ map tl2ill (map ntrans l2)) N
           -> ill_ll (map tl2ill (map ntrans (l1 ++ l2))) N)
  as IH.
-{ clear; induction l1; intros l2 pi; [ assumption | ].
-  list_simpl in pi.
+{ clear. induction l1; intros l2 pi; [ assumption | ]. list_simpl in pi.
   assert (Ha := ntrans_to_trans a).
   eapply ex_ir in pi; [ | apply Permutation_Type_middle ].
   assert (notT (projT1 (@ipgax preiatom ipfrag_ill))) as Hgax by intros [].
@@ -202,7 +199,7 @@ assert (forall l1 l2, ill_ll (map (trans N) l1 ++ map tl2ill (map ntrans l2)) N
     [ eassumption | list_simpl; symmetry; apply Permutation_Type_middle ]. }
 rewrite <- (app_nil_r _) in pi. change nil with (map tl2ill (map ntrans nil)) in pi.
 apply IH in pi. list_simpl in pi.
-apply cut_admissible_ill in pi; try now intros [].
+apply cut_admissible_ill in pi; [ | intros [] .. ].
 eapply (@stronger_tpfrag _ (cutrm_tpfrag tpfrag_tl)).
 - repeat split. intros [].
 - eapply tlfrag2tl.
@@ -238,8 +235,8 @@ Proof. intros l1 l2 HP pi. eapply ex_otr; eassumption. Qed.
 
 Lemma neg_rev_ot A l : otl l (Some (tneg A)) -> otl (A :: l) None.
 Proof.
-intros pi.
-remember (Some (tneg A)) as Pi eqn:HeqPi. induction pi in A, HeqPi |- *; subst;
+intro pi. remember (Some (tneg A)) as Pi eqn:HeqPi.
+induction pi in A, HeqPi |- *; subst;
   try (discriminate HeqPi);
   try (now (rewrite app_comm_cons; constructor; rewrite <- app_comm_cons; apply IHpi)).
 - eapply ex_otr.
@@ -251,9 +248,8 @@ Qed.
 
 Lemma tsubform_toc_ntrans A B : tsubform (toc A) (ntrans B) -> { A' | A = tneg A' }.
 Proof.
-intros Hsub.
-apply (@inl _ (tsubform (toc A) (ptrans B))) in Hsub.
-revert Hsub; clear; induction B; intros [ Hsub | Hsub ];
+intros Hsub%(@inl _ (tsubform (toc A) (ptrans B))).
+clear - Hsub; induction B in Hsub |- *; destruct Hsub as [ Hsub | Hsub ];
   try (now (inversion Hsub; subst; inversion H1));
   try (now (inversion Hsub; inversion X; subst;
               try (apply IHB1; right; assumption);
@@ -311,7 +307,7 @@ induction pi; intros HF HC l1' l2' HP.
   apply app_eq_nil in HP as [-> ->%map_eq_nil].
   apply one_otrr.
 - assert (HP' := HP).
-  apply Permutation_Type_elt_map_inv in HP' as [(l1'' & l2'') ->]; [ | intros ? [=] ].
+  apply Permutation_Type_elt_map_inv in HP' as [(l1'', l2'') ->]; [ | intros ? [=] ].
   list_simpl. constructor.
   rewrite app_assoc. apply IHpi; [ Forall_inf_solve | assumption | ].
   list_simpl. list_simpl in HP.
@@ -334,11 +330,11 @@ induction pi; intros HF HC l1' l2' HP.
   + assert (Permutation_Type (l1' ++ map toc (map tneg l2'))
                          ((l3' ++ l3'') ++ map toc (map tneg (l0 ++ l3)))) as HP'
       by (apply Permutation_Type_app, Permutation_Type_map, Permutation_Type_map; assumption).
-    symmetry; etransitivity; [ apply HP' | ]; list_simpl.
+    symmetry. etransitivity; [ apply HP' | ]. list_simpl.
     apply Permutation_Type_app_head.
     rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_comm.
 - assert (HP' := HP).
-  apply Permutation_Type_elt_map_inv in HP' as [(l1'' & l2'') ->]; [ | intros b Hf; inversion Hf ].
+  apply Permutation_Type_elt_map_inv in HP' as [(l1'', l2'') ->]; [ | intros b [=] ].
   list_simpl. constructor.
   rewrite 2 app_comm_cons, app_assoc.
   apply IHpi; [ | assumption | ].
@@ -363,7 +359,7 @@ induction pi; intros HF HC l1' l2' HP.
     constructor; constructor.
   + intros D [=].
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_elt_inv in HP' as [(l' & l'') Heq].
+  symmetry in HP'. apply Permutation_Type_vs_elt_inv in HP' as [[l' l''] Heq].
   dichot_elt_app_inf_exec Heq; subst.
   + apply ex_otr with ((l' ++ l0 ++ map toc (map tneg l2')) ++ tneg A :: nil);
     [ | list_simpl; apply Permutation_Type_app_head; rewrite app_assoc; symmetry;
@@ -379,8 +375,7 @@ induction pi; intros HF HC l1' l2' HP.
       apply Permutation_Type_app_inv in HP.
       list_simpl in HP. assumption.
   + symmetry in Heq1. decomp_map_inf Heq1. subst.
-    inversion Heq1. subst.
-    list_simpl.
+    inversion Heq1. subst. list_simpl.
     apply ex_otr with ((l1' ++ map toc (map tneg (l2 ++ l4))) ++ toc (tneg A) :: nil);
       [ | list_simpl;
           apply Permutation_Type_app_head, Permutation_Type_app_head, Permutation_Type_app_comm ].
@@ -394,7 +389,7 @@ induction pi; intros HF HC l1' l2' HP.
       rewrite app_assoc in HP. apply Permutation_Type_app_inv in HP.
       list_simpl in HP. assumption.
 - assert (HP' := HP).
-  apply Permutation_Type_elt_map_inv in HP' as [(l1'' & l2'') ->]; [ | intros ? [=] ].
+  apply Permutation_Type_elt_map_inv in HP' as [(l1'', l2'') ->]; [ | intros ? [=] ].
   list_simpl. constructor.
 - apply plus_otrr1.
   apply IHpi; [ Forall_inf_solve | | assumption ].
@@ -409,7 +404,7 @@ induction pi; intros HF HC l1' l2' HP.
   eexists. etransitivity; [ | apply HD].
   constructor; constructor.
 - assert (HP' := HP).
-  apply Permutation_Type_elt_map_inv in HP' as [(l1'' & l2'') ->]; [ | intros ? [=] ].
+  apply Permutation_Type_elt_map_inv in HP' as [(l1'', l2'') ->]; [ | intros ? [=] ].
   list_simpl. constructor; rewrite app_comm_cons, app_assoc.
   + apply IHpi1; [ | Forall_inf_solve | ].
     * Forall_inf_cbn_hyp. Forall_inf_solve_rec.
@@ -450,7 +445,7 @@ induction pi; intros HF HC l1' l2' HP.
   destruct X as [At HAt].
   destruct (tsubform_toc_ntrans _ HAt) as [B ->].
   assert (HP' := HP).
-  apply Permutation_Type_elt_map_inv in HP' as [(l1'' & l2'') ->]; [ | intros ? [=] ].
+  apply Permutation_Type_elt_map_inv in HP' as [(l1'', l2'') ->]; [ | intros ? [=] ].
   list_simpl.
   apply ex_otr with ((l1'' ++ l2'') ++ map toc (map tneg (B :: l2')));
     [ | list_simpl; apply Permutation_Type_app_head; symmetry; apply Permutation_Type_middle ].
@@ -463,7 +458,7 @@ induction pi; intros HF HC l1' l2' HP.
     apply Permutation_Type_app_inv in HP.
     apply Permutation_Type_elt. list_simpl. assumption.
 - assert (HP' := HP).
-  apply Permutation_Type_elt_map_inv in HP' as [(l1'' & l2'') ->]; [ | intros ? [=] ].
+  apply Permutation_Type_elt_map_inv in HP' as [(l1'', l2'') ->]; [ | intros ? [=] ].
   list_simpl. constructor.
   rewrite app_assoc. apply IHpi; [ Forall_inf_solve | assumption | ].
   list_simpl. list_simpl in HP.
@@ -492,7 +487,7 @@ Qed.
 
 Lemma tl_to_otl l : tl_ll (map ntrans l) None -> otl (map ntrans l) None.
 Proof.
-intros pi.
+intro pi.
 replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
 eapply tl_to_otl_neg; [ eassumption | | | list_simpl; reflexivity ].
 + clear. induction l; constructor; [ | assumption ].
@@ -502,14 +497,14 @@ Qed.
 
 (* ** From [tl] to [llfoc] *)
 
-Ltac splitIHpi H :=
+#[local] Ltac splitIHpi H :=
   let HpiN := fresh "HpiN" in
   let HpiP := fresh "HpiP" in
   let HpiS := fresh "HpiS" in
   let HpiN' := fresh "HpiN" in
   let HpiP' := fresh "HpiP" in
   let HpiS' := fresh "HpiS" in
-  try (destruct H as (HpiN & HpiP));
+  try (destruct H as [HpiN HpiP]);
   try (assert (HpiN' := HpiN (eq_refl _)); clear HpiN);
   try (assert (HpiP' := HpiP _ (eq_refl _)); clear HpiP).
 
@@ -737,7 +732,7 @@ End Focusing.
 
 
 Lemma weak_focusing (l : list formula) : ll_ll l -> llfoc l None.
-Proof. intros pi. apply tl_to_llfoc, ll_to_tl, pi. Qed.
+Proof. intro pi. apply tl_to_llfoc, ll_to_tl, pi. Qed.
 
 Lemma focusing (l : list formula) : ll_ll l -> llFoc l None.
 Proof. intros pi%weak_focusing. refine (fst (fst (llfoc_to_llFoc pi _)) eq_refl). unfold lt. reflexivity. Qed.

@@ -53,7 +53,7 @@ match t with
 end.
 
 Lemma form_nattree_section : retract nattree2form form2nattree.
-Proof. intros A. induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n; reflexivity. Qed.
+Proof. intro A. induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n; reflexivity. Qed.
 
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
@@ -61,8 +61,8 @@ Proof. intros A. induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n; reflexivi
 #[export] Instance border_formula : BOrder | 50.
 Proof.
 eapply border_inj, compose_injective.
-- eapply section_injective. intro. apply form_nattree_section.
-- apply nattree2nat_inj.
+- eapply section_injective. exact form_nattree_section.
+- exact nattree2nat_inj.
 Defined.
 
 
