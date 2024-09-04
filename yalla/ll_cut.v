@@ -19,8 +19,8 @@ Section Cut_Elim_Proof.
 Context {P : @pfrag atom}.
 
 Lemma cut_oc_comm A l1 l2 l3 l4 : (forall a l1 l2, projT2 (pgax P) a <> l1 ++ oc A :: l2) ->
-  forall (pi : ll P (l3 ++ oc A :: l4)),
-  (forall lw (pi' : ll P (oc A :: map wn lw)), psize pi' <= psize pi -> ll P (l1 ++ map wn lw ++ l2)) ->
+  forall pi : ll P (l3 ++ oc A :: l4),
+  (forall lw (pi' : ll P (A :: map wn lw)), psize pi' < psize pi -> ll P (l1 ++ map wn lw ++ l2)) ->
   ll P (l1 ++ l4 ++ l3 ++ l2).
 Proof.
 intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
@@ -80,9 +80,9 @@ intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
     assert (IHpi := Hin).
     eapply Dependent_Forall_inf_forall_formula in IHpi; [ | eassumption ].
     apply IHpi; [ list_simpl; reflexivity | ].
-    intros ? pi' Hs; apply (IH _ pi').
-    transitivity (S (psize pi)); [ lia | ].
-    apply PeanoNat.Nat.le_succ_l, (psize_inf_mix eqpmix); assumption.
+    intros ? pi' Hs. apply (IH _ pi').
+    transitivity (psize pi); [ assumption | ].
+    apply (psize_inf_mix eqpmix _ _ Hin).
 - destruct l3; inversion Heql' as [[Heql'' Heq]]. subst.
   dichot_elt_app_inf_exec Heq; subst.
   + apply ex_r with (tens A0 B :: (((l3 ++ l2) ++ l1) ++ l) ++ l0).
@@ -97,8 +97,8 @@ intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
     apply tens_r; [ list_simpl | assumption ].
     rewrite app_comm_cons. eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl.
     rewrite app_comm_cons. apply IHpi1; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ].
-- destruct l3; inversion Heql as [[Heql'' Heq]]; subst.
-  + apply (IH _ (oc_r pi)); reflexivity.
+- destruct l3; inversion Heql as [[Heql'' Heq]]. subst.
+  + apply (IH _ pi). lia.
   + decomp_map_inf Heq; inversion Heq3.
 - dichot_elt_app_inf_exec Heql'; subst.
   + apply ex_r with ((((l3 ++ l2) ++ l1) ++ l) ++ l0).
@@ -381,17 +381,14 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
         by (list_simpl; reflexivity).
       eapply ex_wn_r; eassumption.
     * assert (Hgax := (oc_notin_gax _ Hcut)).
-      refine (cut_oc_comm (dual x) _ _ nil _ _ pi1 _); [ assumption | ].
+      refine (cut_oc_comm (dual x) _ _ nil _ Hgax pi1 _).
       intros lw' pi0 Hs; list_simpl; cbn in IHsize.
       apply Permutation_Type_vs_elt_subst in HP as [(l2', l3') HP ->].
       specialize (HP lw'); symmetry in HP.
       rewrite (app_assoc (map wn l2)), (app_assoc _ _ l3), <- (app_assoc (map wn l2)), <- 2 map_app.
       refine (ex_wn_r _ _ _ _ _ HP).
-      revert pi0 Hl IHsize Hs;
-        list_simpl; change (oc (dual x)) with (dual (wn x)); rewrite app_assoc;
-        intros pi0 Hl IHsize Hs.
-      list_simpl; rewrite app_assoc.
-      eapply (IHsize _ _ _ _ pi0 Hl); cbn; cbn in Hs; lia.
+      revert Hl IHsize. list_simpl. rewrite ? (app_assoc l (map wn _)). intros Hl IHsize.
+      simple refine (IHsize _ _ _ _ _ Hl _ _); [ exact (oc_r pi0) | cbn in *; lia | reflexivity ].
   + rewrite <- 2 app_assoc.
     eapply ex_wn_r, HP.
     rewrite (app_assoc (map wn lw)), (app_assoc l).
@@ -1272,15 +1269,11 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       replace (map wn l4 ++ wn x :: map wn l6) with (map wn (l4 ++ x :: l6)) by (list_simpl; reflexivity).
       apply oc_r. assumption.
     * assert (Hgax := (oc_notin_gax _ Hcut)).
-      refine (cut_oc_comm (dual x) _ _ nil _ _ pi1 _); [ assumption | ].
+      refine (cut_oc_comm (dual x) _ _ nil _ Hgax pi1 _).
       intros lw' pi0 Hs. list_simpl. cbn in IHsize.
-      replace (map wn l4 ++ map wn lw' ++ map wn l6) with (map wn (l4 ++ lw' ++ l6))
-        by (list_simpl; reflexivity).
-      apply oc_r.
-      revert pi0 Hl IHsize Hs.
-      list_simpl. change (oc (dual x)) with (dual (wn x)). rewrite app_comm_cons.
-      intros pi0 Hl IHsize Hs.
-      list_simpl. cbn in Hs. rewrite app_comm_cons. eapply (IHsize _ _ _ _ pi0 Hl); cbn; lia.
+      rewrite <- ? map_app. apply oc_r.
+      revert Hl IHsize. list_simpl. rewrite ? app_comm_cons. intros Hl IHsize.
+      simple refine (IHsize _ _ _ _ _ Hl _ _); [ exact (oc_r pi0) | cbn in *; lia | reflexivity ].
 - (* de_r *)
   destruct l1; inversion Heql; subst; list_simpl.
   + (* main case *)
