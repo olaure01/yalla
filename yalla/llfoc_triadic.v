@@ -449,12 +449,6 @@ Proof.
 intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
   try inversion Hs; try inversion Hn; subst.
 - cbn in Hp. injection Hp as [= Heq <-]. symmetry in Heq. apply map_eq_nil in Heq as ->. apply ax_tfr.
-- remember (partition is_wn l1) as p' eqn:Hp'. symmetry in Hp'. destruct p' as [lw' ls'].
-  destruct (Permutation_Type_partition _ p Hp' Hp).
-  apply Permutation_Type_map_inv in p0 as [lw'' ->]. symmetry in p0.
-  apply exw_tfr with lw''; [ | assumption ].
-  apply ex_tfr with ls'; [ | assumption ].
-  apply IHpi; reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   remember (partition is_wn l1) as p' eqn:Hp'. symmetry in Hp'. destruct p' as [lw' lsa'].
   destruct (Permutation_Type_partition _ p Hp' Hp1).
@@ -793,26 +787,31 @@ Qed.
 Lemma tri_to_mon:
   (forall lw ls l, atrifoc lw ls l -> llFoc (map wn lw ++ ls ++ l) None)
 * (forall lw ls A, strifoc lw ls A ->
-     {'(lw', lx) & (incl_inf lw' lw * incl_inf lx lw * Forall_inf covar_formula lx)%type
-                 & llFoc (polcont (map wn lw' ++ lx ++ ls) A) (polfoc A) }).
+     {'(lw', lx, l') & (incl_inf lw' lw * incl_inf lx lw * Forall_inf covar_formula lx
+                      * Permutation_Type l' (map wn lw' ++ lx ++ ls))%type
+                      & llFoc (polcont l' A) (polfoc A) }).
 Proof.
 apply trifoc_rect.
-- intros A lw ls1 ls2 Hs pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. list_simpl. pol_simpl.
+- intros A lw ls1 ls2 Hs pi [((lw', lx), l') [[[Hincl Hinclx] Hcv] HP] IHpi]. list_simpl. pol_simpl.
   eapply incl_Foc; [ | rewrite 2 app_assoc; apply Permutation_Type_middle | exact Hincl | exact Hinclx | ].
-  + rewrite <- ? app_assoc. apply foc_Fr, IHpi.
+  + rewrite <- ! app_assoc. eapply ex_Fr; [ apply foc_Fr, IHpi | ].
+    now apply Permutation_Type_cons.
   + eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. constructor.
-- intros A lw1 lw2 ls Hnc pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. list_simpl.
+- intros A lw1 lw2 ls Hnc pi [((lw', lx), ls') [[[Hincl Hinclx] Hcv] HP] IHpi]. list_simpl.
   apply de_Fr in IHpi.
   + replace (map wn lw1 ++ wn A :: map wn lw2 ++ ls) with (map wn (lw1 ++ A :: lw2) ++ ls)
       by (list_simpl; reflexivity).
     assert (incl_inf (A :: lw') (lw1 ++ A :: lw2)) as Hincl'
       by (intros C [-> | Hin%Hincl]; [ apply in_inf_elt | assumption ]).
-    eapply incl_Foc; [ | reflexivity | exact Hincl' | exact Hinclx | ]; [ assumption | ].
-    eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. constructor.
-  + apply Forall_inf_app; [ | apply Forall_inf_app ].
+    eapply incl_Foc; [ | reflexivity | exact Hincl' | exact Hinclx | ].
+    * eapply ex_Fr; [ eassumption | ].
+      cbn. now apply Permutation_Type_cons.
+    * eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. constructor.
+  + symmetry in HP. apply (Permutation_Type_Forall_inf HP).
+    apply Forall_inf_app; [ | apply Forall_inf_app ].
     * apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
     * eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. left. right. constructor.
-    * apply tsync_context in pi. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+    * apply tsync_context in pi. eapply Forall_inf_arrow; [ apply Foc_wFoc | assumption ].
 - intros lw ls l pi IHpi.
   eapply ex_Fr; [ apply bot_Fr, IHpi | ].
   rewrite ?(app_assoc _ ls). apply Permutation_Type_middle.
@@ -838,60 +837,67 @@ apply trifoc_rect.
   eapply ex_Fr; [ apply IHpi | ].
   etransitivity; [ rewrite <- app_comm_cons; symmetry; apply Permutation_Type_middle | ].
   rewrite ?(app_assoc _ ls). apply Permutation_Type_middle.
-- intros X lw. cbn. exists (nil, nil).
-  + repeat split; [ intros ? [] | intros ? [] | constructor ].
+- intros X lw. cbn. exists (nil, nil, covar X :: nil).
+  + repeat split; [ intros ? [] | intros ? [] | constructor | reflexivity ].
   + apply ax_Fr.
-- intros X lw1 lw2. exists (nil, covar X :: nil).
-  + repeat split; [ intros ? [] | | ].
+- intros X lw1 lw2. exists (nil, covar X :: nil, covar X :: nil).
+  + repeat split; [ intros ? [] | | | reflexivity ].
     * intros C [-> | [] ]. apply in_inf_elt.
     * repeat constructor.
   + apply ax_Fr.
-- intros A lw ls1 ls2 _ [(lw', lx) [[Hincl Hinclx] Hcv] IHpi] HP.
-  exists (lw', lx); [ repeat split; assumption | ].
-  eapply ex_Fr; [ apply IHpi | ].
-  now apply Permutation_Type_polcont, Permutation_Type_app, Permutation_Type_app.
-- intros lw. cbn. exists (nil, nil).
-  + repeat split; [ intros ? [] | intros ? [] | constructor ].
+- intros A lw ls1 ls2 _ [((lw', lx), ls') [[[Hincl Hinclx] Hcv] HPs] IHpi] HP.
+  exists (lw', lx, ls'); [ repeat split; try assumption | assumption ].
+  etransitivity; [ exact HPs | ].
+  rewrite ! app_assoc. now apply Permutation_Type_app.
+- intros lw. cbn. exists (nil, nil, nil).
+  + repeat split; [ intros ? [] | intros ? [] | constructor | reflexivity ].
   + apply one_Fr.
-- intros A B lw ls1 ls2 pi1 [(lw1', lx1) [[Hincl1 Hinclx1] Hcv1] IHpi1]
-                        pi2 [(lw2', lx2) [[Hincl2 Hinclx2] Hcv2] IHpi2]. cbn.
-  exists (lw1' ++ lw2', lx1 ++ lx2); [ repeat split; try (apply incl_inf_app; assumption) | ].
-  { apply Forall_inf_app; assumption. }
-  apply (@ex_Fr _ ((map wn lw1' ++ lx1 ++ ls1) ++ map wn lw2' ++ lx2 ++ ls2)).
-  + apply tens_Fr; [ assumption | assumption | | ].
-    * apply Forall_inf_app; [ | apply Forall_inf_app ].
-      -- apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
-      -- eapply Forall_inf_arrow; [ | exact Hcv1 ].
-         intros C HC. inversion HC. left. right. constructor.
-      -- apply tsync_context in pi1. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
-    * apply Forall_inf_app; [ | apply Forall_inf_app ].
-      -- apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
-      -- eapply Forall_inf_arrow; [ | exact Hcv2 ].
-         intros C HC. inversion HC. left. right. constructor.
-      -- apply tsync_context in pi2. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
-  + list_simpl. apply Permutation_Type_app_head.
-    rewrite ? app_assoc. apply Permutation_Type_app_tail. rewrite <- ? app_assoc.
-    etransitivity; [ rewrite app_assoc; apply Permutation_Type_app_swap_app | ].
-    list_simpl. apply Permutation_Type_app_head, Permutation_Type_app_head, Permutation_Type_app_comm.
-- intros A B lw ls pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. cbn.
-  exists (lw', lx); [ repeat split; assumption | ].
+- intros A B lw ls1 ls2 pi1 [((lw1', lx1), l1') [[[Hincl1 Hinclx1] Hcv1] HP1] IHpi1]
+                        pi2 [((lw2', lx2), l2') [[[Hincl2 Hinclx2] Hcv2] HP2] IHpi2]. cbn.
+  exists (lw1' ++ lw2', lx1 ++ lx2, l1' ++ l2');
+    [ repeat split; try (apply incl_inf_app; assumption); [ apply Forall_inf_app; assumption | ] | ].
+  { transitivity ((map wn lw1' ++ lx1 ++ ls1) ++ map wn lw2' ++ lx2 ++ ls2).
+    - apply Permutation_Type_app; assumption.
+    - list_simpl. apply Permutation_Type_app; [ reflexivity | ].
+      rewrite <- (app_nil_l (lx1 ++ _)). apply Permutation_Type_app_middle.
+      cbn. rewrite <- (app_nil_l (ls1 ++ _)). rewrite (app_assoc _ _ (ls1 ++ _)).
+      apply Permutation_Type_app_middle. list_simpl. reflexivity. }
+  apply tens_Fr; [ assumption .. | | ].
+  + symmetry in HP1. apply (Permutation_Type_Forall_inf HP1).
+    apply Forall_inf_app; [ | apply Forall_inf_app ].
+    * apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
+    * eapply Forall_inf_arrow; [ | exact Hcv1 ].
+      intros C HC. inversion HC. left. right. constructor.
+    * apply tsync_context in pi1. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+  + symmetry in HP2. apply (Permutation_Type_Forall_inf HP2).
+    apply Forall_inf_app; [ | apply Forall_inf_app ].
+    * apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
+    * eapply Forall_inf_arrow; [ | exact Hcv2 ].
+      intros C HC. inversion HC. left. right. constructor.
+    * apply tsync_context in pi2. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
+- intros A B lw ls pi [((lw', lx), l') [[[Hincl Hinclx] Hcv] HP] IHpi]. cbn.
+  exists (lw', lx, l'); [ repeat split; assumption | ].
   apply plus_Fr1; [ assumption | ].
+  symmetry in HP. apply (Permutation_Type_Forall_inf HP).
   apply Forall_inf_app; [ | apply Forall_inf_app ].
   + apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
   + eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. left. right. constructor.
   + apply tsync_context in pi. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
-- intros A B lw ls pi [(lw', lx) [[Hincl Hinclx] Hcv] IHpi]. cbn.
-  exists (lw', lx); [ repeat split; assumption | ].
+- intros A B lw ls pi [((lw', lx), l') [[[Hincl Hinclx] Hcv] HP] IHpi]. cbn.
+  exists (lw', lx, l'); [ repeat split; assumption | ].
   apply plus_Fr2; [ assumption | ].
+  symmetry in HP. apply (Permutation_Type_Forall_inf HP).
   apply Forall_inf_app; [ | apply Forall_inf_app ].
   + apply forall_Forall_inf. intros ? [y <- _]%in_inf_map_inv. apply wFoc_wn.
   + eapply Forall_inf_arrow; [ | exact Hcv ]. intros C HC. inversion HC. left. right. constructor.
   + apply tsync_context in pi. eapply Forall_inf_arrow; [ apply Foc_wFoc | eassumption ].
-- intros A lw pi IHpi. exists (lw, nil); [ repeat split; [ apply incl_inf_refl | intros ? [] | constructor ] | ].
-  list_simpl. eapply oc_Fr, ex_Fr; [ apply IHpi | ].
+- intros A lw pi IHpi. exists (lw, nil, map wn lw); list_simpl;
+    [ repeat split; [ apply incl_inf_refl | intros ? [] | constructor | reflexivity ] | ].
+  eapply oc_Fr, ex_Fr; [ apply IHpi | ].
   symmetry. apply Permutation_Type_cons_append.
 - intros A lw ls Ha pi IHpi.
-  exists (lw, nil); [ repeat split; [ apply incl_inf_refl | intros ? [] | constructor ] | ].
+  exists (lw, nil, map wn lw ++ ls); list_simpl;
+    [ repeat split; [ apply incl_inf_refl | intros ? [] | constructor | reflexivity ] | ].
   pol_simpl. eapply ex_Fr; [ apply IHpi | ].
   symmetry. list_simpl. rewrite app_assoc. apply Permutation_Type_cons_append.
 Qed.
