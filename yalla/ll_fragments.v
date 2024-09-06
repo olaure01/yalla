@@ -402,8 +402,8 @@ Qed.
 (** ** Standard linear logic: [ll_ll] (no mix, no axiom, commutative) *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_ll :=  @mk_pfrag atom  pcut_none NoAxioms pmix_none true.
-(*                                atoms cut       axioms   mix       perm  *)
+Definition pfrag_ll := @mk_pfrag atom  pcut_none NoAxioms pmix_none true.
+(*                               atoms cut       axioms   mix       perm  *)
 
 Definition ll_ll := ll pfrag_ll.
 

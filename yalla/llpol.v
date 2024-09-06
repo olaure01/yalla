@@ -128,11 +128,10 @@ Proof. induction l as [ | a l IHl ]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma llpol2ll_map_wn_inv l1 l2 : map formulas.wn l1 = map llpol2ll l2 ->
   { l2' & l2 = map neg (map wn l2') & l1 = map pllpol2ll l2' }.
 Proof.
-induction l1 in l2 |- *; intros Heq; destruct l2; inversion Heq.
+induction l1 in l2 |- *; intro Heq; destruct l2; inversion Heq.
 - exists nil; reflexivity.
-- apply IHl1 in H1.
+- apply IHl1 in H1 as [l2' -> ->].
   destruct f; inversion H0; [ destruct p | destruct n ]; inversion H0; subst.
-  destruct H1 as [l2' -> ->].
   exists (p :: l2'); reflexivity.
 Qed.
 
@@ -345,13 +344,13 @@ Qed.
 *)
 
 (** cut / axioms / pmix / permutation *)
-Definition pfrag_mell := @ll_def.mk_pfrag atom  ll_def.pcut_none ll_def.NoAxioms (fun x => false) true.
-(*                                        atoms cut              axioms               pmix        perm  *)
+Definition pfrag_ll :=   @ll_def.mk_pfrag atom  ll_def.pcut_none ll_def.NoAxioms ll_def.pmix_none true.
+(*                                        atoms cut              axioms          pmix             perm  *)
 
 
 (** ** 5. prove equivalence of proof predicates *)
 
-Lemma llpol2llpolfrag l : llpol l -> ll_def.ll pfrag_mell (map llpol2ll l).
+Lemma llpol2llpolfrag l : llpol l -> ll_def.ll pfrag_ll (map llpol2ll l).
 Proof.
 intros pi. induction pi; try now (constructor; auto).
 - eapply ll_def.ex_r; [ eassumption | ].
@@ -366,7 +365,7 @@ intros pi. induction pi; try now (constructor; auto).
   rewrite <- llpol2ll_map_wn. assumption.
 Qed.
 
-Lemma llpolfrag2llpol l : ll_def.ll pfrag_mell (map llpol2ll l) -> llpol l.
+Lemma llpolfrag2llpol l : ll_def.ll pfrag_ll (map llpol2ll l) -> llpol l.
 Proof.
 intros pi.
 remember (map llpol2ll l) as l0.
@@ -495,9 +494,7 @@ Qed.
 Lemma Permutation_Type_polsequent l1 l2 : Permutation_Type l1 l2 -> polsequent l1 -> polsequent l2.
 Proof.
 intros HP [[l ->]|[(l, P) Hpol]].
-- left.
-  symmetry in HP. apply Permutation_Type_map_inv in HP as [l' -> _].
-  exists l'. reflexivity.
+- left. symmetry in HP. apply Permutation_Type_map_inv in HP as [l' -> _]. exists l'. reflexivity.
 - right. exists (l, P).
   symmetry in HP. transitivity l1; assumption.
 Qed.
@@ -1013,17 +1010,8 @@ intro pi. induction pi; split;
   try (destruct IHpi1 as [Hpol1 pi1']); try (destruct IHpi2 as [Hpol2 pi2']);
   try (now constructor);
   try (apply polsequent_neg_add; assumption).
-- right; exists (covar X :: nil,var X); apply Permutation_Type_swap.
-- destruct Hpol.
-  + destruct s as [l0 ->].
-    symmetry in p. apply Permutation_Type_map_inv in p as [l3 -> HP].
-    left. exists l3. reflexivity.
-  + destruct s as ((l0 & P) & H0).
-    assert (HP := H0).
-    apply Permutation_Type_vs_cons_inv in H0 as ((l3 & l4) & ->).
-    symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
-    right. exists (l0, P).
-    symmetry. etransitivity; [ apply Permutation_Type_cons_app | ]; eassumption.
+- right. exists (covar X :: nil, var X). apply Permutation_Type_swap.
+- refine (Permutation_Type_polsequent _ Hpol). assumption.
 - eapply ex_r; eassumption.
 - right. exists (nil, one). reflexivity.
 - apply polsequent_pos_rem_strong in Hpol1 as [l1' ->].

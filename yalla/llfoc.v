@@ -225,6 +225,8 @@ Inductive llfoc : list formula -> option formula -> Type :=
 | wk_fr A l Pi : llfoc l Pi -> llfoc (wn A :: l) Pi
 | co_fr A l Pi : llfoc (wn A :: wn A :: l) Pi -> llfoc (wn A :: l) Pi.
 
+Notation llfoc_pol l A := (llfoc (polcont l A) (polfoc A)).
+
 Fixpoint fpsize l Pi (pi : llfoc l Pi) :=
 match pi with
 | ax_fr _ | one_fr | top_fr _ _ _ => 1
@@ -234,7 +236,7 @@ match pi with
 | with_fr pi1 pi2 => S (max (fpsize pi1) (fpsize pi2))
 end.
 
-Lemma foc_gen_fr l A : llfoc (polcont l A) (polfoc A) -> llfoc (A :: l) None.
+Lemma foc_gen_fr l A : llfoc_pol l A -> llfoc (A :: l) None.
 Proof. destruct (polarity A); pol_simpl; intro pi; [ apply foc_fr | ]; assumption. Qed.
 
 Lemma top_gen_fr l Pi : option_testT sformula Pi -> llfoc (top :: l) Pi.
@@ -276,10 +278,10 @@ intro pi. remember (Some A) as Pi eqn:HeqPi.
 induction pi in HeqPi |- *; inversion HeqPi; subst; try (constructor; fail); try (now apply IHpi); auto.
 Qed.
 
-Lemma llfoc_foc_is_llfoc_foc l A : llfoc l (Some A) -> llfoc (polcont l A) (polfoc A).
+Lemma llfoc_foc_is_llfoc_foc l A : llfoc l (Some A) -> llfoc_pol l A.
 Proof. intro pi. assert (Hs := sync_focus pi). pol_simpl. exact pi. Qed.
 
-Lemma llfoc_cont_is_llfoc_cont l A : aformula A -> llfoc (A :: l) None -> llfoc (polcont l A) (polfoc A).
+Lemma llfoc_cont_is_llfoc_cont l A : aformula A -> llfoc (A :: l) None -> llfoc_pol l A.
 Proof. intros Ha pi. pol_simpl. exact pi. Qed.
 
 Lemma bot_rev_f l Pi (pi : llfoc l Pi) l1 l2 : l = l1 ++ bot :: l2 ->
@@ -717,6 +719,8 @@ Inductive llFoc : list formula -> option formula -> Type :=
 | wk_Fr A l : llFoc l None -> Forall_inf wFoc l -> llFoc (wn A :: l) None
 | co_Fr A l : llFoc (wn A :: wn A :: l) None -> Forall_inf wFoc l -> llFoc (wn A :: l) None.
 
+Notation llFoc_pol l A := (llFoc (polcont l A) (polfoc A)).
+
 Instance llFoc_perm : Proper ((@Permutation_Type _) ==> arrow) (fun l => llFoc l None).
 Proof. intros l1 l2 HP pi. apply ex_Fr with l1; assumption. Qed.
 
@@ -753,7 +757,7 @@ destruct (wtFocl_dec l).
     cbn. rewrite 2 map_app, 2 list_sum_app. simpl. lia.
 Qed.
 
-Lemma foc_gen_Fr l A : llFoc (polcont l A) (polfoc A) -> llFoc (A :: l) None.
+Lemma foc_gen_Fr l A : llFoc_pol l A -> llFoc (A :: l) None.
 Proof. destruct (polarity A); pol_simpl; intro pi; [ apply foc_Fr | ]; assumption. Qed.
 
 Lemma sync_focus_F l A : llFoc l (Some A) -> sformula A.
@@ -775,10 +779,10 @@ induction pi in A, HeqPi |- *; subst;
   + exact (IHl0 l eq_refl).
 Qed.
 
-Lemma llFoc_foc_is_llFoc_foc l A : llFoc l (Some A) -> llFoc (polcont l A) (polfoc A).
+Lemma llFoc_foc_is_llFoc_foc l A : llFoc l (Some A) -> llFoc_pol l A.
 Proof. intro pi. assert (Hs := sync_focus_F pi). pol_simpl. exact pi. Qed.
 
-Lemma llFoc_cont_is_llFoc_cont l A : aformula A -> llFoc (A :: l) None -> llFoc (polcont l A) (polfoc A).
+Lemma llFoc_cont_is_llFoc_cont l A : aformula A -> llFoc (A :: l) None -> llFoc_pol l A.
 Proof. intros Ha pi. pol_simpl. exact pi. Qed.
 
 
