@@ -492,13 +492,13 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
   apply bot_tfr, IHpi; reflexivity.
 - rewrite partition_app in Hp.
   destruct (partition is_wn l1) eqn:Hp1, (partition is_wn l2) eqn:Hp2. cbn in Hp. injection Hp as [= Hp <-].
-  symmetry in Hp. decomp_map_inf Hp. subst.
+  decomp_map Hp. subst.
   apply tens_tfr.
   + apply wk_list_tfr.
     destruct (polarity A); pol_simpl.
     * apply IHpi1, Hp1. reflexivity.
     * apply unfoc_tfr; [ assumption | ].
-      assert (partition is_Foc l0 = (l0, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l1 l6).
+      assert (partition is_Foc l0 = (l0, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l1 l).
       destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
       -- apply wn_tfr.
          cbn in IHpi1. apply IHpi1 with (lsa := l0); [ reflexivity | | eassumption ].
@@ -516,11 +516,11 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
          ++ rewrite Hp'.
             apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
             reflexivity.
-  + apply exw_tfr with (l7 ++ l6); [ apply wk_list_tfr | apply Permutation_Type_app_comm ].
+  + apply exw_tfr with (l3 ++ l); [ apply wk_list_tfr | apply Permutation_Type_app_comm ].
     destruct (polarity B); pol_simpl.
     * apply IHpi2, Hp2. reflexivity.
     * apply unfoc_tfr; [ assumption | ].
-      assert (partition is_Foc l4 = (l4, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l2 l7).
+      assert (partition is_Foc l4 = (l4, nil)) as Hp' by now apply (@wFoc_wn_Foc_partition l2 l3).
       destruct (wn_spec B) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec B) as [Htt|Hntt] ].
       -- apply wn_tfr.
          cbn in IHpi2. apply IHpi2 with (lsa := l4); [ reflexivity | | eassumption ].
@@ -739,7 +739,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     constructor; [ | assumption ]. right. constructor. }
   rewrite Hp2 in Hp'. injection Hp' as [= -> ->].
   cbn in Hp1. destruct (partition is_wn l) eqn:Hp. injection Hp1 as [= Heq <-].
-  symmetry in Heq. decomp_map_inf Heq. injection Heq1 as ->. subst.
+  decomp_map Heq eqn:Hx. injection Hx as [= ->]. subst.
   destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
   + apply (focd_tfr nil), wk_tfr, unfoc_tfr, wn_tfr; [ intros ? [=] | constructor | ].
     cbn in IHpi. eapply IHpi; [ reflexivity | | eassumption ].
@@ -767,15 +767,15 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
       reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= Heq <-].
-  symmetry in Heq. decomp_map_inf Heq. subst.
-  change (x :: l3) with ((x :: nil) ++ l3).
-  apply (fst exw_tfr (l3 ++ x :: nil)); [ | apply Permutation_Type_app_comm ].
+  decomp_map Heq. subst.
+  change (x :: l0) with ((x :: nil) ++ l0).
+  apply (fst exw_tfr (l0 ++ x :: nil)); [ | apply Permutation_Type_app_comm ].
   apply wk_list_tfr.
   exact (snd IHpi eq_refl _ l1 _ _ eq_refl Hp2).
 - intros lw lsa ls la Hp1 Hp2.
   assert (Hp1' := Hp1).
   cbn in Hp1'. destruct (partition is_wn l). injection Hp1' as [= Heq <-].
-  symmetry in Heq. decomp_map_inf Heq. injection Heq1 as ->. subst.
+  decomp_map Heq eqn:Hx. injection Hx as [= ->]. subst.
   rewrite <- (app_nil_l (A :: _)). eapply co_tfr; [ | reflexivity ].
   list_simpl. eapply IHpi; [ reflexivity | | eassumption ].
   cbn in Hp1. cbn. destruct (partition is_wn l). injection Hp1 as [= -> ->]. reflexivity.

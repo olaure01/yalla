@@ -165,8 +165,7 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
   eapply ex_r.
   + apply IHpi. reflexivity.
   + symmetry. assumption.
-- symmetry in Heql. decomp_map Heql. subst.
-  symmetry in Heql3. apply mell2ll_map_wn_inv in Heql3 as [l [-> ->]].
+- decomp_map Heql eqn:Heq. symmetry in Heq. apply mell2ll_map_wn_inv in Heq as [l [-> ->]].
   apply Permutation_Type_map_inv in p as [l' -> HP].
   cbn in Heql. unfold id in Heql. subst.
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ? map_app; reflexivity | ].
@@ -179,7 +178,7 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
   destruct f; destr_eq Heql. subst.
   assert (Heq := H).
   symmetry in H. decomp_map H. subst.
-  apply (@ex_r (add (tens f1 f2) (sum l3 l0))).
+  apply (@ex_r (add (tens f1 f2) (sum l1 l2))).
   + apply tens_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
   + unfold sum, list2fm, add; cbn.
     apply Permutation_Type_cons; [ reflexivity | ].

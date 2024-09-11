@@ -369,10 +369,9 @@ enough
 clear l. intros l A pi.
 induction pi;
   (split; [ intros l'' A'' Heql HeqA | intros l'' Heql HeqN ]); subst;
-  try (symmetry in Heql; decomp_map_inf Heql; destruct x; discriminate Heql3);
+  try (decomp_map Heql eqn:Hx; destruct x; discriminate Hx);
   try discriminate HeqN;
-  try (symmetry in Heql; decomp_map_inf Heql; subst;
-       destruct x; inversion Heql3; subst;
+  try (decomp_map Heql eqn:Hx; subst; destruct x; destr_eq Hx; subst;
        constructor; apply IHpi; list_simpl; reflexivity);
   try (destruct A''; inversion HeqA; subst; constructor; apply IHpi; reflexivity).
 - destruct l''; inversion Heql; destruct l''; inversion Heql.
@@ -389,13 +388,13 @@ induction pi;
   + symmetry. assumption.
 - apply PEPermutation_Type_map_inv in p as [l0 -> HP]. symmetry in HP.
   eapply ex_tr; [ apply IHpi; reflexivity | assumption ].
-- symmetry in Heql. decomp_map_inf Heql. subst. symmetry in Heql3.
-  cbn in Heql3. apply tl2ill_map_ioc_inv in Heql3 as [l -> ->].
+- decomp_map Heql eqn:Heq. subst.
+  symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP]. symmetry in HP.
   eapply ex_oc_tr; [ | eassumption ].
   apply IHpi; [ rewrite <- tl2ill_map_ioc, <- ? map_app | ]; reflexivity.
-- symmetry in Heql. decomp_map_inf Heql. subst. symmetry in Heql3.
-  cbn in Heql3. apply tl2ill_map_ioc_inv in Heql3 as [l -> ->].
+- decomp_map Heql eqn:Heq. subst.
+  symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP].
   symmetry in HP.
   eapply ex_oc_tr; [ | eassumption ].
@@ -403,32 +402,24 @@ induction pi;
 - destruct l''; inversion Heql.
   destruct A''; inversion HeqA; subst.
   apply one_trr.
-- symmetry in Heql. decomp_map_inf Heql. destruct A''; inversion HeqA; subst.
+- decomp_map Heql. destruct A''; inversion HeqA; subst.
   apply tens_trr; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
-- symmetry in Heql. decomp_map_inf Heql; subst.
-  destruct x; discriminate Heql1.
-- symmetry in Heql. decomp_map_inf Heql. destruct x; discriminate Heql2.
-- symmetry in Heql. decomp_map_inf Heql. destruct x; discriminate Heql2.
-- symmetry in Heql. decomp_map_inf Heql.
-  destruct x; inversion Heql3; subst.
-  destruct l3; inversion Heql4.
+- decomp_map Heql eqn:Hx. destruct Hx as [Hx ->%map_eq_nil]. destruct x; destr_eq Hx. subst.
   apply neg_tlr, IHpi; reflexivity.
-- symmetry in Heql. decomp_map_inf Heql.
-  destruct x; inversion Heql3; subst.
+- decomp_map Heql eqn:Hx. destruct x; destr_eq Hx. subst.
   apply plus_tlr; [ apply IHpi1 | apply IHpi2 ]; list_simpl; reflexivity.
-- symmetry in Heql. decomp_map_inf Heql.
-  destruct x; inversion Heql3; subst.
+- decomp_map Heql eqn:Hx. destruct x; destr_eq Hx. subst.
   apply plus_tlr; [ apply IHpi1 | apply IHpi2 ]; list_simpl; reflexivity.
 - apply tl2ill_map_ioc_inv in Heql as [l0' -> ->].
   destruct A''; inversion HeqA. subst.
   apply oc_trr, IHpi; [ rewrite tl2ill_map_ioc | ]; reflexivity.
 - cbn in f. destruct (tl2ill_dec A) as [[[B ->]|]|]; [ | discriminate f | discriminate f].
-  symmetry in Heql. decomp_map_inf Heql. subst.
+  decomp_map Heql. subst.
   eapply (cut_tr f).
   + apply IHpi1; reflexivity.
   + apply IHpi2; list_simpl; reflexivity.
 - cbn in f. destruct (tl2ill_dec A) as [[[B ->]|]|]; [ | discriminate f | discriminate f].
-  symmetry in Heql. decomp_map_inf Heql. subst.
+  decomp_map Heql. subst.
   eapply (cut_tr f).
   + apply IHpi1; reflexivity.
   + apply IHpi2; list_simpl; reflexivity.
@@ -541,14 +532,11 @@ split; [ split | ]; cbn.
         assert (forall x, In_inf x l0 -> In_inf x (fst (projT2 (tpgax P) a))) as Hin
           by (intros x H; rewrite <- Heql0; assumption).
         destruct (tpperm P); cbn in HP; cbn.
-        * clear Heql0. revert l0 Hin HP. induction l; intros l0 Hin Heq; cbn in Heq.
-          -- apply Permutation_Type_nil in Heq.
-             destruct l0; inversion Heq; reflexivity.
-          -- assert (HP := Heq).
-             symmetry in Heq. apply Permutation_Type_vs_cons_inv in Heq.
-             destruct Heq as [[l1 l2] Heq].
-             rewrite map_map in Heq.
-             decomp_map_inf Heq; subst; cbn in Hin, Heq3; symmetry in Heq3; list_simpl.
+        * clear Heql0. revert l0 Hin HP. induction l; intros l0 Hin HP; cbn in HP.
+          -- apply Permutation_Type_nil, map_eq_nil, map_eq_nil in HP as ->. reflexivity.
+          -- symmetry in HP.
+             destruct (Permutation_Type_vs_cons_inv HP) as [[l1 l2] Heq].
+             rewrite map_map in Heq. decomp_map Heq eqn:Hx. subst. symmetry in Hx; list_simpl.
              assert (a0 = tl2ill x) as ->.
              { apply (snd (Hgax a)); [ | assumption ].
                apply Hin, in_inf_elt. }
@@ -559,7 +547,7 @@ split; [ split | ]; cbn.
                 ** left. assumption.
                 ** right. apply in_inf_cons, Hin'.
              ++ list_simpl in HP. list_simpl.
-                eapply Permutation_Type_cons_app_inv. eassumption.
+                symmetry in HP. eapply Permutation_Type_cons_app_inv. eassumption.
         * clear Heql0. revert l0 Hin HP. induction l; intros l0 Hin Heq; cbn in Heq.
           -- symmetry in Heq. exact (map_eq_nil _ _ Heq).
           -- destruct l0; inversion Heq.
@@ -571,14 +559,14 @@ split; [ split | ]; cbn.
     - exfalso.
       apply PEPermutation_Type_vs_elt_inv in HP as [[l1' l2'] _ Heq']. clear - Hgax Heq'.
       apply (f_equal (@rev _)) in Heq'. rewrite rev_involutive in Heq'. list_simpl in Heq'.
-      rewrite map_map in Heq'. decomp_map Heq'; subst.
-      symmetry in Heq'3. exact (fst (fst (Hgax a)) x Heq'3). }
+      rewrite map_map in Heq'. decomp_map Heq'. subst. destruct Heq as [_ [Heq _]].
+      symmetry in Heq. exact (fst (fst (Hgax a)) x Heq). }
   + eapply ex_ir; cbn; [ | eassumption ].
     refine (snd (tl2tlfrag _) _); [ apply gax_tr | assumption ].
   + eapply ex_ir; cbn; [ | eassumption ].
     refine (fst (tl2tlfrag _) _ _); [ apply gax_tr | assumption ].
 - intros [(l1,l2) Heq]%in_inf_split.
-  decomp_map Heq. symmetry in Heq3. exact (N_not_tl2ill _ Heq3).
+  decomp_map Heq eqn:Hx. symmetry in Hx. exact (N_not_tl2ill _ Hx).
 Qed.
 
 Lemma ll_is_tl_cutfree P (Hcut : no_tcut P) (Hgax : easytpgax P) l :

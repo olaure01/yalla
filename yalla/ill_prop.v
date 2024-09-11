@@ -162,13 +162,13 @@ induction pi; cbn; intros HFS; inversion HFS as [|D l' Hhd Htl]; subst; repeat s
   try (apply IHpi2; constructor; [ eapply Hfrag; [ apply Hhd | now repeat constructor ] | ]);
   try apply IHpi; try apply IHpi1; try apply IHpi2;
   try Forall_inf_solve;
-  try (Forall_inf_cbn_hyp; subst; Forall_inf_solve_rec;
+  try (Forall_inf_simpl_hyp; subst; Forall_inf_solve_rec;
        repeat constructor; try assumption;
        eapply Hfrag; [ eassumption | now repeat constructor ]).
 - symmetry in p. exact (PEPermutation_Type_Forall_inf _ _ p Htl).
 - refine (Permutation_Type_Forall_inf _ Htl).
   symmetry in p. apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-- Forall_inf_cbn_hyp. subst. Forall_inf_solve_rec.
+- Forall_inf_simpl_hyp. subst. Forall_inf_solve_rec.
   constructor; [ | constructor; [ | assumption ] ].
   + eapply Hfrag; [ eassumption | now repeat constructor ].
   + eapply Hfrag; [ eassumption | now repeat constructor ].

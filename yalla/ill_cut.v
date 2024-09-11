@@ -290,16 +290,16 @@ induction pi in l', L, Heq |- *;
     * replace (map ioc lw ++ l ++ B :: l0 ++ flat_map (app (map ioc lw)) L1)
         with (flat_map (app (map ioc lw)) ((l ++ B :: l0) :: L1)) by (list_simpl; reflexivity).
       rewrite <- flat_map_app. apply IHpi2. list_simpl. reflexivity.
-- decomp_map_inf Heq. subst. cbn in Heq2. cbn.
+- decomp_map Heq eqn:Heq1. subst.
   assert ({ Lw | flat_map (app (map ioc lw)) L = map ioc Lw }) as [Lw HeqLw].
-  { clear pi IHpi. revert l2 Heq2. clear. induction L; cbn; intros l2 Heq2.
+  { clear pi IHpi. revert l1 Heq1. clear. induction L; cbn; intros l2 Heq2.
     - exists nil. reflexivity.
-    - decomp_map_inf Heq2. subst.
-      inversion Heq1. subst. cbn.
-      cbn in Heq4. apply IHL in Heq4 as [Lw Heq4].
-      exists (lw ++ l1 ++ Lw). list_simpl. rewrite <- Heq4. reflexivity. }
+    - decomp_map Heq2 eqn:Heq. subst. destruct Heq as [Heq1 Heq2].
+      injection Heq1 as [= ->].
+      apply IHL in Heq2 as [Lw Heq2].
+      exists (lw ++ a ++ Lw). list_simpl. rewrite <- Heq2. reflexivity. }
   rewrite HeqLw, <- map_app. apply oc_irr.
-  list_simpl. rewrite <- HeqLw. apply IHpi. rewrite <- Heq2. list_simpl. reflexivity.
+  list_simpl. rewrite <- HeqLw. apply IHpi. rewrite <- Heq1. list_simpl. reflexivity.
 - elt_vs_app_flat_map_cst_inv Heq.
   + list_simpl. apply de_ilr.
     rewrite app_comm_cons, app_assoc. apply IHpi. list_simpl. reflexivity.
@@ -468,17 +468,16 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
     revert Hl IHsize. list_simpl. intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _); lia.
   + dichot_elt_app_inf_exec Heql1; subst.
-    * symmetry in Heql0; decomp_map_inf Heql0; subst.
-      apply cut_oc_comm_left with x; try assumption.
-      intros.
+    * decomp_map Heql0. subst.
+      apply cut_oc_comm_left with A; [ assumption | intros ].
       enough (ill P ((l ++ map ioc l4) ++
-                     flat_map (app (map ioc lw0)) ((map ioc l7 ++ l3) :: nil)) A0)
+                     flat_map (app (map ioc lw0)) ((map ioc l1 ++ l3) :: nil)) A0)
         as pi' by (list_simpl; list_simpl in pi'; assumption).
-      apply substitution_ioc with x; [ intros _; apply oc_irr; assumption | | ].
-      -- intros; apply IHcut with x; [ cbn; lia | | ]; assumption.
+      apply substitution_ioc with A; [ intros _; apply oc_irr; assumption | | ].
+      -- intros; apply IHcut with A; [ cbn; lia | | ]; assumption.
       -- list_simpl.
-         replace (map ioc l4 ++ ioc x :: map ioc l7 ++ l3)
-            with (map ioc (l4 ++ x :: l7) ++ l3) by (list_simpl; reflexivity).
+         replace (map ioc l4 ++ ioc A :: map ioc l1 ++ l3)
+            with (map ioc (l4 ++ A :: l1) ++ l3) by (list_simpl; reflexivity).
          apply ex_oc_ir with lw; assumption.
     * rewrite <- 2 app_assoc.
       eapply ex_oc_ir; [ | eassumption ].
@@ -700,8 +699,8 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       apply lmap_ilr; [ assumption | ].
       revert Hr IHsize; list_simpl; intros Hr IHsize.
       refine (IHsize _ _ _ _ pi1 Hr _); lia.
-    * list_simpl; rewrite (app_assoc l6), (app_assoc _ l); apply lmap_ilr; [ | assumption ].
-      list_simpl; refine (IHsize _ _ _ _ pi1 Hl _); lia.
+    * list_simpl. rewrite (app_assoc l2), (app_assoc _ l). apply lmap_ilr; [ | assumption ].
+      list_simpl. refine (IHsize _ _ _ _ pi1 Hl _); lia.
 - (* neg_ilr *)
   trichot_elt_elt_inf_exec Heql.
   + destruct l3; inversion Heql1.
@@ -891,14 +890,13 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
     * revert Hr IHsize; list_simpl; intros Hr IHsize.
       list_simpl; refine (IHsize _ _ _ _ pi1 Hr _); lia.
 - (* oc_irr *)
-  decomp_map_inf Heql; subst; cbn in pi1, Hl; list_simpl.
-  apply cut_oc_comm_left with x; try assumption.
-  intros.
-  enough (ill P (map ioc l4 ++ flat_map (app (map ioc lw)) (map ioc l6 :: nil)) (ioc A0))
+  decomp_map Heql. subst.
+  apply cut_oc_comm_left with A; [ assumption | intros ].
+  enough (ill P (map ioc l1 ++ flat_map (app (map ioc lw)) (map ioc l2 :: nil)) (ioc A0))
     as pi' by (list_simpl; list_simpl in pi'; assumption).
-  apply substitution_ioc with x; [ intros ?; apply oc_irr; assumption | | ].
-  + intros; apply IHcut with x; [ cbn; lia | | ]; assumption.
-  + clear IHsize; apply oc_irr in Hl; list_simpl in Hl; list_simpl; assumption.
+  apply substitution_ioc with A; [ intros ?; apply oc_irr; assumption | | ].
+  + intros; apply IHcut with A; [ cbn; lia | assumption .. ].
+  + clear IHsize. list_simpl. apply oc_irr in Hl. list_simpl in Hl. exact Hl.
 - (* de_ilr *)
   trichot_elt_elt_inf_exec Heql.
   + list_simpl; apply de_ilr.

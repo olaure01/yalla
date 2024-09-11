@@ -114,7 +114,7 @@ remember (map ill2ill l) as l0 eqn:Heql0. remember (ill2ill A) as A0 eqn:HeqA0.
 revert l Heql0 A HeqA0; induction pi; intros l' Heql0 A' HeqA0; subst;
   try discriminate f;
   try (now destruct A'; inversion HeqA0; subst;
-         try (symmetry in Heql0; decomp_map_inf Heql0; subst); constructor;
+         try (symmetry in Heql0; decomp_map Heql0; subst); constructor;
          try (now apply IHpi); try (now apply IHpi1); try (now apply IHpi2)).
 - destruct A'; inversion HeqA0.
   destruct l'; inversion Heql0; destruct l'; inversion Heql0.
@@ -123,8 +123,8 @@ revert l Heql0 A HeqA0; induction pi; intros l' Heql0 A' HeqA0; subst;
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
   eapply ex_ir; [ | eassumption ].
   apply IHpi; [ assumption | reflexivity ].
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  cbn in Heql0. symmetry in Heql0. apply ill2ill_map_ioc_inv in Heql0 as [l -> ->].
+- decomp_map Heql0 eqn:Heq. subst.
+  symmetry in Heq. apply ill2ill_map_ioc_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP%Permutation_Type_sym].
   eapply ex_ir; [ apply IHpi; [ | reflexivity];
                   rewrite <- ill2ill_map_ioc, <- ? map_app; reflexivity | ].
@@ -132,92 +132,91 @@ revert l Heql0 A HeqA0; induction pi; intros l' Heql0 A' HeqA0; subst;
 - destruct A'; inversion HeqA0.
   destruct l'; inversion Heql0.
   apply one_irr.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq.
   eapply ex_ir.
   + apply one_ilr.
     apply IHpi; [ rewrite <- ! map_app | ]; reflexivity.
   + apply Permutation_Type_middle.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0; subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply tens_ilr.
-    eapply (@ex_ir _ (x1 :: x2 :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x1 :: x2 :: l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    eapply (@ex_ir _ (x1 :: x2 :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x1 :: x2 :: l2)); [ cbn; rewrite map_app | ]; reflexivity.
     * symmetry. apply Permutation_Type_cons_app, Permutation_Type_middle.
   + apply Permutation_Type_middle.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql2.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql3; subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply lmap_ilr.
     * apply IHpi1; reflexivity.
-    * eapply (@ex_ir (l3 ++ x2 :: l7) (x2 :: l3 ++ l7)).
+    * eapply (@ex_ir (l1 ++ x2 :: l2) (x2 :: l1 ++ l2)).
       -- apply IHpi2; [ cbn; rewrite map_app | ]; reflexivity.
       -- symmetry. apply Permutation_Type_middle.
   + rewrite ? app_assoc.
     apply Permutation_Type_cons_app, Permutation_Type_app_tail, Permutation_Type_app_comm.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0. subst.
+- decomp_map Heql0 eqn:Heq. subst. destruct Heq as [Heq _].
+  destruct x; inversion Heq.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply with_ilr1.
-    eapply (@ex_ir _ (x1 :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x1 :: l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    eapply (@ex_ir _ (x1 :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x1 :: l2)); [ cbn; rewrite map_app | ]; reflexivity.
     * symmetry. apply Permutation_Type_middle.
   + apply Permutation_Type_middle.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0. subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply with_ilr2.
-    eapply (@ex_ir _ (x2 :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x2 :: l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    eapply (@ex_ir _ (x2 :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x2 :: l2)); [ cbn; rewrite map_app | ]; reflexivity.
     * symmetry. apply Permutation_Type_middle.
   + apply Permutation_Type_middle.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0. subst.
-  eapply ex_ir.
-  + eapply (zero_ilr (l0 ++ l4)).
-  + apply Permutation_Type_middle.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0. subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq.
+  eapply ex_ir; [ | apply Permutation_Type_middle ].
+  apply zero_ilr.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply plus_ilr.
-    * eapply (@ex_ir _ (x1 :: l0 ++ l4)).
-      -- apply (IHpi1 (l0 ++ x1 :: l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    * eapply (@ex_ir _ (x1 :: l1 ++ l2)).
+      -- apply (IHpi1 (l1 ++ x1 :: l2)); [ cbn; rewrite map_app | ]; reflexivity.
       -- symmetry. apply Permutation_Type_middle.
-    * eapply (@ex_ir _ (x2 :: l0 ++ l4)).
-      -- apply (IHpi2 (l0 ++ x2 :: l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    * eapply (@ex_ir _ (x2 :: l1 ++ l2)).
+      -- apply (IHpi2 (l1 ++ x2 :: l2)); [ cbn; rewrite map_app | ]; reflexivity.
       -- symmetry. apply Permutation_Type_middle.
   + apply Permutation_Type_middle.
 - destruct A'; inversion HeqA0. subst.
   apply ill2ill_map_ioc_inv in Heql0 as [l'' -> -> ].
   apply oc_irr, IHpi; [ | reflexivity ].
   symmetry. apply ill2ill_map_ioc.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0. subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply de_ilr.
-    eapply (@ex_ir _ (x :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x :: l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    eapply (@ex_ir _ (x :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x :: l2)); [ cbn; rewrite map_app | ]; reflexivity.
     * symmetry. apply Permutation_Type_middle.
   + apply Permutation_Type_middle.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0. subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply wk_ilr.
-    apply (IHpi (l0 ++ l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    apply (IHpi (l1 ++ l2)); [ cbn; rewrite map_app | ]; reflexivity.
   + apply Permutation_Type_middle.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql0. subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  destruct x; inversion Heq. subst.
   eapply ex_ir.
   + apply co_ilr.
-    eapply (@ex_ir _ (ioc x :: ioc x :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ ioc x :: ioc x :: l4)); [ cbn; rewrite map_app | ]; reflexivity.
+    eapply (@ex_ir _ (ioc x :: ioc x :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ ioc x :: ioc x :: l2)); [ cbn; rewrite map_app | ]; reflexivity.
     * symmetry.
       etransitivity; [ apply Permutation_Type_cons_app, Permutation_Type_cons_app | ]; reflexivity.
   + apply Permutation_Type_middle.

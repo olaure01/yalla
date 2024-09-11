@@ -253,7 +253,7 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
     * symmetry in Heq0. apply repeat_eq_app in Heq0 as [Heql0 Heq]; inversion Heq as [[HeqA HeqB Heql]]. subst.
       list_simpl in HP. rewrite <- Heql0, <- Heql in HP.
       rewrite (app_assoc (repeat _ _)), <- repeat_app in HP.
-      remember (length l0 + length l) as k eqn:Heqk. clear Heqk Heql0 Heq Heql.
+      remember (length l + length l0) as k eqn:Heqk. clear Heqk Heql0 Heq Heql.
       apply Permutation_Type_app_app_inv in HP as [[[[l1a l2a] l3a] l4a] [[HP1 HP2] [HP3 HP4]]].
       apply Permutation_Type_app_app_inv in HP4 as [[[[l1b l2b] l3b] l4b] [[HP1b HP2b] [HP3b HP4b]]].
       assert (repeat (tens (wn one) bot) (length l1b) = l1b /\ repeat (tens (wn one) bot) (length l3b) = l3b)
@@ -391,13 +391,10 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
   dichot_elt_app_inf_exec Heq; subst.
   + symmetry in HP.
     apply Permutation_Type_map_inv in HP as [l' Heq HP].
-    symmetry in Heq. decomp_map_inf Heq; cbn in Heq1, Heq2, Heq3, Heq5; subst; cbn in HP.
-    apply (Permutation_Type_map wn) in HP.
-    list_simpl in HP.
-    rewrite app_assoc, <- map_app in HP.
-    apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
-    rewrite app_comm_cons, Heq2, Heq5 in HP.
-    apply IHpi in HP.
+    decomp_map Heq eqn:Heq'. destruct Heq' as [Heq2 Heq5]. subst.
+    apply (Permutation_Type_map wn) in HP. list_simpl in HP.
+    rewrite app_assoc, <- map_app in HP. apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
+    rewrite app_comm_cons, Heq2, Heq5 in HP. apply IHpi in HP.
     eapply ex_bbb_r;
       [ apply oc_bbb_r; eassumption | list_simpl; apply Permutation_Type_middle ].
   + dichot_elt_app_inf_exec Heq1; subst.
@@ -421,7 +418,7 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
       apply (@Permutation_Type_cons _ (tens (wn one) bot) _ eq_refl) in HP.
       assert (Permutation_Type (tens (wn one) bot :: l)
                                (l' ++ repeat (tens (wn one) bot) (S n)
-                                   ++ repeat (wn (tens (wn one) bot)) (length l2 + length l'r))) as HP'.
+                                   ++ repeat (wn (tens (wn one) bot)) (length l1 + length l'r))) as HP'.
       { etransitivity; [ apply HP | ].
         cbn. rewrite repeat_app. apply Permutation_Type_cons_app. list_simpl. reflexivity. }
       exact (IHpi _ _ _ HP').
@@ -461,7 +458,7 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
                                         wn (tens (wn one) bot) :: l)) in HP; [ | reflexivity ].
       assert (Permutation_Type (wn (tens (wn one) bot) :: wn (tens (wn one) bot) :: l)
          (l' ++ repeat (tens (wn one) bot) n ++
-                repeat (wn (tens (wn one) bot)) (S (S (length l2 + length l'r)))))
+                repeat (wn (tens (wn one) bot)) (S (S (length l1 + length l'r)))))
         as HP'.
       { etransitivity; [ apply HP | ].
         cbn. cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.

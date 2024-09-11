@@ -314,8 +314,8 @@ induction pi; intros HF HC l1' l2' HP.
   apply Permutation_Type_app_inv in HP. assumption.
 - apply Permutation_Type_app_app_inv in HP as [[[[l3' l3''] l4'] l4''] [[HP1 HP2] [HP3 HP4]]].
   symmetry in HP4. apply Permutation_Type_map_inv in HP4 as [l3''' Heq HP4].
-  symmetry in Heq. decomp_map_inf Heq. subst.
-  apply ex_otr with ((l3' ++ map toc (map tneg l0)) ++ l3'' ++ map toc (map tneg l3)).
+  decomp_map Heq. subst.
+  apply ex_otr with ((l3' ++ map toc (map tneg l4')) ++ l3'' ++ map toc (map tneg l4'')).
   + constructor.
     * apply IHpi1 in HP1; [ assumption | Forall_inf_solve | ].
       destruct (HC _ (eq_refl _)) as [D HD].
@@ -328,7 +328,7 @@ induction pi; intros HF HC l1' l2' HP.
       eexists. etransitivity; [ | apply HD].
       constructor; constructor.
   + assert (Permutation_Type (l1' ++ map toc (map tneg l2'))
-                         ((l3' ++ l3'') ++ map toc (map tneg (l0 ++ l3)))) as HP'
+                         ((l3' ++ l3'') ++ map toc (map tneg (l4' ++ l4'')))) as HP'
       by (apply Permutation_Type_app, Permutation_Type_map, Permutation_Type_map; assumption).
     symmetry. etransitivity; [ apply HP' | ]. list_simpl.
     apply Permutation_Type_app_head.
@@ -338,7 +338,7 @@ induction pi; intros HF HC l1' l2' HP.
   list_simpl. constructor.
   rewrite 2 app_comm_cons, app_assoc.
   apply IHpi; [ | assumption | ].
-  + Forall_inf_cbn_hyp. Forall_inf_solve_rec.
+  + Forall_inf_simpl_hyp. Forall_inf_solve_rec.
     destruct X as [S Hs].
     constructor.
     * exists S. etransitivity; [ | apply Hs].
@@ -359,7 +359,7 @@ induction pi; intros HF HC l1' l2' HP.
     constructor; constructor.
   + intros D [=].
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_elt_inv in HP' as [[l' l''] Heq].
+  symmetry in HP'. apply Permutation_Type_vs_elt_inv in HP' as [(l', l'') Heq].
   dichot_elt_app_inf_exec Heq; subst.
   + apply ex_otr with ((l' ++ l0 ++ map toc (map tneg l2')) ++ tneg A :: nil);
     [ | list_simpl; apply Permutation_Type_app_head; rewrite app_assoc; symmetry;
@@ -368,21 +368,21 @@ induction pi; intros HF HC l1' l2' HP.
     rewrite app_assoc.
     apply IHpi; [ Forall_inf_solve | | ].
     * intros D [= ->].
-      Forall_inf_cbn_hyp. destruct X as [D' HD'].
+      Forall_inf_simpl_hyp. destruct X as [D' HD'].
       eexists. etransitivity; [ | apply HD'].
       constructor; constructor.
     * list_simpl. list_simpl in HP.
       apply Permutation_Type_app_inv in HP.
       list_simpl in HP. assumption.
-  + symmetry in Heq1. decomp_map_inf Heq1. subst.
-    inversion Heq1. subst. list_simpl.
-    apply ex_otr with ((l1' ++ map toc (map tneg (l2 ++ l4))) ++ toc (tneg A) :: nil);
+  + decomp_map Heq1 eqn:Hx. subst. injection Hx as [= ->].
+    list_simpl.
+    apply ex_otr with ((l1' ++ map toc (map tneg (l0 ++ l''))) ++ toc (tneg A) :: nil);
       [ | list_simpl;
           apply Permutation_Type_app_head, Permutation_Type_app_head, Permutation_Type_app_comm ].
     constructor.
     apply IHpi; [ Forall_inf_solve | | ].
     * intros D [= ->].
-      Forall_inf_cbn_hyp. destruct X as [D' HD'].
+      Forall_inf_simpl_hyp. destruct X as [D' HD'].
       eexists. etransitivity; [ | apply HD'].
       constructor; constructor.
     * list_simpl. list_simpl in HP.
@@ -407,7 +407,7 @@ induction pi; intros HF HC l1' l2' HP.
   apply Permutation_Type_elt_map_inv in HP' as [(l1'', l2'') ->]; [ | intros ? [=] ].
   list_simpl. constructor; rewrite app_comm_cons, app_assoc.
   + apply IHpi1; [ | Forall_inf_solve | ].
-    * Forall_inf_cbn_hyp. Forall_inf_solve_rec.
+    * Forall_inf_simpl_hyp. Forall_inf_solve_rec.
       constructor; [ | assumption ].
       destruct X as [D' HD'].
       eexists. etransitivity; [ | apply HD'].
@@ -416,7 +416,7 @@ induction pi; intros HF HC l1' l2' HP.
       apply Permutation_Type_app_inv in HP.
       apply Permutation_Type_elt. assumption.
   + apply IHpi2; [ | Forall_inf_solve | ].
-    * Forall_inf_cbn_hyp. Forall_inf_solve_rec.
+    * Forall_inf_simpl_hyp. Forall_inf_solve_rec.
       constructor; [ | assumption ].
       destruct X as [D' HD'].
       eexists. etransitivity; [ | apply HD'].
@@ -425,14 +425,14 @@ induction pi; intros HF HC l1' l2' HP.
       apply Permutation_Type_app_inv in HP.
       apply Permutation_Type_elt. assumption.
 - symmetry in HP. apply Permutation_Type_map_inv in HP as [l3 Heq HP].
-  symmetry in Heq. decomp_map_inf Heq. subst.
-  assert (l2' = nil) as -> by (destruct l2'; [ reflexivity | destruct l2; inversion Heq2 ]).
+  decomp_map Heq eqn:Hn. subst.
+  assert (l2' = nil) as -> by (destruct l2'; [ reflexivity | destruct l1; discriminate Hn ]).
   list_simpl.
   destruct (HC (toc A) (eq_refl _)) as [A' HC'].
   destruct (tsubform_toc_ntrans _ HC') as [A'' ->].
   apply oc_otrr.
-  destruct l2; inversion Heq2.
-  replace (map toc l1) with (map toc l1 ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
+  destruct l1; inversion Hn.
+  replace (map toc l1') with (map toc l1' ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
   apply neg_rev_ot.
   apply IHpi; [ Forall_inf_solve | | ].
   + destruct (HC _ (eq_refl _)) as [D HD].
@@ -441,7 +441,7 @@ induction pi; intros HF HC l1' l2' HP.
     constructor; constructor.
   + list_simpl in HP; list_simpl.
     apply Permutation_Type_map; assumption.
-- Forall_inf_cbn_hyp; subst.
+- Forall_inf_simpl_hyp; subst.
   destruct X as [At HAt].
   destruct (tsubform_toc_ntrans _ HAt) as [B ->].
   assert (HP' := HP).
@@ -450,7 +450,7 @@ induction pi; intros HF HC l1' l2' HP.
   apply ex_otr with ((l1'' ++ l2'') ++ map toc (map tneg (B :: l2')));
     [ | list_simpl; apply Permutation_Type_app_head; symmetry; apply Permutation_Type_middle ].
   apply IHpi; [ | Forall_inf_solve | ].
-  + Forall_inf_cbn_hyp. Forall_inf_solve_rec.
+  + Forall_inf_simpl_hyp. Forall_inf_solve_rec.
     constructor; [ | assumption ].
     eexists. etransitivity; [ | apply HAt ].
     constructor; constructor.
@@ -466,7 +466,7 @@ induction pi; intros HF HC l1' l2' HP.
 - assert { l3 & Permutation_Type l1' (toc A :: l3) } as [l3 HPw].
   { symmetry in HP. apply Permutation_Type_vs_elt_inv in HP as [[l1l l1r] Heq]. cbn in Heq.
     revert l1l Heq. clear. induction l1'; intros l1l Heq.
-    - exfalso. cbn in Heq. decomp_map Heq. inversion Heq3.
+    - exfalso. cbn in Heq. decomp_map Heq eqn:Hn. discriminate Hn.
     - destruct l1l; inversion Heq; subst.
       + exists l1'. reflexivity.
       + apply IHl1' in H1 as [l3 H1].
@@ -537,33 +537,30 @@ intros pi; induction pi; intros l0 Heq;
 - destruct l0; inversion Heq.
   destruct D; inversion H0.
   constructor.
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply bot_fr; eassumption | apply Permutation_Type_middle ].
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply bot_fr; eassumption | ].
   polfoccont_cbn; destruct (polarity D).
   + apply Permutation_Type_middle.
-  + rewrite (app_comm_cons _ (bot :: l5)).
+  + rewrite (app_comm_cons _ (bot :: l2)).
     apply Permutation_Type_cons_app, Permutation_Type_cons; reflexivity.
 - destruct D; inversion HD.
-  symmetry in Heq; decomp_map_inf Heq; subst.
+  decomp_map Heq. subst.
   assert (IHpi1' := IHpi1 _ (eq_refl _)).
   assert (IHpi2' := IHpi2 _ (eq_refl _)).
   splitIHpi IHpi1'.
   splitIHpi IHpi2'.
   apply (@tens_fr atom_inf); assumption.
-- symmetry in Heq; decomp_map_inf Heq; cbn in Heq3.
-  destruct x; inversion Heq3; subst; cbn; cbn in IHpi.
-  replace (map ntrans l3 ++ ntrans x2 :: ntrans x1 :: map ntrans l5)
-     with (map ntrans (l3 ++ x2 :: x1 :: l5)) in IHpi
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+  replace (map ntrans l1 ++ ntrans x2 :: ntrans x1 :: map ntrans l2)
+     with (map ntrans (l1 ++ x2 :: x1 :: l2)) in IHpi
     by (list_simpl; reflexivity).
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
@@ -573,17 +570,16 @@ intros pi; induction pi; intros l0 Heq;
   rewrite ? app_assoc; apply Permutation_Type_app_tail.
   etransitivity; [ | apply Permutation_Type_app_comm ].
   list_simpl; apply Permutation_Type_app_head, Permutation_Type_swap.
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
-  replace (map ntrans l3 ++ ntrans x2 :: ntrans x1 :: map ntrans l5)
-     with (map ntrans (l3 ++ x2 :: x1 :: l5)) in IHpi
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+  replace (map ntrans l1 ++ ntrans x2 :: ntrans x1 :: map ntrans l2)
+     with (map ntrans (l1 ++ x2 :: x1 :: l2)) in IHpi
     by (list_simpl; reflexivity).
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
-  apply ex_fr with (@parr atom_inf x1 x2 :: @polcont atom_inf (l3 ++ l5) D).
+  apply ex_fr with (@parr atom_inf x1 x2 :: @polcont atom_inf (l1 ++ l2) D).
   + apply parr_fr.
     eapply ex_fr; [ eassumption | ].
-    assert (Permutation_Type (l3 ++ x2 :: x1 :: l5) (x1 :: x2 :: l3 ++ l5)) as HP.
+    assert (Permutation_Type (l1 ++ x2 :: x1 :: l2) (x1 :: x2 :: l1 ++ l2)) as HP.
     { list_simpl; cons2app.
       rewrite ? app_assoc; apply Permutation_Type_app_tail.
       etransitivity; [ | apply Permutation_Type_app_comm ].
@@ -599,24 +595,21 @@ intros pi; induction pi; intros l0 Heq;
   + exfalso. destruct D; inversion H0; inversion Hs.
   + apply IHpi; [ | reflexivity ].
     destruct D; inversion H0; reflexivity.
-- symmetry in Heq; decomp_map_inf Heq; subst.
-  destruct l4; inversion Heq4; subst.
+- decomp_map Heq eqn:Heq0. subst. destruct Heq0 as [Heq ->%map_eq_nil].
   destruct (@polarity atom_inf x).
-  + rewrite (proj2 (pntrans_neg x) s) in Heq3.
-    inversion Heq3; subst.
+  + rewrite (proj2 (pntrans_neg x) s) in Heq.
+    inversion Heq. subst.
     assert (IHpi' := IHpi _ (eq_refl _)).
     splitIHpi IHpi'.
     rewrite (polfocs s), (polconts _ s) in HpiP0.
     eapply ex_fr; [ apply (@foc_fr atom_inf); eassumption | ].
     apply Permutation_Type_cons_append.
   + exfalso.
-    destruct x; inversion Heq3; inversion a.
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
+    destruct x; inversion Heq; inversion a.
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   eapply ex_fr; [ | apply Permutation_Type_middle ].
-  cbn; apply (@top_gen_fr atom_inf); reflexivity.
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
+  cbn. apply (@top_gen_fr atom_inf). reflexivity.
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   polfoccont_cbn.
   destruct (polarity D) as [Hs | Ha].
   + eapply ex_fr; [ | apply Permutation_Type_middle ].
@@ -632,13 +625,12 @@ intros pi; induction pi; intros l0 Heq;
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   apply plus_fr2; assumption.
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
-  replace (map ntrans l3 ++ ntrans x1 :: map ntrans l5)
-     with (map ntrans (l3 ++ x1 :: l5)) in IHpi1
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+  replace (map ntrans l1 ++ ntrans x1 :: map ntrans l2)
+     with (map ntrans (l1 ++ x1 :: l2)) in IHpi1
     by (list_simpl; reflexivity).
-  replace (map ntrans l3 ++ ntrans x2 :: map ntrans l5)
-     with (map ntrans (l3 ++ x2 :: l5)) in IHpi2
+  replace (map ntrans l1 ++ ntrans x2 :: map ntrans l2)
+     with (map ntrans (l1 ++ x2 :: l2)) in IHpi2
     by (list_simpl; reflexivity).
   assert (IHpi1' := IHpi1 _ (eq_refl _)).
   splitIHpi IHpi1'.
@@ -647,13 +639,12 @@ intros pi; induction pi; intros l0 Heq;
   eapply ex_fr; [ apply with_fr | apply Permutation_Type_middle ].
   + eapply ex_fr; [ apply HpiN0 | symmetry; apply Permutation_Type_middle ].
   + eapply ex_fr; [ apply HpiN1 | symmetry; apply Permutation_Type_middle ].
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
-  replace (map ntrans l3 ++ ntrans x1 :: map ntrans l5)
-     with (map ntrans (l3 ++ x1 :: l5)) in IHpi1
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+  replace (map ntrans l1 ++ ntrans x1 :: map ntrans l2)
+     with (map ntrans (l1 ++ x1 :: l2)) in IHpi1
     by (list_simpl; reflexivity).
-  replace (map ntrans l3 ++ ntrans x2 :: map ntrans l5)
-     with (map ntrans (l3 ++ x2 :: l5)) in IHpi2
+  replace (map ntrans l1 ++ ntrans x2 :: map ntrans l2)
+     with (map ntrans (l1 ++ x2 :: l2)) in IHpi2
     by (list_simpl; reflexivity).
   assert (IHpi1' := IHpi1 _ (eq_refl _)).
   splitIHpi IHpi1'.
@@ -677,48 +668,42 @@ intros pi; induction pi; intros l0 Heq;
   apply ntrans_map_toc_inv in Heq.
   destruct Heq as [lw -> ->].
   apply (@oc_fr atom_inf); assumption.
-- symmetry in Heq; decomp_map_inf Heq.
-  destruct x; inversion Heq3; subst.
-  destruct l4; inversion Heq4.
+- decomp_map Heq eqn:Hx. destruct Hx as [Hx ->%map_eq_nil]. destruct x; destr_eq Hx. subst.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply (@de_fr atom_inf) | apply Permutation_Type_middle ].
-  list_simpl; assumption.
-- symmetry in Heq; decomp_map_inf Heq; subst.
-  destruct x; inversion Heq3; subst.
+  list_simpl. assumption.
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply wk_fr; eassumption | apply Permutation_Type_middle ].
-- symmetry in Heq; decomp_map_inf Heq; subst.
-  destruct x; inversion Heq3; subst.
+- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply wk_fr; eassumption | apply (@Permutation_Type_middle_polcont atom_inf) ].
-- symmetry in Heq; decomp_map_inf Heq; subst.
-  symmetry in Heq3; rewrite Heq3 in IHpi.
-  replace (map ntrans l3 ++ ntrans x :: ntrans x :: map ntrans l5)
-     with (map ntrans (l3 ++ x :: x :: l5)) in IHpi
+- decomp_map Heq eqn:Hx. subst. rewrite <- Hx in IHpi.
+  replace (map ntrans l1 ++ ntrans x :: ntrans x :: map ntrans l2)
+     with (map ntrans (l1 ++ x :: x :: l2)) in IHpi
     by (list_simpl; reflexivity).
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
-  destruct x; inversion Heq3; subst.
+  destruct x; destr_eq Hx. subst.
   eapply ex_fr; [ apply co_fr | apply Permutation_Type_middle ].
   eapply ex_fr; [ apply HpiN0 | ].
   cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail.
   list_simpl; etransitivity; [ apply Permutation_Type_app_comm | reflexivity ].
-- symmetry in Heq; decomp_map_inf Heq; subst.
-  symmetry in Heq3; rewrite Heq3 in IHpi.
-  replace (map ntrans l3 ++ ntrans x :: ntrans x :: map ntrans l5)
-     with (map ntrans (l3 ++ x :: x :: l5)) in IHpi
+- decomp_map Heq eqn:Hx. rewrite <- Hx in IHpi.
+  replace (map ntrans l1 ++ ntrans x :: ntrans x :: map ntrans l2)
+     with (map ntrans (l1 ++ x :: x :: l2)) in IHpi
     by (list_simpl; reflexivity).
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
-  destruct x; inversion Heq3; subst.
+  destruct x; destr_eq Hx. subst.
   eapply ex_fr; [ apply co_fr | apply (@Permutation_Type_middle_polcont atom_inf) ].
   eapply ex_fr; [ apply HpiP0 | ].
-  assert (Permutation_Type (l3 ++ wn x :: wn x :: l5) (wn x :: wn x :: l3 ++ l5)) as HP.
+  assert (Permutation_Type (l1 ++ wn x :: wn x :: l2) (wn x :: wn x :: l1 ++ l2)) as HP.
   { cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
     list_simpl. etransitivity; [ apply Permutation_Type_app_comm | reflexivity ]. }
   polfoccont_cbn. destruct (polarity D); [ assumption | ].

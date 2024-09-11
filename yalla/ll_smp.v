@@ -128,15 +128,14 @@ Lemma llfrag2ll l : ll_fragments.ll_ll (map ll2ll l) -> ll l.
 Proof.
 intro pi. remember (map ll2ll l) as l0 eqn:Heql0.
 induction pi in l, Heql0 |- *; subst.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct l2; inversion Heql4.
-  destruct x; inversion Heql2.
-  destruct x0; inversion Heql0.
+- decomp_map Heql0 eqn:Heq. subst. destruct Heq as [Heq1 [Heq2 ->%map_eq_nil]].
+  destruct x; inversion Heq1.
+  destruct x0; inversion Heq2.
   apply ax_r.
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
   eapply ex_r; [ apply IHpi | ]; eassumption.
-- symmetry in Heql0. decomp_map_inf Heql0. subst. symmetry in Heql0.
-  apply ll2ll_map_wn_inv in Heql0 as [l -> ->].
+- decomp_map Heql0 eqn:Heq. subst.
+  symmetry in Heq. apply ll2ll_map_wn_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP].
   eapply ex_r; [ apply IHpi; rewrite <- ll2ll_map_wn, <- ! map_app; reflexivity | ].
   symmetry in HP.
@@ -146,8 +145,8 @@ induction pi in l, Heql0 |- *; subst.
   apply one_r.
 - destruct l as [|f l]; inversion Heql0 as [Heq]. destruct f; inversion Heq.
   apply bot_r, IHpi. assumption.
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  destruct x; inversion Heql2. subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; destr_eq Hx. subst.
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1. reflexivity.
   + apply IHpi2. reflexivity.

@@ -32,8 +32,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
      apply (ex_wn_r _ lw); [ list_simpl | assumption ].
      rewrite (app_assoc l), (app_assoc _ l3), <- (app_assoc l).
      now apply IHpi; list_simpl.
-  + symmetry in Heq1. decomp_map_inf Heq1.
-    exfalso. rewrite <- Heq1 in Hat. inversion Hat.
+  + exfalso. decomp_map Heq1. inversion Hat.
   + list_simpl. rewrite 2 app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. rewrite (app_assoc l0), (app_assoc _ l6).
@@ -99,7 +98,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
   + eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl.
     rewrite app_comm_cons. apply IHpi2; list_simpl; reflexivity.
 - destruct l4; inversion Heq; subst; try (exfalso; inversion Hat; fail).
-  exfalso; decomp_map_inf H1; destruct A; inversion Hat; inversion H1.
+  exfalso. decomp_map H1. inversion Hat.
 - destruct l4; inversion Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl.
   apply de_r.
@@ -124,9 +123,9 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
          apply PCPermutation_Type_app_comm.
     * list_simpl; rewrite app_assoc, (app_assoc _ _ (l0 ++ _)), (app_assoc l1), (app_assoc _ l0).
       apply PCPermutation_Type_app_comm.
-  + apply (ex_r (l3 ++ l6 ++ l2 ++ l1 ++ l5)).
+  + apply (ex_r (l3 ++ l ++ l2 ++ l1 ++ l5)).
     * apply (cut_r _ f); [ | assumption ].
-      apply (ex_r (l1 ++ l5 ++ (dual A0 :: l6) ++ l2)).
+      apply (ex_r (l1 ++ l5 ++ (dual A0 :: l) ++ l2)).
       -- now apply IHpi1.
       -- rewrite app_assoc, app_comm_cons, (app_assoc (dual A0 :: _)).
          apply PCPermutation_Type_app_comm.
@@ -162,8 +161,7 @@ remember (l1 ++ dual A :: l2) as l eqn:Heql. destruct_ll pi2 f Y l Hl Hr HP FL a
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | apply HP ].
     revert Hl IHsize0. list_simpl. intros Hl IHsize0.
     refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
-  + symmetry in Heql1. decomp_map_inf Heql1.
-    destruct Hat as [-> | ->]; discriminate Heql1.
+  + exfalso. decomp_map Heql1 eqn:Heq. destruct Hat as [-> | ->]; discriminate Heq.
   + list_simpl. eapply ex_wn_r; [ | apply HP ].
     revert Hl IHsize0. rewrite 2 app_assoc. intros Hl IHsize0. rewrite 2 app_assoc.
     refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
@@ -223,10 +221,9 @@ remember (l1 ++ dual A :: l2) as l eqn:Heql. destruct_ll pi2 f Y l Hl Hr HP FL a
       refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
     * revert Hr IHsize0. rewrite app_comm_cons. intros Hr IHsize0.
       refine (IHsize0 (psize pi1 + psize Hr) _ _ _ _ _ pi1 Hr _ Hat); lia.
-- destruct l1; inversion Heql; subst.
+- exfalso. destruct l1; inversion Heql; subst.
   + destruct Hat as [-> | ->]; discriminate H0.
-  + decomp_map_inf H1.
-    destruct Hat as [-> | ->]; discriminate H1.
+  + decomp_map H1 eqn:Heq. destruct Hat as [-> | ->]; discriminate Heq.
 - destruct l1; inversion Heql; subst.
   + destruct Hat as [-> | ->]; discriminate H0.
   + cbn. apply de_r.

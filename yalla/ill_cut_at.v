@@ -61,7 +61,7 @@ induction pi2 in l1, l2, Heql |- *; subst;
   + rewrite 2 app_assoc. eapply ex_oc_ir; [ | eassumption ].
     list_simpl. apply IHpi2. list_simpl. reflexivity.
   + dichot_elt_app_inf_exec Heql1; subst.
-    * symmetry in Heql0. decomp_map_inf Heql0. discriminate Heql0.
+    * decomp_map Heql0 eqn:Hov. discriminate Hov.
     * rewrite <- 2 app_assoc. eapply ex_oc_ir; [ | eassumption ]. rewrite 2 app_assoc.
       apply IHpi2. list_simpl. reflexivity.
 - nil_vs_elt_inv Heql.
@@ -88,7 +88,7 @@ induction pi2 in l1, l2, Heql |- *; subst;
   + dichot_elt_app_inf_exec Heql0; subst.
     * list_simpl. rewrite 2 app_assoc. apply lmap_ilr; [ assumption | ].
       list_simpl. apply IHpi2_2. list_simpl. reflexivity.
-    * list_simpl. rewrite (app_assoc l6), (app_assoc (l6 ++ l0)). apply lmap_ilr; [ | assumption ].
+    * list_simpl. rewrite (app_assoc l2), (app_assoc (l2 ++ l0)). apply lmap_ilr; [ | assumption ].
       list_simpl. apply IHpi2_1. reflexivity.
 - assert ({l2' | l2 = l2' ++ ineg A :: nil & l = l1 ++ ivar X :: l2' }) as [l2' -> ->].
   { clear - Heql. induction l2 in Heql |- * using rev_rect.
@@ -105,7 +105,7 @@ induction pi2 in l1, l2, Heql |- *; subst;
   + discriminate Heql1.
   + rewrite 2 app_assoc.
     apply plus_ilr; list_simpl; [ apply IHpi2_1 | apply IHpi2_2 ]; list_simpl; reflexivity.
-- decomp_map_inf Heql. discriminate.
+- decomp_map Heql eqn:Hov. discriminate Hov.
 - trichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_assoc. apply cut_ir with A; [ assumption .. | ].
     list_simpl. apply IHpi2_2. list_simpl. reflexivity.

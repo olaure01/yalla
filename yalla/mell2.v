@@ -115,30 +115,28 @@ intro pi. remember (map mell2ll l) as l0 eqn:Heql0.
 induction pi in l, Heql0 |-* using ll_def.ll_nested_ind; subst;
   try (destruct l as [|f l]; inversion Heql0 as [[Hf Heq]]; destruct f; destr_eq Hf; subst;
        try (constructor; apply IHpi); reflexivity).
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  rewrite (map_eq_nil _ _ Heql4).
-  destruct x; destr_eq Heql2. destruct x0; destr_eq Heql0. subst.
+- decomp_map Heql0 eqn:Heq. subst. destruct Heq as [Heq1 [Heq2 ->%map_eq_nil]].
+  destruct x; destr_eq Heq1. destruct x0; destr_eq Heq2. subst.
   apply ax_r.
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
   eapply ex_r, HP.
   exact (IHpi _ Heq).
-- symmetry in Heql0. decomp_map_inf Heql0. subst.
-  symmetry in Heql0. apply mell2ll_map_wn_inv in Heql0 as [l -> ->].
+- decomp_map Heql0 eqn:Heq. subst.
+  symmetry in Heq. apply mell2ll_map_wn_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP%Permutation_Type_sym].
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ! map_app; reflexivity | ].
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, HP.
 - remember (length L) as n eqn:Heqn.
   repeat (destruct n; inversion eqpmix).
   repeat (destruct L; destr_eq Heqn).
-  cbn in Heql0. symmetry in Heql0. decomp_map_inf Heql0. subst.
-  rewrite (map_eq_nil _ _ Heql4), app_nil_r.
+  list_simpl in Heql0. decomp_map Heql0. subst.
   apply mix_r.
-  + destruct (In_Forall_inf_in (map mell2ll l3) PL); [ apply in_inf_eq | ].
+  + destruct (In_Forall_inf_in (map mell2ll l0) PL); [ apply in_inf_eq | ].
     exact (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
-  + destruct (In_Forall_inf_in (map mell2ll l5) PL); [ right; apply in_inf_eq | ].
+  + destruct (In_Forall_inf_in (map mell2ll l1) PL); [ right; apply in_inf_eq | ].
     exact (ll_def.Dependent_Forall_inf_forall_formula _ _ X i _ eq_refl).
-- symmetry in Heql0. decomp_map_inf Heql0.
-  destruct x; destr_eq Heql2. subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; destr_eq Hx. subst.
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1. reflexivity.
   + apply IHpi2. reflexivity.

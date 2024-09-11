@@ -49,7 +49,7 @@ intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
     list_simpl. rewrite (app_assoc l), (app_assoc _ l5).
     apply IHpi; [ list_simpl; reflexivity | ].
     intros ? pi' Hs. apply (IH _ pi'); lia.
-  + symmetry in Heql'1. decomp_map_inf Heql'1. discriminate Heql'1.
+  + decomp_map Heql'1 eqn:Hwo. discriminate Hwo.
   + list_simpl. rewrite 2 app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. rewrite (app_assoc l0), (app_assoc _ l6).
@@ -99,7 +99,7 @@ intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
     rewrite app_comm_cons. apply IHpi1; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ].
 - destruct l3; inversion Heql as [[Heql'' Heq]]. subst.
   + apply (IH _ pi). lia.
-  + decomp_map_inf Heq; inversion Heq3.
+  + decomp_map Heq eqn:Hwo. discriminate Hwo.
 - dichot_elt_app_inf_exec Heql'; subst.
   + apply ex_r with ((((l3 ++ l2) ++ l1) ++ l) ++ l0).
     * apply (cut_r _ f); [ assumption | list_simpl ].
@@ -136,7 +136,7 @@ intros Hgax IHcut l' L pi;
       as [[L' l''] (Hnil' & -> & HPL')].
     eapply ex_r; [ | apply HPL' ].
     apply IHpi. reflexivity.
-- assert (injective (@wn atom)) as Hinj by (intros x y Hxy; inversion Hxy; reflexivity).
+- assert (injective (@wn atom)) as Hinj by (intros x y [= ->]; reflexivity).
   destruct (Permutation_Type_flat_map_cons_flat_map_app (fun p => wn_n p (wn A)) Hinj lw _ _ _ _ p Heq)
     as [(((((lw1', lw2'), l1'), l2'), l''), L') (H1 & H2 & H3 & <-)].
   apply (ex_wn_r _ lw1'); [ | assumption ].
@@ -170,15 +170,15 @@ intros Hgax IHcut l' L pi;
         app_vs_flat_map_inv Heq1.
         * destruct (IHL lw _ _ Heq3) as (L2 & (Heq & (Heql & FL))).
           split with
-            ((l' ++ (flat_map (fun '(p1,p2) => app (map wn lw) p2) (L0 ++ (n, l) :: nil))) :: L2);
+            ((l' ++ (flat_map (fun '(p1,p2) => app (map wn lw) p2) (L0 ++ (n, l0) :: nil))) :: L2);
             repeat split.
           -- cbn. rewrite Heq, ? flat_map_app. cbn. rewrite app_nil_r, ? app_assoc. reflexivity.
           -- cbn. rewrite Heql. reflexivity.
           -- apply Forall_inf_cons.
-             ++ exists (l', (L0 ++ (n, l) :: nil)). split; [ | left ]; reflexivity.
+             ++ exists (l', (L0 ++ (n, l0) :: nil)). split; [ | left ]; reflexivity.
              ++ apply forall_Forall_inf.
-                intros l0 Hin.
-                destruct (Forall_inf_forall FL l0 Hin) as [(l0', L0') [Heq' Hin']].
+                intros l Hin.
+                destruct (Forall_inf_forall FL l Hin) as [(l0', L0') [Heq' Hin']].
                 exists (l0', L0'). split; [ | right ]; assumption.
         * change (flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L1)
             with (nil ++ (flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L1)) in Heq3.
@@ -249,16 +249,16 @@ intros Hgax IHcut l' L pi;
   assert ({ Lw | flat_map (fun '(p1,p2) => app (map wn lw) p2) L = map wn Lw }) as [Lw HeqLw].
   { clear Heq pi IHpi; revert l' H1; clear; induction L; intros l' Heq.
     - exists nil; reflexivity.
-    - cbn in Heq; decomp_map_inf Heq; subst.
-      destruct a; cbn.
-      destruct l3; inversion_clear Heq3.
-      rewrite <- Heq4 in IHL; list_simpl in IHL.
-      rewrite app_comm_cons, app_assoc in IHL.
+    - cbn in Heq. decomp_map Heq eqn:Heq'. subst.
+      destruct Heq' as [Heq1 Heq2].
+      destruct a. cbn.
+      destruct l2; inversion_clear Heq1.
+      rewrite <- Heq2 in IHL. list_simpl in IHL. rewrite app_comm_cons, app_assoc in IHL.
       destruct (IHL _ eq_refl) as [Lw Heq'].
-      exists (lw ++ l3 ++ Lw); list_simpl; rewrite <- Heq'; reflexivity. }
-  decomp_map_inf H1. subst.
+      exists (lw ++ l2 ++ Lw). list_simpl. rewrite <- Heq'. reflexivity. }
+  decomp_map H1 eqn:Heq1. subst.
   list_simpl. rewrite HeqLw, <- map_app. apply oc_r.
-  list_simpl in IHpi. cbn in H3. rewrite H3 in IHpi.
+  list_simpl in IHpi. rewrite Heq1 in IHpi.
   list_simpl. rewrite <- HeqLw, app_comm_cons. apply IHpi. reflexivity.
 - destruct l'; inversion Heq; subst; list_simpl.
   + destruct L as [ | ([ | n], l') L]; inversion H0; subst.
@@ -370,22 +370,22 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
   + rewrite 2 app_assoc. eapply ex_wn_r, HP. rewrite <- 2 app_assoc.
     revert Hl IHsize. list_simpl. intros Hl IHsize.
     refine (IHsize _ _ _ _ pi1 Hl _ _); lia.
-  + symmetry in Heql1. decomp_map_inf Heql1. subst. cbn in pi1.
-    rewrite <- (app_nil_l (map wn l7 ++ l3)).
-    case_eq (pcut P (oc (dual x))); intros Hcut.
+  + decomp_map Heql1. subst. cbn in pi1.
+    rewrite <- (app_nil_l (map wn l5 ++ l3)).
+    case_eq (pcut P (oc (dual A))); intros Hcut.
     * eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
       list_simpl; apply (cut_r _ Hcut); [ | assumption ].
       cbn; rewrite bidual, app_comm_cons, app_assoc.
       eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
-      replace (map wn l2 ++ wn x :: map wn l7 ++ l3) with (map wn (l2 ++ x :: l7) ++ l3)
+      replace (map wn l4 ++ wn A :: map wn l5 ++ l3) with (map wn (l4 ++ A :: l5) ++ l3)
         by (list_simpl; reflexivity).
       eapply ex_wn_r; eassumption.
     * assert (Hgax := (oc_notin_gax _ Hcut)).
-      refine (cut_oc_comm (dual x) _ _ nil _ Hgax pi1 _).
+      refine (cut_oc_comm (dual A) _ _ nil _ Hgax pi1 _).
       intros lw' pi0 Hs; list_simpl; cbn in IHsize.
       apply Permutation_Type_vs_elt_subst in HP as [(l2', l3') HP ->].
       specialize (HP lw'); symmetry in HP.
-      rewrite (app_assoc (map wn l2)), (app_assoc _ _ l3), <- (app_assoc (map wn l2)), <- 2 map_app.
+      rewrite (app_assoc (map wn l4)), (app_assoc _ _ l3), <- (app_assoc (map wn l4)), <- 2 map_app.
       refine (ex_wn_r _ _ _ _ _ HP).
       revert Hl IHsize. list_simpl. rewrite ? (app_assoc l (map wn _)). intros Hl IHsize.
       simple refine (IHsize _ _ _ _ _ Hl _ _); [ exact (oc_r pi0) | cbn in *; lia | reflexivity ].
@@ -1259,17 +1259,17 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       -- exfalso.
          destruct (P_gax_cut Hcut) as [Hat _]; inversion Hat.
   + (* commutative case *)
-    decomp_map_inf H1. subst. cbn. cbn in pi1, Hl.
-    rewrite app_comm_cons, <- (app_nil_l (map wn l6)).
-    destruct (pcut P (oc (dual x))) eqn:Hcut.
+    decomp_map H1. subst. cbn in pi1.
+    rewrite app_comm_cons, <- (app_nil_l (map wn l2)).
+    destruct (pcut P (oc (dual A))) eqn:Hcut.
     * eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
       apply (cut_r _ Hcut); [ | assumption ].
       list_simpl. rewrite bidual.
       rewrite app_comm_cons. eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
-      replace (map wn l4 ++ wn x :: map wn l6) with (map wn (l4 ++ x :: l6)) by (list_simpl; reflexivity).
+      replace (map wn l1 ++ wn A :: map wn l2) with (map wn (l1 ++ A :: l2)) by (list_simpl; reflexivity).
       apply oc_r. assumption.
     * assert (Hgax := (oc_notin_gax _ Hcut)).
-      refine (cut_oc_comm (dual x) _ _ nil _ Hgax pi1 _).
+      refine (cut_oc_comm (dual A) _ _ nil _ Hgax pi1 _).
       intros lw' pi0 Hs. list_simpl. cbn in IHsize.
       rewrite <- ? map_app. apply oc_r.
       revert Hl IHsize. list_simpl. rewrite ? app_comm_cons. intros Hl IHsize.
