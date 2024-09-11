@@ -175,37 +175,37 @@ induction A.
   destruct IHA2 as [[[p2 | n2] Heq2] | pi2]; subst;
     try now
       (right; intros B Heq; destruct B;
-       try destruct p; try destruct n; inversion Heq;
-       (try now (destruct n1; destruct p1; inversion H0));
-       (try now (destruct n2; destruct p2; inversion H1));
-       (try now (destruct n2; destruct p3; inversion H1))).
+       try destruct p; try destruct n; destr_eq Heq;
+       (try now (destruct n1; destruct p1; destr_eq H0));
+       (try now (destruct n2; destruct p2; destr_eq H1));
+       (try now (destruct n2; destruct p3; destr_eq H1))).
   + left; exists (pos (tens p1 p2)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (pos p3)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi1 (pos p1)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (pos p2)); reflexivity.
 - destruct IHA1 as [[[p1 | n1] Heq1] | pi1];
   destruct IHA2 as [[[p2 | n2] Heq2] | pi2]; subst;
     try now
       (right; intros B Heq; destruct B;
-       try destruct p; try destruct n; inversion Heq;
-       (try now (destruct n1; destruct p1; inversion H0));
-       (try now (destruct n2; destruct p2; inversion H1));
-       (try now (destruct p2; destruct n3; inversion H1))).
+       try destruct p; try destruct n; destr_eq Heq;
+       (try now (destruct n1; destruct p1; destr_eq H0));
+       (try now (destruct n2; destruct p2; destr_eq H1));
+       (try now (destruct p2; destruct n3; destr_eq H1))).
   + left; exists (neg (parr n1 n2)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (neg n3)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi1 (neg n1)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (neg n2)); reflexivity.
 - left; exists (pos zero); reflexivity.
 - left; exists (neg top); reflexivity.
@@ -213,53 +213,53 @@ induction A.
   destruct IHA2 as [[[p2 | n2] Heq2] | pi2]; subst;
     try now
       (right; intros B Heq; destruct B;
-       try destruct p; try destruct n; inversion Heq;
-       (try now (destruct n1; destruct p1; inversion H0));
-       (try now (destruct n2; destruct p2; inversion H1));
-       (try now (destruct n2; destruct p3; inversion H1))).
+       try destruct p; try destruct n; destr_eq Heq;
+       (try now (destruct n1; destruct p1; destr_eq H0));
+       (try now (destruct n2; destruct p2; destr_eq H1));
+       (try now (destruct n2; destruct p3; destr_eq H1))).
   + left; exists (pos (aplus p1 p2)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (pos p3)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi1 (pos p1)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (pos p2)); reflexivity.
 - destruct IHA1 as [[[p1 | n1] Heq1] | pi1];
   destruct IHA2 as [[[p2 | n2] Heq2] | pi2]; subst;
     try now
       (right; intros B Heq; destruct B;
-       try destruct p; try destruct n; inversion Heq;
-       (try now (destruct n1; destruct p1; inversion H0));
-       (try now (destruct n2; destruct p2; inversion H1));
-       (try now (destruct p2; destruct n3; inversion H1))).
+       try destruct p; try destruct n; destr_eq Heq;
+       (try now (destruct n1; destruct p1; destr_eq H0));
+       (try now (destruct n2; destruct p2; destr_eq H1));
+       (try now (destruct p2; destruct n3; destr_eq H1))).
   + left; exists (neg (awith n1 n2)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (neg n3)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi1 (neg n1)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n; try destruct p; inversion Heq; subst.
+    destruct B; try destruct n; try destruct p; destr_eq Heq; subst.
     apply (pi2 (neg n2)); reflexivity.
 - destruct IHA as [[[p | n] Heq] | pi]; subst.
   + right; intros B Heq.
-    destruct B; try destruct p0; try destruct n; destruct p; inversion Heq.
+    destruct B; try destruct p0; try destruct n; destruct p; destr_eq Heq.
   + left; exists (pos (oc n)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct p; inversion Heq; subst.
+    destruct B; try destruct p; destr_eq Heq; subst.
     * apply (pi (neg n)); reflexivity.
-    * destruct n; inversion H0.
+    * destruct n; destr_eq H0.
 - destruct IHA as [[[p | n] Heq] | pi]; subst.
   + left; exists (neg (wn p)); reflexivity.
   + right; intros B Heq.
-    destruct B; try destruct n0; try destruct p; destruct n; inversion Heq.
+    destruct B; try destruct n0; try destruct p; destruct n; destr_eq Heq.
   + right; intros B Heq.
-    destruct B; try destruct n; inversion Heq; subst.
-    * destruct p; inversion H0.
+    destruct B; try destruct n; destr_eq Heq; subst.
+    * destruct p; destr_eq H0.
     * apply (pi (pos p)); reflexivity.
 Qed.
 
@@ -282,61 +282,61 @@ unfold llpol_fragment in HfA;
 - inversion HfA.
 - destruct (llpol2ll_dec (formulas.tens B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p1));
     [ | exfalso; apply (n0 (pos p1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.tens C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p2));
     [ | exfalso; apply (n0 (pos p2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.parr B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment.
   destruct (llpol2ll_dec (nllpol2ll n0_1)); [ | exfalso; apply (n0 (neg n0_1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.parr C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment.
   destruct (llpol2ll_dec (nllpol2ll n0_2)); [ | exfalso; apply (n0 (neg n0_2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.aplus B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p1));
     [ | exfalso; apply (n0 (pos p1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.aplus C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (pllpol2ll p2));
     [ | exfalso; apply (n0 (pos p2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.awith B C)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n0_1));
     [ | exfalso; apply (n0 (neg n0_1)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.awith C B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment; destruct (llpol2ll_dec (nllpol2ll n0_2));
     [ | exfalso; apply (n0 (neg n0_2)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.oc B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment.
   destruct (llpol2ll_dec (nllpol2ll n0)); [ | exfalso; apply (n1 (neg n0)) ]; reflexivity.
 - destruct (llpol2ll_dec (formulas.wn B)); try now inversion HfA.
   destruct s as [B' Heq].
-  destruct B'; [ destruct p | destruct n0 ]; inversion Heq; subst.
+  destruct B'; [ destruct p | destruct n0 ]; destr_eq Heq; subst.
   apply IHHsf.
   unfold llpol_fragment.
   destruct (llpol2ll_dec (pllpol2ll p)); [ | exfalso; apply (n0 (pos p)) ]; reflexivity.
@@ -376,8 +376,8 @@ revert l Heql0; induction pi; intros l' Heql0; subst;
             constructor;
             apply IHpi; reflexivity)).
 - decomp_map Heql0 eqn:Hx. subst. destruct Hx as [Heq1 [Heq2 ->%map_eq_nil]].
-  destruct x; inversion Heq1; [ destruct p | destruct n ]; inversion Heq1.
-  destruct x0; inversion Heq2; [destruct p | destruct n ]; inversion Heq2; subst.
+  destruct x; destr_eq Heq1; [ destruct p | destruct n ]; destr_eq Heq1.
+  destruct x0; destr_eq Heq2; [destruct p | destruct n ]; destr_eq Heq2; subst.
   apply ax_r.
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' -> HP]. symmetry in HP.
   eapply ex_r; [ | eassumption ].
@@ -391,9 +391,8 @@ revert l Heql0; induction pi; intros l' Heql0; subst;
     apply IHpi. rewrite <- ? map_app. reflexivity.
   + symmetry. apply Permutation_Type_app_head, Permutation_Type_app_tail. assumption.
 - discriminate f.
-- destruct l'; inversion Heql0.
-  destruct f; inversion H0; [ destruct p | destruct n ]; inversion H0.
-  destruct l'; inversion H1.
+- destruct l'; destr_eq Heql0. symmetry in H. apply map_eq_nil in H as ->.
+  destruct f; destr_eq Heql0; [ destruct p | destruct n ]; destr_eq Heql0.
   apply one_r.
 - decomp_map Heql0 eqn:Hx. subst.
   destruct x; destr_eq Hx; [ destruct p | destruct n ]; destr_eq Hx; subst.
@@ -401,12 +400,12 @@ revert l Heql0; induction pi; intros l' Heql0; subst;
   + apply IHpi1. reflexivity.
   + apply IHpi2. reflexivity.
   + apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
-- destruct l'; inversion Heql0.
-  destruct f; inversion H0; [ destruct p | destruct n ]; inversion H0. subst.
+- destruct l'; destr_eq Heql0.
+  destruct f; inversion Heql0; [ destruct p | destruct n ]; inversion Heql0. subst.
   apply with_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
-- destruct l'; inversion Heql0.
-  destruct f; inversion H0; [destruct p | destruct n ]; inversion H0. subst.
-  apply llpol2ll_map_wn_inv in H1 as [l'' -> ->].
+- destruct l'; destr_eq Heql0.
+  destruct f; destr_eq Heql0; [destruct p | destruct n ]; destr_eq Heql0. subst.
+  apply llpol2ll_map_wn_inv in H as [l'' -> ->].
   apply oc_r, IHpi.
   cbn. rewrite llpol2ll_map_wn. reflexivity.
 - discriminate f.
@@ -634,8 +633,7 @@ induction pi in P', Q', l' |- *; intros HP.
 - apply Permutation_Type_length_1_inv in HP. discriminate HP.
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [[l2 l3] Heq].
-  destruct l2; inversion Heq.
-  destruct l2; inversion H1. subst.
+  destruct l2; destr_eq Heq. destruct l2; destr_eq H. subst.
   rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
   apply IHpi in HP as [[[N l0] l1] Heq' Htop].
   dichot_elt_app_inf_exec Heq'; subst.
@@ -651,7 +649,7 @@ induction pi in P', Q', l' |- *; intros HP.
     rewrite Heq' in HP. symmetry in HP.
     apply Permutation_Type_cons_app_inv in HP.
     dichot_app_inf_exec Heq';
-      [ | destruct l; inversion Heq'1; list_simpl in Heq'1 ]; subst.
+      [ | destruct l; destr_eq Heq'1; list_simpl in Heq'1 ]; subst.
     * list_simpl in HP.
       assert (Permutation_Type (pos Q :: l ++ pos Q' :: l4)
                                (pos Q :: pos Q' :: l ++ l4)) as HP'
@@ -672,13 +670,13 @@ induction pi in P', Q', l' |- *; intros HP.
       list_simpl in HP.
       apply Permutation_Type_vs_elt_inv in HP as [(l7, l8) ->].
       now exists (N, l7, l8).
-  + destruct l2'; destr_eq H; subst.
+  + destruct l2'; inversion H; subst.
     * rewrite <- (app_nil_l (pos (tens _ _) :: l3')),(app_comm_cons _ _ (pos P')) in HP.
       apply Permutation_Type_cons_app_inv in HP.
       list_simpl in HP.
       destruct (Permutation_Type_vs_cons_inv HP) as [(l4, l5) Heq'].
       dichot_app_inf_exec Heq';
-        [ | destruct l; inversion Heq'1; list_simpl in Heq'1 ]; subst.
+        [ | destruct l; destr_eq Heq'1; list_simpl in Heq'1 ]; subst.
       -- symmetry in HP. rewrite app_assoc in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
          assert (Permutation_Type (pos Q :: l ++ pos P' :: l5)
                                   (pos Q :: pos P' :: l ++ l5)) as HP'
@@ -712,8 +710,8 @@ induction pi in P', Q', l' |- *; intros HP.
          list_simpl in HP. rewrite Heq', app_assoc in HP.
          apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
          destruct l8; inversion Heq''.
-         dichot_app_inf_exec H1;
-           [ | destruct l0; inversion Heq''; list_simpl in H3 ]; subst.
+         dichot_app_inf_exec H2;
+           [ | destruct l0; destr_eq Heq''; list_simpl in H3 ]; subst.
          ++ now exists (N, l2' ++ pos (tens P Q) :: l0, l9); list_simpl.
          ++ now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
          ++ inversion H3. subst.
@@ -722,9 +720,9 @@ induction pi in P', Q', l' |- *; intros HP.
          ++ destruct (IHpi2 Q P' l5 (Permutation_Type_refl _)) as [[[N l6] l7] -> Htop].
             list_simpl in HP. symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
             rewrite app_assoc in HP. apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
-            destruct l8; destr_eq Heq''. subst.
-            dichot_app_inf_exec H0;
-              [ | destruct l; inversion H2; list_simpl in H2 ]; subst.
+            destruct l8; inversion Heq''. subst.
+            dichot_app_inf_exec H3;
+              [ | destruct l; destr_eq H2; list_simpl in H2 ]; subst.
             ** now exists (N, l2' ++ pos (tens P Q) :: l, l9); list_simpl.
             ** now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
             ** now exists (N, l8, l ++ pos (tens P Q) :: l3'); list_simpl.
@@ -736,32 +734,30 @@ induction pi in P', Q', l' |- *; intros HP.
             rewrite app_assoc, Heq' in HP. list_simpl in HP.
             apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
             destruct l8; inversion Heq''.
-            dichot_app_inf_exec H1;
-              [ | destruct l0; inversion H3; list_simpl in H3 ]; subst.
+            dichot_app_inf_exec H2;
+              [ | destruct l0; destr_eq H3; list_simpl in H3 ]; subst.
             ** now exists (N, l2' ++ pos (tens P Q) :: l0, l9); list_simpl.
             ** now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
             ** now exists (N, l8, l0 ++ pos (tens P Q) :: l3'); list_simpl.
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
-  destruct l2; inversion Heq.
-  destruct l2; inversion H1. subst.
+  destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP.
   apply Permutation_Type_cons_app_inv in HP.
   apply (Permutation_Type_cons_app _ _ (neg M)) in HP.
   apply (Permutation_Type_cons_app _ _ (neg N)) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
   dichot_elt_app_inf_exec Heq'; subst.
-  + destruct l4; inversion Heq'1; subst.
+  + destruct l4; destr_eq Heq'1; subst.
     * exists (parr N N', l2, l1); list_simpl; [ reflexivity | ].
       apply par_rs; assumption.
     * now exists (N', l2 ++ neg (parr N M) :: l4, l1); list_simpl.
-  + destruct l4; inversion Heq'1; subst.
+  + destruct l4; destr_eq Heq'1; subst.
     * exists (parr N' M, l0, l3); list_simpl; [ reflexivity | ].
       apply par_ls; assumption.
     * now exists (N', l0, l4 ++ neg (parr N M) :: l3); list_simpl.
 - symmetry in HP. apply Permutation_Type_vs_cons_inv in HP as [(l2, l3) Heq].
-  destruct l2; inversion Heq.
-  destruct l2; inversion H1; subst.
+  destruct l2; inversion Heq. destruct l2; destr_eq H1; subst.
   exists (top, l2, l3); [ reflexivity | ].
   apply top_s.
 - assert (HP' := HP).
@@ -771,7 +767,7 @@ induction pi in P', Q', l' |- *; intros HP.
     apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
     apply IHpi in HP as [[[N l0] l1] -> Htop].
     now exists (N, l0, l1).
-  + destruct l2; inversion H; subst.
+  + destruct l2; destr_eq H; subst.
     * rewrite <- (app_nil_l (pos (aplus _ _) :: l3)), app_comm_cons in HP.
       apply Permutation_Type_cons_app_inv in HP.
       apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
@@ -782,7 +778,7 @@ induction pi in P', Q', l' |- *; intros HP.
       list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
       dichot_elt_app_inf_exec Heq'; subst.
       -- now exists (N', l2 ++ pos (aplus P Q) :: l4, l1); list_simpl.
-      -- destruct l4; inversion Heq'1; subst.
+      -- destruct l4; destr_eq Heq'1; subst.
          now exists (N', l0, l4 ++ pos (aplus P Q) :: l3); list_simpl.
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
@@ -791,7 +787,7 @@ induction pi in P', Q', l' |- *; intros HP.
     apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
     apply IHpi in HP as [[[N l0] l1] -> Htop].
     now exists (N, l0, l1).
-  + destruct l2; inversion H; subst.
+  + destruct l2; destr_eq H; subst.
     * rewrite <- (app_nil_l (pos (aplus _ _) :: l3)), app_comm_cons in HP.
       apply Permutation_Type_cons_app_inv in HP.
       apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
@@ -804,12 +800,11 @@ induction pi in P', Q', l' |- *; intros HP.
       apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
       dichot_elt_app_inf_exec Heq'; subst.
       -- now exists (N', l2 ++ pos (aplus Q P) :: l4, l1); list_simpl.
-      -- destruct l4; inversion Heq'1; subst.
+      -- destruct l4; destr_eq Heq'1; subst.
          now exists (N', l0, l4 ++ pos (aplus Q P) :: l3); list_simpl.
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
-  destruct l2; inversion Heq.
-  destruct l2; inversion H1. subst.
+  destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP.
   assert (HP1 := (Permutation_Type_cons_app _ _ (neg N) HP)).
   assert (HP2 := (Permutation_Type_cons_app _ _ (neg M) HP)).
@@ -817,10 +812,10 @@ induction pi in P', Q', l' |- *; intros HP.
   list_simpl in HP2. apply IHpi2 in HP2 as [[[M' l0'] l1'] Heq'' Htop'].
   dichot_elt_app_inf_exec Heq'; subst.
   + now exists (N', l2 ++ neg (awith N M) :: l4, l1); list_simpl.
-  + destruct l4; inversion Heq'1; subst.
+  + destruct l4; destr_eq Heq'1; subst.
     * list_simpl in Heq''. dichot_elt_app_inf_exec Heq''; subst.
       -- now exists (M', l0 ++ neg (awith N' M) :: l2, l1'); list_simpl.
-      -- destruct l2; inversion Heq''1; subst.
+      -- destruct l2; destr_eq Heq''1; subst.
          ++ exists (awith N' M', l0', l1');list_simpl; [ reflexivity | ].
             apply with_s; assumption.
          ++ now exists (M', l0', l2 ++ neg (awith N' M) :: l1); list_simpl.
@@ -840,19 +835,17 @@ induction pi in P', Q', l' |- *; intros HP.
       decomp_map Heq' eqn:Hp. discriminate Hp.
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
-  destruct l2; inversion Heq.
-  destruct l2; inversion H1. subst.
+  destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP.
   apply Permutation_Type_cons_app_inv, (Permutation_Type_cons_app _ _ (pos P)) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
   dichot_elt_app_inf_exec Heq'; subst.
   + now exists (N', l2 ++ neg (wn P) :: l4, l1); list_simpl.
-  + destruct l4; inversion Heq'1; subst.
+  + destruct l4; destr_eq Heq'1; subst.
     now exists (N', l0, l4 ++ neg (wn P) :: l3); list_simpl.
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
-  destruct l2; inversion Heq.
-  destruct l2; inversion H1. subst.
+  destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
   apply IHpi in HP as [[[N l0] l1] Heq' Htop].
   dichot_elt_app_inf_exec Heq'; subst.
@@ -860,18 +853,17 @@ induction pi in P', Q', l' |- *; intros HP.
   + now exists (N, l2 ++ neg (wn P) :: l4, l1); list_simpl.
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
-  destruct l2; inversion Heq.
-  destruct l2; inversion H1. subst.
+  destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP.
   apply Permutation_Type_cons_app_inv in HP.
   apply (Permutation_Type_cons_app _ _ (neg (wn P))) in HP.
   apply (Permutation_Type_cons_app _ _ (neg (wn P))) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
   dichot_elt_app_inf_exec Heq'; subst.
-  + destruct l4; inversion Heq'1; subst.
+  + destruct l4; destr_eq Heq'1; subst.
     * inversion Htop.
     * now exists (N', l2 ++ neg (wn P) :: l4, l1); list_simpl.
-  + destruct l4; inversion Heq'1; subst.
+  + destruct l4; destr_eq Heq'1; subst.
     * inversion Htop.
     * now exists (N', l0, l4 ++ neg (wn P) :: l3); list_simpl.
 Qed.
@@ -924,7 +916,7 @@ induction pi; cbn; intros Hpol.
     exists (de_r pi'). split; [ assumption | ].
     left. exists (wn P :: l). reflexivity.
   + destruct (Permutation_Type_vs_cons_inv HP) as [(l2, l3) Heq].
-    destruct l2; inversion Heq; subst.
+    destruct l2; destr_eq Heq; subst.
     destruct (@bipos_top_surf _ pi P Q (l2 ++ l3)) as [[[N l] l'] Heq' Htop].
     { symmetry. apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity. }
     assert (Permutation_Type (neg (wn P) :: l2 ++ pos Q :: l3) (pos Q :: neg (wn P) :: l2 ++ l3)) as HP'.

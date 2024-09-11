@@ -33,7 +33,7 @@ end.
 (*
 Lemma l2ill_inj : injective l2ill.
 Proof.
-intros A; induction A; intros B Heq; destruct B; inversion Heq;
+intros A; induction A; intros B Heq; destruct B; destr_eq Heq;
   try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
 Qed.
 *)
@@ -74,11 +74,11 @@ Lemma illfrag2l l A : ill_def.ill ipfrag_lambek (map l2ill l) (l2ill A) -> lprov
 Proof.
 intro pi. remember (map l2ill l) as l0 eqn:Heql. remember (l2ill A) as A0 eqn:HeqA.
 induction pi in l, A, Heql, HeqA |- *;
-  (try now (destruct A; inversion HeqA));
+  (try now (destruct A; destr_eq HeqA));
   (try now (decomp_map Heql eqn:Hx; destruct x; destr_eq Hx)); subst.
 - destruct A; destr_eq HeqA.
-  destruct l as [|B l]; inversion Heql as [[H1 H2]]; destruct l; inversion H2.
-  destruct B; inversion H1. subst.
+  destruct l as [|B l]; inversion Heql as [[H1 H2]]; destruct l; destr_eq H2.
+  destruct B; destr_eq H1. subst.
   apply ax_lr.
 - apply IHpi; [ assumption | reflexivity ].
 - decomp_map Heql eqn:Heq. subst.

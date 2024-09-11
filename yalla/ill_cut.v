@@ -63,7 +63,7 @@ Proof using P_gax_cut_l.
 intros Hoc IHcut l' L C pi. remember (l' ++ flat_map (cons (ioc A)) L) as l eqn:Heq.
 induction pi in l', L, Heq |- *;
   try (constructor; rewrite ? app_comm_cons; apply IHpi; subst; list_simpl; reflexivity).
-- destruct l', L; inversion Heq as [[H1 H2]]; destruct l'; inversion H2; list_simpl.
+- destruct l', L; inversion Heq as [[H1 H2]]; destruct l'; destr_eq H2; list_simpl.
   apply ax_ir.
 - case_eq (ipperm P); intros Hperm; rewrite Hperm in p; cbn in p; subst.
   + destruct (Permutation_Type_app_flat_map_cst _ (map ioc lw) _ _ p)
@@ -78,7 +78,7 @@ induction pi in l', L, Heq |- *;
   rewrite <- H4. apply (ex_oc_ir _ lw1'); [ | assumption ].
   rewrite H3. apply IHpi. assumption.
 - symmetry in Heq. apply app_eq_nil in Heq as [-> Heq].
-  destruct L; inversion Heq.
+  destruct L; destr_eq Heq.
   apply one_irr.
 - elt_vs_app_flat_map_cst_inv Heq.
   + list_simpl. apply one_ilr.
@@ -170,8 +170,8 @@ induction pi in l', L, Heq |- *;
        with (flat_map (app (map ioc lw)) (L ++ (x ++ (A0 :: nil)) :: nil))
       by now list_simpl.
     apply IHpi. list_simpl. reflexivity.
-- destruct l'; inversion Heq as [Heq']; subst.
-  + destruct L; inversion Heq'.
+- destruct l'; destr_eq Heq; subst.
+  + destruct L; destr_eq Heq.
   + list_simpl. apply gen_ilr, IHpi. reflexivity.
 - rewrite app_assoc in Heq. elt_vs_app_flat_map_cst_inv Heq.
   + list_simpl. apply lmap_ilr; [ assumption | ].
@@ -252,10 +252,10 @@ induction pi in l', L, Heq |- *;
                specialize (IHpi2 _ _ eq_refl). list_simpl in IHpi2. list_simpl. assumption.
 - elt_vs_app_flat_map_cst_inv Heq.
   + symmetry in Heq1. apply app_eq_nil in Heq1 as [-> Heq1].
-    destruct L; inversion Heq1.
+    destruct L; destr_eq Heq1.
     list_simpl. apply neg_ilr. assumption.
   + symmetry in Heq2. apply app_eq_nil in Heq2 as [-> Heq2].
-    destruct L1; inversion Heq2.
+    destruct L1; destr_eq Heq2.
     list_simpl. rewrite 3 app_assoc. apply neg_ilr.
     rewrite <- 2 app_assoc.
     replace (map ioc lw ++ l0)
@@ -484,7 +484,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       revert Hl IHsize; cbn; rewrite 2 app_assoc; intros Hl IHsize.
       rewrite 2 app_assoc; refine (IHsize _ _ _ _ pi1 Hl _); lia.
 - (* one_irr *)
-  destruct l1; inversion Heql.
+  destruct l1; destr_eq Heql.
 - (* one_ilr *)
   trichot_elt_elt_inf_exec Heql.
   + list_simpl; apply one_ilr.
@@ -614,7 +614,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
     revert Hr IHsize. list_simpl. intros Hr IHsize.
     refine (IHsize _ _ _ _ pi1 Hr _). lia.
 - (* gen_ilr *)
-  destruct l1; inversion Heql; subst.
+  destruct l1; destr_eq Heql; subst.
   + remember (gen_ilr _ _ Hl) as Hgen eqn:HeqHgen; clear HeqHgen.
     remember (igen A0) as D; destruct_ill pi1 f X l' Hl2 Hr2 HP a; try inversion HeqD;
       try (rewrite <- ? app_assoc, app_assoc; constructor;
@@ -703,7 +703,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
       list_simpl. refine (IHsize _ _ _ _ pi1 Hl _); lia.
 - (* neg_ilr *)
   trichot_elt_elt_inf_exec Heql.
-  + destruct l3; inversion Heql1.
+  + destruct l3; destr_eq Heql1.
   + remember (neg_ilr _ _ Hl) as Hneg; clear HeqHneg.
     remember (ineg A0) as D; destruct_ill pi1 f X l' Hl2 Hr2 HP a; try inversion HeqD;
       try (rewrite <- ? app_assoc, app_assoc; constructor;

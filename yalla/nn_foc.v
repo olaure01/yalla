@@ -90,11 +90,10 @@ Proof. induction l as [ | a l IHl ]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma ntrans_map_toc_inv l1 l2 : map toc l1 = map ntrans l2 ->
   { l2' | l2 = map wn l2' & l1 = map tneg (map ptrans l2') }.
 Proof.
-induction l1 in l2 |- *; intro Heq; destruct l2; inversion Heq.
+induction l1 in l2 |- *; intro Heq; destruct l2; destr_eq Heq.
 - exists nil; reflexivity.
-- apply IHl1 in H1.
-  destruct f; inversion H0.
-  destruct H1 as [l2' -> ->].
+- apply IHl1 in H as [l2' -> ->].
+  destruct f; destr_eq Heq. subst.
   exists (f :: l2'); reflexivity.
 Qed.
 
@@ -286,11 +285,9 @@ Proof.
 intros pi%(@cut_admissible_tl_axfree atom_inf _ _ AtomIAtomTAtom_TAtom); [ | intros [] ].
 induction pi; intros HF HC l1' l2' HP.
 - apply Permutation_Type_length_1_inv in HP.
-  destruct l1'; inversion HP.
-  + destruct l2'; inversion H0.
-  + apply app_eq_nil in H1.
-    destruct H1; subst.
-    destruct l2'; inversion H1.
+  destruct l1'; destr_eq HP.
+  + destruct l2'; destr_eq HP.
+  + apply app_eq_nil in H as [-> ->%map_eq_nil]. subst.
     apply ax_otr.
 - cbn in p.
   apply IHpi; [ | assumption | ].
@@ -431,7 +428,7 @@ induction pi; intros HF HC l1' l2' HP.
   destruct (HC (toc A) (eq_refl _)) as [A' HC'].
   destruct (tsubform_toc_ntrans _ HC') as [A'' ->].
   apply oc_otrr.
-  destruct l1; inversion Hn.
+  destruct l1; destr_eq Hn.
   replace (map toc l1') with (map toc l1' ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
   apply neg_rev_ot.
   apply IHpi; [ Forall_inf_solve | | ].
@@ -467,12 +464,11 @@ induction pi; intros HF HC l1' l2' HP.
   { symmetry in HP. apply Permutation_Type_vs_elt_inv in HP as [[l1l l1r] Heq]. cbn in Heq.
     revert l1l Heq. clear. induction l1'; intros l1l Heq.
     - exfalso. cbn in Heq. decomp_map Heq eqn:Hn. discriminate Hn.
-    - destruct l1l; inversion Heq; subst.
+    - destruct l1l; destr_eq Heq; subst.
       + exists l1'. reflexivity.
-      + apply IHl1' in H1 as [l3 H1].
+      + apply IHl1' in H as [l3 HP%(Permutation_Type_cons (eq_refl t))].
         exists (t :: l3).
-        apply (Permutation_Type_cons (eq_refl t)) in H1.
-        etransitivity; [ eassumption | apply Permutation_Type_swap ]. }
+        etransitivity; [ exact HP | apply Permutation_Type_swap ]. }
   apply ex_otr with (l3 ++ toc A :: map toc (map tneg l2'));
     [ | symmetry; etransitivity; [ apply Permutation_Type_app_tail; eassumption
                                  | apply Permutation_Type_middle ] ].
@@ -518,11 +514,9 @@ Proof.
 intros pi; induction pi; intros l0 Heq;
   (repeat split; [ intros HN; inversion HN
                   | intros D HD; inversion HD ]); subst; list_simpl.
-- destruct l0; inversion Heq.
-  destruct l0; inversion H2.
-  destruct D; inversion H0.
-  destruct f; inversion H1; subst.
-  apply a2t_inj in H4; subst.
+- destruct l0; destr_eq Heq. symmetry in H. apply map_eq_nil in H as ->.
+  destruct D; destr_eq H0. destruct f; destr_eq Heq; subst.
+  apply a2t_inj in H0; subst.
   polfoccont_cbn; apply (@ax_fr atom_inf).
 - apply Permutation_Type_map_inv in p as [l' -> HP].
   assert (IHpi' := IHpi _ (eq_refl _)).
@@ -534,8 +528,8 @@ intros pi; induction pi; intros l0 Heq;
   eapply ex_fr; [ eassumption | ].
   symmetry; polfoccont_cbn.
   destruct (polarity D); [ | apply Permutation_Type_cons; [ reflexivity | ] ]; assumption.
-- destruct l0; inversion Heq.
-  destruct D; inversion H0.
+- destruct l0; destr_eq Heq.
+  destruct D; destr_eq H0.
   constructor.
 - decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
@@ -551,7 +545,7 @@ intros pi; induction pi; intros l0 Heq;
   + apply Permutation_Type_middle.
   + rewrite (app_comm_cons _ (bot :: l2)).
     apply Permutation_Type_cons_app, Permutation_Type_cons; reflexivity.
-- destruct D; inversion HD.
+- destruct D; destr_eq HD.
   decomp_map Heq. subst.
   assert (IHpi1' := IHpi1 _ (eq_refl _)).
   assert (IHpi2' := IHpi2 _ (eq_refl _)).
@@ -592,7 +586,7 @@ intros pi; induction pi; intros l0 Heq;
   + apply (@Permutation_Type_middle_polcont atom_inf).
 - polfoccont_cbn.
   destruct (polarity D) as [Hs | Ha].
-  + exfalso. destruct D; inversion H0; inversion Hs.
+  + exfalso. destruct D; destr_eq H0; inversion Hs.
   + apply IHpi; [ | reflexivity ].
     destruct D; inversion H0; reflexivity.
 - decomp_map Heq eqn:Heq0. subst. destruct Heq0 as [Heq ->%map_eq_nil].
@@ -605,7 +599,7 @@ intros pi; induction pi; intros l0 Heq;
     eapply ex_fr; [ apply (@foc_fr atom_inf); eassumption | ].
     apply Permutation_Type_cons_append.
   + exfalso.
-    destruct x; inversion Heq; inversion a.
+    destruct x; destr_eq Heq; inversion a.
 - decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   eapply ex_fr; [ | apply Permutation_Type_middle ].
   cbn. apply (@top_gen_fr atom_inf). reflexivity.
@@ -617,11 +611,11 @@ intros pi; induction pi; intros l0 Heq;
   + rewrite app_comm_cons.
     eapply ex_fr; [ | apply Permutation_Type_middle ].
     apply (@top_gen_fr atom_inf); reflexivity.
-- destruct D; inversion HD; subst.
+- destruct D; destr_eq HD; subst.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   apply plus_fr1; assumption.
-- destruct D; inversion HD; subst.
+- destruct D; destr_eq HD; subst.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   apply plus_fr2; assumption.
@@ -661,7 +655,7 @@ intros pi; induction pi; intros l0 Heq;
     * symmetry; apply Permutation_Type_middle.
     * cons2app; apply Permutation_Type_cons_app.
       rewrite ? app_assoc; apply Permutation_Type_app_tail, Permutation_Type_app_comm.
-- destruct D; inversion HD; subst.
+- destruct D; destr_eq HD; subst.
   assert (ntrans D :: map toc l = map ntrans (D :: l0)) as Heq' by (rewrite Heq; reflexivity).
   assert (IHpi' := IHpi _ Heq').
   splitIHpi IHpi'.

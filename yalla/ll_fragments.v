@@ -226,7 +226,7 @@ Lemma mix_n_m_r P n m : P.(pmix) n = true -> P.(pmix) m = true ->
   forall L, length L = n + m - 1 -> Forall_inf (ll P) L -> ll P (concat L).
 Proof.
 intros Hpmixn Hpmixm L Heq FL. destruct n as [|n]; [ destruct m as [|m] | ].
-- destruct L; inversion Heq.
+- destruct L; destr_eq Heq.
   apply mix_r; assumption.
 - cbn in Heq. rewrite Nat.sub_0_r in Heq.
   change (concat L) with (concat (nil :: L)).
@@ -545,7 +545,7 @@ induction pi in Heql |- *; subst; try now inversion Heql.
 - destruct l1, lw'; inversion Heql; subst.
   + symmetry in p. now apply Permutation_Type_nil in p as ->.
   + symmetry in p. now apply Permutation_Type_nil in p as ->.
-  + destruct l1 as [|A [|B l1]]; inversion H1.
+  + destruct l1 as [|A [|B l1]]; destr_eq H1.
 - destruct L; discriminate.
 Qed.
 

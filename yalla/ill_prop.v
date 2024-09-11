@@ -21,7 +21,7 @@ Proof.
 intros pi%cut_admissible_ill_axfree; [ | assumption ].
 remember nil as l eqn:Heql. remember izero as C eqn:HeqC.
 induction pi in Heql, HeqC |- *; inversion Heql; inversion HeqC; subst;
-  try now (destruct l1; inversion Heql).
+  try now (destruct l1; destr_eq Heql).
 - symmetry in p. apply PEPermutation_Type_nil in p as ->.
   apply IHpi; reflexivity.
 - apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].

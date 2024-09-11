@@ -159,7 +159,7 @@ Lemma de_tfr C :
 * (forall lw ls A, strifoc lw ls A ->
      forall ls1 ls2, ls = ls1 ++ C :: ls2 -> strifoc (lw ++ C :: nil) (ls1 ++ ls2) A).
 Proof.
-apply trifoc_rect; intros; subst; try now (econstructor; eauto); try now (destruct ls1; inversion H).
+apply trifoc_rect; intros; subst; try now (econstructor; eauto); try now (destruct ls1; destr_eq H).
 - trichot_elt_elt_inf_exec H.
   + list_simpl. apply foc_tfr; [ assumption | ].
     rewrite app_assoc. apply X. rewrite <- app_assoc. reflexivity.

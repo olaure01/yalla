@@ -33,7 +33,7 @@ Definition is_var (A : formula) :=
   end.
 
 Lemma var_spec A : reflectT (var_formula A) (is_var A).
-Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
+Proof. destruct A; cbn; constructor; try (intro H; inversion H); constructor. Qed.
 
 Definition is_covar (A : formula) :=
   match A with
@@ -42,7 +42,7 @@ Definition is_covar (A : formula) :=
   end.
 
 Lemma covar_spec A : reflectT (covar_formula A) (is_covar A).
-Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
+Proof. destruct A; cbn; constructor; try (intro H; inversion H); constructor. Qed.
 
 Definition is_wn (A : formula) :=
   match A with
@@ -51,7 +51,7 @@ Definition is_wn (A : formula) :=
   end.
 
 Lemma wn_spec A : reflectT (wn_formula A) (is_wn A).
-Proof. destruct A; cbn; constructor; try (intros H; inversion H); constructor. Qed.
+Proof. destruct A; cbn; constructor; try (intro H; inversion H); constructor. Qed.
 
 (** Atomic [formula] *)
 Variant atomic : formula -> Type := | atomic_var x : atomic (var x) | atomic_covar x : atomic (covar x).

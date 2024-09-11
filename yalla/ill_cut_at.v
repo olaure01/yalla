@@ -79,7 +79,7 @@ induction pi2 in l1, l2, Heql |- *; subst;
   + discriminate Heql1.
   + rewrite 2 app_assoc. apply lpam_ilr; [ assumption | ].
     list_simpl. apply IHpi2_2. list_simpl. reflexivity.
-- destruct l1; inversion Heql; subst.
+- destruct l1; destr_eq Heql; subst.
   list_simpl. apply gen_ilr, IHpi2. reflexivity.
 - rewrite app_assoc in Heql. trichot_elt_elt_inf_exec Heql.
   + list_simpl. apply lmap_ilr; [ assumption | ].

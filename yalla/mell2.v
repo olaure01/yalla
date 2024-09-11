@@ -127,7 +127,7 @@ induction pi in l, Heql0 |-* using ll_def.ll_nested_ind; subst;
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ! map_app; reflexivity | ].
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, HP.
 - remember (length L) as n eqn:Heqn.
-  repeat (destruct n; inversion eqpmix).
+  repeat (destruct n; destr_eq eqpmix).
   repeat (destruct L; destr_eq Heqn).
   list_simpl in Heql0. decomp_map Heql0. subst.
   apply mix_r.

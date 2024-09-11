@@ -136,7 +136,7 @@ intros A HfA B Hsf.
 induction Hsf;
   try (apply IHHsf;
        destruct HfA as [B0 HfA];
-       destruct B0; inversion HfA; subst;
+       destruct B0; destr_eq HfA; subst;
        eexists; reflexivity).
 assumption.
 Qed.

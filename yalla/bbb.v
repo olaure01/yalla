@@ -55,7 +55,7 @@ Qed.
 Lemma bot_rev_bbb l : ll_bbb l -> forall l1 l2, l = l1 ++ bot :: l2 -> ll_bbb (l1 ++ l2).
 Proof.
 intro pi. induction pi; intros l1' l2' Heq; subst;
-  try (destruct l1'; inversion Heq; subst;
+  try (destruct l1'; destr_eq Heq; subst;
        list_simpl; constructor;
        rewrite ? app_comm_cons; apply IHpi; reflexivity).
 - exfalso. destruct l1' as [|? [|? [|? ?]]]; discriminate Heq.
@@ -69,17 +69,17 @@ intro pi. induction pi; intros l1' l2' Heq; subst;
   + rewrite <- app_assoc. apply mix2_bbb_r; [ | assumption ].
     apply IHpi. reflexivity.
 - exfalso. destruct l1' as [|? [|? [|? ?]]]; discriminate Heq.
-- destruct l1'; inversion Heq; subst; [ assumption | ].
+- destruct l1'; destr_eq Heq; subst; [ assumption | ].
   list_simpl. apply bot_bbb_r, IHpi. reflexivity.
 - rewrite app_comm_cons in Heq. dichot_elt_app_inf_exec Heq; subst.
-  + destruct l1'; inversion Heq0; subst.
+  + destruct l1'; destr_eq Heq0; subst.
     list_simpl. rewrite app_assoc. apply tens_bbb_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_bbb_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- destruct l1'; inversion Heq. subst.
+- destruct l1'; destr_eq Heq. subst.
   list_simpl. apply with_bbb_r; rewrite app_comm_cons; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
-- exfalso. destruct l1'; inversion Heq. decomp_map H1. discriminate.
+- exfalso. destruct l1'; destr_eq Heq. decomp_map H eqn:Hwb. discriminate Hwb.
 Qed.
 
 (** [ll_mix2] is contained in [ll_bbb] *)
@@ -174,19 +174,19 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
   apply Permutation_Type_cons_app_inv in HP.
   apply Permutation_Type_length_1_inv in HP.
   apply app_eq_unit_inf in HP as [[-> ->] | [-> ->]]; destruct l'; inversion Heq as [[Heq' Heq'']]; subst.
-  + destruct n; inversion Heq as [Heq''].
-    destruct m; discriminate Heq''.
+  + destruct n; destr_eq Heq.
+    destruct m; discriminate Heq.
   + destruct l'; inversion Heq'' as [[Heq1 Heq2]].
     * destruct n; inversion Heq1 as [Heq2].
       destruct m; discriminate Heq2.
-    * destruct l'; inversion Heq2 as [Heq3]. rewrite Heq3.
+    * destruct l'; destr_eq Heq2.
       apply ax_bbb_r.
-  + destruct n; inversion Heq as [Heq''].
-    destruct m; discriminate Heq''.
+  + destruct n; destr_eq Heq.
+    destruct m; discriminate Heq.
   + destruct l'; inversion Heq'' as [[Heq1 Heq2]].
-    * destruct n; inversion Heq1 as [Heq2].
-      destruct m; discriminate Heq2.
-    * destruct l'; inversion Heq2 as [Heq3]. rewrite Heq3.
+    * destruct n; destr_eq Heq.
+      destruct m; discriminate Heq.
+    * destruct l'; destr_eq Heq2.
       eapply ex_bbb_r; [ apply ax_bbb_r | apply Permutation_Type_swap ].
 - cbn in p.
   eapply IHpi.
@@ -197,8 +197,8 @@ intros pi. induction pi using ll_nested_ind; intros l' n m HP.
 - discriminate eqpmix.
 - apply Permutation_Type_length_1_inv in HP.
   destruct l'; inversion HP as [[Heq Heq0]].
-  + destruct n; inversion Heq as [Heq'].
-    destruct m; discriminate Heq'.
+  + destruct n; destr_eq Heq.
+    destruct m; discriminate Heq.
   + apply app_eq_nil in Heq0 as [-> _].
     apply one_bbb_r.
 - assert (HP' := HP).
@@ -675,24 +675,24 @@ intros pi. induction pi; intro HP;
             apply Permutation_Type_length_1_inv in p as ->.
             apply IHpi. reflexivity.
          ++ destruct l1; inversion Heql.
-            ** destruct lw'; inversion Heql. cbn in H. subst.
+            ** destruct lw'; destr_eq Heql. cbn in H1. subst.
                symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi. reflexivity.
             ** apply app_eq_nil in H2 as [-> [Heq2 ->]%app_eq_nil].
-               destruct lw'; inversion Heq2. subst.
+               destruct lw'; destr_eq Heq2. subst.
                symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi. reflexivity.
-         ++ repeat (destruct L; inversion f; try discriminate).
+         ++ repeat (destruct L; destr_eq f; try discriminate).
          ++ rewrite ? H1 in *. clear - pi.
             remember (tens (parr one one) bot :: nil) as l.
             induction pi in Heql |- *; inversion Heql; subst.
             ** symmetry in p. cbn in p.
                apply Permutation_Type_length_1_inv in p as ->. apply IHpi. reflexivity.
             ** destruct l1; inversion Heql.
-               --- destruct lw'; inversion Heql.
+               --- destruct lw'; destr_eq Heql.
                    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi. assumption.
                --- apply app_eq_nil in H2 as [-> [Heq2 ->]%app_eq_nil].
-                   destruct lw'; inversion Heq2. subst.
+                   destruct lw'; destr_eq Heq2. subst.
                    symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi. reflexivity.
-            ** repeat (destruct L; inversion f; try discriminate).
+            ** repeat (destruct L; destr_eq f; try discriminate).
             ** apply app_eq_nil in H2 as [-> ->].
                clear - pi1.
                remember (parr one one :: nil) as l.
@@ -701,12 +701,12 @@ intros pi. induction pi; intro HP;
                    apply Permutation_Type_length_1_inv in p as ->.
                    apply IHpi1. reflexivity.
                --- destruct l1; inversion Heql.
-                   +++ destruct lw'; inversion Heql. subst.
+                   +++ destruct lw'; destr_eq Heql. subst.
                        symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi1. assumption.
                    +++ apply app_eq_nil in H2 as [-> [Heq2 ->]%app_eq_nil].
-                       destruct lw'; inversion Heq2. subst.
+                       destruct lw'; destr_eq Heq2. subst.
                        symmetry in p. apply Permutation_Type_nil in p as ->. apply IHpi1. reflexivity.
-               --- repeat (destruct L; inversion f; try discriminate).
+               --- repeat (destruct L; destr_eq f; try discriminate).
                --- assumption.
                --- discriminate f.
                --- destruct a.

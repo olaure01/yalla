@@ -130,7 +130,7 @@ Proof.
 revert l2. induction l1 as [|a l1 IHl1]; intros [|t l2] [=].
 - exists nil; reflexivity.
 - apply IHl1 in H1 as [l2' -> ->].
-  destruct t; inversion H0.
+  destruct t; destr_eq H0. subst.
   exists (t :: l2'); reflexivity.
 Qed.
 
@@ -238,32 +238,32 @@ induction Hsf; unfold tl_fragment in HfA.
 - assumption.
 - destruct (tl2ill_dec (itens B C)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try now inversion Heq.
-  destruct B'; inversion Heq; subst.
+  destruct B'; destr_eq Heq; subst.
   apply IHHsf.
   unfold tl_fragment; destruct (tl2ill_dec (tl2ill B'1)); [ reflexivity | ].
   exfalso; apply (fst p) with B'1; reflexivity.
 - destruct (tl2ill_dec (itens C B)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try now inversion Heq.
-  destruct B'; inversion Heq; subst.
+  destruct B'; destr_eq Heq; subst.
   apply IHHsf.
   unfold tl_fragment; destruct (tl2ill_dec (tl2ill B'2)); [ reflexivity | ].
   exfalso; apply (fst p) with B'2; reflexivity.
 - destruct (tl2ill_dec (ilpam B C)); try now inversion HfA.
-  destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
+  destruct s as [[B' Heq] | Heq]; try destruct B'; destr_eq Heq.
 - destruct (tl2ill_dec (ilpam C B)); try now inversion HfA.
-  destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
+  destruct s as [[B' Heq] | Heq]; try destruct B'; destr_eq Heq.
 - destruct (tl2ill_dec (igen B)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try now inversion Heq.
-  destruct B'; inversion Heq.
+  destruct B'; destr_eq Heq.
 - unfold tl_fragment; destruct (tl2ill_dec N); [ reflexivity | ].
   exfalso; apply (snd p); reflexivity.
 - destruct (tl2ill_dec (ilmap B C)); try now inversion HfA.
-  destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
+  destruct s as [[B' Heq] | Heq]; try destruct B'; destr_eq Heq.
 - destruct (tl2ill_dec (ilmap C B)); try now inversion HfA.
-  destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
+  destruct s as [[B' Heq] | Heq]; try destruct B'; destr_eq Heq.
 - destruct (tl2ill_dec (ineg B)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try now inversion Heq.
-  destruct B'; inversion Heq; subst.
+  destruct B'; destr_eq Heq; subst.
   apply IHHsf.
   unfold tl_fragment; destruct (tl2ill_dec (tl2ill B')); [ reflexivity | ].
   exfalso; apply (fst p) with B'; reflexivity.
@@ -271,23 +271,23 @@ induction Hsf; unfold tl_fragment in HfA.
   exfalso; apply (snd p); reflexivity.
 - destruct (tl2ill_dec (iplus B C)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try now inversion Heq.
-  destruct B'; inversion Heq; subst.
+  destruct B'; destr_eq Heq; subst.
   apply IHHsf.
   unfold tl_fragment; destruct (tl2ill_dec (tl2ill B'1)); [ reflexivity | ].
   exfalso; apply (fst p) with B'1; reflexivity.
 - destruct (tl2ill_dec (iplus C B)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try now inversion Heq.
-  destruct B'; inversion Heq; subst.
+  destruct B'; destr_eq Heq; subst.
   apply IHHsf.
   unfold tl_fragment; destruct (tl2ill_dec (tl2ill B'2)); [ reflexivity | ].
   exfalso; apply (fst p) with B'2; reflexivity.
 - destruct (tl2ill_dec (iwith B C)); try now inversion HfA.
-  destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
+  destruct s as [[B' Heq] | Heq]; try destruct B'; destr_eq Heq.
 - destruct (tl2ill_dec (iwith C B)); try now inversion HfA.
-  destruct s as [[B' Heq] | Heq]; try destruct B'; inversion Heq.
+  destruct s as [[B' Heq] | Heq]; try destruct B'; destr_eq Heq.
 - destruct (tl2ill_dec (ioc B)); try now inversion HfA.
   destruct s as [[B' Heq] | Heq]; try now inversion Heq.
-  destruct B'; inversion Heq; subst.
+  destruct B'; destr_eq Heq; subst.
   apply IHHsf.
   unfold tl_fragment; destruct (tl2ill_dec (tl2ill B')); [ reflexivity | ].
   exfalso; eapply (fst p) with B'; reflexivity.
@@ -338,7 +338,7 @@ intros pi. induction pi;
   try rewrite ? map_app in piS2, piE2;
   list_simpl;
   (try now (constructor; auto));
-  (try now (destruct D; inversion HeqC; subst; constructor; auto));
+  (try now (destruct D; destr_eq HeqC; subst; constructor; auto));
   try apply (PEPermutation_Type_map _ tl2ill) in p;
   try apply (Permutation_Type_map tl2ill) in p.
 - eapply ex_ir, p. exact (piS _ HeqC).
@@ -347,7 +347,7 @@ intros pi. induction pi;
   exact (piS _ HeqC).
 - rewrite tl2ill_map_ioc. eapply ex_oc_ir, p. rewrite <- tl2ill_map_ioc.
   exact (piE HeqC).
-- destruct D; inversion HeqC. subst.
+- destruct D; destr_eq HeqC. subst.
   rewrite tl2ill_map_ioc. cbn. apply oc_irr.
   rewrite <- tl2ill_map_ioc. apply piS. reflexivity.
 - rewrite <- ipcut_t2ipfrag in f.
@@ -373,14 +373,14 @@ induction pi;
   try discriminate HeqN;
   try (decomp_map Heql eqn:Hx; subst; destruct x; destr_eq Hx; subst;
        constructor; apply IHpi; list_simpl; reflexivity);
-  try (destruct A''; inversion HeqA; subst; constructor; apply IHpi; reflexivity).
-- destruct l''; inversion Heql; destruct l''; inversion Heql.
-  destruct A''; inversion HeqA; destruct t; inversion H0; subst.
-  apply t2i_inj in H4 as ->. apply ax_tr.
+  try (destruct A''; destr_eq HeqA; subst; constructor; apply IHpi; reflexivity).
+- destruct l''; destr_eq Heql. symmetry in H. apply map_eq_nil in H as ->.
+  destruct A''; destr_eq HeqA; destruct t; destr_eq Heql; subst.
+  apply t2i_inj in HeqA as ->. apply ax_tr.
 - exfalso.
   rewrite HeqN in Heql.
-  destruct l''; inversion Heql.
-  destruct t; discriminate H0.
+  destruct l''; destr_eq Heql.
+  destruct t; discriminate Heql.
 - apply PEPermutation_Type_map_inv in p.
   destruct p as [l0 -> HP].
   eapply ex_tr.
@@ -399,10 +399,10 @@ induction pi;
   symmetry in HP.
   eapply ex_oc_tr; [ | eassumption ].
   apply IHpi; [ rewrite <- tl2ill_map_ioc, <- ? map_app | ]; reflexivity.
-- destruct l''; inversion Heql.
-  destruct A''; inversion HeqA; subst.
+- destruct l''; destr_eq Heql.
+  destruct A''; destr_eq HeqA; subst.
   apply one_trr.
-- decomp_map Heql. destruct A''; inversion HeqA; subst.
+- decomp_map Heql. destruct A''; destr_eq HeqA; subst.
   apply tens_trr; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 - decomp_map Heql eqn:Hx. destruct Hx as [Hx ->%map_eq_nil]. destruct x; destr_eq Hx. subst.
   apply neg_tlr, IHpi; reflexivity.
@@ -411,7 +411,7 @@ induction pi;
 - decomp_map Heql eqn:Hx. destruct x; destr_eq Hx. subst.
   apply plus_tlr; [ apply IHpi1 | apply IHpi2 ]; list_simpl; reflexivity.
 - apply tl2ill_map_ioc_inv in Heql as [l0' -> ->].
-  destruct A''; inversion HeqA. subst.
+  destruct A''; destr_eq HeqA. subst.
   apply oc_trr, IHpi; [ rewrite tl2ill_map_ioc | ]; reflexivity.
 - cbn in f. destruct (tl2ill_dec A) as [[[B ->]|]|]; [ | discriminate f | discriminate f].
   decomp_map Heql. subst.
@@ -487,16 +487,16 @@ intros Hgax a. split; [ split | ].
   + destruct D; discriminate Heq.
 - destruct (Hgax a) as [Hat _].
   intros A C Heq1 Heq2.
-  destruct (snd (projT2 (tpgax P) a)); inversion Heq1; subst.
+  destruct (snd (projT2 (tpgax P) a)); destr_eq Heq1; subst.
   destruct A; inversion Hat; subst.
-  destruct C; inversion Heq2.
-  apply i2ac_inj in H0 as ->. reflexivity.
+  destruct C; destr_eq Heq2.
+  apply i2ac_inj in Heq2 as ->. reflexivity.
 - destruct (Hgax a) as [_ Hat].
   intros A C Hin Heq.
   eapply Forall_inf_forall in Hat; [ | eassumption ].
   destruct A; inversion Hat; subst.
-  destruct C; inversion Heq.
-  apply i2ac_inj in H0 as ->. reflexivity.
+  destruct C; destr_eq Heq.
+  apply i2ac_inj in Heq as ->. reflexivity.
 Qed.
 
 Lemma easytpgax_easyipgax P : easytpgax P -> easyipgax_nzeropos (t2ipfrag P).
@@ -508,7 +508,7 @@ split; [ split | ]; cbn.
   + assert (Hgaxa := fst (fst (Hgax a)) D).
     apply Hgaxa. cbn.
     rewrite <- Heq, <- HeqC. reflexivity.
-  + destruct D; inversion Heq.
+  + destruct D; destr_eq Heq.
 - intros l C HP.
   assert (prod (sum (snd (projT2 (tpgax P) a) = None /\ C = N)
                     { C' | snd (projT2 (tpgax P) a) = Some C' & C = tl2ill C' })
@@ -524,8 +524,8 @@ split; [ split | ]; cbn.
           right; exists t; [ reflexivity | ].
           apply Hgaxa; [ reflexivity | symmetry; assumption ].
         * left.
-          destruct C; inversion H0; split; [ reflexivity | ].
-          apply i2ac_inj in H1 as <-. reflexivity.
+          destruct C; destr_eq H0; split; [ reflexivity | ].
+          apply i2ac_inj in H0 as <-. reflexivity.
       + rewrite app_nil_r in HP. apply PEPermutation_Type_rev in HP. rewrite 2 rev_involutive in HP.
         apply PEPermutation_Type_map_inv_inj in HP; [ | apply formulas.dual_inj ].
         remember (fst (projT2 (tpgax P) a)) as l0.
@@ -550,10 +550,10 @@ split; [ split | ]; cbn.
                 symmetry in HP. eapply Permutation_Type_cons_app_inv. eassumption.
         * clear Heql0. revert l0 Hin HP. induction l; intros l0 Hin Heq; cbn in Heq.
           -- symmetry in Heq. exact (map_eq_nil _ _ Heq).
-          -- destruct l0; inversion Heq.
+          -- destruct l0; destr_eq Heq.
              assert (forall x, In_inf x l0 -> In_inf x (fst (projT2 (tpgax P) a))) as Hin'
-               by (intros x H; apply Hin, in_inf_cons; assumption).
-             cbn. rewrite (IHl _ Hin' H1). f_equal.
+               by (intros; apply Hin, in_inf_cons; assumption).
+             cbn. rewrite (IHl _ Hin' H). f_equal.
              symmetry. eapply (snd (Hgax _)); [ | assumption ].
              apply Hin, in_inf_eq.
     - exfalso.

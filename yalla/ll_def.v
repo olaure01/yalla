@@ -603,7 +603,7 @@ Lemma bot_rev P (Hgax : forall a, notT (In_inf bot (projT2 (pgax P) a))) l1 l2 :
 Proof.
 intro pi. remember (l1 ++ bot :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -630,7 +630,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0. subst.
+  + destruct l1; destr_eq Heql0. subst.
     rewrite app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
@@ -651,7 +651,7 @@ Lemma parr_rev P A B (Hgax : forall a, notT (In_inf (parr A B) (projT2 (pgax P) 
 Proof.
 intro pi. remember (l1 ++ parr A B :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -679,7 +679,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0. subst.
+  + destruct l1; destr_eq Heql0. subst.
     rewrite 2 app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
@@ -700,7 +700,7 @@ Lemma with_rev1 P A B (Hgax : forall a, notT (In_inf (awith A B) (projT2 (pgax P
 Proof.
 intro pi. remember (l1 ++ awith A B :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -727,7 +727,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0. subst.
+  + destruct l1; destr_eq Heql0. subst.
     rewrite app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
@@ -748,7 +748,7 @@ Lemma with_rev2 P A B (Hgax : forall a, notT (In_inf (awith B A) (projT2 (pgax P
 Proof.
 intro pi. remember (l1 ++ awith B A :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -775,7 +775,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0. subst.
+  + destruct l1; destr_eq Heql0. subst.
     rewrite app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
@@ -796,7 +796,7 @@ Lemma oc_rev P A (Hgax : forall a, notT (In_inf (oc A) (projT2 (pgax P) a))) l1 
 Proof.
 intro pi. remember (l1 ++ oc A :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -823,7 +823,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0. subst.
+  + destruct l1; destr_eq Heql0. subst.
     rewrite app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
@@ -845,7 +845,7 @@ Lemma one_rev P (Hgax : forall a, notT (In_inf one (projT2 (pgax P) a))) l0 (pi0
 Proof.
 intro pi. remember (l1 ++ one :: l2) as l eqn:Heql.
 induction pi in l1, l2, Heql |- * using ll_nested_ind;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -872,11 +872,11 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     apply Forall_inf_cons; [ | assumption ].
     destruct (In_Forall_inf_elt _ _ _ PL).
     refine (Dependent_Forall_inf_forall_formula _ _ X i _ _ eq_refl).
-- destruct l1; inversion Heql; subst.
+- destruct l1; destr_eq Heql; subst.
   + list_simpl. assumption.
-  + destruct l1; discriminate H1.
+  + destruct l1; discriminate H.
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0; subst.
+  + destruct l1; destr_eq Heql0; subst.
     rewrite <- app_comm_cons, 2 app_assoc. apply tens_r; [ assumption | ].
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply tens_r; [ | assumption ].
@@ -895,7 +895,7 @@ Lemma zero_rev P (Hgax : forall a, notT (In_inf zero (projT2 (pgax P) a))) l1 l2
 Proof.
 intro pi. remember (l1 ++ zero :: l2) as l eqn:Heql. intro l'.
 induction pi in l1, l2, Heql |- * using ll_nested_ind;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -923,7 +923,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     destruct (In_Forall_inf_elt _ _ _ PL).
     refine (Dependent_Forall_inf_forall_formula _ _ X i _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0; subst.
+  + destruct l1; destr_eq Heql0; subst.
     rewrite <- app_comm_cons, 2 app_assoc. apply tens_r; [ assumption | ].
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply tens_r; [ | assumption ].
@@ -943,7 +943,7 @@ Lemma tens_one_rev P A (Hgax1 : forall a, notT (In_inf one (projT2 (pgax P) a)))
 Proof.
 intros pi. remember (l1 ++ tens one A :: l2) as l eqn:Heql.
 induction pi in l1, l2, Heql |- * using ll_nested_ind;
-  try (destruct l1; inversion Heql; subst; (try assumption);
+  try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
@@ -971,7 +971,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     destruct (In_Forall_inf_elt _ _ _ PL).
     refine (Dependent_Forall_inf_forall_formula _ _ X i _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
-  + destruct l1; inversion Heql0; subst.
+  + destruct l1; destr_eq Heql0; subst.
     * rewrite <- (app_nil_l _) in pi1. eapply (one_rev Hgax1 pi2) in pi1. assumption.
     * rewrite <- app_comm_cons, (app_comm_cons l), app_assoc. apply tens_r; [ assumption | ].
       rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -994,7 +994,7 @@ induction pi in Heq |- * using ll_nested_ind; subst; try (now inversion Heq).
 - symmetry in p. apply PCPermutation_Type_length_1_inv in p as ->.
   apply IHpi. reflexivity.
 - destruct l1; inversion Heq; subst.
-  + destruct lw'; inversion H0. list_simpl in H0.
+  + destruct lw'; destr_eq H0. list_simpl in H0.
     symmetry in p. apply Permutation_Type_nil in p as ->.
     apply IHpi. assumption.
   + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
@@ -1021,7 +1021,7 @@ induction pi in Heq |- * using ll_nested_ind; subst; try (now inversion Heq).
 - symmetry in p. apply PCPermutation_Type_length_1_inv in p as ->.
   apply IHpi. reflexivity.
 - destruct l1; inversion Heq; subst.
-  + destruct lw'; inversion H0. list_simpl in H0.
+  + destruct lw'; destr_eq H0. list_simpl in H0.
     symmetry in p. apply Permutation_Type_nil in p as ->.
     apply IHpi. assumption.
   + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
@@ -1044,7 +1044,7 @@ Lemma wn_n_rev P A n (Hgax : forall a k, notT (projT2 (pgax P) a = repeat (wn A)
   ll P (repeat (wn A) n) -> (ll P (A :: wn A :: nil)) + (pmix P 0 = true).
 Proof.
 intro pi. remember (repeat (wn A) n) as l eqn:Heql.
-induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; inversion Heql); subst.
+induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; destr_eq Heql); subst.
 - assert (l1 = (repeat (wn A) n)) as ->
     by eapply Permutation.Permutation_repeat, Permutation_Type_Permutation, PCPermutation_Permutation_Type, p.
   apply (IHpi _ eq_refl).
@@ -1063,15 +1063,15 @@ induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; inversion
   + right. rewrite eqpmix. reflexivity.
   + cbn in Heql. symmetry in Heql. apply repeat_eq_app in Heql as [Hl _]. symmetry in Hl.
     inversion_clear X. exact (X0 _ Hl).
-- destruct n; inversion Heql. subst. left.
+- destruct n; destr_eq Heql. subst. left.
   ll_swap. eapply ex_r in pi; [ | apply PCPermutation_Type_cons_append ].
   clear - pi. induction n as [|[|n] IHn].
   + apply wk_r, pi.
   + exact pi.
   + apply IHn, co_r, pi.
-- destruct n; inversion Heql. subst.
+- destruct n; destr_eq Heql. subst.
   apply (IHpi _ eq_refl).
-- destruct n; inversion Heql. subst.
+- destruct n; destr_eq Heql. subst.
   exact (IHpi (S (S n)) eq_refl).
 - rewrite Hcut in f. discriminate f.
 - exfalso. exact (Hgax a _ Heql).
@@ -1196,7 +1196,7 @@ intros pi. induction pi using ll_nested_ind; intros l2' HF;
     revert l2' Hat HF. clear.
     induction l; intros l2 Hat HF; inversion_clear HF as [ | ? ? ? ? Hm ]; f_equal.
     - inversion_clear Hat as [ | ? ? Hat' ].
-      destruct a; inversion_clear Hat'; inversion_clear Hm; reflexivity.
+      destruct a; inversion Hat'; inversion_clear Hm; reflexivity.
     - inversion_clear Hat.
       apply IHl; assumption. }
   apply gax_r.

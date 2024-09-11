@@ -129,13 +129,13 @@ end.
 
 Lemma trans_inj : injective trans.
 Proof.
-intros a. induction a; intros b Heq; destruct b; inversion Heq;
-  (try apply IHa in H0 as ->);
-  (try apply IHa1 in H0 as ->);
-  (try apply IHa2 in H1 as ->); try reflexivity.
+intros a. induction a; intros b Heq; destruct b; destr_eq Heq;
+  (try apply IHa in Heq as ->);
+  (try apply IHa1 in Heq as ->);
+  (try apply IHa2 in H as ->); try reflexivity.
 - f_equal. apply Atom2PreIAtom_inj. assumption.
 - f_equal. apply Atom2PreIAtom_inj. assumption.
-- apply IHa1 in H1 as ->. apply IHa2 in H0 as ->. reflexivity.
+- apply IHa1 in H as ->. apply IHa2 in Heq as ->. reflexivity.
 Qed.
 
 Lemma trans_wn l : map trans (map wn l) = map ioc (map (fun x => (negR (negR (trans x)))) l).

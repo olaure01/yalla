@@ -62,11 +62,10 @@ Proof. induction l as [ | a l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 Lemma mell2ll_map_wn_inv l1 l2 : map formulas.wn l1 = map mell2ll l2 ->
   exists l2', l2 = map wn l2' /\ l1 = map mell2ll l2'.
 Proof.
-induction l1 as [|a l1 IHl1] in l2 |- *; intro Heq; destruct l2; inversion Heq.
+induction l1 as [|a l1 IHl1] in l2 |- *; intro Heq; destruct l2; destr_eq Heq.
 - exists nil. split; reflexivity.
-- apply IHl1 in H1.
-  destruct f; inversion H0. subst.
-  destruct H1 as (l2' & -> & ->).
+- apply IHl1 in H as [l2' [-> ->]].
+  destruct f; destr_eq Heq. subst.
   exists (f :: l2'). split; reflexivity.
 Qed.
 
@@ -100,7 +99,7 @@ intros A HfA B Hsf.
 induction Hsf;
   try (apply IHHsf;
        destruct HfA as [B0 HfA];
-       destruct B0; inversion HfA; subst;
+       destruct B0; destr_eq HfA; subst;
        eexists; reflexivity).
 assumption.
 Qed.
