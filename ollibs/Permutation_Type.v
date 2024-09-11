@@ -1,13 +1,8 @@
 (* This file is directly inspired by the corresponding Coq file
    Sorting/Permutation.v *)
 
-<<<<<<< HEAD
 From Coq Require Import List PeanoNat Compare_dec CMorphisms FinFun Permutation.
-From OLlibs Require Import List_Type.
-=======
-From Coq Require Import List Compare_dec CMorphisms FinFun Permutation.
 From Yalla.OLlibs Require Import List_Type.
->>>>>>> 431b27a (set local path for OLlibs)
 Import ListNotations. (* For notations [] and [a;b;c] *)
 
 Set Implicit Arguments.

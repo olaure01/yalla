@@ -6,7 +6,7 @@ An implementation of the axioms is provided for every type
 by lists up to permutation. *)
 
 From Coq Require Import Relation_Definitions Morphisms Permutation.
-From OLlibs Require Import List_more.
+From Yalla.OLlibs Require Import List_more.
 
 Set Implicit Arguments.
 Set Default Proof Using "Type".
