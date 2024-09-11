@@ -1,3 +1,7 @@
+Set Mangle Names.
+Set Mangle Names Light.
+Set Implicit Arguments.
+
 Definition iffT (A B : Type) := ((A -> B) * (B -> A))%type.
 
 Definition prod_map A B (f : A -> B) p :=

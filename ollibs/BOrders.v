@@ -15,7 +15,7 @@ Class BOrder := {
   total a b : leb a b = false -> leb b a = true;
   asym a b : leb a b = true -> leb b a = true -> a = b;
   trans a b c : leb a b = true -> leb b c = true -> leb a c = true }.
-Coercion car : BOrder >-> Sortclass. (* TODO integrate as [car :> Type] when avalaible for coercion *)
+Coercion car : BOrder >-> Sortclass. (* TODO integrate as [car :> Type] when available for coercion *)
 
 (** ** Equivalence with [UsualOrderedTypeFull] *)
 Module Type ModBOrder.
@@ -79,7 +79,7 @@ Module ModBOrder_as_UsualOrderedTypeFull (B : ModBOrder) : UsualOrderedTypeFull.
   Lemma le_lteq x y : le x y <-> lt x y \/ eq x y.
   Proof.
   split.
-  - intros Hle.
+  - intro Hle.
     destruct (eq_dec x y).
     + right. assumption.
     + left. split; assumption.
@@ -103,7 +103,7 @@ Module UsualOrderedTypeFull_as_BOrder (T : UsualOrderedTypeFull).
 
   Lemma leb_le x y : leb x y = true -> T.le x y.
   Proof.
-  unfold leb. intros Hcmp.
+  unfold leb. intro Hcmp.
   apply T.le_lteq.
   destruct (T.compare_spec x y) as [ Heq | Hlt | Hgt ].
   - right. assumption.
@@ -113,7 +113,7 @@ Module UsualOrderedTypeFull_as_BOrder (T : UsualOrderedTypeFull).
 
   Lemma le_leb x y : T.le x y -> leb x y = true.
   Proof.
-  intros Hle. unfold leb.
+  intro Hle. unfold leb.
   destruct (T.compare_spec x y) as [ Heq | Hlt | Hgt]; [ reflexivity | reflexivity | ].
   destruct (StrictOrder_Irreflexive x).
   apply T.le_lteq in Hle as [ Hlt | -> ].
@@ -123,14 +123,13 @@ Module UsualOrderedTypeFull_as_BOrder (T : UsualOrderedTypeFull).
 
   Lemma nleb_lt x y : leb x y = false -> T.lt y x.
   Proof.
-  unfold leb. intros Hleb.
+  unfold leb. intro Hleb.
   destruct (T.compare_spec x y) as [ Heq | Hlt | Hgt]; [ discriminate Hleb | discriminate Hleb | assumption ].
   Qed.
 
   Lemma lt_nleb x y : T.lt y x -> leb x y = false.
   Proof.
-  intros Hlty.
-  unfold leb.
+  unfold leb. intro Hlty.
   destruct (T.compare_spec x y) as [ -> | Hlt | Hgt]; [ | | reflexivity ].
   - apply StrictOrder_Irreflexive in Hlty as [].
   - apply (StrictOrder_Transitive _ _ _ Hlty) in Hlt.
@@ -140,20 +139,11 @@ Module UsualOrderedTypeFull_as_BOrder (T : UsualOrderedTypeFull).
   Lemma to_BOrder : BOrder.
   Proof.
   split with T.t leb.
-  - intros a b Hf.
-    apply nleb_lt in Hf.
-    apply le_leb.
-    apply T.le_lteq.
-    left ; assumption.
-  - intros a b H1 H2.
-    apply leb_le in H1.
-    apply leb_le in H2.
-    apply T.le_lteq in H1.
-    apply T.le_lteq in H2.
-    destruct H1 as [H1|H1], H2 as [H2|H2]; auto.
+  - intros a b Hf%nleb_lt. apply le_leb, T.le_lteq.
+    left. assumption.
+  - intros a b [H1|H1]%leb_le%T.le_lteq [H2|H2]%leb_le%T.le_lteq; auto.
     apply (StrictOrder_Transitive _ _ _ H2) in H1.
-    apply StrictOrder_Irreflexive in H1.
-    destruct H1.
+    apply StrictOrder_Irreflexive in H1 as [].
   - intros a b c [ H1 | -> ]%leb_le%T.le_lteq [ H2 | -> ]%leb_le%T.le_lteq; apply le_leb, T.le_lteq.
     + left. transitivity b; assumption.
     + left. assumption.
@@ -261,7 +251,7 @@ destruct l0; repeat split; auto.
 - intros c Hc.
   inversion Hc as [ -> | [] ].
   right. reflexivity.
-- unfold l. simpl.
+- unfold l. cbn.
   destruct (leb a c) eqn:Heqbb.
   + now apply andb_true_iff; split.
   + destruct s; inversion Hlen.
@@ -273,13 +263,13 @@ destruct l0; repeat split; auto.
     destruct (leb a c0); apply andb_true_iff; split; auto.
     clear Hlen l. simpl in Hsort.
     apply andb_true_iff in Hsort. apply Hsort.
-- intro Heq. unfold l in Heq. simpl in Heq.
+- intro Heq. unfold l in Heq. cbn in Heq.
   destruct (leb a c); discriminate Heq.
-- intros d Hd. unfold l in Hd. simpl in Hd.
+- intros d Hd. unfold l in Hd. cbn in Hd.
   destruct (leb a c).
   + inversion Hd as [ -> | ]; [ right | left ]; trivial.
   + inversion Hd as [ -> | Hin ].
-    * left. left. reflexivity.
+    * left. apply in_eq.
     * destruct s; inversion Hlen as [ Hlen' ].
       destruct (IH s (le_n _) a (exist _ l0 (is_sorted_tail _ _ _ Hsort)) Hlen') as [_ Hin'].
       apply Hin' in Hin.

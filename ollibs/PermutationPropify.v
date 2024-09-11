@@ -58,9 +58,7 @@ Section Permutation.
         * now apply Permutation_Type_cons_app.
         * intros HP. apply HnP.
           now apply Permutation_Type_cons_app_inv in HP.
-      + right. intros HP. apply Hnin.
-        apply (Permutation_Type_in_inf _ HP).
-        left. reflexivity.
+      + right. intro HP. apply Hnin, (Permutation_Type_in_inf _ HP), in_inf_eq.
     Qed.
 
     Lemma Permutation_Permutation_Type (l1 l2 : list A):

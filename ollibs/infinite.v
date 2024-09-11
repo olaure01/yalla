@@ -75,8 +75,8 @@ Section Infinite.
     end) as ih.
   exists (fun n => hd (c nil) (ih n)).
   assert(forall n x, In (hd (c nil) (ih x)) (ih (n + x))) as HC.
-  { intros n x. induction n; cbn; subst.
-    - destruct x; left; reflexivity.
+  { intros n x. induction n as [|n IHn]; cbn; subst.
+    - destruct x; apply in_eq.
     - right. exact IHn. }
   enough (forall x y, x < y -> hd (c nil) (ih x) = hd (c nil) (ih y) -> x = y) as Hlt.
   { intros x y Heq.
@@ -255,7 +255,7 @@ Section InfDecTypes.
   Proof. apply choice_nat_injective. exists fresh. apply fresh_spec. Qed.
 
   (* A list (of length [n]+1) of distinct fresh elements (not in [l]) *)
-  Fixpoint freshlist_of_list (l : list X)  n :=
+  Fixpoint freshlist_of_list (l : list X) n :=
     match n with
     | 0 => fresh l :: nil
     | S k => let lv := freshlist_of_list l k in fresh (lv ++ l) :: lv
@@ -295,8 +295,7 @@ Section InfDecTypes.
   Lemma freshlist_fresh l n : ~ In (freshlist l n) l.
   Proof.
   intros Hin.
-  assert (In (freshlist l n) (freshlist_of_list l n)) as Hin2
-    by (destruct n; left; reflexivity).
+  assert (In (freshlist l n) (freshlist_of_list l n)) as Hin2 by (destruct n; apply in_eq).
   exact (freshlist_of_list_fresh _ _ _ Hin2 Hin).
   Qed.
 
@@ -312,10 +311,10 @@ Section InfDecTypes.
   unfold freshlist in Heq. rewrite Hprf in Heq.
   destruct l'; [ apply Hnil; reflexivity | ]. cbn in Heq.
   destruct n; cbn in Heq, Hprf; rewrite Heq in Hprf.
-  - assert (In c ((c :: l') ++ nil)) as Hin by (left; reflexivity).
+  - assert (In c ((c :: l') ++ nil)) as Hin by apply in_eq.
     revert Hin. apply NoDup_remove_2. rewrite <- app_comm_cons, <- Hprf.
     apply (freshlist_of_list_NoDup l m).
-  - assert (In c ((c :: l') ++ freshlist_of_list l n)) as Hin by (left; reflexivity).
+  - assert (In c ((c :: l') ++ freshlist_of_list l n)) as Hin by apply in_eq.
     revert Hin. apply NoDup_remove_2. rewrite <- app_comm_cons, <- Hprf.
     apply (freshlist_of_list_NoDup l m).
   Qed.

@@ -15,8 +15,6 @@ match o with
 | None => default
 end.
 
-Definition option_map A B (f : A -> B) := option_eval_default None (fun x => Some (f x)).
-
 Definition option_test A := @option_eval_default A Prop True.
 
 Definition option_testT A := @option_eval_default A Type unit.
@@ -162,9 +160,9 @@ Lemma map_injective_in A B (f : A -> B) l1 l2 : (forall x y, In x l1 -> In y l2 
 Proof.
 induction l1 as [|a l1 IHl1] in l2 |-*; intros Hi Hmap; destruct l2; inversion Hmap as [ [Hhd Htl] ].
 - reflexivity.
-- apply Hi in Hhd as ->; [ | left; reflexivity | left; reflexivity ].
+- apply Hi in Hhd as ->; [ | apply in_eq .. ].
   apply IHl1 in Htl as ->; [ reflexivity | ].
-  intros. apply Hi; [ right | right | ]; assumption.
+  intros. apply Hi; [ right .. | ]; assumption.
 Qed.
 
 (** ** Inverse image of a relation by a(n injective) function *)

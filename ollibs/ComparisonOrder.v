@@ -1,10 +1,11 @@
 (** Order structure on [comparison]
 [Lt] < [Eq] < [Gt] *)
 
-From Coq Require Import Orders.
-
+Set Mangle Names.
+Set Mangle Names Light.
 Set Implicit Arguments.
 
+From Coq Require Import Orders.
 
 Ltac destr_comparison :=
   intros; destruct_all comparison; simpl in *; trivial; try discriminate.
@@ -24,7 +25,7 @@ Definition eqb (c1 c2 : comparison) :=
   end.
 
 Lemma eqb_eq c1 c2 : eqb c1 c2 = true <-> c1 = c2.
-Proof. destr_comparison; split; intros H; (reflexivity + discriminate H). Qed.
+Proof. destr_comparison; split; intro H; (reflexivity + discriminate H). Qed.
 
 (** * [le] *)
 

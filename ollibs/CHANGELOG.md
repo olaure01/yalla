@@ -1,5 +1,32 @@
 # Versions 2.0.x
 
+## Version 2.0.6
+
+* changes on tactics in `List_more.v`
+  * add `as`, `in` and `in *` extensions
+  * try to preserve names in `decomp_map`
+  * add symmetric cases for matching equalities
+  * rename `Forall_inf_cbn_hyp` into `Forall_inf_simpl_hyp`
+  * WARNING: this impacts automatically generated names (in a way which should be more stable)
+* create dedicated file `Vector_more.v` for results using `Vector`
+  * rename `AFCvec_incdep` into `AFCincdep` in `AFC.v`
+  * move `AFCvec` from `AFC.v` to `Vector_more.v`
+* add `Set Implicit Arguments` in most files
+* more uses of `sigT2` rather than `sigT` with `prod` in `List_more.v`
+* move `fold_id` to `List_more.v`
+* adapt to Coq v8.19
+  * remove uses of `auto with arith`
+
+## Version 2.0.5
+
+* rename `decomp_length_plus` into `decomp_length_add`
+* more uses of `sig2` rather than `sig` with `/\` in `List_more.v`
+* add tactics `nil_vs_elt_inv` and `last_destruct` for lists
+* add `Forall2_rev` and `Forall2_inf_rev`
+* remove statements already present in the standard library
+* adapt to Coq v8.18
+  * remove `Let` constructs in `Permutation_Type.v`
+
 ## Version 2.0.4
 
 * rename `fresh_prop` into `fresh_spec`
@@ -14,7 +41,7 @@
     * add `reflectT` and associated results
 	* add `reflect_neg`, `Forall_forallb_reflect` and some results from `ssr.ssrbool`
 * integrate material for dealing with [Issue #12394](https://github.com/coq/coq/issues/12394) in file `issue12394.v`
-* adapt to Coq v8.17.0
+* adapt to Coq v8.17
     * clean uses of tactic `intuition`
     * remove `Forall2_length` (integrated in the standard library in [PR #15986](https://github.com/coq/coq/pull/15986))
 
@@ -42,7 +69,7 @@
 
 * proof scripts more robust with respect to automatically generated names
 * slightly more powerful `unit_vs_elt_inv` tactic
-* adapt to Coq v8.13.0
+* adapt to Coq v8.13
     * remove statements about `repeat` (moved into Coq stdlib: [PR #12799](https://github.com/coq/coq/pull/12799))
     * add locality attributes to `Hint` commands
 
@@ -50,4 +77,4 @@
 
 First Opam-released version.
 
-It coincides with incorporation of part of previous content into the standard library of Coq v8.12.0.
+It coincides with incorporation of part of previous content into the standard library of Coq v8.12.

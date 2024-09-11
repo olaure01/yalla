@@ -1,5 +1,8 @@
 (* TODO submit to stdlib, except part already in ssreflect *)
 
+Set Mangle Names.
+Set Mangle Names Light.
+
 From Coq Require Export Bool.
 From Yalla.OLlibs Require Import Datatypes_more.
 

@@ -1,11 +1,11 @@
 (** Add-ons for Permutation_Type library
 Usefull properties apparently missing in the Permutation_Type library. *)
 
+Set Implicit Arguments.
+
 From Coq Require Import PeanoNat Permutation CMorphisms.
 From Yalla.OLlibs Require Import List_more funtheory.
 From Yalla.OLlibs Require Export Permutation_Type.
-
-Set Implicit Arguments.
 
 
 (** * Additional Properties *)
@@ -93,7 +93,7 @@ apply Permutation_Type_sym, Permutation_Type_cons_app_inv,
 destruct HP as [(l1'', l2'') HP]; symmetry in HP.
 dichot_elt_app_inf_exec HP; subst; rewrite <- ? app_assoc, <- ? app_comm_cons.
 - now exists (l1'', l, l2'); right.
-- now exists (l1', l0, l2''); left.
+- now exists (l1', l, l2''); left.
 Qed.
 
 Lemma Permutation_Type_app_rot A (l1 l2 l3 : list A) :
@@ -232,24 +232,23 @@ intros HP; revert l2; induction HP as [ | ? ? ? ? IHP | | ? ? ? ? IHP1 ? IHP2 ];
 Qed.
 
 Lemma Permutation_Type_map_inv A B (f : A -> B) l1 l2 :
-  Permutation_Type l1 (map f l2) -> { l & l1 = map f l & (Permutation_Type l2 l) }.
+  Permutation_Type l1 (map f l2) -> { l & l1 = map f l & Permutation_Type l2 l }.
 Proof.
-revert l2; induction l1 as [|a l1 IHl1]; intros l2 HP.
+induction l1 as [|a l1 IHl1] in l2 |- *; intro HP.
 - apply Permutation_Type_nil in HP.
   destruct l2; inversion HP.
   now exists nil.
 - apply Permutation_Type_sym in HP.
   destruct (Permutation_Type_vs_cons_inv HP) as [(l1', l2') Heq].
-  decomp_map_inf Heq; subst.
+  decomp_map Heq. subst l2.
   apply Permutation_Type_sym in HP.
   rewrite map_app in HP.
   apply Permutation_Type_cons_app_inv in HP.
-  specialize IHl1 with (l0 ++ l4).
+  specialize IHl1 with (l1' ++ l2').
   rewrite map_app in IHl1.
-  apply IHl1 in HP.
-  destruct HP as [l' Heq HP']; subst.
-  exists (x :: l'); auto.
-  now apply Permutation_Type_sym, Permutation_Type_cons_app, Permutation_Type_sym.
+  apply IHl1 in HP as [l' -> HP'].
+  exists (a :: l'); [ reflexivity | ].
+  apply Permutation_Type_sym, Permutation_Type_cons_app, Permutation_Type_sym, HP'.
 Qed.
 
 Lemma Permutation_Type_map_inv_inj A B (f : A -> B) (Hinj : injective f) l1 l2 :
@@ -261,17 +260,15 @@ revert l2; induction l1 as [|a l1 IHl1]; intros l2 HP.
   apply Permutation_Type_refl.
 - assert (Heq := HP).
   apply Permutation_Type_sym in Heq.
-  apply Permutation_Type_vs_cons_inv in Heq.
-  destruct Heq as [(l3, l4) Heq].
-  decomp_map_inf Heq; subst.
-  rewrite map_app in HP; simpl in HP.
-  rewrite Heq3 in HP.
+  apply Permutation_Type_vs_cons_inv in Heq as [(l3, l4) Heq].
+  decomp_map Heq eqn:Hf. subst l2.
+  rewrite map_app in HP. cbn in HP. rewrite Hf in HP.
   apply Permutation_Type_cons_app_inv in HP.
-  specialize IHl1 with (l0 ++ l6).
+  specialize IHl1 with (l3 ++ l4).
   rewrite map_app in IHl1.
   apply IHl1 in HP.
-  apply Hinj in Heq3; subst.
-  now apply Permutation_Type_cons_app.
+  apply Hinj in Hf as ->.
+  apply Permutation_Type_cons_app, HP.
 Qed.
 
 Lemma Permutation_Type_image A B (f : A -> B) a l l' :
@@ -288,13 +285,12 @@ Lemma Permutation_Type_elt_map_inv A B (f : A -> B) a l1 l2 l3 l4 :
   (forall b, a <> f b) -> {'(l1', l2') | l3 = l1' ++ a :: l2' }.
 Proof.
 intros HP Hf.
-apply Permutation_Type_sym, Permutation_Type_vs_elt_inv in HP.
-destruct HP as [(l', l'') Heq].
+apply Permutation_Type_sym, Permutation_Type_vs_elt_inv in HP as [(l', l'') Heq].
 dichot_elt_app_inf_exec Heq; subst.
-- exists (l', l); reflexivity.
+- exists (l', l). reflexivity.
 - exfalso.
-  symmetry in Heq1; decomp_map_inf Heq1; symmetry in Heq1.
-  apply Hf in Heq1; inversion Heq1.
+  decomp_map Heq1.
+  exact (Hf a eq_refl).
 Qed.
 
 #[export] Instance Permutation_Type_flat_map A B f :
@@ -419,7 +415,7 @@ Qed.
 Lemma Permutation_Type_list_max l1 l2 :
   Permutation_Type l1 l2 -> list_max l1 = list_max l2.
 Proof.
-unfold list_max. intros HP. induction HP; simpl; [ auto | auto | | ].
+unfold list_max. intro HP. induction HP; cbn; [ reflexivity | rewrite IHHP; reflexivity | | ].
 - rewrite ? Nat.max_assoc, (Nat.max_comm x y). reflexivity.
 - etransitivity; eassumption.
 Qed.
@@ -438,7 +434,7 @@ Lemma Permutation_Type_partition A f (l l' l1 l2 l1' l2' : list A) :
   Permutation_Type l l' -> partition f l = (l1, l2) -> partition f l' = (l1', l2') ->
   Permutation_Type l1 l1' * Permutation_Type l2 l2'.
 Proof.
-intros HP. induction HP as [ | x l l' HP IHHP | x y l
+intro HP. induction HP as [ | x l l' HP IHHP | x y l
                            | l l' l'' HP1 IHHP1 HP2 IHHP2 ] in l1, l2, l1', l2' |- *;
   cbn; intros Hp1 Hp2.
 - injection Hp1 as [= <- <-]. injection Hp2 as [= <- <-]. split; reflexivity.

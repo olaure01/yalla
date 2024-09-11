@@ -1,8 +1,13 @@
 (* This file is directly inspired by the corresponding Coq file
    Sorting/Permutation.v *)
 
+<<<<<<< HEAD
+From Coq Require Import List PeanoNat Compare_dec CMorphisms FinFun Permutation.
+From OLlibs Require Import List_Type.
+=======
 From Coq Require Import List Compare_dec CMorphisms FinFun Permutation.
 From Yalla.OLlibs Require Import List_Type.
+>>>>>>> 431b27a (set local path for OLlibs)
 Import ListNotations. (* For notations [] and [a;b;c] *)
 
 Set Implicit Arguments.
@@ -462,7 +467,7 @@ Proof.
  * now rewrite map_length.
  * intros x. rewrite in_map_iff. intros (y & <- & Hy').
    rewrite in_seq in *. simpl in *.
-   destruct Hy' as (_,Hy'). auto with arith.
+   destruct Hy' as (_,Hy'). split; [ apply Nat.le_0_l | ]. apply Hf, Hy'.
 Qed.
 *)
 
@@ -507,8 +512,11 @@ Proof.
    rewrite 2 nth_error_app1; auto.
  - rewrite <- (PeanoNat.Nat.lt_succ_pred _ _ LT) at 1.
    rewrite <- E, <- (PeanoNat.Nat.lt_succ_pred _ _ LT) in LT.
-   rewrite 2 nth_error_app2; auto with arith.
-   rewrite PeanoNat.Nat.sub_succ_l; auto with arith.
+   rewrite 2 nth_error_app2.
+   + rewrite Nat.sub_succ_l; [ reflexivity | ].
+     apply Nat.lt_succ_r; assumption.
+   + apply Nat.lt_succ_r; assumption.
+   + apply Nat.lt_le_incl; assumption.
 Defined.
 
 Lemma Permutation_Type_nth_error l l' :
@@ -580,7 +588,7 @@ Lemma nth_error_Permutation_Type_bis l l' :
   Permutation_Type l l'.
 Proof.
   intros f Hf Hf2 Hf3; apply nth_error_Permutation_Type with f; auto.
-  assert (H : length l' <= length l') by auto with arith.
+  assert (H : length l' <= length l') by reflexivity.
   rewrite <- nth_error_None, Hf3, nth_error_None in H.
   destruct (PeanoNat.Nat.le_gt_cases (length l) (length l')) as [LE|LT];
    [|apply Hf2 in LT; elim (proj1 (PeanoNat.Nat.lt_nge _ _) LT H)].

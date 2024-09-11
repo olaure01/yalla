@@ -1,23 +1,23 @@
 (** Add-ons for [List] library:
 Properties of [flat_map]. *)
 
-From Yalla.OLlibs Require Import funtheory List_more Permutation_Type_more CPermutation_Type GPermutation_Type.
+(* TODO add [as p] to tactics cf List_more *)
+(* TODO remove some prod in sigT *)
 
 Set Implicit Arguments.
 
+From Yalla.OLlibs Require Import funtheory List_more Permutation_Type_more CPermutation_Type GPermutation_Type.
+
 
 Lemma flat_map_elt A B (f : A -> list B) a L l1 l2 :
-     flat_map f L = l1 ++ a :: l2 ->
-     {'(L1, L2, L0, l1', l2') | l1 = flat_map f L1 ++ l1' /\ l2 = l2' ++ flat_map f L2
-                             /\ L = L1 ++ L0 :: L2 /\ f L0 = l1' ++ a :: l2' }.
+  flat_map f L = l1 ++ a :: l2 ->
+  {'(L1, L2, L0, l1', l2') | l1 = flat_map f L1 ++ l1' /\ l2 = l2' ++ flat_map f L2
+                           & L = L1 ++ L0 :: L2 /\ f L0 = l1' ++ a :: l2' }.
 Proof.
-intros Heq.
-rewrite flat_map_concat_map in Heq.
-apply concat_vs_elt in Heq.
-destruct Heq as [(((L1, L2), l1''), l2'') [-> [-> Heq]]].
-decomp_map_inf Heq; subst.
-now exists (l0, l2, x, l1'', l2''); simpl; repeat split;
-  try rewrite flat_map_concat_map.
+intro Heq. rewrite flat_map_concat_map in Heq.
+apply concat_vs_elt in Heq as [(((L1, L2), l1''), l2'') [-> [-> Heq]]].
+decomp_map Heq eqn:Hf. subst L.
+now exists (L1, L2, x, l1'', l2''); cbn; repeat split; rewrite ? flat_map_concat_map.
 Qed.
 
 Lemma app_vs_flat_map B T (f : B -> T) L l1 l2 :
@@ -44,7 +44,7 @@ revert l1 l2; induction L as [|[b l] L IHL]; simpl; intros l1 l2 Heq.
       -- now exists (nil, L, b , l1, t' :: l0); simpl; rewrite ? app_nil_r.
   + apply IHL in Heq1.
     destruct Heq1 as [ (((((L1 & L2) & n) & l1') & l2') & (Hnil & -> & -> & ->))
-                     | [[L1 L2] (-> & -> & ->)]] ; [left | right].
+                     | [[L1 L2] [-> [-> ->]]]] ; [left | right].
     * now exists ((b, l) :: L1, L2, n, l1', l2').
     * now exists ((b, l) :: L1, L2).
 Qed.
@@ -86,7 +86,7 @@ intros Heq; dichot_app_inf_exec Heq; subst.
   + left; left; exists (t :: l); subst; repeat split.
     intros Heq ; inversion Heq.
 - app_vs_flat_map_inv Heq1.
-  + now left; right; exists (L0, L1, n, l, l1).
+  + now left; right; exists (L0, L1, n, l1, l3).
   + now right; exists (L0, L1).
 Qed.
 
@@ -121,29 +121,21 @@ Lemma elt_vs_app_flat_map C T (f : C -> T) l0 L l1 l2 B :
           /\ l1 = l0 ++ flat_map (fun '(p1,p2) => f p1 :: p2) L1
           /\ l2 = l ++ flat_map (fun '(p1,p2) => f p1 :: p2) L2 }.
 Proof.
-intros Heq; dichot_elt_app_inf_exec Heq; subst; [ now left; left; exists l | ].
-revert l3 l2 Heq1; induction L as [|[n l] L IHL]; simpl; intros l3 l2 Heq.
-- exfalso; destruct l3; inversion Heq.
-- rewrite app_comm_cons in Heq.
-  dichot_elt_app_inf_exec Heq.
-  + destruct l3 as [|t l3]; inversion Heq0; subst.
-    * now right; exists (nil, L, n, l).
-    * now left; right; exists (nil, L, n, l3, l1).
-  + apply IHL in Heq1; destruct Heq1 as [[Heqa | Heqb] | [Heq Heqc]]; subst.
-    * destruct Heqa as [l' [Heqa _]].
-      exfalso.
-      rewrite <- (app_nil_r l0), <- 2 app_assoc in Heqa.
-      apply app_inv_head in Heqa.
-      simpl in Heqa; destruct l4; inversion Heqa.
-    * left; right.
-      destruct Heqb as (((((L' & L'') & n') & l'') & l''') & (-> & Heqb2 & ->)).
-      apply app_inv_head in Heqb2; subst.
-      now exists ((n, l) :: L', L'', n', l'', l'''); simpl; rewrite ? app_assoc.
-    * right.
-      destruct Heq as (((L' & L'') & n') & l'').
-      destruct Heqc as (-> & -> & Heqc2 & ->).
-      apply app_inv_head in Heqc2; subst.
-      now exists ((n, l) :: L', L'', n' , l'').
+intro Heq. dichot_elt_app_inf_exec Heq; subst; [ now left; left; exists l | ].
+induction L as [|[n l'] L IHL] in l, l2, Heq1 |- *; cbn in Heq1.
+- exfalso. nil_vs_elt_inv Heq1.
+- rewrite app_comm_cons in Heq1. dichot_elt_app_inf_exec Heq1; subst.
+  + destruct l as [|t l]; inversion Heq0; subst.
+    * right. exists (nil, L, n, l'). repeat split.
+    * left. right. exists (nil, L, n, l, l1). repeat split.
+  + apply IHL in Heq2 as [[[l'' [Heqa _]]
+                       | [[[[[L' L''] n'] l''] l'''] [-> [->%app_inv_head ->]]]]
+                       | [[[[L' L''] n'] l''] [-> [-> [->%app_inv_head ->]]]]].
+    * exfalso.
+      rewrite <- (app_nil_r l0), <- 2 app_assoc in Heqa. apply app_inv_head in Heqa.
+      cbn in Heqa. nil_vs_elt_inv Heqa.
+    * left. right. exists ((n, l') :: L', L'', n', l'', l'''). cbn. rewrite ? app_assoc. repeat split.
+    * right. exists ((n, l') :: L', L'', n' , l''). repeat split.
 Qed.
 
 Ltac elt_vs_app_flat_map_inv H :=
@@ -170,14 +162,12 @@ Lemma map_f_flat_map T T1 T2 (g : T -> T2) (f : T1 -> T2) lw' lw l L :
   map f lw = l ++ flat_map (fun '(p1, p2) => g p1 :: p2) L ->
   { Lw | l ++ flat_map (fun '(p1, p2) => app (map f lw') p2) L = map f Lw }.
 Proof.
-revert lw l; induction L as [|[b l0] L IHL]; simpl; intros lw l Heq.
-- subst; exists lw; symmetry; assumption.
+induction L as [|[b l0] L IHL] in lw, l |- *; cbn; intro Heq.
+- exists lw. symmetry. assumption.
 - rewrite app_comm_cons, app_assoc in Heq.
-  apply IHL in Heq; destruct Heq as [Lw Heq].
-  symmetry in Heq; decomp_map_inf Heq; simpl in Heq1, Heq2; subst.
-  rewrite <- Heq2; simpl.
-  exists (l4 ++ lw' ++ l6 ++ l3).
-  now rewrite ? map_app, <- app_assoc.
+  apply IHL in Heq as [Lw Heq].
+  decomp_map Heq eqn:Hf. subst Lw. destruct Hf as [_ <-].
+  exists (l ++ (lw' ++ l0) ++ l2). rewrite ! map_app. reflexivity.
 Qed.
 
 Lemma Permutation_Type_app_flat_map B T (f : B -> T) lw0 L lw l :
@@ -224,7 +214,7 @@ Lemma Permutation_Type_f_app_flat_map T T1 T2 (g : T -> T2) (f : T1 -> T2) lw0 L
                               (l ++ flat_map (fun '(_, p2) => app (map f lw0) p2) L))) }.
 Proof.
 intros HP Heq.
-apply (Permutation_Type_map f) in HP; rewrite Heq in HP.
+apply (Permutation_Type_map f) in HP. rewrite Heq in HP.
 apply Permutation_Type_app_flat_map; assumption.
 Qed.
 
@@ -384,18 +374,18 @@ dichot_app_inf_exec Heq2; subst.
       constructor.
 - app_vs_flat_map_inv Heq1.
   + induction L1 as [|[n' l'] L1 IHL1] using rev_rect; [ | clear IHL1 ]; simpl.
-    * exists (L0 ++ (n , l0) :: nil, l2 ++ l); simpl; rewrite ? app_nil_r; repeat split.
+    * exists (L0 ++ (n , l2) :: nil, l3 ++ l); simpl; rewrite ? app_nil_r; repeat split.
       -- intros _ Heqnil; destruct L0; inversion Heqnil.
       -- now rewrite <- app_assoc.
       -- rewrite 2 flat_map_app; simpl; rewrite <- app_assoc, ? app_nil_r ; symmetry.
-         rewrite 3 app_assoc, <- (app_assoc l), <- 2 (app_assoc _ _ l0); constructor.
-    * exists (L1 ++ (n' , l' ++ l) :: L0 ++ (n , l0) :: nil, l2); simpl; repeat split.
+         rewrite 3 app_assoc, <- (app_assoc l), <- 2 (app_assoc _ _ l2); constructor.
+    * exists (L1 ++ (n' , l' ++ l) :: L0 ++ (n , l2) :: nil, l3); simpl; repeat split.
       -- intros _ Heqnil; destruct L1; inversion Heqnil.
       -- now rewrite ? flat_map_app; simpl; rewrite flat_map_app; simpl;
            rewrite ? app_nil_r, <- ? app_assoc.
       -- rewrite 2 flat_map_app; simpl; rewrite 2 flat_map_app; simpl;
            rewrite ? app_nil_r, <- ? app_assoc, 3 app_assoc,
-                   <- (app_assoc l2), <- 2 (app_assoc _ _ l').
+                   <- (app_assoc l3), <- 2 (app_assoc _ _ l').
          now etransitivity ; [ apply cperm_Type | ]; rewrite <- ? app_assoc.
   + induction L1 as [|[n l'] L1 IHL1] using rev_rect; [ | clear IHL1 ]; simpl.
     * now exists (L0, l); simpl; rewrite ? app_nil_r.
@@ -494,7 +484,7 @@ Lemma app_vs_app_flat_map_cst T (A : T) l0 L l1 l2 :
           /\ l1 = l0 ++ flat_map (cons A) L1
           /\ l2 = flat_map (cons A) L2 }.
 Proof.
-intros Heq; dichot_app_inf_exec Heq.
+intro Heq. dichot_app_inf_exec Heq.
 - destruct l as [|t l]; subst.
   + right; exists (nil, L); simpl; auto.
     now rewrite 2 app_nil_r.
@@ -502,7 +492,7 @@ intros Heq; dichot_app_inf_exec Heq.
     repeat split.
     intros Heq; inversion Heq.
 - app_vs_flat_map_cst_inv Heq1.
-  + left; right; exists (L0, L1, l, l4); auto.
+  + left; right; exists (L0, L1, l3, l4); auto.
   + right; exists (L0, L1); auto.
 Qed.
 
@@ -536,34 +526,21 @@ Lemma elt_vs_app_flat_map_cst T (A : T) l0 L l1 l2 B :
           /\ l1 = l0 ++ flat_map (cons A) L1
           /\ l2 = l ++ flat_map (cons A) L2 }.
 Proof.
-intros Heq; dichot_elt_app_inf_exec Heq; subst; [ now left; left; exists l | ].
-revert l3 l2 Heq1; induction L as [|l L IHL]; intros l3 l2 Heq.
-- exfalso; destruct l3; inversion Heq.
-- simpl in Heq ; rewrite app_comm_cons in Heq.
-  dichot_elt_app_inf_exec Heq.
-  + destruct l3 ; inversion Heq0 ; subst.
-    * right.
-      exists (nil, L, l); repeat split.
-    * left; right.
-      exists (nil, L , l3, l1); repeat split.
-  + apply IHL in Heq1 ; destruct Heq1 as [[Heqa | Heqb] | [Heq Heqc]].
-    * destruct Heqa as [l' [Heqa _]].
-      exfalso.
-      rewrite <- (app_nil_r l0) in Heqa.
-      rewrite <- 2 app_assoc in Heqa.  apply app_inv_head in Heqa.
-      simpl in Heqa ; destruct l4 ; inversion Heqa.
-    * left; right.
-      destruct Heqb as ((((L' & L'') & l') & l'') & (Heqb1 & Heqb2 & Heqb3)).
-      simpl in Heqb1 ; simpl in Heqb2 ; simpl in Heqb3.
-      apply app_inv_head in Heqb2.
-      exists (l :: L', L'', l', l''); simpl; subst ; repeat split.
-      now simpl; rewrite ? app_assoc.
-    * right.
-      destruct Heq as ((L' & L'') & l').
-      destruct Heqc as (Heqc & Heqc1 & Heqc2 & Heqc3).
-      simpl in Heqc1 ; simpl in Heqc2 ; simpl in Heqc3.
-      apply app_inv_head in Heqc2.
-      exists (l :: L', L'', l'); simpl; subst; repeat split.
+intro Heq. dichot_elt_app_inf_exec Heq; subst; [ left; left; exists l; repeat split | ].
+induction L as [|l' L IHL] in l, l2, Heq1 |- *; cbn in Heq1.
+- exfalso. nil_vs_elt_inv Heq1.
+- rewrite app_comm_cons in Heq1. dichot_elt_app_inf_exec Heq1; subst.
+  + destruct l as [|t l]; destr_eq Heq0; subst.
+    * right. exists (nil, L, l'). repeat split.
+    * left. right. exists (nil, L , l, l1). repeat split.
+  + apply IHL in Heq2 as [[[l'' [Heqa _]]
+                       | [[[[L' L''] l''] l'''] [-> [->%app_inv_head ->]]]]
+                       | [[[L' L''] l''] [-> [-> [->%app_inv_head ->]]]]].
+    * exfalso.
+      rewrite <- (app_nil_r l0) in Heqa. rewrite <- 2 app_assoc in Heqa. apply app_inv_head in Heqa.
+      cbn in Heqa. nil_vs_elt_inv Heqa.
+    * left. right. exists (l' :: L', L'', l'', l'''). cbn. rewrite ? app_assoc. repeat split.
+    * right. exists (l' :: L', L'', l''). repeat split.
 Qed.
 
 Ltac elt_vs_app_flat_map_cst_inv H :=
@@ -589,14 +566,12 @@ Lemma map_f_flat_map_cst T T1 (A : T1) (f : T -> T1) lw' lw l L :
   map f lw = l ++ flat_map (cons A) L ->
   { Lw | l ++ flat_map (app (map f lw')) L = map f Lw }.
 Proof.
-revert lw l; induction L as [|l0 L IHL]; simpl; intros lw l Heq.
-- subst; exists lw; symmetry; assumption.
+induction L as [|l0 L IHL] in lw, l |- *; cbn; intro Heq.
+- exists lw. symmetry. assumption.
 - rewrite app_comm_cons, app_assoc in Heq.
-  apply IHL in Heq; destruct Heq as [Lw Heq].
-  symmetry in Heq; decomp_map_inf Heq; simpl in Heq1, Heq2; subst.
-  rewrite <- Heq2; simpl.
-  exists (l4 ++ lw' ++ l6 ++ l3); rewrite <- ? map_app.
-  now rewrite <- app_assoc.
+  apply IHL in Heq as [Lw Heq].
+  decomp_map Heq eqn:Hf. subst Lw. rewrite <- Hf.
+  exists (l ++ (lw' ++ l0) ++ l2). rewrite ! map_app. reflexivity.
 Qed.
 
 Lemma Permutation_Type_app_flat_map_cst T (A : T) lw0 L lw l :
@@ -606,29 +581,26 @@ Lemma Permutation_Type_app_flat_map_cst T (A : T) lw0 L lw l :
             (Permutation_Type (lw' ++ flat_map (app lw0) L')
                               (l ++ flat_map (app lw0) L))) }.
 Proof.
-intros HP.
+intro HP.
 destruct (@Permutation_Type_app_flat_map _ _ (fun _ => A) lw0 (map (fun p => (1, p)) L) lw l).
 { replace (flat_map (fun '(p1,p2) => A :: p2)
-                    (map (fun p => (1,p)) L)) with (flat_map (cons A) L); auto.
-  clear; induction L; auto.
-  now simpl; rewrite IHL. }
-destruct x as (L', lw').
-destruct y as (H1 & H2 & H3).
+                    (map (fun p => (1,p)) L)) with (flat_map (cons A) L)
+    by (clear; induction L as [|? ? IHL]; [ | cbn; rewrite IHL ]; reflexivity).
+  assumption. }
+destruct x as (L', lw'), y as [H1 [H2 H3]].
 split with (map snd L', lw'); repeat split.
-- intros Hneq Heq.
-  apply map_eq_nil in Heq.
-  apply H1; auto.
-  intros Heq1.
-  apply Hneq.
-  now apply map_eq_nil in Heq1.
-- replace (flat_map (cons A) (map snd L')) with (flat_map (fun '(_, p2) => A :: p2) L'); auto.
-  clear; induction L'; auto.
-  destruct a; simpl; rewrite IHL'; auto.
+- intros Hneq ->%map_eq_nil.
+  apply H1; [ | reflexivity ].
+  intros ->%map_eq_nil. apply Hneq. reflexivity.
+- replace (flat_map (cons A) (map snd L')) with (flat_map (fun '(_, p2) => A :: p2) L')
+    by (clear; induction L' as [|[] L' IHL']; [ | cbn; rewrite IHL']; reflexivity).
+  assumption.
 - replace (flat_map (app lw0) (map snd L')) with (flat_map (fun '(_, p2) => lw0 ++ p2) L')
-    by (now clear; induction L'; try destruct a; simpl; try rewrite IHL').
-  now replace (flat_map (app lw0) L)
+    by (clear; induction L' as [|[] L' IHL']; [ | cbn; rewrite IHL']; reflexivity).
+  replace (flat_map (app lw0) L)
      with (flat_map (fun '(_, p2) => lw0 ++ p2) (map (fun p => (1, p)) L))
-       by (now clear; induction L; simpl; try rewrite IHL).
+       by (clear; induction L as [|? ? IHL]; [ | cbn; rewrite IHL ]; reflexivity).
+  assumption.
 Qed.
 
 Lemma Permutation_Type_f_app_flat_map_cst T T1 (A : T1) (f : T -> T1) lw0 L lw lw' l :
@@ -638,8 +610,8 @@ Lemma Permutation_Type_f_app_flat_map_cst T T1 (A : T1) (f : T -> T1) lw0 L lw l
             (Permutation_Type (lw' ++ flat_map (app (map f lw0)) L')
                               (l ++ flat_map (app (map f lw0)) L))) }.
 Proof.
-intros HP Heq; apply (Permutation_Type_map f) in HP; rewrite Heq in HP.
-apply Permutation_Type_app_flat_map_cst ; assumption.
+intros HP%(Permutation_Type_map f) Heq. rewrite Heq in HP.
+apply Permutation_Type_app_flat_map_cst. assumption.
 Qed.
 
 Lemma Permutation_Type_flat_map_cons_flat_map_app_cst T T1 (A : T1) (f : T -> T1)
@@ -656,24 +628,23 @@ Proof.
 intros HP Heq.
 destruct (@Permutation_Type_flat_map_cons_flat_map_app _ _ _ (fun _ => A)
             f Hinj l0 l1 l2 lp1 lp2 l (map (fun p => (1 , p)) L)); auto.
-{ rewrite Heq.
-  replace (flat_map (fun '(p1, p2) => A :: p2) (map (fun p => (1, p)) L))
-     with (flat_map (cons A) L) by (now clear; induction L; simpl; try rewrite IHL); auto. }
-destruct x as (((((l1' & l2') & l3') & l4') & l') & L').
-destruct y as (H1 & H2 & H3 & H4).
+{ replace (flat_map (fun '(p1, p2) => A :: p2) (map (fun p => (1, p)) L))
+     with (flat_map (cons A) L) by (clear; induction L as [|? ? IHL]; [ | cbn; rewrite IHL]; reflexivity).
+  assumption. }
+destruct x as [[[[[l1' l2'] l3'] l4'] l'] L'], y as [H1 [H2 [H3 H4]]].
 split with (l1', l2', l3', l4', l', map snd L'); repeat split; auto.
-- rewrite H1.
-  replace (flat_map (fun '(p1, p2) => A :: p2) L')
-    with (flat_map (cons A) (map snd L'))
-    by (now clear; induction L'; try destruct a; simpl; try rewrite IHL'); auto.
-- rewrite H3.
-  replace (flat_map (fun '(p1, p2) => map f l0 ++ p2) L')
-    with (flat_map (app (map f l0)) (map snd L'))
-    by (now clear; induction L'; try destruct a; simpl; try rewrite IHL'); auto.
-- rewrite H4.
-  replace (flat_map (fun '(p1, p2) => map f l0 ++ p2) (map (fun p  => (1, p)) L))
-    with (flat_map (app (map f l0)) L)
-    by (now clear; induction L; simpl; try rewrite IHL); auto.
+- replace (flat_map (cons A) (map snd L'))
+     with (flat_map (fun '(_, p2) => A :: p2) L')
+    by (clear; induction L' as [|[] L' IHL']; [ | cbn; rewrite IHL']; reflexivity).
+  assumption.
+- replace (flat_map (app (map f l0)) (map snd L'))
+     with (flat_map (fun '(_, p2) => map f l0 ++ p2) L')
+    by (clear; induction L' as [|[] L' IHL']; [ | cbn; rewrite IHL']; reflexivity).
+  assumption.
+- replace (flat_map (app (map f l0)) L)
+     with (flat_map (fun '(_, p2) => map f l0 ++ p2) (map (fun p  => (1, p)) L))
+    by (clear; induction L as [|? ? IHL]; [ | cbn; rewrite IHL]; reflexivity).
+  assumption.
 Qed.
 
 Lemma CPermutation_Type_app_flat_map_cst T (A : T) lw0 L lw l :
@@ -683,27 +654,27 @@ Lemma CPermutation_Type_app_flat_map_cst T (A : T) lw0 L lw l :
             (CPermutation_Type (lw' ++ flat_map (app lw0) L')
                                (l ++ flat_map (app lw0) L))) }.
 Proof.
-intros HC.
+intro HC.
 destruct (@CPermutation_Type_app_flat_map _ _ (fun p => A) lw0 (map (fun x => (1 , x)) L) lw l)
-  as ((L' & lw') & (H1 & H2 & H3)).
-{ replace (flat_map (fun '(p1, p2) => A :: p2) (map (fun x => (1, x)) L))
-  with (flat_map (cons A) L)
-    by (now clear; induction L; try destruct a; simpl; try rewrite IHL); auto. }
+  as [[L' lw'] [H1 [H2 H3]]].
+{ replace (flat_map (fun '(_, p2) => A :: p2) (map (fun x => (1, x)) L))
+     with (flat_map (cons A) L)
+    by (clear; induction L as [|[] L IHL]; [ | cbn; rewrite IHL .. ]; reflexivity).
+  assumption. }
 split with (map snd L' , lw'); repeat split.
-- intros Hneq Heq.
-  apply map_eq_nil in Heq.
-  apply H1; auto.
-  intros Heq1.
-  apply map_eq_nil in Heq1.
-  now apply Hneq.
-- rewrite H2.
-  now replace (flat_map (fun '(p1, p2) => A :: p2) L')
-    with (flat_map (cons A) (map snd L'))
-    by (clear; induction L'; try destruct a; simpl; try rewrite IHL'; reflexivity).
+- intros Hneq ->%map_eq_nil.
+  apply H1; [ | reflexivity ].
+  intros ->%map_eq_nil.
+  apply Hneq. reflexivity.
+- replace (flat_map (cons A) (map snd L'))
+     with (flat_map (fun '(_, p2) => A :: p2) L')
+    by (clear; induction L' as [|[] L' IHL']; [ | cbn; rewrite IHL']; reflexivity).
+  assumption.
 - replace (flat_map (app lw0) (map snd L'))
-    with (flat_map (fun '(_, p2) => lw0 ++ p2) L')
-    by (clear; induction L'; try destruct a; simpl; try rewrite IHL'; reflexivity).
-  now replace (flat_map (app lw0) L)
+     with (flat_map (fun '(_, p2) => lw0 ++ p2) L')
+    by (clear; induction L' as [|[] L' IHL']; [ | cbn; rewrite IHL']; reflexivity).
+  replace (flat_map (app lw0) L)
     with (flat_map (fun '(_, p2) => lw0 ++ p2) (map (fun x => (1, x)) L))
-    by (clear; induction L; simpl; try rewrite IHL; reflexivity).
+    by (clear; induction L; [ | cbn; rewrite IHL ]; reflexivity).
+  assumption.
 Qed.

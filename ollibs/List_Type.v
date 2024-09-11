@@ -130,11 +130,7 @@ Section Facts.
   Qed.
 
   Lemma in_inf_elt : forall (x:A) l1 l2, In_inf x (l1 ++ x :: l2).
-  Proof.
-  intros.
-  apply in_inf_or_app.
-  right; left; reflexivity.
-  Qed.
+  Proof. intros. apply in_inf_or_app. right. apply in_inf_eq. Qed.
 
   Lemma in_inf_elt_inv : forall (x y : A) l1 l2,
     In_inf x (l1 ++ y :: l2) -> ((x = y) + In_inf x (l1 ++ l2))%type.
@@ -218,7 +214,7 @@ Section Elts.
     - destruct l; simpl; [ inversion 2 | auto ].
     - destruct l; simpl.
       * inversion 2.
-      * intros d ie; right; apply hn; auto with arith.
+      * intros d ie; right; apply hn. now apply Nat.succ_le_mono.
   Qed.
 
   Lemma In_inf_nth l (x:A) d : In_inf x l ->
@@ -227,9 +223,9 @@ Section Elts.
     induction l as [|a l IH].
     - easy.
     - intros [H|H].
-      + subst; exists 0; simpl; auto with arith.
+      + subst; exists 0; simpl; [ | reflexivity ]. apply Nat.lt_0_succ.
       + destruct (IH H) as [n Hn Hn'].
-        exists (S n); simpl; auto with arith.
+        apply Nat.succ_lt_mono in Hn. now exists (S n).
   Qed.
 
   Lemma nth_split_inf n (l:list A) d : n < length l ->
@@ -258,10 +254,9 @@ Section Elts.
   Proof.
     induction l as [|a l IH].
     - easy.
-    - intros [H|H].
-      * subst; exists 0; simpl; auto with arith.
-      * destruct (IH H) as (n,Hn).
-        exists (S n); simpl; auto with arith.
+    - intros [H|[n ?] %IH].
+      + subst; now exists 0.
+      + now exists (S n).
   Qed.
 
   Lemma nth_error_split_inf l n (a:A) : nth_error l n = Some a ->
@@ -816,7 +811,7 @@ Section Add.
 
   Lemma Add_inf_length a l l' : Add_inf a l l' -> length l' = S (length l).
   Proof.
-   induction 1; simpl; auto with arith.
+   induction 1; simpl; auto.
   Qed.
 
   Lemma Add_inf_inv a l : In_inf a l -> { l' & Add_inf a l' l }.
@@ -894,15 +889,14 @@ Section NatSeq.
   Lemma in_inf_seq len start n :
     start <= n < start+len -> In_inf n (seq start len).
   Proof.
-   revert start. induction len; simpl; intros start H.
-   - inversion_clear H.
-     rewrite <- plus_n_O in H1.
-     apply (Nat.lt_irrefl _ (Nat.le_lt_trans _ _ _ H0 H1)).
-   - destruct H as [H1 H2].
-     destruct (le_lt_eq_dec _ _ H1); intuition.
-     right; apply IHlen.
-     rewrite <- plus_n_Sm in H2.
-     intuition auto with arith.
+    revert start. induction len as [|len IHlen]; intros start.
+    - rewrite Nat.add_0_r.
+      intros (H,H'). apply (Nat.lt_irrefl start).
+      eapply Nat.le_lt_trans; eassumption.
+    - intros [H1 H2].
+      destruct (le_lt_eq_dec _ _ H1).
+      + right. rewrite Nat.add_succ_r in H2. now apply IHlen.
+      + left. assumption.
   Qed.
 
   Lemma in_inf_seq_inv len start n :
@@ -910,11 +904,13 @@ Section NatSeq.
   Proof.
    revert start. induction len; simpl; intros.
    - inversion H.
-   - rewrite <- plus_n_Sm.
+   - rewrite Nat.add_succ_r.
      destruct X; subst.
-     + intuition auto with arith.
-     + apply IHlen in i.
-       intuition auto with arith.
+     + split; [ reflexivity | ].
+       rewrite <- Nat.add_succ_l. apply Nat.le_add_r.
+     + apply IHlen in i as [H1 H2]. split.
+       * transitivity (S start); [ | assumption ]. apply Nat.le_succ_diag_r.
+       * rewrite <- Nat.add_succ_l. assumption.
   Qed.
 
  End NatSeq.
@@ -1426,7 +1422,7 @@ Section ForallPairs_inf.
     induction 1.
     inversion 1.
     simpl; destruct 1; destruct 1; subst; auto.
-    - left; right.
+    - left. right.
       apply Forall_inf_forall with _ _ _ y in f; eauto.
     - right.
       apply Forall_inf_forall with _ _ _ x in f; eauto.

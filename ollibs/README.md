@@ -1,7 +1,7 @@
 # OLlibs
 **Add-ons for the Coq Standard Library**
 
-Working with `Coq 8.17.0`
+Working with `Coq 8.19`
 
 [Opam](https://coq.inria.fr/opam-using.html)-based installation procedure:
 
@@ -16,8 +16,8 @@ Manual installation procedure:
 
 ## Extensions of Standard Library
 
-* `Bool_more`       : add-ons for standard library List
-* `Datatypes_more`  : add-ons for standard library List
+* `Bool_more`       : add-ons for standard library Bool
+* `Datatypes_more`  : add-ons for standard library Datatypes
 * `List_more`       : add-ons for standard library List
 * `funtheory`       : properties of functions
 * `dectype`         : types with decidable/Boolean equality (using records rather than modules)
@@ -28,6 +28,7 @@ Manual installation procedure:
 * `AFC`             : finite versions of the axiom of choice
 * `nattree`         : nat-labelled trees and coding into nat
 * `Wf_nat_more`     : well-founded order on products of `nat`
+* `Vector_more`     : add-ons for standard library Vector
 * `List_Type`       : `List` with output in `Type`
 * `inhabited_Type`  : `inhabited` with output in `Type`
 

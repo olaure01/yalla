@@ -1,10 +1,10 @@
 (** Add-ons for Permutation library
 Usefull properties apparently missing in the Permutation library. *)
 
+Set Implicit Arguments.
+
 From Coq Require Export Permutation List.
 From Yalla.OLlibs Require Import List_more funtheory.
-
-Set Implicit Arguments.
 
 
 Lemma Permutation_app_app_inv A (l1 l2 l3 l4 : list A) :
@@ -62,50 +62,41 @@ Qed.
 Lemma Permutation_map_inv_inj A B (f : A -> B) (Hinj : injective f) l1 l2 :
   Permutation (map f l1) (map f l2) -> Permutation l1 l2.
 Proof.
-revert l2; induction l1; intros l2 HP.
-- apply Permutation_nil in HP.
-  now destruct l2; inversion HP.
+induction l1 as [|a l1 IHl1] in l2 |- *; intro HP.
+- apply Permutation_nil, map_eq_nil in HP as ->. constructor.
 - symmetry in HP.
-  destruct (Permutation_vs_cons_inv HP) as (l3 & l4 & Heq).
-  decomp_map Heq; subst.
-  rewrite map_app in HP; simpl in HP.
-  rewrite Heq3 in HP; symmetry in HP.
-  apply Permutation_cons_app_inv in HP.
-  specialize IHl1 with (l0 ++ l6).
+  destruct (Permutation_vs_cons_inv HP) as [l3 [l4 Heq]].
+  decomp_map Heq eqn:Hf. subst l2.
+  rewrite map_app in HP. cbn in HP. rewrite Hf in HP.
+  symmetry in HP. apply Permutation_cons_app_inv in HP.
+  specialize IHl1 with (l3 ++ l4).
   rewrite map_app in IHl1.
   apply IHl1 in HP.
-  apply Hinj in Heq3; subst.
-  now apply Permutation_cons_app.
+  apply Hinj in Hf as ->.
+  apply Permutation_cons_app, HP.
 Qed.
 
 Lemma Permutation_map_inv_inj_local A B (f : A -> B) l1 l2 :
   (forall x y, In x l1 -> In y l2 -> f x = f y -> x = y) ->
     Permutation (map f l1) (map f l2) -> Permutation l1 l2.
 Proof.
-revert l2; induction l1; intros l2 Hi HP.
-- apply Permutation_nil in HP.
-  now destruct l2; inversion HP.
-- assert (Heq := HP).
-  symmetry in Heq.
-  apply Permutation_vs_cons_inv in Heq.
-  destruct Heq as (l3 & l4 & Heq).
-  decomp_map Heq; subst.
-  rewrite map_app in HP; simpl in HP.
-  rewrite Heq3 in HP.
+induction l1 in l2 |- *; intros Hi HP.
+- apply Permutation_nil, map_eq_nil in HP as ->. constructor.
+- assert (Heq := HP). symmetry in Heq.
+  apply Permutation_vs_cons_inv in Heq as [l3 [l4 Heq]].
+  decomp_map Heq eqn:Hf. subst l2.
+  rewrite map_app in HP. cbn in HP. rewrite Hf in HP.
   apply Permutation_cons_app_inv in HP.
-  specialize IHl1 with (l0 ++ l6).
+  specialize IHl1 with (l3 ++ l4).
   rewrite map_app in IHl1.
   apply IHl1 in HP.
-  + symmetry in Heq3; apply Hi in Heq3; subst.
-    * now apply Permutation_cons_app.
+  + symmetry in Hf. apply Hi in Hf as ->.
+    * apply Permutation_cons_app, HP.
     * apply in_eq.
     * apply in_elt.
-  + intros x' y' Hx' Hy' Hf.
-    apply Hi; auto.
-    * now apply in_cons.
-    * apply in_app_or in Hy'.
-      destruct Hy' as [ Hy' | Hy' ]; apply in_or_app; [left|right]; auto.
-      now apply in_cons.
+  + intros x' y' Hx' Hy' Hf'. apply Hi, Hf'.
+    * apply in_cons, Hx'.
+    * apply in_or_app. apply in_app_or in Hy' as []; [left|right; apply in_cons]; assumption.
 Qed.
 
 Lemma partition_Permutation A f (l l1 l2 : list A) : partition f l = (l1, l2) -> Permutation l (l1 ++ l2).
