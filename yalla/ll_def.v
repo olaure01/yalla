@@ -198,7 +198,7 @@ Inductive ll P : list formula -> Type :=
 Definition mix'_r P L : is_true (pmix P (length L)) -> ll P (flat_map (@projT1 _ (ll P)) L).
 Proof.
 intros Hmix. rewrite flat_map_concat_map. apply mix_r.
-- rewrite map_length. assumption.
+- rewrite length_map. assumption.
 - apply list_to_Forall.
 Defined.
 
@@ -305,7 +305,7 @@ Section ll_ind.
                   @mix_r _ (map (projT1 (P:=ll P)) (Forall_to_list f))
                            (eq_ind_r (fun n => pmix P n = true)
                            (eq_ind_r (fun n => pmix P n = true) e (Forall_to_list_length f))
-                           (map_length (projT1 (P:=ll P)) (Forall_to_list f)))
+                           (length_map (projT1 (P:=ll P)) (Forall_to_list f)))
                         (list_to_Forall (Forall_to_list f)))) as HL
     by (apply X2; clear e; induction HP; cbn; constructor; assumption).
   clear - HL.
@@ -316,7 +316,7 @@ Section ll_ind.
                                                     (Forall_to_list_support f) in
           eq_ind_r (fun n => pmix P n = true)
                    (eq_ind_r (fun n => pmix P n = true) e (Forall_to_list_length f))
-                   (map_length (projT1 (P:=ll P)) (Forall_to_list f)))
+                   (length_map (projT1 (P:=ll P)) (Forall_to_list f)))
     by apply (Eqdep_dec.UIP_dec Bool.bool_dec).
   rewrite <- (Forall_to_list_support f). assumption.
   Defined.
@@ -355,7 +355,7 @@ induction pi using ll_nested_ind'; try now constructor.
   apply mix'_r.
   destruct Heq as (_ & _ & Hpmix & _).
   specialize Hpmix with (length L).
-  rewrite <- map_length with _ _ (@projT1 _ (ll Q)) L', eqL', map_length.
+  rewrite <- length_map with _ _ (@projT1 _ (ll Q)) L', eqL', length_map.
   case_eq (pmix Q (length L)); intros eq; [ reflexivity | exfalso ].
   rewrite eq, eqpmix in Hpmix.
   inversion Hpmix.
@@ -625,7 +625,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   replace ((concat L1 ++ l1') ++ l2' ++ concat L2) with (concat (L1 ++ (l1' ++ l2') :: L2));
     [ | rewrite concat_app; cbn; rewrite 3 app_assoc; reflexivity].
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + apply Forall_inf_app; [ assumption | ].
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
@@ -674,7 +674,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   replace ((concat L1 ++ l1') ++ A :: B :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: B :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + apply Forall_inf_app; [ assumption | ].
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
@@ -722,7 +722,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   replace ((concat L1 ++ l1') ++ A :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + apply Forall_inf_app; [ assumption | ].
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
@@ -770,7 +770,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   replace ((concat L1 ++ l1') ++ A :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + apply Forall_inf_app; [ assumption | ].
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
@@ -818,7 +818,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   replace ((concat L1 ++ l1') ++ A :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + apply Forall_inf_app; [ assumption | ].
     apply Forall_inf_cons; [ | assumption ].
     apply (X _ _ eq_refl).
@@ -864,7 +864,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   replace ((concat L1 ++ l1') ++ l0 ++ l2' ++ concat L2) with (concat (L1 ++ (l1' ++ l0 ++ l2') :: L2))
     by (rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity).
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + assert (Fl1 := Forall_inf_app_l _ _ PL).
     assert (Fl2 := Forall_inf_app_r _ _ PL).
     apply Forall_inf_app; [ assumption | ].
@@ -914,7 +914,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   replace ((concat L1 ++ l1') ++ l' ++ l2' ++ concat L2) with (concat (L1 ++ (l1' ++ l' ++ l2') :: L2))
     by (rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity).
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + assert (Fl1 := Forall_inf_app_l _ _ PL).
     assert (Fl2 := Forall_inf_app_r _ _ PL).
     apply Forall_inf_app; [ assumption | ].
@@ -962,7 +962,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   replace ((concat L1 ++ l1') ++ A :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: l2') :: L2))
     by (rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity).
   apply mix_r.
-  + rewrite app_length. rewrite app_length in eqpmix. assumption.
+  + rewrite length_app. rewrite length_app in eqpmix. assumption.
   + assert (Fl1 := Forall_inf_app_l _ _ PL).
     assert (Fl2 := Forall_inf_app_r _ _ PL).
     apply Forall_inf_app; [ assumption | ].
@@ -1051,7 +1051,7 @@ induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; destr_eq 
 - symmetry in Heql. apply repeat_eq_app in Heql as [Heq1 [Hw Heq2]%repeat_eq_app].
   apply (IHpi (length l1 + (length lw' + length l2))).
   assert (lw' = repeat A (length lw')) as Hlw'.
-  { clear - Hw. rewrite map_length in Hw.
+  { clear - Hw. rewrite length_map in Hw.
     induction lw' as [|a l IHl]; [ reflexivity | cbn ].
     cbn in Hw. injection Hw as [= -> Hl].
     f_equal. apply IHl, Hl. }
@@ -1387,7 +1387,7 @@ induction pi using ll_nested_ind; try (now constructor).
   + apply ex_r with (map wn l0 ++ concat L); [ | apply PCPermutation_Type_app_comm ].
     rewrite <- (app_nil_l _). apply co_list_gen_perm_r; [ assumption | ].
     rewrite app_nil_l, flat_map_concat_map. apply mix_r.
-    * rewrite map_length. assumption.
+    * rewrite length_map. assumption.
     * apply forall_Forall_inf.
       intros l' [l1 <- [pil1 Hin]%(In_Forall_inf_in _ PL)]%in_inf_map_inv.
       apply (Dependent_Forall_inf_forall_formula _ _ X) in Hin as pi.

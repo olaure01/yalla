@@ -62,10 +62,10 @@ intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
   change ((l3' ++ l2 ++ l1 ++ l4') ++ concat (L4 ++ L3))
     with (concat ((l3' ++ l2 ++ l1 ++ l4') :: L4 ++ L3)).
   apply mix_r.
-  + cbn. rewrite app_length.
+  + cbn. rewrite length_app.
     replace (S (length L4 + length L3))
        with (length L3 + length ((l3' ++ oc A :: l4') :: L4)) by (cbn; lia).
-    rewrite <- app_length; assumption.
+    rewrite <- length_app; assumption.
   + change ((l3' ++ l2 ++ l1 ++ l4') :: L4 ++ L3) with (((l3' ++ l2 ++ l1 ++ l4') :: L4) ++ L3).
     assert (FL3 := Forall_inf_app_l _ _ PL).
     assert (FL4 := Forall_inf_app_r _ _ PL).
@@ -403,7 +403,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
   rewrite <- concat_app.
   apply mix_r.
   + clear IHsize.
-    rewrite app_length; rewrite app_length in f; apply f.
+    rewrite length_app; rewrite length_app in f; apply f.
   + assert (FL1 := Forall_inf_app_l _ _ Hax).
     assert (FL2 := Forall_inf_app_r _ _ Hax).
     inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -453,7 +453,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
     rewrite <- concat_app.
     apply mix_r.
     * clear IHsize.
-      rewrite app_length; rewrite app_length in f; apply f.
+      rewrite length_app; rewrite length_app in f; apply f.
     * assert (FL1 := Forall_inf_app_l _ _ Hax).
       assert (FL2 := Forall_inf_app_r _ _ Hax).
       inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -520,7 +520,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- (app_nil_l _), <- Heqb1.
       change ((l2 ++ l2') ++ concat L2) with (concat ((l2 ++ l2') :: L2)).
       rewrite <- concat_app. apply mix_r.
-      ++ rewrite app_length. rewrite app_length in f. cbn. cbn in f. assumption.
+      ++ rewrite length_app. rewrite length_app in f. cbn. cbn in f. assumption.
       ++ assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2. subst. clear FL2. rename X0 into FL2. rename X into pi.
@@ -603,7 +603,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -717,7 +717,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -810,7 +810,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -890,7 +890,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -983,7 +983,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- (app_nil_l _), <- Heqb1.
       change ((l2 ++ l2') ++ concat L2) with (concat ((l2 ++ l2') :: L2)).
       rewrite <- concat_app. apply mix_r.
-      -- clear IHsize. rewrite app_length. rewrite app_length in f. cbn. cbn in f. assumption.
+      -- clear IHsize. rewrite length_app. rewrite length_app in f. cbn. cbn in f. assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -1075,7 +1075,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       change ((l2 ++ l2') ++ concat L2) with (concat ((l2 ++ l2') :: L2)).
       rewrite <- concat_app.
       apply mix_r.
-      -- clear IHsize. rewrite app_length. rewrite app_length in f. cbn. cbn in f. assumption.
+      -- clear IHsize. rewrite length_app. rewrite length_app in f. cbn. cbn in f. assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst. clear FL2. rename X0 into FL2. rename X into pi.
@@ -1187,7 +1187,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -1315,7 +1315,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -1406,7 +1406,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.
@@ -1496,7 +1496,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
       rewrite <- concat_app.
       apply mix_r.
       -- clear IHsize.
-         rewrite app_length; rewrite app_length in f; cbn; cbn in f; assumption.
+         rewrite length_app; rewrite length_app in f; cbn; cbn in f; assumption.
       -- assert (FL1 := Forall_inf_app_l _ _ Hax).
          assert (FL2 := Forall_inf_app_r _ _ Hax).
          inversion FL2; subst; clear FL2; rename X0 into FL2; rename X into pi.

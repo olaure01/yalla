@@ -21,16 +21,16 @@ Class IAtomType_into_nat (I : DecType) := IAtom_into_nat : embedding (option I) 
 Class IAtom2AtomType (A : DecType) (I : DecType) := IAtom2Atom : option I -> A.
 
 Class IAtom2AtomType_fin A I := {
-  IAtom2Atom_fin_base :> IAtom2AtomType A I;
+  IAtom2Atom_fin_base :: IAtom2AtomType A I;
   IAtom2Atom_fin x : { l & forall i, iffT (x = IAtom2Atom i) (In_inf i l) } }.
 
 Class IAtom2AtomType_retract A I := {
-  IAtom2Atom_retract_base :> IAtom2AtomType A I;
+  IAtom2Atom_retract_base :: IAtom2AtomType A I;
   IAtom2Atom_retract_base_inv : A -> option I;
   IAtom2Atom_retract : retract IAtom2Atom_retract_base_inv IAtom2Atom }.
 
 Class Atom2IAtomType_self (A I : DecType) := {
-  Atom2IAtom_Atom_self :> AtomType_self A;
+  Atom2IAtom_Atom_self :: AtomType_self A;
   Atom2PreIAtom : A -> I;
   Atom2PreIAtom_bij : bijective Atom2PreIAtom }.
 
@@ -39,13 +39,13 @@ Class TAtom2IAtomType (I T : DecType) := {
   TAtom2PreIAtom_bij : bijective TAtom2PreIAtom }.
 
 Class TLAtomType A I T := {
-  TLAtom_base :> IAtom2AtomType_retract A I;
-  TLAtom_TAtom :> TAtom2IAtomType I T }.
+  TLAtom_base :: IAtom2AtomType_retract A I;
+  TLAtom_TAtom :: TAtom2IAtomType I T }.
 
 Class AtomIAtomTAtomType A I T := {
-  AtomIAtomTAtom_IAtom2Atom :> IAtom2AtomType_retract A I;
-  AtomIAtomTAtom_Atom2IAtom :> Atom2IAtomType_self A I;
-  AtomIAtomTAtom_TAtom :> TLAtomType A I T }.
+  AtomIAtomTAtom_IAtom2Atom :: IAtom2AtomType_retract A I;
+  AtomIAtomTAtom_Atom2IAtom :: Atom2IAtomType_self A I;
+  AtomIAtomTAtom_TAtom :: TLAtomType A I T }.
 
 
 (** *** Construction of derived classes *)

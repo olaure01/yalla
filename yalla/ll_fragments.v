@@ -69,7 +69,7 @@ refine (ext_wn_param fp _ ((tens_n n bot) :: nil) _ _ pi).
     rewrite HeqL, flat_map_concat_map.
     replace ((wn (tens_n (length L) bot)) :: nil )
        with (@wn atom (tens_n (length (map (cons (wn (tens_n (length L) bot))) L)) bot) :: nil)
-       by (rewrite map_length; reflexivity).
+       by (rewrite length_map; reflexivity).
     apply de_r, tens_n_r.
     apply forall_Forall_inf.
     intros l' Hin.
@@ -240,7 +240,7 @@ intros Hpmixn Hpmixm L Heq FL. destruct n as [|n]; [ destruct m as [|m] | ].
   replace (concat (l1 ++ l2)) with (concat (l1 ++ ((concat l2) :: nil)))
     by (rewrite ! concat_app; cbn; rewrite app_nil_r; reflexivity).
   apply mix_r.
-  + rewrite app_length, Nat.add_comm. assumption.
+  + rewrite length_app, Nat.add_comm. assumption.
   + assert (FL1 := Forall_inf_app_l _ _ FL).
     assert (FL2 := Forall_inf_app_r _ _ FL).
     apply forall_Forall_inf.
@@ -829,7 +829,7 @@ refine (ext_wn_param fp _ (tens (wn one) (wn one) :: nil) _ _ pi).
          apply (ex_concat_r fp nil).
          rewrite app_nil_l, flat_map_concat_map.
          apply mix_r.
-         ++ rewrite map_length; assumption.
+         ++ rewrite length_map; assumption.
          ++ apply forall_Forall_inf.
             intros l' Hin.
             apply in_inf_map_inv in Hin as [l'' <- Hin].

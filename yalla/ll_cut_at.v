@@ -44,7 +44,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
         apply PCPermutation_Type_app_comm ].
   change ((l1' ++ l2 ++ l1 ++ l2') ++ concat L2) with (concat ((l1' ++ l2 ++ l1 ++ l2') :: L2)).
   rewrite <- concat_app. apply mix_r.
-  + rewrite app_length. cbn. rewrite app_length in eqpmix. cbn in eqpmix. assumption.
+  + rewrite length_app. cbn. rewrite length_app in eqpmix. cbn in eqpmix. assumption.
   + assert (FL1 := Forall_inf_app_l _ _ PL).
     assert (FL2 := Forall_inf_app_r _ _ PL).
     inversion FL2; subst; clear FL2 X0; rename X1 into FL2.
@@ -171,7 +171,7 @@ remember (l1 ++ dual A :: l2) as l eqn:Heql. destruct_ll pi2 f Y l Hl Hr HP FL a
      with ((l1' ++ l0 ++ l2') ++ concat L2) by (rewrite ? app_assoc; reflexivity).
   change ((l1' ++ l0 ++ l2') ++ concat L2) with (concat ((l1' ++ l0 ++ l2') :: L2)).
   rewrite <- concat_app. apply mix_r.
-  + rewrite app_length. rewrite app_length in f. cbn. cbn in f. assumption.
+  + rewrite length_app. rewrite length_app in f. cbn. cbn in f. assumption.
   + assert (FL1 := Forall_inf_app_l _ _ FL).
     assert (FL2 := Forall_inf_app_r _ _ FL).
     inversion FL2. subst. clear FL2. rename X1 into FL2. rename X0 into pi.

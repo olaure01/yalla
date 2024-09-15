@@ -152,7 +152,7 @@ intros pi. induction pi using ll_nested_ind; list_simpl; try (constructor; assum
   eapply Permutation_Type_map in p.
   eapply ex_wn_r; eassumption.
 - rewrite concat_map. apply mix_r.
-  + cbn. rewrite map_length. assumption.
+  + cbn. rewrite length_map. assumption.
   + apply forall_Forall_inf.
     intros l' Hin.
     destruct (in_inf_map_inv (map (subs A x)) L l' Hin) as [l0 <- [pi' Hin']%(In_Forall_inf_in _ PL)].
