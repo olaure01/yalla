@@ -5,6 +5,8 @@
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
 Require Import CMorphisms.
+#[local] Set Warnings "-stdlib-vector".
+Require Vector.
 
 Require Import BoolOrder.
 Require Import List_more.
