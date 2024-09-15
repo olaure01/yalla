@@ -142,11 +142,8 @@ intros l pi.
 remember (map ll2ll l) as l0.
 revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   try (inversion f ; fail).
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct l1 ; inversion Heql4.
-  destruct x ; inversion Heql2.
-  destruct x0 ; inversion Heql0.
-  subst ; subst.
+- decomp_map Heql0 eqn:Heq. destruct Heq as [Heq1 [Heq2 ->%map_eq_nil]]. subst.
+  destruct x ; inversion Heq1. destruct x0 ; inversion Heq2. subst.
   apply ax_r.
 - simpl in p.
   apply Permutation_Type_map_inv in p.
@@ -155,10 +152,9 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
   apply ypt2pt in HP.
   eapply ex_r...
   apply IHpi...
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst; symmetry in Heql0.
-  simpl in Heql0 ; apply ll2ll_map_wn_inv in Heql0 ;
-    destruct Heql0 as (l & ? & ?) ; subst.
-  apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
+- decomp_map Heql0 eqn:Heqw. subst.
+  symmetry in Heqw. apply ll2ll_map_wn_inv in Heqw as [l [-> ->]].
+  apply Permutation_Type_map_inv in p as [l' -> HP].
   eapply ex_r ;
     [ apply IHpi ; rewrite <- ll2ll_map_wn ; rewrite <- ? map_app | ]...
   apply ypt2pt.
@@ -171,8 +167,8 @@ revert l Heql0 ; induction pi ; intros l' Heql0 ; subst ;
 - destruct l' ; inversion Heql0 ; destruct f ; inversion H0.
   apply bot_r.
   apply IHpi...
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql2 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_r.
   apply tens_r.
   + apply IHpi1...

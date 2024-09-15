@@ -352,7 +352,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     rewrite app_comm_cons ; rewrite 2 app_assoc.
     exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * exfalso; symmetry in Heq0; decomp_map Heq0; inversion Heq0.
+    * exfalso. decomp_map Heq0 eqn:Hi. discriminate Hi.
     * rewrite 2 app_assoc in IHpi.
       assert (pi':=IHpi _ _ eq_refl).
       list_simpl in pi' ; destruct pi' as [pi' Hs].
@@ -365,7 +365,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (one_ilr _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi':=IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -391,7 +391,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (tens_ilr _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -423,7 +423,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
       destruct pi' as [pi' Hs].
       list_simpl.
       exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi')...
-  + destruct l4 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
     rewrite (app_comm_cons _ _ (ineg C)) in pi'.
@@ -465,21 +465,21 @@ induction pi ; intros l1' l2' Heq ; subst ;
       destruct pi' as [pi' Hs].
       list_simpl.
       exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi')...
-    * destruct l5 ; inversion Heq2 ; subst.
+    * destruct l4 ; inversion Heq2 ; subst.
       assert (pi' := IHpi1 _ _ eq_refl).
       destruct pi' as [pi' Hs].
       list_simpl.
       rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
+      rewrite (app_assoc l).
+      rewrite (app_assoc (l ++ _)).
+      rewrite <- (app_assoc l).
       exists (lmap_ilr _ _ _ _ _ _ _ pi' pi2)...
 - rewrite app_comm_cons in IHpi.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
   exists (neg_irr _ _ _ pi')...
 - dichot_elt_app_inf_exec Heq ; subst.
   + destruct l1 ; inversion Heq1.
-  + destruct l2 ; inversion Heq1 ; subst.
+  + destruct l1 ; inversion Heq1 ; subst.
     assert (pi' := IHpi _ _ eq_refl).
     destruct pi' as [pi' Hs].
     rewrite ? app_comm_cons.
@@ -496,7 +496,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (with_ilr1 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -513,7 +513,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (with_ilr2 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -524,7 +524,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     exists (with_ilr2 _ _ _ _ _ _ pi')...
 - dichot_elt_app_inf_exec Heq ; subst ; list_simpl.
   + exists (zero_ilr _ _ _ _)...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     rewrite app_comm_cons.
     rewrite 2 app_assoc.
     exists (zero_ilr _ _ _ _)...
@@ -543,7 +543,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi2' as [pi2' Hs2].
     list_simpl.
     exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi1.
     assert (pi1' := IHpi1 _ _ eq_refl).
     rewrite app_comm_cons in pi1'.
@@ -557,7 +557,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     rewrite app_comm_cons.
     rewrite 2 app_assoc.
     exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
-- decomp_map_inf Heq; inversion Heq3.
+- decomp_map Heq eqn:Hi. discriminate Hi.
 - dichot_elt_app_inf_exec Heq ; subst.
   + rewrite app_comm_cons in IHpi.
     rewrite app_assoc in IHpi.
@@ -566,7 +566,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (de_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -582,7 +582,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (wk_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -597,7 +597,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     list_simpl in pi' ; destruct pi' as [pi' Hs].
     list_simpl ; exists (co_ilr _ _ _ _ _ pi')...
   + symmetry in Heq1.
-    destruct l3 ; inversion Heq1 ; subst.
+    destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
@@ -618,9 +618,9 @@ induction pi ; intros l1' l2' Heq ; subst ;
     * destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
       list_simpl.
       rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
+      rewrite (app_assoc l).
+      rewrite (app_assoc (l ++ _)).
+      rewrite <- (app_assoc l).
       eexists (@cut_ir _ f _ _ _ _ _ pi' pi2)...
     * rewrite app_comm_cons in IHpi2.
       rewrite app_assoc in IHpi2.
@@ -694,7 +694,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     rewrite app_comm_cons ; rewrite 2 app_assoc.
     exists (ex_oc_ir _ _ _ _ _ _ pi' p)...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * exfalso; symmetry in Heq0; decomp_map Heq0; inversion Heq0.
+    * exfalso. decomp_map Heq0 eqn:Hi. discriminate Hi.
     * rewrite 2 app_assoc in IHpi.
       assert (pi':=IHpi _ _ eq_refl).
       list_simpl in pi' ; destruct pi' as [pi' Hs].
@@ -707,7 +707,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (one_ilr _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi':=IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -733,7 +733,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (tens_ilr _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -764,7 +764,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
       destruct pi' as [pi' Hs].
       list_simpl.
       exists (lpam_ilr _ _ _ _ _ _ _ pi1 pi')...
-  + destruct l4 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi2.
     assert (pi' := IHpi2 _ _ eq_refl).
     rewrite (app_comm_cons _ _ (igen C)) in pi'.
@@ -807,21 +807,21 @@ induction pi ; intros l1' l2' Heq ; subst ;
       destruct pi' as [pi' Hs].
       list_simpl.
       exists (lmap_ilr _ _ _ _ _ _ _ pi1 pi')...
-    * destruct l5 ; inversion Heq2 ; subst.
+    * destruct l4 ; inversion Heq2 ; subst.
       assert (pi' := IHpi1 _ _ eq_refl).
       destruct pi' as [pi' Hs].
       list_simpl.
       rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
+      rewrite (app_assoc l).
+      rewrite (app_assoc (l ++ _)).
+      rewrite <- (app_assoc l).
       exists (lmap_ilr _ _ _ _ _ _ _ pi' pi2)...
 - rewrite app_comm_cons in IHpi.
   destruct (IHpi _ _ eq_refl) as [pi' Hs].
   exists (neg_irr _ _ _ pi')...
 - dichot_elt_app_inf_exec Heq ; subst.
   + destruct l1 ; inversion Heq1.
-  + destruct l2 ; inversion Heq1 ; subst.
+  + destruct l1 ; inversion Heq1 ; subst.
     assert (pi' := IHpi _ _ eq_refl).
     destruct pi' as [pi' Hs].
     rewrite ? app_comm_cons.
@@ -838,7 +838,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (with_ilr1 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -855,7 +855,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (with_ilr2 _ _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -866,7 +866,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     exists (with_ilr2 _ _ _ _ _ _ pi')...
 - dichot_elt_app_inf_exec Heq ; subst ; list_simpl.
   + exists (zero_ilr _ _ _ _)...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     rewrite app_comm_cons.
     rewrite 2 app_assoc.
     exists (zero_ilr _ _ _ _)...
@@ -885,7 +885,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi2' as [pi2' Hs2].
     list_simpl.
     exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi1.
     assert (pi1' := IHpi1 _ _ eq_refl).
     rewrite app_comm_cons in pi1'.
@@ -899,7 +899,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     rewrite app_comm_cons.
     rewrite 2 app_assoc.
     exists (plus_ilr _ _ _ _ _ _ pi1' pi2')...
-- decomp_map_inf Heq; inversion Heq3.
+- decomp_map Heq eqn:Hi. discriminate Hi.
 - dichot_elt_app_inf_exec Heq ; subst.
   + rewrite app_comm_cons in IHpi.
     rewrite app_assoc in IHpi.
@@ -908,7 +908,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (de_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -924,7 +924,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     destruct pi' as [pi' Hs].
     list_simpl.
     exists (wk_ilr _ _ _ _ _ pi')...
-  + destruct l3 ; inversion Heq1 ; subst.
+  + destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi'.
@@ -939,7 +939,7 @@ induction pi ; intros l1' l2' Heq ; subst ;
     list_simpl in pi' ; destruct pi' as [pi' Hs].
     list_simpl ; exists (co_ilr _ _ _ _ _ pi')...
   + symmetry in Heq1.
-    destruct l3 ; inversion Heq1 ; subst.
+    destruct l ; inversion Heq1 ; subst.
     list_simpl in IHpi.
     assert (pi' := IHpi _ _ eq_refl).
     rewrite app_comm_cons in pi' ; rewrite 2 app_assoc in pi'.
@@ -960,9 +960,9 @@ induction pi ; intros l1' l2' Heq ; subst ;
     * destruct (IHpi1 _ _ eq_refl) as [pi' Hs].
       list_simpl.
       rewrite app_comm_cons.
-      rewrite (app_assoc l4).
-      rewrite (app_assoc (l4 ++ _)).
-      rewrite <- (app_assoc l4).
+      rewrite (app_assoc l).
+      rewrite (app_assoc (l ++ _)).
+      rewrite <- (app_assoc l).
       eexists (@cut_ir _ f _ _ _ _ _ pi' pi2)...
     * rewrite app_comm_cons in IHpi2.
       rewrite app_assoc in IHpi2.

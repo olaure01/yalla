@@ -326,12 +326,12 @@ Lemma bot_rev {P} : (forall a, In bot (projT2 (pgax P) a) -> False) ->
   forall l1 l2, ll P (l1 ++ bot :: l2) -> ll P (l1 ++ l2).
 Proof with myeeasy.
 intros Hgax l1 l2 pi.
-remember (l1 ++ bot :: l2) as l ; revert l1 l2 Heql.
-induction pi ; intros l1' l2' Heq ; subst.
+remember (l1 ++ bot :: l2) as l; revert l1 l2 Heql.
+induction pi; intros l1' l2' Heq; subst.
 - exfalso.
-  destruct l1' ; inversion Heq.
-  destruct l1' ; inversion H1.
-  destruct l1' ; inversion H3.
+  destruct l1'; inversion Heq.
+  destruct l1'; inversion H1.
+  destruct l1'; inversion H3.
 - apply PCPermutation_Type_vs_elt_inv in p.
   destruct p as [(l3 & l4) HP' Heq].
   simpl in HP'; simpl in Heq.
@@ -344,13 +344,12 @@ induction pi ; intros l1' l2' Heq ; subst.
 - dichot_elt_app_inf_exec Heq; subst.
   + rewrite app_assoc.
     eapply ex_wn_r...
-    list_simpl ; apply IHpi ; list_simpl...
-  + dichot_elt_app_inf_exec Heq1 ; subst.
-    * exfalso.
-      symmetry in Heq0; decomp_map Heq0; inversion Heq0.
-    * list_simpl ; eapply ex_wn_r...
+    list_simpl; apply IHpi; list_simpl...
+  + dichot_elt_app_inf_exec Heq1; subst.
+    * exfalso. decomp_map Heq0 eqn:Hwb. discriminate Hwb.
+    * list_simpl; eapply ex_wn_r...
       rewrite 2 app_assoc.
-      apply IHpi ; list_simpl...
+      apply IHpi; list_simpl...
 - destruct l1' ; inversion Heq.
 - dichot_elt_app_inf_exec Heq ; subst.
   + rewrite app_assoc ; apply mix2_r...
@@ -395,9 +394,7 @@ induction pi ; intros l1' l2' Heq ; subst.
   + rewrite app_comm_cons.
     apply IHpi2...
 - exfalso.
-  destruct l1' ; inversion Heq.
-  decomp_map H1.
-  inversion H1.
+  destruct l1'; injection Heq as [= [=] Heq]. decomp_map Heq. discriminate.
 - destruct l1' ; inversion Heq ; subst.
   list_simpl ; eapply de_r...
   rewrite app_comm_cons.
@@ -448,8 +445,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
     eapply ex_wn_r...
     list_simpl ; apply IHpi ; list_simpl...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * exfalso.
-      symmetry in Heq0; decomp_map Heq0; inversion Heq0.
+    * exfalso. decomp_map Heq0 eqn:Hwp. discriminate Hwp.
     * list_simpl ; eapply ex_wn_r...
       rewrite 2 app_assoc.
       apply IHpi ; list_simpl...
@@ -493,8 +489,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   + rewrite app_comm_cons.
     apply IHpi2...
 - exfalso.
-  destruct l1' ; inversion Heq.
-  decomp_map H1; inversion H1.
+  destruct l1'; injection Heq as [= [=] Heq]. decomp_map Heq. discriminate.
 - destruct l1' ; inversion Heq ; subst.
   list_simpl ; eapply de_r...
   rewrite app_comm_cons.
@@ -542,8 +537,7 @@ induction pi ; intros l1' l2' Heq ; subst.
     eapply ex_wn_r...
     list_simpl ; apply IHpi ; list_simpl...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * exfalso.
-      symmetry in Heq0; decomp_map Heq0; inversion Heq0.
+    * exfalso. decomp_map Heq0 eqn:Hwo. discriminate Hwo.
     * list_simpl ; eapply ex_wn_r...
       rewrite 2 app_assoc.
       apply IHpi ; list_simpl...
@@ -584,9 +578,7 @@ induction pi ; intros l1' l2' Heq ; subst.
     apply IHpi1...
   + rewrite app_comm_cons.
     apply IHpi2...
-- exfalso.
-  destruct l1' ; inversion Heq.
-  decomp_map H1; inversion H1.
+- exfalso. destruct l1'; destr_eq Heq. decomp_map H eqn:Hwo. discriminate Hwo.
 - destruct l1' ; inversion Heq ; subst.
   list_simpl ; eapply de_r...
   rewrite app_comm_cons.
@@ -635,8 +627,7 @@ induction pi ; intros A' l1' l2' Heq ; subst.
     eapply ex_wn_r...
     list_simpl ; apply IHpi ; list_simpl...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * exfalso.
-      symmetry in Heq0; decomp_map Heq0; inversion Heq0.
+    * exfalso. decomp_map Heq0 eqn:Hwt. discriminate Hwt.
     * list_simpl ; eapply ex_wn_r...
       rewrite 2 app_assoc.
       apply IHpi ; list_simpl...
@@ -677,9 +668,7 @@ induction pi ; intros A' l1' l2' Heq ; subst.
     apply IHpi1...
   + rewrite app_comm_cons.
     apply IHpi2...
-- exfalso.
-  destruct l1' ; inversion Heq.
-  decomp_map H1; inversion H1.
+- exfalso. destruct l1'; destr_eq Heq. decomp_map H eqn:Hwt. discriminate Hwt.
 - destruct l1' ; inversion Heq ; subst.
   list_simpl ; eapply de_r...
   rewrite app_comm_cons.

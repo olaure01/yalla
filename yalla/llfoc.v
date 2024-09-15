@@ -328,15 +328,15 @@ induction pi ; intros l1' l2' Heq ; subst.
       exists (tens_fr _ _ _ _ pi1' pi2) ; simpl...
   + destruct (polarity B) as [Hs | Ha].
     * assert (H2 := IHpi2 _ _ (polconts _ _ Hs)).
-      rewrite <- (polconts _ (l0 ++ l2') Hs) in H2.
+      rewrite <- (polconts _ (l ++ l2') Hs) in H2.
       destruct H2 as [pi2' Hs2].
       rewrite <- app_assoc.
       exists (tens_fr _ _ _ _ pi1 pi2') ; simpl...
-    * assert (polcont (l0 ++ bot :: l2') B = (B :: l0) ++ bot :: l2') as Hpa
+    * assert (polcont (l ++ bot :: l2') B = (B :: l) ++ bot :: l2') as Hpa
         by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
       assert (H2 := IHpi2 _ _ Hpa).
       rewrite <- app_comm_cons in H2.
-      rewrite <- (polconta _ (l0 ++ l2') Ha) in H2.
+      rewrite <- (polconta _ (l ++ l2') Ha) in H2.
       destruct H2 as [pi2' Hs2].
       rewrite <- app_assoc.
       exists (tens_fr _ _ _ _ pi1 pi2') ; simpl...
@@ -388,9 +388,7 @@ induction pi ; intros l1' l2' Heq ; subst.
   destruct H1 as [pi1' Hs1].
   destruct H2 as [pi2' Hs2].
   exists (with_fr _ _ _ _ pi1' pi2') ; simpl...
-- exfalso.
-  decomp_map Heq.
-  inversion Heq3.
+- exfalso. decomp_map Heq eqn:Hw. discriminate Hw.
 - destruct l1' ; inversion Heq ; subst.
   destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ (polconts _ _ Hs)).
@@ -462,15 +460,15 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
       exists (tens_fr _ _ _ _ pi1' pi2) ; simpl...
   + destruct (polarity B) as [Hs | Ha].
     * assert (H2 := IHpi2 _ _ _ _ (polconts _ _ Hs)).
-      rewrite <- (polconts _ (l0 ++ A' :: B' :: l2') Hs) in H2.
+      rewrite <- (polconts _ (l ++ A' :: B' :: l2') Hs) in H2.
       destruct H2 as [pi2' Hs2].
       rewrite <- app_assoc.
       exists (tens_fr _ _ _ _ pi1 pi2') ; simpl...
-    * assert (polcont (l0 ++ parr A' B' :: l2') B = (B :: l0) ++ parr A' B' :: l2')
+    * assert (polcont (l ++ parr A' B' :: l2') B = (B :: l) ++ parr A' B' :: l2')
         as Hpa by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
       assert (H2 := IHpi2 _ _ _ _ Hpa).
       rewrite <- app_comm_cons in H2.
-      rewrite <- (polconta _ (l0 ++ A' :: B' :: l2') Ha) in H2.
+      rewrite <- (polconta _ (l ++ A' :: B' :: l2') Ha) in H2.
       destruct H2 as [pi2' Hs2].
       rewrite <- app_assoc.
       exists (tens_fr _ _ _ _ pi1 pi2') ; simpl...
@@ -523,9 +521,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
   destruct H1 as [pi1' Hs1].
   destruct H2 as [pi2' Hs2].
   exists (with_fr _ _ _ _ pi1' pi2') ; simpl...
-- exfalso.
-  decomp_map Heq.
-  inversion Heq3.
+- exfalso. decomp_map Heq eqn:Hw. discriminate Hw.
 - destruct l1' ; inversion Heq ; subst.
   destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
@@ -607,18 +603,18 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
               | exists (tens_fr _ _ _ _ pi2' pi2) ] ; simpl...
   + destruct (polarity B) as [Hs | Ha].
     * assert (H2 := IHpi2 _ _ _ _ (polconts _ _ Hs)).
-      rewrite <- (polconts _ (l0 ++ A' :: l2') Hs) in H2.
-      rewrite <- (polconts _ (l0 ++ B' :: l2') Hs) in H2.
+      rewrite <- (polconts _ (l ++ A' :: l2') Hs) in H2.
+      rewrite <- (polconts _ (l ++ B' :: l2') Hs) in H2.
       destruct H2 as [[pi1' Hs1] [pi1'' Hs2]].
       rewrite <- 2 app_assoc.
       split ; [ exists (tens_fr _ _ _ _ pi1 pi1')
               | exists (tens_fr _ _ _ _ pi1 pi1'') ] ; simpl...
-    * assert (polcont (l0 ++ awith A' B' :: l2') B = (B :: l0) ++ awith A' B' :: l2')
+    * assert (polcont (l ++ awith A' B' :: l2') B = (B :: l) ++ awith A' B' :: l2')
         as Hpa by (rewrite (polconta _ _ Ha) ; rewrite app_comm_cons ; reflexivity).
       assert (H2 := IHpi2 _ _ _ _ Hpa).
       rewrite <- 2 app_comm_cons in H2.
-      rewrite <- (polconta _ (l0 ++ A' :: l2') Ha) in H2.
-      rewrite <- (polconta _ (l0 ++ B' :: l2') Ha) in H2.
+      rewrite <- (polconta _ (l ++ A' :: l2') Ha) in H2.
+      rewrite <- (polconta _ (l ++ B' :: l2') Ha) in H2.
       destruct H2 as [[pi1' Hs1] [pi1'' Hs2]].
       rewrite <- 2 app_assoc.
       split ; [ exists (tens_fr _ _ _ _ pi1 pi1')
@@ -682,9 +678,7 @@ induction pi ; intros A' B' l1' l2' Heq ; subst.
     destruct H2 as [[pi2' Hs2] [pi2'' Hs2']].
     split ; [ exists (with_fr _ _ _ _ pi1' pi2')
             | exists (with_fr _ _ _ _ pi1'' pi2'') ] ; simpl...
-- exfalso.
-  decomp_map Heq.
-  inversion Heq3.
+- exfalso. decomp_map Heq eqn:Hw. discriminate Hw.
 - destruct l1' ; inversion Heq ; subst.
   destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ _ Hs)).
@@ -1304,30 +1298,27 @@ Proof with myeeasy.
   apply Permutation_Type_vs_cons_inv in HP'.
   destruct HP' as ((l1' & l2') & Heq) ; simpl in Heq.
   dichot_elt_app_inf_exec Heq ; subst.
-  + symmetry in Heq0; decomp_map_inf Heq0 ; subst.
-    inversion Heq0 ; subst.
+  + decomp_map Heq0 eqn:Hw. subst. injection Hw as [= ->].
     assert (HP' := HP).
-    list_simpl in HP'.  
+    list_simpl in HP'.
     symmetry in HP'.
     apply Permutation_Type_cons_app_inv in HP'.
     symmetry in HP'.
     apply Permutation_Type_vs_cons_inv in HP'.
-    destruct HP' as ((l1' & l2') & Heq) ; simpl in Heq.
+    destruct HP' as ((l1'' & l2'') & Heq) ; simpl in Heq.
     rewrite app_assoc in Heq.
     dichot_elt_app_inf_exec Heq ; subst.
-    * rewrite <- map_app in Heq1.
-      symmetry in Heq1; decomp_map_inf Heq1 ; subst.
-      inversion Heq1 ; subst.
-      exists (l0,(l3 ++ l5,lw')) ; simpl ; split ; [ split | ]...
+    * rewrite <- map_app in Heq0.
+      decomp_map Heq0 eqn:Hw. injection Hw as [= ->].
+      exists (l0,(l1' ++ l1,lw')) ; simpl ; split ; [ split | ]...
       -- symmetry in HP.
          list_simpl in HP.
          apply Permutation_Type_cons_app_inv in HP.
          list_simpl...
-      -- simpl in Hi ; simpl in Heq4 ; revert Hi Heq4 ; clear ;
-           induction lw' ; intros Hi Heq.
+      -- revert Hi Heq0 ; clear ; induction lw' ; intros Hi Heq.
          ++ apply incl_inf_nil_l.
          ++ destruct (incl_inf_cons_inv Hi) as [Hin Hi'].
-            assert (HP := Permutation_Type_middle l3 l5 A).
+            assert (HP := Permutation_Type_middle l1' l1 A).
             symmetry in HP ; apply (Permutation_Type_in_inf _ HP) in Hin.
             inversion Hin ; subst.
             ** apply incl_inf_cons.
@@ -1336,7 +1327,7 @@ Proof with myeeasy.
                --- apply IHlw'...
             ** apply incl_inf_cons...
                apply IHlw'...
-    * exists (l2 ++ l2', (l3 ++ A :: l5, A :: lw')) ; simpl ; split ; [ split | ]...
+    * exists (l2 ++ l2'', (l1' ++ A :: l1, A :: lw')) ; simpl ; split ; [ split | ]...
       -- symmetry in HP.
          list_simpl in HP.
          apply Permutation_Type_cons_app_inv in HP.
@@ -1361,9 +1352,8 @@ Proof with myeeasy.
     destruct HP' as ((l1'' & l2'') & Heq).
     rewrite <- app_assoc in Heq.
     dichot_elt_app_inf_exec Heq ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0 ; subst.
-      inversion Heq0 ; subst.
-      exists (l2 ++ l2', (l3 ++ A :: l5, A :: lw')) ; simpl ; split ; [ split | ]...
+    * decomp_map Heq0 eqn:Hw. subst. injection Hw as [= ->].
+      exists (l1 ++ l2', (l1'' ++ A :: l0, A :: lw')) ; simpl ; split ; [ split | ]...
       -- symmetry in HP.
          list_simpl in HP.
          apply Permutation_Type_cons_app_inv in HP.
@@ -1378,7 +1368,7 @@ Proof with myeeasy.
          symmetry.
          rewrite ? app_assoc.
          apply Permutation_Type_cons_app...
-    * exists (l1 ++ l2'',(A :: lw,A :: A :: lw')) ; simpl ; split ; [ split | ]...
+    * exists (l0 ++ l2'',(A :: lw,A :: A :: lw')) ; simpl ; split ; [ split | ]...
       -- symmetry in HP.
          rewrite app_assoc in HP.
          apply Permutation_Type_cons_app_inv in HP.

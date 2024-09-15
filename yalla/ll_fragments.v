@@ -152,10 +152,10 @@ induction pi ; intros l' l0' l1' HP.
     simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
   symmetry in HP1b.
   apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-  symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+  decomp_map Heqa. subst.
   symmetry in HP2b.
   apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-  symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+  decomp_map Heqb. subst.
   apply (Permutation_Type_app_head l2a) in HP4b.
   assert (IHP1 := Permutation_Type_trans HP2 HP4b).
   apply (Permutation_Type_app_head l1a) in HP3b.
@@ -180,8 +180,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply bot_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -199,10 +199,10 @@ induction pi ; intros l' l0' l1' HP.
       simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
     symmetry in HP1b.
     apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-    symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+    decomp_map Heqa. subst.
     symmetry in HP2b.
     apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-    symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+    decomp_map Heqb. subst.
     apply (Permutation_Type_app_head l2a) in HP4b.
     assert (IHP1 := Permutation_Type_trans HP2 HP4b).
     apply (@Permutation_Type_cons _ A _ eq_refl) in IHP1.
@@ -217,8 +217,8 @@ induction pi ; intros l' l0' l1' HP.
     apply (Permutation_Type_cons_app _ _ (tens A B)) in HP3.
     eapply ex_r ; [ apply tens_r | simpl ; rewrite Hperm ; apply HP3 ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * exfalso; symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -233,8 +233,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply parr_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -245,8 +245,8 @@ induction pi ; intros l' l0' l1' HP.
   + eapply ex_r ; [ apply top_r
                   | simpl ; rewrite Hperm ; apply Permutation_Type_middle ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -260,8 +260,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply plus_r1 | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -275,8 +275,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply plus_r2 | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -295,8 +295,8 @@ induction pi ; intros l' l0' l1' HP.
     eapply ex_r ; [ apply with_r
                   | simpl ; rewrite Hperm ; apply Permutation_Type_middle ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -305,20 +305,19 @@ induction pi ; intros l' l0' l1' HP.
   apply Permutation_Type_cons_app_inv in HP.
   dichot_elt_app_inf_exec Heq ; subst.
   + symmetry in HP.
-    apply Permutation_Type_map_inv in HP.
-    destruct HP as [l' Heq HP].
-    symmetry in Heq; decomp_map_inf Heq; simpl in Heq1, Heq2, Heq3, Heq5; subst; simpl in HP.
+    apply Permutation_Type_map_inv in HP as [l' Heq HP].
+    decomp_map Heq eqn:Heq1. destruct Heq1 as [Heq1 Heq2]. subst.
     apply (Permutation_Type_map wn) in HP.
     list_simpl in HP.
     rewrite app_assoc in HP.
     rewrite <- map_app in HP.
     apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
-    rewrite app_comm_cons, Heq2, Heq5 in HP.
+    rewrite app_comm_cons, Heq1, Heq2 in HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply oc_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -332,14 +331,13 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply de_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
-      inversion Heq2 ; subst.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. destr_eq Hw. subst.
       list_simpl in HP ; rewrite <- map_app in HP.
       apply (@Permutation_Type_cons _ one _ eq_refl) in HP.
       assert (Permutation_Type (one :: l)
                                (l' ++ map (fun _ : unit => one) (tt :: l1')
-                                   ++ map (fun _ : unit => wn one) (l1 ++ l4)))
+                                   ++ map (fun _ : unit => wn one) (l1 ++ l'r)))
         as HP' by (etransitivity ; [ apply HP | ] ; Permutation_Type_solve). 
       apply IHpi in HP'...
 - assert (HP' := HP).
@@ -353,9 +351,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply wk_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
-      inversion Heq2 ; subst.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. destr_eq Hw. subst.
       list_simpl in HP ; rewrite <- map_app in HP.
       apply IHpi in HP...
 - assert (HP' := HP).
@@ -372,15 +369,14 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply co_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
-      inversion Heq2 ; subst.
+    * decomp_map Heq0 eqn:Ho. discriminate Ho.
+    * decomp_map Heq2 eqn:Hw. destr_eq Hw. subst.
       list_simpl in HP ; rewrite <- map_app in HP.
       apply (@Permutation_Type_cons _ (wn one) _ eq_refl) in HP.
       apply (@Permutation_Type_cons _ (wn one) _ eq_refl) in HP.
       assert (Permutation_Type (wn one :: wn one :: l)
                                (l' ++ map (fun _ : unit => one) l1' ++
-                                  map (fun _ : unit => wn one) (tt :: tt :: l1 ++ l4)))
+                                  map (fun _ : unit => wn one) (tt :: tt :: l1 ++ l'r)))
         as HP' by (etransitivity ; [ apply HP | Permutation_Type_solve ]).
       apply IHpi in HP'...
 - apply Permutation_Type_app_app_inv in HP.
@@ -391,10 +387,10 @@ induction pi ; intros l' l0' l1' HP.
     simpl in HP1b ; simpl in HP2b ; simpl in HP3b ; simpl in HP4b.
   symmetry in HP1b.
   apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-  symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+  decomp_map Heqa. subst.
   symmetry in HP2b.
   apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-  symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+  decomp_map Heqb. subst.
   apply (Permutation_Type_app_head l2a) in HP4b.
   assert (IHP1 := Permutation_Type_trans HP2 HP4b).
   apply (@Permutation_Type_cons _ (dual A) _ eq_refl) in IHP1.
@@ -673,10 +669,10 @@ induction pi ; intros l' l0' l1' HP.
     simpl in HP1b, HP2b, HP3b, HP4b.
   symmetry in HP1b.
   apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-  symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+  decomp_map Heqa. subst.
   symmetry in HP2b.
   apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-  symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+  decomp_map Heqb. subst.
   apply (Permutation_Type_app_head l2a) in HP4b.
   assert (IHP1 := Permutation_Type_trans HP2 HP4b).
   apply (Permutation_Type_app_head l1a) in HP3b.
@@ -702,8 +698,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply bot_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -721,10 +717,10 @@ induction pi ; intros l' l0' l1' HP.
       simpl in HP1b, HP2b, HP3b, HP4b.
     symmetry in HP1b.
     apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-    symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+    decomp_map Heqa. subst.
     symmetry in HP2b.
     apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-    symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+    decomp_map Heqb. subst.
     apply (Permutation_Type_app_head l2a) in HP4b.
     assert (IHP1 := Permutation_Type_trans HP2 HP4b).
     apply (@Permutation_Type_cons _ A _ eq_refl) in IHP1.
@@ -739,11 +735,10 @@ induction pi ; intros l' l0' l1' HP.
     apply (Permutation_Type_cons_app _ _ (tens A B)) in HP3.
     eapply ex_r ; [ apply tens_r | simpl ; rewrite Hperm ; apply HP3 ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0.
-      inversion Heq0 ; subst ; list_simpl in HP.
-      rewrite (app_assoc (map _ l4)) in HP.
+    * decomp_map Heq0. subst. injection Heq as [= <- <-].
+      list_simpl in HP. rewrite (app_assoc (map _ l)) in HP.
       rewrite <- map_app in HP.
-      remember (l4 ++ l6) as l0 ; clear Heql0.
+      remember (l ++ l0) as l'' ; clear Heql''.
       apply Permutation_Type_app_app_inv in HP.
       destruct HP as [[[[l1a l2a] l3a] l4a] [[HP1 HP2] [HP3 HP4]]] ;
         simpl in HP1, HP2, HP3, HP4.
@@ -752,10 +747,10 @@ induction pi ; intros l' l0' l1' HP.
         simpl in HP1b, HP2b, HP3b, HP4b.
       symmetry in HP1b.
       apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-      symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+      decomp_map Heqa. subst.
       symmetry in HP2b.
       apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-      symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+      decomp_map Heqb. subst.
       apply (Permutation_Type_app_head l2a) in HP4b.
       assert (IHP1 := Permutation_Type_trans HP2 HP4b).
       apply (@Permutation_Type_cons _ bot _ eq_refl) in IHP1.
@@ -774,7 +769,7 @@ induction pi ; intros l' l0' l1' HP.
       list_simpl in IHP2.
       assert (Permutation_Type (l2a ++ l1a) l') as HP' by Permutation_Type_solve.
       eapply ex_r ; [ apply mix2_r | simpl ; rewrite Hperm ; apply HP' ]...
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -789,8 +784,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply parr_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -801,8 +796,8 @@ induction pi ; intros l' l0' l1' HP.
   + eapply ex_r ; [ apply top_r
                   | simpl ; rewrite Hperm ; apply Permutation_Type_middle ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -816,8 +811,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply plus_r1 | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -831,8 +826,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply plus_r2 | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -851,8 +846,8 @@ induction pi ; intros l' l0' l1' HP.
     eapply ex_r ; [ apply with_r
                   | simpl ; rewrite Hperm ; apply Permutation_Type_middle ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -862,21 +857,20 @@ induction pi ; intros l' l0' l1' HP.
   dichot_elt_app_inf_exec Heq ; subst.
   + symmetry in HP.
     apply Permutation_Type_map_inv in HP as [l' Heq HP].
-    symmetry in Heq; decomp_map_inf Heq;
-      simpl in Heq1, Heq2, Heq3, Heq5; subst; simpl in HP.
+    decomp_map Heq eqn:Heq1. destruct Heq1 as [Heq1 Heq2]. subst.
     apply (Permutation_Type_map wn) in HP.
     list_simpl in HP.
     rewrite app_assoc in HP.
     rewrite <- map_app in HP.
     apply (@Permutation_Type_cons _ A _ eq_refl) in HP.
     rewrite app_comm_cons in HP.
+    rewrite Heq1 in HP.
     rewrite Heq2 in HP.
-    rewrite Heq5 in HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply oc_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; inversion Heq2.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. discriminate Hw.
 - assert (HP' := HP).
   symmetry in HP'.
   apply Permutation_Type_vs_cons_inv in HP'.
@@ -890,14 +884,13 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply de_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
-      inversion Heq2 ; subst.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. subst. injection Hw as [= <-].
       list_simpl in HP ; rewrite <- map_app in HP.
       apply (@Permutation_Type_cons _ (tens bot bot) _ eq_refl) in HP.
       assert (Permutation_Type (tens bot bot :: l)
                                (l' ++ map (fun _ : unit => tens bot bot) (tt :: l1')
-                                   ++ map (fun _ : unit => wn (tens bot bot)) (l1 ++ l4)))
+                                   ++ map (fun _ : unit => wn (tens bot bot)) (l1 ++ l'r)))
         as HP' by (etransitivity ; [ apply HP | ] ; Permutation_Type_solve). 
       apply IHpi in HP'...
 - assert (HP' := HP).
@@ -911,9 +904,8 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply wk_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
-      inversion Heq2 ; subst.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. injection Hw as [= <-].
       list_simpl in HP ; rewrite <- map_app in HP.
       apply IHpi in HP...
 - assert (HP' := HP).
@@ -930,15 +922,14 @@ induction pi ; intros l' l0' l1' HP.
     apply IHpi in HP.
     eapply ex_r ; [ apply co_r | simpl ; rewrite Hperm ]...
   + dichot_elt_app_inf_exec Heq1 ; subst.
-    * symmetry in Heq0; decomp_map_inf Heq0; inversion Heq0.
-    * symmetry in Heq2; decomp_map_inf Heq2; simpl in Heq1, Heq2, Heq3; subst; simpl in HP.
-      inversion Heq2 ; subst.
+    * decomp_map Heq0 eqn:Ht. discriminate Ht.
+    * decomp_map Heq2 eqn:Hw. injection Hw as [= <-].
       list_simpl in HP ; rewrite <- map_app in HP.
       apply (@Permutation_Type_cons _ (wn (tens bot bot)) _ eq_refl) in HP.
       apply (@Permutation_Type_cons _ (wn (tens bot bot)) _ eq_refl) in HP.
       assert (Permutation_Type (wn (tens bot bot) :: wn (tens bot bot) :: l)
                                (l' ++ map (fun _ : unit => tens bot bot) l1' ++
-                                  map (fun _ : unit => wn (tens bot bot)) (tt :: tt :: l1 ++ l4)))
+                                  map (fun _ : unit => wn (tens bot bot)) (tt :: tt :: l1 ++ l'r)))
         as HP' by (etransitivity ; [ apply HP | Permutation_Type_solve ]).
       apply IHpi in HP'...
 - apply Permutation_Type_app_app_inv in HP as [[[[l1a l2a] l3a] l4a] [[HP1 HP2] [HP3 HP4]]];
@@ -947,10 +938,10 @@ induction pi ; intros l' l0' l1' HP.
     simpl in HP1b, HP2b, HP3b, HP4b.
   symmetry in HP1b.
   apply Permutation_Type_map_inv in HP1b as [la Heqa _].
-  symmetry in Heqa; decomp_map_inf Heqa; simpl in Heqa1, Heqa2; subst.
+  decomp_map Heqa. subst.
   symmetry in HP2b.
   apply Permutation_Type_map_inv in HP2b as [lb Heqb _].
-  symmetry in Heqb; decomp_map_inf Heqb; simpl in Heqb1, Heqb2; subst.
+  decomp_map Heqb. subst.
   apply (Permutation_Type_app_head l2a) in HP4b.
   assert (IHP1 := Permutation_Type_trans HP2 HP4b).
   apply (@Permutation_Type_cons _ (dual A) _ eq_refl) in IHP1.

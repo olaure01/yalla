@@ -128,16 +128,14 @@ induction l1 ; intros l2 Heq ;
     simpl in HP ; rewrite H1 in HP.
     rewrite app_comm_cons in HP.
     apply Permutation_Type_cons_app_inv in HP.
-    decomp_map_inf H1 ; subst ; simpl in HP.
-    replace (mell2ll f :: map mell2ll l4 ++ map mell2ll l6)
-      with (map mell2ll ((f :: l4) ++ l6))
+    decomp_map H1 eqn:Hx. subst. simpl in HP.
+    replace (mell2ll f :: map mell2ll l0 ++ map mell2ll l3)
+      with (map mell2ll ((f :: l0) ++ l3))
       in HP by (list_simpl ; reflexivity).
-    apply IHl1 in HP.
-    destruct HP as ((l1' & l2') & (Heq1 & Heq2) & HP).
-    simpl in Heq1 ; simpl in Heq2 ; subst ; simpl in H1 ; simpl in HP.
-    destruct x ; inversion H1.
-    symmetry in Heq2; decomp_map_inf Heq2 ; subst.
-    exists (x :: l1', x0 :: l1 ++ x :: l2) ; split ; [ split | ]...
+    apply IHl1 in HP as ((l1' & l2') & (Heq1 & Heq2) & HP).
+    destruct x ; inversion Hx. subst.
+    list_simpl in Heq2. decomp_map Heq2. subst.
+    exists (x :: l1', f :: l0 ++ x :: l3) ; split ; [ split | ]...
     * list_simpl...
     * rewrite app_comm_cons.
       apply Permutation_Type_cons_app...
@@ -354,19 +352,12 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   try (now (apply Permutation_Type_image in HP ;
             destruct HP as [Z Heq] ;
             destruct Z ; inversion Heq)).
-- apply Permutation_Type_length_2_inv in HP as [ HP | HP]; decomp_map HP; subst.
-  + destruct l1 ; inversion HP4.
-    destruct x ; inversion HP1 ; subst.
-    destruct x0 ; inversion HP3 ; subst.
-    apply (f_equal (fold_right add empty)) in HP.
-    rewrite elts_retract in HP ; subst.
-    apply ax_r.
-  + destruct l1 ; inversion HP4.
-    destruct x ; inversion HP1 ; subst.
-    destruct x0 ; inversion HP3 ; subst.
-    apply (f_equal (fold_right add empty)) in HP.
-    rewrite elts_retract in HP ; subst.
-    simpl.
+- apply Permutation_Type_length_2_inv in HP as [ HP | HP]; decomp_map HP eqn:Heq; subst;
+    destruct Heq as [Hx [Hx0 ->%map_eq_nil] ];
+    destruct x; inversion Hx; destruct x0; inversion Hx0; subst;
+    apply (f_equal (fold_right add empty)) in HP; rewrite elts_retract in HP; subst.
+  + apply ax_r.
+  + simpl.
     assert (add (var X) (add (covar X) empty)
           = add (covar X) (add (var X) empty))
       as Hswap by apply add_swap.
@@ -392,10 +383,9 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   apply one_r.
 - symmetry in HP.
   assert (HP2 := HP).
-  apply Permutation_Type_vs_cons_inv in HP.
-  destruct HP as ((l1 & l2) & HP).
-  decomp_map HP ; subst.
-  destruct x ; inversion HP4 ; subst.
+  apply Permutation_Type_vs_cons_inv in HP as ((l1 & l2) & HP).
+  decomp_map HP eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP ; subst.
   rewrite list2fm_elt.
@@ -416,10 +406,9 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   rewrite map_app...
 - symmetry in HP.
   assert (HP2 := HP).
-  apply Permutation_Type_vs_cons_inv in HP.
-  destruct HP as ((l3 & l4) & HP).
-  decomp_map HP ; subst.
-  destruct x ; inversion HP4 ; subst.
+  apply Permutation_Type_vs_cons_inv in HP as ((l3 & l4) & HP).
+  decomp_map HP eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP ; subst.
   eapply Permutation_Type_trans in HP2 ; [ | apply elts_fmmap ].
@@ -444,7 +433,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
     eapply Permutation_Type_trans ; [ | apply elts_fmmap ].
     unfold fmmap.
     eapply Permutation_Type_trans ; [ | symmetry ; apply elts_perm ].
-    change (mell2ll x1 :: map mell2ll l7) with (map mell2ll (x1 :: l7)).
+    change (mell2ll x1 :: map mell2ll l1) with (map mell2ll (x1 :: l1)).
     apply Permutation_Type_map.
     symmetry.
     etransitivity.
@@ -455,7 +444,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
     eapply Permutation_Type_trans ; [ | apply elts_fmmap ].
     unfold fmmap.
     eapply Permutation_Type_trans ; [ | symmetry ; apply elts_perm ].
-    change (mell2ll x2 :: map mell2ll l4) with (map mell2ll (x2 :: l4)).
+    change (mell2ll x2 :: map mell2ll l2) with (map mell2ll (x2 :: l2)).
     apply Permutation_Type_map.
     symmetry.
     etransitivity.
@@ -464,10 +453,9 @@ revert m HP ; induction pi ; intros m HP ; subst ;
       apply elts_perm.
 - symmetry in HP.
   assert (HP2 := HP).
-  apply Permutation_Type_vs_cons_inv in HP.
-  destruct HP as ((l1 & l2) & HP).
-  decomp_map HP ; subst.
-  destruct x ; inversion HP4 ; subst.
+  apply Permutation_Type_vs_cons_inv in HP as ((l1 & l2) & HP).
+  decomp_map HP eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP ; subst.
   rewrite list2fm_elt.
@@ -491,10 +479,9 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   apply Permutation_Type_cons_app...
 - symmetry in HP.
   assert (HP2 := HP).
-  apply Permutation_Type_vs_cons_inv in HP.
-  destruct HP as ((l1 & l2) & HP).
-  decomp_map HP ; subst.
-  destruct x ; inversion HP4 ; subst.
+  apply Permutation_Type_vs_cons_inv in HP as ((l1 & l2) & HP).
+  decomp_map HP eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP ; subst.
   rewrite list2fm_elt.
@@ -507,8 +494,7 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   symmetry in HP2.
   apply Permutation_Type_cons_app_inv in HP2.
   rewrite <- map_app in HP2.
-  apply mell2ll_map_wn_inv in HP2.
-  destruct HP2 as ((l1' & l2') & (Heq1 & Heq2) & HP) ; subst.
+  apply mell2ll_map_wn_inv in HP2 as ((l1' & l2') & (-> & Heq2) & HP).
   rewrite Heq2.
   erewrite list2fm_map.
   apply oc_r.
@@ -527,10 +513,9 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   etransitivity ; [ | symmetry ; apply elts_perm ]...
 - symmetry in HP.
   assert (HP2 := HP).
-  apply Permutation_Type_vs_cons_inv in HP.
-  destruct HP as ((l1 & l2) & HP).
-  decomp_map HP ; subst.
-  destruct x ; inversion HP4 ; subst.
+  apply Permutation_Type_vs_cons_inv in HP as ((l1 & l2) & HP).
+  decomp_map HP eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP ; subst.
   rewrite list2fm_elt.
@@ -553,10 +538,9 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   apply Permutation_Type_cons_app...
 - symmetry in HP.
   assert (HP2 := HP).
-  apply Permutation_Type_vs_cons_inv in HP.
-  destruct HP as ((l1 & l2) & HP).
-  decomp_map HP ; subst.
-  destruct x ; inversion HP4 ; subst.
+  apply Permutation_Type_vs_cons_inv in HP as ((l1 & l2) & HP).
+  decomp_map HP eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP ; subst.
   rewrite list2fm_elt.
@@ -577,10 +561,9 @@ revert m HP ; induction pi ; intros m HP ; subst ;
   rewrite map_app...
 - symmetry in HP.
   assert (HP2 := HP).
-  apply Permutation_Type_vs_cons_inv in HP.
-  destruct HP as ((l1 & l2) & HP).
-  decomp_map HP ; subst.
-  destruct x ; inversion HP4 ; subst.
+  apply Permutation_Type_vs_cons_inv in HP as ((l1 & l2) & HP).
+  decomp_map HP eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply (f_equal list2fm) in HP.
   rewrite list2fm_retract in HP ; subst.
   rewrite list2fm_elt.

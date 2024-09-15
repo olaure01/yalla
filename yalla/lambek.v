@@ -94,26 +94,25 @@ remember (l2ill A) as A0.
 revert l A Heql0 HeqA0 ; induction pi ;
   intros l' A' Heql0 HeqA0 ; subst ;
   (try now (destruct A' ; inversion HeqA0)) ;
-  (try now (symmetry in Heql0; decomp_map_inf Heql0 ; destruct x ; inversion Heql0)) ;
-  (try now (symmetry in Heql0; decomp_map_inf Heql0 ; destruct x ; inversion Heql3)).
+  (try now (decomp_map Heql0 eqn:Hx; destruct x; inversion Hx)).
 - destruct A' ; inversion HeqA0.
   destruct l' ; inversion Heql0 ;
     destruct l' ; inversion Heql0.
   destruct l ; inversion H3 ; subst ; subst.
   apply ax_lr.
 - apply IHpi...
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct l4 ; inversion Heql0 ; destruct lw' ; inversion H0.
-  + symmetry in p ; apply Permutation_Type.Permutation_Type_nil in p ; subst.
+- decomp_map Heql0. subst.
+  destruct l3; inversion Heq; destruct lw'; inversion Heq.
+  + symmetry in p. apply Permutation_Type.Permutation_Type_nil in p as ->.
     apply IHpi...
     list_simpl...
-  + destruct l ; inversion H1.
+  + destruct l; discriminate H1.
 - destruct A' ; inversion HeqA0 ; subst.
   apply lpam_lrr.
   apply IHpi...
   rewrite map_last...
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply lpam_llr.
   + apply IHpi1...
   + apply IHpi2...
@@ -124,17 +123,17 @@ revert l A Heql0 HeqA0 ; induction pi ;
   apply with_lrr.
   + apply IHpi1...
   + apply IHpi2...
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply with_llr1.
   apply IHpi...
   list_simpl...
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply with_llr2.
   apply IHpi...
   list_simpl...
-- inversion f.
+- discriminate f.
 Qed.
 
 
@@ -164,5 +163,5 @@ rewrite map_app in pi2.
 apply illfrag2l.
 rewrite 2 map_app.
 eapply ill_cut.cut_ir_axfree...
-intros a ; destruct a.
+intros [].
 Qed.

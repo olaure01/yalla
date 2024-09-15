@@ -454,7 +454,7 @@ intros l A pi.
 induction pi ;
   (split ; [ intros l'' A'' Heql HeqA | intros l'' Heql HeqN ]) ; subst ; 
   try (now (destruct A'' ; inversion HeqA)) ;
-  try (now (symmetry in Heql; decomp_map_inf Heql ; destruct x ; inversion Heql3)) ;
+  try (now (decomp_map Heql eqn:Hx; destruct x; inversion Hx)) ;
   try (now inversion HeqN).
 - destruct l'' ; inversion Heql ;
     destruct l'' ; inversion Heql.
@@ -475,16 +475,16 @@ induction pi ;
   destruct p as [l0 Heq HP] ; subst.
   symmetry in HP.
   eapply ex_tr ; [ apply IHpi | ]...
-- symmetry in Heql; decomp_map_inf Heql ; subst; symmetry in Heql3.
-  simpl in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
-  apply Permutation_Type_map_inv in p ; destruct p as [l' ? HP] ; subst.
+- decomp_map Heql. subst.
+  symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
+  apply Permutation_Type_map_inv in p as [l' -> HP].
   symmetry in HP.
   eapply ex_oc_tr ; [ | eassumption ].
   apply IHpi...
   rewrite <- tl2ill_map_ioc ; rewrite <- ? map_app...
-- symmetry in Heql; decomp_map_inf Heql ; subst; symmetry in Heql3.
-  simpl in Heql3 ; apply tl2ill_map_ioc_inv in Heql3 ; destruct Heql3 as [l ? ?] ; subst.
-  apply Permutation_Type_map_inv in p ; destruct p as [l' ? HP] ; subst.
+- decomp_map Heql eqn:Heq. subst.
+  symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
+  apply Permutation_Type_map_inv in p as [l' -> HP].
   symmetry in HP.
   eapply ex_oc_tr ; [ | eassumption ].
   apply IHpi...
@@ -492,45 +492,42 @@ induction pi ;
 - destruct l'' ; inversion Heql.
   destruct A'' ; inversion HeqA ; subst.
   apply one_trr.
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply one_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply one_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; destruct A'' ; inversion HeqA ; subst.
+- decomp_map Heql. destruct A''; inversion HeqA; subst.
   apply tens_trr.
   + apply IHpi1...
   + apply IHpi2...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply tens_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply tens_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql1 ; subst.
 - destruct A'' ; inversion HeqA ; subst.
   apply neg_trr.
   apply IHpi...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
-  destruct l3 ; inversion Heql4.
+- decomp_map Heql eqn:Heq. destruct Heq as [Hx ->%map_eq_nil]. subst.
+  destruct x; inversion Hx. subst.
   apply neg_tlr.
   apply IHpi...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply zero_tlr.
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply zero_tlr.
 - destruct A'' ; inversion HeqA ; subst.
   apply plus_trr1.
@@ -538,15 +535,15 @@ induction pi ;
 - destruct A'' ; inversion HeqA ; subst.
   apply plus_trr2.
   apply IHpi...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply plus_tlr.
   + apply IHpi1...
     list_simpl...
   + apply IHpi2...
     list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply plus_tlr.
   + apply IHpi1...
     list_simpl...
@@ -558,33 +555,33 @@ induction pi ;
   apply oc_trr.
   apply IHpi...
   rewrite tl2ill_map_ioc...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
+ apply de_tlr.
+  apply IHpi...
+  list_simpl...
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply de_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
-  apply de_tlr.
-  apply IHpi...
-  list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply wk_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply wk_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply co_tlr.
   apply IHpi...
   list_simpl...
-- symmetry in Heql; decomp_map_inf Heql ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   apply co_tlr.
   apply IHpi...
   list_simpl...
@@ -760,12 +757,11 @@ split ; [ split | ] ; simpl.
           -- assert (HP := Heq).
              symmetry in Heq ; apply Permutation_Type_vs_cons_inv in Heq.
              destruct Heq as [[l1 l2] Heq] ; simpl in Heq.
-             rewrite map_map in Heq ; decomp_map_inf Heq ; subst ;
-               simpl in Hin, Heq3; symmetry in Heq3; list_simpl.
-             assert (a0 = tl2ill x) ; subst.
+             rewrite map_map in Heq. decomp_map Heq eqn:Heq0. subst. symmetry in Heq0.
+             assert (a0 = tl2ill x); subst.
              { apply (snd (Hgax a))...
-               apply Hin ; apply in_inf_elt. }
-             symmetry ; apply Permutation_Type_cons_app.
+               apply Hin. apply in_inf_elt. }
+             list_simpl. symmetry ; apply Permutation_Type_cons_app.
              symmetry ; rewrite <- map_app ; apply IHl.
              ++ intros x0 Hin' ; apply Hin.
                 apply in_inf_app_or in Hin' ; destruct Hin' as [Hin' | Hin'] ; apply in_inf_or_app.
@@ -787,10 +783,10 @@ split ; [ split | ] ; simpl.
       apply (f_equal (@rev _)) in Heq'.
       rewrite rev_involutive in Heq' ; list_simpl in Heq'.
       rewrite map_map in Heq'.
-      decomp_map Heq' ; subst.
+      decomp_map Heq' eqn:Heq; subst. destruct Heq as [Heq1 [Heq2 Heq3]].
       assert (Hgaxa := fst (fst (Hgax a)) x).
       apply Hgaxa ; simpl.
-      unfold i2ac ; rewrite <- Heq'3... }
+      unfold i2ac ; rewrite <- Heq2... }
   + eapply ex_ir ; simpl...
     refine (snd (tl2tlfrag _ _ _) _)...
     apply gax_tr.
@@ -799,7 +795,7 @@ split ; [ split | ] ; simpl.
     apply gax_tr.
 - intros Hin.
   apply in_inf_split in Hin ; destruct Hin as [(l1,l2) Heq].
-  decomp_map Heq; symmetry in Heq3.
+  decomp_map Heq eqn:Heq0. symmetry in Heq0.
   eapply N_not_tl2ill...
 Qed.
 

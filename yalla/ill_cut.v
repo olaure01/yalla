@@ -378,19 +378,17 @@ induction pi2 ; intros l' L Heq.
         with (flat_map (app (map ioc lw)) ((l ++ B :: l0) :: L1)) by (list_simpl ; reflexivity).
       rewrite <- flat_map_app ; refine (IHpi2_2 _ _ _)...
       rewrite ? flat_map_app ; list_simpl...
-- decomp_map_inf Heq; subst; simpl in Heq2; simpl.
+- decomp_map Heq. subst.
   assert ({ Lw | flat_map (app (map ioc lw)) L = map ioc Lw }) as [Lw HeqLw].
-  { clear pi2 IHpi2 ; revert l2 Heq2 ; clear ; induction L ; intros l2 Heq2.
+  { clear pi2 IHpi2 ; revert l1 Heq0 ; clear ; induction L ; intros l2 Heq2.
     - exists nil...
     - simpl in Heq2.
-      decomp_map_inf Heq2 ; subst.
-      inversion Heq1 ; subst ; simpl.
-      simpl in Heq4 ; apply IHL in Heq4.
-      destruct Heq4 as [Lw Heq4].
-      exists (lw ++ l1 ++ Lw) ; list_simpl ; rewrite <- Heq4... }
+      decomp_map Heq2 eqn:Heq1. subst. destruct Heq1 as [[= ->] Heq1]. simpl.
+      apply IHL in Heq1 as [Lw Heq1].
+      exists (lw ++ a ++ Lw) ; list_simpl ; rewrite <- Heq1... }
   rewrite HeqLw ; rewrite <- map_app ; apply oc_irr.
   list_simpl ; rewrite <- HeqLw ; refine (IHpi2 _ _ _).
-  rewrite <- Heq2 ; list_simpl...
+  rewrite <- Heq0 ; list_simpl...
 - elt_vs_app_flat_map_cst_inv Heq.
   + list_simpl ; apply de_ilr.
     rewrite app_comm_cons ; rewrite app_assoc ; refine (IHpi2 _ _ _) ; list_simpl...
@@ -516,19 +514,19 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
     revert Hl IHsize ; list_simpl ; intros Hl IHsize.
     refine (IHsize _ _ _ _ _ pi1 Hl _ _)...
   + dichot_elt_app_inf_exec Heql1 ; subst.
-    * symmetry in Heql0; decomp_map_inf Heql0; subst; simpl in HP, pi1.
+    * decomp_map Heql0. subst.
       assert (HP' := HP).
       apply Permutation_Type_vs_elt_inv in HP' ; destruct HP' as [(l1',l2') Heq] ;
         simpl in Heq ; subst.
       apply Permutation_Type_app_inv in HP.
       revert Hl IHsize ; list_simpl ; rewrite app_assoc ; intros Hl IHsize.
       rewrite app_assoc ; eapply (cut_oc_comm_left _ (ipsize pi1))...
-      -- list_simpl ; rewrite app_comm_cons ; change (ioc x :: map ioc l7) with (map ioc (x :: l7)) ;
-           rewrite (app_assoc (map ioc l4)) ; rewrite <- map_app.
-         apply (ex_oc_ir _ _ (l1' ++ x :: l2'))...
+      -- list_simpl. rewrite app_comm_cons. change (ioc A :: map ioc l1) with (map ioc (A :: l1)).
+           rewrite (app_assoc (map ioc l4)), <- map_app.
+         apply (ex_oc_ir _ _ (l1' ++ A :: l2'))...
          revert Hl IHsize ; list_simpl ; rewrite app_assoc ; intros Hl IHsize...
       -- intros lw pi0 Hs'.
-         list_simpl ; rewrite (app_assoc (map ioc l4)) ; rewrite (app_assoc _ (map ioc l7)) ;
+         list_simpl. rewrite (app_assoc (map ioc l4)). rewrite (app_assoc _ (map ioc l1)) ;
            rewrite <- (app_assoc (map ioc l4)) ; rewrite <- 2 map_app ;
            apply (ex_oc_ir _ _ (l1' ++ lw ++ l2'))...
          list_simpl ; rewrite app_assoc.
@@ -855,7 +853,7 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
       apply lmap_ilr...
       revert Hr IHsize ; list_simpl ; intros Hr IHsize.
       refine (IHsize _ _ _ _ _ pi1 Hr _ _)...
-    * list_simpl ; rewrite (app_assoc l6) ; rewrite (app_assoc _ l) ; apply lmap_ilr...
+    * list_simpl ; rewrite (app_assoc l2) ; rewrite (app_assoc _ l) ; apply lmap_ilr...
       list_simpl ; refine (IHsize _ _ _ _ _ pi1 Hl _ _)...
 - (* neg_irr *)
   simpl in IHsize.
@@ -1152,9 +1150,9 @@ remember (l1 ++ A :: l2) as l ; destruct_ill pi2 f X l Hl Hr HP a.
       list_simpl ; refine (IHsize _ _ _ _ _ pi1 Hr _ _)...
 - (* oc_irr *)
   remember (oc_irr _ _ _ Hl) as Hloc ; rewrite HeqHloc in IHsize ; clear HeqHloc.
-  decomp_map_inf Heql; subst; simpl in pi1, IHsize, Hl; list_simpl.
+  decomp_map Heql. subst. simpl in IHsize.
   eapply (cut_oc_comm_left _ (ipsize pi1))...
-  + change (ioc x :: map ioc l6) with (map ioc (x :: l6)) ; rewrite <- map_app ; apply oc_irr...
+  + change (ioc A :: map ioc l2) with (map ioc (A :: l2)) ; rewrite <- map_app ; apply oc_irr...
   + intros lw Hs' pi.
     rewrite <- 2 map_app ; apply oc_irr.
     revert Hl IHsize ; list_simpl ; intros Hl IHsize.

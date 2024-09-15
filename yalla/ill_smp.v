@@ -119,7 +119,7 @@ remember (map ill2ill l) as l0 ; remember (ill2ill A) as A0.
 revert l Heql0 A HeqA0 ; induction pi ; intros l' Heql0 A' HeqA0 ; subst ;
   try (inversion f ; fail) ;
   try (destruct A' ; inversion HeqA0 ; subst ;
-         try (symmetry in Heql0; decomp_map_inf Heql0 ; subst) ; constructor ;
+         try (decomp_map Heql0 ; subst) ; constructor ;
          try (apply IHpi ; try assumption ; try reflexivity ; fail) ;
          try (apply IHpi1 ; try assumption ; try reflexivity ; fail) ;
          try (apply IHpi2 ; try assumption ; try reflexivity ; fail) ; fail).
@@ -135,10 +135,9 @@ revert l Heql0 A HeqA0 ; induction pi ; intros l' Heql0 A' HeqA0 ; subst ;
   apply ypt2pt in HP.
   eapply ex_ir...
   apply IHpi...
-- symmetry in Heql0; decomp_map_inf Heql0; subst.
-  simpl in Heql0; symmetry in Heql0; apply ill2ill_map_ioc_inv in Heql0;
-    destruct Heql0 as (l & ? & ?); subst.
-  apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
+- decomp_map Heql0 eqn:Heq. subst.
+  symmetry in Heq. apply ill2ill_map_ioc_inv in Heq as [l [-> ->]].
+  apply Permutation_Type_map_inv in p as [l' -> HP].
   eapply ex_ir ;
     [ apply IHpi ; try reflexivity ;
       rewrite <- ill2ill_map_ioc ; rewrite <- ? map_app | ]...
@@ -149,67 +148,66 @@ revert l Heql0 A HeqA0 ; induction pi ; intros l' Heql0 A' HeqA0 ; subst ;
 - destruct A' ; inversion HeqA0.
   destruct l' ; inversion Heql0.
   apply one_irr.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx.
   eapply ex_ir.
   + apply one_ilr.
     apply IHpi...
     rewrite <- ? map_app...
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply tens_ilr.
-    eapply (ex_ir _ (x1 :: x2 :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x1 :: x2 :: l4))...
+    eapply (ex_ir _ (x1 :: x2 :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x1 :: x2 :: l2))...
       simpl ; rewrite map_app...
     * apply ypt2pt ; Permutation_Type_solve.
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql3 ; subst.
+- decomp_map Heql0 eqn:Hx. destruct x; discriminate Hx.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply lmap_ilr.
     * apply IHpi1...
-    * eapply (ex_ir (l3 ++ x2 :: l7) (x2 :: l3 ++ l7)).
+    * eapply (ex_ir (l1 ++ x2 :: l2) (x2 :: l1 ++ l2)).
       -- apply IHpi2...
          simpl ; rewrite map_app...
       -- apply ypt2pt ; Permutation_Type_solve.
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply with_ilr1.
-    eapply (ex_ir _ (x1 :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x1 :: l4))...
+    eapply (ex_ir _ (x1 :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x1 :: l2))...
       simpl ; rewrite map_app...
     * apply ypt2pt ; Permutation_Type_solve.
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply with_ilr2.
-    eapply (ex_ir _ (x2 :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x2 :: l4))...
+    eapply (ex_ir _ (x2 :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x2 :: l2))...
       simpl ; rewrite map_app...
     * apply ypt2pt ; Permutation_Type_solve.
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
-  + eapply (zero_ilr (l0 ++ l4)).
+  + eapply (zero_ilr (l1 ++ l2)).
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply plus_ilr.
-    * eapply (ex_ir _ (x1 :: l0 ++ l4)).
-      -- apply (IHpi1 (l0 ++ x1 :: l4))...
+    * eapply (ex_ir _ (x1 :: l1 ++ l2)).
+      -- apply (IHpi1 (l1 ++ x1 :: l2))...
          simpl ; rewrite map_app...
       -- apply ypt2pt ; Permutation_Type_solve.
-    * eapply (ex_ir _ (x2 :: l0 ++ l4)).
-      -- apply (IHpi2 (l0 ++ x2 :: l4))...
+    * eapply (ex_ir _ (x2 :: l1 ++ l2)).
+      -- apply (IHpi2 (l1 ++ x2 :: l2))...
          simpl ; rewrite map_app...
       -- apply ypt2pt ; Permutation_Type_solve.
   + apply ypt2pt ; Permutation_Type_solve.
@@ -219,28 +217,28 @@ revert l Heql0 A HeqA0 ; induction pi ; intros l' Heql0 A' HeqA0 ; subst ;
   apply oc_irr.
   apply IHpi...
   symmetry ; apply ill2ill_map_ioc.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply de_ilr.
-    eapply (ex_ir _ (x :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ x :: l4))...
+    eapply (ex_ir _ (x :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ x :: l2))...
       simpl ; rewrite map_app...
     * apply ypt2pt ; Permutation_Type_solve.
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply wk_ilr.
-    apply (IHpi (l0 ++ l4))...
+    apply (IHpi (l1 ++ l2))...
     simpl ; rewrite map_app...
   + apply ypt2pt ; Permutation_Type_solve.
-- symmetry in Heql0; decomp_map_inf Heql0 ; subst.
-  destruct x ; inversion Heql0 ; subst.
+- decomp_map Heql0 eqn:Hx. subst.
+  destruct x; inversion Hx. subst.
   eapply ex_ir.
   + apply co_ilr.
-    eapply (ex_ir _ (ioc x :: ioc x :: l0 ++ l4)).
-    * apply (IHpi (l0 ++ ioc x :: ioc x :: l4))...
+    eapply (ex_ir _ (ioc x :: ioc x :: l1 ++ l2)).
+    * apply (IHpi (l1 ++ ioc x :: ioc x :: l2))...
       simpl ; rewrite map_app...
     * apply ypt2pt ; Permutation_Type_solve.
   + apply ypt2pt ; Permutation_Type_solve.

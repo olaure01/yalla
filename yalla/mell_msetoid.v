@@ -228,9 +228,9 @@ revert m Heql ; induction pi ; intros m Heql ;
   eapply ex_r.
   + apply IHpi...
   + symmetry...
-- symmetry in Heql; decomp_map Heql ; subst; symmetry in Heql3.
-  apply mell2ll_map_wn_inv in Heql3 ; destruct Heql3 as (l & Heq1 & Heq2) ; subst.
-  apply Permutation_Type_map_inv in p ; destruct p as [l' Heq HP] ; subst.
+- decomp_map Heql eqn:Heql3. symmetry in Heql3.
+  apply mell2ll_map_wn_inv in Heql3 as (l & -> & ->).
+  apply Permutation_Type_map_inv in p as [l' -> HP].
   simpl in Heql ; unfold id in Heql ; subst.
   eapply ex_r ;
     [ apply IHpi ; rewrite <- mell2ll_map_wn ; rewrite <- ? map_app | ]...
@@ -249,7 +249,7 @@ revert m Heql ; induction pi ; intros m Heql ;
   destruct f ; inversion H0 ; subst.
   assert (Heq := H1).
   symmetry in H1; decomp_map H1 ; subst.
-  apply (ex_r (add (tens f1 f2) (sum l3 l0))).
+  apply (ex_r (add (tens f1 f2) (sum l1 l2))).
   + apply tens_r.
     * apply IHpi1...
     * apply IHpi2...
