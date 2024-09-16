@@ -1,5 +1,11 @@
 # YALLA: an LL library for Coq
 
+## Version 2.0.6 (2024/09/16)
+
+This is mostly an adaptation of v2.0 to Coq v8.20 and OLlibs v2.0.7.
+
+*Tested with Coq v8.20.*
+
 ## Version 2.0.5 (2024/09/15)
 
 This is mostly an adaptation of v2.0 to Coq v8.19 and OLlibs v2.0.6.
