@@ -1,5 +1,10 @@
 # Versions 2.0.x
 
+## Version 2.0.7
+
+* adapt to Coq v8.20
+  * rename some `_length` into `length_`
+
 ## Version 2.0.6
 
 * changes on tactics in `List_more.v`

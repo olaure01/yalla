@@ -459,7 +459,7 @@ Lemma nat_bijection_Permutation n f :
 Proof.
  intros Hf BD.
  apply NoDup_Permutation_bis; auto using Injective_map_NoDup, seq_NoDup.
- * now rewrite map_length.
+ * now rewrite length_map.
  * intros x. rewrite in_map_iff. intros (y & <- & Hy').
    rewrite in_seq in *. simpl in *.
    destruct Hy' as (_,Hy'). split; [ apply Nat.le_0_l | ]. apply Hf, Hy'.
@@ -555,7 +555,7 @@ Proof.
     destruct (nth_error_split_inf l (f 0) Ha) as [(l1, l2) L12 L1].
     rewrite L12. symmetry; apply Permutation_Type_cons_app; symmetry.
     apply IHl' with (adapt f).
-    + revert E. rewrite L12, !app_length. simpl.
+    + revert E. rewrite L12, !length_app. simpl.
       rewrite <- plus_n_Sm. now injection 1.
     + now apply adapt_injective.
     + intro n. rewrite <- (adapt_ok a), <- L12; auto.

@@ -161,7 +161,7 @@ Section InfiniteDec.
   intros Hinj l.
   destruct pigeon_dectype with (map f (seq 0 (S (length l)))) l as [x Hin Hnin].
   - apply injective_NoDup, seq_NoDup. assumption.
-  - rewrite map_length, seq_length. lia.
+  - rewrite length_map, length_seq. lia.
   - remember (S (length l)) as k. clear Heqk.
     remember 0 as s. clear Heqs.
     induction k in s, Hin, Hnin |-*; cbn; [ easy | ].
