@@ -67,7 +67,7 @@ induction pi in l', L, Heq |- *;
   apply ax_ir.
 - case_eq (ipperm P); intros Hperm; rewrite Hperm in p; cbn in p; subst.
   + destruct (Permutation_Type_app_flat_map_cst _ (map ioc lw) _ _ p)
-      as [[L' l''] (Hnil' & HeqL' & HPL')];
+      as [[L' l''] Hnil' [HeqL' HPL']];
       cbn in Hnil', HeqL', HPL'; subst.
     eapply ex_ir; [ | rewrite Hperm; cbn; apply HPL' ].
     apply (IHpi _ _ eq_refl).

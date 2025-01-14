@@ -370,15 +370,14 @@ Qed.
 
 Lemma stronger_pfrag P Q (Hle : le_pfrag P Q) l : ll P l -> ll Q l.
 Proof.
-intros pi. induction pi using ll_nested_ind; try (constructor; assumption).
+intro pi. induction pi using ll_nested_ind; try (constructor; assumption).
 - refine (ex_r _ _ IHpi _).
   apply (PCPermutation_Type_monot (pperm P)), p.
   apply Hle.
 - exact (ex_wn_r _ _ _ _ IHpi p).
 - apply mix_r.
   + destruct Hle as (_ & _ & Hmix & _).
-    specialize (Hmix (length L)).
-    eapply implb_true_iff, eqpmix. apply le_implb, Hmix.
+    eapply implb_true_iff, eqpmix. apply le_implb, (Hmix (length L)).
   + clear eqpmix. induction L as [|l L IHL]; constructor; inversion X; subst.
     * apply X0.
     * eapply IHL, X1.

@@ -473,7 +473,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
       rewrite <- Heqp in Hincl. cbn in Hincl.
       apply (incl_inf_Forall_inf Hincl). assumption.
     - rewrite partition_as_filter in Heqp. injection Heqp as [= -> ->].
-      apply (reflectT_iffT _ _  (Forall_inf_forallb_reflectT _ _ _ (fun D => (reflectT_neg _ _ (wn_spec D))))),
+      apply (reflectT_iffT (Forall_inf_forallb_reflectT _ _ _ (fun D => (reflectT_neg (wn_spec D))))),
             forallb_filter. }
   assert (forall x, In_inf x lsa -> is_Foc x = true) as Hlsa'.
   { injection Hp1 as [= -> <-].
@@ -506,15 +506,15 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
       -- apply as_tfr; [ assumption | ].
          apply IHpi1 with (lsa := A :: l0); [ reflexivity | | ]; cbn.
          ++ rewrite Hp1.
-            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
             reflexivity.
-         ++ rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+         ++ rewrite Hp'. apply (reflectT_iffT (Foc_spec _)) in Htt as ->. reflexivity.
       -- apply IHpi1 with (lsa := A :: l0); [ reflexivity | | ]; cbn.
          ++ rewrite Hp1.
-            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
             reflexivity.
          ++ rewrite Hp'.
-            apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+            apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
             reflexivity.
   + apply exw_tfr with (l3 ++ l); [ apply wk_list_tfr | apply Permutation_Type_app_comm ].
     destruct (polarity B); pol_simpl.
@@ -528,15 +528,15 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
       -- apply as_tfr; [ assumption | ].
          apply IHpi2 with (lsa := B :: l4); [ reflexivity | | ]; cbn.
          ++ rewrite Hp2.
-            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
             reflexivity.
-         ++ rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+         ++ rewrite Hp'. apply (reflectT_iffT (Foc_spec _)) in Htt as ->. reflexivity.
       -- apply IHpi2 with (lsa := B :: l4); [ reflexivity | | ]; cbn.
          ++ rewrite Hp2.
-            apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+            apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
             reflexivity.
          ++ rewrite Hp'.
-            apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+            apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
             reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   cbn in Hp1. destruct (partition is_wn l) eqn:Hp. injection Hp1 as [= -> <-].
@@ -551,73 +551,73 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     * apply as_tfr; [ assumption | ].
       eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnB as ->.
          reflexivity.
-      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in HttB as ->. reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT (Foc_spec _)) in HttB as ->. reflexivity.
     * eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnB as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttB as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in HnttB as ->.
          reflexivity.
   + apply as_tfr; [ assumption | ].
     destruct (wn_spec B) as [HwnB|HnwnB]; [ inversion HwnB; subst | destruct (Foc_spec B) as [HttB|HnttB] ].
     * apply wn_tfr.
       eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnA as ->.
          reflexivity.
-      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in HttA as ->. reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT (Foc_spec _)) in HttA as ->. reflexivity.
     * apply as_tfr; [ assumption | ].
       eapply ex_tfr; [ | apply Permutation_Type_swap ].
       eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnA as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (Foc_spec _)) in HttB as ->.
-         apply (reflectT_iffT _ _ (Foc_spec _)) in HttA as ->.
+         apply (reflectT_iffT (Foc_spec _)) in HttB as ->.
+         apply (reflectT_iffT (Foc_spec _)) in HttA as ->.
          reflexivity.
     * eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnA as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttB as ->.
-         apply (reflectT_iffT _ _ (Foc_spec _)) in HttA as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in HnttB as ->.
+         apply (reflectT_iffT (Foc_spec _)) in HttA as ->.
          reflexivity.
   + eapply exa_tfr; [ | apply Permutation_Type_swap ].
     destruct (wn_spec B) as [HwnB|HnwnB]; [ inversion HwnB; subst | destruct (Foc_spec B) as [HttB|HnttB] ].
     * apply wn_tfr.
       eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnA as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttA as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in HnttA as ->.
          reflexivity.
     * apply as_tfr; [ assumption | ].
       eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnA as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (Foc_spec _)) in HttB as ->.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttA as ->.
+         apply (reflectT_iffT (Foc_spec _)) in HttB as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in HnttA as ->.
          reflexivity.
     * eapply exa_tfr; [ | apply Permutation_Type_swap ].
       eapply IHpi; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnB as ->.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in HnwnA as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnB as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in HnwnA as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttB as ->.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in HnttA as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in HnttB as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in HnttA as ->.
          reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= -> <-].
@@ -625,7 +625,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
   { rewrite partition_as_filter in Hp2. injection Hp2 as [= <- <-].
     apply forall_Forall_inf.
     intros C [_ HC]%filter_In_inf_inv.
-    apply (reflectT_iffT _ _ (Foc_spec _)), HC. }
+    apply (reflectT_iffT (Foc_spec _)), HC. }
   cbn in Hp2. destruct (partition is_Foc l1). injection Hp2 as [= <- <-].
   apply top_tfr, Htt.
 - apply plus_tfr1.
@@ -640,15 +640,15 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     * apply as_tfr; [ assumption | ].
       apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
       -- rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
-      -- rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+      -- rewrite Hp'. apply (reflectT_iffT (Foc_spec _)) in Htt as ->. reflexivity.
     * apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
       -- rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
       -- rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
          reflexivity.
 - apply plus_tfr2.
   destruct (polarity A) as [HsA|HaA]; pol_simpl.
@@ -662,17 +662,17 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     * apply as_tfr; [ assumption | ].
       apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
       -- rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
       -- rewrite Hp'.
-         apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->.
+         apply (reflectT_iffT (Foc_spec _)) in Htt as ->.
          reflexivity.
     * apply IHpi with (lsa := A :: ls); [ reflexivity | | ]; cbn.
       -- rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
       -- rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
          reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   cbn in Hp1. destruct (partition is_wn l) eqn:Hp. injection Hp1 as [= -> <-].
@@ -684,15 +684,15 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     * apply as_tfr; [ assumption | ].
       eapply IHpi1; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
-      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT (Foc_spec _)) in Htt as ->. reflexivity.
     * eapply IHpi1; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
          reflexivity.
   + destruct (wn_spec B) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec B) as [Htt|Hntt] ].
     * apply wn_tfr.
@@ -700,15 +700,15 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     * apply as_tfr; [ assumption | ].
       eapply IHpi2; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
-      -- cbn. rewrite Hp'. apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+      -- cbn. rewrite Hp'. apply (reflectT_iffT (Foc_spec _)) in Htt as ->. reflexivity.
     * eapply IHpi2; [ reflexivity | | ].
       -- cbn. rewrite Hp.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+         apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
          reflexivity.
       -- cbn. rewrite Hp'.
-         apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+         apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
          reflexivity.
 - assert (ls = nil) as ->.
   { clear - Hp. induction l as [|A l IHl] in Hp, lw |- *; cbn in Hp.
@@ -724,14 +724,14 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
   + apply as_tfr; [ assumption | ].
     apply IHpi with (lsa := A :: nil); [ reflexivity | | ]; cbn.
     * rewrite Hp.
-      apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+      apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
       reflexivity.
-    * apply (reflectT_iffT _ _ (Foc_spec _)) in Htt as ->. reflexivity.
+    * apply (reflectT_iffT (Foc_spec _)) in Htt as ->. reflexivity.
   + apply IHpi with (lsa := A :: nil); [ reflexivity | | ]; cbn.
     * rewrite Hp.
-      apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+      apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
       reflexivity.
-    * apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+    * apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
       reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   assert (partition is_Foc lsa = (lsa, nil)) as Hp'.
@@ -760,10 +760,10 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     apply (focd_tfr nil), wk_tfr, unfoc_tfr; [ now intros ? ->; apply Hntt; right | assumption | ].
     cbn in IHpi. eapply IHpi with (lsa := A :: l1); [ reflexivity | | ].
     * rewrite Hp.
-      apply (reflectT_iffT _ _ (reflectT_neg _ _ (wn_spec _))), negb_true_iff in Hnwn as ->.
+      apply (reflectT_iffT (reflectT_neg (wn_spec _))), negb_true_iff in Hnwn as ->.
       reflexivity.
     * cbn. rewrite Hp2.
-      apply (reflectT_iffT _ _ (reflectT_neg _ _ (Foc_spec _))), negb_true_iff in Hntt as ->.
+      apply (reflectT_iffT (reflectT_neg (Foc_spec _))), negb_true_iff in Hntt as ->.
       reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= Heq <-].

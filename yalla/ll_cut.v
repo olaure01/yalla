@@ -133,7 +133,7 @@ intros Hgax IHcut l' L pi;
     destruct p; destruct l'; inversion Heq; destruct n; cbn in H0; inversion H0;
       destruct l'; destr_eq H1; destruct l'; discriminate.
 - destruct (PCPermutation_Type_app_flat_map _ (fun p => wn_n p (wn A)) (map wn lw) _ _ _ p)
-      as [[L' l''] (Hnil' & -> & HPL')].
+      as [[L' l''] Hnil' [-> HPL']].
     eapply ex_r; [ | apply HPL' ].
     apply IHpi. reflexivity.
 - assert (injective (@wn atom)) as Hinj by (intros x y [= ->]; reflexivity).

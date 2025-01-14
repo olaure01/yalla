@@ -1,6 +1,6 @@
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-From OLlibs Require Import infinite List_more Permutation_Type GPermutation_Type Dependent_Forall_Type.
+From OLlibs Require Import funtheory infinite List_more Permutation_Type GPermutation_Type Dependent_Forall_Type.
 From Yalla Require Export ll_def.
 
 Set Implicit Arguments.
@@ -14,24 +14,20 @@ Notation formula := (@formula atom).
 (** ** Substitutions *)
 
 (** Parallel substitution in [formula] with distinguished substitution for positive and negative atoms *)
-Fixpoint psubs2 (sl sr : atom -> formula) (A : formula) :=
-match A with
-| var x     => sl x
-| covar x   => dual (sr x)
-| one       => one
-| bot       => bot
-| tens A B  => tens (psubs2 sl sr A) (psubs2 sl sr B)
-| parr A B  => parr (psubs2 sl sr A) (psubs2 sl sr B)
-| zero      => zero
-| top       => top
+Fixpoint psubs2 (sl sr : atom -> formula) C :=
+match C with
+| var x => sl x
+| covar x => dual (sr x)
+| one | bot | zero | top => C
+| tens A B => tens (psubs2 sl sr A) (psubs2 sl sr B)
+| parr A B => parr (psubs2 sl sr A) (psubs2 sl sr B)
 | aplus A B => aplus (psubs2 sl sr A) (psubs2 sl sr B)
 | awith A B => awith (psubs2 sl sr A) (psubs2 sl sr B)
-| oc A      => oc (psubs2 sl sr A)
-| wn A      => wn (psubs2 sl sr A)
+| oc A => oc (psubs2 sl sr A)
+| wn A => wn (psubs2 sl sr A)
 end.
 
-Lemma psubs2_ext sl1 sr1 sl2 sr2 A : (forall x, sl1 x = sl2 x) -> (forall x, sr1 x = sr2 x) ->
-  psubs2 sl1 sr1 A = psubs2 sl2 sr2 A.
+Lemma psubs2_ext sl1 sr1 sl2 sr2 A : sl1 ~ sl2 -> sr1 ~ sr2 -> psubs2 sl1 sr1 A = psubs2 sl2 sr2 A.
 Proof. intros He1 He2. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? He1, ? He2; reflexivity. Qed.
 
 Lemma psubs2_dual sl sr A : psubs2 sr sl (dual A) = dual (psubs2 sl sr A).
@@ -41,7 +37,7 @@ Lemma psubs2_var A : psubs2 var var A = A.
 Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2; reflexivity. Qed.
 
 Lemma psubs2_comp rl rr sl sr A :
-  psubs2 rl rr (psubs2 sl sr A) = psubs2 (fun x => psubs2 rl rr (sl x)) (fun x => psubs2 rr rl (sr x)) A.
+  psubs2 rl rr (psubs2 sl sr A) = psubs2 (compose (psubs2 rl rr) sl) (compose (psubs2 rr rl) sr) A.
 Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? psubs2_dual; reflexivity. Qed.
 
 (** basic operation for substitution of atoms *)
@@ -77,7 +73,7 @@ Lemma subs_psubs2 C x A : subs C x A = psubs2 (fun y => repl_at y x C) (fun y =>
 Proof. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2; reflexivity. Qed.
 
 Lemma subs_refl x A : subs (var x) x A = A.
-Proof. rewrite subs_psubs2, (psubs2_ext _ _ var var); [ apply psubs2_var | | ]; intro; apply repl_at_diag. Qed.
+Proof. rewrite subs_psubs2, (@psubs2_ext _ _ var var); [ apply psubs2_var | | ]; intro; apply repl_at_diag. Qed.
 
 Lemma subs_dual A C x : subs C x (dual A) = dual (subs C x A).
 Proof. rewrite ? subs_psubs2, psubs2_dual. reflexivity. Qed.

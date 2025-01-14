@@ -101,8 +101,8 @@ Definition exp (m : exp_mod) A := fold_right (fun b : bool => if b then wn else 
 (** Orthogonal / dual of a [formula] *)
 
 (** (the dual of [tens] and [parr] is the one compatible with non-commutative systems) *)
-Fixpoint dual A :=
-match A with
+Fixpoint dual C :=
+match C with
 | var x => covar x
 | covar x => var x
 | one => bot
