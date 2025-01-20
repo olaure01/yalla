@@ -1,6 +1,7 @@
 -R ollibs Yalla.OLlibs
 -R microyalla Yalla.MicroYalla
 -R yalla Yalla
+-R addendum Yalla.Addendum
 
 ollibs/AFC.v
 ollibs/Bool_more.v
@@ -70,3 +71,5 @@ yalla/nn_prop.v
 yalla/subs.v
 yalla/tl.v
 yalla/yalla_ax.v
+
+addendum
