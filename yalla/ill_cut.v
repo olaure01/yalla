@@ -971,7 +971,7 @@ provability is preserved if we remove the cut rule. *)
 Lemma cut_admissible_ill P (HatN : noN_iax P) (Hat : atomic_iax P) (Hcut : icut_closed P) l C :
   ill P l C -> @ill preiatom (cutrm_ipfrag P) l C.
 Proof.
-intros pi. induction pi; try (econstructor; eassumption).
+intro pi. induction pi; try (econstructor; eassumption).
 - eapply cut_ir_gax; [ assumption | | | eassumption .. ].
   + intros a Hcut'. split.
     * apply Hat.
@@ -1007,7 +1007,7 @@ Proof. now intros pi1 pi2; apply cut_ir_axfree with A. Qed.
 
 Lemma cut_ill_admissible l C : ill (cutupd_ipfrag ipfrag_ill ipcut_all) l C -> ill_ll l C.
 Proof.
-intros pi. induction pi; try (econstructor; eassumption).
+intro pi. induction pi; try (econstructor; eassumption).
 - apply cut_ill_ir with A; assumption.
 - destruct a.
 Qed.

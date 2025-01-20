@@ -65,6 +65,8 @@ Definition no_ax P := notT (projT1 (pgax P)).
 
 Definition atomic_ax P := forall a, Forall_inf atomic (projT2 (pgax P) a).
 
+Definition gax_excludes P A := forall a, notT (In_inf A (projT2 (pgax P) a)).
+
 Definition full_cut P := forall C, pcut P C = true.
 
 Definition no_cut P := forall C, pcut P C = false.
@@ -597,8 +599,7 @@ Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
 
 (** ** Reversibility statements *)
 
-Lemma bot_rev P (Hgax : forall a, notT (In_inf bot (projT2 (pgax P) a))) l1 l2 :
-  ll P (l1 ++ bot :: l2) -> ll P (l1 ++ l2).
+Lemma bot_rev P (Hgax : gax_excludes P bot) l1 l2 : ll P (l1 ++ bot :: l2) -> ll P (l1 ++ l2).
 Proof.
 intro pi. remember (l1 ++ bot :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
@@ -641,11 +642,10 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (@cut_r _ A f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a).
-  rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma parr_rev P A B (Hgax : forall a, notT (In_inf (parr A B) (projT2 (pgax P) a))) l1 l2 :
+Lemma parr_rev P A B (Hgax : gax_excludes P (parr A B)) l1 l2 :
   ll P (l1 ++ parr A B :: l2) -> ll P (l1 ++ A :: B :: l2).
 Proof.
 intro pi. remember (l1 ++ parr A B :: l2) as l eqn:Heql.
@@ -690,11 +690,10 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a).
-  rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma with_rev1 P A B (Hgax : forall a, notT (In_inf (awith A B) (projT2 (pgax P) a))) l1 l2 :
+Lemma with_rev1 P A B (Hgax : gax_excludes P (awith A B)) l1 l2 :
   ll P (l1 ++ awith A B :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
 intro pi. remember (l1 ++ awith A B :: l2) as l eqn:Heql.
@@ -738,11 +737,10 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a).
-  rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma with_rev2 P A B (Hgax : forall a, notT (In_inf (awith B A) (projT2 (pgax P) a))) l1 l2 :
+Lemma with_rev2 P A B (Hgax : gax_excludes P (awith B A)) l1 l2 :
   ll P (l1 ++ awith B A :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
 intro pi. remember (l1 ++ awith B A :: l2) as l eqn:Heql.
@@ -786,12 +784,10 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a).
-  rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma oc_rev P A (Hgax : forall a, notT (In_inf (oc A) (projT2 (pgax P) a))) l1 l2 :
-  ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
+Lemma oc_rev P A (Hgax : gax_excludes P (oc A)) l1 l2 : ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
 intro pi. remember (l1 ++ oc A :: l2) as l eqn:Heql.
 induction pi using ll_nested_ind in l1, l2, Heql |- *;
@@ -835,14 +831,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a).
-  rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma one_rev P (Hgax : forall a, notT (In_inf one (projT2 (pgax P) a))) l0 (pi0 : ll P l0) l1 l2 :
-  ll P (l1 ++ one :: l2) -> ll P (l1 ++ l0 ++ l2).
+Lemma one_rev P (Hgax : gax_excludes P one) l1 l2 :
+  ll P (l1 ++ one :: l2) -> forall l0, ll P l0 -> ll P (l1 ++ l0 ++ l2).
 Proof.
-intro pi. remember (l1 ++ one :: l2) as l eqn:Heql.
+intros pi l0 pi0. remember (l1 ++ one :: l2) as l eqn:Heql.
 induction pi in l1, l2, Heql |- * using ll_nested_ind;
   try (destruct l1; destr_eq Heql; subst; (try assumption);
        list_simpl; constructor; rewrite ? app_comm_cons;
@@ -889,7 +884,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
 - contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma zero_rev P (Hgax : forall a, notT (In_inf zero (projT2 (pgax P) a))) l1 l2 :
+Lemma zero_rev P (Hgax : gax_excludes P zero) l1 l2 :
   ll P (l1 ++ zero :: l2) -> forall l0, ll P (l1 ++ l0 ++ l2).
 Proof.
 intro pi. remember (l1 ++ zero :: l2) as l eqn:Heql. intro l'.
@@ -936,8 +931,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
 - contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 
-Lemma tens_one_rev P A (Hgax1 : forall a, notT (In_inf one (projT2 (pgax P) a)))
-  (Hgax2 : forall a, notT (In_inf (tens one A) (projT2 (pgax P) a))) l1 l2 :
+Lemma tens_one_rev P A (Hgax1 : gax_excludes P one) (Hgax2 : gax_excludes P (tens one A)) l1 l2 :
   ll P (l1 ++ tens one A :: l2) -> ll P (l1 ++ A :: l2).
 Proof.
 intros pi. remember (l1 ++ tens one A :: l2) as l eqn:Heql.
@@ -971,7 +965,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     refine (Dependent_Forall_inf_forall_formula _ _ X i _ _ eq_refl).
 - rewrite app_comm_cons in Heql. dichot_elt_app_inf_exec Heql; subst.
   + destruct l1; destr_eq Heql0; subst.
-    * rewrite <- (app_nil_l _) in pi1. eapply (one_rev Hgax1 pi2) in pi1. assumption.
+    * rewrite <- (app_nil_l _) in pi1. apply (one_rev Hgax1 _ _ pi1 pi2).
     * rewrite <- app_comm_cons, (app_comm_cons l), app_assoc. apply tens_r; [ assumption | ].
       rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply tens_r; [ | assumption ].
@@ -1009,7 +1003,7 @@ induction pi in Heq |- * using ll_nested_ind; subst; try (now inversion Heq).
 - injection Heq as [= -> -> [-> ->]%app_eq_nil].
   split; assumption.
 - rewrite Hcut in f. discriminate f.
-- exfalso. exact (Hgax a Heq).
+- contradiction (Hgax a Heq).
 Qed.
 
 Lemma plus_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = aplus A B :: nil)) (Hcut : no_cut P) :
@@ -1036,7 +1030,7 @@ induction pi in Heq |- * using ll_nested_ind; subst; try (now inversion Heq).
 - injection Heq as [= -> -> ->]. left. assumption.
 - injection Heq as [= -> -> ->]. right. assumption.
 - rewrite Hcut in f. discriminate f.
-- exfalso. exact (Hgax a Heq).
+- contradiction (Hgax a Heq).
 Qed.
 
 Lemma wn_n_rev P A n (Hgax : forall a k, notT (projT2 (pgax P) a = repeat (wn A) k)) (Hcut : no_cut P) :
@@ -1073,7 +1067,7 @@ induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; destr_eq 
 - destruct n; destr_eq Heql. subst.
   exact (IHpi (S (S n)) eq_refl).
 - rewrite Hcut in f. discriminate f.
-- exfalso. exact (Hgax a _ Heql).
+- contradiction (Hgax a _ Heql).
 Qed.
 
 Lemma wn_rev P A (Hgax : forall a k, notT (projT2 (pgax P) a = repeat (wn A) k)) (Hcut : no_cut P) :
@@ -1107,7 +1101,7 @@ Lemma munit_smp_map_wn l1 l2 : Forall2_inf munit_smp (map wn l1) l2 ->
 Proof.
 induction l1 in l2 |- *; intros HF; inversion HF; subst.
 - exists nil; constructor.
-- inversion X; subst.
+- inversion X. subst.
   apply IHl1 in X0 as [ l'' -> HF' ].
   exists (B :: l''); constructor; assumption.
 Qed.
@@ -1168,7 +1162,7 @@ intros pi. induction pi using ll_nested_ind; intros l2' HF;
     { intros a Hone.
       eapply Forall_inf_forall in Hone; [ | apply Hgax].
       inversion Hone. }
-    rewrite <- (app_nil_l _) in HF1; eapply (one_rev Hgax1 HF2) in HF1; assumption.
+    rewrite <- (app_nil_l _) in HF1. apply (one_rev Hgax1 _ _ HF1 HF2).
 - inversion_clear HF as [ | ? ? ? ? Hm HF' ].
   inversion Hm; subst.
   + constructor; apply IHpi; constructor; try constructor; assumption.

@@ -18,32 +18,32 @@ Section Cut_Elim_Proof.
 
 Context {P : @pfrag atom}.
 
-Lemma cut_oc_comm A l1 l2 l3 l4 : (forall a l1 l2, projT2 (pgax P) a <> l1 ++ oc A :: l2) ->
+Lemma cut_oc_comm A l1 l2 l3 l4 (Hgax : gax_excludes P (oc A)) :
   forall pi : ll P (l3 ++ oc A :: l4),
-  (forall lw (pi' : ll P (A :: map wn lw)), psize pi' < psize pi -> ll P (l1 ++ map wn lw ++ l2)) ->
-  ll P (l1 ++ l4 ++ l3 ++ l2).
+  (forall lw (pi' : ll P (A :: map wn lw)), psize pi' < psize pi ->
+  ll P (l1 ++ map wn lw ++ l2)) -> ll P (l1 ++ l4 ++ l3 ++ l2).
 Proof.
-intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
-  induction pi using ll_nested_ind in l3, l4, Heql, IH |- *; try inversion Heql as [Heql']; subst;
-  cbn in IH;
-  try (destruct l3; destr_eq Heql'; subst;
-       eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl;
-       constructor;
-       (rewrite ? app_comm_cons; eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl;
-       rewrite ? app_comm_cons;
-         try (apply IHpi; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ]);
-         try (apply IHpi1; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ]);
-         (try apply IHpi2;  [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ])));
-  try now do 3 (destruct l3; inversion Heql).
+intros pi IH. remember (l3 ++ oc A :: l4) as l eqn:Heql.
+induction pi using ll_nested_ind in l3, l4, Heql, IH |- *; try inversion Heql as [Heql']; subst;
+cbn in IH;
+try (destruct l3; destr_eq Heql'; subst;
+     eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl;
+     constructor;
+     (rewrite ? app_comm_cons; eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl;
+     rewrite ? app_comm_cons;
+       try (apply IHpi; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ]);
+       try (apply IHpi1; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ]);
+       (try apply IHpi2;  [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ])));
+try now do 3 (destruct l3; inversion Heql).
 - apply PCPermutation_Type_vs_elt_subst in p as [[l3' l4'] HP ->].
-  specialize (HP (l2 ++ l1)); list_simpl in HP.
+  specialize (HP (l2 ++ l1)). list_simpl in HP.
   assert (PCPermutation_Type (pperm P) (l1 ++ l4' ++ l3' ++ l2) (l1 ++ l4 ++ l3 ++ l2)) as HP'.
   { etransitivity; [ rewrite app_assoc; apply PCPermutation_Type_app_rot | ].
     etransitivity; [ | apply PCPermutation_Type_app_rot ].
     list_simpl; symmetry; assumption. }
   refine (ex_r _ _ _ HP').
-  apply IHpi;  [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ].
-- symmetry in Heql'; trichot_elt_app_inf_exec Heql'; subst.
+  apply IHpi; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ].
+- symmetry in Heql'. trichot_elt_app_inf_exec Heql'; subst.
   + list_simpl. rewrite app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. rewrite (app_assoc l), (app_assoc _ l5).
@@ -113,7 +113,7 @@ intros Hgax pi IH; remember (l3 ++ oc A :: l4) as l eqn:Heql;
     apply (cut_r _ f); [ list_simpl | assumption ].
     rewrite app_comm_cons; eapply ex_r; [ | apply PCPermutation_Type_app_rot ]; list_simpl.
     rewrite app_comm_cons; apply IHpi1; [ reflexivity | intros ? pi' Hs; apply (IH _ pi'); lia ].
-- contradiction (Hgax _ _ _ Heql).
+- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
 Qed.
 Arguments cut_oc_comm : clear implicits.
 
@@ -322,8 +322,8 @@ intros Hgax IHcut l' L pi;
     induction k as [|k IH]; [ | apply oc_r ]; assumption.
   + rewrite app_comm_cons, app_assoc; eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; rewrite app_assoc.
     apply IHL; try assumption.
-    * cbn in pi; rewrite wn_n_wn in pi; list_simpl; assumption.
-    * intros _; apply Hoc; intros Heq; inversion Heq.
+    * cbn in pi. rewrite wn_n_wn in pi. list_simpl. assumption.
+    * intros _. apply Hoc. intros [=].
 Qed.
 
 Variable P_gax_cut : forall a C l1 l2,
@@ -331,9 +331,9 @@ Variable P_gax_cut : forall a C l1 l2,
     atomic C
   * forall b l3 l4, projT2 (pgax P) b = l3 ++ dual C :: l4 -> { c | projT2 (pgax P) c = l3 ++ l2 ++ l1 ++ l4 }.
 
-Lemma oc_notin_gax A (Hcut : pcut P (oc A) = false) a l1 l2 : projT2 (pgax P) a <> l1 ++ oc A :: l2.
+Lemma oc_notin_gax A (Hcut : pcut P (oc A) = false) : gax_excludes P (oc A).
 Proof using P_gax_cut.
-intros Ha. specialize (P_gax_cut _ _ _ _ Ha).
+intros a [(l1, l2) Ha]%in_inf_split. specialize (P_gax_cut _ _ _ _ Ha).
 destruct (pcut P (oc A)); [ discriminate Hcut | ].
 destruct (P_gax_cut eq_refl) as [Hgax _]. inversion Hgax.
 Qed.

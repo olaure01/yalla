@@ -3661,7 +3661,7 @@ Qed.
 Lemma ll_to_ill_oclpam_axfree P (P_perm : ipperm P = true) (P_axfree : no_iax P) l C :
   Forall_inf oclpam (C :: l) -> ll (i2pfrag P) (ill2ll C :: rev (map dual (map ill2ll l))) -> ill P l C.
 Proof.
-intros Hoclm pi .
+intros Hoclm pi.
 apply cut_admissible_axfree in pi; [ | assumption ].
 apply (stronger_pfrag _ _ (cutrm_i2pfrag P)) in pi.
 eapply ll_to_ill_oclpam_cutfree in pi; [ | eassumption | | | eassumption | | ].

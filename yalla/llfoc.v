@@ -84,9 +84,9 @@ destruct x; intros HnF;
   try (now exfalso; apply HnF; left; right; eexists);
   try (now exfalso; apply HnF; right; eexists).
 - left. left. left. reflexivity.
-- left. left. right. exists (x1,x2). reflexivity.
+- left. left. right. eexists (_, _). reflexivity.
 - left. right. reflexivity.
-- right. exists (x1,x2). reflexivity.
+- right. eexists (_, _). reflexivity.
 Qed.
 
 Lemma not_wFocl l : notT (Forall_inf wFoc l) ->
