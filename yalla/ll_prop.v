@@ -143,11 +143,7 @@ Variable P_cut : full_cut P.
 
 (** Deduction lemma for linear logic. *)
 Lemma deduction_list lax l :
-  ll (axupd_pfrag P (existT (fun x => x -> _) (sum _ { k | k < length lax })
-                            (fun a => match a with
-                                      | inl x => projT2 (pgax P) x
-                                      | inr x => nth (proj1_sig x) lax one :: nil
-                                      end))) l ->
+  ll (axext_pfrag P (fun x : { k | k < length lax } => nth (proj1_sig x) lax one :: nil)) l ->
   ll P (l ++ map wn (map dual lax)).
 Proof using P_perm.
 induction lax as [ | A lax IHlax ] in l |- *; intros pi.
@@ -156,11 +152,7 @@ induction lax as [ | A lax IHlax ] in l |- *; intros pi.
   cbn. intros [a | [k Hlt]].
   + exists a. reflexivity.
   + exfalso. exact (PeanoNat.Nat.nlt_0_r _ Hlt).
-- remember (axupd_pfrag P (existT (fun x => x -> _) (sum _ { k | k < length lax })
-                                  (fun a => match a with
-                                            | inl x => projT2 (pgax P) x
-                                            | inr x => nth (proj1_sig x) lax one :: nil
-                                            end)))
+- remember (axext_pfrag P (fun x : { k | k < length lax } => nth (proj1_sig x) lax one :: nil))
     as Q eqn:HeqQ.
   cbn. cons2app. rewrite app_assoc.
   apply IHlax.
@@ -185,11 +177,7 @@ Qed.
 
 Lemma deduction_list_inv lax l :
   ll P (l ++ map wn (map dual lax)) ->
-  ll (axupd_pfrag P (existT (fun x => x -> _) (sum _ { k | k < length lax })
-                            (fun a => match a with
-                                      | inl x => projT2 (pgax P) x
-                                      | inr x => nth (proj1_sig x) lax one :: nil
-                                      end))) l.
+  ll (axext_pfrag P (fun x : { k | k < length lax } => nth (proj1_sig x) lax one :: nil)) l.
 Proof using P_perm P_cut.
 induction lax as [|A lax IHlax] in l |- *; intro pi.
 - list_simpl in pi.
@@ -202,15 +190,12 @@ induction lax as [|A lax IHlax] in l |- *; intro pi.
   + cbn. rewrite bidual.
     change nil with (map (@wn atom) nil).
     apply oc_r. cbn.
-    assert ({ b | A :: nil = projT2 (pgax (axupd_pfrag P
-     (existT (fun x => x -> _) (sum _ {k | k < S (length lax)})
-        (fun a0 => match a0 with
-                   | inl x => projT2 (pgax P) x
-                   | inr x => match proj1_sig x with
-                              | 0 => A
-                              | S m => nth m lax one
-                              end :: nil
-                   end)))) b}) as [b Hgax]
+    assert ({ b | A :: nil
+                = projT2 (pgax (axext_pfrag P (fun x : { k | k < S (length lax) } => match proj1_sig x with
+                                                                                     | 0 => A
+                                                                                     | S m => nth m lax one
+                                                                                     end :: nil))) b})
+      as [b Hgax]
       by (clear; cbn; exists (inr (exist _ 0 (le_n_S _ _ (le_0_n _)))); reflexivity).
     rewrite Hgax. apply gax_r.
   + eapply ex_r; [ | apply PCPermutation_Type_sym, PCPermutation_Type_cons_append ].

@@ -172,6 +172,16 @@ Definition cutupd_tpfrag P b := mk_tpfrag b (tpgax P) (tpperm P).
 
 Definition axupd_tpfrag P G := mk_tpfrag (tpcut P) G (tpperm P).
 
+(* apply [f] to each element of [ipgax] *)
+Definition axmodif_tpfrag P f := axupd_tpfrag P ((existT (fun x => x -> _) _ (fun a => f (projT2 (tpgax P) a)))).
+
+(* extend [pgax] with familiy [f] indexed by [T] *)
+Definition axext_tpfrag P T (f : T -> _) := axupd_tpfrag P ((existT (fun x => x -> _) _
+  (fun a => match a with
+            | inl x => projT2 (tpgax P) x
+            | inr x => f x
+            end))).
+
 Definition cutrm_tpfrag P := cutupd_tpfrag P tpcut_none.
 
 Lemma notcut_cutrm P : no_tcut (cutrm_tpfrag P).

@@ -45,10 +45,7 @@ Proof. induction l as [|a l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 (** Substitution in proofs *)
 Lemma subs_ill P A x l C (HN : atN <> x) (Hcut : forall D, Bool.le (ipcut P D) (ipcut P (isubs A x D))) :
   ill P l C ->
-  ill (axupd_ipfrag P (existT (fun x => x -> list iformula * iformula) _
-                              (fun a => (map (isubs A x) (fst (projT2 (ipgax P) a)),
-                                             isubs A x (snd (projT2 (ipgax P) a))))))
-      (map (isubs A x) l) (isubs A x C).
+  ill (axmodif_ipfrag P (fun '(l, D) => (map (isubs A x) l, isubs A x D))) (map (isubs A x) l) (isubs A x C).
 Proof.
 intro pi. induction pi; cbn; rewrite ? map_app;
   try (cbn in IHpi; rewrite ? map_app in IHpi);
@@ -69,7 +66,13 @@ intro pi. induction pi; cbn; rewrite ? map_app;
 - rewrite isubs_ioc in *. apply oc_irr. assumption.
 - refine (cut_ir (isubs A x A0) _ IHpi1 IHpi2).
   eapply Bool.implb_true_iff, f. apply Bool.le_implb, Hcut.
-- refine (gax_ir _).
+- assert ({ b | isubs A x (snd (projT2 (ipgax P) a))
+              = snd (projT2 (ipgax (axmodif_ipfrag P (fun '(l, D) => (map (isubs A x) l, isubs A x D)))) b)
+              & (map (isubs A x) (fst (projT2 (ipgax P) a)))
+              = fst (projT2 (ipgax (axmodif_ipfrag P (fun '(l, D) => (map (isubs A x) l, isubs A x D)))) b) })
+      as [b -> ->]
+      by (exists a; cbn; destruct (projT2 (ipgax P) a); reflexivity).
+  apply gax_ir.
 Qed.
 
 Lemma subs_ill_axfree P (P_axfree : no_iax P) A x

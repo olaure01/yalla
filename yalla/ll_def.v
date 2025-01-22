@@ -105,6 +105,17 @@ Qed.
 (** Same proof fragment as [P] but with value [G] for [pgax]. *)
 Definition axupd_pfrag P G := mk_pfrag (pcut P) G (pmix P) (pperm P).
 
+(* apply [f] to each element of [pgax] *)
+Definition axmodif_pfrag P f := axupd_pfrag P ((existT (fun x => x -> _) _ (fun a => f (projT2 (pgax P) a)))).
+
+(* extend [pgax] with familiy [f] indexed by [T] *)
+Definition axext_pfrag P T (f : T -> _) := axupd_pfrag P ((existT (fun x => x -> _) _
+  (fun a => match a with
+            | inl x => projT2 (pgax P) x
+            | inr x => f x
+            end))).
+
+
 (** Same proof fragment as [P] but with value [b] for [pcut]. *)
 Definition cutupd_pfrag P b := mk_pfrag b (pgax P) (pmix P) (pperm P).
 
@@ -1259,17 +1270,11 @@ induction pi using ll_nested_ind; cbn;
 Qed.
 
 Lemma ax_exp_frag P l P' : ll P' l ->
-  le_pfrag P' (axupd_pfrag P (existT (fun x => x -> _) _ (fun a => match a with
-                                                                   | inl x => projT2 (pgax P) x
-                                                                   | inr x => x :: dual x :: nil
-                                                                   end))) ->
+  le_pfrag P' (axext_pfrag P (fun A => A :: dual A :: nil)) ->
   ll P l.
 Proof.
 intros pi Hlf.
-apply (@ax_gen (axupd_pfrag P (existT (fun x => x -> _) _ (fun a => match a with
-                                                                    | inl x => projT2 (pgax P) x
-                                                                    | inr x => x :: dual x :: nil
-                                                                    end)))); try reflexivity.
+apply (@ax_gen (axext_pfrag P (fun A => A :: dual A :: nil))); try reflexivity.
 - cbn. intros [|]; [ apply gax_r | apply ax_exp ].
 - eapply stronger_pfrag; eassumption.
 Qed.
@@ -1414,20 +1419,17 @@ Qed.
 (** By extending axioms of [P] with [map wn l0],
 one can turn any proof of [l] in [P] into a proof of [l ++ map wn l0]. *)
 Lemma ext_wn P (P_perm : pperm P = true) l l0 : ll P l ->
-  ll (axupd_pfrag P ((existT (fun x => x -> _) _ (fun a => projT2 (pgax P) a ++ map wn l0))))
-     (l ++ map wn l0).
+  ll (axmodif_pfrag P (fun l => l ++ map wn l0)) (l ++ map wn l0).
 Proof.
-intros pi.
-remember (axupd_pfrag P ((existT (fun x => x -> _) _ (fun a => projT2 (pgax P) a ++ map wn l0))))
-  as Q.
-refine (ext_wn_param _ _ _ _ _ pi).
-- rewrite HeqQ. assumption.
-- rewrite HeqQ. intro. reflexivity.
+intro pi. refine (ext_wn_param _ _ _ _ _ pi).
+- assumption.
+- intro. reflexivity.
 - intro a.
-  assert ({ b | projT2 (pgax P) a ++ map wn l0 = projT2 (pgax Q) b}) as [b ->]
+  assert ({ b | projT2 (pgax P) a ++ map wn l0
+              = projT2 (pgax (axmodif_pfrag P (fun l => l ++ map wn l0))) b}) as [b ->]
     by (subst; exists a; reflexivity).
   apply gax_r.
-- intros L P_mix Q_mix. rewrite HeqQ in Q_mix. cbn in Q_mix. rewrite P_mix in Q_mix. discriminate Q_mix.
+- intros L P_mix Q_mix. cbn in Q_mix. rewrite P_mix in Q_mix. discriminate Q_mix.
 Qed.
 
 

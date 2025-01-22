@@ -67,6 +67,16 @@ Qed.
 
 Definition axupd_ipfrag P G := mk_ipfrag (ipcut P) G (ipperm P).
 
+(* apply [f] to each element of [ipgax] *)
+Definition axmodif_ipfrag P f := axupd_ipfrag P ((existT (fun x => x -> _) _ (fun a => f (projT2 (ipgax P) a)))).
+
+(* extend [pgax] with familiy [f] indexed by [T] *)
+Definition axext_ipfrag P T (f : T -> _) := axupd_ipfrag P ((existT (fun x => x -> _) _
+  (fun a => match a with
+            | inl x => projT2 (ipgax P) x
+            | inr x => f x
+            end))).
+
 Definition cutupd_ipfrag P b := mk_ipfrag b (ipgax P) (ipperm P).
 
 Definition cutrm_ipfrag P := cutupd_ipfrag P ipcut_none.

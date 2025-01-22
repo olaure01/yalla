@@ -345,7 +345,7 @@ apply (ex_r (rev l)); [ |  symmetry; apply Permutation_Type_rev ].
 rewrite <- app_nil_l. apply bot_rev; [ intros [] | ]. rewrite app_nil_l.
 apply munit_elim
   with (l1 := map (subs bot x)
-                (ill2ll (ivar (a2i x)) :: rev (map dual (map ill2ll (map (trans (ivar (a2i x))) l))))).
+                  (ill2ll (ivar (a2i x)) :: rev (map dual (map ill2ll (map (trans (ivar (a2i x))) l))))).
 - intros [].
 - eapply (stronger_pfrag (axupd_pfrag pfrag_ll _)), subs_ll.
   + repeat split. intros [].

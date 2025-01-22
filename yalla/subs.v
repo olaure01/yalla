@@ -136,9 +136,7 @@ Proof. rewrite <- (psubs2_var A), <- psubs2_dual. apply psubs2_monot. intro. ll_
 (** Substitution in proofs *)
 
 Lemma subs_ll P A x l (Hcut : forall C, Bool.le (pcut P C) (pcut P (subs A x C))) : ll P l ->
-    ll (axupd_pfrag P (existT (fun x => x -> _) _
-                              (fun a => map (subs A x) (projT2 (pgax P) a))))
-       (map (subs A x) l).
+    ll (axmodif_pfrag P (map (subs A x))) (map (subs A x) l).
 Proof.
 intros pi. induction pi using ll_nested_ind; list_simpl; try (constructor; assumption).
 - ll_swap. apply ax_exp.
