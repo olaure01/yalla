@@ -345,6 +345,8 @@ Definition ll_nested_ind P := fun Pred ax_case ex_case ex_wn_case mix_case one_c
 
 #[export] Instance ll_perm P : Proper ((@PCPermutation_Type _ (pperm P)) ==> arrow) (ll P) | 100.
 Proof. intros l1 l2 HP pi. exact (ex_r _ _ pi HP). Qed.
+#[export] Instance ll_perm_flip P : Proper ((@PCPermutation_Type _ (pperm P)) ==> flip arrow) (ll P) | 100.
+Proof. intros l1 l2 HP pi. symmetry in HP. exact (ex_r _ _ pi HP). Qed.
 
 (* Unused
 Lemma same_pfrag P Q : eq_pfrag P Q -> forall l, ll P l -> ll Q l.
@@ -575,10 +577,8 @@ induction n in l |- *; intros pi.
 - apply bot_r. assumption.
 - destruct n; [ assumption | ].
   apply parr_r.
-  apply ex_r with (parr_n (S n) A :: (l ++ (A :: nil)));
-     [ | symmetry; rewrite PCPermutation_Type_cons_append; reflexivity ].
-  apply IHn, (ex_r _ _ pi).
-  rewrite app_assoc. apply PCPermutation_Type_cons_append.
+  rewrite PCPermutation_Type_cons_append. apply IHn.
+  rewrite app_assoc, <- PCPermutation_Type_cons_append. assumption.
 Qed.
 
 (** Permutation on mix *)
@@ -602,8 +602,7 @@ Ltac ll_swap :=
   end.
 Ltac ll_swap_hyp H :=
   match goal with
-  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ =>
-        eapply ex_r in H; [ | apply PCPermutation_Type_swap ]
+  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ => eapply ex_r in H; [ | apply PCPermutation_Type_swap ]
   end.
 Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
 
@@ -620,9 +619,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
-  specialize (HP' nil). symmetry in HP'.
-  refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' nil). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite app_assoc. apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. apply IHpi. list_simpl. reflexivity.
@@ -667,9 +664,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
-  specialize (HP' (A :: B :: nil)). symmetry in HP'.
-  refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' (A :: B :: nil)). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
@@ -715,8 +710,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
-  specialize (HP' (A :: nil)). symmetry in HP'. refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
@@ -762,8 +756,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
-  specialize (HP' (A :: nil)). symmetry in HP'. refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
@@ -808,8 +801,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
-  specialize (HP' (A :: nil)). symmetry in HP'. refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
@@ -856,8 +848,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l1', l2') HP' ->].
-  specialize (HP' l0). symmetry in HP'. refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' l0). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
     apply IHpi. list_simpl. reflexivity.
@@ -906,8 +897,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l1', l2') HP' ->].
-  specialize (HP' l'). symmetry in HP'. refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' l'). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
     apply IHpi. list_simpl. reflexivity.
@@ -953,8 +943,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutation_Type_vs_elt_subst in p as [(l1', l2') HP' ->].
-  specialize (HP' (A :: nil)). symmetry in HP'. refine (ex_r _ _ _ HP').
-  apply IHpi. reflexivity.
+  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - dichot_elt_app_inf_exec Heql; subst.
   + rewrite app_comm_cons, app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
     apply IHpi. list_simpl. reflexivity.
@@ -1068,7 +1057,8 @@ induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; destr_eq 
   + cbn in Heql. symmetry in Heql. apply repeat_eq_app in Heql as [Hl _]. symmetry in Hl.
     inversion_clear X. exact (X0 _ Hl).
 - destruct n; destr_eq Heql. subst. left.
-  ll_swap. eapply ex_r in pi; [ | apply PCPermutation_Type_cons_append ].
+  rewrite PCPermutation_Type_swap.
+  rewrite PCPermutation_Type_cons_append in pi.
   clear - pi. induction n as [|[|n] IHn].
   + apply wk_r, pi.
   + exact pi.
@@ -1372,12 +1362,12 @@ Lemma ext_wn_param P Q (Q_perm : pperm Q = true) (Hcut: forall A, Bool.le (pcut 
 Proof.
 intros pi.
 induction pi using ll_nested_ind; try (now constructor).
-- eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
+- rewrite PCPermutation_Type_app_comm.
   apply wk_list_r, ax_r.
 - eapply ex_r; [ eassumption | ].
   apply PCPermutation_Permutation_Type in p.
   rewrite Q_perm.
-  apply Permutation_Type_app_tail; assumption.
+  apply Permutation_Type_app_tail. assumption.
 - list_simpl.
   eapply ex_wn_r; [ | eassumption ].
   rewrite app_assoc in IHpi. rewrite 2 app_assoc. assumption.
@@ -1439,7 +1429,7 @@ Lemma weak_consistency_no_dual_proofs_ll P (Hcut : full_cut P) :
   iffT (ll P nil) { A & ll P (A :: nil) & ll P (dual A :: nil) }.
 Proof.
 split.
-- intros pi. exists one; constructor. exact pi.
+- intro pi. exists one; constructor. exact pi.
 - intros [A pi1 pi2]. rewrite <- app_nil_r. exact (cut_r _ (Hcut A) pi2 pi1).
 Qed.
 
@@ -1484,7 +1474,6 @@ Ltac ll_swap :=
   end.
 Ltac ll_swap_hyp H :=
   match goal with
-  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ =>
-        eapply ex_r in H; [ | apply PCPermutation_Type_swap ]
+  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ => eapply ex_r in H; [ | apply PCPermutation_Type_swap ]
   end.
 Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
