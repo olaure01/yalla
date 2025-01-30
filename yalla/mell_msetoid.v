@@ -147,7 +147,7 @@ intro pi. induction pi;
     unfold sum, list2fm.
     cbn; rewrite fold_id.
     apply Permutation_Type_app_comm.
-- rewrite fold_id, mell2ll_map_wn.
+- unfold list2fm. rewrite fold_id, mell2ll_map_wn.
   unfold elts, add, fmmap, list2fm in IHpi. cbn in IHpi.
   rewrite fold_id, mell2ll_map_wn in IHpi.
   apply ll_def.oc_r. assumption.
@@ -187,9 +187,9 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
   destruct f; destr_eq Heql. subst.
   apply mell2ll_map_wn_inv in H as [m' [-> ->]].
   replace (oc f :: map wn m')
-     with (add (oc f) (fmmap wn m')) by (cbn; rewrite fold_id; reflexivity).
+     with (add (oc f) (fmmap wn m')) by (unfold fmmap, list2fm; cbn; rewrite fold_id; reflexivity).
   apply oc_r, IHpi.
-  cbn. rewrite fold_id, mell2ll_map_wn. reflexivity.
+  cbn. unfold list2fm. rewrite fold_id, mell2ll_map_wn. reflexivity.
 - destruct a.
 Qed.
 
