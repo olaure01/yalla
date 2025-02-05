@@ -357,7 +357,7 @@ induction pi; intros HF HC l1' l2' HP.
   + intros D [=].
 - assert (HP' := HP).
   symmetry in HP'. apply Permutation_Type_vs_elt_inv in HP' as [(l', l'') Heq].
-  dichot_elt_app_inf_exec Heq; subst.
+  decomp_elt_eq_app Heq; subst.
   + apply ex_otr with ((l' ++ l0 ++ map toc (map tneg l2')) ++ tneg A :: nil);
     [ | list_simpl; apply Permutation_Type_app_head; rewrite app_assoc; symmetry;
         apply Permutation_Type_cons_app; list_simpl; reflexivity ].
@@ -418,17 +418,18 @@ induction pi; intros HF HC l1' l2' HP.
       destruct X as [D' HD'].
       eexists. etransitivity; [ | apply HD'].
       constructor; constructor.
-    * list_simpl; list_simpl in HP.
+    * list_simpl. list_simpl in HP.
       apply Permutation_Type_app_inv in HP.
       apply Permutation_Type_elt. assumption.
 - symmetry in HP. apply Permutation_Type_map_inv in HP as [l3 Heq HP].
+  remember (map tneg l2') as l2't.
   decomp_map Heq eqn:Hn. subst.
-  assert (l2' = nil) as -> by (destruct l2'; [ reflexivity | destruct l1; discriminate Hn ]).
+  assert (l2' = nil) as -> by (destruct l2'; [ reflexivity | destruct l2't; discriminate Hn ]).
   list_simpl.
   destruct (HC (toc A) (eq_refl _)) as [A' HC'].
   destruct (tsubform_toc_ntrans _ HC') as [A'' ->].
   apply oc_otrr.
-  destruct l1; destr_eq Hn.
+  destruct l2't; destr_eq Hn.
   replace (map toc l1') with (map toc l1' ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
   apply neg_rev_ot.
   apply IHpi; [ Forall_inf_solve | | ].

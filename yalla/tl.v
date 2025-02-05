@@ -398,12 +398,12 @@ induction pi;
   + symmetry. assumption.
 - apply PEPermutation_Type_map_inv in p as [l0 -> HP]. symmetry in HP.
   eapply ex_tr; [ apply IHpi; reflexivity | assumption ].
-- decomp_map Heql eqn:Heq. subst.
+- remember (map ioc lw') as l0. decomp_map Heql eqn:Heq. subst.
   symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP]. symmetry in HP.
   eapply ex_oc_tr; [ | eassumption ].
   apply IHpi; [ rewrite <- tl2ill_map_ioc, <- ? map_app | ]; reflexivity.
-- decomp_map Heql eqn:Heq. subst.
+- remember (map ioc lw') as l0. decomp_map Heql eqn:Heq. subst.
   symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP].
   symmetry in HP.

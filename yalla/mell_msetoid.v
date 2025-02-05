@@ -165,7 +165,8 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
   eapply ex_r.
   + apply IHpi. reflexivity.
   + symmetry. assumption.
-- decomp_map Heql eqn:Heq. symmetry in Heq. apply mell2ll_map_wn_inv in Heq as [l [-> ->]].
+- remember (map formulas.wn lw') as l0. decomp_map Heql eqn:Heq.
+  symmetry in Heq. apply mell2ll_map_wn_inv in Heq as [l [-> ->]].
   apply Permutation_Type_map_inv in p as [l' -> HP].
   cbn in Heql. unfold id in Heql. subst.
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ? map_app; reflexivity | ].

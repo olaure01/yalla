@@ -27,7 +27,7 @@ induction pi in Heql, HeqC |- *; inversion Heql; inversion HeqC; subst;
 - apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
   symmetry in p. apply Permutation_Type_nil in p as ->.
   apply IHpi; reflexivity.
-- rewrite app_assoc in Heql. symmetry in Heql. nil_vs_elt_inv Heql.
+- rewrite app_assoc in Heql. symmetry in Heql. decomp_nil_eq_elt Heql.
 - contradiction (Hgax a).
 Qed.
 

@@ -367,9 +367,8 @@ Qed.
 
 Lemma llpolfrag2llpol l : ll_def.ll pfrag_ll (map llpol2ll l) -> llpol l.
 Proof.
-intros pi.
-remember (map llpol2ll l) as l0.
-revert l Heql0; induction pi; intros l' Heql0; subst;
+intro pi. remember (map llpol2ll l) as l0 eqn:Heql0.
+revert l Heql0. induction pi; intros l' Heql0; subst;
   try (now (destruct l'; inversion Heql0;
             destruct f; inversion H0;
               [ destruct p | destruct n ]; inversion H0; subst;
@@ -382,7 +381,8 @@ revert l Heql0; induction pi; intros l' Heql0; subst;
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' -> HP]. symmetry in HP.
   eapply ex_r; [ | eassumption ].
   apply IHpi. reflexivity.
-- decomp_map Heql0 eqn:Heq. subst.
+- remember (map formulas.wn lw') as l0.
+  decomp_map Heql0 eqn:Heq. subst.
   symmetry in Heq. apply llpol2ll_map_wn_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP].
   apply (Permutation_Type_map wn), (Permutation_Type_map neg) in HP.
@@ -508,7 +508,7 @@ destruct Hi' as [ (l0 & Hi') | ((l0 & P) & Hi') ].
   left; eexists; reflexivity.
 - assert (Hi'' := Hi').
   apply Permutation_Type_vs_cons_inv in Hi' as ((l3 & l4) & Heq).
-  dichot_elt_app_inf_exec Heq; subst.
+  decomp_elt_eq_app Heq; subst.
   + list_simpl in Hi''.
     symmetry in Hi''.
     apply Permutation_Type_cons_app_inv in Hi''.
@@ -636,7 +636,7 @@ induction pi in P', Q', l' |- *; intros HP.
   destruct l2; destr_eq Heq. destruct l2; destr_eq H. subst.
   rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
   apply IHpi in HP as [[[N l0] l1] Heq' Htop].
-  dichot_elt_app_inf_exec Heq'; subst.
+  decomp_elt_eq_app Heq'; subst.
   + now exists (N, l0, l4 ++ neg bot :: l3); list_simpl.
   + now exists (N, l2 ++ neg bot :: l4, l1); list_simpl.
 - assert (HP' := HP).
@@ -648,7 +648,7 @@ induction pi in P', Q', l' |- *; intros HP.
     apply Permutation_Type_vs_cons_inv in HP' as [(l3, l4) Heq'].
     rewrite Heq' in HP. symmetry in HP.
     apply Permutation_Type_cons_app_inv in HP.
-    dichot_app_inf_exec Heq';
+    decomp_app_eq_app Heq';
       [ | destruct l; destr_eq Heq'1; list_simpl in Heq'1 ]; subst.
     * list_simpl in HP.
       assert (Permutation_Type (pos Q :: l ++ pos Q' :: l4)
@@ -675,7 +675,7 @@ induction pi in P', Q', l' |- *; intros HP.
       apply Permutation_Type_cons_app_inv in HP.
       list_simpl in HP.
       destruct (Permutation_Type_vs_cons_inv HP) as [(l4, l5) Heq'].
-      dichot_app_inf_exec Heq';
+      decomp_app_eq_app Heq';
         [ | destruct l; destr_eq Heq'1; list_simpl in Heq'1 ]; subst.
       -- symmetry in HP. rewrite app_assoc in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
          assert (Permutation_Type (pos Q :: l ++ pos P' :: l5)
@@ -701,7 +701,7 @@ induction pi in P', Q', l' |- *; intros HP.
       apply Permutation_Type_cons_app_inv in HP.
       list_simpl in HP.
       destruct (Permutation_Type_vs_cons_inv HP) as [(l4, l5) Heq'].
-      dichot_app_inf_exec Heq'; subst.
+      decomp_app_eq_app Heq'; subst.
       -- assert (Permutation_Type (pos Q :: l ++ pos P' :: l5)
                                   (pos Q :: pos P' :: l ++ l5)) as HP'
            by (symmetry; apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity).
@@ -710,7 +710,7 @@ induction pi in P', Q', l' |- *; intros HP.
          list_simpl in HP. rewrite Heq', app_assoc in HP.
          apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
          destruct l8; inversion Heq''.
-         dichot_app_inf_exec H2;
+         decomp_app_eq_app H2;
            [ | destruct l0; destr_eq Heq''; list_simpl in H3 ]; subst.
          ++ now exists (N, l2' ++ pos (tens P Q) :: l0, l9); list_simpl.
          ++ now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
@@ -721,7 +721,7 @@ induction pi in P', Q', l' |- *; intros HP.
             list_simpl in HP. symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
             rewrite app_assoc in HP. apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
             destruct l8; inversion Heq''. subst.
-            dichot_app_inf_exec H3;
+            decomp_app_eq_app H3;
               [ | destruct l; destr_eq H2; list_simpl in H2 ]; subst.
             ** now exists (N, l2' ++ pos (tens P Q) :: l, l9); list_simpl.
             ** now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
@@ -734,7 +734,7 @@ induction pi in P', Q', l' |- *; intros HP.
             rewrite app_assoc, Heq' in HP. list_simpl in HP.
             apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
             destruct l8; inversion Heq''.
-            dichot_app_inf_exec H2;
+            decomp_app_eq_app H2;
               [ | destruct l0; destr_eq H3; list_simpl in H3 ]; subst.
             ** now exists (N, l2' ++ pos (tens P Q) :: l0, l9); list_simpl.
             ** now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
@@ -747,7 +747,7 @@ induction pi in P', Q', l' |- *; intros HP.
   apply (Permutation_Type_cons_app _ _ (neg M)) in HP.
   apply (Permutation_Type_cons_app _ _ (neg N)) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
-  dichot_elt_app_inf_exec Heq'; subst.
+  decomp_elt_eq_app Heq'; subst.
   + destruct l4; destr_eq Heq'1; subst.
     * exists (parr N N', l2, l1); list_simpl; [ reflexivity | ].
       apply par_rs; assumption.
@@ -776,7 +776,7 @@ induction pi in P', Q', l' |- *; intros HP.
     * rewrite 2 app_comm_cons in HP.
       apply Permutation_Type_cons_app_inv, (Permutation_Type_cons_app _ _ (pos P)) in HP.
       list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
-      dichot_elt_app_inf_exec Heq'; subst.
+      decomp_elt_eq_app Heq'; subst.
       -- now exists (N', l2 ++ pos (aplus P Q) :: l4, l1); list_simpl.
       -- destruct l4; destr_eq Heq'1; subst.
          now exists (N', l0, l4 ++ pos (aplus P Q) :: l3); list_simpl.
@@ -798,7 +798,7 @@ induction pi in P', Q', l' |- *; intros HP.
       apply Permutation_Type_cons_app_inv, (Permutation_Type_cons_app _ _ (pos P)) in HP.
       list_simpl in HP.
       apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
-      dichot_elt_app_inf_exec Heq'; subst.
+      decomp_elt_eq_app Heq'; subst.
       -- now exists (N', l2 ++ pos (aplus Q P) :: l4, l1); list_simpl.
       -- destruct l4; destr_eq Heq'1; subst.
          now exists (N', l0, l4 ++ pos (aplus Q P) :: l3); list_simpl.
@@ -810,10 +810,10 @@ induction pi in P', Q', l' |- *; intros HP.
   assert (HP2 := (Permutation_Type_cons_app _ _ (neg M) HP)).
   list_simpl in HP1. apply IHpi1 in HP1 as [[[N' l0] l1] Heq' Htop].
   list_simpl in HP2. apply IHpi2 in HP2 as [[[M' l0'] l1'] Heq'' Htop'].
-  dichot_elt_app_inf_exec Heq'; subst.
+  decomp_elt_eq_app Heq'; subst.
   + now exists (N', l2 ++ neg (awith N M) :: l4, l1); list_simpl.
   + destruct l4; destr_eq Heq'1; subst.
-    * list_simpl in Heq''. dichot_elt_app_inf_exec Heq''; subst.
+    * list_simpl in Heq''. decomp_elt_eq_app Heq''; subst.
       -- now exists (M', l0 ++ neg (awith N' M) :: l2, l1'); list_simpl.
       -- destruct l2; destr_eq Heq''1; subst.
          ++ exists (awith N' M', l0', l1');list_simpl; [ reflexivity | ].
@@ -839,7 +839,7 @@ induction pi in P', Q', l' |- *; intros HP.
   rewrite 2 app_comm_cons in HP.
   apply Permutation_Type_cons_app_inv, (Permutation_Type_cons_app _ _ (pos P)) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
-  dichot_elt_app_inf_exec Heq'; subst.
+  decomp_elt_eq_app Heq'; subst.
   + now exists (N', l2 ++ neg (wn P) :: l4, l1); list_simpl.
   + destruct l4; destr_eq Heq'1; subst.
     now exists (N', l0, l4 ++ neg (wn P) :: l3); list_simpl.
@@ -848,7 +848,7 @@ induction pi in P', Q', l' |- *; intros HP.
   destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
   apply IHpi in HP as [[[N l0] l1] Heq' Htop].
-  dichot_elt_app_inf_exec Heq'; subst.
+  decomp_elt_eq_app Heq'; subst.
   + now exists (N, l0, l4 ++ neg (wn P) :: l3); list_simpl.
   + now exists (N, l2 ++ neg (wn P) :: l4, l1); list_simpl.
 - assert (HP' := HP).
@@ -859,7 +859,7 @@ induction pi in P', Q', l' |- *; intros HP.
   apply (Permutation_Type_cons_app _ _ (neg (wn P))) in HP.
   apply (Permutation_Type_cons_app _ _ (neg (wn P))) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
-  dichot_elt_app_inf_exec Heq'; subst.
+  decomp_elt_eq_app Heq'; subst.
   + destruct l4; destr_eq Heq'1; subst.
     * inversion Htop.
     * now exists (N', l2 ++ neg (wn P) :: l4, l1); list_simpl.

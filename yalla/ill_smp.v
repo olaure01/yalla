@@ -8,6 +8,7 @@ From OLlibs Require Import funtheory dectype List_more Permutation_Type_more.
 
 From Yalla Require ill_cut.
 
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -123,7 +124,8 @@ revert l Heql0 A HeqA0; induction pi; intros l' Heql0 A' HeqA0; subst;
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
   eapply ex_ir; [ | eassumption ].
   apply IHpi; [ assumption | reflexivity ].
-- decomp_map Heql0 eqn:Heq. subst.
+- remember (map iformulas.ioc lw') as l0.
+  decomp_map Heql0 eqn:Heq. subst.
   symmetry in Heq. apply ill2ill_map_ioc_inv in Heq as [l -> ->].
   apply Permutation_Type_map_inv in p as [l' -> HP%Permutation_Type_sym].
   eapply ex_ir; [ apply IHpi; [ | reflexivity];

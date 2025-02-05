@@ -160,7 +160,7 @@ Lemma de_tfr C :
      forall ls1 ls2, ls = ls1 ++ C :: ls2 -> strifoc (lw ++ C :: nil) (ls1 ++ ls2) A).
 Proof.
 apply trifoc_rect; intros; subst; try now (econstructor; eauto); try now (destruct ls1; destr_eq H).
-- trichot_elt_elt_inf_exec H.
+- decomp_elt_eq_elt H.
   + list_simpl. apply foc_tfr; [ assumption | ].
     rewrite app_assoc. apply X. rewrite <- app_assoc. reflexivity.
   + apply focd_tfr, wk_list_tfr; [ | assumption ].
@@ -174,12 +174,12 @@ apply trifoc_rect; intros; subst; try now (econstructor; eauto); try now (destru
   + apply Forall_inf_app_r in f. inversion f. assumption.
 - constructor; [ assumption | ].
   rewrite app_comm_cons. apply X. reflexivity.
-- unit_vs_elt_inv H. apply axd_tfr.
+- decomp_unit_eq_elt H. apply axd_tfr.
 - destruct (Permutation_Type_vs_elt_inv _ _ _ p) as [(l1, l2) ->].
   apply Permutation_Type_app_inv in p.
   eapply ex_tfr; [ | eassumption ].
   apply X. reflexivity.
-- dichot_elt_app_inf_exec H; subst.
+- decomp_elt_eq_app H; subst.
   + rewrite app_assoc. apply tens_tfr.
     * apply X. reflexivity.
     * apply wk_list_tfr. assumption.

@@ -189,7 +189,7 @@ intros Hpmixn Hpmixm L Heq FL. destruct n as [|n]; [ destruct m as [|m] | ].
     change nil with (concat (@nil (list formula))).
     apply mix_r; [ assumption | constructor ].
 - cbn in Heq. rewrite Nat.sub_0_r in Heq.
-  destruct (decomp_length_add L n m Heq) as [(l1, l2) [<- <-] ->].
+  destruct (length_eq_add_inv L n m Heq) as [(l1, l2) [<- <-] ->].
   replace (concat (l1 ++ l2)) with (concat (l1 ++ ((concat l2) :: nil)))
     by (rewrite ! concat_app; cbn; rewrite app_nil_r; reflexivity).
   apply mix_r.
