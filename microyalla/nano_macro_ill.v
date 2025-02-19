@@ -1,4 +1,4 @@
-From Coq Require Import List.
+From Stdlib Require Import List.
 From OLlibs Require Import dectype Permutation_Type.
 From Yalla Require Import ill_def nanoill.
 

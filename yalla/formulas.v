@@ -1,4 +1,4 @@
-From Coq Require Import List EqNat RelationClasses Lia.
+From Stdlib Require Import List EqNat RelationClasses Lia.
 From OLlibs Require Import Datatypes_more Bool_more funtheory dectype.
 From Yalla Require Export atoms.
 

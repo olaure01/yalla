@@ -1,6 +1,6 @@
 (** * Focusing in Linear Logic *)
 
-From Coq Require Import CMorphisms Wf_nat Lia.
+From Stdlib Require Import CMorphisms Wf_nat Lia.
 From OLlibs Require Import infinite funtheory Bool_more List_more Permutation_Type_more.
 From Yalla Require Import ll_fragments.
 

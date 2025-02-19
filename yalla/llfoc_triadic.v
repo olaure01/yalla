@@ -1,6 +1,6 @@
 (** * Andreoli's triadic system for focusing *)
 
-From Coq Require Import Wf_nat Lia.
+From Stdlib Require Import Wf_nat Lia.
 From OLlibs Require Import Datatypes_more Bool_more infinite List_more Permutation_Type_more.
 From Yalla Require Import ll_fragments llfoc.
 

@@ -1,6 +1,6 @@
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
-From Coq Require Import CMorphisms.
+From Stdlib Require Import CMorphisms.
 From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GPermutation_Type.
 
 

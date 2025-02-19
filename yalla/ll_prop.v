@@ -1,6 +1,6 @@
 (** * Properties relying on cut admissibility *)
 
-From Coq Require Import Bool.
+From Stdlib Require Import Bool.
 From OLlibs Require Import dectype List_more Dependent_Forall_Type flat_map_more
                            Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ll_cut.

@@ -1,6 +1,6 @@
 (** * Example of a concrete use of the yalla library: unit-free MELL in Prop *)
 
-From Coq Require Import Morphisms.
+From Stdlib Require Import Morphisms.
 From OLlibs Require Import funtheory dectype List_more Permutation_more Permutation_Type_more.
 
 

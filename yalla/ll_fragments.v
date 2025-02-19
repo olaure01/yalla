@@ -1,6 +1,6 @@
 (** * Definitions of various Linear Logic fragments *)
 
-From Coq Require Import PeanoNat Lia.
+From Stdlib Require Import PeanoNat Lia.
 From OLlibs Require Import infinite funtheory List_more Dependent_Forall_Type
                            Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ll_prop.

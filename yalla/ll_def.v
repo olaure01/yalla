@@ -1,8 +1,8 @@
 (** * Linear Logic with explicit permutations *)
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
-From Coq Require Import CMorphisms BoolOrder PeanoNat Lia.
-From Coq Require Permutation.
+From Stdlib Require Import CMorphisms BoolOrder PeanoNat Lia.
+From Stdlib Require Permutation.
 From OLlibs Require Import dectype funtheory List_more Dependent_Forall_Type
                            Permutation_Type_more GPermutation_Type.
 From Yalla Require Export formulas.

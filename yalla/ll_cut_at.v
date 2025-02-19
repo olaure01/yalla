@@ -1,6 +1,6 @@
 (** * Cut admissibility for atomic cut-formula for [ll] *)
 
-From Coq Require Import Wf_nat Lia.
+From Stdlib Require Import Wf_nat Lia.
 From OLlibs Require Import List_more Dependent_Forall_Type GPermutation_Type.
 From Yalla Require Export ll_def.
 

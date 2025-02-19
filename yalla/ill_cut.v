@@ -1,7 +1,7 @@
 (** * Cut admissibility for Intuitionistic Linear Logic *)
 (* see ill_prop.v for other properties *)
 
-From Coq Require Import PeanoNat Wf_nat List Lia.
+From Stdlib Require Import PeanoNat Wf_nat List Lia.
 From OLlibs Require Import funtheory dectype List_more flat_map_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ill_cut_at.
 

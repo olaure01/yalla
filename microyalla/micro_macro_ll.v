@@ -1,4 +1,4 @@
-From Coq Require Import List Lia.
+From Stdlib Require Import List Lia.
 From OLlibs Require Import dectype Permutation_Type.
 From Yalla Require Import ll_def microll.
 

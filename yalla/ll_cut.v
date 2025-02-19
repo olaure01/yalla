@@ -1,6 +1,6 @@
 (** * Cut admissibility for [ll] *)
 
-From Coq Require Import Wf_nat Lia.
+From Stdlib Require Import Wf_nat Lia.
 From OLlibs Require Import dectype funtheory List_more Permutation_Type_more GPermutation_Type
                            flat_map_more Dependent_Forall_Type.
 From Yalla Require Import ll_cut_at.

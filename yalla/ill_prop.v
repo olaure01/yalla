@@ -1,7 +1,7 @@
 (** * Properties of Intuitionistic Linear Logic *)
 (* Properties depending on cut admissibility *)
 
-From Coq Require Import Bool.
+From Stdlib Require Import Bool.
 From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Export ill_cut.
 

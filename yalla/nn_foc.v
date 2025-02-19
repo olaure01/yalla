@@ -1,6 +1,6 @@
 (** * Focusing by Polarized Translation *)
 
-From Coq Require Import CMorphisms.
+From Stdlib Require Import CMorphisms.
 From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GPermutation_Type.
 From Yalla Require Import ll_fragments llfoc tl nn_prop.
 
