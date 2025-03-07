@@ -129,7 +129,7 @@ intro pi. remember (map ll2ll l) as l0 eqn:Heql0.
 induction pi in l, Heql0 |- *; subst;
   try (destruct l as [|f l]; destr_eq Heql0; destruct f; destr_eq Heql0; subst;
        constructor; apply IHpi; reflexivity).
-- decomp_map Heql0 eqn:Heq. subst. destruct Heq as [Heq1 [Heq2 ->%map_eq_nil]].
+- decomp_map Heql0 eqn:Heq. subst l. destruct Heq as [Heq1 [Heq2 ->]].
   destruct x; destr_eq Heq1. destruct x0; destr_eq Heq2. subst.
   apply ax_r.
 - cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].

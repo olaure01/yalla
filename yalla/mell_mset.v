@@ -236,12 +236,11 @@ induction pi in m, HP |- *;
   try discriminate;
   try (apply Permutation_Type_image in HP as [ [] [=] ]; fail).
 - apply Permutation_Type_length_2_inv in HP as [HP | HP]; decomp_map HP eqn:Heq; subst;
-    destruct Heq as [Heq1 [Heq2 ->%map_eq_nil] ];
+    destruct Heq as [Heq1 [Heq2 ->] ];
     destruct x; destr_eq Heq1; destruct x0; destr_eq Heq2; subst;
     apply (f_equal (fold_right add empty)) in HP; rewrite elts_retract in HP; subst.
   + apply ax_r.
-  + cbn.
-    assert (add (var X) (add (covar X) empty)
+  + assert (add (var X) (add (covar X) empty)
           = add (covar X) (add (var X) empty))
       as Hswap by apply add_swap.
     cbn in Hswap. cbn. rewrite Hswap. apply ax_r.
@@ -252,7 +251,7 @@ induction pi in m, HP |- *;
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map. assumption.
 - apply Permutation_Type_length_1_inv in HP.
   remember (elts m) as l eqn:Heql.
-  decomp_map HP eqn:Heq. destruct Heq as [Hx ->%map_eq_nil]. destruct x; destr_eq Hx. subst.
+  decomp_map HP eqn:Heq. destruct Heq as [Hx ->]. destruct x; destr_eq Hx. subst l.
   apply (f_equal (fold_right add empty)) in HP.
   rewrite elts_retract in HP. subst m.
   apply one_r.

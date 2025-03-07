@@ -590,7 +590,7 @@ intros pi; induction pi; intros l0 Heq;
   + exfalso. destruct D; destr_eq H0; inversion Hs.
   + apply IHpi; [ | reflexivity ].
     destruct D; inversion H0; reflexivity.
-- decomp_map Heq eqn:Heq0. subst. destruct Heq0 as [Heq ->%map_eq_nil].
+- decomp_map Heq eqn:Heq0. subst l0. destruct Heq0 as [Heq ->].
   destruct (@polarity atom_inf x).
   + rewrite (proj2 (pntrans_neg x) s) in Heq.
     inversion Heq. subst.
@@ -663,7 +663,7 @@ intros pi; induction pi; intros l0 Heq;
   apply ntrans_map_toc_inv in Heq.
   destruct Heq as [lw -> ->].
   apply (@oc_fr atom_inf); assumption.
-- decomp_map Heq eqn:Hx. destruct Hx as [Hx ->%map_eq_nil]. destruct x; destr_eq Hx. subst.
+- decomp_map Heq eqn:Hx. destruct Hx as [Hx ->]. destruct x; destr_eq Hx. subst.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply (@de_fr atom_inf) | apply Permutation_Type_middle ].

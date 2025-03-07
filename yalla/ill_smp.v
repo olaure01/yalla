@@ -131,9 +131,6 @@ revert l Heql0 A HeqA0; induction pi; intros l' Heql0 A' HeqA0; subst;
   eapply ex_ir; [ apply IHpi; [ | reflexivity];
                   rewrite <- ill2ill_map_ioc, <- ? map_app; reflexivity | ].
   apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map. assumption.
-- destruct A'; destr_eq HeqA0.
-  destruct l'; destr_eq Heql0.
-  apply one_irr.
 - decomp_map Heql0 eqn:Heq. subst.
   destruct x; destr_eq Heq.
   eapply ex_ir.

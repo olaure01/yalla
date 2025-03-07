@@ -374,7 +374,7 @@ revert l Heql0. induction pi; intros l' Heql0; subst;
               [ destruct p | destruct n ]; inversion H0; subst;
             constructor;
             apply IHpi; reflexivity)).
-- decomp_map Heql0 eqn:Hx. subst. destruct Hx as [Heq1 [Heq2 ->%map_eq_nil]].
+- decomp_map Heql0 eqn:Hx. subst l'. destruct Hx as [Heq1 [Heq2 ->]].
   destruct x; destr_eq Heq1; [ destruct p | destruct n ]; destr_eq Heq1.
   destruct x0; destr_eq Heq2; [destruct p | destruct n ]; destr_eq Heq2; subst.
   apply ax_r.

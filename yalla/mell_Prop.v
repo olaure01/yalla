@@ -139,7 +139,7 @@ intros pi.
 remember (map mell2ll l) as l0.
 induction pi in l, Heql0 |- *; subst;
   try (destruct l; destr_eq Heql0; destruct f; destr_eq Heql0; subst; now try (constructor; apply IHpi)).
-- decomp_map Heql0 eqn:Heq. subst. destruct Heq as [Heq1 [Heq2 ->%map_eq_nil]].
+- decomp_map Heql0 eqn:Heq. subst l. destruct Heq as [Heq1 [Heq2 ->]].
   destruct x; destr_eq Heq1. destruct x0; destr_eq Heq2. subst.
   apply ax_r.
 - cbn in p.

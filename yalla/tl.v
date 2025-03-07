@@ -384,7 +384,7 @@ induction pi;
   try (decomp_map Heql eqn:Hx; subst; destruct x; destr_eq Hx; subst;
        constructor; apply IHpi; list_simpl; reflexivity);
   try (destruct A''; destr_eq HeqA; subst; constructor; apply IHpi; reflexivity).
-- destruct l''; destr_eq Heql. symmetry in H. apply map_eq_nil in H as ->.
+- destruct l''; destr_eq Heql. decomp_map H. subst l.
   destruct A''; destr_eq HeqA; destruct t; destr_eq Heql; subst.
   apply t2i_inj in HeqA as ->. apply ax_tr.
 - exfalso.
@@ -414,7 +414,7 @@ induction pi;
   apply one_trr.
 - decomp_map Heql. destruct A''; destr_eq HeqA; subst.
   apply tens_trr; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
-- decomp_map Heql eqn:Hx. destruct Hx as [Hx ->%map_eq_nil]. destruct x; destr_eq Hx. subst.
+- decomp_map Heql eqn:Hx. destruct Hx as [Hx ->]. destruct x; destr_eq Hx. subst.
   apply neg_tlr, IHpi; reflexivity.
 - decomp_map Heql eqn:Hx. destruct x; destr_eq Hx. subst.
   apply plus_tlr; [ apply IHpi1 | apply IHpi2 ]; list_simpl; reflexivity.
