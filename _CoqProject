@@ -1,45 +1,6 @@
 -R microyalla Yalla.MicroYalla
 -R yalla Yalla
+# -arg "-mangle-names '__'"
 
-microyalla/microill.v
-microyalla/microll.v
-microyalla/micro_macro_ill.v
-microyalla/micro_macro_ll.v
-microyalla/nanoill.v
-microyalla/nanoll.v
-microyalla/nano_macro_ill.v
-microyalla/nano_macro_ll.v
-
-yalla/atoms.v
-yalla/bbb.v
-yalla/fmformulas.v
-yalla/fmiformulas.v
-yalla/formulas.v
-yalla/iformulas.v
-yalla/ill_cut_at.v
-yalla/ill_cut.v
-yalla/ill_def.v
-yalla/ill_prop.v
-yalla/ill_smp.v
-yalla/ill_vs_ll.v
-yalla/isubs.v
-yalla/lambek.v
-yalla/lj.v
-yalla/ll_cut_at.v
-yalla/ll_cut.v
-yalla/ll_def.v
-yalla/llfoc.v
-yalla/llfoc_triadic.v
-yalla/ll_fragments.v
-yalla/llpol.v
-yalla/ll_prop.v
-yalla/ll_smp.v
-yalla/mell2.v
-yalla/mell_msetoid.v
-yalla/mell_mset.v
-yalla/mell_Prop.v
-yalla/nn_def.v
-yalla/nn_foc.v
-yalla/nn_prop.v
-yalla/subs.v
-yalla/tl.v
+microyalla
+yalla
