@@ -3,7 +3,7 @@
 (** * Some tactics for tentative automatic solving of [Permutation] goals
 The main tactic is [Permutation_solve] which fails is the goal is not solved. *)
 
-From Coq Require Import Permutation.
+From Stdlib Require Import Permutation.
 From Yalla.OLlibs Require Import List_more.
 
 

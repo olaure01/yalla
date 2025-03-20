@@ -3,7 +3,7 @@
 (** * Some tactics for tentative automatic solving of [CPermutation] goals
 The main tactic is [CPermutation_solve] which fails is the goal is not solved. *)
 
-From Coq Require Import CPermutation.
+From Stdlib Require Import CPermutation.
 From Yalla.OLlibs Require Import List_more.
 
 

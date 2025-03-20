@@ -1,8 +1,8 @@
 (* Parameter definitions for yalla library *)
 (* v 1.1   Olivier Laurent *)
 
+From Stdlib Require Import PeanoNat.
 Require Import funtheory.
-Require Import PeanoNat.
 
 
 (* We provide a possible value for parameters of the library

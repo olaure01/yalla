@@ -2,7 +2,7 @@
 (*   Olivier Laurent *)
 
 
-Require Export List.
+From Stdlib Require Export List.
 Export ListNotations.
 
 (* From ollibs/Permutation_Type.v *)

@@ -5,7 +5,7 @@ Set Mangle Names Light.
 Set Implicit Arguments.
 
 #[local] Set Warnings "-stdlib-vector".
-From Coq Require Import PeanoNat Lia Vector.
+From Stdlib Require Import PeanoNat Lia Vector.
 
 (** * Axioms of Finite Choices over vectors *)
 Lemma AFCvec A (R : nat -> A -> Prop) n (l : Vector.t _ n) :

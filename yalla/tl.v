@@ -3,12 +3,12 @@
 
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
-Require Import Arith_base.
-Require Import CRelationClasses.
-Require Import CMorphisms.
+From Stdlib Require Import Arith_base.
+From Stdlib Require Import CRelationClasses.
+From Stdlib Require Import CMorphisms.
+From Stdlib Require Import BoolOrder.
 
 Require Import funtheory.
-Require Import BoolOrder.
 Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import GPermutation_Type.

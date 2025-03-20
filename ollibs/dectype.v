@@ -1,8 +1,8 @@
 (** Types with decidable equality formalized as types with Boolean valued equality
 this is based on records rather than modules (as opposed to stdlib) *)
 
-From Coq Require Import Bool PeanoNat Equalities.
-From Coq Require Eqdep_dec.
+From Stdlib Require Import Bool PeanoNat Equalities.
+From Stdlib Require Eqdep_dec.
 From Yalla.OLlibs Require Export inhabited_Type.
 From Yalla.OLlibs Require Import funtheory.
 

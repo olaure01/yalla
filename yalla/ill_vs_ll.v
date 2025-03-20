@@ -518,7 +518,6 @@ induction pi ; intros l' Heq HF ; subst ;
   eapply IHpi.
   + reflexivity.
   + eapply Permutation_Type_Forall_inf...
-    apply HP.
 - rewrite (map_map _ _ l') in Heq. decomp_map Heq eqn:Heq3. rewrite <- (map_map _ _) in Heq3.
   symmetry in Heq3.
   destruct (ill2ll_map_ioc_inv _ _ _ Heq3) as [l'' ? ?] ; subst.

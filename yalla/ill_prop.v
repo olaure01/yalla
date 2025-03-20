@@ -3,7 +3,7 @@
 (** * Intuitionistic Linear Logic *)
 (* Properties depending on cut admissibility *)
 
-Require Import Bool.
+From Stdlib Require Import Bool.
 Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import GPermutation_Type.

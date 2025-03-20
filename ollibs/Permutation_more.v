@@ -3,7 +3,7 @@ Usefull properties apparently missing in the Permutation library. *)
 
 Set Implicit Arguments.
 
-From Coq Require Export Permutation List.
+From Stdlib Require Export Permutation List.
 From Yalla.OLlibs Require Import List_more funtheory.
 
 

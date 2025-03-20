@@ -3,7 +3,7 @@ Usefull properties apparently missing in the Permutation_Type library. *)
 
 Set Implicit Arguments.
 
-From Coq Require Import PeanoNat Permutation CMorphisms.
+From Stdlib Require Import PeanoNat Permutation CMorphisms.
 From Yalla.OLlibs Require Import List_more funtheory.
 From Yalla.OLlibs Require Export Permutation_Type.
 

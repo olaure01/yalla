@@ -1,6 +1,6 @@
 (** Properties of lists with output in [Type] *)
 
-From Coq Require Import PeanoNat Compare_dec List.
+From Stdlib Require Import PeanoNat Compare_dec List.
 
 Set Implicit Arguments.
 

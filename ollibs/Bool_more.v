@@ -3,7 +3,7 @@
 Set Mangle Names.
 Set Mangle Names Light.
 
-From Coq Require Export Bool.
+From Stdlib Require Export Bool.
 From Yalla.OLlibs Require Import Datatypes_more.
 
 Lemma reflect_neg P b : reflect P b -> reflect (not P) (negb b).

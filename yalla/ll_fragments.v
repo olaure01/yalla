@@ -6,7 +6,7 @@
 
 (** * Definitions of various Linear Logic fragments *)
 
-Require Import BoolOrder.
+From Stdlib Require Import BoolOrder.
 Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import Permutation_Type_solve.

@@ -2,7 +2,7 @@
 
 Set Implicit Arguments.
 
-From Coq Require Export CPermutation.
+From Stdlib Require Export CPermutation.
 From Yalla.OLlibs Require Import List_more funtheory.
 
 Lemma CPermutation_app_app_inv A (l1 l2 l3 l4 : list A) :

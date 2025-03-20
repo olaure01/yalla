@@ -4,11 +4,11 @@
 (** * Linear Logic with explicit permutations *)
 (* not cuts here, see ll_cut.v for cut admissibility and ll_prop.v for other properties *)
 
-Require Import CMorphisms.
+From Stdlib Require Import CMorphisms.
 #[local] Set Warnings "-stdlib-vector".
-Require Vector.
+From Stdlib Require Vector.
+From Stdlib Require Import BoolOrder.
 
-Require Import BoolOrder.
 Require Import List_more.
 Require Import List_Type.
 Require Import Permutation_Type_more.

@@ -7,8 +7,8 @@ Set Mangle Names.
 Set Mangle Names Light.
 Set Implicit Arguments.
 
-From Coq Require Import PeanoNat.
-From Coq Require Export List.
+From Stdlib Require Import PeanoNat.
+From Stdlib Require Export List.
 From Yalla.OLlibs Require Import Datatypes_more Bool_more.
 From Yalla.OLlibs Require Export List_Type.
 Import EqNotations.

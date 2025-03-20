@@ -1,6 +1,6 @@
 (** Properties of functions *)
 
-From Coq Require Import Program.Basics Relation_Definitions RelationClasses List.
+From Stdlib Require Import Program.Basics Relation_Definitions RelationClasses List.
 From Yalla.OLlibs Require Import inhabited_Type.
 
 Set Implicit Arguments.

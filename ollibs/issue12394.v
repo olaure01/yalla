@@ -1,4 +1,4 @@
-From Coq Require Import Eqdep_dec.
+From Stdlib Require Import Eqdep_dec.
 From Yalla.OLlibs Require Import List_more.
 
 Set Implicit Arguments.

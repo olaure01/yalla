@@ -1,6 +1,6 @@
 (** Factorized statements for different notions of permutation *)
 
-From Coq Require Import List Morphisms Permutation.
+From Stdlib Require Import List Morphisms Permutation.
 From Yalla.OLlibs Require Import funtheory ComparisonOrder
                            Permutation_more Permutation_solve
                            CPermutation_more CPermutation_solve.

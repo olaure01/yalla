@@ -2,7 +2,7 @@
 
 (** * Properties relying on cut admissibility *)
 
-Require Import Bool.
+From Stdlib Require Import Bool.
 Require Import List_more.
 Require Import Permutation_Type_more.
 Require Import CPermutation_Type.

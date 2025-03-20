@@ -3,11 +3,10 @@
 
 (** * Intuitionistic Linear Logic formulas *)
 
-Require Import RelationClasses.
-Require Import List.
-Require Import Lia.
-
-Require Import Bool.
+From Stdlib Require Import RelationClasses.
+From Stdlib Require Import List.
+From Stdlib Require Import Lia.
+From Stdlib Require Import Bool.
 
 Require yalla_ax.
 

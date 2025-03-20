@@ -6,8 +6,8 @@
 
 (** * Focusing in Linear Logic *)
 
-Require Import Arith_base.
-Require Import CMorphisms.
+From Stdlib Require Import Arith_base.
+From Stdlib Require Import CMorphisms.
 
 Require Import List_more.
 Require Import List_Type.

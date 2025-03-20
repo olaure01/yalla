@@ -3,7 +3,7 @@
 
 (** * Cut admissibility for [ll] *)
 
-Require Import Arith_base.
+From Stdlib Require Import Arith_base.
 
 Require Import funtheory.
 Require Import List_more.

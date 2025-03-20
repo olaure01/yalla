@@ -1,6 +1,6 @@
 (** Infinite Types *)
 
-From Coq Require Import Bool PeanoNat Lia List.
+From Stdlib Require Import Bool PeanoNat Lia List.
 From Yalla.OLlibs Require Import funtheory List_Type.
 From Yalla.OLlibs Require Export inhabited_Type dectype.
 

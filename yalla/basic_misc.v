@@ -3,7 +3,7 @@
 
 (** * A few basic ingredients used in [yalla] *)
 
-Require Import Lia.
+From Stdlib Require Import Lia.
 Require Import GPermutation_Type Permutation_Type_solve.
 
 (** ** Definitions *)

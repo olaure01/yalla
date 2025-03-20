@@ -4,8 +4,8 @@
 (** * Intuitionistic Linear Logic *)
 (* Cut admissibility, see ill_prop.v for other properties *)
 
-Require Import Arith_base.
-Require Import List.
+From Stdlib Require Import Arith_base.
+From Stdlib Require Import List.
 
 Require Import funtheory.
 Require Import List_more.

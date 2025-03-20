@@ -3,7 +3,7 @@
 
 (** * Study of Linear Logic enriched with [bot = oc bot] *)
 
-Require Import Arith_base.
+From Stdlib Require Import Arith_base.
 
 Require Import List_more.
 Require Import Permutation_Type_more.

@@ -3,8 +3,8 @@ Definition and basic properties of cyclic permutations in [Type]. *)
 
 Set Implicit Arguments.
 
-From Coq Require Import CMorphisms PeanoNat.
-From Coq Require CPermutation.
+From Stdlib Require Import CMorphisms PeanoNat.
+From Stdlib Require CPermutation.
 From Yalla.OLlibs Require Import List_more Permutation_Type_more funtheory.
 
 

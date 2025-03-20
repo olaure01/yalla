@@ -4,7 +4,7 @@ Set Mangle Names.
 Set Mangle Names Light.
 Set Implicit Arguments.
 
-From Coq Require Import PeanoNat Lia List.
+From Stdlib Require Import PeanoNat Lia List.
 
 (** * Functional Axiom of Choice for finite functions *)
 Lemma AFC A (a : A) k (R : nat -> A -> Prop):

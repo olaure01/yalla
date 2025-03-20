@@ -1,7 +1,7 @@
 (** Well-founded order on products of [nat] *)
 
-From Coq Require Import Relation_Operators Lexicographic_Product Lia.
-From Coq Require Export Wf_nat.
+From Stdlib Require Import Relation_Operators Lexicographic_Product Lia.
+From Stdlib Require Export Wf_nat.
 
 Set Implicit Arguments.
 

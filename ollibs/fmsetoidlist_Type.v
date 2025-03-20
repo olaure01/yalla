@@ -5,7 +5,7 @@ Equality is an equivalence relation.
 An implementation of the axioms is provided for every type
 by lists up to permutation (with output in [Type]. *)
 
-From Coq Require Import CMorphisms List.
+From Stdlib Require Import CMorphisms List.
 From Yalla.OLlibs Require Import Permutation_Type.
 
 Set Implicit Arguments.
