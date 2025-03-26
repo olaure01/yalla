@@ -1,4 +1,10 @@
-# YALLA: an LL library for Coq
+# YALLA: an LL library for the Rocq Prover
+
+## Version 2.0.7 (2025/03/26)
+
+This is mostly an adaptation of v2.0 to Rocq v9.0 and OLlibs v2.0.7.
+
+*Tested with Rocq v9.0.*
 
 ## Version 2.0.6 (2024/09/16)
 

@@ -1,6 +1,6 @@
-# YALLA: an LL library for Coq
+# YALLA: an LL library for Rocq
 
-## Yet Another deep embedding of Linear Logic in Coq
+## Yet Another deep embedding of Linear Logic in the Rocq Prover
 
 
 
