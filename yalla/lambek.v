@@ -1,7 +1,7 @@
 (** * Example of a concrete use of the yalla library: a variant of the Lambek calculus
   tensor-free Lambek calculus with additive conjunction and its unit *)
 
-From OLlibs Require Import dectype funtheory List_more Permutation_Type.
+From OLlibs Require Import dectype funtheory List_more PermutationT.
 
 
 (** ** 0. load the [ill] library *)
@@ -85,7 +85,7 @@ induction pi in l, A, Heql, HeqA |- *;
 - remember (map iformulas.ioc lw') as l4.
   decomp_map Heql eqn:Heq. subst.
   destruct l4; inversion Heq; destruct lw'; inversion H0.
-  + symmetry in p. apply Permutation_Type.Permutation_Type_nil in p as ->.
+  + symmetry in p. apply PermutationT.PermutationT_nil in p as ->.
     apply IHpi; [ list_simpl | ]; reflexivity.
   + destruct l; discriminate H1.
 - destruct A; destr_eq HeqA. subst.

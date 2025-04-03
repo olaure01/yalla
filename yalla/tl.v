@@ -1,7 +1,7 @@
 (** * Example of a concrete use of the yalla library: tensor logic *)
 
 From Stdlib Require Import CMorphisms.
-From OLlibs Require Import funtheory infinite List_more Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import funtheory infinite List_more PermutationT_more GPermutationT.
 
 
 (** ** 0. load the [ill] library *)
@@ -151,7 +151,7 @@ Definition no_tcut P := forall C, tpcut P C = false.
 Definition no_tax P := notT (projT1 (tpgax P)).
 
 Definition atomic_tax P := forall a,
-  (option_testT tatomic (snd (projT2 (tpgax P) a))) * (Forall_inf tatomic (fst (projT2 (tpgax P) a))).
+  (option_testT tatomic (snd (projT2 (tpgax P) a))) * (ForallT tatomic (fst (projT2 (tpgax P) a))).
 
 Definition le_tpfrag P Q :=
   ((forall A, Bool.le (tpcut P A) (tpcut Q A))
@@ -192,9 +192,9 @@ Proof. repeat split; try reflexivity. intro a. exists a. reflexivity. Qed.
 
 Inductive tl P : list tformula -> option tformula -> Type :=
 | ax_tr X : tl P (tvar X :: nil) (Some (tvar X))
-| ex_tr l1 l2 A : tl P l1 A -> PEPermutation_Type (tpperm P) l1 l2 -> tl P l2 A
+| ex_tr l1 l2 A : tl P l1 A -> PEPermutationT (tpperm P) l1 l2 -> tl P l2 A
 | ex_oc_tr l1 lw lw' l2 A :
-    tl P (l1 ++ map toc lw ++ l2) A -> Permutation_Type lw lw' -> tl P (l1 ++ map toc lw' ++ l2) A
+    tl P (l1 ++ map toc lw ++ l2) A -> PermutationT lw lw' -> tl P (l1 ++ map toc lw' ++ l2) A
 | one_trr : tl P nil (Some tone)
 | one_tlr l1 l2 A : tl P (l1 ++ l2) A -> tl P (l1 ++ tone :: l2) A
 | tens_trr A B l1 l2 : tl P l1 (Some A) -> tl P l2 (Some B) -> tl P (l1 ++ l2) (Some (ttens A B))
@@ -214,7 +214,7 @@ Inductive tl P : list tformula -> option tformula -> Type :=
 | gax_tr a : tl P (fst (projT2 (tpgax P) a)) (snd (projT2 (tpgax P) a)).
 
 #[export] Instance tl_perm P Pi :
-  Proper ((PEPermutation_Type (tpperm P)) ==> arrow) (fun l => tl P l Pi) | 100.
+  Proper ((PEPermutationT (tpperm P)) ==> arrow) (fun l => tl P l Pi) | 100.
 Proof. intros l1 l2 HP pi. apply ex_tr with l1; assumption. Qed.
 
 Lemma stronger_tpfrag P Q (Hle : le_tpfrag P Q) l A : tl P l A -> tl Q l A.
@@ -223,7 +223,7 @@ intros pi.
 destruct Hle as [[Hcut Hgax] Hp].
 induction pi; (try now constructor).
 - apply ex_tr with l1; [ assumption | ].
-  hyps_GPermutation_Type_unfold; unfold PEPermutation_Type.
+  hyps_GPermutationT_unfold; unfold PEPermutationT.
   destruct (tpperm P), (tpperm Q); cbn in Hp; try inversion Hp; subst;
     [ assumption | | ]; reflexivity.
 - eapply ex_oc_tr; [ apply IHpi | assumption ].
@@ -349,8 +349,8 @@ intros pi. induction pi;
   list_simpl;
   (try now (constructor; auto));
   (try now (destruct D; destr_eq HeqC; subst; constructor; auto));
-  try apply (PEPermutation_Type_map _ tl2ill) in p;
-  try apply (Permutation_Type_map tl2ill) in p.
+  try apply (PEPermutationT_map _ tl2ill) in p;
+  try apply (PermutationT_map tl2ill) in p.
 - eapply ex_ir, p. exact (piS _ HeqC).
 - eapply ex_ir, p. exact (piE HeqC).
 - rewrite tl2ill_map_ioc. eapply ex_oc_ir, p. rewrite <- tl2ill_map_ioc.
@@ -391,21 +391,21 @@ induction pi;
   rewrite HeqN in Heql.
   destruct l''; destr_eq Heql.
   destruct t; discriminate Heql.
-- apply PEPermutation_Type_map_inv in p.
+- apply PEPermutationT_map_inv in p.
   destruct p as [l0 -> HP].
   eapply ex_tr.
   + apply IHpi; reflexivity.
   + symmetry. assumption.
-- apply PEPermutation_Type_map_inv in p as [l0 -> HP]. symmetry in HP.
+- apply PEPermutationT_map_inv in p as [l0 -> HP]. symmetry in HP.
   eapply ex_tr; [ apply IHpi; reflexivity | assumption ].
 - remember (map ioc lw') as l0. decomp_map Heql eqn:Heq. subst.
   symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
-  apply Permutation_Type_map_inv in p as [l' -> HP]. symmetry in HP.
+  apply PermutationT_map_inv in p as [l' -> HP]. symmetry in HP.
   eapply ex_oc_tr; [ | eassumption ].
   apply IHpi; [ rewrite <- tl2ill_map_ioc, <- ? map_app | ]; reflexivity.
 - remember (map ioc lw') as l0. decomp_map Heql eqn:Heq. subst.
   symmetry in Heq. apply tl2ill_map_ioc_inv in Heq as [l -> ->].
-  apply Permutation_Type_map_inv in p as [l' -> HP].
+  apply PermutationT_map_inv in p as [l' -> HP].
   symmetry in HP.
   eapply ex_oc_tr; [ | eassumption ].
   apply IHpi; [ rewrite <- tl2ill_map_ioc, <- ? map_app | ]; reflexivity.
@@ -484,7 +484,7 @@ Qed.
 Definition easytpgax P := forall a,
   (forall D, notT (ill2ll (snd (projT2 (ipgax (t2ipfrag P)) a)) = dual (ill2ll D)))
 * (forall A C, snd (projT2 (tpgax P) a) = Some A -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A)
-* (forall A C, In_inf A (fst (projT2 (tpgax P) a)) -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A).
+* (forall A C, InT A (fst (projT2 (tpgax P) a)) -> ill2ll C = ill2ll (tl2ill A) -> C = tl2ill A).
 
 Lemma tatomic_easytpgax P : atomic_tax P -> easytpgax P.
 Proof.
@@ -503,7 +503,7 @@ intros Hgax a. split; [ split | ].
   apply i2ac_inj in Heq2 as ->. reflexivity.
 - destruct (Hgax a) as [_ Hat].
   intros A C Hin Heq.
-  eapply Forall_inf_forall in Hat; [ | eassumption ].
+  eapply ForallT_forall in Hat; [ | eassumption ].
   destruct A; inversion Hat; subst.
   destruct C; destr_eq Heq.
   apply i2ac_inj in Heq as ->. reflexivity.
@@ -522,9 +522,9 @@ split; [ split | ]; cbn.
 - intros l C HP.
   assert (prod (sum (snd (projT2 (tpgax P) a) = None /\ C = N)
                     { C' | snd (projT2 (tpgax P) a) = Some C' & C = tl2ill C' })
-               (PEPermutation_Type (tpperm P) (map tl2ill (fst (projT2 (tpgax P) a))) l))
+               (PEPermutationT (tpperm P) (map tl2ill (fst (projT2 (tpgax P) a))) l))
     as [[[HeqNone HeqN] | [C' Heq1 Heqé]] HPE]; subst.
-  { apply PCPermutation_Type_vs_cons_inv in HP.
+  { apply PCPermutationT_vs_cons_inv in HP.
     destruct HP as [[l1 l2] HP Heq]; cbn in Heq, HP.
     destruct l1; inversion Heq; subst.
     - split; [ clear - Hgax H0 | clear - Hgax HP ].
@@ -536,38 +536,38 @@ split; [ split | ]; cbn.
         * left.
           destruct C; destr_eq H0; split; [ reflexivity | ].
           apply i2ac_inj in H0 as <-. reflexivity.
-      + rewrite app_nil_r in HP. apply PEPermutation_Type_rev in HP. rewrite 2 rev_involutive in HP.
-        apply PEPermutation_Type_map_inv_inj in HP; [ | apply formulas.dual_inj ].
+      + rewrite app_nil_r in HP. apply PEPermutationT_rev in HP. rewrite 2 rev_involutive in HP.
+        apply PEPermutationT_map_inv_inj in HP; [ | apply formulas.dual_inj ].
         remember (fst (projT2 (tpgax P) a)) as l0.
-        assert (forall x, In_inf x l0 -> In_inf x (fst (projT2 (tpgax P) a))) as Hin
+        assert (forall x, InT x l0 -> InT x (fst (projT2 (tpgax P) a))) as Hin
           by (intros x H; rewrite <- Heql0; assumption).
         destruct (tpperm P); cbn in HP; cbn.
         * clear Heql0. revert l0 Hin HP. induction l; intros l0 Hin HP; cbn in HP.
-          -- apply Permutation_Type_nil, map_eq_nil, map_eq_nil in HP as ->. reflexivity.
+          -- apply PermutationT_nil, map_eq_nil, map_eq_nil in HP as ->. reflexivity.
           -- symmetry in HP.
-             destruct (Permutation_Type_vs_cons_inv HP) as [[l1 l2] Heq].
+             destruct (PermutationT_vs_cons_inv HP) as [[l1 l2] Heq].
              rewrite map_map in Heq. decomp_map Heq eqn:Hx. subst. symmetry in Hx; list_simpl.
              assert (a0 = tl2ill x) as ->.
              { apply (snd (Hgax a)); [ | assumption ].
-               apply Hin, in_inf_elt. }
-             symmetry. apply Permutation_Type_cons_app.
+               apply Hin, inT_elt. }
+             symmetry. apply PermutationT_cons_app.
              symmetry. rewrite <- map_app. apply IHl.
              ++ intros x0 Hin'. apply Hin.
-                apply in_inf_app_or in Hin'. destruct Hin' as [Hin' | Hin']; apply in_inf_or_app.
+                apply inT_app_sum in Hin' as [Hin' | Hin']; apply inT_sum_app.
                 ** left. assumption.
-                ** right. apply in_inf_cons, Hin'.
+                ** right. apply inT_cons, Hin'.
              ++ list_simpl in HP. list_simpl.
-                symmetry in HP. eapply Permutation_Type_cons_app_inv. eassumption.
+                symmetry in HP. eapply PermutationT_cons_app_inv. eassumption.
         * clear Heql0. revert l0 Hin HP. induction l; intros l0 Hin Heq; cbn in Heq.
           -- symmetry in Heq. exact (map_eq_nil _ _ Heq).
           -- destruct l0; destr_eq Heq.
-             assert (forall x, In_inf x l0 -> In_inf x (fst (projT2 (tpgax P) a))) as Hin'
-               by (intros; apply Hin, in_inf_cons; assumption).
+             assert (forall x, InT x l0 -> InT x (fst (projT2 (tpgax P) a))) as Hin'
+               by (intros; apply Hin, inT_cons; assumption).
              cbn. rewrite (IHl _ Hin' H). f_equal.
              symmetry. eapply (snd (Hgax _)); [ | assumption ].
-             apply Hin, in_inf_eq.
+             apply Hin, inT_eq.
     - exfalso.
-      apply PEPermutation_Type_vs_elt_inv in HP as [[l1' l2'] _ Heq']. clear - Hgax Heq'.
+      apply PEPermutationT_vs_elt_inv in HP as [[l1' l2'] _ Heq']. clear - Hgax Heq'.
       apply (f_equal (@rev _)) in Heq'. rewrite rev_involutive in Heq'. list_simpl in Heq'.
       rewrite map_map in Heq'. decomp_map Heq'. subst. destruct Heq as [_ [Heq _]].
       symmetry in Heq. exact (fst (fst (Hgax a)) x Heq). }
@@ -575,7 +575,7 @@ split; [ split | ]; cbn.
     refine (snd (tl2tlfrag _) _); [ apply gax_tr | assumption ].
   + eapply ex_ir; cbn; [ | eassumption ].
     refine (fst (tl2tlfrag _) _ _); [ apply gax_tr | assumption ].
-- intros [(l1,l2) Heq]%in_inf_split.
+- intros [(l1,l2) Heq]%inT_split.
   decomp_map Heq eqn:Hx. symmetry in Hx. exact (N_not_tl2ill _ Hx).
 Qed.
 
@@ -603,8 +603,8 @@ split; [ split; [ split | ] | ]; (intros A pi + intros pi).
               :: rev (map dual (map ill2ll (map tl2ill l))))) in pi; [ | | reflexivity ].
   + exact (fst (tlfrag2tl _ _) _ pi).
   + change (tl2ill A :: map tl2ill l) with (map tl2ill (A :: l)).
-    apply forall_Forall_inf.
-    intros x [s0 <- _]%in_inf_map_inv.
+    apply forall_ForallT.
+    intros x [s0 <- _]%inT_map_inv.
     apply tl2ill_nz.
 - apply tl2tlfrag in pi.
   apply ill_to_ll, (snd pi (eq_refl _)).
@@ -613,8 +613,8 @@ split; [ split; [ split | ] | ]; (intros A pi + intros pi).
            (ill2ll N :: rev (map dual (map ill2ll (map tl2ill l))))) in pi; [ | | reflexivity ].
   + exact (snd (tlfrag2tl _ _) pi).
   + constructor; [ constructor | ].
-    apply forall_Forall_inf.
-    intros x [s0 <- _]%in_inf_map_inv.
+    apply forall_ForallT.
+    intros x [s0 <- _]%inT_map_inv.
     apply tl2ill_nz.
 Qed.
 

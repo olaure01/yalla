@@ -1,5 +1,5 @@
 From Stdlib Require Import List Lia.
-From OLlibs Require Import dectype Permutation_Type.
+From OLlibs Require Import dectype PermutationT.
 From Yalla Require Import ll_def microll.
 
 Set Implicit Arguments.
@@ -56,11 +56,11 @@ induction l1; intros l2 Heq; destruct l2; inversion Heq; trivial.
 Qed.
 *)
 
-Lemma transp_perm A n (l : list A) : Permutation_Type l (transp n l).
+Lemma transp_perm A n (l : list A) : PermutationT l (transp n l).
 Proof.
 induction n in l |- *; cbn; destruct l; trivial.
-- destruct l; [ reflexivity | apply Permutation_Type_swap ].
-- apply Permutation_Type_cons, IHn; reflexivity.
+- destruct l; [ reflexivity | apply PermutationT_swap ].
+- apply PermutationT_cons, IHn; reflexivity.
 Qed.
 
 Lemma transp_map A B (f : A -> B) n l :
@@ -83,8 +83,8 @@ intros pi; induction pi; cbn; try (now constructor).
 - rewrite map_app.
   apply (ex_r (formulas.tens (ll2ll A) (ll2ll B) :: map ll2ll l2 ++ map ll2ll l1)).
   + now constructor.
-  + cbn; apply Permutation_Type_cons; [ reflexivity | ].
-    apply Permutation_Type_app_comm.
+  + cbn; apply PermutationT_cons; [ reflexivity | ].
+    apply PermutationT_app_comm.
 - rewrite ll2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- ll2ll_map_wn; assumption.

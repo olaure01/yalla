@@ -1,5 +1,5 @@
 From Stdlib Require Import List.
-From OLlibs Require Import dectype Permutation_Type.
+From OLlibs Require Import dectype PermutationT.
 From Yalla Require Import ll_def nanoll.
 
 Fixpoint nll2ll A :=
@@ -29,14 +29,14 @@ Theorem nll2ll_proof : forall l, ll l -> ll_def.ll pfrag_ll (map nll2ll l).
 Proof.
 intros l pi; induction pi ; cbn; try (now constructor).
 - eapply ex_r; [ eassumption | cbn ].
-  apply Permutation_Type_map.
-  apply Permutation_Type_app_head.
-  apply Permutation_Type_swap.
+  apply PermutationT_map.
+  apply PermutationT_app_head.
+  apply PermutationT_swap.
 - rewrite map_app.
   apply (ex_r (formulas.tens (nll2ll A) (nll2ll B) :: map nll2ll l2 ++ map nll2ll l1)).
   + now constructor.
-  + cbn; apply Permutation_Type_cons; try reflexivity.
-    apply Permutation_Type_app_comm.
+  + cbn; apply PermutationT_cons; try reflexivity.
+    apply PermutationT_app_comm.
 - rewrite nll2ll_map_wn.
   constructor.
   rewrite <- nll2ll_map_wn; assumption.

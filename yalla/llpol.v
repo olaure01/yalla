@@ -1,7 +1,7 @@
 (** * Example of a concrete use of the yalla library: polarized linear logic LLpol *)
 
 From Stdlib Require Import CMorphisms.
-From OLlibs Require Import funtheory dectype List_more Permutation_Type Permutation_Type_more.
+From OLlibs Require Import funtheory dectype List_more PermutationT PermutationT_more.
 
 
 (** ** 0. load the [ll] library *)
@@ -141,7 +141,7 @@ Qed.
 (** [ll] restricted to polarized formulas *)
 Inductive llpol : list formula -> Type :=
 | ax_r X : llpol (neg (covar X) :: pos (var X) :: nil)
-| ex_r l1 l2 : llpol l1 -> Permutation_Type l1 l2 -> llpol l2
+| ex_r l1 l2 : llpol l1 -> PermutationT l1 l2 -> llpol l2
 | one_r : llpol (pos one :: nil)
 | bot_r l : llpol l -> llpol (neg bot :: l)
 | tens_r P Q l1 l2 : llpol (pos P :: l1) -> llpol (pos Q :: l2) -> llpol (pos (tens P Q) :: l1 ++ l2)
@@ -155,7 +155,7 @@ Inductive llpol : list formula -> Type :=
 | wk_r P l : llpol l -> llpol (neg (wn P) :: l)
 | co_r P l : llpol (neg (wn P) :: neg (wn P) :: l) -> llpol (neg (wn P) :: l).
 
-Instance llpol_perm : Proper ((@Permutation_Type _) ==> arrow) llpol.
+Instance llpol_perm : Proper ((@PermutationT _) ==> arrow) llpol.
 Proof. intros l1 l2 HP pi. eapply ex_r; eassumption. Qed.
 
 
@@ -354,12 +354,12 @@ Lemma llpol2llpolfrag l : llpol l -> ll_def.ll pfrag_ll (map llpol2ll l).
 Proof.
 intros pi. induction pi; try now (constructor; auto).
 - eapply ll_def.ex_r; [ eassumption | ].
-  apply Permutation_Type_map. assumption.
+  apply PermutationT_map. assumption.
 - eapply ll_def.ex_r.
   + cbn in IHpi1, IHpi2. apply (ll_def.tens_r IHpi1 IHpi2).
-  + apply Permutation_Type_cons; [ reflexivity | ].
+  + apply PermutationT_cons; [ reflexivity | ].
     fold (map llpol2ll). rewrite map_app.
-    apply Permutation_Type_app_comm.
+    apply PermutationT_app_comm.
 - cbn. rewrite ? map_app, llpol2ll_map_wn.
   apply ll_def.oc_r.
   rewrite <- llpol2ll_map_wn. assumption.
@@ -378,18 +378,18 @@ revert l Heql0. induction pi; intros l' Heql0; subst;
   destruct x; destr_eq Heq1; [ destruct p | destruct n ]; destr_eq Heq1.
   destruct x0; destr_eq Heq2; [destruct p | destruct n ]; destr_eq Heq2; subst.
   apply ax_r.
-- cbn in p. apply Permutation_Type_map_inv in p as [l'' -> HP]. symmetry in HP.
+- cbn in p. apply PermutationT_map_inv in p as [l'' -> HP]. symmetry in HP.
   eapply ex_r; [ | eassumption ].
   apply IHpi. reflexivity.
 - remember (map formulas.wn lw') as l0.
   decomp_map Heql0 eqn:Heq. subst.
   symmetry in Heq. apply llpol2ll_map_wn_inv in Heq as [l -> ->].
-  apply Permutation_Type_map_inv in p as [l' -> HP].
-  apply (Permutation_Type_map wn), (Permutation_Type_map neg) in HP.
+  apply PermutationT_map_inv in p as [l' -> HP].
+  apply (PermutationT_map wn), (PermutationT_map neg) in HP.
   eapply ex_r.
   + rewrite <- llpol2ll_map_wn in IHpi.
     apply IHpi. rewrite <- ? map_app. reflexivity.
-  + symmetry. apply Permutation_Type_app_head, Permutation_Type_app_tail. assumption.
+  + symmetry. apply PermutationT_app_head, PermutationT_app_tail. assumption.
 - discriminate f.
 - destruct l'; destr_eq Heql0. symmetry in H. apply map_eq_nil in H as ->.
   destruct f; destr_eq Heql0; [ destruct p | destruct n ]; destr_eq Heql0.
@@ -399,7 +399,7 @@ revert l Heql0. induction pi; intros l' Heql0; subst;
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1. reflexivity.
   + apply IHpi2. reflexivity.
-  + apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
+  + apply PermutationT_cons, PermutationT_app_comm. reflexivity.
 - destruct l'; destr_eq Heql0.
   destruct f; inversion Heql0; [ destruct p | destruct n ]; inversion Heql0. subst.
   apply with_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
@@ -419,7 +419,7 @@ Qed.
 
 Lemma ax_gen_r A : llpol (dual A :: A :: nil).
 Proof.
-eapply ex_r; [ | apply Permutation_Type_swap ].
+eapply ex_r; [ | apply PermutationT_swap ].
 apply llpolfrag2llpol.
 cbn. rewrite <- llpol2ll_dual. apply ll_def.ax_exp.
 Qed.
@@ -443,7 +443,7 @@ Lemma par_inv N M l : llpol (neg (parr N M) :: l) -> llpol (neg N :: neg M :: l)
 Proof.
 intros pi.
 rewrite <- (app_nil_l l).
-eapply ex_r; [ | apply Permutation_Type_swap ].
+eapply ex_r; [ | apply PermutationT_swap ].
 rewrite 2 app_comm_cons. eapply cut_r.
 - rewrite <- (app_nil_l (neg N :: nil)), 2 app_comm_cons, <- app_comm_cons.
   apply (@tens_r (ndual M) (ndual N)).
@@ -473,24 +473,24 @@ Qed.
 (** Polarized sequents are those with at most one positive formula. *)
 Definition polsequent l :=
   ({ l0 | l = map neg l0 } +
-   {'(l0, P0) & Permutation_Type l (pos P0 :: map neg l0) })%type.
+   {'(l0, P0) & PermutationT l (pos P0 :: map neg l0) })%type.
 
-Lemma uniq_polsequent l1 l2 P1 P2 : Permutation_Type (pos P1 :: l1) (pos P2 :: map neg l2) ->
-  { l1' & l1 = map neg l1' /\ P1 = P2 & Permutation_Type l1' l2 }.
+Lemma uniq_polsequent l1 l2 P1 P2 : PermutationT (pos P1 :: l1) (pos P2 :: map neg l2) ->
+  { l1' & l1 = map neg l1' /\ P1 = P2 & PermutationT l1' l2 }.
 Proof.
 intros HP.
 assert (HP' := HP). symmetry in HP'.
-apply Permutation_Type_vs_cons_inv in HP' as [(l', l'') Heq]. cbn in Heq.
+apply PermutationT_vs_cons_inv in HP' as [(l', l'') Heq]. cbn in Heq.
 destruct l' as [|A l']; destr_eq Heq; subst.
-- apply Permutation_Type_cons_inv, Permutation_Type_map_inv in HP as [l -> HP'].
+- apply PermutationT_cons_inv, PermutationT_map_inv in HP as [l -> HP'].
   exists l; [ repeat split | symmetry; assumption ].
 - exfalso. decomp_map H eqn:Hp. discriminate Hp.
 Qed.
 
-Lemma Permutation_Type_polsequent l1 l2 : Permutation_Type l1 l2 -> polsequent l1 -> polsequent l2.
+Lemma PermutationT_polsequent l1 l2 : PermutationT l1 l2 -> polsequent l1 -> polsequent l2.
 Proof.
 intros HP [[l ->]|[(l, P) Hpol]].
-- left. symmetry in HP. apply Permutation_Type_map_inv in HP as [l' -> _]. exists l'. reflexivity.
+- left. symmetry in HP. apply PermutationT_map_inv in HP as [l' -> _]. exists l'. reflexivity.
 - right. exists (l, P).
   symmetry in HP. transitivity l1; assumption.
 Qed.
@@ -507,28 +507,28 @@ destruct Hi' as [ (l0 & Hi') | ((l0 & P) & Hi') ].
   exists l4; left; repeat split.
   left; eexists; reflexivity.
 - assert (Hi'' := Hi').
-  apply Permutation_Type_vs_cons_inv in Hi' as ((l3 & l4) & Heq).
+  apply PermutationT_vs_cons_inv in Hi' as ((l3 & l4) & Heq).
   decomp_elt_eq_app Heq; subst.
   + list_simpl in Hi''.
     symmetry in Hi''.
-    apply Permutation_Type_cons_app_inv in Hi''.
+    apply PermutationT_cons_app_inv in Hi''.
     symmetry in Hi''.
-    apply Permutation_Type_map_inv in Hi'' as [l' Heq HP].
+    apply PermutationT_map_inv in Hi'' as [l' Heq HP].
     symmetry in Heq; decomp_map_inf Heq; subst.
     eexists; left; repeat split.
     right; exists (l4 ++ l6, P); cbn; rewrite map_app.
-    symmetry; apply Permutation_Type_middle.
+    symmetry; apply PermutationT_middle.
   + symmetry in Hi''.
     rewrite app_assoc in Hi''.
-    apply Permutation_Type_cons_app_inv in Hi''.
+    apply PermutationT_cons_app_inv in Hi''.
     list_simpl in Hi''.
     symmetry in Hi''.
-    apply Permutation_Type_map_inv in Hi''.
+    apply PermutationT_map_inv in Hi''.
     destruct Hi'' as [l' Heq HP].
     symmetry in Heq; decomp_map_inf Heq; subst.
     eexists; right; repeat split.
     right; exists (l6 ++ l7, P); cbn; rewrite map_app.
-    symmetry; apply Permutation_Type_middle.
+    symmetry; apply PermutationT_middle.
 Qed.
 *)
 
@@ -536,12 +536,12 @@ Lemma polsequent_neg_add N l : polsequent l -> polsequent (neg N :: l).
 Proof.
 intros [ [l0 ->] | [[l0 P0] HP] ].
 - left. exists (N :: l0). reflexivity.
-- destruct (Permutation_Type_vs_cons_inv HP) as [(l2, l3) ->].
-  symmetry in HP. apply Permutation_Type_cons_app_inv in HP. symmetry in HP.
-  apply Permutation_Type_map_inv in HP as [l1 Heq' _].
+- destruct (PermutationT_vs_cons_inv HP) as [(l2, l3) ->].
+  symmetry in HP. apply PermutationT_cons_app_inv in HP. symmetry in HP.
+  apply PermutationT_map_inv in HP as [l1 Heq' _].
   decomp_map Heq'. subst.
   right. exists (N :: l2 ++ l3, P0). cbn. rewrite map_app, app_comm_cons.
-  symmetry. apply Permutation_Type_cons_app. reflexivity.
+  symmetry. apply PermutationT_cons_app. reflexivity.
 Qed.
 
 Lemma polsequent_neg_rem N l : polsequent (neg N :: l) -> polsequent l.
@@ -549,27 +549,27 @@ Proof.
 intros [ [l0 Heq] | [[l0 P0] HP] ].
 - destruct l0; inversion Heq.
   left. exists l0. reflexivity.
-- destruct (Permutation_Type_vs_cons_inv HP) as [(l2, l3) Heq].
+- destruct (PermutationT_vs_cons_inv HP) as [(l2, l3) Heq].
   destruct l2; destr_eq Heq. subst.
-  symmetry in HP. rewrite app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. symmetry in HP.
-  apply Permutation_Type_map_inv in HP as [l1 Heq' _].
+  symmetry in HP. rewrite app_comm_cons in HP. apply PermutationT_cons_app_inv in HP. symmetry in HP.
+  apply PermutationT_map_inv in HP as [l1 Heq' _].
   list_simpl in Heq'. decomp_map Heq'. subst.
   right. exists (l2 ++ l3, P0). cbn. rewrite map_app.
-  symmetry. apply Permutation_Type_middle.
+  symmetry. apply PermutationT_middle.
 Qed.
 
 Lemma polsequent_pos_rem_strong P l : polsequent (pos P :: l) -> { l' | l = map neg l' }.
 Proof.
 intros [ [l0 Heq] | [[l0 Q0] HP] ].
 - decomp_map Heq eqn:Hx. discriminate Hx.
-- destruct (Permutation_Type_vs_cons_inv HP) as [(l', l'') Heq].
+- destruct (PermutationT_vs_cons_inv HP) as [(l', l'') Heq].
   destruct l'; destr_eq Heq; subst.
-  + apply Permutation_Type_cons_inv in HP.
-    apply Permutation_Type_map_inv in HP as [l' -> _].
+  + apply PermutationT_cons_inv in HP.
+    apply PermutationT_map_inv in HP as [l' -> _].
     exists l'. reflexivity.
   + exfalso.
-    symmetry in HP. rewrite app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. symmetry in HP.
-    apply Permutation_Type_map_inv in HP as [[|] Heq' _]; discriminate Heq'.
+    symmetry in HP. rewrite app_comm_cons in HP. apply PermutationT_cons_app_inv in HP. symmetry in HP.
+    apply PermutationT_map_inv in HP as [[|] Heq' _]; discriminate Heq'.
 Qed.
 
 Lemma polsequent_pos_rem_weak P l : polsequent (pos P :: l) -> polsequent l.
@@ -583,7 +583,7 @@ match pi with
 | oc_r _ pi1 | de_r pi1 | wk_r _ pi1 | co_r pi1 => Forall_sequent PS pi1 * PS l
 end.
 
-Definition Forall_formula FS := Forall_sequent (Forall_inf FS).
+Definition Forall_formula FS := Forall_sequent (ForallT FS).
 
 Lemma Forall_sequent_is PS l (pi : llpol l) : Forall_sequent PS pi -> PS l.
 Proof. destruct pi; cbn; tauto. Qed.
@@ -614,7 +614,7 @@ induction N in l |- *; intros Ht Hp; inversion_clear Ht as [ | ? ? Ht' | ? ? Ht'
   + exists (parr_r pi'). split; [ | apply polsequent_neg_add ]; assumption.
 - destruct (IHN2 (neg N1 :: l) Ht') as [pi' Hpol'].
   + apply polsequent_neg_add. assumption.
-  + exists (parr_r (ex_r pi' (Permutation_Type_swap _ _ _))).
+  + exists (parr_r (ex_r pi' (PermutationT_swap _ _ _))).
     repeat split; repeat apply polsequent_neg_add; assumption.
 - exists (top_r l). apply polsequent_neg_add. assumption.
 - destruct (IHN1 l Ht' Hp) as [pi1' Hpol1].
@@ -622,93 +622,93 @@ induction N in l |- *; intros Ht Hp; inversion_clear Ht as [ | ? ? Ht' | ? ? Ht'
   exists (with_r pi1' pi2'). split; [ split | apply polsequent_neg_add ]; assumption.
 Qed.
 
-Lemma bipos_top_surf l (pi : llpol l) P' Q' l' : Permutation_Type l (pos P' :: pos Q' :: l') ->
+Lemma bipos_top_surf l (pi : llpol l) P' Q' l' : PermutationT l (pos P' :: pos Q' :: l') ->
   {'(N, l1, l2) & l' = l1 ++ neg N :: l2 & top_surf N }.
 (* TODO try { N & In_inf (neg N) l' & top_surf N } *)
 Proof.
 induction pi in P', Q', l' |- *; intros HP.
-- apply Permutation_Type_length_2_inv in HP as [ HP | HP ]; discriminate HP.
+- apply PermutationT_length_2_inv in HP as [ HP | HP ]; discriminate HP.
 - eapply IHpi.
   etransitivity; [ apply p | apply HP ].
-- apply Permutation_Type_length_1_inv in HP. discriminate HP.
+- apply PermutationT_length_1_inv in HP. discriminate HP.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [[l2 l3] Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [[l2 l3] Heq].
   destruct l2; destr_eq Heq. destruct l2; destr_eq H. subst.
-  rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
+  rewrite 2 app_comm_cons in HP. apply PermutationT_cons_app_inv in HP. list_simpl in HP.
   apply IHpi in HP as [[[N l0] l1] Heq' Htop].
   decomp_elt_eq_app Heq'; subst.
   + now exists (N, l0, l4 ++ neg bot :: l3); list_simpl.
   + now exists (N, l2 ++ neg bot :: l4, l1); list_simpl.
 - assert (HP' := HP).
   symmetry in HP'.
-  apply Permutation_Type_vs_cons_inv in HP' as [(l2', l3') Heq].
+  apply PermutationT_vs_cons_inv in HP' as [(l2', l3') Heq].
   destruct l2'; destr_eq Heq. subst.
-  + apply Permutation_Type_cons_inv in HP.
+  + apply PermutationT_cons_inv in HP.
     assert (HP' := HP).
-    apply Permutation_Type_vs_cons_inv in HP' as [(l3, l4) Heq'].
+    apply PermutationT_vs_cons_inv in HP' as [(l3, l4) Heq'].
     rewrite Heq' in HP. symmetry in HP.
-    apply Permutation_Type_cons_app_inv in HP.
+    apply PermutationT_cons_app_inv in HP.
     decomp_app_eq_app Heq';
       [ | destruct l; destr_eq Heq'1; list_simpl in Heq'1 ]; subst.
     * list_simpl in HP.
-      assert (Permutation_Type (pos Q :: l ++ pos Q' :: l4)
+      assert (PermutationT (pos Q :: l ++ pos Q' :: l4)
                                (pos Q :: pos Q' :: l ++ l4)) as HP'
-        by (symmetry; apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity).
+        by (symmetry; apply PermutationT_cons, PermutationT_cons_app; reflexivity).
       apply IHpi2 in HP' as [[[N l5] l6] Heq' Htop]; cbn in Heq'.
       rewrite Heq', app_assoc in HP.
-      apply Permutation_Type_vs_elt_inv in HP as [(l7, l8) ->].
+      apply PermutationT_vs_elt_inv in HP as [(l7, l8) ->].
       now exists (N, l7, l8).
-    * destruct (IHpi2 Q Q' l4 (Permutation_Type_refl _)) as [[[N l5] l6] -> Htop].
+    * destruct (IHpi2 Q Q' l4 (PermutationT_refl _)) as [[[N l5] l6] -> Htop].
       rewrite app_assoc in HP.
-      apply Permutation_Type_vs_elt_inv in HP as [(l7, l8) ->].
+      apply PermutationT_vs_elt_inv in HP as [(l7, l8) ->].
       now exists (N, l7, l8).
-    * assert (Permutation_Type (pos P :: l3 ++ pos Q' :: l)
+    * assert (PermutationT (pos P :: l3 ++ pos Q' :: l)
                                (pos P :: pos Q' :: l3 ++ l)) as HP'
-        by (symmetry; apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity).
+        by (symmetry; apply PermutationT_cons, PermutationT_cons_app; reflexivity).
       apply IHpi1 in HP' as [[[N l5] l6] Heq' Htop].
       rewrite app_assoc, Heq' in HP.
       list_simpl in HP.
-      apply Permutation_Type_vs_elt_inv in HP as [(l7, l8) ->].
+      apply PermutationT_vs_elt_inv in HP as [(l7, l8) ->].
       now exists (N, l7, l8).
   + destruct l2'; inversion H; subst.
     * rewrite <- (app_nil_l (pos (tens _ _) :: l3')),(app_comm_cons _ _ (pos P')) in HP.
-      apply Permutation_Type_cons_app_inv in HP.
+      apply PermutationT_cons_app_inv in HP.
       list_simpl in HP.
-      destruct (Permutation_Type_vs_cons_inv HP) as [(l4, l5) Heq'].
+      destruct (PermutationT_vs_cons_inv HP) as [(l4, l5) Heq'].
       decomp_app_eq_app Heq';
         [ | destruct l; destr_eq Heq'1; list_simpl in Heq'1 ]; subst.
-      -- symmetry in HP. rewrite app_assoc in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
-         assert (Permutation_Type (pos Q :: l ++ pos P' :: l5)
+      -- symmetry in HP. rewrite app_assoc in HP. apply PermutationT_cons_app_inv in HP. list_simpl in HP.
+         assert (PermutationT (pos Q :: l ++ pos P' :: l5)
                                   (pos Q :: pos P' :: l ++ l5)) as HP'
-           by (symmetry; apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity).
+           by (symmetry; apply PermutationT_cons, PermutationT_cons_app; reflexivity).
          apply IHpi2 in HP' as [[[N l6] l7] Heq' Htop].
          rewrite Heq', app_assoc in HP.
-         apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) ->].
+         apply PermutationT_vs_elt_inv in HP as [(l8, l9) ->].
          now exists (N, l8, l9).
-      -- destruct (IHpi2 Q P' l5 (Permutation_Type_refl _)) as [[[N l6] l7] -> Htop].
-         list_simpl in HP. symmetry in HP. apply Permutation_Type_cons_app_inv in HP. rewrite app_assoc in HP.
-         apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) ->].
+      -- destruct (IHpi2 Q P' l5 (PermutationT_refl _)) as [[[N l6] l7] -> Htop].
+         list_simpl in HP. symmetry in HP. apply PermutationT_cons_app_inv in HP. rewrite app_assoc in HP.
+         apply PermutationT_vs_elt_inv in HP as [(l8, l9) ->].
          now exists (N, l8, l9).
-      -- assert (Permutation_Type (pos P :: l4 ++ pos P' :: l)
+      -- assert (PermutationT (pos P :: l4 ++ pos P' :: l)
                                   (pos P :: pos P' :: l4 ++ l)) as HP'
-           by (symmetry; apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity).
+           by (symmetry; apply PermutationT_cons, PermutationT_cons_app; reflexivity).
          apply IHpi1 in HP' as [[[N l6] l7] Heq' Htop].
-         list_simpl in HP. symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
+         list_simpl in HP. symmetry in HP. apply PermutationT_cons_app_inv in HP.
          rewrite app_assoc, Heq' in HP. list_simpl in HP.
-         apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) ->].
+         apply PermutationT_vs_elt_inv in HP as [(l8, l9) ->].
          now exists (N, l8, l9).
     * rewrite 2 (app_comm_cons _ (pos (tens _ _) :: l3')) in HP.
-      apply Permutation_Type_cons_app_inv in HP.
+      apply PermutationT_cons_app_inv in HP.
       list_simpl in HP.
-      destruct (Permutation_Type_vs_cons_inv HP) as [(l4, l5) Heq'].
+      destruct (PermutationT_vs_cons_inv HP) as [(l4, l5) Heq'].
       decomp_app_eq_app Heq'; subst.
-      -- assert (Permutation_Type (pos Q :: l ++ pos P' :: l5)
+      -- assert (PermutationT (pos Q :: l ++ pos P' :: l5)
                                   (pos Q :: pos P' :: l ++ l5)) as HP'
-           by (symmetry; apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity).
+           by (symmetry; apply PermutationT_cons, PermutationT_cons_app; reflexivity).
          apply IHpi2 in HP' as [[[N l6] l7] Heq' Htop].
-         symmetry in HP. rewrite app_assoc in HP. apply Permutation_Type_cons_app_inv in HP.
+         symmetry in HP. rewrite app_assoc in HP. apply PermutationT_cons_app_inv in HP.
          list_simpl in HP. rewrite Heq', app_assoc in HP.
-         apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
+         apply PermutationT_vs_elt_inv in HP as [(l8, l9) Heq''].
          destruct l8; inversion Heq''.
          decomp_app_eq_app H2;
            [ | destruct l0; destr_eq Heq''; list_simpl in H3 ]; subst.
@@ -717,22 +717,22 @@ induction pi in P', Q', l' |- *; intros HP.
          ++ inversion H3. subst.
             now exists (N, l8, l0 ++ pos (tens P Q) :: l3'); list_simpl.
       -- destruct l; inversion Heq'1; list_simpl in Heq'1; subst.
-         ++ destruct (IHpi2 Q P' l5 (Permutation_Type_refl _)) as [[[N l6] l7] -> Htop].
-            list_simpl in HP. symmetry in HP. apply Permutation_Type_cons_app_inv in HP.
-            rewrite app_assoc in HP. apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
+         ++ destruct (IHpi2 Q P' l5 (PermutationT_refl _)) as [[[N l6] l7] -> Htop].
+            list_simpl in HP. symmetry in HP. apply PermutationT_cons_app_inv in HP.
+            rewrite app_assoc in HP. apply PermutationT_vs_elt_inv in HP as [(l8, l9) Heq''].
             destruct l8; inversion Heq''. subst.
             decomp_app_eq_app H3;
               [ | destruct l; destr_eq H2; list_simpl in H2 ]; subst.
             ** now exists (N, l2' ++ pos (tens P Q) :: l, l9); list_simpl.
             ** now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
             ** now exists (N, l8, l ++ pos (tens P Q) :: l3'); list_simpl.
-         ++ assert (Permutation_Type (pos P :: l4 ++ pos P' :: l)
+         ++ assert (PermutationT (pos P :: l4 ++ pos P' :: l)
                                      (pos P :: pos P' :: l4 ++ l)) as HP'
-              by (symmetry; apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity).
+              by (symmetry; apply PermutationT_cons, PermutationT_cons_app; reflexivity).
             apply IHpi1 in HP' as [[[N l6] l7] Heq' Htop].
-            symmetry in HP. list_simpl in HP. apply Permutation_Type_cons_app_inv in HP.
+            symmetry in HP. list_simpl in HP. apply PermutationT_cons_app_inv in HP.
             rewrite app_assoc, Heq' in HP. list_simpl in HP.
-            apply Permutation_Type_vs_elt_inv in HP as [(l8, l9) Heq''].
+            apply PermutationT_vs_elt_inv in HP as [(l8, l9) Heq''].
             destruct l8; inversion Heq''.
             decomp_app_eq_app H2;
               [ | destruct l0; destr_eq H3; list_simpl in H3 ]; subst.
@@ -740,12 +740,12 @@ induction pi in P', Q', l' |- *; intros HP.
             ** now exists (N, l8 ++ pos (tens P Q) :: nil, l9); list_simpl.
             ** now exists (N, l8, l0 ++ pos (tens P Q) :: l3'); list_simpl.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP.
-  apply Permutation_Type_cons_app_inv in HP.
-  apply (Permutation_Type_cons_app _ _ (neg M)) in HP.
-  apply (Permutation_Type_cons_app _ _ (neg N)) in HP.
+  apply PermutationT_cons_app_inv in HP.
+  apply (PermutationT_cons_app _ _ (neg M)) in HP.
+  apply (PermutationT_cons_app _ _ (neg N)) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
   decomp_elt_eq_app Heq'; subst.
   + destruct l4; destr_eq Heq'1; subst.
@@ -756,46 +756,46 @@ induction pi in P', Q', l' |- *; intros HP.
     * exists (parr N' M, l0, l3); list_simpl; [ reflexivity | ].
       apply par_ls; assumption.
     * now exists (N', l0, l4 ++ neg (parr N M) :: l3); list_simpl.
-- symmetry in HP. apply Permutation_Type_vs_cons_inv in HP as [(l2, l3) Heq].
+- symmetry in HP. apply PermutationT_vs_cons_inv in HP as [(l2, l3) Heq].
   destruct l2; inversion Heq. destruct l2; destr_eq H1; subst.
   exists (top, l2, l3); [ reflexivity | ].
   apply top_s.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; destr_eq Heq. subst.
-  + apply Permutation_Type_cons_inv in HP.
-    apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
+  + apply PermutationT_cons_inv in HP.
+    apply (@PermutationT_cons _ _ (pos P) eq_refl) in HP.
     apply IHpi in HP as [[[N l0] l1] -> Htop].
     now exists (N, l0, l1).
   + destruct l2; destr_eq H; subst.
     * rewrite <- (app_nil_l (pos (aplus _ _) :: l3)), app_comm_cons in HP.
-      apply Permutation_Type_cons_app_inv in HP.
-      apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
+      apply PermutationT_cons_app_inv in HP.
+      apply (@PermutationT_cons _ _ (pos P) eq_refl) in HP.
       list_simpl in HP. apply IHpi in HP as [[[N l0] l1] -> Htop].
       now exists (N, l0, l1).
     * rewrite 2 app_comm_cons in HP.
-      apply Permutation_Type_cons_app_inv, (Permutation_Type_cons_app _ _ (pos P)) in HP.
+      apply PermutationT_cons_app_inv, (PermutationT_cons_app _ _ (pos P)) in HP.
       list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
       decomp_elt_eq_app Heq'; subst.
       -- now exists (N', l2 ++ pos (aplus P Q) :: l4, l1); list_simpl.
       -- destruct l4; destr_eq Heq'1; subst.
          now exists (N', l0, l4 ++ pos (aplus P Q) :: l3); list_simpl.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; destr_eq Heq. subst.
-  + apply Permutation_Type_cons_inv in HP.
-    apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
+  + apply PermutationT_cons_inv in HP.
+    apply (@PermutationT_cons _ _ (pos P) eq_refl) in HP.
     apply IHpi in HP as [[[N l0] l1] -> Htop].
     now exists (N, l0, l1).
   + destruct l2; destr_eq H; subst.
     * rewrite <- (app_nil_l (pos (aplus _ _) :: l3)), app_comm_cons in HP.
-      apply Permutation_Type_cons_app_inv in HP.
-      apply (@Permutation_Type_cons _ _ (pos P) eq_refl) in HP.
+      apply PermutationT_cons_app_inv in HP.
+      apply (@PermutationT_cons _ _ (pos P) eq_refl) in HP.
       list_simpl in HP.
       apply IHpi in HP as [[[N l0] l1] -> Htop].
       now exists (N, l0, l1).
     * rewrite 2 app_comm_cons in HP.
-      apply Permutation_Type_cons_app_inv, (Permutation_Type_cons_app _ _ (pos P)) in HP.
+      apply PermutationT_cons_app_inv, (PermutationT_cons_app _ _ (pos P)) in HP.
       list_simpl in HP.
       apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
       decomp_elt_eq_app Heq'; subst.
@@ -803,11 +803,11 @@ induction pi in P', Q', l' |- *; intros HP.
       -- destruct l4; destr_eq Heq'1; subst.
          now exists (N', l0, l4 ++ pos (aplus Q P) :: l3); list_simpl.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
-  rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP.
-  assert (HP1 := (Permutation_Type_cons_app _ _ (neg N) HP)).
-  assert (HP2 := (Permutation_Type_cons_app _ _ (neg M) HP)).
+  rewrite 2 app_comm_cons in HP. apply PermutationT_cons_app_inv in HP.
+  assert (HP1 := (PermutationT_cons_app _ _ (neg N) HP)).
+  assert (HP2 := (PermutationT_cons_app _ _ (neg M) HP)).
   list_simpl in HP1. apply IHpi1 in HP1 as [[[N' l0] l1] Heq' Htop].
   list_simpl in HP2. apply IHpi2 in HP2 as [[[M' l0'] l1'] Heq'' Htop'].
   decomp_elt_eq_app Heq'; subst.
@@ -822,42 +822,42 @@ induction pi in P', Q', l' |- *; intros HP.
     * now exists (N', l0, l4 ++ neg (awith N M) :: l3); list_simpl.
 - exfalso.
   assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; inversion Heq; subst.
-  + apply Permutation_Type_cons_inv, Permutation_Type_vs_cons_inv in HP as [(l2, l3) Heq'].
+  + apply PermutationT_cons_inv, PermutationT_vs_cons_inv in HP as [(l2, l3) Heq'].
     decomp_map Heq' eqn:Hp. discriminate Hp.
   + destruct l2; inversion H1; subst.
     * rewrite <- (app_nil_l (pos (oc _) :: l3)), app_comm_cons in HP.
-      apply Permutation_Type_cons_app_inv, Permutation_Type_vs_cons_inv in HP as [(l2', l3') Heq'].
+      apply PermutationT_cons_app_inv, PermutationT_vs_cons_inv in HP as [(l2', l3') Heq'].
       decomp_map Heq' eqn:Hp. discriminate Hp.
     * rewrite 2 app_comm_cons in HP.
-      apply Permutation_Type_cons_app_inv, Permutation_Type_vs_cons_inv in HP as [(l2', l3') Heq'].
+      apply PermutationT_cons_app_inv, PermutationT_vs_cons_inv in HP as [(l2', l3') Heq'].
       decomp_map Heq' eqn:Hp. discriminate Hp.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP.
-  apply Permutation_Type_cons_app_inv, (Permutation_Type_cons_app _ _ (pos P)) in HP.
+  apply PermutationT_cons_app_inv, (PermutationT_cons_app _ _ (pos P)) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
   decomp_elt_eq_app Heq'; subst.
   + now exists (N', l2 ++ neg (wn P) :: l4, l1); list_simpl.
   + destruct l4; destr_eq Heq'1; subst.
     now exists (N', l0, l4 ++ neg (wn P) :: l3); list_simpl.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
-  rewrite 2 app_comm_cons in HP. apply Permutation_Type_cons_app_inv in HP. list_simpl in HP.
+  rewrite 2 app_comm_cons in HP. apply PermutationT_cons_app_inv in HP. list_simpl in HP.
   apply IHpi in HP as [[[N l0] l1] Heq' Htop].
   decomp_elt_eq_app Heq'; subst.
   + now exists (N, l0, l4 ++ neg (wn P) :: l3); list_simpl.
   + now exists (N, l2 ++ neg (wn P) :: l4, l1); list_simpl.
 - assert (HP' := HP).
-  symmetry in HP'. apply Permutation_Type_vs_cons_inv in HP' as [(l2, l3) Heq].
+  symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
   destruct l2; inversion Heq. destruct l2; destr_eq H1. subst.
   rewrite 2 app_comm_cons in HP.
-  apply Permutation_Type_cons_app_inv in HP.
-  apply (Permutation_Type_cons_app _ _ (neg (wn P))) in HP.
-  apply (Permutation_Type_cons_app _ _ (neg (wn P))) in HP.
+  apply PermutationT_cons_app_inv in HP.
+  apply (PermutationT_cons_app _ _ (neg (wn P))) in HP.
+  apply (PermutationT_cons_app _ _ (neg (wn P))) in HP.
   list_simpl in HP. apply IHpi in HP as [[[N' l0] l1] Heq' Htop].
   decomp_elt_eq_app Heq'; subst.
   + destruct l4; destr_eq Heq'1; subst.
@@ -874,7 +874,7 @@ Proof.
 induction pi; cbn; intros Hpol.
 - exists (ax_r X). assumption.
 - symmetry in p.
-  destruct (IHpi (Permutation_Type_polsequent p Hpol)) as [pi' Hpi'].
+  destruct (IHpi (PermutationT_polsequent p Hpol)) as [pi' Hpi'].
   symmetry in p.
   exists (ex_r pi' p). split; assumption.
 - exists one_r.
@@ -915,29 +915,29 @@ induction pi; cbn; intros Hpol.
     assert (polsequent (pos P :: map neg l)) as [pi' Hpol']%IHpi by (right; exists (l, P); reflexivity).
     exists (de_r pi'). split; [ assumption | ].
     left. exists (wn P :: l). reflexivity.
-  + destruct (Permutation_Type_vs_cons_inv HP) as [(l2, l3) Heq].
+  + destruct (PermutationT_vs_cons_inv HP) as [(l2, l3) Heq].
     destruct l2; destr_eq Heq; subst.
     destruct (@bipos_top_surf _ pi P Q (l2 ++ l3)) as [[[N l] l'] Heq' Htop].
-    { symmetry. apply Permutation_Type_cons, Permutation_Type_cons_app; reflexivity. }
-    assert (Permutation_Type (neg (wn P) :: l2 ++ pos Q :: l3) (pos Q :: neg (wn P) :: l2 ++ l3)) as HP'.
-    { symmetry. rewrite ? app_comm_cons. apply Permutation_Type_cons_app. reflexivity. }
-    apply (Permutation_Type_polsequent HP') in Hpol.
+    { symmetry. apply PermutationT_cons, PermutationT_cons_app; reflexivity. }
+    assert (PermutationT (neg (wn P) :: l2 ++ pos Q :: l3) (pos Q :: neg (wn P) :: l2 ++ l3)) as HP'.
+    { symmetry. rewrite ? app_comm_cons. apply PermutationT_cons_app. reflexivity. }
+    apply (PermutationT_polsequent HP') in Hpol.
     apply polsequent_pos_rem_strong in Hpol as [l'' Heq''].
     decomp_map Heq'' eqn:Hx. subst. rewrite <- map_app in Heq'. decomp_map Heq' eqn:Hx0. subst.
     injection Hx as [= ->]. injection Hx0 as [= ->].
     assert (polsequent (pos Q :: neg (wn P) :: map neg l ++ map neg l')) as Hpol.
     { right. exists (wn P :: l ++ l', Q). cbn. rewrite map_app. reflexivity. }
     destruct (top_imp_top_surf_proof Htop Hpol) as [pit Hpolt].
-    assert (Permutation_Type (neg N :: pos Q :: neg (wn P) :: map neg l ++ map neg l')
+    assert (PermutationT (neg N :: pos Q :: neg (wn P) :: map neg l ++ map neg l')
                              (neg (wn P) :: map neg l2 ++ pos Q :: map neg l3)) as HP''.
     { transitivity (pos Q :: neg (wn P) :: map neg l2 ++ map neg l3).
       - rewrite <- ? map_app, Heq'. list_simpl.
         rewrite ? (app_comm_cons _ _ (neg (wn P))), ? (app_comm_cons _ _ (pos Q)).
-        apply Permutation_Type_cons_app. reflexivity.
-      - rewrite ? app_comm_cons. apply Permutation_Type_cons_app. reflexivity. }
+        apply PermutationT_cons_app. reflexivity.
+      - rewrite ? app_comm_cons. apply PermutationT_cons_app. reflexivity. }
     exists (ex_r pit HP''). split; [ assumption | ].
     right. exists (wn P :: l2 ++ l3, Q).
-    symmetry. rewrite ? app_comm_cons. apply Permutation_Type_cons_app. cbn. rewrite map_app. reflexivity.
+    symmetry. rewrite ? app_comm_cons. apply PermutationT_cons_app. cbn. rewrite map_app. reflexivity.
 - destruct (IHpi (polsequent_neg_rem Hpol)) as [pi' Hpi'].
   exists (wk_r P pi'). split; assumption.
 - apply polsequent_neg_rem in Hpol.
@@ -949,7 +949,7 @@ Qed.
 (** [llpol] with [top] rule constrained to at most one positive formula. *)
 Inductive llpolt : list formula -> Type :=
 | ax_rt X : llpolt (neg (covar X) :: pos (var X) :: nil)
-| ex_rt l1 l2 : llpolt l1 -> Permutation_Type l1 l2 -> llpolt l2
+| ex_rt l1 l2 : llpolt l1 -> PermutationT l1 l2 -> llpolt l2
 | one_rt : llpolt (pos one :: nil)
 | bot_rt l : llpolt l -> llpolt (neg bot :: l)
 | tens_rt P Q l1 l2 : llpolt (pos P :: l1) -> llpolt (pos Q :: l2) -> llpolt (pos (tens P Q) :: l1 ++ l2)
@@ -963,7 +963,7 @@ Inductive llpolt : list formula -> Type :=
 | wk_rt P l : llpolt l -> llpolt (neg (wn P) :: l)
 | co_rt P l : llpolt (neg (wn P) :: neg (wn P) :: l) -> llpolt (neg (wn P) :: l).
 
-Instance llpolt_perm : Proper ((@Permutation_Type _) ==> arrow) llpolt.
+Instance llpolt_perm : Proper ((@PermutationT _) ==> arrow) llpolt.
 Proof. intros l1 l2 HP pi. eapply ex_rt; eassumption. Qed.
 
 (** For polarized sequents, [llpol] corresponds to [top] rule with at most one positive formula. *)
@@ -985,8 +985,8 @@ intro pi. induction pi; split;
   try (destruct IHpi1 as [Hpol1 pi1']); try (destruct IHpi2 as [Hpol2 pi2']);
   try (now constructor);
   try (apply polsequent_neg_add; assumption).
-- right. exists (covar X :: nil, var X). apply Permutation_Type_swap.
-- refine (Permutation_Type_polsequent _ Hpol). assumption.
+- right. exists (covar X :: nil, var X). apply PermutationT_swap.
+- refine (PermutationT_polsequent _ Hpol). assumption.
 - eapply ex_r; eassumption.
 - right. exists (nil, one). reflexivity.
 - apply polsequent_pos_rem_strong in Hpol1 as [l1' ->].

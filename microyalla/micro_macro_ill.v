@@ -2,7 +2,7 @@ From Stdlib Require Import List Lia.
 (*
 From OLlibs Require Import funtheory.
 *)
-From OLlibs Require Import dectype Permutation_Type.
+From OLlibs Require Import dectype PermutationT.
 From Yalla Require Import ill_def microill.
 
 Set Implicit Arguments.
@@ -55,11 +55,11 @@ induction l1 in l2 |- *; intros Heq; destruct l2; inversion Heq.
 Qed.
 *)
 
-Lemma transp_perm A n (l : list A) : Permutation_Type l (transp n l).
+Lemma transp_perm A n (l : list A) : PermutationT l (transp n l).
 Proof.
 induction n in l |- *; cbn; destruct l; trivial.
-- destruct l; [ reflexivity | apply Permutation_Type_swap ].
-- apply Permutation_Type_cons, IHn; reflexivity.
+- destruct l; [ reflexivity | apply PermutationT_swap ].
+- apply PermutationT_cons, IHn; reflexivity.
 Qed.
 
 Lemma transp_map A B (f : A -> B) n l :
@@ -84,9 +84,9 @@ induction pi; rewrite <- (app_nil_l _); try (now constructor).
 - apply (ex_ir (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
   + now constructor.
   + cbn; rewrite map_app.
-    etransitivity; [ apply Permutation_Type_app_comm | ].
-    apply Permutation_Type_cons; [ reflexivity | ].
-    apply Permutation_Type_app_comm.
+    etransitivity; [ apply PermutationT_app_comm | ].
+    apply PermutationT_cons; [ reflexivity | ].
+    apply PermutationT_app_comm.
 - rewrite ill2ill_map_ioc.
   constructor.
   rewrite <- ill2ill_map_ioc; assumption.

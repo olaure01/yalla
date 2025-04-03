@@ -1,7 +1,7 @@
 (** * Example of a concrete use of the yalla library: unit-free MELL in Prop *)
 
 From Stdlib Require Import Morphisms.
-From OLlibs Require Import funtheory dectype List_more Permutation_more Permutation_Type_more.
+From OLlibs Require Import funtheory dectype List_more Permutation_more PermutationT_more.
 
 
 (** ** 0. load the [yalla] library *)
@@ -119,7 +119,7 @@ intro pi. induction pi; try ((try inversion IHpi); do 2 constructor; assumption)
   + constructor. assumption.
   + constructor.
     eapply ll_def.ex_r; [ eassumption | ].
-    apply Permutation_Type_map, Permutation_Type_app_head, Permutation_Type_swap.
+    apply PermutationT_map, PermutationT_app_head, PermutationT_swap.
   + apply IHPermutation_transp2.
     * apply Permutation_Permutation_transp in H.
       eapply ex_r; eassumption.
@@ -128,7 +128,7 @@ intro pi. induction pi; try ((try inversion IHpi); do 2 constructor; assumption)
   eapply ll_def.ex_r.
   + exact (ll_def.tens_r IHpi1 IHpi2).
   + cbn. rewrite map_app.
-    apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
+    apply PermutationT_cons, PermutationT_app_comm. reflexivity.
 - destruct IHpi. constructor.
   cbn. rewrite mell2ll_map_wn. apply ll_def.oc_r. rewrite <- mell2ll_map_wn. assumption.
 Qed.
@@ -143,16 +143,16 @@ induction pi in l, Heql0 |- *; subst;
   destruct x; destr_eq Heq1. destruct x0; destr_eq Heq2. subst.
   apply ax_r.
 - cbn in p.
-  apply Permutation_Type_map_inv in p
-    as [l'' Heq HP%Permutation_Type_sym%Permutation_Type_Permutation].
+  apply PermutationT_map_inv in p
+    as [l'' Heq HP%PermutationT_sym%PermutationT_Permutation].
   eapply ex_r; [ | eassumption ].
   apply IHpi. assumption.
 - decomp_map Heql0 eqn:Heq. subst.
   symmetry in Heq. destruct (mell2ll_map_wn_inv _ _ Heq) as [l' [-> ->]].
-  apply Permutation_Type_map_inv in p as [l'' ->].
+  apply PermutationT_map_inv in p as [l'' ->].
   eapply (@ex_r (l1 ++ map wn l'' ++ l2)).
   + apply IHpi. list_simpl. rewrite mell2ll_map_wn. reflexivity.
-  + symmetry. apply Permutation_app_head, Permutation_app_tail, Permutation_map, Permutation_Type_Permutation, p.
+  + symmetry. apply Permutation_app_head, Permutation_app_tail, Permutation_map, PermutationT_Permutation, p.
 - discriminate f.
 - decomp_map Heql0 eqn:Hx. destruct x; destr_eq Hx. subst.
   eapply ex_r; [ apply tens_r | ].
@@ -177,7 +177,7 @@ Proof. intros [pi]%(inhabited_covariant (mellfrag2mell _)). exact pi. Qed.
 Lemma ax_gen_r A : mell (dual A :: A :: nil).
 Proof.
 apply mellfrag2mell. cbn. rewrite <- mell2ll_dual.
-eapply ll_def.ex_r; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
+eapply ll_def.ex_r; [ apply ll_def.ax_exp | apply PermutationT_swap ].
 Qed.
 
 (** *** cut admissibility *)

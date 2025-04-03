@@ -2,7 +2,7 @@
 (* see ill_prop.v for other properties *)
 
 From Stdlib Require Import PeanoNat Wf_nat List Lia.
-From OLlibs Require Import funtheory dectype List_more flat_map_more Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import funtheory dectype List_more flat_map_more PermutationT_more GPermutationT.
 From Yalla Require Export ill_cut_at.
 
 Set Default Proof Using "Type".
@@ -39,7 +39,7 @@ induction pi in HeqB |- *; inversion HeqB; subst;
   try (list_simpl; rewrite app_assoc; constructor;
        list_simpl; rewrite ? app_comm_cons, ? (app_assoc l0), ? (app_assoc l3); assumption).
 - apply (ex_ir (l1 ++ l0 ++ l2)); [ assumption | ].
-  apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail. assumption.
+  apply PEPermutationT_app_head, PEPermutationT_app_tail. assumption.
 - list_simpl. rewrite app_assoc. eapply ex_oc_ir; [ | eassumption ].
   list_simpl. rewrite (app_assoc l0), (app_assoc _ l3), <- (app_assoc l0). assumption.
 - apply IH, pi.
@@ -66,14 +66,14 @@ induction pi in l', L, Heq |- *;
 - destruct l', L; inversion Heq as [[H1 H2]]; destruct l'; destr_eq H2; list_simpl.
   apply ax_ir.
 - case_eq (ipperm P); intros Hperm; rewrite Hperm in p; cbn in p; subst.
-  + destruct (Permutation_Type_app_flat_map_cons_inv _ (map ioc lw) _ _ p)
+  + destruct (PermutationT_app_flat_map_cons_inv _ (map ioc lw) _ _ p)
       as [[L' l''] Hnil' [HeqL' HPL']];
       cbn in Hnil', HeqL', HPL'; subst.
     eapply ex_ir; [ | rewrite Hperm; cbn; apply HPL' ].
     apply (IHpi _ _ eq_refl).
   + apply (IHpi _ _ eq_refl).
 - assert (injective (@ioc preiatom)) as Hinj by (intros x y [= ->]; reflexivity).
-  destruct (Permutation_Type_app_map_app_eq_app_flat_map_cons_inv _ Hinj lw _ _ _ _ p Heq)
+  destruct (PermutationT_app_map_app_eq_app_flat_map_cons_inv _ Hinj lw _ _ _ _ p Heq)
     as [(((((lw1', lw2'), l1'), l2'), l''), L') H1 [H2 [H3 H4]]].
   rewrite <- H4. apply (ex_oc_ir _ lw1'); [ | assumption ].
   rewrite H3. apply IHpi. assumption.
@@ -457,7 +457,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
   decomp_unit_eq_elt Heql; list_simpl; assumption.
 - (* ex_ir *)
   cbn in IHsize.
-  apply PEPermutation_Type_vs_elt_subst in HP as [(l1',l2') HP ->].
+  apply PEPermutationT_vs_elt_subst in HP as [(l1',l2') HP ->].
   specialize (HP l0); symmetry in HP.
   refine (ex_ir _ _ _ _ HP).
   refine (IHsize _ _ _ _ pi1 Hl _); lia.
@@ -498,7 +498,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hone _); lia).
     * apply (ex_ir (l3 ++ l ++ l4)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hone _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * list_simpl; rewrite app_assoc; eapply ex_oc_ir; [ | eassumption ].
       list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hone _); lia.
@@ -543,7 +543,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Htens _); lia).
     * apply (ex_ir (l3 ++ l ++ l4)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Htens _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * list_simpl; rewrite app_assoc; eapply ex_oc_ir; [ | eassumption ].
       list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Htens _); lia.
@@ -587,7 +587,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlpam _); lia).
     * apply (ex_ir (l4 ++ l ++ l3 ++ l5)).
       -- cbn in IHsize. refine (IHsize _ _ _ _ Hl2 Hlpam _). lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail. assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail. assumption.
     * list_simpl. rewrite app_assoc. eapply ex_oc_ir; [ | eassumption ].
       list_simpl. rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
       cbn in IHsize. refine (IHsize _ _ _ _ Hl2 Hlpam _). lia.
@@ -625,7 +625,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
     * apply (ex_ir (nil ++ l' ++ l2)).
       -- revert Hgen IHsize; rewrite <- (app_nil_l _); intros Hgen IHsize.
          refine (IHsize _ _ _ _ Hl2 Hgen _); cbn; lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * rewrite <- ? app_assoc, app_assoc; eapply ex_oc_ir; [ | eassumption ].
       rewrite <- app_assoc, (app_assoc l'), (app_assoc _ l0), <- (app_assoc l').
       revert Hgen IHsize; rewrite <- (app_nil_l _); intros Hgen IHsize.
@@ -672,7 +672,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlmap _); lia).
     * apply (ex_ir ((l4 ++ l3) ++ l ++ l5)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlmap _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * list_simpl; rewrite 2 app_assoc; eapply ex_oc_ir; [ | eassumption ].
       list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l), app_assoc.
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hlmap _); lia.
@@ -712,7 +712,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hneg _); lia).
     * apply (ex_ir (l ++ l' ++ nil)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hneg _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * rewrite <- ? app_assoc, app_assoc; eapply ex_oc_ir; [ | eassumption ].
       rewrite <- app_assoc, (app_assoc l'), (app_assoc _ l2), <- (app_assoc l').
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hneg _); lia.
@@ -755,7 +755,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hwith _); lia).
     * apply (ex_ir (l3 ++ l ++ l4)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hwith _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * list_simpl; rewrite app_assoc; eapply ex_oc_ir; [ | eassumption ].
       list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hwith _); lia.
@@ -792,7 +792,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hwith _); lia).
     * apply (ex_ir (l3 ++ l ++ l4)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hwith _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * list_simpl; rewrite app_assoc; eapply ex_oc_ir; [ | eassumption ].
       list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hwith _); lia.
@@ -826,7 +826,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hzero _); lia).
     * apply (ex_ir (l3 ++ l ++ l4)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hzero _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * list_simpl; rewrite app_assoc; eapply ex_oc_ir; [ | eassumption ].
       list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hzero _); lia.
@@ -863,7 +863,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
            cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hplus _); lia).
     * apply (ex_ir (l3 ++ l ++ l4)).
       -- cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hplus _); lia.
-      -- apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail; assumption.
+      -- apply PEPermutationT_app_head, PEPermutationT_app_tail; assumption.
     * list_simpl; rewrite app_assoc; eapply ex_oc_ir; [ | eassumption ].
       list_simpl; rewrite (app_assoc l), (app_assoc _ l2), <- (app_assoc l).
       cbn in IHsize; refine (IHsize _ _ _ _ Hl2 Hplus _); lia.
@@ -979,7 +979,7 @@ intro pi. induction pi; try (econstructor; eassumption).
     * intros b l3 l4 Hb. apply Hcut. assumption.
   + intros a D l3 l4 Ha Hcut'. split.
     * cbn in Ha. assert (Hatl := fst (Hat a)). rewrite Ha in Hatl.
-      exact (Forall_inf_elt _ _ _ Hatl).
+      exact (ForallT_elt _ _ _ Hatl).
     * intros a' Ha'. apply Hcut.
       cbn in Ha, Ha'. rewrite Ha, Ha'. reflexivity.
 - revert a. change (ipgax P) with (ipgax (cutrm_ipfrag P)). apply gax_ir.

@@ -1,6 +1,6 @@
 (** * Order structure and finite multiset structure on formulas *)
 
-From OLlibs Require Import funtheory infinite nattree fmsetlist_Type BOrders.
+From OLlibs Require Import funtheory infinite nattree fmsetlistT BOrders.
 From Yalla Require Export formulas.
 
 Set Implicit Arguments.

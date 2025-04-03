@@ -2,7 +2,7 @@
 (* Properties depending on cut admissibility *)
 
 From Stdlib Require Import Bool.
-From OLlibs Require Import dectype List_more Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import dectype List_more PermutationT_more GPermutationT.
 From Yalla Require Export ill_cut.
 
 Set Implicit Arguments.
@@ -22,10 +22,10 @@ intros pi%cut_admissible_ill_axfree; [ | assumption ].
 remember nil as l eqn:Heql. remember izero as C eqn:HeqC.
 induction pi in Heql, HeqC |- *; inversion Heql; inversion HeqC; subst;
   try now (destruct l1; destr_eq Heql).
-- symmetry in p. apply PEPermutation_Type_nil in p as ->.
+- symmetry in p. apply PEPermutationT_nil in p as ->.
   apply IHpi; reflexivity.
 - apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
-  symmetry in p. apply Permutation_Type_nil in p as ->.
+  symmetry in p. apply PermutationT_nil in p as ->.
   apply IHpi; reflexivity.
 - rewrite app_assoc in Heql. symmetry in Heql. decomp_nil_eq_elt Heql.
 - contradiction (Hgax a).
@@ -38,7 +38,7 @@ Lemma cut_N_ir P (Hgax : noN_iax P) l0 l1 l2 C :
   ill P l0 N -> ill P (l1 ++ N :: l2) C -> ill P (l1 ++ l0 ++ l2) C.
 Proof.
 intros pi1 pi2. refine (cut_at_ir_gax Hgax _ _ _ pi1 pi2).
-intros b l l' Heq. contradiction (Hgax b). rewrite Heq. apply in_inf_elt.
+intros b l l' Heq. contradiction (Hgax b). rewrite Heq. apply inT_elt.
 Qed.
 
 Lemma ilmap_to_ineg P A : ill P (ilmap A N :: nil) (ineg A).
@@ -154,21 +154,21 @@ Definition ifragment FS := forall A : iformula, FS A -> forall B, isubform B A -
 
 (** Conservativity over fragments *)
 Lemma iconservativity P (P_cutfree : no_icut P) FS (Hfrag : ifragment FS) l A (pi : ill P l A) :
-  Forall_inf FS (A :: l) -> Forall_iformula FS pi.
+  ForallT FS (A :: l) -> Forall_iformula FS pi.
 Proof.
 induction pi; cbn; intros HFS; inversion HFS as [|D l' Hhd Htl]; subst; repeat split; try assumption;
   try (apply IHpi; constructor; [ eapply Hfrag; [ apply Hhd | now repeat constructor ] | ]);
   try (apply IHpi1; constructor; [ eapply Hfrag; [ apply Hhd | now repeat constructor ] | ]);
   try (apply IHpi2; constructor; [ eapply Hfrag; [ apply Hhd | now repeat constructor ] | ]);
   try apply IHpi; try apply IHpi1; try apply IHpi2;
-  try Forall_inf_solve;
-  try (Forall_inf_simpl_hyp; subst; Forall_inf_solve_rec;
+  try ForallT_solve;
+  try (ForallT_simpl_hyp; subst; ForallT_solve_rec;
        repeat constructor; try assumption;
        eapply Hfrag; [ eassumption | now repeat constructor ]).
-- symmetry in p. exact (PEPermutation_Type_Forall_inf _ _ p Htl).
-- refine (Permutation_Type_Forall_inf _ Htl).
-  symmetry in p. apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-- Forall_inf_simpl_hyp. subst. Forall_inf_solve_rec.
+- symmetry in p. exact (PEPermutationT_ForallT _ _ p Htl).
+- refine (PermutationT_ForallT _ Htl).
+  symmetry in p. apply PermutationT_app_head, PermutationT_app_tail, PermutationT_map, p.
+- ForallT_simpl_hyp. subst. ForallT_solve_rec.
   constructor; [ | constructor; [ | assumption ] ].
   + eapply Hfrag; [ eassumption | now repeat constructor ].
   + eapply Hfrag; [ eassumption | now repeat constructor ].
@@ -185,12 +185,12 @@ apply (iconservativity P_cutfree).
   eapply Exists_impl, Hf.
   intros D HCD. transitivity C; assumption.
 - remember (A :: l) as l0. clear. induction l0 as [|A l IHl]; repeat constructor.
-  eapply Forall_inf_arrow, IHl.
+  eapply ForallT_arrow, IHl.
   intros B Hl. right. exact Hl.
 Qed.
 
 Lemma iconservativity_axfree P (P_axfree : no_iax P) FS (Hfrag : ifragment FS) l A (pi : ill P l A) :
-  Forall_inf FS (A :: l) -> { pi' : ill P l A & Forall_iformula FS pi' }.
+  ForallT FS (A :: l) -> { pi' : ill P l A & Forall_iformula FS pi' }.
 Proof.
 intro HFS.
 apply cut_admissible_ill_axfree in pi; [ | assumption ].
@@ -216,7 +216,7 @@ refine (iconservativity_axfree P_axfree _ pi _).
   eapply Exists_impl, Hf.
   intros D HCD. transitivity C; assumption.
 - remember (A :: l) as l0. clear. induction l0 as [|A l IHl]; repeat constructor.
-  eapply Forall_inf_arrow, IHl.
+  eapply ForallT_arrow, IHl.
   intros B Hl. right. exact Hl.
 Qed.
 

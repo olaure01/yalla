@@ -1,7 +1,7 @@
 (** * Example of a concrete use of the yalla library: LL *)
 
 From Stdlib Require Import CMorphisms.
-From OLlibs Require Import funtheory infinite List_more Permutation_Type_more.
+From OLlibs Require Import funtheory infinite List_more PermutationT_more.
 
 
 (** ** 0. load the [yalla] library *)
@@ -89,7 +89,7 @@ Qed.
 
 Inductive ll : list formula -> Type :=
 | ax_r X : ll (covar X :: var X :: nil)
-| ex_r l1 l2 : ll l1 -> Permutation_Type l1 l2 -> ll l2
+| ex_r l1 l2 : ll l1 -> PermutationT l1 l2 -> ll l2
 | one_r : ll (one :: nil)
 | bot_r l : ll l -> ll (bot :: l)
 | tens_r A B l1 l2 : ll (A :: l1) -> ll (B :: l2) -> ll (tens A B :: l1 ++ l2)
@@ -103,7 +103,7 @@ Inductive ll : list formula -> Type :=
 | wk_r A l : ll l -> ll (wn A :: l)
 | co_r A l : ll (wn A :: wn A :: l) -> ll (wn A :: l).
 
-Instance ll_perm : Proper ((@Permutation_Type _) ==> arrow) ll.
+Instance ll_perm : Proper ((@PermutationT _) ==> arrow) ll.
 Proof. intros l1 ? ? ?. apply ex_r with l1; assumption. Qed.
 
 (** ** 4. characterize corresponding [ll] fragment *)
@@ -116,10 +116,10 @@ Lemma ll2llfrag l : ll l -> ll_fragments.ll_ll (map ll2ll l).
 Proof.
 intro pi. induction pi; try (constructor; assumption).
 - eapply ll_def.ex_r; [ eassumption | ].
-  apply Permutation_Type_map. assumption.
+  apply PermutationT_map. assumption.
 - eapply ll_def.ex_r.
   + exact (ll_def.tens_r IHpi1 IHpi2).
-  + list_simpl. apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
+  + list_simpl. apply PermutationT_cons, PermutationT_app_comm. reflexivity.
 - cbn. rewrite ll2ll_map_wn. apply ll_def.oc_r. rewrite <- ll2ll_map_wn. assumption.
 Qed.
 
@@ -132,14 +132,14 @@ induction pi in l, Heql0 |- *; subst;
 - decomp_map Heql0 eqn:Heq. subst l. destruct Heq as [Heq1 [Heq2 ->]].
   destruct x; destr_eq Heq1. destruct x0; destr_eq Heq2. subst.
   apply ax_r.
-- cbn in p. apply Permutation_Type_map_inv in p as [l'' Heq HP%Permutation_Type_sym].
+- cbn in p. apply PermutationT_map_inv in p as [l'' Heq HP%PermutationT_sym].
   eapply ex_r; [ apply IHpi | ]; eassumption.
 - decomp_map Heql0 eqn:Heq. subst.
   symmetry in Heq. apply ll2ll_map_wn_inv in Heq as [l -> ->].
-  apply Permutation_Type_map_inv in p as [l' -> HP].
+  apply PermutationT_map_inv in p as [l' -> HP].
   eapply ex_r; [ apply IHpi; rewrite <- ll2ll_map_wn, <- ! map_app; reflexivity | ].
   symmetry in HP.
-  apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map. assumption.
+  apply PermutationT_app_head, PermutationT_app_tail, PermutationT_map. assumption.
 - discriminate f.
 - destruct l as [|f []]; destr_eq Heql0. destruct f; destr_eq Heql0.
   apply one_r.
@@ -147,7 +147,7 @@ induction pi in l, Heql0 |- *; subst;
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1. reflexivity.
   + apply IHpi2. reflexivity.
-  + apply Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
+  + apply PermutationT_cons, PermutationT_app_comm. reflexivity.
 - destruct l as [|f l]; destr_eq Heql0. destruct f; destr_eq Heql0. subst.
   apply with_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
 - destruct l as [|f l]; inversion Heql0 as [[Heq Hwn]]. destruct f; destr_eq Heq. subst.
@@ -166,7 +166,7 @@ Qed.
 Lemma ax_gen_r A : ll (dual A :: A :: nil).
 Proof.
 apply llfrag2ll. cbn. rewrite <- ll2ll_dual.
-eapply ll_def.ex_r; [ apply ll_def.ax_exp | apply Permutation_Type_swap ].
+eapply ll_def.ex_r; [ apply ll_def.ax_exp | apply PermutationT_swap ].
 Qed.
 
 (** *** cut admissibility *)

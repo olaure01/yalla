@@ -1,6 +1,6 @@
 (** * Substitutions in Intuitionistic Linear Logic formulas and proofs *)
 
-From OLlibs Require Import infinite List_more Permutation_Type GPermutation_Type.
+From OLlibs Require Import infinite List_more PermutationT GPermutationT.
 From Yalla Require Export ill_def.
 
 Set Implicit Arguments.
@@ -53,10 +53,10 @@ intro pi. induction pi; cbn; rewrite ? map_app;
   try (cbn in IHpi2; rewrite ? map_app in IHpi2);
   try (constructor; assumption).
 - apply ax_exp_ill.
-- eapply PEPermutation_Type_map in p.
+- eapply PEPermutationT_map in p.
   eapply ex_ir; eassumption.
 - rewrite isubs_ioc in *.
-  eapply Permutation_Type_map in p.
+  eapply PermutationT_map in p.
   eapply ex_oc_ir; eassumption.
 - list_simpl. apply lpam_ilr; assumption.
 - unfold repl_iat in IHpi. rewrite if_eq_dt_dec_neq in IHpi by exact HN. apply gen_irr, IHpi.

@@ -1,7 +1,7 @@
 (** * Parametric negative translation from [ll] into [ill]. *)
 
-From OLlibs Require Import Datatypes_more funtheory infinite List_more Dependent_Forall_Type
-                           Permutation_Type GPermutation_Type.
+From OLlibs Require Import Datatypes_more funtheory infinite List_more Dependent_ForallT
+                           PermutationT GPermutationT.
 From Yalla Require Import subs isubs.
 From Yalla Require Export ill_vs_ll.
 
@@ -49,7 +49,7 @@ intros Heq. destruct i; [ right | left; reflexivity ].
 enough (a2i (i2a (Some c)) = Some c) as Heqc by (rewrite <- Heqc; f_equal; assumption).
 apply i2i_not_atN. intros [=].
 Qed.
-Lemma i2a_fin a : { l & forall i, iffT (a = i2a i) (In_inf i l) }.
+Lemma i2a_fin a : { l & forall i, iffT (a = i2a i) (InT i l) }.
 Proof.
 destruct (eq_dt_dec a Na) as [ -> | Hneq ].
 - exists (atN :: a2i (i2a atN) :: nil). intros i. split.
@@ -106,7 +106,7 @@ Lemma negR_ilr_head P (Hperm : ipperm P = true) A l : ill P l A -> ill P (negR A
 Proof.
 intros pi.
 rewrite <- (app_nil_r _), <- app_comm_cons.
-eapply ex_ir; [ | symmetry; rewrite Hperm; apply Permutation_Type_middle ].
+eapply ex_ir; [ | symmetry; rewrite Hperm; apply PermutationT_middle ].
 apply negR_ilr, pi.
 Qed.
 
@@ -151,20 +151,20 @@ apply (cut_ir (itens (negR (negR A2)) (negR (negR B2))) (Hcut _)).
 - rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl. cons2app. apply tens_irr; apply lmap_irr.
-  + eapply ex_ir; [ apply pi1 | rewrite Hperm; apply Permutation_Type_swap ].
-  + eapply ex_ir; [ apply pi2 | rewrite Hperm; apply Permutation_Type_swap ].
+  + eapply ex_ir; [ apply pi1 | rewrite Hperm; apply PermutationT_swap ].
+  + eapply ex_ir; [ apply pi2 | rewrite Hperm; apply PermutationT_swap ].
 - list_simpl. rewrite <- (app_nil_l _).
   apply tens_ilr.
   list_simpl.
   rewrite <- (app_nil_l (negR (itens _ _) :: _)), 2 app_comm_cons, <- (app_nil_l _).
   apply negR_ilr_head; [ assumption | ].
   apply negR_irr.
-  eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
+  eapply ex_ir; [ | rewrite Hperm; apply PermutationT_swap ].
   apply negR_ilr_head; [ assumption | ].
   apply negR_irr.
-  cons2app. rewrite app_assoc. eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_middle ].
+  cons2app. rewrite app_assoc. eapply ex_ir; [ | rewrite Hperm; apply PermutationT_middle ].
   list_simpl. apply negR_ilr_head; [ assumption | ].
-  eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
+  eapply ex_ir; [ | rewrite Hperm; apply PermutationT_swap ].
   cons2app. apply tens_irr; apply ax_exp_ill.
 Qed.
 
@@ -177,9 +177,9 @@ cons2app. rewrite <- (app_nil_l _).
 apply (cut_ir (iplus (negR (negR A2)) (negR (negR B2))) (Hcut _)).
 - rewrite <- (app_nil_l _). apply plus_ilr.
   + list_simpl. apply plus_irr1, negR_irr.
-    eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ]; assumption.
+    eapply ex_ir; [ | rewrite Hperm; apply PermutationT_swap ]; assumption.
   + list_simpl. apply plus_irr2, negR_irr.
-    eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ]; assumption.
+    eapply ex_ir; [ | rewrite Hperm; apply PermutationT_swap ]; assumption.
 - list_simpl. rewrite <- (app_nil_l _).
   apply plus_ilr.
   + list_simpl. apply negR_ilr_head; [ assumption | ].
@@ -195,7 +195,7 @@ Lemma trans_dual P (Hperm : ipperm P = true) (Hcut : full_icut P) A :
 Proof.
 induction A; cbn.
 - apply negR_ilr_head, ax_exp_ill. assumption.
-- eapply ex_ir; [ | rewrite Hperm; apply Permutation_Type_swap ].
+- eapply ex_ir; [ | rewrite Hperm; apply PermutationT_swap ].
   apply negR_ilr_head, ax_exp_ill. assumption.
 - apply negR_ilr_head, ax_exp_ill. assumption.
 - cons2app. apply negR_ilr, ax_exp_ill.
@@ -204,8 +204,8 @@ induction A; cbn.
   cons2app. rewrite <- (app_nil_l _).
   eapply cut_ir; [ exact (Hcut _) | | apply IHA2 ].
   apply ax_exp_ill.
-- eapply ex_ir in IHA1; [ | rewrite Hperm; apply Permutation_Type_swap ].
-  eapply ex_ir in IHA2; [ | rewrite Hperm; apply Permutation_Type_swap ].
+- eapply ex_ir in IHA1; [ | rewrite Hperm; apply PermutationT_swap ].
+  eapply ex_ir in IHA2; [ | rewrite Hperm; apply PermutationT_swap ].
   apply (neg_tens_propag Hperm Hcut IHA2) in IHA1.
   cons2app. apply negR_ilr. apply negR_irr.
   cons2app. rewrite <- (app_nil_l _).
@@ -218,8 +218,8 @@ induction A; cbn.
   cons2app. rewrite <- (app_nil_l _).
   eapply cut_ir; [ exact (Hcut _) | | apply IHA2 ].
   apply ax_exp_ill.
-- eapply ex_ir in IHA1; [ | rewrite Hperm; apply Permutation_Type_swap ].
-  eapply ex_ir in IHA2; [ | rewrite Hperm; apply Permutation_Type_swap ].
+- eapply ex_ir in IHA1; [ | rewrite Hperm; apply PermutationT_swap ].
+  eapply ex_ir in IHA2; [ | rewrite Hperm; apply PermutationT_swap ].
   apply (neg_plus_propag Hperm Hcut IHA1) in IHA2.
   cons2app. apply negR_ilr, negR_irr.
   cons2app. rewrite <- (app_nil_l _).
@@ -230,7 +230,7 @@ induction A; cbn.
   change (ioc (negR (trans A)) :: nil) with (map ioc (negR (trans A) :: nil)).
   apply oc_irr.
   rewrite <- (app_nil_l _). apply de_ilr, negR_irr.
-  eapply ex_ir; [ eassumption | rewrite Hperm; apply Permutation_Type_swap ].
+  eapply ex_ir; [ eassumption | rewrite Hperm; apply PermutationT_swap ].
 - cons2app. apply negR_ilr, negR_irr.
   cons2app. apply negR_ilr.
   change (ioc (negR (trans (dual A))) :: nil) with (map ioc (negR (trans (dual A)) :: nil)).
@@ -300,7 +300,7 @@ Variable P_perm : pperm P = true.
 
 Lemma ll_to_ill_trans_gen l l0 :
   (forall L, pmix P (length L) = true ->
-             forall (FL : Forall_inf (ll P) L),
+             forall (FL : ForallT (ll P) L),
                Forall_Proofs (fun l pi => ill (p2ipfrag P) (map ioc l0 ++ map trans l) R) FL ->
                ill (p2ipfrag P) (map ioc l0 ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map ioc l0 ++ map trans l) R.
@@ -315,27 +315,27 @@ induction Hll using ll_nested_ind.
   apply (ax_ir (a2i X)).
 - rewrite P_perm in p.
   eapply ex_ir; [ eassumption | ].
-  apply PEPermutation_Type_app_head, PEPermutation_Type_map.
+  apply PEPermutationT_app_head, PEPermutationT_map.
   cbn; rewrite P_perm; assumption.
 - list_simpl in IHHll; rewrite map_map in IHHll; cbn in IHHll;
     rewrite <- (map_map _ _ lw) in IHHll.
   list_simpl; rewrite map_map; cbn; rewrite <- (map_map _ _ lw').
   rewrite app_assoc in IHHll; rewrite app_assoc.
-  eapply Permutation_Type_map in p.
+  eapply PermutationT_map in p.
   eapply ex_oc_ir; eassumption.
 - apply Hmix with PL; assumption.
-- eapply ex_ir; [ | cbn; rewrite P_perm; apply Permutation_Type_middle ].
+- eapply ex_ir; [ | cbn; rewrite P_perm; apply PermutationT_middle ].
   rewrite <- 2 (app_nil_l _).
   apply lmap_ilr.
   + apply one_irr.
   + eapply ex_ir; [ eassumption
-                  | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+                  | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
 - apply one_ilr; assumption.
 - apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l1))
-    in IHHll1; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+    in IHHll1; [ | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
   apply negR_irr in IHHll1.
   apply (ex_ir _ (trans B :: map ioc l0 ++ map trans l2))
-    in IHHll2; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+    in IHHll2; [ | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
   apply negR_irr in IHHll2.
   apply (tens_irr _ _ _ _ IHHll1) in IHHll2.
   apply (lmap_ilr _ _ _ _ _ _ IHHll2) in Hax.
@@ -343,57 +343,57 @@ induction Hll using ll_nested_ind.
   apply co_list_ilr.
   apply (ex_ir _ _ _ Hax).
   cbn; rewrite P_perm; list_simpl.
-  apply Permutation_Type_app_head.
-  etransitivity; [ apply Permutation_Type_app_comm | list_simpl; apply Permutation_Type_app_head ].
-  etransitivity; [ apply Permutation_Type_app_comm | ].
-  apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity.
+  apply PermutationT_app_head.
+  etransitivity; [ apply PermutationT_app_comm | list_simpl; apply PermutationT_app_head ].
+  etransitivity; [ apply PermutationT_app_comm | ].
+  apply PermutationT_cons, PermutationT_app_comm; reflexivity.
 - cbn; apply tens_ilr.
   eapply ex_ir; [ eassumption | ].
   cbn; rewrite P_perm; cbn.
-  apply Permutation_Type_app_head, Permutation_Type_swap.
+  apply PermutationT_app_head, PermutationT_swap.
 - apply zero_ilr.
 - apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l))
-    in IHHll; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+    in IHHll; [ | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
   apply negR_irr in IHHll.
   apply (plus_irr1 _ (negR (trans B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
   apply (ex_ir _ _ _ Hax).
   cbn; rewrite P_perm; list_simpl.
-  apply Permutation_Type_app_head.
-  etransitivity; [ apply Permutation_Type_app_comm | ].
-  apply Permutation_Type_cons; reflexivity.
+  apply PermutationT_app_head.
+  etransitivity; [ apply PermutationT_app_comm | ].
+  apply PermutationT_cons; reflexivity.
 - apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l))
-    in IHHll; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+    in IHHll; [ | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
   apply negR_irr in IHHll.
   apply (plus_irr2 _ (negR (trans B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
   apply (ex_ir _ _ _ Hax).
   cbn; rewrite P_perm; list_simpl.
-  apply Permutation_Type_app_head.
-  etransitivity; [ apply Permutation_Type_app_comm | ].
-  apply Permutation_Type_cons; reflexivity.
+  apply PermutationT_app_head.
+  etransitivity; [ apply PermutationT_app_comm | ].
+  apply PermutationT_cons; reflexivity.
 - apply plus_ilr; assumption.
 - cbn in IHHll. rewrite map_map in IHHll. cbn in IHHll. rewrite <- map_map in IHHll.
   apply (ex_ir _ (trans A :: map ioc (l0 ++ map (fun x => (negR (negR (trans x)))) l)))
-    in IHHll; [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_cons_app;
+    in IHHll; [ | cbn; rewrite P_perm; symmetry; apply PermutationT_cons_app;
                   list_simpl; rewrite map_id, map_map; reflexivity ].
   apply negR_irr, oc_irr in IHHll.
-  eapply ex_ir; [ | cbn; rewrite P_perm; apply Permutation_Type_middle ].
+  eapply ex_ir; [ | cbn; rewrite P_perm; apply PermutationT_middle ].
   apply negR_ilr_head; [ assumption | ].
   eapply ex_ir; [ eassumption | ].
   list_simpl; rewrite ? map_map; reflexivity.
 - cbn. apply de_ilr.
-  eapply ex_ir; [ | cbn; rewrite P_perm; apply Permutation_Type_middle ].
+  eapply ex_ir; [ | cbn; rewrite P_perm; apply PermutationT_middle ].
   apply negR_ilr_head; [ assumption | ].
   apply negR_irr.
-  eapply ex_ir; [ eassumption | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+  eapply ex_ir; [ eassumption | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
 - apply wk_ilr. assumption.
 - rewrite <- (app_nil_l (map _ _ ++ _)). apply co_ilr. assumption.
 - apply (ex_ir _ (trans (dual A) :: map ioc l0 ++ map trans l1)) in IHHll1;
-    [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+    [ | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
   apply negR_irr in IHHll1.
   apply (ex_ir _ (trans A :: map ioc l0 ++ map trans l2)) in IHHll2;
-    [ | cbn; rewrite P_perm; symmetry; apply Permutation_Type_middle ].
+    [ | cbn; rewrite P_perm; symmetry; apply PermutationT_middle ].
   apply negR_irr in IHHll2.
   assert (ipperm (p2ipfrag P) = true) as Hperm by (cbn; assumption).
   assert (full_icut (p2ipfrag P)) as Hcut by (intro; reflexivity).
@@ -404,8 +404,8 @@ induction Hll using ll_nested_ind.
   rewrite <- (app_nil_l (map ioc _ ++ _)).
   apply co_list_ilr.
   eapply ex_ir; [ eassumption | ].
-  cbn. rewrite P_perm. list_simpl. apply Permutation_Type_app_head.
-  rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_comm.
+  cbn. rewrite P_perm. list_simpl. apply PermutationT_app_head.
+  rewrite ? app_assoc. apply PermutationT_app_tail, PermutationT_app_comm.
 - rewrite <- (app_nil_l _). apply wk_list_ilr.
   change (projT1 (pgax P)) with (projT1 (ipgax (p2ipfrag P))) in a. apply (gax_ir a).
 Qed.
@@ -413,7 +413,7 @@ Qed.
 Lemma ll_to_ill_trans l :
   (forall L : list (list formula),
      pmix P (length L) = true ->
-     forall FL : Forall_inf (ll P) L,
+     forall FL : ForallT (ll P) L,
        Forall_Proofs (fun l0 (_ : ll P l0) => ill (p2ipfrag P) (map ioc nil ++ map trans l0) R) FL ->
        ill (p2ipfrag P) (map ioc nil ++ map trans (concat L)) R) ->
   ll P l -> ill (p2ipfrag P) (map trans l) R.

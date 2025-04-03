@@ -1,6 +1,6 @@
 (** * Order structure and finite multiset structure on intuitionistic formulas *)
 
-From OLlibs Require Import funtheory dectype nattree fmsetlist_Type BOrders.
+From OLlibs Require Import funtheory dectype nattree fmsetlistT BOrders.
 From Yalla Require Export iformulas.
 
 Set Implicit Arguments.

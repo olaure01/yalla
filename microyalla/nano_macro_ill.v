@@ -1,5 +1,5 @@
 From Stdlib Require Import List.
-From OLlibs Require Import dectype Permutation_Type.
+From OLlibs Require Import dectype PermutationT.
 From Yalla Require Import ill_def nanoill.
 
 Fixpoint ill2ill A :=
@@ -27,16 +27,16 @@ Proof.
 intros l A pi.
 induction pi; rewrite <- (app_nil_l _) ; try (now constructor).
 - eapply ex_ir; [ eassumption | cbn ].
-  apply Permutation_Type_map.
-  apply Permutation_Type_app_head.
-  apply Permutation_Type_swap.
+  apply PermutationT_map.
+  apply PermutationT_app_head.
+  apply PermutationT_swap.
 - now rewrite map_app; rewrite app_nil_l ; constructor.
 - apply (ex_ir (nil ++ map ill2ill l1 ++ iformulas.ilmap (ill2ill A) (ill2ill B) :: map ill2ill l2)).
   + now constructor.
   + cbn; rewrite map_app.
-    etransitivity; [ apply Permutation_Type_app_comm | ].
-    apply Permutation_Type_cons; try reflexivity.
-    apply Permutation_Type_app_comm.
+    etransitivity; [ apply PermutationT_app_comm | ].
+    apply PermutationT_cons; try reflexivity.
+    apply PermutationT_app_comm.
 - rewrite ill2ill_map_ioc.
   constructor.
   rewrite <- ill2ill_map_ioc; assumption.

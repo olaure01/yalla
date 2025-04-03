@@ -236,12 +236,12 @@ Instance sub_list_po : PreOrder subform_list.
 Proof. split; intro; [ rewrite <- app_nil_l; apply sub_id_list | apply sub_trans_list ]. Qed.
 
 (* Unused
-From OLlibs Require Import GPermutation_Type.
+From OLlibs Require Import GPermutationT.
 
-Lemma sub_perm_list b l l1 l2 : subform_list l l1 -> PCPermutation_Type b l1 l2 -> subform_list l l2.
+Lemma sub_perm_list b l l1 l2 : subform_list l l1 -> PCPermutationT b l1 l2 -> subform_list l l2.
 Proof.
 intros HF HP. apply Forall_forall.
-setoid_rewrite <- (PCPermutation_Type_Exists _ _ HP).
+setoid_rewrite <- (PCPermutationT_Exists _ _ HP).
 apply Forall_forall; assumption.
 Qed.
 *)

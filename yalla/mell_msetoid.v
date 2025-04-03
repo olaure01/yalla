@@ -1,7 +1,7 @@
 (** * Example of a concrete use of the yalla library: multi-set based MELL up to an equivalence relation *)
 
 From Stdlib Require Import CMorphisms.
-From OLlibs Require Import funtheory dectype fmsetoidlist_Type List_more Permutation_Type_more.
+From OLlibs Require Import funtheory dectype fmsetoidlistT List_more PermutationT_more.
 
 
 (** ** 0. load the [ll] library *)
@@ -132,21 +132,21 @@ intro pi. induction pi;
   try now (constructor; eassumption).
 - apply meq_perm in X.
   eapply ll_def.ex_r; [ eassumption | ].
-  apply Permutation_Type_map; assumption.
+  apply PermutationT_map; assumption.
 - eapply ll_def.ex_r.
   + apply ll_def.tens_r.
-    * assert (Helt := Permutation_Type_map mell2ll (elts_add A l1)).
+    * assert (Helt := PermutationT_map mell2ll (elts_add A l1)).
       apply (ll_def.ex_r _ _ IHpi1) in Helt.
       cbn in Helt; eassumption.
-    * assert (Helt := Permutation_Type_map mell2ll (elts_add B l2)).
+    * assert (Helt := PermutationT_map mell2ll (elts_add B l2)).
       apply (ll_def.ex_r _ _ IHpi2) in Helt.
       cbn in Helt; eassumption.
-  + apply Permutation_Type_cons; [ reflexivity | ].
+  + apply PermutationT_cons; [ reflexivity | ].
     rewrite <- map_app.
-    apply Permutation_Type_map.
+    apply PermutationT_map.
     unfold sum, list2fm.
     cbn; rewrite fold_id.
-    apply Permutation_Type_app_comm.
+    apply PermutationT_app_comm.
 - unfold list2fm. rewrite fold_id, mell2ll_map_wn.
   unfold elts, add, fmmap, list2fm in IHpi. cbn in IHpi.
   rewrite fold_id, mell2ll_map_wn in IHpi.
@@ -161,17 +161,17 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
 - destruct m; destr_eq Heql. destruct m; destr_eq H. symmetry in H0. rewrite (map_eq_nil _ _ H0).
   destruct f; destr_eq Heql. destruct f0; destr_eq H. subst.
   apply ax_r.
-- subst. cbn in p. apply Permutation_Type_map_inv in p as [l' -> HP].
+- subst. cbn in p. apply PermutationT_map_inv in p as [l' -> HP].
   eapply ex_r.
   + apply IHpi. reflexivity.
   + symmetry. assumption.
 - remember (map formulas.wn lw') as l0. decomp_map Heql eqn:Heq.
   symmetry in Heq. apply mell2ll_map_wn_inv in Heq as [l [-> ->]].
-  apply Permutation_Type_map_inv in p as [l' -> HP].
+  apply PermutationT_map_inv in p as [l' -> HP].
   cbn in Heql. unfold id in Heql. subst.
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ? map_app; reflexivity | ].
   symmetry in HP.
-  apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map. assumption.
+  apply PermutationT_app_head, PermutationT_app_tail, PermutationT_map. assumption.
 - destruct m; destr_eq Heql. symmetry in H. rewrite (map_eq_nil _ _ H).
   destruct f; destr_eq Heql.
   apply one_r.
@@ -182,8 +182,8 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
   apply (@ex_r (add (tens f1 f2) (sum l1 l2))).
   + apply tens_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
   + unfold sum, list2fm, add; cbn.
-    apply Permutation_Type_cons; [ reflexivity | ].
-    rewrite fold_id. apply Permutation_Type_app_comm.
+    apply PermutationT_cons; [ reflexivity | ].
+    rewrite fold_id. apply PermutationT_app_comm.
 - destruct m; destr_eq Heql.
   destruct f; destr_eq Heql. subst.
   apply mell2ll_map_wn_inv in H as [m' [-> ->]].
@@ -203,7 +203,7 @@ Lemma ax_gen_r A : mell (add (dual A) (add A empty)).
 Proof.
 apply mellfrag2mell.
 eapply ll_def.ex_r; [ apply ll_def.ax_exp | ].
-rewrite mell2ll_dual. apply Permutation_Type_swap.
+rewrite mell2ll_dual. apply PermutationT_swap.
 Qed.
 
 
@@ -212,7 +212,7 @@ Qed.
 Lemma cut_r A m1 m2 : mell (add A m1) -> mell (add (dual A) m2) -> mell (sum m1 m2).
 Proof.
 intros [pi1]%mell2mellfrag [pi2]%mell2mellfrag. apply mellfrag2mell.
-eapply ll_def.ex_r; [ | apply Permutation_Type_map; symmetry; apply elts_sum ].
+eapply ll_def.ex_r; [ | apply PermutationT_map; symmetry; apply elts_sum ].
 cbn in pi2. rewrite <- mell2ll_dual in pi2. rewrite map_app.
 refine (ll_cut.cut_r_axfree _ pi2 pi1).
 intros [].

@@ -3,7 +3,7 @@
 
 From Stdlib Require Import CMorphisms.
 From Stdlib Require BoolOrder.
-From OLlibs Require Import dectype funtheory List_more Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import dectype funtheory List_more PermutationT_more GPermutationT.
 From Yalla Require Export iformulas.
 
 Set Implicit Arguments.
@@ -28,10 +28,10 @@ Record ipfrag := mk_ipfrag {
 
 Definition no_iax P := notT (projT1 (ipgax P)).
 
-Definition noN_iax P := forall a, notT (In_inf N (fst (projT2 (ipgax P) a))).
+Definition noN_iax P := forall a, notT (InT N (fst (projT2 (ipgax P) a))).
 
 Definition atomic_iax P := forall a,
-  Forall_inf iatomic (fst (projT2 (ipgax P) a)) * iatomic (snd (projT2 (ipgax P) a)).
+  ForallT iatomic (fst (projT2 (ipgax P) a)) * iatomic (snd (projT2 (ipgax P) a)).
 
 Definition full_icut P := forall C, ipcut P C = true.
 
@@ -99,9 +99,9 @@ Proof. repeat split; [ | reflexivity ]. intro a. exists a. reflexivity. Qed.
 
 Inductive ill P : list iformula -> iformula -> Type :=
 | ax_ir X : ill P (ivar X :: nil) (ivar X)
-| ex_ir l1 l2 A : ill P l1 A -> PEPermutation_Type (ipperm P) l1 l2 -> ill P l2 A
+| ex_ir l1 l2 A : ill P l1 A -> PEPermutationT (ipperm P) l1 l2 -> ill P l2 A
 | ex_oc_ir l1 lw lw' l2 A :
-    ill P (l1 ++ map ioc lw ++ l2) A -> Permutation_Type lw lw' -> ill P (l1 ++ map ioc lw' ++ l2) A
+    ill P (l1 ++ map ioc lw ++ l2) A -> PermutationT lw lw' -> ill P (l1 ++ map ioc lw' ++ l2) A
 | one_irr : ill P nil ione
 | one_ilr l1 l2 A : ill P (l1 ++ l2) A -> ill P (l1 ++ ione :: l2) A
 | tens_irr A B l1 l2 : ill P l1 A -> ill P l2 B -> ill P (l1 ++ l2) (itens A B)
@@ -158,7 +158,7 @@ Inductive ill P : list iformula -> iformula -> Type :=
 #[global] Arguments cut_ir [P] _ f [l0 l1 l2 _] _ _.
 #[global] Arguments gax_ir [P] _.
 
-Instance ill_perm P A : Proper ((@PEPermutation_Type _ (ipperm P)) ==> arrow) (fun l => ill P l A).
+Instance ill_perm P A : Proper ((@PEPermutationT _ (ipperm P)) ==> arrow) (fun l => ill P l A).
 Proof. intros l1 l2 HP pi. eapply ex_ir; eassumption. Qed.
 
 Fixpoint ipsize P l A (pi : ill P l A) :=
@@ -178,7 +178,7 @@ Lemma stronger_ipfrag P Q (Hfrag : le_ipfrag P Q) l A : ill P l A -> ill Q l A.
 Proof.
 intro pi. induction pi; try (constructor; assumption).
 - apply (ex_ir l1); [ assumption | ].
-  destruct Hfrag as [_ [_ Hp]]. apply (PEPermutation_Type_monot (ipperm P) _ Hp), p.
+  destruct Hfrag as [_ [_ Hp]]. apply (PEPermutationT_monot (ipperm P) _ Hp), p.
 - apply (ex_oc_ir _ lw); assumption.
 - destruct Hfrag as [Hcut _]. specialize (Hcut A). rewrite f in Hcut. apply (cut_ir A Hcut); assumption.
 - destruct Hfrag as [_ [Hgax _]], (Hgax a) as [b ->]. apply gax_ir.
@@ -203,7 +203,7 @@ match pi with
 | cut_ir _ _ pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS l A
 end.
 
-Definition Forall_iformula P FS := @Forall_isequent P (fun l A => (Forall_inf FS (A :: l))%type).
+Definition Forall_iformula P FS := @Forall_isequent P (fun l A => (ForallT FS (A :: l))%type).
 
 Lemma Forall_isequent_is P PS l A (pi : ill P l A) : Forall_isequent PS pi -> PS l A.
 Proof. destruct pi; cbn; tauto. Qed.
@@ -243,7 +243,7 @@ replace (ioc a :: ioc a :: map ioc l ++ map ioc l)
   with (map ioc (a :: a :: l ++ l))
   by (list_simpl; reflexivity).
 eapply ex_oc_ir; try eassumption.
-apply Permutation_Type_cons; [ reflexivity | symmetry; apply Permutation_Type_middle ].
+apply PermutationT_cons; [ reflexivity | symmetry; apply PermutationT_middle ].
 Qed.
 
 (** *** Some tactics for manipulating rules *)

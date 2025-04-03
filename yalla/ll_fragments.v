@@ -1,8 +1,8 @@
 (** * Definitions of various Linear Logic fragments *)
 
 From Stdlib Require Import PeanoNat Lia.
-From OLlibs Require Import infinite funtheory List_more Dependent_Forall_Type
-                           Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import infinite funtheory List_more Dependent_ForallT
+                           PermutationT_more GPermutationT.
 From Yalla Require Export ll_prop.
 From Yalla Require Import subs.
 
@@ -18,7 +18,7 @@ Notation ll := (@ll atom).
 
 (** ** Property on mix_n *)
 
-Lemma mix_by_tens_n P L : Forall_inf (ll P) L -> ll P (tens_n (length L) bot :: concat L).
+Lemma mix_by_tens_n P L : ForallT (ll P) L -> ll P (tens_n (length L) bot :: concat L).
 Proof.
 intro FL. induction FL as [|l0 [|l L] pi FL IHFL]; cbn; repeat constructor; rewrite ? app_nil_r; assumption.
 Qed.
@@ -50,16 +50,16 @@ Lemma mix_to_ll P (fp : pperm P = true) n bn l :
   ll (pmixupd_point_pfrag P n bn) l -> ll P (wn (tens_n n bot) :: l).
 Proof.
 intro pi.
-eapply ex_r; [ | symmetry; rewrite fp; apply Permutation_Type_cons_append ].
+eapply ex_r; [ | symmetry; rewrite fp; apply PermutationT_cons_append ].
 refine (ext_wn_param fp _ ((tens_n n bot) :: nil) _ _ pi).
 - reflexivity.
 - cbn. intro.
-  eapply ex_r; [ | rewrite fp; apply Permutation_Type_cons_append ].
+  eapply ex_r; [ | rewrite fp; apply PermutationT_cons_append ].
   apply wk_r, gax_r.
 - intros L Hmix Hmix' FL. remember (length L) as nL eqn:HeqL. destruct (nL =? n) eqn:Heq.
   + cbn in Hmix. rewrite Heq in Hmix.
     apply ex_r with (map wn (tens_n n bot :: nil) ++ concat L);
-      [ cbn | rewrite fp; apply Permutation_Type_app_comm ].
+      [ cbn | rewrite fp; apply PermutationT_app_comm ].
     apply co_const_list_r with (S nL).
     change (repeat (wn (tens_n n bot)) (S nL))
       with ((@wn atom (tens_n n bot) :: nil) ++ repeat (wn (tens_n n bot)) nL).
@@ -71,18 +71,18 @@ refine (ext_wn_param fp _ ((tens_n n bot) :: nil) _ _ pi).
        with (@wn atom (tens_n (length (map (cons (wn (tens_n (length L) bot))) L)) bot) :: nil)
        by (rewrite length_map; reflexivity).
     apply de_r, tens_n_r.
-    apply forall_Forall_inf.
+    apply forall_ForallT.
     intros l' Hin.
-    destruct (in_inf_map_inv _ _ _ Hin) as [l'' <- Hin'']. clear Hin.
+    destruct (inT_map_inv _ _ _ Hin) as [l'' <- Hin'']. clear Hin.
     apply bot_r.
-    destruct (in_inf_map_inv _ _ _ Hin'') as [l' <- Hin']. clear Hin''.
+    destruct (inT_map_inv _ _ _ Hin'') as [l' <- Hin']. clear Hin''.
     subst. replace (length L) with n by (symmetry; apply Nat.eqb_eq, Heq).
     apply ex_r with (l' ++ map wn (tens_n n bot :: nil)).
-    * apply Forall_inf_forall with (map (fun l => l ++ map wn (tens_n n bot :: nil)) L); [ assumption | ].
+    * apply ForallT_forall with (map (fun l => l ++ map wn (tens_n n bot :: nil)) L); [ assumption | ].
       change (l' ++ map wn (tens_n n bot :: nil))
         with ((fun l0 => l0 ++ map wn (tens_n n bot :: nil)) l').
-      apply in_inf_map. assumption.
-    * symmetry. rewrite fp. apply Permutation_Type_cons_append.
+      apply inT_map. assumption.
+    * symmetry. rewrite fp. apply PermutationT_cons_append.
   + exfalso. cbn in Hmix. rewrite Heq, Hmix' in Hmix. discriminate Hmix.
 Qed.
 
@@ -96,10 +96,10 @@ induction pi using ll_nested_ind; try now constructor.
 - apply ex_wn_r with lw; assumption.
 - apply mix_r.
   + cbn. cbn in eqpmix. destruct (length L =? n); [ reflexivity | assumption ].
-  + apply forall_Forall_inf.
+  + apply forall_ForallT.
     intros l' Hin.
-    apply In_Forall_inf_in with _ _ _ _ PL in Hin as [pi' Hin].
-    apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
+    apply InT_In_ForallT with _ _ _ _ PL in Hin as [pi' Hin].
+    apply (Dependent_ForallT_forall_formula _ _ X Hin).
 - apply cut_r with A; assumption.
 - destruct a as [a|[]]; cbn.
   + change (ll (pmixupd_point_pfrag P n true) (projT2 (pgax P) a))
@@ -108,9 +108,8 @@ induction pi using ll_nested_ind; try now constructor.
   + apply parr_n_r.
     rewrite app_nil_r, repeat_to_concat. apply mix_r.
     * cbn. rewrite repeat_length, Nat.eqb_refl. reflexivity.
-    * apply forall_Forall_inf.
-      intros l' Hin.
-      apply in_inf_in, repeat_spec in Hin as ->.
+    * apply forall_ForallT.
+      intros ? ->%repeat_specT.
       apply one_r.
 Qed.
 
@@ -131,17 +130,17 @@ intro pi. induction pi using ll_nested_ind; try now constructor.
         by (replace n with (length L) by (apply Nat.eqb_eq, Heq); reflexivity).
       apply gax_r.
     * apply mix_by_tens_n.
-      apply forall_Forall_inf.
+      apply forall_ForallT.
       intros l' Hin.
-      apply In_Forall_inf_in with _ _ _ _ PL in Hin as [pi' Hin].
-      apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
+      apply InT_In_ForallT with _ _ _ _ PL in Hin as [pi' Hin].
+      apply (Dependent_ForallT_forall_formula _ _ X Hin).
   + cbn in eqpmix. rewrite Heq in eqpmix.
     apply mix_r.
     * assumption.
-    * apply forall_Forall_inf.
+    * apply forall_ForallT.
       intros l' Hin.
-      apply In_Forall_inf_in with _ _ _ _ PL in Hin as [pi' Hin].
-      apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
+      apply InT_In_ForallT with _ _ _ _ PL in Hin as [pi' Hin].
+      apply (Dependent_ForallT_forall_formula _ _ X Hin).
 - apply cut_r with A; [ reflexivity | assumption | assumption ].
 - cbn.
   change (projT2 (pgax P) a)
@@ -176,7 +175,7 @@ Proof. intros Hcut Hperm pi. apply mix_to_ll with true, parr_n_to_mix; assumptio
 (** provability in [P + mix_n + mix_m] is equivalent to provability in [P + mix_n + mix_m + pmix_(n+m-1)] *)
 
 Lemma mix_n_m_r P n m : P.(pmix) n = true -> P.(pmix) m = true ->
-  forall L, length L = n + m - 1 -> Forall_inf (ll P) L -> ll P (concat L).
+  forall L, length L = n + m - 1 -> ForallT (ll P) L -> ll P (concat L).
 Proof.
 intros Hpmixn Hpmixm L Heq FL. destruct n as [|n]; [ destruct m as [|m] | ].
 - destruct L; destr_eq Heq.
@@ -185,7 +184,7 @@ intros Hpmixn Hpmixm L Heq FL. destruct n as [|n]; [ destruct m as [|m] | ].
   change (concat L) with (concat (nil :: L)).
   apply mix_r.
   + cbn. rewrite Heq. assumption.
-  + apply Forall_inf_cons; [ | assumption ].
+  + apply ForallT_cons; [ | assumption ].
     change nil with (concat (@nil (list formula))).
     apply mix_r; [ assumption | constructor ].
 - cbn in Heq. rewrite Nat.sub_0_r in Heq.
@@ -194,11 +193,11 @@ intros Hpmixn Hpmixm L Heq FL. destruct n as [|n]; [ destruct m as [|m] | ].
     by (rewrite ! concat_app; cbn; rewrite app_nil_r; reflexivity).
   apply mix_r.
   + rewrite length_app, Nat.add_comm. assumption.
-  + assert (FL1 := Forall_inf_app_l _ _ FL).
-    assert (FL2 := Forall_inf_app_r _ _ FL).
-    apply forall_Forall_inf.
-    intros l' [Hin | Hin]%in_inf_app_or.
-    * apply Forall_inf_forall with l1; assumption.
+  + assert (FL1 := ForallT_app_l _ _ FL).
+    assert (FL2 := ForallT_app_r _ _ FL).
+    apply forall_ForallT.
+    intros l' [Hin | Hin]%inT_app_sum.
+    * apply ForallT_forall with l1; assumption.
     * inversion Hin; [ | inversion X ]. subst.
       apply mix_r; assumption.
 Qed.
@@ -206,19 +205,19 @@ Qed.
 Lemma mix_conservativity P Q : (forall C, Bool.le (pcut P C) (pcut Q C)) -> Bool.le (pperm P) (pperm Q) ->
   (forall a, { b | projT2 (pgax P) a = projT2 (pgax Q) b }) ->
   (forall n, pmix P n = true ->
-    forall L, length L = n -> Forall_inf (ll Q) L -> ll Q (concat L)) ->
+    forall L, length L = n -> ForallT (ll Q) L -> ll Q (concat L)) ->
 forall l, ll P l -> ll Q l.
 Proof.
 intros Hcut Hperm Hgax Hpmix l pi.
 induction pi using ll_nested_ind; try now constructor.
 - apply ex_r with l1; [ assumption | ].
-  apply PCPermutation_Type_monot with (pperm P); assumption.
+  apply PCPermutationT_monot with (pperm P); assumption.
 - apply ex_wn_r with lw; assumption.
 - apply (Hpmix (length L)); [ assumption | reflexivity | ].
-  apply forall_Forall_inf.
+  apply forall_ForallT.
   intros l' Hin.
-  apply (In_Forall_inf_in _ PL) in Hin as [pi' Hin].
-  apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
+  apply (InT_In_ForallT _ PL) in Hin as [pi' Hin].
+  apply (Dependent_ForallT_forall_formula _ _ X Hin).
 - specialize (Hcut A). rewrite f in Hcut.
   apply cut_r with A; assumption.
 - destruct (Hgax a) as [b ->]; apply gax_r.
@@ -226,7 +225,7 @@ Qed.
 
 Lemma mix_conservativity_updl P fmix : let Q := (pmixupd_pfrag P fmix) in
   (forall n, pmix Q n = true ->
-    forall L, length L = n -> Forall_inf (ll P) L -> ll P (concat L)) ->
+    forall L, length L = n -> ForallT (ll P) L -> ll P (concat L)) ->
   forall l, ll Q l -> ll P l.
 Proof.
 intros Q Hpmix l pi; apply mix_conservativity with Q;
@@ -235,7 +234,7 @@ Qed.
 
 Lemma mix_conservativity_updr P fmix : let Q := (pmixupd_pfrag P fmix) in
   (forall n, pmix P n = true ->
-    forall L, length L = n -> Forall_inf (ll Q) L -> ll Q (concat L)) ->
+    forall L, length L = n -> ForallT (ll Q) L -> ll Q (concat L)) ->
   forall l, ll P l -> ll Q l.
 Proof.
 intros Q Hpmix l pi; apply mix_conservativity with P;
@@ -256,7 +255,7 @@ Qed.
 (** provability in [P + mix_2] is equivalent to provability in [P + mix k] for all k >= 2 *)
 
 Lemma mix_2_to_mix_k_r P : P.(pmix) 2 = true ->
-  forall L, 2 <= length L -> Forall_inf (ll P) L -> ll P (concat L).
+  forall L, 2 <= length L -> ForallT (ll P) L -> ll P (concat L).
 Proof.
 intro Hpmix. induction L as [|A [|B [|C L]] IHL]; intros Hl FL; [ cbn in Hl; lia .. | | ].
 - apply mix_r; assumption.
@@ -264,7 +263,7 @@ intro Hpmix. induction L as [|A [|B [|C L]] IHL]; intros Hl FL; [ cbn in Hl; lia
   replace (concat (A :: B :: C :: L))
      with (concat (A :: (concat (B :: C :: L) :: nil)))
     by (cbn; rewrite <- ? app_assoc, app_nil_r; reflexivity).
-  apply mix_r, Forall_inf_cons, Forall_inf_cons, Forall_inf_nil; [ assumption .. | ].
+  apply mix_r, ForallT_cons, ForallT_cons, ForallT_nil; [ assumption .. | ].
   apply IHL; [ cbn; lia | assumption ].
 Qed.
 
@@ -296,7 +295,7 @@ Qed.
 (** provability in [P + mix_0 + mix_n] is equivalent to provability in [P + mix_k] for all k <= n *)
 
 Lemma mix_0_n_r P n : P.(pmix) 0 = true -> P.(pmix) n = true ->
-  forall L, length L <= n -> Forall_inf (ll P) L -> ll P (concat L).
+  forall L, length L <= n -> ForallT (ll P) L -> ll P (concat L).
 Proof.
 intros Hpmix0 Hpmixn L.
 remember (n - length L) as k eqn:Heqk.
@@ -305,9 +304,9 @@ induction k in L, Heqk |- *; intros Hlen FL.
   apply mix_r; assumption.
 - change (concat L) with (concat (nil :: L)).
   apply IHk; cbn; [ lia .. | ].
-  apply Forall_inf_cons; [ | assumption ].
+  apply ForallT_cons; [ | assumption ].
   change nil with (concat (@nil (list formula))).
-  apply mix_r, Forall_inf_nil. assumption.
+  apply mix_r, ForallT_nil. assumption.
 Qed.
 
 Lemma mix_0_n_admissible P n : P.(pmix) 0 = true -> P.(pmix) n = true ->
@@ -334,7 +333,7 @@ Qed.
 (** provability in [P + mix_0 + mix_2] is equivalent to provability in [P + mix_k] for all k *)
 
 Lemma allmix_r P : P.(pmix) 0 = true -> P.(pmix) 2 = true ->
-  forall L, Forall_inf (ll P) L -> ll P (concat L).
+  forall L, ForallT (ll P) L -> ll P (concat L).
 Proof.
 intros Hpmix0 Hpimx2 [|l1 [|l2 L]] FL.
 - apply mix_r; assumption.
@@ -387,9 +386,9 @@ Lemma cut_mix0_admissible l : ll (cutupd_pfrag pfrag_mix0 pcut_all) l -> ll_mix0
 Proof.
 intro pi. induction pi using ll_nested_ind; (try now constructor); try (econstructor; eassumption).
 - apply mix_r; [ assumption | ].
-  apply forall_Forall_inf.
-  intros l' Hin. destruct (In_Forall_inf_in _ PL Hin) as [pi' HFin].
-  apply (Dependent_Forall_inf_forall_formula _ _ X HFin).
+  apply forall_ForallT.
+  intros l' Hin. destruct (InT_In_ForallT _ PL Hin) as [pi' HFin].
+  apply (Dependent_ForallT_forall_formula _ _ X HFin).
 - eapply cut_mix0_r; eassumption.
 - destruct a.
 Qed.
@@ -459,7 +458,7 @@ intro pi. apply (stronger_pfrag _ (axext_pfrag P' (fun _ : unit => bot :: bot ::
     change nil with (concat (@nil (list formula))).
     apply mix_r.
     * rewrite HeqP'. reflexivity.
-    * apply Forall_inf_nil.
+    * apply ForallT_nil.
 - rewrite HeqP'. repeat split; cbn; intros; [ | exists a | | ]; try reflexivity.
   destruct n.
   + apply BoolOrder.le_true.
@@ -473,10 +472,10 @@ Proof.
 remember (one :: one :: nil) as l eqn:Heql.
 intro pi. induction pi in Heql |- *; subst; try now inversion Heql.
 - apply IHpi.
-  apply Permutation_Type_sym, Permutation_Type_length_2_inv in p as []; assumption.
+  apply PermutationT_sym, PermutationT_length_2_inv in p as []; assumption.
 - destruct l1, lw'; inversion Heql; subst.
-  + symmetry in p. now apply Permutation_Type_nil in p as ->.
-  + symmetry in p. now apply Permutation_Type_nil in p as ->.
+  + symmetry in p. now apply PermutationT_nil in p as ->.
+  + symmetry in p. now apply PermutationT_nil in p as ->.
   + destruct l1 as [|A [|B l1]]; destr_eq H1.
 - destruct L; discriminate.
 Qed.
@@ -497,9 +496,9 @@ Lemma cut_mix2_admissible l : ll (cutupd_pfrag pfrag_mix2 pcut_all) l -> ll_mix2
 Proof.
 intro pi. induction pi using ll_nested_ind; try (now constructor); try (econstructor; eassumption).
 - apply mix_r; [ assumption | ].
-  apply forall_Forall_inf.
-  intros l' [pi' HFin]%(In_Forall_inf_in _ PL).
-  apply (Dependent_Forall_inf_forall_formula _ _ X HFin).
+  apply forall_ForallT.
+  intros l' [pi' HFin]%(InT_In_ForallT _ PL).
+  apply (Dependent_ForallT_forall_formula _ _ X HFin).
 - eapply cut_mix2_r; eassumption.
 - destruct a.
 Qed.
@@ -588,18 +587,18 @@ intros pi%(stronger_pfrag _ (axext_pfrag P' (fun '(A, B) => parr (dual B) (dual 
   + apply gax_r.
   + apply parr_r.
     apply (ex_r (parr A B :: (dual B :: nil) ++ (dual A) :: nil));
-      [ |etransitivity; [ apply PCPermutation_Type_cons_append | reflexivity ] ].
+      [ |etransitivity; [ apply PCPermutationT_cons_append | reflexivity ] ].
     apply parr_r.
-    eapply ex_r; [ | symmetry; apply PCPermutation_Type_cons_append ].
+    eapply ex_r; [ | symmetry; apply PCPermutationT_cons_append ].
     list_simpl; rewrite <- (app_nil_l (dual A :: _)), 2 app_comm_cons.
     change ((B :: dual B :: nil) ++ dual A :: A :: nil)
       with (concat ((B :: dual B :: nil) :: (dual A :: A :: nil) :: nil)).
     apply mix_r.
     * rewrite HeqP'. reflexivity.
-    * apply Forall_inf_cons.
+    * apply ForallT_cons.
       -- apply ax_exp.
-      -- apply Forall_inf_cons; [ | apply Forall_inf_nil].
-         apply ex_r with (A :: dual A :: nil); [ apply ax_exp | apply PCPermutation_Type_swap ].
+      -- apply ForallT_cons; [ | apply ForallT_nil].
+         apply ex_r with (A :: dual A :: nil); [ apply ax_exp | apply PCPermutationT_swap ].
 - rewrite HeqP'. repeat split; cbn; intros; try reflexivity.
   + exists a. reflexivity.
   + repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
@@ -617,8 +616,8 @@ intros pi%(stronger_pfrag _ (axext_pfrag P' (fun _ : unit => one :: one :: nil))
     rewrite HeqP'.
     change ((one :: nil) ++ one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r; [ reflexivity | ].
-    repeat (apply Forall_inf_cons; try apply one_r).
-    apply Forall_inf_nil.
+    repeat (apply ForallT_cons; try apply one_r).
+    apply ForallT_nil.
 - rewrite HeqP'. repeat split; cbn; intros; try reflexivity.
   + exists a. reflexivity.
   + repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
@@ -631,14 +630,14 @@ Proof.
 remember nil as l eqn:Heql.
 intros pi. induction pi in Heql using ll_nested_ind; subst; try now inversion Heql.
 - apply IHpi.
-  cbn in p. apply Permutation_Type_sym, Permutation_Type_nil in p as ->. reflexivity.
+  cbn in p. apply PermutationT_sym, PermutationT_nil in p as ->. reflexivity.
 - apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
-  symmetry in p. now apply Permutation_Type_nil in p as ->.
+  symmetry in p. now apply PermutationT_nil in p as ->.
 - destruct L as [|? [|? [|? L]]]; try discriminate eqpmix.
   cbn in Heql. rewrite app_nil_r in Heql. apply app_eq_nil in Heql as [-> ->].
-  destruct (In_Forall_inf_in nil PL) as [pi Hin].
-  + apply in_inf_eq.
-  + apply (Dependent_Forall_inf_forall_formula _ _ X Hin eq_refl).
+  destruct (InT_In_ForallT nil PL) as [pi Hin].
+  + apply inT_eq.
+  + apply (Dependent_ForallT_forall_formula _ _ X Hin eq_refl).
 Qed.
 
 
@@ -657,9 +656,9 @@ Lemma cut_mix02_admissible l : ll (cutupd_pfrag pfrag_mix02 pcut_all) l -> ll_mi
 Proof.
 intro pi. induction pi using ll_nested_ind; try (now constructor); try (econstructor; eassumption).
 - apply mix_r; [ assumption | ].
-  apply forall_Forall_inf.
-  intros l' [pi Hin]%(In_Forall_inf_in _ PL).
-  apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
+  apply forall_ForallT.
+  intros l' [pi Hin]%(InT_In_ForallT _ PL).
+  apply (Dependent_ForallT_forall_formula _ _ X Hin).
 - eapply cut_mix02_r; eassumption.
 - destruct a.
 Qed.
@@ -672,11 +671,11 @@ Lemma mix02_to_ll P (fp : pperm P = true) b1 b2 bp l :
   ll P (wn (tens (wn one) (wn one)) :: l).
 Proof.
 intro pi.
-eapply ex_r; [ | symmetry; apply PCPermutation_Type_cons_append ].
+eapply ex_r; [ | symmetry; apply PCPermutationT_cons_append ].
 refine (ext_wn_param fp _ (tens (wn one) (wn one) :: nil) _ _ pi).
 - reflexivity.
 - cbn. intro a.
-  eapply ex_r; [ | apply PCPermutation_Type_cons_append ].
+  eapply ex_r; [ | apply PCPermutationT_cons_append ].
   apply wk_r, gax_r.
 - intros L Hpmix eqpmix FL. destruct L.
   + apply de_r.
@@ -688,31 +687,31 @@ refine (ext_wn_param fp _ (tens (wn one) (wn one) :: nil) _ _ pi).
     * destruct L.
       -- cbn.
          apply ex_r with (wn (tens (wn one) (wn one)) :: (l0 ++ l1));
-           [ | list_simpl; rewrite app_assoc; apply PCPermutation_Type_cons_append ].
+           [ | list_simpl; rewrite app_assoc; apply PCPermutationT_cons_append ].
          inversion FL; subst; inversion X0; subst.
          clear FL X0 X2.
          apply co_r, co_r.
          apply ex_r with (wn (tens (wn one) (wn one)) :: ((l0 ++ wn (tens (wn one) (wn one)) :: nil)
                                                               ++ (l1 ++ wn (tens (wn one) (wn one)) :: nil)));
            [ apply de_r, tens_r; apply wk_r; assumption | rewrite fp; cbn ].
-         apply Permutation_Type_cons; [ reflexivity | ].
-         symmetry; etransitivity; [ apply Permutation_Type_cons_append | ].
-         rewrite ? app_assoc; apply Permutation_Type_app_tail.
-         list_simpl; apply Permutation_Type_middle.
+         apply PermutationT_cons; [ reflexivity | ].
+         symmetry; etransitivity; [ apply PermutationT_cons_append | ].
+         rewrite ? app_assoc; apply PermutationT_app_tail.
+         list_simpl; apply PermutationT_middle.
       -- apply ex_r with (wn (tens (wn one) (wn one)) :: concat (l0 :: l1 :: l2 :: L));
-           [ | rewrite fp; cbn; apply Permutation_Type_cons_append ].
+           [ | rewrite fp; cbn; apply PermutationT_cons_append ].
          apply co_const_list_r with (length (l0 :: l1 :: l2 :: L)).
          apply (ex_concat_r fp nil).
          rewrite app_nil_l, flat_map_concat_map.
          apply mix_r.
          ++ rewrite length_map; assumption.
-         ++ apply forall_Forall_inf.
+         ++ apply forall_ForallT.
             intros l' Hin.
-            apply in_inf_map_inv in Hin as [l'' <- Hin].
+            apply inT_map_inv in Hin as [l'' <- Hin].
             apply ex_r with ((fun l0 => l0 ++ (map wn (tens (wn one) (wn one) :: nil))) l'');
-              [ | symmetry; apply PCPermutation_Type_cons_append ].
-            apply (in_inf_map (fun l => l ++ map wn (tens (wn one) (wn one) :: nil))) in Hin.
-            apply Forall_inf_forall
+              [ | symmetry; apply PCPermutationT_cons_append ].
+            apply (inT_map (fun l => l ++ map wn (tens (wn one) (wn one) :: nil))) in Hin.
+            apply ForallT_forall
              with (map (fun l => l ++ map wn (tens (wn one) (wn one) :: nil)) (l0 :: l1 :: l2 :: L)); assumption.
 Qed.
 
@@ -728,19 +727,19 @@ intro pi. eapply stronger_pfrag in pi.
   change (oc bot :: oc bot :: map wn nil)
     with (concat ((@oc atom bot :: map wn nil) :: (oc bot :: map wn nil) :: nil)).
   apply mix_r; [ reflexivity | ].
-  apply forall_Forall_inf.
+  apply forall_ForallT.
   intros l' Hin.
   destruct Hin.
   + subst.
     apply oc_r, bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r; [ reflexivity | ].
-    apply Forall_inf_nil.
+    apply ForallT_nil.
   + destruct i; [ | destruct i ]; subst.
     apply oc_r, bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r; [ reflexivity | ].
-    apply Forall_inf_nil.
+    apply ForallT_nil.
 - repeat split.
   + intro A. destruct (pcut P A); reflexivity.
   + intro a. exists a. reflexivity.
@@ -762,19 +761,19 @@ Proof.
 intro pi.
 apply (ex_r (l ++ map wn (one :: tens (wn one) bot :: nil))).
 2:{ rewrite fp. cbn.
-    symmetry. etransitivity; [ apply Permutation_Type_swap | ].
-    etransitivity; [ apply Permutation_Type_cons_append | ].
-    cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
-    apply Permutation_Type_cons_append. }
+    symmetry. etransitivity; [ apply PermutationT_swap | ].
+    etransitivity; [ apply PermutationT_cons_append | ].
+    cons2app; rewrite ? app_assoc; apply PermutationT_app_tail; list_simpl.
+    apply PermutationT_cons_append. }
 refine (ext_wn_param fp _ (one :: tens (wn one) bot :: nil) _ _ pi).
 - reflexivity.
 - cbn. intro a.
-  eapply ex_r; [ | apply PCPermutation_Type_app_comm ]; list_simpl.
+  eapply ex_r; [ | apply PCPermutationT_app_comm ]; list_simpl.
   apply wk_r, wk_r, gax_r.
 - destruct L.
   { intros Hpmix0 Hpmix0' pi'. cbn.
     apply de_r.
-    eapply ex_r; [ | apply PCPermutation_Type_swap ].
+    eapply ex_r; [ | apply PCPermutationT_swap ].
     apply wk_r, one_r. }
   destruct L.
   { intros Hpmix1 Hpmix1' FL. cbn in Hpmix1, Hpmix1'. rewrite Hpmix1 in Hpmix1'; inversion Hpmix1'. }
@@ -784,23 +783,23 @@ refine (ext_wn_param fp _ (one :: tens (wn one) bot :: nil) _ _ pi).
   inversion FL; inversion X0; subst; clear FL X0 X2;
     rename X into pi1; rename X1 into pi2; rename l1 into l2; rename l0 into l1.
   apply (ex_r (wn (tens (wn one) bot) :: (wn one :: l2) ++ l1)); [ | rewrite fp; cbn ].
-  2:{ etransitivity; [ apply Permutation_Type_cons_append | ].
-      cons2app; rewrite ? app_assoc; apply Permutation_Type_app_tail; list_simpl.
-      etransitivity; [ | rewrite app_assoc; apply Permutation_Type_cons_append ].
-      apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity. }
+  2:{ etransitivity; [ apply PermutationT_cons_append | ].
+      cons2app; rewrite ? app_assoc; apply PermutationT_app_tail; list_simpl.
+      etransitivity; [ | rewrite app_assoc; apply PermutationT_cons_append ].
+      apply PermutationT_cons, PermutationT_app_comm; reflexivity. }
   apply co_r, co_r, de_r.
   apply (ex_r (tens (wn one) bot :: (wn (tens (wn one) bot) :: wn one :: l2)
                                    ++ (wn (tens (wn one) bot) :: l1))).
-  2:{ rewrite fp; cbn; apply Permutation_Type_cons, Permutation_Type_cons; try reflexivity.
-      symmetry; rewrite ? (app_comm_cons _ _ (wn one)); apply Permutation_Type_middle. }
+  2:{ rewrite fp; cbn; apply PermutationT_cons, PermutationT_cons; try reflexivity.
+      symmetry; rewrite ? (app_comm_cons _ _ (wn one)); apply PermutationT_middle. }
   apply tens_r.
   + eapply ex_r; [ apply pi1 | rewrite fp; cbn ].
-    symmetry. etransitivity; [ apply Permutation_Type_swap | ].
-    etransitivity; [ apply Permutation_Type_cons_append | ].
-    cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_cons_append.
+    symmetry. etransitivity; [ apply PermutationT_swap | ].
+    etransitivity; [ apply PermutationT_cons_append | ].
+    cons2app. rewrite ? app_assoc. apply PermutationT_app_tail, PermutationT_cons_append.
   + apply bot_r; eapply ex_r; [ apply pi2 | rewrite fp; cbn ].
-    symmetry. etransitivity; [ apply Permutation_Type_cons_append | ].
-    cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_cons_append.
+    symmetry. etransitivity; [ apply PermutationT_cons_append | ].
+    cons2app. rewrite ? app_assoc. apply PermutationT_app_tail, PermutationT_cons_append.
 Qed.
 
 (** Provability in [ll_mix02] is equivalent to provability of [ll]
@@ -875,7 +874,7 @@ intros pi%(stronger_pfrag _ (axext_pfrag P' (fun b : bool => if b then one :: on
   + apply bot_r, bot_r.
     change nil with (concat (@nil (list formula))).
     rewrite HeqP'.
-    apply mix_r; [ reflexivity | apply Forall_inf_nil ].
+    apply mix_r; [ reflexivity | apply ForallT_nil ].
 - rewrite HeqP'. repeat split; cbn; try reflexivity.
   + intro a. exists a. reflexivity.
   + intro n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
@@ -903,16 +902,16 @@ eapply stronger_pfrag in pi.
     apply oc_r, parr_r.
     change (one :: one :: map wn nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r; [ reflexivity | ].
-    apply Forall_inf_cons; [ apply one_r | ].
-    apply Forall_inf_cons; [ apply one_r | ].
-    apply Forall_inf_nil.
+    apply ForallT_cons; [ apply one_r | ].
+    apply ForallT_cons; [ apply one_r | ].
+    apply ForallT_nil.
   + rewrite <- app_nil_r.
     eapply cut_r; [ reflexivity | | apply pi ].
     change nil with (map (@wn atom) nil).
     apply oc_r, bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r; [ reflexivity | ].
-    apply Forall_inf_nil.
+    apply ForallT_nil.
 - eapply le_pfrag_po; [ apply cutupd_pfrag_true| ].
   repeat split.
   + intro a. exists a. reflexivity.
@@ -939,20 +938,20 @@ eapply stronger_pfrag in pi.
     change (one :: oc bot :: map wn nil)
       with (concat ((@one atom :: nil) :: (oc bot :: map wn nil) :: nil)).
     apply mix_r; [ reflexivity | ].
-    apply Forall_inf_cons; [ apply one_r | ].
-    apply Forall_inf_cons.
+    apply ForallT_cons; [ apply one_r | ].
+    apply ForallT_cons.
     { apply oc_r, bot_r.
       change (map wn nil) with (concat (@nil (list formula))).
       apply mix_r; [ reflexivity | ].
-      apply Forall_inf_nil. }
-    apply Forall_inf_nil.
+      apply ForallT_nil. }
+    apply ForallT_nil.
   + rewrite <- app_nil_r.
     eapply cut_r; [ reflexivity | | apply pi ].
     change nil with (map (@wn atom) nil).
     apply oc_r, bot_r.
     change (map wn nil) with (concat (@nil (list formula))).
     apply mix_r; [ reflexivity | ].
-    apply Forall_inf_nil.
+    apply ForallT_nil.
 - eapply le_pfrag_po; [ apply cutupd_pfrag_true| ].
   repeat split.
   + intro a. exists a. reflexivity.
@@ -969,15 +968,15 @@ Lemma ll_to_mix02'''_axcut P (Hgax_at : atomic_ax P) (Hcut : cut_closed P) (Hper
 Proof.
 intro pi. apply ll_to_mix02''_axcut; [ assumption .. | ].
 induction n as [|n IHn ] in l, pi |- *; cons2app.
-- eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ].
+- eapply ex_r; [ | rewrite Hperm; apply PermutationT_app_comm ].
   cbn. apply wk_r.
-  eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ]; assumption.
-- eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ].
+  eapply ex_r; [ | rewrite Hperm; apply PermutationT_app_comm ]; assumption.
+- eapply ex_r; [ | rewrite Hperm; apply PermutationT_app_comm ].
   cbn. apply co_r. rewrite 2 app_comm_cons.
-  eapply ex_r; [ | rewrite Hperm; apply Permutation_Type_app_comm ].
+  eapply ex_r; [ | rewrite Hperm; apply PermutationT_app_comm ].
   list_simpl. apply IHn.
   list_simpl in pi. eapply ex_r; [ apply pi | rewrite Hperm; cbn ].
-  apply Permutation_Type_cons, Permutation_Type_middle. reflexivity.
+  apply PermutationT_cons, PermutationT_middle. reflexivity.
 Qed.
 
 (* llR *)
@@ -999,13 +998,13 @@ Proof.
 intros HR1 HR2 l Hll. induction Hll; try (now constructor); try (econstructor; eassumption).
 destruct a; cbn.
 - rewrite <- (app_nil_l _). apply (@cut_r _ (pfrag_llR R2) (dual R2) eq_refl).
-  + rewrite bidual. eapply ex_r, PCPermutation_Type_swap.
+  + rewrite bidual. eapply ex_r, PCPermutationT_swap.
     apply HR1.
   + assert ({ b | dual R2 :: nil = projT2 (pgax (pfrag_llR R2)) b }) as [b ->] by now exists true.
     apply gax_r.
 - eapply (@cut_r _ (pfrag_llR R2) R2 eq_refl) in HR2.
   + eapply ex_r; [ apply HR2 | ].
-    symmetry. apply Permutation_Type_cons_app. rewrite app_nil_r. reflexivity.
+    symmetry. apply PermutationT_cons_app. rewrite app_nil_r. reflexivity.
   + assert ({ b | R2 :: one :: nil = projT2 (pgax (pfrag_llR R2)) b }) as [b ->] by now exists false.
     apply gax_r.
 Qed.
@@ -1058,9 +1057,9 @@ intros [|]; cbn.
       as [b ->] by (now exists (inr (exist _ 1 (le_n 2)))).
     apply gax_r.
   + apply (ex_r (tens (dual R) bot :: (one :: nil) ++ R :: nil));
-      [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
+      [ | apply PermutationT_cons, PermutationT_swap; reflexivity ].
     apply tens_r.
-    * eapply ex_r; [ | apply PCPermutation_Type_swap ].
+    * eapply ex_r; [ | apply PCPermutationT_swap ].
       eapply stronger_pfrag; [ | apply ax_exp ].
       repeat split; try reflexivity.
       intros [[] | [[|[|n]] Hlt]]; cbn.
@@ -1074,16 +1073,16 @@ Lemma llwnR_to_ll R l : llR (wn R) l -> ll_ll (l ++ wn R :: nil).
 Proof.
 intros pi%llR_to_ll.
 eapply (ex_r _ (wn (tens (dual (wn R)) bot) :: l ++ wn (wn R) :: nil)) in pi;
-  [ | symmetry; cons2app; rewrite ? app_assoc; apply Permutation_Type_cons_append ].
+  [ | symmetry; cons2app; rewrite ? app_assoc; apply PermutationT_cons_append ].
 eapply (@cut_ll_r _ nil) in pi.
 - eapply cut_ll_r with (wn (wn R)).
   + cbn. change (wn R :: nil) with (map wn (R :: nil)). apply oc_r. cbn.
     replace (wn R) with (dual (oc (dual R))) by (cbn; rewrite bidual; reflexivity).
     apply ax_exp.
-  + eapply ex_r; [ apply pi | symmetry; list_simpl; apply Permutation_Type_cons_append ].
+  + eapply ex_r; [ apply pi | symmetry; list_simpl; apply PermutationT_cons_append ].
 - cbn. rewrite bidual. change nil with (map (@wn atom) nil).
   apply oc_r, parr_r.
-  eapply ex_r; [ apply wk_r, one_r | apply Permutation_Type_swap ].
+  eapply ex_r; [ apply wk_r, one_r | apply PermutationT_swap ].
 Qed.
 
 Lemma ll_wn_wn_to_llR R l : ll_ll (l ++ wn R :: wn (tens (dual R) bot) :: nil) -> llR R l.
@@ -1094,15 +1093,15 @@ refine (cut_r (oc (dual R)) _ _ _); [ reflexivity | | ].
 - rewrite <- (app_nil_l (dual _ :: l)).
   refine (cut_r (oc (parr one R)) _ _ _); [ reflexivity | | ].
   + cbn. rewrite bidual. eapply ex_r; [apply pi | ].
-    symmetry. etransitivity; [ apply Permutation_Type_cons_append | ].
-    cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
-    list_simpl. apply Permutation_Type_cons_append.
+    symmetry. etransitivity; [ apply PermutationT_cons_append | ].
+    cons2app. rewrite ? app_assoc. apply PermutationT_app_tail.
+    list_simpl. apply PermutationT_cons_append.
   + change nil with (map (@wn atom) nil).
     apply oc_r, parr_r.
     apply (ex_r (R :: one :: nil)).
     * assert ({ b | R :: one :: nil = projT2 (pgax (pfrag_llR R)) b }) as [b ->] by now exists false.
       apply gax_r.
-    * apply Permutation_Type_swap.
+    * apply PermutationT_swap.
 - change nil with (map (@wn atom) nil). apply oc_r.
   assert ({ b | dual R :: map wn nil = projT2 (pgax (pfrag_llR R)) b }) as [b ->] by now exists true.
   apply gax_r.
@@ -1112,10 +1111,10 @@ Lemma ll_wn_to_llwnR R l : ll_ll (l ++ wn R :: nil) -> llR (wn R) l.
 Proof.
 intro pi. eapply ll_wn_wn_to_llR.
 eapply (ex_r (wn (tens (dual (wn R)) bot) :: wn (wn R) :: l)).
-2:{ cons2app. etransitivity; [ rewrite ! app_assoc; apply Permutation_Type_cons_append | ].
-    rewrite ! app_assoc. apply Permutation_Type_app_tail, Permutation_Type_cons_append. }
+2:{ cons2app. etransitivity; [ rewrite ! app_assoc; apply PermutationT_cons_append | ].
+    rewrite ! app_assoc. apply PermutationT_app_tail, PermutationT_cons_append. }
 apply wk_r, de_r.
-eapply ex_r; [ apply pi | symmetry; apply Permutation_Type_cons_append ].
+eapply ex_r; [ apply pi | symmetry; apply PermutationT_cons_append ].
 Qed.
 
 End Atoms.

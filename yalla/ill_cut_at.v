@@ -1,6 +1,6 @@
 (** * Atomic cut admissibility for Intuitionistic Linear Logic *)
 
-From OLlibs Require Import dectype List_more GPermutation_Type.
+From OLlibs Require Import dectype List_more GPermutationT.
 From Yalla Require Export ill_def.
 
 Set Default Proof Using "Type".
@@ -27,15 +27,15 @@ induction pi; inversion HeqX; subst;
 - cbn. rewrite <- Hb. apply (gax_ir b).
 - apply (ex_ir (l1 ++ l0 ++ l2)).
   + apply IHpi; assumption.
-  + apply PEPermutation_Type_app_head, PEPermutation_Type_app_tail. assumption.
+  + apply PEPermutationT_app_head, PEPermutationT_app_tail. assumption.
 - list_simpl. rewrite app_assoc. eapply ex_oc_ir; [ | eassumption ].
   list_simpl. rewrite (app_assoc l0), (app_assoc _ l3), <- (app_assoc l0). apply IHpi; assumption.
 - list_simpl. rewrite app_assoc. apply lpam_ilr; [ assumption | ].
   list_simpl. rewrite ? app_comm_cons, (app_assoc l3). apply IHpi2; assumption.
-- contradiction (P_gax_noN_l b). rewrite Hb. apply in_inf_elt.
+- contradiction (P_gax_noN_l b). rewrite Hb. apply inT_elt.
 - list_simpl. rewrite app_assoc. apply lmap_ilr; [ assumption | ].
   list_simpl. rewrite app_comm_cons, (app_assoc l3). apply IHpi2; assumption.
-- contradiction (P_gax_noN_l b). rewrite Hb. apply in_inf_elt.
+- contradiction (P_gax_noN_l b). rewrite Hb. apply inT_elt.
 - list_simpl. rewrite app_assoc.
   apply plus_ilr; list_simpl; rewrite app_comm_cons, (app_assoc l0); [ apply IHpi1 | apply IHpi2 ]; assumption.
 - list_simpl. rewrite app_assoc. apply cut_ir with A; [ assumption .. | ].
@@ -54,7 +54,7 @@ induction pi2 in l1, l2, Heql |- *; subst;
        | inversion Heql1
        | rewrite 2 app_assoc; constructor; list_simpl; apply IHpi2; list_simpl; reflexivity ]).
 - decomp_unit_eq_elt Heql. injection Heql as [= ->]. list_simpl. assumption.
-- apply PEPermutation_Type_vs_elt_subst in p as [(l4, l5) HP ->].
+- apply PEPermutationT_vs_elt_subst in p as [(l4, l5) HP ->].
   specialize (HP l0). symmetry in HP. refine (ex_ir _ _ _ _ HP).
   apply IHpi2. reflexivity.
 - decomp_elt_eq_app Heql; subst.

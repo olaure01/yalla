@@ -1,8 +1,8 @@
 (** * Properties relying on cut admissibility *)
 
 From Stdlib Require Import Bool.
-From OLlibs Require Import dectype List_more Dependent_Forall_Type flat_map_more
-                           Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import dectype List_more Dependent_ForallT flat_map_more
+                           PermutationT_more GPermutationT.
 From Yalla Require Export ll_cut.
 
 Set Default Proof Using "Type".
@@ -21,10 +21,10 @@ Lemma strong_consistency_axfree P (Hgax : no_ax P) (Hmix0 : pmix P 0 = false) : 
 Proof.
 intros pi%(cut_admissible_axfree Hgax).
 remember nil as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; (discriminate Heql + subst).
-- symmetry in p. apply IHpi, (PCPermutation_Type_nil _ _ p).
+- symmetry in p. apply IHpi, (PCPermutationT_nil _ _ p).
 - symmetry in p. apply IHpi.
   apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
-  apply Permutation_Type_nil in p as ->. reflexivity.
+  apply PermutationT_nil in p as ->. reflexivity.
 - destruct L; [ | inversion Heql as [HeqL] ].
   + cbn in eqpmix. rewrite Hmix0 in eqpmix. discriminate eqpmix.
   + apply app_eq_nil in HeqL as [-> _].
@@ -38,9 +38,9 @@ Lemma weak_consistency_axfree P (Hgax : no_ax P) : notT (ll P (zero :: nil)).
 Proof.
 intros pi%(cut_admissible_axfree Hgax).
 remember (zero :: nil) as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; (discriminate Heql + subst).
-- symmetry in p. apply IHpi, (PCPermutation_Type_length_1_inv _ _ _ p).
+- symmetry in p. apply IHpi, (PCPermutationT_length_1_inv _ _ _ p).
 - enough (lw' = nil) as ->
-    by (symmetry in p; apply Permutation_Type_nil in p as ->; exact (IHpi Heql)).
+    by (symmetry in p; apply PermutationT_nil in p as ->; exact (IHpi Heql)).
   destruct l1.
   + destruct lw'; (discriminate Heql + reflexivity).
   + injection Heql as [= _ [-> [->%map_eq_nil ->]%app_eq_nil]%app_eq_nil].
@@ -62,27 +62,27 @@ Definition fragment FS := forall A : formula, FS A -> forall B, subform B A -> F
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
 Lemma conservativity P (P_cutfree : no_cut P) FS (Hfrag : fragment FS) l (pi : ll P l) :
-  Forall_inf FS l -> Forall_formula FS pi.
+  ForallT FS l -> Forall_formula FS pi.
 Proof.
 induction pi using ll_nested_ind; cbn; intros HFS; try split; try now (inversion HFS; auto);
   try (inversion_clear HFS; try split; try apply IHpi; try apply IHpi1; try apply IHpi2;
        repeat constructor; try assumption; (eapply Hfrag; [ eassumption | ]); repeat constructor).
 - symmetry in p.
-  eapply IHpi, PCPermutation_Type_Forall_inf; eassumption.
+  eapply IHpi, PCPermutationT_ForallT; eassumption.
 - symmetry in p.
-  eapply IHpi, (PCPermutation_Type_Forall_inf true), HFS.
-  apply Permutation_Type_app_head, Permutation_Type_app_tail, Permutation_Type_map, p.
-- apply Forall_Proofs_to_Forall_inf in X. clear - X HFS.
+  eapply IHpi, (PCPermutationT_ForallT true), HFS.
+  apply PermutationT_app_head, PermutationT_app_tail, PermutationT_map, p.
+- apply Forall_Proofs_to_ForallT in X. clear - X HFS.
   induction PL in X, HFS |- *; [ constructor | split; inversion X; subst ].
-  + apply X0. cbn. exact (Forall_inf_app_l _ _ HFS).
-  + apply IHPL; [ apply X1 | exact (Forall_inf_app_r _ _ HFS) ].
+  + apply X0. cbn. exact (ForallT_app_l _ _ HFS).
+  + apply IHPL; [ apply X1 | exact (ForallT_app_r _ _ HFS) ].
 - inversion_clear HFS. split.
   + apply IHpi1.
-    constructor; [ | exact (Forall_inf_app_r _ _ X0) ].
+    constructor; [ | exact (ForallT_app_r _ _ X0) ].
     apply (Hfrag _ X).
     constructor; constructor.
   + apply IHpi2.
-    constructor; [ | exact (Forall_inf_app_l _ _ X0) ].
+    constructor; [ | exact (ForallT_app_l _ _ X0) ].
     apply (Hfrag _ X).
     constructor; constructor.
 - rewrite P_cutfree in f. discriminate f.
@@ -97,12 +97,12 @@ apply (conservativity P_cutfree).
 - intros A Hf B Hs. eapply Exists_impl, Hf.
   intros C HAC. transitivity A; assumption.
 - clear. induction l as [|A l IHl]; repeat constructor.
-  eapply Forall_inf_arrow, IHl. intros B Hl. right. exact Hl.
+  eapply ForallT_arrow, IHl. intros B Hl. right. exact Hl.
 Qed.
 
 (** Linear logic (with no axioms) is conservative over its fragments. *)
 Lemma conservativity_axfree P (P_axfree : no_ax P) FS (Hfrag : fragment FS) l (pi : ll P l) :
-  Forall_inf FS l -> { pi' : ll P l & Forall_formula FS pi' }.
+  ForallT FS l -> { pi' : ll P l & Forall_formula FS pi' }.
 Proof.
 intros HFS.
 apply cut_admissible_axfree in pi; [ | assumption ].
@@ -132,7 +132,7 @@ refine (conservativity_axfree P_axfree _ pi _).
 - intros A Hf B Hs. eapply Exists_impl, Hf.
   intros C HAC. transitivity A; assumption.
 - clear. induction l as [|a l IHl]; repeat constructor.
-  eapply Forall_inf_arrow, IHl. intros A Hl. right. exact Hl.
+  eapply ForallT_arrow, IHl. intros A Hl. right. exact Hl.
 Qed.
 
 
@@ -158,15 +158,15 @@ induction lax as [ | A lax IHlax ] in l |- *; intros pi.
   apply IHlax.
   eapply ax_gen; [ | | | | refine (ext_wn _ (dual A :: nil) pi); assumption ]; try (now rewrite ! HeqQ).
   cbn in pi. cbn. intros [p | [[|k] Hlen]]; cbn.
-  + eapply ex_r; [ | apply PCPermutation_Type_cons_append ].
+  + eapply ex_r; [ | apply PCPermutationT_cons_append ].
     apply wk_r.
     assert ({ b | projT2 (pgax P) p = projT2 (pgax Q) b}) as [b Hgax]
       by (subst; cbn; exists (inl p); reflexivity).
     rewrite Hgax. apply gax_r.
-  + eapply ex_r; [ | apply PCPermutation_Type_swap ].
+  + eapply ex_r; [ | apply PCPermutationT_swap ].
     apply de_r.
-    eapply ex_r; [ apply ax_exp | apply PCPermutation_Type_swap ].
-  + eapply ex_r; [ | apply PCPermutation_Type_swap ].
+    eapply ex_r; [ apply ax_exp | apply PCPermutationT_swap ].
+  + eapply ex_r; [ | apply PCPermutationT_swap ].
     apply wk_r.
     assert ({ b | nth k lax one :: nil = projT2 (pgax Q) b}) as [b Hgax].
     { subst. clear - Hlen. cbn.
@@ -198,7 +198,7 @@ induction lax as [|A lax IHlax] in l |- *; intro pi.
       as [b Hgax]
       by (clear; cbn; exists (inr (exist _ 0 (le_n_S _ _ (le_0_n _)))); reflexivity).
     rewrite Hgax. apply gax_r.
-  + eapply ex_r; [ | apply PCPermutation_Type_sym, PCPermutation_Type_cons_append ].
+  + eapply ex_r; [ | apply PCPermutationT_sym, PCPermutationT_cons_append ].
     eapply stronger_pfrag, pi.
     repeat split; [ reflexivity | cbn | reflexivity .. ].
     intros [p | [k Hlen]].

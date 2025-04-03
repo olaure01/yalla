@@ -1,6 +1,6 @@
 (** * Example of a concrete use of the yalla library: intuitionistic logic*)
 
-From OLlibs Require Import funtheory infinite List_more Permutation_Type_more.
+From OLlibs Require Import funtheory infinite List_more PermutationT_more.
 
 
 (** ** 0. load the [ill] library *)
@@ -27,7 +27,7 @@ Inductive iformula :=
 (** *** Additive presentation *)
 Inductive lj : list iformula -> iformula -> Type :=
 | ax_r X l : lj (ivar X :: l) (ivar X)
-| ex_r l1 l2 A : lj l1 A -> Permutation_Type l1 l2 -> lj l2 A
+| ex_r l1 l2 A : lj l1 A -> PermutationT l1 l2 -> lj l2 A
 | true_r l : lj l itrue
 | false_lr C l : lj (ifalse :: l) C
 | and_rr A B l : lj l A -> lj l B -> lj l (iand A B)
@@ -46,12 +46,12 @@ Proof.
 induction l as [|a l IHl] in l0, A |- *; intro p; [ exact p | ].
 cbn. apply co_lr.
 apply ex_r with (l ++ a :: a :: l0);
-  [ | symmetry; rewrite app_comm_cons; apply Permutation_Type_cons_app, Permutation_Type_middle ].
+  [ | symmetry; rewrite app_comm_cons; apply PermutationT_cons_app, PermutationT_middle ].
 apply IHl.
 eapply ex_r; [ eassumption | ].
-list_simpl. etransitivity; [ apply Permutation_Type_middle | ].
-apply Permutation_Type_app_head.
-rewrite app_comm_cons. apply Permutation_Type_cons_app, Permutation_Type_middle.
+list_simpl. etransitivity; [ apply PermutationT_middle | ].
+apply PermutationT_app_head.
+rewrite app_comm_cons. apply PermutationT_cons_app, PermutationT_middle.
 Qed.
 
 Lemma wk_list_lr l0 l A : lj l A -> lj (l0 ++ l) A.
@@ -60,7 +60,7 @@ Proof. now induction l0 as [|a l0 IHl0] in l, A |- *; intro p; [ exact p | apply
 (** *** Multiplicative presentation *)
 Inductive lj_mul : list iformula -> iformula -> Type :=
 | max_r X : lj_mul (ivar X :: nil) (ivar X)
-| mex_r l1 l2 A : lj_mul l1 A -> Permutation_Type l1 l2 -> lj_mul l2 A
+| mex_r l1 l2 A : lj_mul l1 A -> PermutationT l1 l2 -> lj_mul l2 A
 | mtrue_r : lj_mul nil itrue
 | mfalse_lr C l : lj_mul (ifalse :: l) C
 | mand_rr A B l1 l2 : lj_mul l1 A -> lj_mul l2 B -> lj_mul (l1 ++ l2) (iand A B)
@@ -78,12 +78,12 @@ Proof.
 induction l as [|a l IHl] in l0, A |- *; cbn; intro p; [ exact p | ].
 apply mco_lr.
 apply mex_r with (l ++ a :: a :: l0);
-  [ | symmetry; rewrite app_comm_cons; apply Permutation_Type_cons_app, Permutation_Type_middle ].
+  [ | symmetry; rewrite app_comm_cons; apply PermutationT_cons_app, PermutationT_middle ].
 apply IHl.
 eapply mex_r; [ eassumption | ].
-list_simpl. etransitivity; [ apply Permutation_Type_middle | ].
-apply Permutation_Type_app_head.
-rewrite app_comm_cons. apply Permutation_Type_cons_app, Permutation_Type_middle.
+list_simpl. etransitivity; [ apply PermutationT_middle | ].
+apply PermutationT_app_head.
+rewrite app_comm_cons. apply PermutationT_cons_app, PermutationT_middle.
 Qed.
 
 Lemma mwk_list_lr l l0 A : lj_mul l0 A -> lj_mul (l ++ l0) A.
@@ -95,35 +95,35 @@ Proof.
 intros p. induction p; try now constructor.
 - eapply ex_r; eassumption.
 - apply and_rr.
-  + apply ex_r with (l2 ++ l1); [ | apply Permutation_Type_app_comm ].
+  + apply ex_r with (l2 ++ l1); [ | apply PermutationT_app_comm ].
     apply wk_list_lr. assumption.
   + apply wk_list_lr. assumption.
 - apply co_lr, and_lr2.
-  apply ex_r with (iand A B :: B :: l); [ | apply Permutation_Type_swap ].
+  apply ex_r with (iand A B :: B :: l); [ | apply PermutationT_swap ].
   apply and_lr1. assumption.
 - apply map_lr.
-  + apply ex_r with (l2 ++ l1); [ | apply Permutation_Type_app_comm ].
+  + apply ex_r with (l2 ++ l1); [ | apply PermutationT_app_comm ].
     apply wk_list_lr. assumption.
-  + apply ex_r with (l1 ++ B :: l2); [ | symmetry; apply Permutation_Type_middle ].
+  + apply ex_r with (l1 ++ B :: l2); [ | symmetry; apply PermutationT_middle ].
     apply wk_list_lr. assumption.
 Qed.
 
 Lemma lj2lj_mul l A : lj l A -> lj_mul l A.
 Proof.
 intros p. induction p; try now constructor.
-- apply mex_r with (l ++ ivar X :: nil); [ | symmetry; apply Permutation_Type_cons_append ].
+- apply mex_r with (l ++ ivar X :: nil); [ | symmetry; apply PermutationT_cons_append ].
   apply mwk_list_lr, max_r.
 - eapply mex_r; eassumption.
 - rewrite <- (app_nil_r _). apply mwk_list_lr, mtrue_r.
 - rewrite <- (app_nil_r _). apply mco_list_lr.
   rewrite app_nil_r. apply mand_rr; assumption.
 - apply mand_lr.
-  apply mex_r with (B :: A :: l); [ | apply Permutation_Type_swap ].
+  apply mex_r with (B :: A :: l); [ | apply PermutationT_swap ].
   apply mwk_lr. assumption.
 - apply mand_lr, mwk_lr. assumption.
-- apply mex_r with (l ++ imap A B :: nil); [ | symmetry; apply Permutation_Type_cons_append ].
+- apply mex_r with (l ++ imap A B :: nil); [ | symmetry; apply PermutationT_cons_append ].
   apply mco_list_lr.
-  apply mex_r with (imap A B :: l ++ l); [ | rewrite ! app_assoc; apply Permutation_Type_cons_append ].
+  apply mex_r with (imap A B :: l ++ l); [ | rewrite ! app_assoc; apply PermutationT_cons_append ].
   apply mmap_lr; assumption.
 Qed.
 
@@ -149,56 +149,56 @@ Lemma skeleton l A : ill_cut.ill_ll l A -> lj (map ill2lj l) (ill2lj A).
 Proof.
 intros pi. induction pi; cbn;
   try (eapply ex_r with (map ill2lj (_ :: l1 ++ l2));
-        [ cbn | apply Permutation_Type_map, Permutation_Type_middle ]);
+        [ cbn | apply PermutationT_map, PermutationT_middle ]);
   try (constructor; assumption);
-  try (constructor; eapply ex_r; [ eassumption | rewrite ? map_app; symmetry; apply Permutation_Type_middle ]).
-- apply ex_r with (map ill2lj l1); [ | apply Permutation_Type_map ]; assumption.
+  try (constructor; eapply ex_r; [ eassumption | rewrite ? map_app; symmetry; apply PermutationT_middle ]).
+- apply ex_r with (map ill2lj l1); [ | apply PermutationT_map ]; assumption.
 - eapply ex_r; [ eassumption | ].
-  apply Permutation_Type_map, Permutation_Type_app_head,
-        Permutation_Type_app_tail, Permutation_Type_map; assumption.
+  apply PermutationT_map, PermutationT_app_head,
+        PermutationT_app_tail, PermutationT_map; assumption.
 - list_simpl. apply and_rr.
-  + apply ex_r with (map ill2lj l2 ++ map ill2lj l1); [ | apply Permutation_Type_app_comm ].
+  + apply ex_r with (map ill2lj l2 ++ map ill2lj l1); [ | apply PermutationT_app_comm ].
     apply wk_list_lr. assumption.
   + apply wk_list_lr. assumption.
 - apply co_lr.
   apply and_lr2.
   apply ex_r with (iand (ill2lj A) (ill2lj B) :: ill2lj B :: map ill2lj (l1 ++ l2));
-    [ | apply Permutation_Type_swap ].
+    [ | apply PermutationT_swap ].
   apply and_lr1.
   eapply ex_r; [ eassumption | ].
-  list_simpl. symmetry. apply Permutation_Type_cons_app, Permutation_Type_middle.
-- constructor. eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply Permutation_Type_cons_append.
+  list_simpl. symmetry. apply PermutationT_cons_app, PermutationT_middle.
+- constructor. eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply PermutationT_cons_append.
 - apply ex_r with (map ill2lj (iformulas.ilpam A B :: l0 ++ l1 ++ l2));
-    [ | list_simpl; rewrite app_comm_cons; apply Permutation_Type_app_swap_app ].
+    [ | list_simpl; rewrite app_comm_cons; apply PermutationT_app_swap_app ].
   cbn. apply map_lr.
-  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | list_simpl; symmetry; apply Permutation_Type_app_rot ].
+  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | list_simpl; symmetry; apply PermutationT_app_rot ].
     rewrite map_app. apply wk_list_lr. assumption.
   + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2));
-      [ | list_simpl; symmetry; rewrite ? app_assoc; apply Permutation_Type_middle ].
+      [ | list_simpl; symmetry; rewrite ? app_assoc; apply PermutationT_middle ].
     rewrite map_app. apply wk_list_lr. assumption.
-- constructor. eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply Permutation_Type_cons_append.
+- constructor. eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply PermutationT_cons_append.
 - apply map_lr; [ assumption | apply ax_r ].
 - apply ex_r with (map ill2lj (iformulas.ilmap A B :: l0 ++ l1 ++ l2)).
-  2:{ list_simpl. cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
-      list_simpl. etransitivity; [ apply Permutation_Type_cons_append | ].
-      list_simpl. apply Permutation_Type_app_swap_app. }
+  2:{ list_simpl. cons2app. rewrite ? app_assoc. apply PermutationT_app_tail.
+      list_simpl. etransitivity; [ apply PermutationT_cons_append | ].
+      list_simpl. apply PermutationT_app_swap_app. }
   cbn. apply map_lr.
-  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | list_simpl; symmetry; apply Permutation_Type_app_rot ].
+  + apply ex_r with (map ill2lj ((l1 ++ l2) ++ l0)); [ | list_simpl; symmetry; apply PermutationT_app_rot ].
     rewrite map_app. apply wk_list_lr. assumption.
   + apply ex_r with (map ill2lj (l0 ++ l1 ++ B :: l2));
-      [ | list_simpl; symmetry; rewrite ? app_assoc; apply Permutation_Type_middle ].
+      [ | list_simpl; symmetry; rewrite ? app_assoc; apply PermutationT_middle ].
     rewrite map_app. apply wk_list_lr. assumption.
-- apply ex_r with (map ill2lj (iformulas.ineg A :: l)); [ | list_simpl; apply Permutation_Type_cons_append ].
+- apply ex_r with (map ill2lj (iformulas.ineg A :: l)); [ | list_simpl; apply PermutationT_cons_append ].
   apply map_lr; [ assumption | apply ax_r ].
 - apply or_lr.
   + eapply ex_r; [ apply IHpi1 | ].
-    rewrite <- map_cons. list_simpl. symmetry. apply Permutation_Type_middle.
+    rewrite <- map_cons. list_simpl. symmetry. apply PermutationT_middle.
   + eapply ex_r; [ apply IHpi2 | ].
-    rewrite <- map_cons. list_simpl. symmetry. apply Permutation_Type_middle.
+    rewrite <- map_cons. list_simpl. symmetry. apply PermutationT_middle.
 - assumption.
-- eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply Permutation_Type_middle.
+- eapply ex_r; [ eassumption | ]. list_simpl. symmetry. apply PermutationT_middle.
 - constructor. eapply ex_r; [ eassumption | ].
-  list_simpl. symmetry. apply Permutation_Type_cons_app, Permutation_Type_middle.
+  list_simpl. symmetry. apply PermutationT_cons_app, PermutationT_middle.
 - discriminate f.
 - destruct a.
 Qed.
@@ -233,7 +233,7 @@ unfold oc_lj2ill_cbv. intros pi. induction pi; cbn.
   rewrite <- (app_nil_l _). apply ill_def.de_ilr. rewrite app_nil_l.
   apply ill_def.ax_ir.
 - apply ill_def.ex_ir with (map oc_lj2ill_cbv l1); [ assumption | ].
-  apply Permutation_Type_map. assumption.
+  apply PermutationT_map. assumption.
 - change nil with (map (@iformulas.ioc preiatom) nil).
   apply ill_def.oc_irr, ill_def.one_irr.
 - rewrite <- (app_nil_l _). apply ill_def.de_ilr, ill_def.zero_ilr.
@@ -252,7 +252,7 @@ unfold oc_lj2ill_cbv. intros pi. induction pi; cbn.
   apply ill_def.ex_ir
     with (nil ++ map oc_lj2ill_cbv l1 ++ lj2ill_cbv (imap A B) :: (map oc_lj2ill_cbv l2)).
   + apply ill_def.lmap_ilr; assumption.
-  + cbn. rewrite map_map. list_simpl. symmetry. apply Permutation_Type_middle.
+  + cbn. rewrite map_map. list_simpl. symmetry. apply PermutationT_middle.
 - rewrite <- (app_nil_l _). apply ill_def.wk_ilr. assumption.
 - rewrite <- (app_nil_l _). apply ill_def.co_ilr. assumption.
 Qed.
@@ -335,11 +335,11 @@ Proof.
 unfold oc_lj2ill_cbn. intro pi. induction pi; try now constructor.
 - rewrite <- map_map.
   apply ill_def.ex_ir with (map iformulas.ioc (map lj2ill_cbn (l ++ ivar X :: nil)));
-    [ | list_simpl; symmetry; apply Permutation_Type_cons_append ].
+    [ | list_simpl; symmetry; apply PermutationT_cons_append ].
   list_simpl. rewrite <- (app_nil_l _).
   apply ill_def.wk_list_ilr, ill_def.de_ilr, ill_def.ax_ir.
 - eapply ill_def.ex_ir with (map _ l1);
-    [ eassumption | cbn; apply Permutation_Type_map; assumption ].
+    [ eassumption | cbn; apply PermutationT_map; assumption ].
 - rewrite <- (app_nil_l _). apply ill_def.de_ilr, ill_def.zero_ilr.
 - rewrite <- map_map; list_simpl; rewrite <- (app_nil_l _).
   change (iformulas.ioc (iformulas.iwith (lj2ill_cbn A) (lj2ill_cbn B))
@@ -377,12 +377,12 @@ unfold oc_lj2ill_cbn. intro pi. induction pi; try now constructor.
   apply ill_def.ex_ir
     with (nil ++ map iformulas.ioc (map lj2ill_cbn l) ++
               (iformulas.ioc (iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B)) :: nil));
-    [ | list_simpl; symmetry; apply Permutation_Type_cons_append ].
+    [ | list_simpl; symmetry; apply PermutationT_cons_append ].
   apply ill_def.co_list_ilr.
   apply ill_def.ex_ir
     with (nil ++ (iformulas.ioc (iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B)) ::
                         (map iformulas.ioc (map lj2ill_cbn l))) ++ (map iformulas.ioc (map lj2ill_cbn l)));
-    [ | cbn; rewrite ? app_assoc; apply Permutation_Type_cons_append ].
+    [ | cbn; rewrite ? app_assoc; apply PermutationT_cons_append ].
   apply (@ill_cut.cut_ill_ir _ (iformulas.ioc (lj2ill_cbn B))); [ | assumption ].
   rewrite <- map_cons.
   apply ill_def.oc_irr.
@@ -390,7 +390,7 @@ unfold oc_lj2ill_cbn. intro pi. induction pi; try now constructor.
   apply ill_def.de_ilr.
   apply ill_def.ex_ir with (nil ++ map iformulas.ioc (map lj2ill_cbn l) ++
                               iformulas.ilmap (iformulas.ioc (lj2ill_cbn A)) (lj2ill_cbn B) :: nil);
-    [ | list_simpl; symmetry; apply Permutation_Type_cons_append ].
+    [ | list_simpl; symmetry; apply PermutationT_cons_append ].
   apply ill_def.lmap_ilr.
   + apply ill_def.oc_irr; assumption.
   + apply ill_def.ax_exp_ill.
@@ -457,7 +457,7 @@ Lemma disjunction_property (A B : iformula) : lj nil (ior A B) -> lj nil A + lj 
 Proof.
 intros pi. remember nil as l eqn:Heql. remember (ior A B) as C eqn:HeqC.
 induction pi; inversion Heql; inversion HeqC; subst; [ | left; assumption | right; assumption ].
-symmetry in p. apply Permutation_Type_nil in p as ->.
+symmetry in p. apply PermutationT_nil in p as ->.
 apply IHpi; reflexivity.
 Qed.
 

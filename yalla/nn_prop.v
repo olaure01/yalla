@@ -1,7 +1,7 @@
 (** * Parametric negative translation from [ll] into [ill]. *)
 (** Properties relying on cut admissibility *)
 
-From OLlibs Require Import funtheory infinite List_more Dependent_Forall_Type Permutation_Type GPermutation_Type.
+From OLlibs Require Import funtheory infinite List_more Dependent_ForallT PermutationT GPermutationT.
 From Yalla Require Import subs ll_fragments bbb.
 From Yalla Require Export nn_def.
 
@@ -40,17 +40,17 @@ induction A; cbn; rewrite ? bidual.
 - apply parr_r.
   destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite (Hr2 c).
   apply (ex_r ((covar c :: var c :: nil) ++ unill R :: nil));
-    [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
+    [ | apply PermutationT_cons, PermutationT_swap; reflexivity ].
   eapply (@cut_r _ (pfrag_llR (unill R)) (dual one) eq_refl).
-  + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
+  + apply (ex_r (unill R :: one :: nil)); [ | apply PermutationT_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r, ax_r.
 - destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2].  rewrite (Hr2 c).
-  apply (ex_r (covar c :: var c :: nil)); [ | apply Permutation_Type_swap ].
+  apply (ex_r (covar c :: var c :: nil)); [ | apply PermutationT_swap ].
   apply ax_r.
 - apply parr_r, bot_r.
   apply (@gax_r _ (pfrag_llR (unill R)) false).
-- apply (ex_r (bot :: one :: nil)); [ | apply Permutation_Type_swap ].
+- apply (ex_r (bot :: one :: nil)); [ | apply PermutationT_swap ].
   apply bot_r, one_r.
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
   apply parr_r, parr_r.
@@ -65,63 +65,63 @@ induction A; cbn; rewrite ? bidual.
     2:{ list_simpl.
         transitivity ((tens (dual (unill R)) (unill (trans R A1))
               :: (unill (trans R A2) :: unill R :: tens A1 A2 :: nil))).
-        - apply Permutation_Type_cons, Permutation_Type_cons, Permutation_Type_swap; reflexivity.
-        - apply Permutation_Type_swap. }
+        - apply PermutationT_cons, PermutationT_cons, PermutationT_swap; reflexivity.
+        - apply PermutationT_swap. }
     apply tens_r.
-    -- eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
+    -- eapply ex_r; [ eassumption | apply PermutationT_swap ].
     -- apply (ex_r (tens A1 A2 ::
                (unill (trans R A2) :: nil) ++ unill (trans R A1) :: nil));
-         [ | etransitivity; [ apply Permutation_Type_cons_append | apply Permutation_Type_swap ] ].
+         [ | etransitivity; [ apply PermutationT_cons_append | apply PermutationT_swap ] ].
        apply tens_r.
-       ++ eapply ex_r; [ apply IHA1 | apply Permutation_Type_swap ].
-       ++ eapply ex_r; [ apply IHA2 | apply Permutation_Type_swap ].
+       ++ eapply ex_r; [ apply IHA1 | apply PermutationT_swap ].
+       ++ eapply ex_r; [ apply IHA2 | apply PermutationT_swap ].
 - apply (ex_r (parr A1 A2 ::
-          tens (unill (trans R A2)) (unill (trans R A1)) :: nil)); [ | apply Permutation_Type_swap ].
+          tens (unill (trans R A2)) (unill (trans R A1)) :: nil)); [ | apply PermutationT_swap ].
   apply parr_r.
   apply (ex_r (tens (unill (trans R A2)) (unill (trans R A1))
                   :: (A1 :: nil) ++ (A2 :: nil)));
-    [ | etransitivity; [ apply Permutation_Type_middle
-                       | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ] ].
+    [ | etransitivity; [ apply PermutationT_middle
+                       | apply PermutationT_cons, PermutationT_swap; reflexivity ] ].
   apply tens_r; assumption.
 - apply parr_r, top_r.
-- eapply ex_r; [ apply top_r | apply Permutation_Type_swap ].
+- eapply ex_r; [ apply top_r | apply PermutationT_swap ].
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
   apply parr_r, with_r.
   + apply (ex_r (tens (dual (unill R)) (unill (trans R A1)) ::
                     (aplus A1 A2 :: nil) ++ unill R :: nil));
-      [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
+      [ | apply PermutationT_cons, PermutationT_swap; reflexivity ].
     apply tens_r.
-    * eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
-    * eapply ex_r; [ | apply Permutation_Type_swap ].
+    * eapply ex_r; [ eassumption | apply PermutationT_swap ].
+    * eapply ex_r; [ | apply PermutationT_swap ].
       apply plus_r1.
-      eapply ex_r; [ | apply Permutation_Type_swap ]; assumption.
+      eapply ex_r; [ | apply PermutationT_swap ]; assumption.
   + apply (ex_r (tens (dual (unill R)) (unill (trans R A2)) ::
                     (aplus A1 A2 :: nil) ++ unill R :: nil));
-      [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
+      [ | apply PermutationT_cons, PermutationT_swap; reflexivity ].
     apply tens_r.
-    * eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
-    * eapply ex_r; [ | apply Permutation_Type_swap ].
+    * eapply ex_r; [ eassumption | apply PermutationT_swap ].
+    * eapply ex_r; [ | apply PermutationT_swap ].
       apply plus_r2.
-      eapply ex_r; [ | apply Permutation_Type_swap ]; assumption.
+      eapply ex_r; [ | apply PermutationT_swap ]; assumption.
 - assert (Hax := @ax_exp _ (pfrag_llR (unill R)) (unill R)).
-  eapply ex_r; [ | apply Permutation_Type_swap ].
+  eapply ex_r; [ | apply PermutationT_swap ].
   apply with_r.
-  + eapply ex_r; [ | apply Permutation_Type_swap ].
+  + eapply ex_r; [ | apply PermutationT_swap ].
     apply plus_r1; assumption.
-  + eapply ex_r; [ | apply Permutation_Type_swap ].
+  + eapply ex_r; [ | apply PermutationT_swap ].
     apply plus_r2; assumption.
 - apply parr_r.
   apply (ex_r ((oc A ::
                   map wn (tens (dual (unill R)) (unill (trans R A)) :: nil))
                   ++ unill R :: nil));
-    [ | etransitivity; [ apply Permutation_Type_middle
-                       | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ] ].
+    [ | etransitivity; [ apply PermutationT_middle
+                       | apply PermutationT_cons, PermutationT_swap; reflexivity ] ].
   apply (@cut_r _ (pfrag_llR (unill R)) (dual one) eq_refl).
-  + apply (ex_r (unill R :: one :: nil)); [ | apply Permutation_Type_swap ].
+  + apply (ex_r (unill R :: one :: nil)); [ | apply PermutationT_swap ].
     apply (@gax_r _ (pfrag_llR (unill R)) false).
   + apply bot_r, oc_r.
     apply (ex_r ((wn (tens (dual (unill R)) (unill (trans R A))) :: nil)
-                     ++ (A :: nil) ++ nil)); [ | apply Permutation_Type_swap ].
+                     ++ (A :: nil) ++ nil)); [ | apply PermutationT_swap ].
     apply de_r, tens_r.
     * apply (@gax_r _ (pfrag_llR (unill R)) true).
     * assumption.
@@ -129,12 +129,12 @@ induction A; cbn; rewrite ? bidual.
   change (wn A :: nil) with (map wn (A :: nil)).
   apply oc_r, parr_r.
   apply (ex_r (tens (dual (unill R)) (unill (trans R A)) :: (wn A :: nil) ++ unill R :: nil));
-    [ | apply Permutation_Type_cons, Permutation_Type_swap; reflexivity ].
+    [ | apply PermutationT_cons, PermutationT_swap; reflexivity ].
   apply tens_r.
-  + eapply ex_r; [ eassumption | apply Permutation_Type_swap ].
-  + apply (ex_r (wn A :: unill (trans R A) :: nil)); [ | apply Permutation_Type_swap ].
+  + eapply ex_r; [ eassumption | apply PermutationT_swap ].
+  + apply (ex_r (wn A :: unill (trans R A) :: nil)); [ | apply PermutationT_swap ].
     apply de_r.
-    eapply ex_r; [ | apply Permutation_Type_swap ]; assumption.
+    eapply ex_r; [ | apply PermutationT_swap ]; assumption.
 Qed.
 
 (** The previous lemma comes with the following result from the [ll_fragments] library:
@@ -156,15 +156,15 @@ assert (forall l',
   rewrite rev_unit in X.
   apply (ex_r _ (dual (unill (trans R x))
            :: l' ++ map dual (map unill (map (trans R) (rev l))))) in X;
-    [ | symmetry; apply Permutation_Type_middle ].
+    [ | symmetry; apply PermutationT_middle ].
   apply (cut_r _ (Hcut _) X) in Hb.
   rewrite rev_unit. change (x :: rev l) with ((x :: nil) ++ rev l). rewrite app_assoc.
   apply IHl.
-  eapply ex_r; [ eassumption | list_simpl; apply Permutation_Type_middle ]. }
+  eapply ex_r; [ eassumption | list_simpl; apply PermutationT_middle ]. }
 assert (llR (unill R) (dual (unill R) :: nil)) as HR by apply (@gax_r _ (pfrag_llR (unill R)) true).
 apply (cut_r _ (Hcut _) HR) in Hill.
 rewrite app_nil_r, <- (app_nil_l (rev _)), <- ? map_rev in Hill. apply Hll in Hill.
-eapply ex_r; [ apply Hill | symmetry; apply Permutation_Type_rev ].
+eapply ex_r; [ apply Hill | symmetry; apply PermutationT_rev ].
 Qed.
 
 
@@ -220,7 +220,7 @@ End RTranslation.
 Lemma ie_ie_diag A : ielem A -> ill_ll (trans A (unill A) :: A :: nil) A.
 Proof.
 intros Hgfn.
-eapply ex_ir; [ | apply Permutation_Type_swap ].
+eapply ex_ir; [ | apply PermutationT_swap ].
 cons2app. rewrite <- (app_nil_l _). eapply cut_ir_axfree.
 - intros [].
 - apply ie_ie. assumption.
@@ -238,10 +238,10 @@ induction Hll; cbn.
 - cons2app. rewrite <- (app_nil_l _).
   apply lmap_ilr; [ apply (ax_ir (a2i X)) | assumption ].
 - eapply ex_ir; [ eassumption | ].
-  apply Permutation_Type_map. assumption.
+  apply PermutationT_map. assumption.
 - list_simpl in IHHll. rewrite trans_wn in IHHll.
   list_simpl. rewrite trans_wn.
-  eapply Permutation_Type_map in p.
+  eapply PermutationT_map in p.
   eapply ex_oc_ir; eassumption.
 - discriminate f.
 - rewrite <- 2 (app_nil_l _). apply lmap_ilr; [ apply one_irr | assumption ].
@@ -252,22 +252,22 @@ induction Hll; cbn.
   apply (lmap_ilr _ _ _ _ _ _ IHHll2) in Hax.
   apply (ex_ir _ _ _ Hax).
   fold (map (trans R)). list_simpl.
-  symmetry. etransitivity; [ apply Permutation_Type_cons, Permutation_Type_app_comm; reflexivity | ].
-  rewrite ? app_assoc. apply Permutation_Type_cons_append.
+  symmetry. etransitivity; [ apply PermutationT_cons, PermutationT_app_comm; reflexivity | ].
+  rewrite ? app_assoc. apply PermutationT_cons_append.
 - rewrite <- (app_nil_l (itens _ _ :: _)). apply tens_ilr.
-  eapply ex_ir; [ eassumption | apply Permutation_Type_swap ].
+  eapply ex_ir; [ eassumption | apply PermutationT_swap ].
 - rewrite <- (app_nil_l (izero :: _)). apply zero_ilr.
 - apply negR_irr in IHHll.
   apply (plus_irr1 _ (negR R (trans R B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
   apply (ex_ir _ _ _ Hax).
   fold (map (trans R)). list_simpl.
-  symmetry. apply Permutation_Type_cons_append.
+  symmetry. apply PermutationT_cons_append.
 - apply negR_irr in IHHll.
   apply (plus_irr2 _ (negR R (trans R B))) in IHHll.
   apply (lmap_ilr _ _ _ _ _ _ IHHll) in Hax.
   apply (ex_ir _ _ _ Hax).
-  fold (map (trans R)). list_simpl. symmetry. apply Permutation_Type_cons_append.
+  fold (map (trans R)). list_simpl. symmetry. apply PermutationT_cons_append.
 - rewrite <- (app_nil_l (iplus _ _ :: _)). apply plus_ilr; assumption.
 - cbn in IHHll. rewrite map_map in IHHll. cbn in IHHll. rewrite <- map_map in IHHll.
   apply negR_irr, oc_irr in IHHll.
@@ -292,10 +292,10 @@ induction Hll; cbn.
   fold (map (trans R)) in pi0. list_simpl in pi0. list_simpl. assumption.
 - destruct a.
   + apply ie_dual_diag; assumption.
-  + cbn. eapply ex_ir; [ | apply Permutation_Type_swap ].
+  + cbn. eapply ex_ir; [ | apply PermutationT_swap ].
     rewrite <- 2 (app_nil_l (negR _ _ :: _)). apply lmap_ilr.
     * apply one_irr.
-    * eapply ex_ir; [ | apply Permutation_Type_swap ].
+    * eapply ex_ir; [ | apply PermutationT_swap ].
       apply ie_ie_diag. assumption.
 Qed.
 
@@ -341,7 +341,7 @@ Qed.
 Lemma cut_admissible_ll_from_ill (l : list formula) : ll ((cutupd_pfrag pfrag_ll pcut_all)) l -> ll_ll l.
 Proof.
 remember (fresh (flat_map atom_list l)) as x eqn:Heqx. intro pi.
-apply (ex_r (rev l)); [ |  symmetry; apply Permutation_Type_rev ].
+apply (ex_r (rev l)); [ |  symmetry; apply PermutationT_rev ].
 rewrite <- app_nil_l. apply bot_rev; [ intros [] | ]. rewrite app_nil_l.
 apply munit_elim
   with (l1 := map (subs bot x)
@@ -360,7 +360,7 @@ apply munit_elim
 - cbn. constructor.
   + destruct (bijective_inverse Atom2PreIAtom_bij) as [f Hr1 Hr2]. rewrite (Hr2 x), repl_at_eq.
     apply musmp_bot.
-  + clear pi. rewrite map_rev. apply Forall2_inf_rev.
+  + clear pi. rewrite map_rev. apply Forall2T_rev.
     assert (Forall (fun A => ~ In x (atom_list A)) l) as Hf.
     { assert (Hf := fresh_spec (flat_map atom_list l)). rewrite <- Heqx in Hf.
       clear Heqx. induction l as [|A l IHl]; constructor.
@@ -395,8 +395,8 @@ intros pi. induction pi; try (econstructor; eassumption).
     apply mix_r; constructor.
   + change (one :: one :: nil) with (concat ((@one atom :: nil) :: (one :: nil) :: nil)).
     apply mix_r; [ reflexivity | ].
-    repeat (apply Forall_inf_cons; try apply one_r).
-    apply Forall_inf_nil.
+    repeat (apply ForallT_cons; try apply one_r).
+    apply ForallT_nil.
 Qed.
 
 Lemma ll_mix02_to_ill_trans (l : list formula) : ll_mix02 l -> ill_ll (map (trans ione) l) ione.
@@ -412,13 +412,13 @@ intros Hll%(ll_to_ill_trans ione).
   destruct L; [ | inversion eqpmix ].
   cbn; rewrite app_nil_r.
   assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l0) ione).
-  { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by apply in_inf_eq.
-    apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-    refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+  { assert (InT l0 (l0 :: l1 :: nil)) as Hin by apply inT_eq.
+    apply (InT_In_ForallT _ FL) in Hin as [pi Hin].
+    refine (Dependent_ForallT_forall_formula _ _ FLind Hin). }
   assert (ill (p2ipfrag ione (@pfrag_mix02 atom_inf)) (map (trans ione) l1) ione).
-  { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; apply in_inf_eq).
-    apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-    refine (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+  { assert (InT l1 (l0 :: l1 :: nil)) as Hin by (right; apply inT_eq).
+    apply (InT_In_ForallT _ FL) in Hin as [pi Hin].
+    refine (Dependent_ForallT_forall_formula _ _ FLind Hin). }
   rewrite map_app, <- (app_nil_l (map _ l0 ++ map _ l1)), <- (app_nil_r (map _ l0 ++ map _ l1)).
   eapply cut_ir_axfree.
   + intros [].
@@ -479,7 +479,7 @@ eapply (@llR1_R2 _ _ (wn one)) in Hz2.
   + change (wn one :: nil) with (map (@wn atom) (one :: nil)).
     apply oc_r, bot_r, de_r, one_r.
   + apply one_r.
-- apply (ex_r (parr bot (wn one) :: oc bot :: nil)); [ | apply Permutation_Type_swap ].
+- apply (ex_r (parr bot (wn one) :: oc bot :: nil)); [ | apply PermutationT_swap ].
   apply parr_r, bot_r.
   change (oc bot) with (@dual atom (wn one)). apply ax_exp.
 Qed.
@@ -556,14 +556,14 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 pcut_all)) in Hll.
     destruct L; [ | discriminate eqpmix ].
     assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all))
                 (map ioc (R :: nil) ++ map (trans (ioc R)) l0) (ioc R)).
-    { assert (In_inf l0 (l0 :: l1 :: nil)) as Hin by apply in_inf_eq.
-      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-      apply (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+    { assert (InT l0 (l0 :: l1 :: nil)) as Hin by apply inT_eq.
+      apply (InT_In_ForallT _ FL) in Hin as [pi Hin].
+      apply (Dependent_ForallT_forall_formula _ _ FLind Hin). }
     assert (ill (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all))
                 (map ioc (R :: nil) ++ map (trans (ioc R)) l1) (ioc R)).
-    { assert (In_inf l1 (l0 :: l1 :: nil)) as Hin by (right; apply in_inf_eq).
-      apply (In_Forall_inf_in _ FL) in Hin as [pi Hin].
-      apply (Dependent_Forall_inf_forall_formula _ _ FLind Hin). }
+    { assert (InT l1 (l0 :: l1 :: nil)) as Hin by (right; apply inT_eq).
+      apply (InT_In_ForallT _ FL) in Hin as [pi Hin].
+      apply (Dependent_ForallT_forall_formula _ _ FLind Hin). }
     cbn. rewrite app_nil_r, map_app, <- (app_nil_l (ioc R :: _)), <- (app_nil_r (map _ l1)).
     rewrite app_comm_cons, (app_assoc _ (map _ l1)).
     assert (forall C, ipcut (p2ipfrag (ioc R) (cutupd_pfrag (@pfrag_mix02 atom_inf) pcut_all)) C = true)
@@ -574,7 +574,7 @@ apply (stronger_pfrag _ (cutupd_pfrag pfrag_mix02 pcut_all)) in Hll.
       apply co_ilr.
       eapply ex_ir.
       -- apply tens_irr; [ apply X | apply X0 ].
-      -- symmetry. apply Permutation_Type_cons, Permutation_Type_middle. reflexivity.
+      -- symmetry. apply PermutationT_cons, PermutationT_middle. reflexivity.
     * apply tens_ilr, wk_ilr, ax_exp_ill.
 - now repeat split.
 Qed.
@@ -585,20 +585,20 @@ intro Hll. induction Hll; try discriminate f; cbn.
 - cons2app. rewrite <- (app_nil_l _). apply lmap_ilr.
   + apply (ax_ir (a2i X)).
   + rewrite app_nil_l. apply ax_exp_ill.
-- eapply ex_ir; [ eassumption | apply Permutation_Type_map; assumption ].
+- eapply ex_ir; [ eassumption | apply PermutationT_map; assumption ].
 - apply (ll_mix02_to_ill_trans_gen R) in l.
   rewrite <- (app_nil_l (ioc _ :: _)) in l.
   rewrite map_app, <- (app_nil_r (map _ l1)).
   eapply (cut_ir_axfree); [ intros [] | eassumption | ].
-  eapply ex_ir; [ | apply Permutation_Type_app_comm ]; assumption.
+  eapply ex_ir; [ | apply PermutationT_app_comm ]; assumption.
 - apply negR_ilr_head, one_irr. reflexivity.
 - rewrite <- (app_nil_l (ione :: _)). apply one_ilr. assumption.
 - apply negR_ilr_head; [ reflexivity | ].
-  list_simpl. eapply ex_ir; [ | apply Permutation_Type_app_comm ].
+  list_simpl. eapply ex_ir; [ | apply PermutationT_app_comm ].
   list_simpl in IHHll1. list_simpl in IHHll2.
   apply tens_irr; apply negR_irr; assumption.
 - rewrite <- (app_nil_l (itens _ _ :: _)). apply tens_ilr.
-  eapply ex_ir; [ eassumption | apply Permutation_Type_swap ].
+  eapply ex_ir; [ eassumption | apply PermutationT_swap ].
 - rewrite <- (app_nil_l (izero :: _)). apply zero_ilr.
 - apply negR_ilr_head, plus_irr1, negR_irr, IHHll. reflexivity.
 - apply negR_ilr_head, plus_irr2, negR_irr, IHHll. reflexivity.

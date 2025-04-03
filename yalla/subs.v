@@ -1,6 +1,6 @@
 (** * Substitutions in Linear Logic formulas and proofs *)
 
-From OLlibs Require Import funtheory infinite List_more Permutation_Type GPermutation_Type Dependent_Forall_Type.
+From OLlibs Require Import funtheory infinite List_more PermutationT GPermutationT Dependent_ForallT.
 From Yalla Require Export ll_def.
 
 Set Implicit Arguments.
@@ -85,7 +85,7 @@ Proof. induction l as [|a l IHl]; [ | cbn; rewrite IHl ]; reflexivity. Qed.
 (** Monotony of connectives *)
 
 (* With restriction to occurring atoms *)
-Lemma psubs2_monot_loc P A sl sr : Forall_inf (fun x => ll P (sl x :: dual (sr x) :: nil)) (atom_list A) ->
+Lemma psubs2_monot_loc P A sl sr : ForallT (fun x => ll P (sl x :: dual (sr x) :: nil)) (atom_list A) ->
   ll P (psubs2 sl sr A :: psubs2 sl sr (dual A) :: nil).
 Proof.
 induction A; cbn; intros Hfv.
@@ -94,27 +94,27 @@ induction A; cbn; intros Hfv.
 - ll_swap. apply bot_r, one_r.
 - apply bot_r, one_r.
 - ll_swap. apply parr_r.
-  cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
+  cons2app. eapply ex_r; [ | apply PCPermutationT_app_rot ].
   rewrite app_assoc. apply tens_r.
-  + apply Forall_inf_app_r in Hfv.
+  + apply ForallT_app_r in Hfv.
     apply IHA1. assumption.
-  + apply Forall_inf_app_l in Hfv.
+  + apply ForallT_app_l in Hfv.
     apply IHA2. assumption.
 - apply parr_r.
-  cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
+  cons2app. eapply ex_r; [ | apply PCPermutationT_app_rot ].
   rewrite app_assoc. apply tens_r.
-  + apply Forall_inf_app_r in Hfv.
+  + apply ForallT_app_r in Hfv.
     specialize (IHA2 Hfv). ll_swap in IHA2. assumption.
-  + apply Forall_inf_app_l in Hfv.
+  + apply ForallT_app_l in Hfv.
     specialize (IHA1 Hfv). ll_swap in IHA1. assumption.
 - ll_swap. apply top_r.
 - apply top_r.
-- eapply plus_r1 in IHA1; [ | eapply Forall_inf_app_l, Hfv ]. ll_swap in IHA1.
-  eapply plus_r2 in IHA2; [ | eapply Forall_inf_app_r, Hfv ]. ll_swap in IHA2.
+- eapply plus_r1 in IHA1; [ | eapply ForallT_app_l, Hfv ]. ll_swap in IHA1.
+  eapply plus_r2 in IHA2; [ | eapply ForallT_app_r, Hfv ]. ll_swap in IHA2.
   ll_swap. apply with_r; eassumption.
 - apply with_r; ll_swap; [ apply plus_r1 | apply plus_r2 ]; ll_swap.
-  + eapply IHA1, Forall_inf_app_l, Hfv.
-  + eapply IHA2, Forall_inf_app_r, Hfv.
+  + eapply IHA1, ForallT_app_l, Hfv.
+  + eapply IHA2, ForallT_app_r, Hfv.
 - change (ll P (oc (psubs2 sl sr A) :: map wn (psubs2 sl sr (dual A) :: nil))).
   apply oc_r.
   specialize (IHA Hfv). ll_swap in IHA.
@@ -127,7 +127,7 @@ Qed.
 
 Lemma psubs2_monot P sl sr (Hs : forall x, ll P (sl x :: dual (sr x) :: nil)) A :
   ll P (psubs2 sl sr A :: psubs2 sl sr (dual A) :: nil).
-Proof. apply psubs2_monot_loc, forall_Forall_inf. intros ? _. apply Hs. Qed.
+Proof. apply psubs2_monot_loc, forall_ForallT. intros ? _. apply Hs. Qed.
 
 Lemma ax_exp_from_monot P (A : formula) : ll P (A :: dual A :: nil).
 Proof. rewrite <- (psubs2_var A), <- psubs2_dual. apply psubs2_monot. intro. ll_swap. apply ax_r. Qed.
@@ -140,17 +140,17 @@ Lemma subs_ll P A x l (Hcut : forall C, Bool.le (pcut P C) (pcut P (subs A x C))
 Proof.
 intros pi. induction pi using ll_nested_ind; list_simpl; try (constructor; assumption).
 - ll_swap. apply ax_exp.
-- eapply PCPermutation_Type_map in p.
+- eapply PCPermutationT_map in p.
   eapply ex_r; eassumption.
 - rewrite ! map_app in IHpi. rewrite subs_wn in *.
-  eapply Permutation_Type_map in p.
+  eapply PermutationT_map in p.
   eapply ex_wn_r; eassumption.
 - rewrite concat_map. apply mix_r.
   + cbn. rewrite length_map. assumption.
-  + apply forall_Forall_inf.
+  + apply forall_ForallT.
     intros l' Hin.
-    destruct (in_inf_map_inv (map (subs A x)) L l' Hin) as [l0 <- [pi' Hin']%(In_Forall_inf_in _ PL)].
-    refine (Dependent_Forall_inf_forall_formula _ _ X Hin').
+    destruct (inT_map_inv (map (subs A x)) L l' Hin) as [l0 <- [pi' Hin']%(InT_In_ForallT _ PL)].
+    refine (Dependent_ForallT_forall_formula _ _ X Hin').
 - cbn in IHpi. rewrite subs_wn in *. apply oc_r. assumption.
 - refine (cut_r (subs A x A0) _ _ _); [ | rewrite <- subs_dual; assumption | assumption ].
   eapply Bool.implb_true_iff, f. apply Bool.le_implb, Hcut.

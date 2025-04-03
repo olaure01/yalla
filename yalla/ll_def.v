@@ -3,8 +3,8 @@
 
 From Stdlib Require Import CMorphisms BoolOrder PeanoNat Lia.
 From Stdlib Require Permutation.
-From OLlibs Require Import dectype funtheory List_more Dependent_Forall_Type
-                           Permutation_Type_more GPermutation_Type.
+From OLlibs Require Import dectype funtheory List_more Dependent_ForallT
+                           PermutationT_more GPermutationT.
 From Yalla Require Export formulas.
 
 Import EqNotations.
@@ -17,11 +17,11 @@ Section Atoms.
 Context {atom : DecType}.
 Notation formula := (@formula atom).
 
-Notation Dependent_Forall_inf_forall_formula :=
-  (Dependent_Forall_inf_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
+Notation Dependent_ForallT_forall_formula :=
+  (Dependent_ForallT_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
                                                                     (fun x y => proj2 (eqb_eq x y)))).
 
-Ltac Dependent_Forall_inversion_formula H := Dependent_Forall_inversion (@formulas_dectype atom) H.
+Ltac Dependent_ForallT_inversion_formula H := Dependent_ForallT_inversion (@formulas_dectype atom) H.
 
 (** ** Fragments for proofs *)
 
@@ -63,9 +63,9 @@ Record pfrag := mk_pfrag {
 
 Definition no_ax P := notT (projT1 (pgax P)).
 
-Definition atomic_ax P := forall a, Forall_inf atomic (projT2 (pgax P) a).
+Definition atomic_ax P := forall a, ForallT atomic (projT2 (pgax P) a).
 
-Definition gax_excludes P A := forall a, notT (In_inf A (projT2 (pgax P) a)).
+Definition gax_excludes P A := forall a, notT (InT A (projT2 (pgax P) a)).
 
 Definition full_cut P := forall C, pcut P C = true.
 
@@ -182,9 +182,9 @@ All rules have their main formula at first position in the conclusion.
 *)
 Inductive ll P : list formula -> Type :=
 | ax_r X : ll P (covar X :: var X :: nil)
-| ex_r l1 l2 : ll P l1 -> PCPermutation_Type (pperm P) l1 l2 -> ll P l2
-| ex_wn_r l1 lw lw' l2 : ll P (l1 ++ map wn lw ++ l2) -> Permutation_Type lw lw' -> ll P (l1 ++ map wn lw' ++ l2)
-| mix_r L (f : is_true (pmix P (length L))) : Forall_inf (ll P) L -> ll P (concat L)
+| ex_r l1 l2 : ll P l1 -> PCPermutationT (pperm P) l1 l2 -> ll P l2
+| ex_wn_r l1 lw lw' l2 : ll P (l1 ++ map wn lw ++ l2) -> PermutationT lw lw' -> ll P (l1 ++ map wn lw' ++ l2)
+| mix_r L (f : is_true (pmix P (length L))) : ForallT (ll P) L -> ll P (concat L)
 | one_r : ll P (one :: nil)
 | bot_r l : ll P l -> ll P (bot :: l)
 | tens_r A B l1 l2 : ll P (A :: l1) -> ll P (B :: l2) -> ll P (tens A B :: l2 ++ l1)
@@ -219,12 +219,12 @@ Section ll_ind.
 
   Context {P : pfrag}.
 
-  Definition Forall_Proofs (Pred : forall l, ll P l -> Type) L (piL : Forall_inf (ll P) L) :=
-    Dependent_Forall_inf Pred piL.
+  Definition Forall_Proofs (Pred : forall l, ll P l -> Type) L (piL : ForallT (ll P) L) :=
+    Dependent_ForallT Pred piL.
 
-  Lemma Forall_Proofs_to_Forall_inf (Pred : forall l, ll P l -> Type) L (piL : Forall_inf (ll P) L) :
+  Lemma Forall_Proofs_to_ForallT (Pred : forall l, ll P l -> Type) L (piL : ForallT (ll P) L) :
     Forall_Proofs Pred piL -> 
-    Forall_inf (fun x => Pred (projT1 x) (projT2 x)) (Forall_to_list piL).
+    ForallT (fun x => Pred (projT1 x) (projT2 x)) (Forall_to_list piL).
   Proof. intros PpiL. induction PpiL; constructor; assumption. Qed.
 
   Fixpoint pre_ll_nested_ind l (pi : ll P l) : forall (Pred : forall l, ll P l -> Type),
@@ -262,10 +262,10 @@ Section ll_ind.
     | ex_wn_r l1 lw lw' l2 pi p => ex_wn_case l1 lw lw' l2 pi p (rec_call pi)
     | @mix_r _ L eqpmix PL => mix_case L eqpmix PL (
                 (fix ll_nested_ind_aux (L : list (list formula))
-                                       (PL : Forall_inf (ll P) L) : Forall_Proofs Pred PL :=
+                                       (PL : ForallT (ll P) L) : Forall_Proofs Pred PL :=
                    match PL with
-                   | Forall_inf_nil _ => Dependent_Forall_inf_nil _ Pred
-                   | @Forall_inf_cons _ _ l L Pil PiL => Dependent_Forall_inf_cons _ Pil (rec_call Pil)
+                   | ForallT_nil _ => Dependent_ForallT_nil _ Pred
+                   | @ForallT_cons _ _ l L Pil PiL => Dependent_ForallT_cons _ Pil (rec_call Pil)
                                                             (ll_nested_ind_aux L PiL)
                    end) L PL)
     | one_r => one_case
@@ -289,7 +289,7 @@ Section ll_ind.
     (forall l1 l2 pi p, Pred l1 pi -> Pred l2 (ex_r l1 l2 pi p)) ->
     (forall l1 lw lw' l2 pi p, Pred (l1 ++ map wn lw ++ l2) pi ->
        Pred (l1 ++ map wn lw' ++ l2) (ex_wn_r l1 lw lw' l2 pi p)) ->
-    (forall L eqpmix, Forall_inf (fun x => Pred (projT1 x) (projT2 x)) L ->
+    (forall L eqpmix, ForallT (fun x => Pred (projT1 x) (projT2 x)) L ->
        Pred _ (mix'_r L eqpmix)) ->
     Pred (one :: nil) one_r ->
     (forall l pi, Pred l pi -> Pred (bot :: l) (bot_r pi)) ->
@@ -343,9 +343,9 @@ Definition ll_nested_ind P := fun Pred ax_case ex_case ex_wn_case mix_case one_c
 #[global] Arguments ll_nested_ind [P] Pred.
 #[global] Arguments ll_nested_ind' [P] Pred.
 
-#[export] Instance ll_perm P : Proper ((@PCPermutation_Type _ (pperm P)) ==> arrow) (ll P) | 100.
+#[export] Instance ll_perm P : Proper ((@PCPermutationT _ (pperm P)) ==> arrow) (ll P) | 100.
 Proof. intros l1 l2 HP pi. exact (ex_r _ _ pi HP). Qed.
-#[export] Instance ll_perm_flip P : Proper ((@PCPermutation_Type _ (pperm P)) ==> flip arrow) (ll P) | 100.
+#[export] Instance ll_perm_flip P : Proper ((@PCPermutationT _ (pperm P)) ==> flip arrow) (ll P) | 100.
 Proof. intros l1 l2 HP pi. symmetry in HP. exact (ex_r _ _ pi HP). Qed.
 
 (* Unused
@@ -355,7 +355,7 @@ intros Heq l pi.
 induction pi using ll_nested_ind'; try now constructor.
 - apply (ex_r l1 _ IHpi).
   destruct Heq as (_ & _ & _  & Hp).
-  unfold PCPermutation_Type in *.
+  unfold PCPermutationT in *.
   destruct (pperm P), (pperm Q); cbn in Hp; try inversion Hp; try assumption.
 - apply (ex_wn_r l1 lw); assumption.
 - assert ({L' & (map (@projT1 _ (ll Q)) L') = (map (@projT1 _ (ll P)) L)}) as [L' eqL'].
@@ -387,7 +387,7 @@ Lemma stronger_pfrag P Q (Hle : le_pfrag P Q) l : ll P l -> ll Q l.
 Proof.
 intro pi. induction pi using ll_nested_ind; try (constructor; assumption).
 - refine (ex_r _ _ IHpi _).
-  apply (PCPermutation_Type_monot (pperm P)), p.
+  apply (PCPermutationT_monot (pperm P)), p.
   apply Hle.
 - exact (ex_wn_r _ _ _ _ IHpi p).
 - apply mix_r.
@@ -410,10 +410,10 @@ Fixpoint Forall_sequent P PS l (pi : ll P l) : Type :=
 match pi with
 | ax_r _ | gax_r _ => PS l
 | ex_r _ _ pi1 _ | ex_wn_r _ _ _ _ pi1 _ => Forall_sequent PS pi1 * PS l
-| mix_r _ PL => ((fix Forall_sequent_Forall P L (PL : Forall_inf (ll P) L) {struct PL} : Type :=
+| mix_r _ PL => ((fix Forall_sequent_Forall P L (PL : ForallT (ll P) L) {struct PL} : Type :=
        match PL with
-       | Forall_inf_nil _ => unit
-       | Forall_inf_cons _ Pl PL => (Forall_sequent PS Pl * Forall_sequent_Forall _ _ PL)%type
+       | ForallT_nil _ => unit
+       | ForallT_cons _ Pl PL => (Forall_sequent PS Pl * Forall_sequent_Forall _ _ PL)%type
        end) _ _ PL) * PS l
 | one_r | top_r _ => PS l
 | bot_r pi1 | parr_r pi1 => Forall_sequent PS pi1 * PS l
@@ -423,7 +423,7 @@ match pi with
 | oc_r pi1 | de_r pi1 | wk_r _ pi1 | co_r pi1 => Forall_sequent PS pi1 * PS l
 end.
 
-Definition Forall_formula P FS := @Forall_sequent P (Forall_inf FS).
+Definition Forall_formula P FS := @Forall_sequent P (ForallT FS).
 
 Lemma Forall_sequent_is P PS l (pi : ll P l) : Forall_sequent PS pi -> PS l.
 Proof. destruct pi; cbn; tauto. Qed.
@@ -438,7 +438,7 @@ induction pi using ll_nested_ind;
 cbn. clear eqpmix. intros [HFS HPS].
 split; [ clear HPS | exact (HPQ _ HPS) ].
 induction PL; [ constructor | ].
-unfold Forall_Proofs in X. Dependent_Forall_inversion_formula X. tauto.
+unfold Forall_Proofs in X. Dependent_ForallT_inversion_formula X. tauto.
 Qed.
 
 Lemma Forall_sequent_stronger_pfrag P Q (Hfrag : le_pfrag P Q) PS l (pi : ll P l) :
@@ -449,7 +449,7 @@ induction pi using ll_nested_ind; intros HFS; try (cbn in HFS; cbn; tauto).
   split; [ clear HPS | exact HPS ].
   induction PL in X, HFS |- *.
   + exact HFS.
-  + unfold Forall_Proofs in X. Dependent_Forall_inversion_formula X.
+  + unfold Forall_Proofs in X. Dependent_ForallT_inversion_formula X.
     destruct HFS as [Hp HFS]. split.
     * exact (X1 Hp).
     * exact (IHPL X2 HFS).
@@ -464,10 +464,10 @@ Fixpoint psize P l (pi : ll P l) :=
 match pi with
 | ax_r _ | gax_r _ => 1
 | ex_r _ _ pi0 _ | ex_wn_r _ _ _ _ pi0 _ => S (psize pi0)
-| mix_r _ PL => S ((fix psize_Forall P L (PL : Forall_inf (ll P) L) {struct PL} :=
+| mix_r _ PL => S ((fix psize_Forall P L (PL : ForallT (ll P) L) {struct PL} :=
        match PL with
-       | Forall_inf_nil _ => 0
-       | Forall_inf_cons _ Pl PL => (psize Pl) + (psize_Forall _ _ PL)
+       | ForallT_nil _ => 0
+       | ForallT_cons _ Pl PL => (psize Pl) + (psize_Forall _ _ PL)
        end) _ _ PL)
 | one_r | top_r _ => 1
 | bot_r pi0 | parr_r pi0 | plus_r1 _ pi0 | plus_r2 _ pi0 => S (psize pi0)
@@ -479,12 +479,12 @@ end.
 Lemma psize_pos P l (pi : @ll P l) : 0 < psize pi.
 Proof. destruct pi; cbn; lia. Qed.
 
-Lemma psize_mix P L eq (FL : Forall_inf (ll P) L) :
-  psize (mix_r eq FL) = S (Forall_inf_sum (fun _ pi => psize pi) FL).
+Lemma psize_mix P L eq (FL : ForallT (ll P) L) :
+  psize (mix_r eq FL) = S (ForallT_sum (fun _ pi => psize pi) FL).
 Proof. cbn. clear eq. induction FL; [ | cbn; rewrite <- 2 Nat.add_succ_r, IHFL ]; reflexivity. Qed.
 
-Lemma psize_inf_mix P L eq (FL : Forall_inf (ll P) L) l (pi : ll P l) :
-  In_Forall_inf _ pi FL -> psize pi < psize (mix_r eq FL).
+Lemma psize_inf_mix P L eq (FL : ForallT (ll P) L) l (pi : ll P l) :
+  In_ForallT _ pi FL -> psize pi < psize (mix_r eq FL).
 Proof.
 intros Hin. cbn. clear eq. induction FL; inversion Hin.
 - injection H as [= -> H'].
@@ -504,18 +504,18 @@ Lemma co_list_r P l l' : ll P (map wn l ++ map wn l ++ l') -> ll P (map wn l ++ 
 Proof.
 induction l in l' |- *; intros pi; [ assumption | ].
 rewrite <- app_nil_l.
-apply (ex_wn_r _ (l ++ a :: nil)); [ | symmetry; apply Permutation_Type_cons_append ].
+apply (ex_wn_r _ (l ++ a :: nil)); [ | symmetry; apply PermutationT_cons_append ].
 list_simpl. apply IHl.
 replace (map wn l ++ map wn l ++ wn a :: l')
   with (nil ++ map wn (l ++ l ++ a :: nil) ++ l')
   by (list_simpl; reflexivity).
-apply (ex_wn_r _ (a :: l ++ l)); [ | rewrite app_assoc; apply Permutation_Type_cons_append ].
+apply (ex_wn_r _ (a :: l ++ l)); [ | rewrite app_assoc; apply PermutationT_cons_append ].
 list_simpl. apply co_r.
 replace (wn a :: wn a :: map wn l ++ map wn l ++ l')
    with (nil ++ map wn (a :: a :: l ++ l) ++ l')
   by (list_simpl; reflexivity).
 apply ex_wn_r with ((a :: l) ++ a :: l); [ list_simpl; list_simpl in pi; assumption | ].
-rewrite (app_comm_cons _ l). symmetry. apply Permutation_Type_middle.
+rewrite (app_comm_cons _ l). symmetry. apply PermutationT_middle.
 Qed.
 
 Lemma co_const_list_r P n A l : ll P (repeat (wn A) n ++ l) -> ll P ((wn A) :: l).
@@ -534,18 +534,18 @@ Proof.
 induction L in l0, l |- *; intros pi.
 - apply ex_r with (map wn l0 ++ l ++ concat nil).
   + apply wk_list_r. assumption.
-  + rewrite P_perm. cbn. rewrite 2 app_nil_r. apply Permutation_Type_app_swap.
+  + rewrite P_perm. cbn. rewrite 2 app_nil_r. apply PermutationT_app_swap.
 - apply ex_r with (map wn l0 ++ l ++ concat (a :: L));
     [ | rewrite P_perm; cbn; rewrite 2 (app_assoc _ _ (a ++ _));
-        apply Permutation_Type_app_tail, Permutation_Type_app_swap ].
+        apply PermutationT_app_tail, PermutationT_app_swap ].
   apply co_list_r.
   apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L).
   + apply IHL.
     rewrite <- app_assoc. assumption.
-  + rewrite P_perm. cbn. rewrite ? app_assoc. apply Permutation_Type_app_tail.
-    etransitivity; [ apply Permutation_Type_app_comm | ].
-    rewrite <- ? app_assoc. apply Permutation_Type_app_head.
-    rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_comm.
+  + rewrite P_perm. cbn. rewrite ? app_assoc. apply PermutationT_app_tail.
+    etransitivity; [ apply PermutationT_app_comm | ].
+    rewrite <- ? app_assoc. apply PermutationT_app_head.
+    rewrite ? app_assoc. apply PermutationT_app_tail, PermutationT_app_comm.
 Qed.
 
 Lemma ex_concat_r P (P_perm : pperm P = true) l A L :
@@ -555,15 +555,15 @@ induction L in l |- *; intros pi; [ assumption | ].
 apply ex_r with ((A :: l ++ a) ++ repeat A (length L) ++ concat L).
 - apply IHL.
   now apply ex_r with (l ++ (A :: a) ++ flat_map (cons A) L);
-    [ | rewrite P_perm; cbn; symmetry; apply Permutation_Type_cons_app; rewrite app_assoc ].
-- rewrite P_perm. cbn. cons2app. rewrite ? app_assoc. apply Permutation_Type_app_tail.
-  list_simpl. etransitivity; [ apply Permutation_Type_middle | ].
-  apply Permutation_Type_app_head, Permutation_Type_cons, Permutation_Type_app_comm. reflexivity.
+    [ | rewrite P_perm; cbn; symmetry; apply PermutationT_cons_app; rewrite app_assoc ].
+- rewrite P_perm. cbn. cons2app. rewrite ? app_assoc. apply PermutationT_app_tail.
+  list_simpl. etransitivity; [ apply PermutationT_middle | ].
+  apply PermutationT_app_head, PermutationT_cons, PermutationT_app_comm. reflexivity.
 Qed.
 
 
 (** n-ary versions of tens and parr rules *)
-Lemma tens_n_r P L A : Forall_inf (ll P) (map (cons A) L) -> ll P (tens_n (length L) A :: concat L).
+Lemma tens_n_r P L A : ForallT (ll P) (map (cons A) L) -> ll P (tens_n (length L) A :: concat L).
 Proof.
 induction L as [|l L IHL]; intros FL.
 - apply one_r.
@@ -577,32 +577,32 @@ induction n in l |- *; intros pi.
 - apply bot_r. assumption.
 - destruct n; [ assumption | ].
   apply parr_r.
-  rewrite PCPermutation_Type_cons_append. apply IHn.
-  rewrite app_assoc, <- PCPermutation_Type_cons_append. assumption.
+  rewrite PCPermutationT_cons_append. apply IHn.
+  rewrite app_assoc, <- PCPermutationT_cons_append. assumption.
 Qed.
 
 (** Permutation on mix *)
-Lemma ex_mix_r P L L' (eq : is_true (pmix P (length L))) (p : Permutation_Type L L') :
-  Forall_inf (ll P) L -> ll P (concat L').
+Lemma ex_mix_r P L L' (eq : is_true (pmix P (length L))) (p : PermutationT L L') :
+  ForallT (ll P) L -> ll P (concat L').
 Proof.
 intros FL.
 apply mix_r.
 - replace (length L') with (length L); [ assumption | ].
-  apply Permutation_Type_length. assumption.
-- apply forall_Forall_inf. intros l Hin.
-  apply (@Forall_inf_forall (list formula) (ll P) L); [ assumption | ].
-  apply Permutation_Type_in_inf with L'; [ | assumption ].
+  apply PermutationT_length. assumption.
+- apply forall_ForallT. intros l Hin.
+  apply (@ForallT_forall (list formula) (ll P) L); [ assumption | ].
+  apply PermutationT_inT with L'; [ | assumption ].
   symmetry. assumption.
 Qed.
 
 (** *** Some tactics for manipulating rules *)
 Ltac ll_swap :=
   match goal with
-  | |- ll ?P (?a1 :: ?a2 :: nil) => eapply ex_r; [ | apply PCPermutation_Type_swap ]
+  | |- ll ?P (?a1 :: ?a2 :: nil) => eapply ex_r; [ | apply PCPermutationT_swap ]
   end.
 Ltac ll_swap_hyp H :=
   match goal with
-  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ => eapply ex_r in H; [ | apply PCPermutation_Type_swap ]
+  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ => eapply ex_r in H; [ | apply PCPermutationT_swap ]
   end.
 Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
 
@@ -618,7 +618,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
   rewrite (HP' nil). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_assoc. apply (ex_wn_r _ lw); [ | assumption ].
@@ -628,14 +628,14 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
-  apply Dependent_Forall_inf_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
+  apply Dependent_ForallT_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
   inversion_clear Fl2.
   replace ((concat L1 ++ l1') ++ l2' ++ concat L2) with (concat (L1 ++ (l1' ++ l2') :: L2));
     [ | rewrite concat_app; cbn; rewrite 3 app_assoc; reflexivity].
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + apply Forall_inf_app; [ assumption | ].
-    apply Forall_inf_cons; [ | assumption ].
+  + apply ForallT_app; [ assumption | ].
+    apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
   + destruct l1; destr_eq Heql0. subst.
@@ -650,7 +650,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (@cut_r _ A f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma parr_rev P A B (Hgax : gax_excludes P (parr A B)) l1 l2 :
@@ -663,7 +663,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
   rewrite (HP' (A :: B :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_comm_cons, app_assoc.
@@ -674,14 +674,14 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
-  apply Dependent_Forall_inf_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
+  apply Dependent_ForallT_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
   inversion_clear Fl2.
   replace ((concat L1 ++ l1') ++ A :: B :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: B :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + apply Forall_inf_app; [ assumption | ].
-    apply Forall_inf_cons; [ | assumption ].
+  + apply ForallT_app; [ assumption | ].
+    apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
   + destruct l1; destr_eq Heql0. subst.
@@ -696,7 +696,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma with_rev1 P A B (Hgax : gax_excludes P (awith A B)) l1 l2 :
@@ -709,7 +709,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
   rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc.
@@ -720,14 +720,14 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
-  apply Dependent_Forall_inf_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
+  apply Dependent_ForallT_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
   inversion_clear Fl2.
   replace ((concat L1 ++ l1') ++ A :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + apply Forall_inf_app; [ assumption | ].
-    apply Forall_inf_cons; [ | assumption ].
+  + apply ForallT_app; [ assumption | ].
+    apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
   + destruct l1; destr_eq Heql0. subst.
@@ -742,7 +742,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma with_rev2 P A B (Hgax : gax_excludes P (awith B A)) l1 l2 :
@@ -755,7 +755,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
   rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc.
@@ -766,14 +766,14 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
-  apply Dependent_Forall_inf_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
+  apply Dependent_ForallT_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
   inversion_clear Fl2.
   replace ((concat L1 ++ l1') ++ A :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + apply Forall_inf_app; [ assumption | ].
-    apply Forall_inf_cons; [ | assumption ].
+  + apply ForallT_app; [ assumption | ].
+    apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
   + destruct l1; destr_eq Heql0. subst.
@@ -788,7 +788,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma oc_rev P A (Hgax : gax_excludes P (oc A)) l1 l2 : ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
@@ -800,7 +800,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l3, l4) HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
   rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc.
@@ -811,14 +811,14 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
-  apply Dependent_Forall_inf_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
+  apply Dependent_ForallT_app_inv in X as [[l1'' Fl1] [l2'' Fl2]].
   inversion_clear Fl2.
   replace ((concat L1 ++ l1') ++ A :: l2' ++ concat L2) with (concat (L1 ++ (l1' ++ A :: l2') :: L2));
     [ |rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity].
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + apply Forall_inf_app; [ assumption | ].
-    apply Forall_inf_cons; [ | assumption ].
+  + apply ForallT_app; [ assumption | ].
+    apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
   + destruct l1; destr_eq Heql0. subst.
@@ -834,7 +834,7 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply (cut_r A0 f); [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma one_rev P (Hgax : gax_excludes P one) l1 l2 :
@@ -847,7 +847,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l1', l2') HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l1', l2') HP' ->].
   rewrite (HP' l0). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
@@ -861,13 +861,13 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     by (rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity).
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + assert (Fl1 := Forall_inf_app_l _ _ PL).
-    assert (Fl2 := Forall_inf_app_r _ _ PL).
-    apply Forall_inf_app; [ assumption | ].
+  + assert (Fl1 := ForallT_app_l _ _ PL).
+    assert (Fl2 := ForallT_app_r _ _ PL).
+    apply ForallT_app; [ assumption | ].
     inversion Fl2. subst.
-    apply Forall_inf_cons; [ | assumption ].
-    destruct (In_Forall_inf_elt _ _ _ PL).
-    refine (Dependent_Forall_inf_forall_formula _ _ X i _ _ eq_refl).
+    apply ForallT_cons; [ | assumption ].
+    destruct (In_ForallT_elt _ _ _ PL).
+    refine (Dependent_ForallT_forall_formula _ _ X i _ _ eq_refl).
 - destruct l1; destr_eq Heql; subst.
   + list_simpl. assumption.
   + destruct l1; discriminate H.
@@ -883,7 +883,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. eapply cut_r; [ eassumption | | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma zero_rev P (Hgax : gax_excludes P zero) l1 l2 :
@@ -896,7 +896,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l1', l2') HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l1', l2') HP' ->].
   rewrite (HP' l'). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
@@ -910,13 +910,13 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     by (rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity).
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + assert (Fl1 := Forall_inf_app_l _ _ PL).
-    assert (Fl2 := Forall_inf_app_r _ _ PL).
-    apply Forall_inf_app; [ assumption | ].
+  + assert (Fl1 := ForallT_app_l _ _ PL).
+    assert (Fl2 := ForallT_app_r _ _ PL).
+    apply ForallT_app; [ assumption | ].
     inversion Fl2. subst.
-    apply Forall_inf_cons; [ | assumption ].
-    destruct (In_Forall_inf_elt _ _ _ PL).
-    refine (Dependent_Forall_inf_forall_formula _ _ X i _ _ eq_refl).
+    apply ForallT_cons; [ | assumption ].
+    destruct (In_ForallT_elt _ _ _ PL).
+    refine (Dependent_ForallT_forall_formula _ _ X i _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
   + destruct l1; destr_eq Heql0; subst.
     rewrite <- app_comm_cons, 2 app_assoc. apply tens_r; [ assumption | ].
@@ -929,7 +929,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. eapply cut_r; [ eassumption | | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma tens_one_rev P A (Hgax1 : gax_excludes P one) (Hgax2 : gax_excludes P (tens one A)) l1 l2 :
@@ -942,7 +942,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
        (apply IHpi + apply IHpi1 + apply IHpi2); reflexivity);
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
-- apply PCPermutation_Type_vs_elt_subst in p as [(l1', l2') HP' ->].
+- apply PCPermutationT_vs_elt_subst in p as [(l1', l2') HP' ->].
   rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
@@ -956,13 +956,13 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     by (rewrite concat_app; cbn; rewrite ? app_comm_cons, ? app_assoc; reflexivity).
   apply mix_r.
   + rewrite length_app. rewrite length_app in eqpmix. assumption.
-  + assert (Fl1 := Forall_inf_app_l _ _ PL).
-    assert (Fl2 := Forall_inf_app_r _ _ PL).
-    apply Forall_inf_app; [ assumption | ].
+  + assert (Fl1 := ForallT_app_l _ _ PL).
+    assert (Fl2 := ForallT_app_r _ _ PL).
+    apply ForallT_app; [ assumption | ].
     inversion Fl2. subst.
-    apply Forall_inf_cons; [ | assumption ].
-    destruct (In_Forall_inf_elt _ _ _ PL).
-    refine (Dependent_Forall_inf_forall_formula _ _ X i _ _ eq_refl).
+    apply ForallT_cons; [ | assumption ].
+    destruct (In_ForallT_elt _ _ _ PL).
+    refine (Dependent_ForallT_forall_formula _ _ X i _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
   + destruct l1; destr_eq Heql0; subst.
     * rewrite <- (app_nil_l _) in pi1. apply (one_rev Hgax1 _ _ pi1 pi2).
@@ -976,7 +976,7 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply cut_r with A0; [ assumption | | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- contradiction (Hgax2 a). rewrite Heql. apply in_inf_elt.
+- contradiction (Hgax2 a). rewrite Heql. apply inT_elt.
 Qed.
 
 Lemma tens_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = tens A B :: nil)) (Hcut : no_cut P) :
@@ -984,20 +984,20 @@ Lemma tens_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = tens A B :: nil
 Proof.
 intros pi. remember (tens A B :: nil) as l eqn:Heq. rewrite Heq in Hgax.
 induction pi in Heq |- * using ll_nested_ind; subst; try (now inversion Heq).
-- symmetry in p. apply PCPermutation_Type_length_1_inv in p as ->.
+- symmetry in p. apply PCPermutationT_length_1_inv in p as ->.
   apply IHpi. reflexivity.
 - destruct l1; inversion Heq; subst.
   + destruct lw'; destr_eq H0. list_simpl in H0.
-    symmetry in p. apply Permutation_Type_nil in p as ->.
+    symmetry in p. apply PermutationT_nil in p as ->.
     apply IHpi. assumption.
   + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
-    symmetry in p. apply Permutation_Type_nil in p as ->.
+    symmetry in p. apply PermutationT_nil in p as ->.
     apply IHpi. list_simpl. reflexivity.
 - change (tens A B :: nil) with (nil ++ tens A B :: nil) in Heq.
   apply concat_eq_elt in Heq as [(((L1, L2), l1'), l2') [eqb eqt] ->].
   destruct l1'.
   + destruct l2'; [ | discriminate eqt ].
-    destruct (Dependent_Forall_inf_app_inv _ _ X) as [[FL1 PL1] [FL2 PL2]].
+    destruct (Dependent_ForallT_app_inv _ _ X) as [[FL1 PL1] [FL2 PL2]].
     inversion_clear PL2. exact (X0 eq_refl).
   + exfalso. exact (app_cons_not_nil (concat L1) l1' f eqb).
 - injection Heq as [= -> -> [-> ->]%app_eq_nil].
@@ -1011,20 +1011,20 @@ Lemma plus_rev P A B (Hgax : forall a, notT (projT2 (pgax P) a = aplus A B :: ni
 Proof.
 intro pi. remember (aplus A B :: nil) as l eqn:Heq. rewrite Heq in Hgax.
 induction pi in Heq |- * using ll_nested_ind; subst; try (now inversion Heq).
-- symmetry in p. apply PCPermutation_Type_length_1_inv in p as ->.
+- symmetry in p. apply PCPermutationT_length_1_inv in p as ->.
   apply IHpi. reflexivity.
 - destruct l1; inversion Heq; subst.
   + destruct lw'; destr_eq H0. list_simpl in H0.
-    symmetry in p. apply Permutation_Type_nil in p as ->.
+    symmetry in p. apply PermutationT_nil in p as ->.
     apply IHpi. assumption.
   + apply app_eq_nil in H1 as [-> [->%map_eq_nil ->]%app_eq_nil].
-    symmetry in p. apply Permutation_Type_nil in p as ->.
+    symmetry in p. apply PermutationT_nil in p as ->.
     apply IHpi. list_simpl. reflexivity.
 - change (aplus A B :: nil) with (nil ++ aplus A B :: nil) in Heq.
   apply concat_eq_elt in Heq as [(((L1, L2), l1'), l2') [eqb eqt] ->].
   destruct l1'.
   + destruct l2'; [ | discriminate eqt ].
-    destruct (Dependent_Forall_inf_app_inv _ _ X) as [[FL1 PL1] [FL2 PL2]].
+    destruct (Dependent_ForallT_app_inv _ _ X) as [[FL1 PL1] [FL2 PL2]].
     inversion_clear PL2. exact (X0 eq_refl).
   + exfalso. exact (app_cons_not_nil (concat L1) l1' f eqb).
 - injection Heq as [= -> -> ->]. left. assumption.
@@ -1039,7 +1039,7 @@ Proof.
 intro pi. remember (repeat (wn A) n) as l eqn:Heql.
 induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; destr_eq Heql); subst.
 - assert (l1 = (repeat (wn A) n)) as ->
-    by eapply Permutation.Permutation_repeat, Permutation_Type_Permutation, PCPermutation_Permutation_Type, p.
+    by eapply Permutation.Permutation_repeat, PermutationT_Permutation, PCPermutation_PermutationT, p.
   apply (IHpi _ eq_refl).
 - symmetry in Heql. apply repeat_eq_app in Heql as [Heq1 [Hw Heq2]%repeat_eq_app].
   apply (IHpi (length l1 + (length lw' + length l2))).
@@ -1049,7 +1049,7 @@ induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; destr_eq 
     cbn in Hw. injection Hw as [= -> Hl].
     f_equal. apply IHl, Hl. }
   rewrite Hlw' in p.
-  apply Permutation_Type_Permutation, Permutation.Permutation_repeat in p.
+  apply PermutationT_Permutation, Permutation.Permutation_repeat in p.
   rewrite <- Heq1 at 1. rewrite <- Heq2 at 1. rewrite p.
   rewrite map_repeat, ? repeat_app. reflexivity.
 - destruct L.
@@ -1057,8 +1057,8 @@ induction pi in n, Heql |- * using ll_nested_ind; (try now destruct n; destr_eq 
   + cbn in Heql. symmetry in Heql. apply repeat_eq_app in Heql as [Hl _]. symmetry in Hl.
     inversion_clear X. exact (X0 _ Hl).
 - destruct n; destr_eq Heql. subst. left.
-  rewrite PCPermutation_Type_swap.
-  rewrite PCPermutation_Type_cons_append in pi.
+  rewrite PCPermutationT_swap.
+  rewrite PCPermutationT_cons_append in pi.
   clear - pi. induction n as [|[|n] IHn].
   + apply wk_r, pi.
   + exact pi.
@@ -1097,8 +1097,8 @@ Inductive munit_smp : formula -> formula -> Type :=
 Lemma munit_smp_id A : munit_smp A A.
 Proof. induction A; constructor; assumption. Qed.
 
-Lemma munit_smp_map_wn l1 l2 : Forall2_inf munit_smp (map wn l1) l2 ->
-  { l & l2 = map wn l & Forall2_inf munit_smp l1 l }.
+Lemma munit_smp_map_wn l1 l2 : Forall2T munit_smp (map wn l1) l2 ->
+  { l & l2 = map wn l & Forall2T munit_smp l1 l }.
 Proof.
 induction l1 in l2 |- *; intros HF; inversion HF; subst.
 - exists nil; constructor.
@@ -1107,7 +1107,7 @@ induction l1 in l2 |- *; intros HF; inversion HF; subst.
   exists (B :: l''); constructor; assumption.
 Qed.
 
-Lemma munit_elim P (Hgax : atomic_ax P) l1 : ll P l1 -> forall l2, Forall2_inf munit_smp l1 l2 -> ll P l2.
+Lemma munit_elim P (Hgax : atomic_ax P) l1 : ll P l1 -> forall l2, Forall2T munit_smp l1 l2 -> ll P l2.
 Proof.
 intros pi. induction pi using ll_nested_ind; intros l2' HF;
   try now (inversion HF as [ | ? ? ? ? Hm HF' ];
@@ -1121,59 +1121,59 @@ intros pi. induction pi using ll_nested_ind; intros l2' HF;
   inversion Hc''; subst.
   apply ax_r.
 - symmetry in p.
-  eapply PCPermutation_Type_Forall2_inf in p as [la HP]; [ | eassumption ].
+  eapply PCPermutationT_Forall2T in p as [la HP]; [ | eassumption ].
   symmetry in HP.
   eapply ex_r; [ | apply HP ].
   apply IHpi. assumption.
-- apply Forall2_inf_app_inv_l in HF as [(l'1, l'2) [HF1 HF2] ->].
-  apply Forall2_inf_app_inv_l in HF2 as [(l''1, l''2) [HF2 HF3] ->].
+- apply Forall2T_app_inv_l in HF as [(l'1, l'2) [HF1 HF2] ->].
+  apply Forall2T_app_inv_l in HF2 as [(l''1, l''2) [HF2 HF3] ->].
   assert (HF4 := HF2).
   apply munit_smp_map_wn in HF2 as [ l''' -> HF2 ].
   symmetry in p.
-  apply (Permutation_Type_map wn) in p.
-  eapply Permutation_Type_Forall2_inf in p as [la HP]; [ | eassumption ].
+  apply (PermutationT_map wn) in p.
+  eapply PermutationT_Forall2T in p as [la HP]; [ | eassumption ].
   symmetry in HP.
-  apply Permutation_Type_map_inv in HP as [lb -> HP].
+  apply PermutationT_map_inv in HP as [lb -> HP].
   symmetry in HP.
   eapply ex_wn_r; [ | apply HP ].
   apply IHpi.
-  repeat apply Forall2_inf_app; assumption.
-- destruct (@concat_Forall2_inf formula) with formula L l2' munit_smp as [L' eq HF']; [ assumption | ].
+  repeat apply Forall2T_app; assumption.
+- destruct (@concat_Forall2T formula) with formula L l2' munit_smp as [L' eq HF']; [ assumption | ].
   rewrite <- eq.
   apply mix_r.
   + replace (length L') with (length L); [ assumption | ].
-    apply Forall2_inf_length with (Forall2_inf munit_smp); assumption.
-  + apply forall_Forall_inf. intros l' Hin.
-    apply Forall2_inf_in_r with (b := l') in HF'; [ | assumption ].
+    apply Forall2T_length with (Forall2T munit_smp); assumption.
+  + apply forall_ForallT. intros l' Hin.
+    apply Forall2T_inT_r with (b := l') in HF'; [ | assumption ].
     destruct HF' as [l Hinl Rll'].
-    apply (In_Forall_inf_in _ PL) in Hinl as (pi' & Hinl).
-    refine (Dependent_Forall_inf_forall_formula _ _ X Hinl _ Rll').
+    apply (InT_In_ForallT _ PL) in Hinl as (pi' & Hinl).
+    refine (Dependent_ForallT_forall_formula _ _ X Hinl _ Rll').
 - inversion_clear HF as [ | ? ? ? ? Hm HF' ].
   inversion_clear Hm; inversion_clear HF'.
   constructor.
 - inversion_clear HF as [ | ? ? ? ? Hm HF' ].
-  apply Forall2_inf_app_inv_l in HF' as [(l2'', l1'') [HF2 HF1] Heq]; subst.
+  apply Forall2T_app_inv_l in HF' as [(l2'', l1'') [HF2 HF1] Heq]; subst.
   inversion Hm; subst.
   + constructor; [ apply IHpi1 | apply IHpi2 ]; constructor; assumption.
-  + apply (Forall2_inf_cons one one) in HF1; [ | constructor ].
+  + apply (Forall2T_cons one one) in HF1; [ | constructor ].
     apply IHpi1 in HF1.
-    apply (Forall2_inf_cons B y) in HF2; [ | assumption ].
+    apply (Forall2T_cons B y) in HF2; [ | assumption ].
     apply IHpi2 in HF2.
-    assert (forall a, notT (In_inf one (projT2 (pgax P) a))) as Hgax1.
+    assert (forall a, notT (InT one (projT2 (pgax P) a))) as Hgax1.
     { intros a Hone.
-      eapply Forall_inf_forall in Hone; [ | apply Hgax].
+      eapply ForallT_forall in Hone; [ | apply Hgax].
       inversion Hone. }
     rewrite <- (app_nil_l _) in HF1. apply (one_rev Hgax1 _ _ HF1 HF2).
 - inversion_clear HF as [ | ? ? ? ? Hm HF' ].
   inversion Hm; subst.
   + constructor; apply IHpi; constructor; try constructor; assumption.
-  + apply (Forall2_inf_cons bot bot) in HF'; [ | constructor ].
-    apply (Forall2_inf_cons A y) in HF'; [ | assumption ].
+  + apply (Forall2T_cons bot bot) in HF'; [ | constructor ].
+    apply (Forall2T_cons A y) in HF'; [ | assumption ].
     apply IHpi in HF'.
     rewrite <- (app_nil_l l'), app_comm_cons.
     eapply bot_rev; [ | assumption ].
     intros a Hbot.
-    eapply Forall_inf_forall in Hbot; [ | apply Hgax].
+    eapply ForallT_forall in Hbot; [ | apply Hgax].
     inversion Hbot.
 - inversion_clear HF as [ | ? ? ? ? Hm HF' ]. inversion_clear Hm.
   constructor; [ apply IHpi1 | apply IHpi2 ]; constructor; assumption.
@@ -1181,9 +1181,9 @@ intros pi. induction pi using ll_nested_ind; intros l2' HF;
   inversion_clear Hm.
   destruct (munit_smp_map_wn _ HF') as [ l'' Heq HF'' ]; subst.
   constructor; apply IHpi; constructor; assumption.
-- apply Forall2_inf_app_inv_l in HF as [(l', l'') [HF2 HF1] ->].
+- apply Forall2T_app_inv_l in HF as [(l', l'') [HF2 HF1] ->].
   eapply cut_r; [ eassumption | apply IHpi1 | apply IHpi2 ];
-    (apply Forall2_inf_cons; [ apply munit_smp_id | ]); assumption.
+    (apply Forall2T_cons; [ apply munit_smp_id | ]); assumption.
 - assert (Hat := Hgax a).
   assert (projT2 (pgax P) a = l2') as <-.
   { remember (projT2 (pgax P) a) as l.
@@ -1208,11 +1208,11 @@ induction A; cbn.
 - ll_swap. apply bot_r, one_r.
 - apply bot_r, one_r.
 - ll_swap. apply parr_r.
-  cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
+  cons2app. eapply ex_r; [ | apply PCPermutationT_app_rot ].
   rewrite app_assoc. apply tens_r; assumption.
 - apply parr_r.
   ll_swap in IHA1. ll_swap in IHA2.
-  cons2app. eapply ex_r; [ | apply PCPermutation_Type_app_rot ].
+  cons2app. eapply ex_r; [ | apply PCPermutationT_app_rot ].
   rewrite app_assoc. apply tens_r; assumption.
 - ll_swap. apply top_r.
 - apply top_r.
@@ -1236,23 +1236,23 @@ Lemma ax_gen P Q l (Hperm : Bool.le (pperm P) (pperm Q)) (Hmix : forall n, Bool.
 Proof.
 intro pi.
 induction pi using ll_nested_ind; cbn;
-  try (assert (Hgax1 := Forall_inf_app_l _ _ Hgax));
-  try (assert (Hgax2 := Forall_inf_app_r _ _ Hgax));
+  try (assert (Hgax1 := ForallT_app_l _ _ Hgax));
+  try (assert (Hgax2 := ForallT_app_r _ _ Hgax));
   try (apply IHpi1 in Hgax1);
   try (apply IHpi2 in Hgax2);
   try (now constructor; auto).
 - eapply ex_r; [ eassumption | ].
-  apply (PCPermutation_Type_monot _ _ Hperm). assumption.
+  apply (PCPermutationT_monot _ _ Hperm). assumption.
 - eapply ex_wn_r; eassumption.
 - apply mix_r.
   + specialize Hmix with (length L).
     rewrite eqpmix in Hmix.
     destruct (pmix Q (length L)); assumption.
-  + apply forall_Forall_inf.
+  + apply forall_ForallT.
     intros l' Hin. clear eqpmix. induction PL; inversion Hin.
     * subst.
-      unfold Forall_Proofs in X. Dependent_Forall_inversion_formula X. assumption.
-    * unfold Forall_Proofs in X. Dependent_Forall_inversion_formula X.
+      unfold Forall_Proofs in X. Dependent_ForallT_inversion_formula X. assumption.
+    * unfold Forall_Proofs in X. Dependent_ForallT_inversion_formula X.
       apply IHPL; assumption.
 - eapply cut_r; [ | eassumption | eassumption ].
   specialize (Hcut A). eapply implb_true_iff, f. apply le_implb, Hcut.
@@ -1278,10 +1278,10 @@ Fixpoint gax_elts P l (pi : ll P l) :=
 match pi with
 | ax_r _ => nil
 | ex_r _ _ pi0 _ | ex_wn_r _ _ _ _ pi0 _ => gax_elts pi0
-| mix_r _ PL => (fix gax_elts_Forall P L (PL : Forall_inf (ll P) L) {struct PL} :=
+| mix_r _ PL => (fix gax_elts_Forall P L (PL : ForallT (ll P) L) {struct PL} :=
        match PL with
-       | Forall_inf_nil _ => nil
-       | Forall_inf_cons _ Pl PL => (gax_elts Pl) ++ (gax_elts_Forall _ _ PL)
+       | ForallT_nil _ => nil
+       | ForallT_cons _ Pl PL => (gax_elts Pl) ++ (gax_elts_Forall _ _ PL)
        end) _ _ PL
 | one_r | top_r _ => nil
 | bot_r pi0 | parr_r pi0 | plus_r1 _ pi0 | plus_r2 _ pi0 => gax_elts pi0
@@ -1290,44 +1290,44 @@ match pi with
 | gax_r a => a :: nil
 end.
 
-Lemma gax_elts_mix P L eq (FL : Forall_inf (ll P) L) l (pi : ll P l) : In_Forall_inf _ pi FL ->
-  forall ax, In_inf ax (gax_elts pi) -> In_inf ax (gax_elts (mix_r eq FL)).
+Lemma gax_elts_mix P L eq (FL : ForallT (ll P) L) l (pi : ll P l) : In_ForallT _ pi FL ->
+  forall ax, InT ax (gax_elts pi) -> InT ax (gax_elts (mix_r eq FL)).
 Proof.
 cbn. clear eq. induction FL in l, pi |- *; intros Hin; inversion Hin.
 - inversion H. subst.
   apply inj_pair2_eq_dec in H2; [ | apply (list_eq_dec (@eqb formulas_dectype)); apply eqb_eq ]; subst.
-  intros ax Hin_ax. apply in_inf_or_app. left. assumption.
-- intros ax Hin_ax. apply in_inf_or_app. right.
+  intros ax Hin_ax. apply inT_sum_app. left. assumption.
+- intros ax Hin_ax. apply inT_sum_app. right.
   apply IHFL with l pi; assumption.
 Qed.
 
 Lemma ax_gen_loc P Q l (Hperm : Bool.le (pperm P) (pperm Q)) (Hmix : forall n, Bool.le (pmix P n) (pmix Q n))
   (Hcut : forall A, Bool.le (pcut P A) (pcut Q A)) (pi : ll P l) :
-  Forall_inf (fun a => ll Q (projT2 (pgax P) a)) (gax_elts pi) -> ll Q l.
+  ForallT (fun a => ll Q (projT2 (pgax P) a)) (gax_elts pi) -> ll Q l.
 Proof.
 induction pi using ll_nested_ind; cbn; intros Hgax;
-  try (assert (Hgax1 := Forall_inf_app_l _ _ Hgax));
-  try (assert (Hgax2 := Forall_inf_app_r _ _ Hgax));
+  try (assert (Hgax1 := ForallT_app_l _ _ Hgax));
+  try (assert (Hgax2 := ForallT_app_r _ _ Hgax));
   try (apply IHpi1 in Hgax1);
   try (apply IHpi2 in Hgax2);
   try (now constructor; auto).
 - apply IHpi in Hgax.
   eapply ex_r; [ eassumption | ].
-  apply (PCPermutation_Type_monot _ _ Hperm). assumption.
+  apply (PCPermutationT_monot _ _ Hperm). assumption.
 - apply IHpi in Hgax.
   eapply ex_wn_r; eassumption.
 - apply mix_r.
   + specialize Hmix with (length L).
     rewrite eqpmix in Hmix.
     destruct (pmix Q (length L)); assumption.
-  + apply forall_Forall_inf.
+  + apply forall_ForallT.
     intros l' Hin. clear eqpmix. induction PL; inversion Hin.
     * subst.
-      unfold Forall_Proofs in X. Dependent_Forall_inversion_formula X.
+      unfold Forall_Proofs in X. Dependent_ForallT_inversion_formula X.
       apply X1.
-      now apply Forall_inf_app_l in Hgax.
-    * unfold Forall_Proofs in X. Dependent_Forall_inversion_formula X.
-      apply Forall_inf_app_r in Hgax.
+      now apply ForallT_app_l in Hgax.
+    * unfold Forall_Proofs in X. Dependent_ForallT_inversion_formula X.
+      apply ForallT_app_r in Hgax.
       apply IHPL; assumption.
 - eapply cut_r; [ | eassumption | eassumption ].
   specialize (Hcut A). eapply implb_true_iff, f. apply le_implb, Hcut.
@@ -1340,7 +1340,7 @@ Lemma ax_loc P l (pi : ll P l) :
 Proof.
 refine (ax_gen_loc _ _ _ pi _); try reflexivity.
 destruct (gax_elts pi) as [|d l0]; [ constructor | remember (d :: l0) as l1 ]. clear - d.
-apply forall_Forall_inf. intros a [n Hn <-]%(In_inf_nth _ _ d).
+apply forall_ForallT. intros a [n Hn <-]%(InT_nth _ _ d).
 enough (projT2 (pgax P) (nth n l1 d)
       = projT2 (pgax (axupd_pfrag P (existT (fun x => x -> _) _
                                             (fun n => projT2 (pgax P) (Vector.nth (Vector.of_list l1) n)))))
@@ -1357,50 +1357,50 @@ Qed.
 Lemma ext_wn_param P Q (Q_perm : pperm Q = true) (Hcut: forall A, Bool.le (pcut P A) (pcut Q A)) l0
   (Hgax : forall a, ll Q (projT2 (pgax P) a ++ map wn l0))
   (Hmix : forall L, pmix P (length L) = true -> pmix Q (length L) = false ->
-     forall (FL : Forall_inf (ll Q) (map (fun l => l ++ (map wn l0)) L)), ll Q (concat L ++ map wn l0)) l :
+     forall (FL : ForallT (ll Q) (map (fun l => l ++ (map wn l0)) L)), ll Q (concat L ++ map wn l0)) l :
   ll P l -> ll Q (l ++ map wn l0).
 Proof.
 intros pi.
 induction pi using ll_nested_ind; try (now constructor).
-- rewrite PCPermutation_Type_app_comm.
+- rewrite PCPermutationT_app_comm.
   apply wk_list_r, ax_r.
 - eapply ex_r; [ eassumption | ].
-  apply PCPermutation_Permutation_Type in p.
+  apply PCPermutation_PermutationT in p.
   rewrite Q_perm.
-  apply Permutation_Type_app_tail. assumption.
+  apply PermutationT_app_tail. assumption.
 - list_simpl.
   eapply ex_wn_r; [ | eassumption ].
   rewrite app_assoc in IHpi. rewrite 2 app_assoc. assumption.
 - destruct (pmix Q (length L)) eqn:Q_mix.
-  + apply ex_r with (map wn l0 ++ concat L); [ | apply PCPermutation_Type_app_comm ].
+  + apply ex_r with (map wn l0 ++ concat L); [ | apply PCPermutationT_app_comm ].
     rewrite <- (app_nil_l _). apply co_list_gen_perm_r; [ assumption | ].
     rewrite app_nil_l, flat_map_concat_map. apply mix_r.
     * rewrite length_map. assumption.
-    * apply forall_Forall_inf.
-      intros l' [l1 <- [pil1 Hin]%(In_Forall_inf_in _ PL)]%in_inf_map_inv.
-      apply (Dependent_Forall_inf_forall_formula _ _ X) in Hin as pi.
-      eapply ex_r; [ exact pi | apply PCPermutation_Type_app_comm ].
+    * apply forall_ForallT.
+      intros l' [l1 <- [pil1 Hin]%(InT_In_ForallT _ PL)]%inT_map_inv.
+      apply (Dependent_ForallT_forall_formula _ _ X) in Hin as pi.
+      eapply ex_r; [ exact pi | apply PCPermutationT_app_comm ].
   + apply Hmix; [ assumption | assumption | ].
-    apply forall_Forall_inf.
-    intros l' [l1 <- [pil1 Hin]%(In_Forall_inf_in _ PL)]%in_inf_map_inv.
-    apply (Dependent_Forall_inf_forall_formula _ _ X Hin).
-- eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
+    apply forall_ForallT.
+    intros l' [l1 <- [pil1 Hin]%(InT_In_ForallT _ PL)]%inT_map_inv.
+    apply (Dependent_ForallT_forall_formula _ _ X Hin).
+- eapply ex_r; [ | apply PCPermutationT_app_comm ].
   apply wk_list_r, one_r.
-- eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
+- eapply ex_r; [ | apply PCPermutationT_app_comm ].
   apply co_list_r.
   apply ex_r with (tens A B :: (l2 ++ map wn l0) ++ l1 ++ map wn l0);
     [ apply tens_r; assumption | rewrite Q_perm; cbn ].
   list_simpl. rewrite ? app_comm_cons. remember (tens A B :: l2) as l2'.
-  symmetry. etransitivity; [ apply Permutation_Type_app_comm | ].
-  rewrite ? app_assoc. apply Permutation_Type_app_tail, Permutation_Type_app_tail, Permutation_Type_app_comm.
+  symmetry. etransitivity; [ apply PermutationT_app_comm | ].
+  rewrite ? app_assoc. apply PermutationT_app_tail, PermutationT_app_tail, PermutationT_app_comm.
 - rewrite <- app_comm_cons, <- map_app in IHpi.
   rewrite <- app_comm_cons, <- map_app.
   apply oc_r, IHpi.
-- eapply ex_r; [ | apply PCPermutation_Type_app_comm ].
+- eapply ex_r; [ | apply PCPermutationT_app_comm ].
   apply co_list_r.
   apply (ex_r ((l2 ++ map wn l0) ++ l1 ++ map wn l0));
     [ | rewrite Q_perm, <- app_assoc;
-        symmetry; apply Permutation_Type_app_middle, Permutation_Type_app_rot ].
+        symmetry; apply PermutationT_app_middle, PermutationT_app_rot ].
   refine (cut_r A _ IHpi1 IHpi2).
   eapply implb_true_iff, f. apply le_implb, Hcut.
 - apply Hgax.
@@ -1442,8 +1442,8 @@ End Atoms.
 Arguments ll_nested_ind : clear implicits.
 Arguments ll_nested_ind' : clear implicits.
 
-Notation Dependent_Forall_inf_forall_formula :=
-  (Dependent_Forall_inf_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
+Notation Dependent_ForallT_forall_formula :=
+  (Dependent_ForallT_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
                                                                     (fun x y => proj2 (eqb_eq x y)))).
 
 Ltac destruct_ll H f X l Hl Hr HP FL a :=
@@ -1470,10 +1470,10 @@ Ltac destruct_ll H f X l Hl Hr HP FL a :=
 
 Ltac ll_swap :=
   match goal with
-  | |- ll ?P (?a1 :: ?a2 :: nil) => eapply ex_r; [ | apply PCPermutation_Type_swap ]
+  | |- ll ?P (?a1 :: ?a2 :: nil) => eapply ex_r; [ | apply PCPermutationT_swap ]
   end.
 Ltac ll_swap_hyp H :=
   match goal with
-  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ => eapply ex_r in H; [ | apply PCPermutation_Type_swap ]
+  | H : ll ?P (?a1 :: ?a2 :: nil) |- _ => eapply ex_r in H; [ | apply PCPermutationT_swap ]
   end.
 Tactic Notation "ll_swap" "in" hyp(H) := ll_swap_hyp H.
