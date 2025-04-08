@@ -1,6 +1,6 @@
 (** * Comparison between Intuitionistic Linear Logic and Linear Logic *)
 
-From OLlibs Require Import Datatypes_more funtheory infinite List_more PermutationT_more GPermutationT.
+From OLlibs Require Import Logic_Datatypes_more funtheory infinite List_more PermutationT_more GPermutationT.
 From Yalla Require Import ll_fragments.
 From Yalla Require Export ill_prop.
 

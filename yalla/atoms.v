@@ -1,7 +1,7 @@
 (** * Various structures on atoms required in the Yalla library *)
 (** and consistency checks *)
 
-From OLlibs Require Import Datatypes_more funtheory ListT.
+From OLlibs Require Import Logic_Datatypes_more funtheory ListT.
 From OLlibs Require Export infinite.
 
 

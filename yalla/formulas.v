@@ -1,5 +1,5 @@
 From Stdlib Require Import List EqNat RelationClasses Lia.
-From OLlibs Require Import Datatypes_more Bool_more funtheory dectype.
+From OLlibs Require Import Logic_Datatypes_more Bool_more funtheory dectype.
 From Yalla Require Export atoms.
 
 Set Implicit Arguments.

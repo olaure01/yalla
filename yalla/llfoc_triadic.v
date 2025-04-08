@@ -1,7 +1,7 @@
 (** * Andreoli's triadic system for focusing *)
 
 From Stdlib Require Import Wf_nat Lia.
-From OLlibs Require Import Datatypes_more Bool_more infinite List_more PermutationT_more.
+From OLlibs Require Import Logic_Datatypes_more Bool_more infinite List_more PermutationT_more.
 From Yalla Require Import ll_fragments llfoc.
 
 Set Implicit Arguments.
