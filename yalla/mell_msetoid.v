@@ -77,7 +77,7 @@ Qed.
 
 (** *** 2bis. sequents *)
 
-Instance fmsetoid_formula : FinMultisetoid (list _) formula := FMoidConstr_list formula.
+Instance fmsetoid_formula : FinMultisetoid _ formula := FMoidConstr_list formula.
 
 
 (** ** 3. define proofs *)

@@ -106,12 +106,12 @@ Qed.
 
 (** *** 2bis. sequents *)
 
-Instance fmset_formula : FinMultiset (SortedList _) formula := FMConstr_slist border_formula.
+Instance fmset_formula : FinMultiset _ formula := FMConstr_slist border_formula.
 
 
 (** ** 3. define proofs *)
 
-Inductive mell : SortedList border_formula -> Prop :=
+Inductive mell : fmset_formula -> Prop :=
 | ax_r X : mell (add (covar X) (add (var X) empty))
 | one_r : mell (add one empty)
 | bot_r m : mell m -> mell (add bot m)
