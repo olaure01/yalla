@@ -35,7 +35,7 @@ end.
 Lemma l2ill_inj : injective l2ill.
 Proof.
 intros A; induction A; intros B Heq; destruct B; destr_eq Heq;
-  try apply IHA1 in H0; try apply IHA2 in H1; subst; reflexivity.
+  try apply IHA1 in Heq; try apply IHA2 in H; subst; reflexivity.
 Qed.
 *)
 
