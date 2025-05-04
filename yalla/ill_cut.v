@@ -5,6 +5,7 @@ From Stdlib Require Import PeanoNat Wf_nat List Lia.
 From OLlibs Require Import funtheory dectype List_more flat_map_more PermutationT_more GPermutationT.
 From Yalla Require Export ill_cut_at.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -454,7 +455,7 @@ remember (l1 ++ A :: l2) as l; destruct_ill pi2 f X l Hl Hr HP a;
        (try intros Hl IHsize); (try intros Hsize); constructor;
        list_simpl; rewrite ? (app_comm_cons _ _ A0); refine (IHsize _ _ _ _ pi1 Hl _); lia).
 - (* ax_ir *)
-  decomp_unit_eq_elt Heql; list_simpl; assumption.
+  decomp_unit_eq Heql. list_simpl. assumption.
 - (* ex_ir *)
   cbn in IHsize.
   apply PEPermutationT_vs_elt_subst in HP as [(l1',l2') HP ->].

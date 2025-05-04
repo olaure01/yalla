@@ -4,6 +4,7 @@ From OLlibs Require Import Logic_Datatypes_more funtheory infinite List_more Per
 From Yalla Require Import ll_fragments.
 From Yalla Require Export ill_prop.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -988,8 +989,7 @@ enough (forall l, ll_ll (map dual (map ill2ll l)) ->
           (ForallT (fun F => ll_mix0 (ill2ll F :: nil)) l) -> False)
   as Hgen.
 { intros [pi1 pi2].
-  eapply cut_ll_r in pi1.
-  eapply cut_mix0_r in pi2.
+  eapply cut_ll_r in pi1; [ eapply cut_mix0_r in pi2 | ].
   - change (dual (ill2ll A) :: nil)
       with (map dual (map ill2ll (A :: nil))) in pi1.
     rewrite app_nil_r in pi1.
@@ -1032,7 +1032,7 @@ revert l Heql0; induction pi; intros l' Heq HF; subst; try discriminate f.
   eapply IHpi; [ reflexivity | eassumption ].
 - destruct l'; inversion Heq.
   symmetry in H1. decomp_map H1. symmetry in H1. decomp_map H1. subst.
-  destruct i; inversion H0. subst.
+  destruct i; inversion H0.
   + inversion HF. subst.
     cbn in X. rewrite <- (app_nil_l _) in X. eapply parr_rev in X; [ | intros [] ].
     list_simpl in X.
@@ -2262,7 +2262,7 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
             list_simpl. apply PermutationT_app_head. symmetry. apply PermutationT_app_rot.
     * list_simpl in H2. decomp_map H2 eqn:Hx. decomp_map H2. subst.
       apply (f_equal (@rev _)) in H2. list_simpl in H2. subst.
-      destruct x; destr_eq Hx. subst.
+      destruct x; destr_eq Hx.
       -- assert (HP4' := HP4).
          symmetry in HP4'. apply PermutationT_vs_cons_inv in HP4' as [(l4a & l4b) Heq'].
          decomp_elt_eq_app Heq'; subst.
@@ -2739,7 +2739,7 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
                apply PermutationT_app_comm.
       -- assert (HP4' := HP4).
          symmetry in HP4'. apply PermutationT_vs_cons_inv in HP4' as [(l4a, l4b) Heq'].
-         decomp_elt_eq_app Heq'. subst.
+         decomp_elt_eq_app Heq'.
          ++ cbn in HP3. rewrite map_map in HP3.
             symmetry in HP3. apply PermutationT_map_inv in HP3 as [l3''' Heq' HP3].
             decomp_map Heq'. subst.
@@ -3378,7 +3378,7 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
       -- destruct HP' as [IH1 IH2].
          split; [ assumption | intros _ ? ].
          apply IH2.
-         intro Hnil. decomp_nil_eq_elt Hnil.
+         intro Hnil. decomp_nil_eq Hnil.
       -- assert (Hocll := ForallT_app_l _ _ Hocl).
          assert (Hoclr := ForallT_app_r _ _ Hocl).
          apply ForallT_app; [ assumption | ].
@@ -3427,8 +3427,7 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
       list_simpl in IHHll. list_simpl in HP'. apply IHHll in HP'; [ | assumption | ].
       -- destruct HP' as [IH1 IH2].
          split; [ assumption | intros _ ? ].
-         apply IH2.
-         intro Hnil. decomp_nil_eq_elt Hnil.
+         apply IH2. intro Hnil. decomp_nil_eq Hnil.
       -- assert (Hocll := ForallT_app_l _ _ Hocl).
          assert (Hoclr := ForallT_app_r _ _ Hocl).
          apply ForallT_app; [ assumption | ].
@@ -3490,8 +3489,7 @@ intros Hll. induction Hll; intros l0 lo C Hoclm Hocl HP; try discriminate.
          list_simpl in IHHll1. list_simpl in HP'. apply IHHll1 in HP'; try assumption.
          ++ destruct HP' as [IH1 IH2].
             split; [ assumption | intros _ ? ].
-            apply IH2.
-            intro Hnil. decomp_nil_eq_elt Hnil.
+            apply IH2. intro Hnil. decomp_nil_eq Hnil.
          ++ apply ForallT_app; [ | constructor ]; assumption.
       -- apply (PEPermutationT_cons _ (eq_refl (ill2ll x2))) in HP.
          apply PEPermutation_PCPermutationT in HP. unfold id in HP. rewrite app_comm_cons in HP.

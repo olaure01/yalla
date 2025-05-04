@@ -212,7 +212,7 @@ Definition mix'_r P L : is_true (pmix P (length L)) -> ll P (flat_map (@projT1 _
 Proof.
 intros Hmix. rewrite flat_map_concat_map. apply mix_r.
 - rewrite length_map. assumption.
-- apply list_to_Forall.
+- apply list_to_ForallT.
 Defined.
 
 Section ll_ind.
@@ -224,7 +224,7 @@ Section ll_ind.
 
   Lemma Forall_Proofs_to_ForallT (Pred : forall l, ll P l -> Type) L (piL : ForallT (ll P) L) :
     Forall_Proofs Pred piL -> 
-    ForallT (fun x => Pred (projT1 x) (projT2 x)) (Forall_to_list piL).
+    ForallT (fun x => Pred (projT1 x) (projT2 x)) (ForallT_to_list piL).
   Proof. intros PpiL. induction PpiL; constructor; assumption. Qed.
 
   Fixpoint pre_ll_nested_ind l (pi : ll P l) : forall (Pred : forall l, ll P l -> Type),
@@ -313,25 +313,25 @@ Section ll_ind.
   intros.
   apply pre_ll_nested_ind; try assumption.
   intros L e f HP.
-  assert (Pred (flat_map (projT1 (P:=ll P)) (Forall_to_list f))
-               (rew <- [fun l => ll P l] flat_map_concat_map (projT1 (P:=ll P)) (Forall_to_list f) in
-                  @mix_r _ (map (projT1 (P:=ll P)) (Forall_to_list f))
+  assert (Pred (flat_map (projT1 (P:=ll P)) (ForallT_to_list f))
+               (rew <- [fun l => ll P l] flat_map_concat_map (projT1 (P:=ll P)) (ForallT_to_list f) in
+                  @mix_r _ (map (projT1 (P:=ll P)) (ForallT_to_list f))
                            (eq_ind_r (fun n => pmix P n = true)
-                           (eq_ind_r (fun n => pmix P n = true) e (Forall_to_list_length f))
-                           (length_map (projT1 (P:=ll P)) (Forall_to_list f)))
-                        (list_to_Forall (Forall_to_list f)))) as HL
+                           (eq_ind_r (fun n => pmix P n = true) e (ForallT_to_list_length f))
+                           (length_map (projT1 (P:=ll P)) (ForallT_to_list f)))
+                        (list_to_ForallT (ForallT_to_list f)))) as HL
     by (apply X2; clear e; induction HP; cbn; constructor; assumption).
   clear - HL.
-  rewrite (flat_map_concat_map (@projT1 _ (ll P)) (Forall_to_list f)) in HL. unfold eq_rect_r in HL. cbn in HL.
-  rewrite <- (Forall_to_list_to_Forall f).
+  rewrite (flat_map_concat_map (@projT1 _ (ll P)) (ForallT_to_list f)) in HL. unfold eq_rect_r in HL. cbn in HL.
+  rewrite <- (ForallT_to_list_to_ForallT f).
   replace e with
       (rew [fun n : nat => pmix P n = true] f_equal (length (A:=list formula))
-                                                    (Forall_to_list_support f) in
+                                                    (ForallT_to_list_support f) in
           eq_ind_r (fun n => pmix P n = true)
-                   (eq_ind_r (fun n => pmix P n = true) e (Forall_to_list_length f))
-                   (length_map (projT1 (P:=ll P)) (Forall_to_list f)))
+                   (eq_ind_r (fun n => pmix P n = true) e (ForallT_to_list_length f))
+                   (length_map (projT1 (P:=ll P)) (ForallT_to_list f)))
     by apply (Eqdep_dec.UIP_dec Bool.bool_dec).
-  rewrite <- (Forall_to_list_support f). assumption.
+  rewrite <- (ForallT_to_list_support f). assumption.
   Defined.
 
 End ll_ind.

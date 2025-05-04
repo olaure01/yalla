@@ -4,6 +4,8 @@ From Stdlib Require Import Wf_nat Lia.
 From OLlibs Require Import List_more Dependent_ForallT GPermutationT.
 From Yalla Require Export ll_def.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -54,7 +56,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
       [ | list_simpl; rewrite app_assoc, (app_assoc _ l2); apply PCPermutationT_app_comm ].
     destruct (In_ForallT_elt _ _ (l1' ++ A :: l2') PL) as [pi Hin].
     refine (Dependent_ForallT_forall_formula _ _ X Hin _ _ eq_refl).
-- exfalso. decomp_unit_eq_elt Heq. inversion Hat.
+- exfalso. decomp_unit_eq Heq. inversion Hat.
 - destruct l4; destr_eq Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply bot_r.
@@ -182,7 +184,7 @@ remember (l1 ++ dual A :: l2) as l eqn:Heql. destruct_ll pi2 f Y l Hl Hr HP FL a
     refine (IHsize0 _ _ _ _ _ _ pi1 pi _ _); [ | reflexivity | assumption ].
     assert (psize pi < psize (mix_r f FL)) as H by (eapply psize_inf_mix; eassumption).
     cbn in H. lia.
-- decomp_unit_eq_elt Heql. destruct Hat as [-> | ->]; discriminate Heql.
+- decomp_unit_eq Heql. destruct Hat as [-> | ->]; discriminate Heql.
 - destruct l1; inversion Heql; subst.
   + destruct Hat as [-> | ->]; discriminate H0.
   + cbn. apply bot_r.

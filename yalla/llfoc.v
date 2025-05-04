@@ -4,6 +4,7 @@ From Stdlib Require Import CMorphisms Wf_nat Lia.
 From OLlibs Require Import infinite funtheory Bool_more List_more PermutationT_more.
 From Yalla Require Import ll_fragments.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -288,7 +289,7 @@ Lemma bot_rev_f l Pi (pi : llfoc l Pi) l1 l2 : l = l1 ++ bot :: l2 ->
   { pi' : llfoc (l1 ++ l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 revert l1 l2. induction pi; intros l1' l2' Heq; subst.
-- exfalso. destruct l1'; destr_eq Heq. decomp_nil_eq_elt H.
+- exfalso. decomp_unit_eq Heq. discriminate Heq.
 - assert (HP := p).
   cbn; apply PermutationT_vs_elt_inv in p as ((l3 & l4) & ->).
   cbn in IHpi, HP; cbn.
@@ -406,7 +407,7 @@ Lemma parr_rev_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ parr A B :: l2 ->
   { pi' : llfoc (l1 ++ A :: B :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 revert A B l1 l2; induction pi; intros A' B' l1' l2' Heq; subst; cbn.
-- exfalso. destruct l1'; destr_eq Heq. decomp_nil_eq_elt H.
+- exfalso. decomp_unit_eq Heq. discriminate Heq.
 - assert (HP := p).
   apply PermutationT_vs_elt_inv in p as [(l3, l4) ->].
   destruct (IHpi _ _ _ _ eq_refl) as [pi0 Hs].
@@ -527,7 +528,7 @@ Lemma with_rev_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ awith A B :: l2 ->
  * { pi' : llfoc (l1 ++ B :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 revert A B l1 l2. induction pi; intros A' B' l1' l2' Heq; subst; cbn.
-- exfalso. destruct l1'; destr_eq Heq. decomp_nil_eq_elt H.
+- exfalso. decomp_unit_eq Heq. discriminate Heq.
 - assert (HP := p).
   apply PermutationT_vs_elt_inv in p as ((l3 & l4) & ->).
   destruct (IHpi _ _ _ _ eq_refl) as [[pi01 Hs1] [pi02 Hs2]].
@@ -1120,8 +1121,8 @@ revert l Pi pi. induction s using lt_wf_rect; intros l Pi pi; split; [ split | ]
   apply X in H; [ | lia ].
   apply co_gen_Fr, H. reflexivity.
 (* second conjunct *)
-- exists ((covar X0 :: nil), (covar X0 :: nil), nil, nil). repeat split; [ reflexivity .. | ].
-  + apply inclT_nil_l.
+- exists ((covar X0 :: nil), (covar X0 :: nil), nil, nil).
+  + repeat split; [ reflexivity .. | apply inclT_nil_l ].
   + apply ax_Fr.
 - symmetry in p.
   specialize X with (S (fpsize pi)) _ _ pi.
@@ -1130,8 +1131,8 @@ revert l Pi pi. induction s using lt_wf_rect; intros l Pi pi; split; [ split | ]
   + exists (l', l0, lw, lw'); repeat split; [ | assumption .. ].
     etransitivity; eassumption.
   + apply (PermutationT_ForallT p). assumption.
-- exists (nil, nil, nil, nil). repeat split; [ reflexivity .. | ].
-  + apply inclT_nil_l.
+- exists (nil, nil, nil, nil).
+  +  repeat split; [ reflexivity .. | apply inclT_nil_l ].
   + apply one_Fr.
 - assert (HF1 := ForallT_app_l _ _ HF).
   assert (HF2 := ForallT_app_r _ _ HF).

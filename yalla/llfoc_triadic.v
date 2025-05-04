@@ -4,6 +4,8 @@ From Stdlib Require Import Wf_nat Lia.
 From OLlibs Require Import Logic_Datatypes_more Bool_more infinite List_more PermutationT_more.
 From Yalla Require Import ll_fragments llfoc.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -174,7 +176,7 @@ apply trifoc_rect; intros; subst; try now (econstructor; eauto); try now (destru
   + apply ForallT_app_r in f. inversion f. assumption.
 - constructor; [ assumption | ].
   rewrite app_comm_cons. apply X. reflexivity.
-- decomp_unit_eq_elt H. apply axd_tfr.
+- decomp_unit_eq H. apply axd_tfr.
 - destruct (PermutationT_vs_elt_inv _ _ _ p) as [(l1, l2) ->].
   apply PermutationT_app_inv in p.
   eapply ex_tfr; [ | eassumption ].

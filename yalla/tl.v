@@ -8,6 +8,7 @@ From OLlibs Require Import funtheory infinite List_more PermutationT_more GPermu
 
 From Yalla Require Import ll_def ill_vs_ll.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -384,9 +385,9 @@ induction pi;
   try (decomp_map Heql eqn:Hx; subst; destruct x; destr_eq Hx; subst;
        constructor; apply IHpi; list_simpl; reflexivity);
   try (destruct A''; destr_eq HeqA; subst; constructor; apply IHpi; reflexivity).
-- destruct l''; destr_eq Heql. decomp_map H. subst l.
-  destruct A''; destr_eq HeqA; destruct t; destr_eq Heql; subst.
-  apply t2i_inj in HeqA as ->. apply ax_tr.
+- decomp_map Heql. destruct Heq as [Heq ->]. subst l''.
+  destruct A''; destr_eq HeqA; destruct x; destr_eq Heq; subst.
+  apply t2i_inj in Heq as ->. apply ax_tr.
 - exfalso.
   rewrite HeqN in Heql.
   destruct l''; destr_eq Heql.

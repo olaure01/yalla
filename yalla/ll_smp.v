@@ -9,6 +9,7 @@ From OLlibs Require Import funtheory infinite List_more PermutationT_more.
 From Yalla Require Import atoms.
 From Yalla Require ll_fragments.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 

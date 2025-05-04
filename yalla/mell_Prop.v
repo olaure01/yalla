@@ -9,6 +9,7 @@ From OLlibs Require Import funtheory dectype List_more Permutation_more Permutat
 From Yalla Require Import atoms.
 From Yalla Require ll_cut.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 

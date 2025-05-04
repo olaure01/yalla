@@ -8,6 +8,7 @@ From OLlibs Require Import funtheory dectype List_more PermutationT_more.
 
 From Yalla Require ill_cut.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -159,8 +160,8 @@ revert l Heql0 A HeqA0; induction pi; intros l' Heql0 A' HeqA0; subst;
       -- symmetry. apply PermutationT_middle.
   + rewrite ? app_assoc.
     apply PermutationT_cons_app, PermutationT_app_tail, PermutationT_app_comm.
-- decomp_map Heql0 eqn:Heq. subst l'. destruct Heq as [Heq _].
-  destruct x; destr_eq Heq.
+- decomp_map Heql0 eqn:Heq.
+  destruct Heq as [Heq _]. destruct x; discriminate Heq.
 - decomp_map Heql0 eqn:Heq. subst l'.
   destruct x; destr_eq Heq. subst.
   eapply ex_ir.

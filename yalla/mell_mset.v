@@ -10,6 +10,7 @@ Import FMSetNotations.
 From Yalla Require Import atoms fmformulas.
 From Yalla Require ll_cut.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -235,8 +236,8 @@ assert (PermutationT l (map mell2ll (elts m))) as HP by (subst l; reflexivity). 
 induction pi in m, HP |- *;
   try discriminate;
   try (apply PermutationT_image in HP as [ [] [=] ]; fail).
-- apply PermutationT_length_2_inv in HP as [HP | HP]; decomp_map HP eqn:Heq; subst;
-    destruct Heq as [Heq1 [Heq2 ->] ];
+- apply PermutationT_length_2_inv in HP as [HP | HP];
+    decomp_map HP eqn:Heq; subst; destruct Heq as [Heq1 [Heq2 ->] ];
     destruct x; destr_eq Heq1; destruct x0; destr_eq Heq2; subst;
     apply (f_equal (fold_right add empty)) in HP; rewrite elts_retract in HP; subst.
   + apply ax_r.
@@ -251,7 +252,7 @@ induction pi in m, HP |- *;
   apply PermutationT_app_head, PermutationT_app_tail, PermutationT_map. assumption.
 - apply PermutationT_length_1_inv in HP.
   remember (elts m) as l eqn:Heql.
-  decomp_map HP eqn:Heq. destruct Heq as [Hx ->]. destruct x; destr_eq Hx. subst l.
+  decomp_map HP eqn:Heq. destruct Heq as [Heq ->]. destruct x; destr_eq Heq. subst l.
   apply (f_equal (fold_right add empty)) in HP.
   rewrite elts_retract in HP. subst m.
   apply one_r.

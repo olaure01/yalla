@@ -8,6 +8,7 @@ From OLlibs Require Import funtheory dectype List_more PermutationT PermutationT
 
 From Yalla Require ll_cut.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -642,8 +643,8 @@ induction pi in P', Q', l' |- *; intros HP.
 - assert (HP' := HP).
   symmetry in HP'.
   apply PermutationT_vs_cons_inv in HP' as [(l2', l3') Heq].
-  destruct l2'; destr_eq Heq. subst.
-  + apply PermutationT_cons_inv in HP.
+  destruct l2'; destr_eq Heq.
+  + subst. apply PermutationT_cons_inv in HP.
     assert (HP' := HP).
     apply PermutationT_vs_cons_inv in HP' as [(l3, l4) Heq'].
     rewrite Heq' in HP. symmetry in HP.
@@ -762,8 +763,8 @@ induction pi in P', Q', l' |- *; intros HP.
   apply top_s.
 - assert (HP' := HP).
   symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
-  destruct l2; destr_eq Heq. subst.
-  + apply PermutationT_cons_inv in HP.
+  destruct l2; destr_eq Heq.
+  + subst. apply PermutationT_cons_inv in HP.
     apply (@PermutationT_cons _ _ (pos P) eq_refl) in HP.
     apply IHpi in HP as [[[N l0] l1] -> Htop].
     now exists (N, l0, l1).
@@ -782,8 +783,8 @@ induction pi in P', Q', l' |- *; intros HP.
          now exists (N', l0, l4 ++ pos (aplus P Q) :: l3); list_simpl.
 - assert (HP' := HP).
   symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l2, l3) Heq].
-  destruct l2; destr_eq Heq. subst.
-  + apply PermutationT_cons_inv in HP.
+  destruct l2; destr_eq Heq.
+  + subst. apply PermutationT_cons_inv in HP.
     apply (@PermutationT_cons _ _ (pos P) eq_refl) in HP.
     apply IHpi in HP as [[[N l0] l1] -> Htop].
     now exists (N, l0, l1).

@@ -6,6 +6,7 @@ From OLlibs Require Import dectype funtheory List_more PermutationT_more GPermut
 From Yalla Require Import ll_cut_at.
 From Yalla Require Export ll_def.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -362,7 +363,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
 - (* ax_r *)
   destruct l1; injection Heql as [= <- Heql].
   + subst l2. eapply ex_r; [ apply pi1 | apply PCPermutationT_cons_append ].
-  + decomp_unit_eq_elt Heql. list_simpl. assumption.
+  + decomp_unit_eq Heql. list_simpl. assumption.
 - (* ex_r *)
   cbn in IHsize.
   apply PCPermutationT_vs_elt_subst in HP as [[l1' l2'] HP ->].
@@ -418,7 +419,7 @@ remember (l1 ++ A :: l2) as l eqn:Heql. destruct_ll pi2 f X l Hl Hr HP Hax a.
     enough (psize pi < psize (mix_r f Hax)) by lia.
     apply psize_inf_mix; assumption.
 - (* one_r *)
-  decomp_unit_eq_elt Heql; list_simpl.
+  decomp_unit_eq Heql. list_simpl.
   remember one_r as Hone eqn:Hdel. clear Hdel.
   remember (dual one :: l0) as l'; destruct_ll pi1 f X l Hl2 Hr2 HP Hax a; try inversion Heql';
     cbn in IHsize.

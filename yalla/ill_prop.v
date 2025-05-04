@@ -5,6 +5,8 @@ From Stdlib Require Import Bool.
 From OLlibs Require Import dectype List_more PermutationT_more GPermutationT.
 From Yalla Require Export ill_cut.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -27,7 +29,7 @@ induction pi in Heql, HeqC |- *; inversion Heql; inversion HeqC; subst;
 - apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
   symmetry in p. apply PermutationT_nil in p as ->.
   apply IHpi; reflexivity.
-- rewrite app_assoc in Heql. symmetry in Heql. decomp_nil_eq_elt Heql.
+- decomp_nil_eq Heql.
 - contradiction (Hgax a).
 Qed.
 

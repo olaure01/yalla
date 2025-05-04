@@ -3,6 +3,7 @@
 From OLlibs Require Import dectype List_more GPermutationT.
 From Yalla Require Export ill_def.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -53,7 +54,7 @@ induction pi2 in l1, l2, Heql |- *; subst;
        [ list_simpl; constructor; rewrite ? app_comm_cons, app_assoc; apply IHpi2; list_simpl; reflexivity
        | inversion Heql1
        | rewrite 2 app_assoc; constructor; list_simpl; apply IHpi2; list_simpl; reflexivity ]).
-- decomp_unit_eq_elt Heql. injection Heql as [= ->]. list_simpl. assumption.
+- decomp_unit_eq Heql. injection Heql as [= ->]. list_simpl. assumption.
 - apply PEPermutationT_vs_elt_subst in p as [(l4, l5) HP ->].
   specialize (HP l0). symmetry in HP. refine (ex_ir _ _ _ _ HP).
   apply IHpi2. reflexivity.
@@ -64,7 +65,7 @@ induction pi2 in l1, l2, Heql |- *; subst;
     * decomp_map Heql0 eqn:Hov. discriminate Hov.
     * rewrite <- 2 app_assoc. eapply ex_oc_ir; [ | eassumption ]. rewrite 2 app_assoc.
       apply IHpi2. list_simpl. reflexivity.
-- decomp_nil_eq_elt Heql.
+- exfalso. decomp_nil_eq Heql.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_assoc. apply tens_irr; [ | assumption ].
     list_simpl. apply IHpi2_1. reflexivity.
