@@ -213,24 +213,24 @@ Section Focusing.
 
 Inductive otl : list tformula -> option tformula -> Type :=
 | ax_otr X : otl (tvar X :: nil) (Some (tvar X))
-| ex_otr l1 l2 A : otl l1 A -> PermutationT l1 l2 -> otl l2 A
+| ex_otr l1 l2 Pi : otl l1 Pi -> PermutationT l1 l2 -> otl l2 Pi
 | one_otrr : otl nil (Some tone)
-| one_otlr l1 l2 A : otl (l1 ++ l2) A -> otl (l1 ++ tone :: l2) A
+| one_otlr l1 l2 Pi : otl (l1 ++ l2) Pi -> otl (l1 ++ tone :: l2) Pi
 | tens_otrr A B l1 l2 : otl l1 (Some A) -> otl l2 (Some B) -> otl (l1 ++ l2) (Some (ttens A B))
-| tens_otlr A B l1 l2 C : otl (l1 ++ A :: B :: l2) C -> otl (l1 ++ ttens A B :: l2) C
+| tens_otlr A B l1 l2 Pi : otl (l1 ++ A :: B :: l2) Pi -> otl (l1 ++ ttens A B :: l2) Pi
 | neg_otrr A l : otl (A :: l) None -> otl l (Some (tneg A))
 | neg_otlr A l : otl l (Some A) -> otl (l ++ tneg A :: nil) None
-| zero_otlr l1 l2 C : otl (l1 ++ tzero :: l2) C
+| zero_otlr l1 l2 Pi : otl (l1 ++ tzero :: l2) Pi
 | plus_otrr1 A B l : otl l (Some A) -> otl l (Some (tplus A B))
 | plus_otrr2 A B l : otl l (Some A) -> otl l (Some (tplus B A))
-| plus_otlr A B l1 l2 C : otl (l1 ++ A :: l2) C -> otl (l1 ++ B :: l2) C -> otl (l1 ++ tplus A B :: l2) C
+| plus_otlr A B l1 l2 Pi : otl (l1 ++ A :: l2) Pi -> otl (l1 ++ B :: l2) Pi -> otl (l1 ++ tplus A B :: l2) Pi
 | oc_otrr A l : otl (A :: map toc l) None -> otl (map toc l) (Some (toc (tneg A)))
 | de_otlr A l : otl l (Some A) -> otl (l ++ toc (tneg A) :: nil) None
-| wk_otlr A l1 l2 C : otl (l1 ++ l2) C -> otl (l1 ++ toc A :: l2) C
-| co_otlr A l1 l2 C : otl (l1 ++ toc A :: toc A :: l2) C -> otl (l1 ++ toc A :: l2) C.
+| wk_otlr A l1 l2 Pi : otl (l1 ++ l2) Pi -> otl (l1 ++ toc A :: l2) Pi
+| co_otlr A l1 l2 Pi : otl (l1 ++ toc A :: toc A :: l2) Pi -> otl (l1 ++ toc A :: l2) Pi.
 
-Instance otl_perm Pi : Proper ((@PermutationT _) ==> arrow) (fun l => otl l Pi).
-Proof. intros l1 l2 HP pi. eapply ex_otr; eassumption. Qed.
+Instance otl_perm : Proper ((@PermutationT _) ==> eq ==> iffT) otl.
+Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_otr pi HP). Qed.
 
 Lemma neg_rev_ot A l : otl l (Some (tneg A)) -> otl (A :: l) None.
 Proof.

@@ -214,9 +214,8 @@ Inductive tl P : list tformula -> option tformula -> Type :=
     tl P l0 (Some A) -> tl P (l1 ++ A :: l2) C -> tl P (l1 ++ l0 ++ l2) C
 | gax_tr a : tl P (fst (projT2 (tpgax P) a)) (snd (projT2 (tpgax P) a)).
 
-#[export] Instance tl_perm P Pi :
-  Proper ((PEPermutationT (tpperm P)) ==> arrow) (fun l => tl P l Pi) | 100.
-Proof. intros l1 l2 HP pi. apply ex_tr with l1; assumption. Qed.
+#[export] Instance tl_perm P : Proper ((PEPermutationT (tpperm P)) ==> eq ==> iffT) (tl P) | 100.
+Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_tr _ pi HP). Qed.
 
 Lemma stronger_tpfrag P Q (Hle : le_tpfrag P Q) l A : tl P l A -> tl Q l A.
 Proof.

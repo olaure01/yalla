@@ -228,6 +228,9 @@ Inductive llfoc : list formula -> option formula -> Type :=
 
 Notation llfoc_pol l A := (llfoc (polcont l A) (polfoc A)).
 
+Instance llfoc_perm : Proper ((@PermutationT _) ==> eq ==> iffT) llfoc.
+Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_fr pi HP). Qed.
+
 Fixpoint fpsize l Pi (pi : llfoc l Pi) :=
 match pi with
 | ax_fr _ | one_fr | top_fr _ _ _ => 1
@@ -713,8 +716,10 @@ Inductive llFoc : list formula -> option formula -> Type :=
 
 Notation llFoc_pol l A := (llFoc (polcont l A) (polfoc A)).
 
-Instance llFoc_perm : Proper ((@PermutationT _) ==> arrow) (fun l => llFoc l None).
-Proof. intros l1 l2 HP pi. apply ex_Fr with l1; assumption. Qed.
+(* useless in practice: [llFoc _ None] not recognized, require constant relation as 2nd parameter?
+Instance llFoc_perm : Proper ((@PermutationT _) ==> iffT) (fun l => llFoc l None).
+Proof. intros l1 l2 HP. split; intro pi; [ | symmetry in HP ]; exact (ex_Fr pi HP). Qed.
+*)
 
 Lemma top_gen_Fr l : llFoc (top :: l) None.
 Proof.

@@ -85,8 +85,8 @@ Inductive ill : list iformula -> iformula -> Type :=
 | wk_ilr A l C : ill l C -> ill (ioc A :: l) C
 | co_ilr A l C : ill (ioc A :: ioc A :: l) C -> ill (ioc A :: l) C.
 
-Instance ill_perm C : Proper ((@PermutationT _) ==> arrow) (fun l => ill l C).
-Proof. intros l1 l2 HP pi. eapply ex_ir; eassumption. Qed.
+Instance ill_perm : Proper ((@PermutationT _) ==> eq ==> iffT) ill.
+Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_ir pi HP). Qed.
 
 (** ** 4. characterize corresponding [ill] fragment *)
 

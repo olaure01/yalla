@@ -158,8 +158,8 @@ Inductive ill P : list iformula -> iformula -> Type :=
 #[global] Arguments cut_ir [P] _ f [l0 l1 l2 _] _ _.
 #[global] Arguments gax_ir [P] _.
 
-Instance ill_perm P A : Proper ((@PEPermutationT _ (ipperm P)) ==> arrow) (fun l => ill P l A).
-Proof. intros l1 l2 HP pi. eapply ex_ir; eassumption. Qed.
+Instance ill_perm P : Proper ((@PEPermutationT _ (ipperm P)) ==> eq ==> iffT) (ill P).
+Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_ir _ _ _ pi HP). Qed.
 
 Fixpoint ipsize P l A (pi : ill P l A) :=
 match pi with
