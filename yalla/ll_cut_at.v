@@ -26,7 +26,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
   assert (PCPermutationT (pperm P) (l1 ++ l5' ++ l4' ++ l2) (l1 ++ l5 ++ l4 ++ l2)) as HP'.
   { etransitivity; [ rewrite app_assoc; apply PCPermutationT_app_rot | ].
     etransitivity; [ | apply PCPermutationT_app_rot ].
-    list_simpl. symmetry. assumption. }
+    list_simpl. assumption. }
   refine (ex_r _ _ _ HP').
   now apply IHpi.
 - symmetry in Heq. decomp_elt_eq_app_app Heq; subst.
@@ -34,7 +34,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
      apply (ex_wn_r _ lw); [ list_simpl | assumption ].
      rewrite (app_assoc l), (app_assoc _ l3), <- (app_assoc l).
      now apply IHpi; list_simpl.
-  + exfalso. decomp_map Heq1. inversion Hat.
+  + exfalso. decomp_map_eq Heq. inversion Hat.
   + list_simpl. rewrite 2 app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. rewrite (app_assoc l0), (app_assoc _ l6).
@@ -61,7 +61,7 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply bot_r.
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-  apply IHpi; list_simpl; reflexivity.
+  apply IHpi; list_reflexivity.
 - destruct l4; inversion Heq; subst; try (exfalso; inversion Hat; fail).
   decomp_elt_eq_app H1; subst.
   + list_simpl.
@@ -69,16 +69,16 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
     rewrite app_comm_cons; eapply ex_r; [ list_simpl | symmetry; apply PCPermutationT_app_rot ].
     rewrite 3 app_assoc; cbn; apply tens_r; [ assumption | ].
     list_simpl. rewrite app_comm_cons. eapply ex_r; [ | apply PCPermutationT_app_rot ].
-    list_simpl. rewrite app_comm_cons. apply IHpi2; list_simpl; reflexivity.
+    list_simpl. rewrite app_comm_cons. apply IHpi2; list_reflexivity.
   + eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
     apply tens_r; [ | assumption ].
     list_simpl; rewrite app_comm_cons; eapply ex_r; [ | apply PCPermutationT_app_rot ].
-    list_simpl. rewrite app_comm_cons. apply IHpi1; list_simpl; reflexivity.
+    list_simpl. rewrite app_comm_cons. apply IHpi1; list_reflexivity.
 - destruct l4; destr_eq Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply parr_r.
   rewrite 2 app_comm_cons. eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-  rewrite 2 app_comm_cons. apply IHpi; list_simpl; reflexivity.
+  rewrite 2 app_comm_cons. apply IHpi; list_reflexivity.
 - destruct l4; destr_eq Heq; subst;  try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply top_r.
@@ -86,36 +86,36 @@ revert l3 l4 Heql. induction pi using ll_nested_ind; intros l4 l5 Heq; subst.
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply plus_r1.
   rewrite app_comm_cons. eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-  rewrite app_comm_cons. apply IHpi; list_simpl; reflexivity.
+  rewrite app_comm_cons. apply IHpi; list_reflexivity.
 - destruct l4; destr_eq Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply plus_r2.
   rewrite app_comm_cons. eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-  rewrite app_comm_cons. apply IHpi; list_simpl; reflexivity.
+  rewrite app_comm_cons. apply IHpi; list_reflexivity.
 - destruct l4; destr_eq Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply with_r; rewrite app_comm_cons.
   + eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-    rewrite app_comm_cons. apply IHpi1; list_simpl; reflexivity.
+    rewrite app_comm_cons. apply IHpi1; list_reflexivity.
   + eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-    rewrite app_comm_cons. apply IHpi2; list_simpl; reflexivity.
+    rewrite app_comm_cons. apply IHpi2; list_reflexivity.
 - destruct l4; inversion Heq; subst; try (exfalso; inversion Hat; fail).
-  exfalso. decomp_map H1. inversion Hat.
+  exfalso. decomp_map_eq H1. inversion Hat.
 - destruct l4; destr_eq Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply de_r.
   rewrite app_comm_cons; eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-  rewrite app_comm_cons. apply IHpi; list_simpl; reflexivity.
+  rewrite app_comm_cons. apply IHpi; list_reflexivity.
 - destruct l4; destr_eq Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply wk_r.
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-  apply IHpi; list_simpl; reflexivity.
+  apply IHpi; list_reflexivity.
 - destruct l4; destr_eq Heq; subst; try (exfalso; inversion Hat; fail).
   eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
   apply co_r.
   rewrite 2 app_comm_cons; eapply ex_r; [ | apply PCPermutationT_app_rot ]; list_simpl.
-  rewrite 2 app_comm_cons. apply IHpi; list_simpl; reflexivity.
+  rewrite 2 app_comm_cons. apply IHpi; list_reflexivity.
 - decomp_elt_eq_app Heq; subst.
   + apply (ex_r ((l4 ++ l2 ++ l1 ++ l) ++ l0)).
     * apply (cut_r _ f); [ assumption | ].
@@ -156,14 +156,13 @@ remember (l1 ++ dual A :: l2) as l eqn:Heql. destruct_ll pi2 f Y l Hl Hr HP FL a
   + destruct l1; inversion H1; [ | destruct l1; destr_eq H2 ]; subst.
     apply codual in H0; cbn; subst; list_simpl; assumption.
 - apply PCPermutationT_vs_elt_subst in HP as [(l1',l2') HP ->].
-  specialize (HP l0); symmetry in HP.
-  refine (ex_r _ _ _ HP).
+  specialize (HP l0). refine (ex_r _ _ _ HP).
   refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
 - decomp_elt_eq_app_app Heql; subst.
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | apply HP ].
     revert Hl IHsize0. list_simpl. intros Hl IHsize0.
     refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
-  + exfalso. decomp_map Heql1 eqn:Heq. destruct Hat as [-> | ->]; discriminate Heq.
+  + exfalso. decomp_map_eq Heql eqn:Heq. destruct Hat as [-> | ->]; discriminate Heq.
   + list_simpl. eapply ex_wn_r; [ | apply HP ].
     revert Hl IHsize0. rewrite 2 app_assoc. intros Hl IHsize0. rewrite 2 app_assoc.
     refine (IHsize0 (psize pi1 + psize Hl) _ _ _ _ _ pi1 Hl _ Hat); lia.
@@ -225,7 +224,7 @@ remember (l1 ++ dual A :: l2) as l eqn:Heql. destruct_ll pi2 f Y l Hl Hr HP FL a
       refine (IHsize0 (psize pi1 + psize Hr) _ _ _ _ _ pi1 Hr _ Hat); lia.
 - exfalso. destruct l1; inversion Heql; subst.
   + destruct Hat as [-> | ->]; discriminate H0.
-  + decomp_map H1 eqn:Heq. destruct Hat as [-> | ->]; discriminate Heq.
+  + decomp_map_eq H1 eqn:Heq. destruct Hat as [-> | ->]; discriminate Heq.
 - destruct l1; inversion Heql; subst.
   + destruct Hat as [-> | ->]; discriminate H0.
   + cbn. apply de_r.

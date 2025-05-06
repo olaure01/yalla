@@ -241,7 +241,7 @@ rewrite app_assoc, 2 app_comm_cons.
 rewrite (app_assoc _ _ l2), <- map_app in pi.
 replace (ioc a :: ioc a :: map ioc l ++ map ioc l)
   with (map ioc (a :: a :: l ++ l))
-  by (list_simpl; reflexivity).
+  by list_reflexivity.
 eapply ex_oc_ir; try eassumption.
 apply PermutationT_cons; [ reflexivity | symmetry; apply PermutationT_middle ].
 Qed.

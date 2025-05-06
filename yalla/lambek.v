@@ -76,37 +76,37 @@ Proof.
 intro pi. remember (map l2ill l) as l0 eqn:Heql. remember (l2ill A) as A0 eqn:HeqA.
 induction pi in l, A, Heql, HeqA |- *;
   (try now (destruct A; destr_eq HeqA));
-  (try now (decomp_map Heql eqn:Hx; destruct x; destr_eq Hx)); subst.
+  (try now (decomp_map_eq Heql eqn:Hx; destruct x; destr_eq Hx)); subst.
 - destruct A; destr_eq HeqA.
   destruct l as [|B l]; inversion Heql as [[H1 H2]]; destruct l; destr_eq H2.
   destruct B; destr_eq H1. subst.
   apply ax_lr.
 - apply IHpi; [ assumption | reflexivity ].
 - remember (map iformulas.ioc lw') as l4.
-  decomp_map Heql eqn:Heq. subst.
+  decomp_map_eq Heql eqn:Heq. subst.
   destruct l4; inversion Heq; destruct lw'; inversion H0.
   + symmetry in p. apply PermutationT.PermutationT_nil in p as ->.
     apply IHpi; [ list_simpl | ]; reflexivity.
   + destruct l; discriminate H1.
 - destruct A; destr_eq HeqA. subst.
-  decomp_map Heql. subst.
+  decomp_map_eq Heql. subst.
   apply tens_lrr; [ apply IHpi1 | apply IHpi2]; reflexivity.
-- decomp_map Heql eqn:Hx. subst.
+- decomp_map_eq Heql eqn:Hx. subst.
   destruct x; destr_eq Hx. subst.
   apply tens_llr.
   apply IHpi; [ list_simpl | ]; reflexivity.
 - destruct A; destr_eq HeqA. subst.
   apply lpam_lrr.
   apply IHpi; [ rewrite map_last | ]; reflexivity.
-- decomp_map Heql eqn:Hx. subst.
+- decomp_map_eq Heql eqn:Hx. subst.
   destruct x; destr_eq Hx. subst.
-  apply lpam_llr; [ apply IHpi1 | apply IHpi2]; list_simpl; reflexivity.
+  apply lpam_llr; [ apply IHpi1 | apply IHpi2]; list_reflexivity.
 - destruct A; destr_eq HeqA. subst.
   apply lmap_lrr.
   apply IHpi; reflexivity.
-- decomp_map Heql eqn:Hx. subst.
+- decomp_map_eq Heql eqn:Hx. subst.
   destruct x; destr_eq Hx. subst.
-  apply lmap_llr; [ apply IHpi1 | apply IHpi2]; list_simpl; reflexivity.
+  apply lmap_llr; [ apply IHpi1 | apply IHpi2]; list_reflexivity.
 Qed.
 
 

@@ -145,11 +145,11 @@ intro pi. induction pi;
     rewrite <- map_app.
     apply PermutationT_map.
     unfold sum, list2fm.
-    cbn; rewrite fold_id.
+    cbn; rewrite fold_right_id.
     apply PermutationT_app_comm.
-- unfold list2fm. rewrite fold_id, mell2ll_map_wn.
+- unfold list2fm. rewrite fold_right_id, mell2ll_map_wn.
   unfold elts, add, fmmap, list2fm in IHpi. cbn in IHpi.
-  rewrite fold_id, mell2ll_map_wn in IHpi.
+  rewrite fold_right_id, mell2ll_map_wn in IHpi.
   apply ll_def.oc_r. assumption.
 Qed.
 
@@ -165,7 +165,7 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
   eapply ex_r.
   + apply IHpi. reflexivity.
   + symmetry. assumption.
-- remember (map formulas.wn lw') as l0. decomp_map Heql eqn:Heq.
+- remember (map formulas.wn lw') as l0. decomp_map_eq Heql eqn:Heq.
   symmetry in Heq. apply mell2ll_map_wn_inv in Heq as [l [-> ->]].
   apply PermutationT_map_inv in p as [l' -> HP].
   cbn in Heql. unfold id in Heql. subst.
@@ -178,19 +178,19 @@ intros pi. remember (map mell2ll (elts m)) as l. induction pi in m, Heql |- *;
 - destruct m; destr_eq Heql.
   destruct f; destr_eq Heql. subst.
   assert (Heq := H).
-  symmetry in H. decomp_map H. subst.
+  symmetry in H. decomp_map_eq H. subst.
   apply (@ex_r (add (tens f1 f2) (sum l1 l2))).
   + apply tens_r; [ apply IHpi1 | apply IHpi2 ]; reflexivity.
   + unfold sum, list2fm, add; cbn.
     apply PermutationT_cons; [ reflexivity | ].
-    rewrite fold_id. apply PermutationT_app_comm.
+    rewrite fold_right_id. apply PermutationT_app_comm.
 - destruct m; destr_eq Heql.
   destruct f; destr_eq Heql. subst.
   apply mell2ll_map_wn_inv in H as [m' [-> ->]].
   replace (oc f :: map wn m')
-     with (add (oc f) (fmmap wn m')) by (unfold fmmap, list2fm; cbn; rewrite fold_id; reflexivity).
+     with (add (oc f) (fmmap wn m')) by (unfold fmmap, list2fm; cbn; rewrite fold_right_id; reflexivity).
   apply oc_r, IHpi.
-  cbn. unfold list2fm. rewrite fold_id, mell2ll_map_wn. reflexivity.
+  cbn. unfold list2fm. rewrite fold_right_id, mell2ll_map_wn. reflexivity.
 - destruct a.
 Qed.
 

@@ -6,9 +6,10 @@ From Stdlib Require Permutation.
 From OLlibs Require Import dectype funtheory List_more Dependent_ForallT
                            PermutationT_more GPermutationT.
 From Yalla Require Export formulas.
-
 Import EqNotations.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -19,7 +20,7 @@ Notation formula := (@formula atom).
 
 Notation Dependent_ForallT_forall_formula :=
   (Dependent_ForallT_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
-                                                                    (fun x y => proj2 (eqb_eq x y)))).
+                                                                 (fun x y => proj2 (eqb_eq x y)))).
 
 Ltac Dependent_ForallT_inversion_formula H := Dependent_ForallT_inversion (@formulas_dectype atom) H.
 
@@ -136,7 +137,7 @@ Lemma cutrm_cutrm P : cutrm_pfrag (cutrm_pfrag P) = cutrm_pfrag P.
 Proof. reflexivity. Qed.
 
 Lemma cutrm_pfrag_le P : le_pfrag (cutrm_pfrag P) P.
-Proof. repeat split; try reflexivity. intros a. exists a. reflexivity. Qed.
+Proof. repeat split; [ intro a; exists a | .. ]; reflexivity. Qed.
 
 
 (** Same proof fragment as [P] but with a different pmix *)
@@ -151,7 +152,7 @@ Lemma pmixupd_point_comm P n1 n2 b1 b2 : n1 <> n2 ->
 Proof.
 intros Hneq k.
 destruct (k =? n1) eqn:Heq1, (k =? n2) eqn:Heq2; cbn; rewrite Heq1, Heq2; try reflexivity.
-contradiction Hneq. apply Nat.eqb_eq in Heq1 as <-. apply Nat.eqb_eq in Heq2 as <-. reflexivity.
+apply Nat.eqb_eq in Heq1 as <-. apply Nat.eqb_eq in Heq2 as <-. contradiction Hneq. reflexivity.
 Qed.
 
 (** ** Rules *)
@@ -210,7 +211,7 @@ Inductive ll P : list formula -> Type :=
 
 Definition mix'_r P L : is_true (pmix P (length L)) -> ll P (flat_map (@projT1 _ (ll P)) L).
 Proof.
-intros Hmix. rewrite flat_map_concat_map. apply mix_r.
+intro Hmix. rewrite flat_map_concat_map. apply mix_r.
 - rewrite length_map. assumption.
 - apply list_to_ForallT.
 Defined.
@@ -508,12 +509,12 @@ apply (ex_wn_r _ (l ++ a :: nil)); [ | symmetry; apply PermutationT_cons_append 
 list_simpl. apply IHl.
 replace (map wn l ++ map wn l ++ wn a :: l')
   with (nil ++ map wn (l ++ l ++ a :: nil) ++ l')
-  by (list_simpl; reflexivity).
+  by list_reflexivity.
 apply (ex_wn_r _ (a :: l ++ l)); [ | rewrite app_assoc; apply PermutationT_cons_append ].
 list_simpl. apply co_r.
 replace (wn a :: wn a :: map wn l ++ map wn l ++ l')
    with (nil ++ map wn (a :: a :: l ++ l) ++ l')
-  by (list_simpl; reflexivity).
+  by list_reflexivity.
 apply ex_wn_r with ((a :: l) ++ a :: l); [ list_simpl; list_simpl in pi; assumption | ].
 rewrite (app_comm_cons _ l). symmetry. apply PermutationT_middle.
 Qed.
@@ -619,12 +620,12 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
-  rewrite (HP' nil). apply IHpi. reflexivity.
+  rewrite <- (HP' nil). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_assoc. apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hwb. discriminate Hwb.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hwb. discriminate Hwb.
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -638,13 +639,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0. subst.
+  + destruct l1; destr_eq Heql. subst.
     rewrite app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
 - exfalso.
-  destruct l1; injection Heql as [= [=] Heq]. decomp_map Heq. discriminate.
+  destruct l1; injection Heql as [= [=] Heq]. decomp_map_eq Heq. discriminate.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_assoc. apply (@cut_r _ A f); [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -664,13 +665,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
-  rewrite (HP' (A :: B :: nil)). apply IHpi. reflexivity.
+  rewrite <- (HP' (A :: B :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hwp. discriminate Hwp.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hwp. discriminate Hwp.
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -684,13 +685,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0. subst.
+  + destruct l1; destr_eq Heql. subst.
     rewrite 2 app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
 - exfalso.
-  destruct l1; injection Heql as [= [=] Heq]. decomp_map Heq. discriminate.
+  destruct l1; injection Heql as [= [=] Heq]. decomp_map_eq Heq. discriminate.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_comm_cons, app_assoc. apply (cut_r A0 f); [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -710,13 +711,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
-  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
+  rewrite <- (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hww. discriminate Hww.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hww. discriminate Hww.
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -730,13 +731,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0. subst.
+  + destruct l1; destr_eq Heql. subst.
     rewrite app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
 - exfalso.
-  destruct l1; injection Heql as [= [=] Heq]. decomp_map Heq. discriminate.
+  destruct l1; injection Heql as [= [=] Heq]. decomp_map_eq Heq. discriminate.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc. apply (cut_r A0 f); [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -756,13 +757,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
-  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
+  rewrite <- (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hww. discriminate Hww.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hww. discriminate Hww.
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -776,13 +777,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0. subst.
+  + destruct l1; destr_eq Heql. subst.
     rewrite app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
 - exfalso.
-  destruct l1; injection Heql as [= [=] Heq]. decomp_map Heq. discriminate.
+  destruct l1; injection Heql as [= [=] Heq]. decomp_map_eq Heq. discriminate.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc. apply (cut_r A0 f); [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -801,13 +802,13 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l3, l4) HP' ->].
-  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
+  rewrite <- (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc.
     apply (ex_wn_r _ lw); [ | assumption ].
     list_simpl. apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hwo. discriminate Hwo.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hwo. discriminate Hwo.
     * list_simpl. apply (ex_wn_r _ lw); [ | assumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -821,14 +822,14 @@ induction pi using ll_nested_ind in l1, l2, Heql |- *;
     apply ForallT_cons; [ | assumption ].
     apply (X _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0. subst.
+  + destruct l1; destr_eq Heql. subst.
     rewrite app_comm_cons, app_assoc. apply tens_r; [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
   + list_simpl. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
 - destruct l1; injection Heql as [= [= <-] Heq].
   + rewrite <- Heq. exact pi.
-  + exfalso. decomp_map Heq. discriminate.
+  + exfalso. decomp_map_eq Heq. discriminate.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc. apply (cut_r A0 f); [ assumption | ].
     rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -848,12 +849,12 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l1', l2') HP' ->].
-  rewrite (HP' l0). apply IHpi. reflexivity.
+  rewrite <- (HP' l0). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
     apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hwo. discriminate Hwo.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hwo. discriminate Hwo.
     * list_simpl. eapply ex_wn_r; [ | eassumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -872,12 +873,12 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   + list_simpl. assumption.
   + destruct l1; discriminate H.
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0; subst.
+  + destruct l1; destr_eq Heql; subst.
     rewrite <- app_comm_cons, 2 app_assoc. apply tens_r; [ assumption | ].
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- exfalso. destruct l1; destr_eq Heql. decomp_map H eqn:Hwo. discriminate Hwo.
+- exfalso. destruct l1; destr_eq Heql. decomp_map_eq H eqn:Hwo. discriminate Hwo.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_assoc. eapply cut_r; [ eassumption | assumption | ].
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -897,12 +898,12 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l1', l2') HP' ->].
-  rewrite (HP' l'). apply IHpi. reflexivity.
+  rewrite <- (HP' l'). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
     apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hwz. discriminate Hwz.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hwz. discriminate Hwz.
     * list_simpl. eapply ex_wn_r; [ | eassumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -918,12 +919,12 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     destruct (In_ForallT_elt _ _ _ PL).
     refine (Dependent_ForallT_forall_formula _ _ X i _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0; subst.
+  + destruct l1; destr_eq Heql. subst.
     rewrite <- app_comm_cons, 2 app_assoc. apply tens_r; [ assumption | ].
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- exfalso. destruct l1; destr_eq Heql. decomp_map H eqn:Hwz. discriminate Hwz.
+- exfalso. destruct l1; destr_eq Heql. decomp_map_eq H eqn:Hwz. discriminate Hwz.
 - decomp_elt_eq_app Heql; subst.
   + rewrite 2 app_assoc. eapply cut_r; [ eassumption | assumption | ].
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.
@@ -943,12 +944,12 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
   (try now do 3 (destruct l1 as [|? l1]; inversion Heql));
   subst.
 - apply PCPermutationT_vs_elt_subst in p as [(l1', l2') HP' ->].
-  rewrite (HP' (A :: nil)). apply IHpi. reflexivity.
+  rewrite <- (HP' (A :: nil)). apply IHpi. reflexivity.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc. eapply ex_wn_r; [ | eassumption ]. list_simpl.
     apply IHpi. list_simpl. reflexivity.
-  + decomp_elt_eq_app Heql1; subst.
-    * exfalso. decomp_map Heql0 eqn:Hwt. discriminate Hwt.
+  + decomp_elt_eq_app Heql; subst.
+    * exfalso. decomp_map_eq Heql eqn:Hwt. discriminate Hwt.
     * list_simpl. eapply ex_wn_r; [ | eassumption ].
       rewrite 2 app_assoc. apply IHpi. list_simpl. reflexivity.
 - apply concat_eq_elt in Heql as [(((L1, L2), l1'), l2') [-> ->] ->].
@@ -964,13 +965,13 @@ induction pi in l1, l2, Heql |- * using ll_nested_ind;
     destruct (In_ForallT_elt _ _ _ PL).
     refine (Dependent_ForallT_forall_formula _ _ X i _ _ eq_refl).
 - rewrite app_comm_cons in Heql. decomp_elt_eq_app Heql; subst.
-  + destruct l1; destr_eq Heql0; subst.
+  + destruct l1; destr_eq Heql; subst.
     * rewrite <- (app_nil_l _) in pi1. apply (one_rev Hgax1 _ _ pi1 pi2).
     * rewrite <- app_comm_cons, (app_comm_cons l), app_assoc. apply tens_r; [ assumption | ].
       rewrite app_comm_cons. apply IHpi2. reflexivity.
   + rewrite <- app_assoc. apply tens_r; [ | assumption ].
     rewrite app_comm_cons. apply IHpi1. reflexivity.
-- exfalso. destruct l1; destr_eq Heql. decomp_map H eqn:Hwt. discriminate Hwt.
+- exfalso. destruct l1; destr_eq Heql. decomp_map_eq H eqn:Hwt. discriminate Hwt.
 - decomp_elt_eq_app Heql; subst.
   + rewrite app_comm_cons, app_assoc. apply cut_r with A0; [ assumption | assumption | ].
     list_simpl. rewrite app_comm_cons. apply IHpi2. reflexivity.

@@ -160,7 +160,7 @@ assert (forall l',
   apply (cut_r _ (Hcut _) X) in Hb.
   rewrite rev_unit. change (x :: rev l) with ((x :: nil) ++ rev l). rewrite app_assoc.
   apply IHl.
-  eapply ex_r; [ eassumption | list_simpl; apply PermutationT_middle ]. }
+  eapply ex_r; [ eassumption | list_esimpl; apply PermutationT_middle ]. }
 assert (llR (unill R) (dual (unill R) :: nil)) as HR by apply (@gax_r _ (pfrag_llR (unill R)) true).
 apply (cut_r _ (Hcut _) HR) in Hill.
 rewrite app_nil_r, <- (app_nil_l (rev _)), <- ? map_rev in Hill. apply Hll in Hill.

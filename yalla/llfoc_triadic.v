@@ -162,7 +162,7 @@ Lemma de_tfr C :
      forall ls1 ls2, ls = ls1 ++ C :: ls2 -> strifoc (lw ++ C :: nil) (ls1 ++ ls2) A).
 Proof.
 apply trifoc_rect; intros; subst; try now (econstructor; eauto); try now (destruct ls1; destr_eq H).
-- decomp_elt_eq_elt H.
+- decomp_elt_eq_elt H; subst.
   + list_simpl. apply foc_tfr; [ assumption | ].
     rewrite app_assoc. apply X. rewrite <- app_assoc. reflexivity.
   + apply focd_tfr, wk_list_tfr; [ | assumption ].
@@ -493,7 +493,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
   apply bot_tfr, IHpi; reflexivity.
 - rewrite partition_app in Hp.
   destruct (partition is_wn l1) eqn:Hp1, (partition is_wn l2) eqn:Hp2. cbn in Hp. injection Hp as [= Hp <-].
-  decomp_map Hp. subst.
+  decomp_map_eq Hp. subst.
   apply tens_tfr.
   + apply wk_list_tfr.
     destruct (polarity A); pol_simpl.
@@ -715,7 +715,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
   { clear - Hp. induction l as [|A l IHl] in Hp, lw |- *; cbn in Hp.
     - injection Hp as [= _ <-]. reflexivity.
     - destruct (partition is_wn (map wn l)). injection Hp as [= Heq ->].
-      symmetry in Heq. decomp_map Heq. subst.
+      symmetry in Heq. decomp_map_eq Heq. subst.
       exact (IHl _ eq_refl). }
   apply oc_tfr.
   destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
@@ -740,7 +740,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
     constructor; [ | assumption ]. right. constructor. }
   rewrite Hp2 in Hp'. injection Hp' as [= -> ->].
   cbn in Hp1. destruct (partition is_wn l) eqn:Hp. injection Hp1 as [= Heq <-].
-  decomp_map Heq eqn:Hx. injection Hx as [= ->]. subst.
+  decomp_map_eq Heq eqn:Hx. injection Hx as [= ->]. subst.
   destruct (wn_spec A) as [Hwn|Hnwn]; [ inversion Hwn; subst | destruct (Foc_spec A) as [Htt|Hntt] ].
   + apply (focd_tfr nil), wk_tfr, unfoc_tfr, wn_tfr; [ intros ? [=] | constructor | ].
     cbn in IHpi. eapply IHpi; [ reflexivity | | eassumption ].
@@ -768,7 +768,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
       reflexivity.
 - intros lw lsa ls la Hp1 Hp2.
   cbn in Hp1. destruct (partition is_wn l). injection Hp1 as [= Heq <-].
-  decomp_map Heq. subst.
+  decomp_map_eq Heq. subst.
   change (x :: l0) with ((x :: nil) ++ l0).
   apply (fst exw_tfr (l0 ++ x :: nil)); [ | apply PermutationT_app_comm ].
   apply wk_list_tfr.
@@ -776,7 +776,7 @@ intros pi; induction pi; (split; [ intros A' Hs lw ls Hp | intros Hn ]);
 - intros lw lsa ls la Hp1 Hp2.
   assert (Hp1' := Hp1).
   cbn in Hp1'. destruct (partition is_wn l). injection Hp1' as [= Heq <-].
-  decomp_map Heq eqn:Hx. injection Hx as [= ->]. subst.
+  decomp_map_eq Heq eqn:Hx. injection Hx as [= ->]. subst.
   rewrite <- (app_nil_l (A :: _)). eapply co_tfr; [ | reflexivity ].
   list_simpl. eapply IHpi; [ reflexivity | | eassumption ].
   cbn in Hp1. cbn. destruct (partition is_wn l). injection Hp1 as [= -> ->]. reflexivity.
@@ -801,7 +801,7 @@ apply trifoc_rect.
 - intros A lw1 lw2 ls Hnc pi [((lw', lx), ls') [[[Hincl Hinclx] Hcv] HP] IHpi]. list_simpl.
   apply de_Fr in IHpi.
   + replace (map wn lw1 ++ wn A :: map wn lw2 ++ ls) with (map wn (lw1 ++ A :: lw2) ++ ls)
-      by (list_simpl; reflexivity).
+      by list_reflexivity.
     assert (inclT (A :: lw') (lw1 ++ A :: lw2)) as Hincl'
       by (intros C [-> | Hin%Hincl]; [ apply inT_elt | assumption ]).
     eapply incl_Foc; [ | reflexivity | exact Hincl' | exact Hinclx | ].

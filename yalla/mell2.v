@@ -116,13 +116,13 @@ intro pi. remember (map mell2ll l) as l0 eqn:Heql0.
 induction pi in l, Heql0 |-* using ll_def.ll_nested_ind; subst;
   try (destruct l as [|f l]; inversion Heql0 as [[Hf Heq]]; destruct f; destr_eq Hf; subst;
        try (constructor; apply IHpi); reflexivity).
-- decomp_map Heql0 eqn:Heq. subst l. destruct Heq as [Heq1 [Heq2 ->]].
+- decomp_map_eq Heql0 eqn:Heq. subst l. destruct Heq as [Heq1 [Heq2 ->]].
   destruct x; destr_eq Heq1. destruct x0; destr_eq Heq2. subst.
   apply ax_r.
 - cbn in p. apply PermutationT_map_inv in p as [l'' Heq HP%PermutationT_sym].
   eapply ex_r, HP.
   exact (IHpi _ Heq).
-- decomp_map Heql0 eqn:Heq. subst.
+- decomp_map_eq Heql0 eqn:Heq. subst.
   symmetry in Heq. apply mell2ll_map_wn_inv in Heq as [l -> ->].
   apply PermutationT_map_inv in p as [l' -> HP%PermutationT_sym].
   eapply ex_r; [ apply IHpi; rewrite <- mell2ll_map_wn, <- ! map_app; reflexivity | ].
@@ -130,13 +130,13 @@ induction pi in l, Heql0 |-* using ll_def.ll_nested_ind; subst;
 - remember (length L) as n eqn:Heqn.
   repeat (destruct n; destr_eq eqpmix).
   repeat (destruct L; destr_eq Heqn).
-  list_simpl in Heql0. decomp_map Heql0. subst.
+  list_simpl in Heql0. decomp_map_eq Heql0. subst.
   apply mix_r.
   + destruct (InT_In_ForallT (map mell2ll l0) PL); [ apply inT_eq | ].
     exact (ll_def.Dependent_ForallT_forall_formula _ _ X i _ eq_refl).
   + destruct (InT_In_ForallT (map mell2ll l1) PL); [ right; apply inT_eq | ].
     exact (ll_def.Dependent_ForallT_forall_formula _ _ X i _ eq_refl).
-- decomp_map Heql0 eqn:Hx. subst.
+- decomp_map_eq Heql0 eqn:Hx. subst.
   destruct x; destr_eq Hx. subst.
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1. reflexivity.

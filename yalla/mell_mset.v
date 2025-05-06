@@ -92,13 +92,13 @@ induction l1 as [|A l1 IHl1] in l2 |- *; intro Heq; destruct l2 as [ | B l2 ].
     apply PermutationT_cons; [ reflexivity | assumption ].
   + injection Heq as [= <- Heq].
     cbn in HP. rewrite Heq, app_comm_cons in HP. apply PermutationT_cons_app_inv in HP.
-    decomp_map Heq eqn:Hx. subst. destruct x; destr_eq Hx.
+    decomp_map_eq Heq eqn:Hx. subst. destruct x; destr_eq Hx.
     cbn in HP.
     replace (mell2ll B :: map mell2ll l0 ++ map mell2ll l3)
        with (map mell2ll ((B :: l0) ++ l3)) in HP
-      by (list_simpl; reflexivity).
+      by list_reflexivity.
     apply IHl1 in HP as [(l1', l2') [-> Heq2] HP].
-    decomp_map Heq2. subst.
+    decomp_map_eq Heq2. subst.
     exists (x :: l1', B :: l0 ++ x :: l3); [ repeat split | ].
     * list_simpl. reflexivity.
     * rewrite app_comm_cons. apply PermutationT_cons_app, HP.
@@ -237,7 +237,7 @@ induction pi in m, HP |- *;
   try discriminate;
   try (apply PermutationT_image in HP as [ [] [=] ]; fail).
 - apply PermutationT_length_2_inv in HP as [HP | HP];
-    decomp_map HP eqn:Heq; subst; destruct Heq as [Heq1 [Heq2 ->] ];
+    decomp_map_eq HP eqn:Heq; subst; destruct Heq as [Heq1 [Heq2 ->] ];
     destruct x; destr_eq Heq1; destruct x0; destr_eq Heq2; subst;
     apply (f_equal (fold_right add empty)) in HP; rewrite elts_retract in HP; subst.
   + apply ax_r.
@@ -252,13 +252,13 @@ induction pi in m, HP |- *;
   apply PermutationT_app_head, PermutationT_app_tail, PermutationT_map. assumption.
 - apply PermutationT_length_1_inv in HP.
   remember (elts m) as l eqn:Heql.
-  decomp_map HP eqn:Heq. destruct Heq as [Heq ->]. destruct x; destr_eq Heq. subst l.
+  decomp_map_eq HP eqn:Heq. destruct Heq as [Heq ->]. destruct x; destr_eq Heq. subst l.
   apply (f_equal (fold_right add empty)) in HP.
   rewrite elts_retract in HP. subst m.
   apply one_r.
 - symmetry in HP.
   destruct (PermutationT_vs_cons_inv HP) as [(l1, l2) HP2].
-  decomp_map HP2 eqn:Hx. subst. destruct x; destr_eq Hx. subst.
+  decomp_map_eq HP2 eqn:Hx. subst. destruct x; destr_eq Hx. subst.
   apply (f_equal list2fm) in HP2.
   rewrite list2fm_retract in HP2. subst. rewrite list2fm_elt.
   apply bot_r, IHpi.
@@ -274,7 +274,7 @@ induction pi in m, HP |- *;
   rewrite map_app. assumption.
 - symmetry in HP.
   destruct (PermutationT_vs_cons_inv HP) as [(l3, l4) HP2].
-  decomp_map HP2 eqn:Hx. subst. destruct x; destr_eq Hx. subst.
+  decomp_map_eq HP2 eqn:Hx. subst. destruct x; destr_eq Hx. subst.
   apply (f_equal list2fm) in HP2. rewrite list2fm_retract in HP2. subst.
   eapply PermutationT_trans in HP; [ | apply elts_fmmap ].
   unfold fmmap in HP.
@@ -283,7 +283,7 @@ induction pi in m, HP |- *;
   list_simpl in HP. symmetry in HP. apply PermutationT_cons_app_inv in HP.
   rewrite <- map_app in HP. apply PermutationT_map_inv in HP as [l Heq HP].
   rewrite list2fm_elt. eapply list2fm_perm in HP. rewrite HP.
-  decomp_map Heq. subst.
+  decomp_map_eq Heq. subst.
   rewrite list2fm_app, sum_comm. apply tens_r.
   + apply IHpi1.
     eapply PermutationT_trans; [ | apply elts_fmmap ].
@@ -305,7 +305,7 @@ induction pi in m, HP |- *;
     * apply PermutationT_cons, elts_perm. reflexivity.
 - symmetry in HP.
   destruct (PermutationT_vs_cons_inv HP) as [(l1, l2) HP2].
-  decomp_map HP2 eqn:Hx. subst. destruct x; destr_eq Hx; subst.
+  decomp_map_eq HP2 eqn:Hx. subst. destruct x; destr_eq Hx; subst.
   apply (f_equal list2fm) in HP2. rewrite list2fm_retract in HP2. subst.
   rewrite list2fm_elt.
   apply parr_r, IHpi.
@@ -322,7 +322,7 @@ induction pi in m, HP |- *;
   list_simpl. apply PermutationT_cons_app, PermutationT_cons_app. assumption.
 - symmetry in HP.
   destruct (PermutationT_vs_cons_inv HP) as [(l1, l2) HP2].
-  decomp_map HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
+  decomp_map_eq HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
   apply (f_equal list2fm) in HP2. rewrite list2fm_retract in HP2. subst.
   rewrite list2fm_elt.
   eapply PermutationT_trans in HP; [ | apply elts_fmmap ].
@@ -345,7 +345,7 @@ induction pi in m, HP |- *;
   etransitivity; [ | symmetry; apply elts_perm ]. assumption.
 - symmetry in HP.
   destruct (PermutationT_vs_cons_inv HP) as [(l1, l2) HP2].
-  decomp_map HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
+  decomp_map_eq HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
   apply (f_equal list2fm) in HP2. rewrite list2fm_retract in HP2. subst.
   rewrite list2fm_elt.
   apply de_r, IHpi.
@@ -362,7 +362,7 @@ induction pi in m, HP |- *;
   list_simpl. apply PermutationT_cons_app. assumption.
 - symmetry in HP.
   destruct (PermutationT_vs_cons_inv HP) as [(l1, l2) HP2].
-  decomp_map HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
+  decomp_map_eq HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
   apply (f_equal list2fm) in HP2. rewrite list2fm_retract in HP2. subst.
   rewrite list2fm_elt.
   apply wk_r, IHpi.
@@ -378,7 +378,7 @@ induction pi in m, HP |- *;
   rewrite map_app. assumption.
 - symmetry in HP.
   destruct (PermutationT_vs_cons_inv HP) as [(l1, l2) HP2].
-  decomp_map HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
+  decomp_map_eq HP2 eqn:Hx. destruct x; destr_eq Hx. subst.
   apply (f_equal list2fm) in HP2. rewrite list2fm_retract in HP2. subst.
   rewrite list2fm_elt.
   apply co_r, IHpi.

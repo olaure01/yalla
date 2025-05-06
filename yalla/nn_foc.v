@@ -4,6 +4,7 @@ From Stdlib Require Import CMorphisms.
 From OLlibs Require Import funtheory infinite List_more PermutationT_more GPermutationT.
 From Yalla Require Import ll_fragments llfoc tl nn_prop.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -311,7 +312,7 @@ induction pi; intros HF HC l1' l2' HP.
   apply PermutationT_app_inv in HP. assumption.
 - apply PermutationT_app_app_inv in HP as [[[[l3' l3''] l4'] l4''] [[HP1 HP2] [HP3 HP4]]].
   symmetry in HP4. apply PermutationT_map_inv in HP4 as [l3''' Heq HP4].
-  decomp_map Heq. subst.
+  decomp_map_eq Heq. subst.
   apply ex_otr with ((l3' ++ map toc (map tneg l4')) ++ l3'' ++ map toc (map tneg l4'')).
   + constructor.
     * apply IHpi1 in HP1; [ assumption | ForallT_solve | ].
@@ -360,7 +361,7 @@ induction pi; intros HF HC l1' l2' HP.
   decomp_elt_eq_app Heq; subst.
   + apply ex_otr with ((l' ++ l0 ++ map toc (map tneg l2')) ++ tneg A :: nil);
     [ | list_simpl; apply PermutationT_app_head; rewrite app_assoc; symmetry;
-        apply PermutationT_cons_app; list_simpl; reflexivity ].
+        apply PermutationT_cons_app; list_reflexivity ].
     constructor.
     rewrite app_assoc.
     apply IHpi; [ ForallT_solve | | ].
@@ -371,7 +372,7 @@ induction pi; intros HF HC l1' l2' HP.
     * list_simpl. list_simpl in HP.
       apply PermutationT_app_inv in HP.
       list_simpl in HP. assumption.
-  + decomp_map Heq1 eqn:Hx. subst. injection Hx as [= ->].
+  + decomp_map_eq Heq eqn:Hx. subst. injection Hx as [= ->].
     list_simpl.
     apply ex_otr with ((l1' ++ map toc (map tneg (l0 ++ l''))) ++ toc (tneg A) :: nil);
       [ | list_simpl;
@@ -423,14 +424,14 @@ induction pi; intros HF HC l1' l2' HP.
       apply PermutationT_elt. assumption.
 - symmetry in HP. apply PermutationT_map_inv in HP as [l3 Heq HP].
   remember (map tneg l2') as l2't.
-  decomp_map Heq eqn:Hn. subst.
+  decomp_map_eq Heq eqn:Hn. subst.
   assert (l2' = nil) as -> by (destruct l2'; [ reflexivity | destruct l2't; discriminate Hn ]).
   list_simpl.
   destruct (HC (toc A) (eq_refl _)) as [A' HC'].
   destruct (tsubform_toc_ntrans _ HC') as [A'' ->].
   apply oc_otrr.
   destruct l2't; destr_eq Hn.
-  replace (map toc l1') with (map toc l1' ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
+  replace (map toc l1') with (map toc l1' ++ map toc (map tneg nil)) by list_reflexivity.
   apply neg_rev_ot.
   apply IHpi; [ ForallT_solve | | ].
   + destruct (HC _ (eq_refl _)) as [D HD].
@@ -464,7 +465,7 @@ induction pi; intros HF HC l1' l2' HP.
 - assert { l3 & PermutationT l1' (toc A :: l3) } as [l3 HPw].
   { symmetry in HP. apply PermutationT_vs_elt_inv in HP as [[l1l l1r] Heq]. cbn in Heq.
     revert l1l Heq. clear. induction l1'; intros l1l Heq.
-    - exfalso. cbn in Heq. decomp_map Heq eqn:Hn. discriminate Hn.
+    - exfalso. cbn in Heq. decomp_map_eq Heq eqn:Hn. discriminate Hn.
     - destruct l1l; destr_eq Heq; subst.
       + exists l1'. reflexivity.
       + apply IHl1' in H as [l3 HP%(PermutationT_cons (eq_refl t))].
@@ -485,8 +486,8 @@ Qed.
 Lemma tl_to_otl l : tl_ll (map ntrans l) None -> otl (map ntrans l) None.
 Proof.
 intro pi.
-replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil)) by (list_simpl; reflexivity).
-eapply tl_to_otl_neg; [ eassumption | | | list_simpl; reflexivity ].
+replace (map ntrans l) with (map ntrans l ++ map toc (map tneg nil)) by list_reflexivity.
+eapply tl_to_otl_neg; [ eassumption | | | list_reflexivity ].
 + clear. induction l; constructor; [ | assumption ].
   eexists. reflexivity.
 + intros ? [=].
@@ -532,12 +533,12 @@ intros pi; induction pi; intros l0 Heq;
 - destruct l0; destr_eq Heq.
   destruct D; destr_eq H0.
   constructor.
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply bot_fr; eassumption | apply PermutationT_middle ].
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
@@ -547,16 +548,16 @@ intros pi; induction pi; intros l0 Heq;
   + rewrite (app_comm_cons _ (bot :: l2)).
     apply PermutationT_cons_app, PermutationT_cons; reflexivity.
 - destruct D; destr_eq HD.
-  decomp_map Heq. subst.
+  decomp_map_eq Heq. subst.
   assert (IHpi1' := IHpi1 _ (eq_refl _)).
   assert (IHpi2' := IHpi2 _ (eq_refl _)).
   splitIHpi IHpi1'.
   splitIHpi IHpi2'.
   apply (@tens_fr atom_inf); assumption.
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   replace (map ntrans l1 ++ ntrans x2 :: ntrans x1 :: map ntrans l2)
      with (map ntrans (l1 ++ x2 :: x1 :: l2)) in IHpi
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply parr_fr | apply PermutationT_middle ].
@@ -565,10 +566,10 @@ intros pi; induction pi; intros l0 Heq;
   rewrite ? app_assoc; apply PermutationT_app_tail.
   etransitivity; [ | apply PermutationT_app_comm ].
   list_simpl; apply PermutationT_app_head, PermutationT_swap.
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   replace (map ntrans l1 ++ ntrans x2 :: ntrans x1 :: map ntrans l2)
      with (map ntrans (l1 ++ x2 :: x1 :: l2)) in IHpi
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   apply ex_fr with (@parr atom_inf x1 x2 :: @polcont atom_inf (l1 ++ l2) D).
@@ -590,7 +591,7 @@ intros pi; induction pi; intros l0 Heq;
   + exfalso. destruct D; destr_eq H0; inversion Hs.
   + apply IHpi; [ | reflexivity ].
     destruct D; inversion H0; reflexivity.
-- decomp_map Heq eqn:Heq0. subst l0. destruct Heq0 as [Heq ->].
+- decomp_map_eq Heq eqn:Heq0. subst l0. destruct Heq0 as [Heq ->].
   destruct (@polarity atom_inf x).
   + rewrite (proj2 (pntrans_neg x) s) in Heq.
     inversion Heq. subst.
@@ -601,10 +602,10 @@ intros pi; induction pi; intros l0 Heq;
     apply PermutationT_cons_append.
   + exfalso.
     destruct x; destr_eq Heq; inversion a.
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   eapply ex_fr; [ | apply PermutationT_middle ].
   cbn. apply (@top_gen_fr atom_inf). reflexivity.
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   polfoccont_cbn.
   destruct (polarity D) as [Hs | Ha].
   + eapply ex_fr; [ | apply PermutationT_middle ].
@@ -620,13 +621,13 @@ intros pi; induction pi; intros l0 Heq;
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   apply plus_fr2; assumption.
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   replace (map ntrans l1 ++ ntrans x1 :: map ntrans l2)
      with (map ntrans (l1 ++ x1 :: l2)) in IHpi1
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   replace (map ntrans l1 ++ ntrans x2 :: map ntrans l2)
      with (map ntrans (l1 ++ x2 :: l2)) in IHpi2
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (IHpi1' := IHpi1 _ (eq_refl _)).
   splitIHpi IHpi1'.
   assert (IHpi2' := IHpi2 _ (eq_refl _)).
@@ -634,13 +635,13 @@ intros pi; induction pi; intros l0 Heq;
   eapply ex_fr; [ apply with_fr | apply PermutationT_middle ].
   + eapply ex_fr; [ apply HpiN0 | symmetry; apply PermutationT_middle ].
   + eapply ex_fr; [ apply HpiN1 | symmetry; apply PermutationT_middle ].
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   replace (map ntrans l1 ++ ntrans x1 :: map ntrans l2)
      with (map ntrans (l1 ++ x1 :: l2)) in IHpi1
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   replace (map ntrans l1 ++ ntrans x2 :: map ntrans l2)
      with (map ntrans (l1 ++ x2 :: l2)) in IHpi2
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (IHpi1' := IHpi1 _ (eq_refl _)).
   splitIHpi IHpi1'.
   assert (IHpi2' := IHpi2 _ (eq_refl _)).
@@ -663,25 +664,25 @@ intros pi; induction pi; intros l0 Heq;
   apply ntrans_map_toc_inv in Heq.
   destruct Heq as [lw -> ->].
   apply (@oc_fr atom_inf); assumption.
-- decomp_map Heq eqn:Hx. destruct Hx as [Hx ->]. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct Hx as [Hx ->]. destruct x; destr_eq Hx. subst.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply (@de_fr atom_inf) | apply PermutationT_middle ].
   list_simpl. assumption.
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply wk_fr; eassumption | apply PermutationT_middle ].
-- decomp_map Heq eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heq eqn:Hx. destruct x; destr_eq Hx. subst.
   rewrite <- map_app in IHpi.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   eapply ex_fr; [ apply wk_fr; eassumption | apply (@PermutationT_middle_polcont atom_inf) ].
-- decomp_map Heq eqn:Hx. subst. rewrite <- Hx in IHpi.
+- decomp_map_eq Heq eqn:Hx. subst. rewrite <- Hx in IHpi.
   replace (map ntrans l1 ++ ntrans x :: ntrans x :: map ntrans l2)
      with (map ntrans (l1 ++ x :: x :: l2)) in IHpi
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   destruct x; destr_eq Hx. subst.
@@ -689,10 +690,10 @@ intros pi; induction pi; intros l0 Heq;
   eapply ex_fr; [ apply HpiN0 | ].
   cons2app; rewrite ? app_assoc; apply PermutationT_app_tail.
   list_simpl; etransitivity; [ apply PermutationT_app_comm | reflexivity ].
-- decomp_map Heq eqn:Hx. rewrite <- Hx in IHpi.
+- decomp_map_eq Heq eqn:Hx. rewrite <- Hx in IHpi.
   replace (map ntrans l1 ++ ntrans x :: ntrans x :: map ntrans l2)
      with (map ntrans (l1 ++ x :: x :: l2)) in IHpi
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (IHpi' := IHpi _ (eq_refl _)).
   splitIHpi IHpi'.
   destruct x; destr_eq Hx. subst.
@@ -706,7 +707,7 @@ intros pi; induction pi; intros l0 Heq;
 Qed.
 
 Lemma tl_to_llfoc (l : list formula) : tl_ll (map ntrans l) None -> llfoc l None.
-Proof. intros pi%tl_to_otl. eapply otl_to_llfoc in pi; [ apply pi | ]; reflexivity. Qed.
+Proof. intros pi%tl_to_otl. apply (otl_to_llfoc pi _ eq_refl). reflexivity. Qed.
 
 End Focusing.
 

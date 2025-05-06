@@ -140,7 +140,7 @@ intros pi.
 remember (map mell2ll l) as l0.
 induction pi in l, Heql0 |- *; subst;
   try (destruct l; destr_eq Heql0; destruct f; destr_eq Heql0; subst; now try (constructor; apply IHpi)).
-- decomp_map Heql0 eqn:Heq. subst l. destruct Heq as [Heq1 [Heq2 ->]].
+- decomp_map_eq Heql0 eqn:Heq. subst l. destruct Heq as [Heq1 [Heq2 ->]].
   destruct x; destr_eq Heq1. destruct x0; destr_eq Heq2. subst.
   apply ax_r.
 - cbn in p.
@@ -148,14 +148,14 @@ induction pi in l, Heql0 |- *; subst;
     as [l'' Heq HP%PermutationT_sym%PermutationT_Permutation].
   eapply ex_r; [ | eassumption ].
   apply IHpi. assumption.
-- decomp_map Heql0 eqn:Heq. subst.
+- decomp_map_eq Heql0 eqn:Heq. subst.
   symmetry in Heq. destruct (mell2ll_map_wn_inv _ _ Heq) as [l' [-> ->]].
   apply PermutationT_map_inv in p as [l'' ->].
   eapply (@ex_r (l1 ++ map wn l'' ++ l2)).
   + apply IHpi. list_simpl. rewrite mell2ll_map_wn. reflexivity.
   + symmetry. apply Permutation_app_head, Permutation_app_tail, Permutation_map, PermutationT_Permutation, p.
 - discriminate f.
-- decomp_map Heql0 eqn:Hx. destruct x; destr_eq Hx. subst.
+- decomp_map_eq Heql0 eqn:Hx. destruct x; destr_eq Hx. subst.
   eapply ex_r; [ apply tens_r | ].
   + apply IHpi1. reflexivity.
   + apply IHpi2. reflexivity.

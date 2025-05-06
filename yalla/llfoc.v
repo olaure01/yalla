@@ -292,7 +292,7 @@ Lemma bot_rev_f l Pi (pi : llfoc l Pi) l1 l2 : l = l1 ++ bot :: l2 ->
   { pi' : llfoc (l1 ++ l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 revert l1 l2. induction pi; intros l1' l2' Heq; subst.
-- exfalso. decomp_unit_eq Heq. discriminate Heq.
+- exfalso. decomp_list_eq Heq.
 - assert (HP := p).
   cbn; apply PermutationT_vs_elt_inv in p as ((l3 & l4) & ->).
   cbn in IHpi, HP; cbn.
@@ -308,7 +308,7 @@ revert l1 l2. induction pi; intros l1' l2' Heq; subst.
   + exists pi. cbn. lia.
   + destruct (IHpi _ _ eq_refl) as [pi0 Hs].
     exists (bot_fr pi0). cbn. lia.
-- decomp_elt_eq_app Heq; subst.
+- decomp_list_eq Heq; subst.
   + destruct (polarity A) as [Hs | Ha].
     * assert (H1 := IHpi1 _ _ (polconts _ Hs)).
       rewrite <- (polconts (l1' ++ l) Hs) in H1.
@@ -337,7 +337,7 @@ revert l1 l2. induction pi; intros l1' l2' Heq; subst.
       exists (tens_fr _ _ _ _ pi1 pi2'); cbn; lia.
 - destruct l1'; destr_eq Heq; subst.
   assert (A :: B :: l1' ++ bot :: l2' = (A :: B :: l1') ++ bot :: l2') as Heql
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (H0 := IHpi _ _ Heql).
   rewrite <- 2 app_comm_cons in H0.
   destruct H0 as [pi0 Hs].
@@ -370,9 +370,9 @@ revert l1 l2. induction pi; intros l1' l2' Heq; subst.
     exists (plus_fr2 _ B _ pi1'); cbn; lia.
 - destruct l1'; destr_eq Heq; subst.
   assert (A :: l1' ++ bot :: l2' = (A :: l1') ++ bot :: l2') as Heql1
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (B :: l1' ++ bot :: l2' = (B :: l1') ++ bot :: l2') as Heql2
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (H1 := IHpi1 _ _ Heql1).
   assert (H2 := IHpi2 _ _ Heql2).
   rewrite <- app_comm_cons in H1.
@@ -381,7 +381,7 @@ revert l1 l2. induction pi; intros l1' l2' Heq; subst.
   destruct H2 as [pi2' Hs2].
   exists (with_fr pi1' pi2'); cbn; lia.
 - exfalso.
-  decomp_map Heq eqn:Hx. discriminate Hx.
+  decomp_map_eq Heq eqn:Hx. discriminate Hx.
 - destruct l1'; destr_eq Heq; subst.
   destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ (polconts _ Hs)).
@@ -399,7 +399,7 @@ revert l1 l2. induction pi; intros l1' l2' Heq; subst.
   exists (wk_fr _ pi0); cbn; lia.
 - destruct l1'; destr_eq Heq; subst.
   assert (wn A :: wn A :: l1' ++ bot :: l2' = (wn A :: wn A :: l1') ++ bot :: l2')
-    as Heql by (list_simpl; reflexivity).
+    as Heql by list_reflexivity.
   assert (H0 := IHpi _ _ Heql).
   rewrite <- 2 app_comm_cons in H0.
   destruct H0 as [pi0 Hs].
@@ -410,7 +410,7 @@ Lemma parr_rev_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ parr A B :: l2 ->
   { pi' : llfoc (l1 ++ A :: B :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 revert A B l1 l2; induction pi; intros A' B' l1' l2' Heq; subst; cbn.
-- exfalso. decomp_unit_eq Heq. discriminate Heq.
+- exfalso. decomp_list_eq Heq.
 - assert (HP := p).
   apply PermutationT_vs_elt_inv in p as [(l3, l4) ->].
   destruct (IHpi _ _ _ _ eq_refl) as [pi0 Hs].
@@ -427,7 +427,7 @@ revert A B l1 l2; induction pi; intros A' B' l1' l2' Heq; subst; cbn.
 - destruct l1'; destr_eq Heq; subst.
   destruct (IHpi _ _ _ _ eq_refl) as [pi0 Hs].
   exists (bot_fr pi0); cbn; lia.
-- decomp_elt_eq_app Heq; subst.
+- decomp_list_eq Heq; subst.
   + destruct (polarity A) as [Hs | Ha].
     * assert (H1 := IHpi1 _ _ _ _ (polconts _ Hs)).
       rewrite <- (polconts (l1' ++ A' :: B' :: l) Hs) in H1.
@@ -457,7 +457,7 @@ revert A B l1 l2; induction pi; intros A' B' l1' l2' Heq; subst; cbn.
 - destruct l1'; destr_eq Heq; subst.
   + exists pi; cbn; lia.
   + assert (A :: B :: l1' ++ parr A' B' :: l2' = (A :: B :: l1') ++ parr A' B' :: l2')
-      as Heql by (list_simpl; reflexivity).
+      as Heql by list_reflexivity.
     assert (H0 := IHpi _ _ _ _ Heql).
     rewrite <- 2 app_comm_cons in H0.
     destruct H0 as [pi0 Hs].
@@ -491,9 +491,9 @@ revert A B l1 l2; induction pi; intros A' B' l1' l2' Heq; subst; cbn.
     exists (plus_fr2 _ B _ pi1'); cbn; lia.
 - destruct l1'; destr_eq Heq; subst.
   assert (A :: l1' ++ parr A' B' :: l2' = (A :: l1') ++ parr A' B' :: l2') as Heql1
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (B :: l1' ++ parr A' B' :: l2' = (B :: l1') ++ parr A' B' :: l2') as Heql2
-    by (list_simpl; reflexivity).
+    by list_reflexivity.
   assert (H1 := IHpi1 _ _ _ _ Heql1).
   assert (H2 := IHpi2 _ _ _ _ Heql2).
   rewrite <- app_comm_cons in H1.
@@ -501,7 +501,7 @@ revert A B l1 l2; induction pi; intros A' B' l1' l2' Heq; subst; cbn.
   destruct H1 as [pi1' Hs1].
   destruct H2 as [pi2' Hs2].
   exists (with_fr pi1' pi2'); cbn; lia.
-- exfalso. decomp_map Heq eqn:Hx. discriminate Hx.
+- exfalso. decomp_map_eq Heq eqn:Hx. discriminate Hx.
 - destruct l1'; destr_eq Heq; subst.
   destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ Hs)).
@@ -520,7 +520,7 @@ revert A B l1 l2; induction pi; intros A' B' l1' l2' Heq; subst; cbn.
 - destruct l1'; destr_eq Heq. subst.
   assert (wn A :: wn A :: l1' ++ parr A' B' :: l2'
        = (wn A :: wn A :: l1') ++ parr A' B' :: l2')
-    as Heql by (list_simpl; reflexivity).
+    as Heql by list_reflexivity.
   assert (H0 := IHpi _ _ _ _ Heql).
   rewrite <- 2 app_comm_cons in H0. destruct H0 as [pi0 Hs].
   exists (co_fr pi0). cbn. lia.
@@ -531,7 +531,7 @@ Lemma with_rev_f l Pi (pi : llfoc l Pi) A B l1 l2 : l = l1 ++ awith A B :: l2 ->
  * { pi' : llfoc (l1 ++ B :: l2) Pi | fpsize pi' < fpsize pi }.
 Proof.
 revert A B l1 l2. induction pi; intros A' B' l1' l2' Heq; subst; cbn.
-- exfalso. decomp_unit_eq Heq. discriminate Heq.
+- exfalso. decomp_list_eq Heq.
 - assert (HP := p).
   apply PermutationT_vs_elt_inv in p as ((l3 & l4) & ->).
   destruct (IHpi _ _ _ _ eq_refl) as [[pi01 Hs1] [pi02 Hs2]].
@@ -550,7 +550,7 @@ revert A B l1 l2. induction pi; intros A' B' l1' l2' Heq; subst; cbn.
 - destruct l1'; destr_eq Heq; subst.
   destruct (IHpi _ _ _ _ eq_refl) as [[pi01 Hs1] [pi02 Hs2]].
   split; [ exists (bot_fr pi01) | exists (bot_fr pi02) ]; cbn; lia.
-- decomp_elt_eq_app Heq; subst.
+- decomp_list_eq Heq; subst.
   + destruct (polarity A) as [Hs | Ha].
     * assert (H1 := IHpi1 _ _ _ _ (polconts _ Hs)).
       rewrite <- (polconts (l1' ++ A' :: l) Hs), <- (polconts (l1' ++ B' :: l) Hs) in H1.
@@ -585,7 +585,7 @@ revert A B l1 l2. induction pi; intros A' B' l1' l2' Heq; subst; cbn.
              | exists (tens_fr _ _ _ _ pi1 pi1'') ]; cbn; lia.
 - destruct l1'; destr_eq Heq; subst.
   assert (A :: B :: l1' ++ awith A' B' :: l2' = (A :: B :: l1') ++ awith A' B' :: l2')
-    as Heql by (list_simpl; reflexivity).
+    as Heql by list_reflexivity.
   assert (H0 := IHpi _ _ _ _ Heql).
   rewrite <- ? app_comm_cons in H0.
   destruct H0 as [[pi1' Hs1] [pi1'' Hs2]].
@@ -623,9 +623,9 @@ revert A B l1 l2. induction pi; intros A' B' l1' l2' Heq; subst; cbn.
 - destruct l1'; destr_eq Heq; subst.
   + split; [ exists pi1 | exists pi2 ]; subst; cbn; lia.
   + assert (A :: l1' ++ awith A' B' :: l2' = (A :: l1') ++ awith A' B' :: l2') as Heql1
-      by (list_simpl; reflexivity).
+      by list_reflexivity.
     assert (B :: l1' ++ awith A' B' :: l2' = (B :: l1') ++ awith A' B' :: l2') as Heql2
-      by (list_simpl; reflexivity).
+      by list_reflexivity.
     assert (H1 := IHpi1 _ _ _ _ Heql1).
     assert (H2 := IHpi2 _ _ _ _ Heql2).
     rewrite <- 2 app_comm_cons in H1.
@@ -633,7 +633,7 @@ revert A B l1 l2. induction pi; intros A' B' l1' l2' Heq; subst; cbn.
     destruct H1 as [[pi1' Hs1] [pi1'' Hs1']].
     destruct H2 as [[pi2' Hs2] [pi2'' Hs2']].
     split; [ exists (with_fr pi1' pi2') | exists (with_fr pi1'' pi2'') ]; cbn; lia.
-- exfalso. decomp_map Heq eqn:Hx. discriminate Hx.
+- exfalso. decomp_map_eq Heq eqn:Hx. discriminate Hx.
 - destruct l1'; destr_eq Heq; subst.
   destruct (polarity A) as [Hs | Ha].
   + assert (H1 := IHpi _ _ _ _ (polconts _ Hs)).
@@ -653,7 +653,7 @@ revert A B l1 l2. induction pi; intros A' B' l1' l2' Heq; subst; cbn.
 - destruct l1'; destr_eq Heq; subst.
   assert (wn A :: wn A :: l1' ++ awith A' B' :: l2'
        = (wn A :: wn A :: l1') ++ awith A' B' :: l2')
-    as Heql by (list_simpl; reflexivity).
+    as Heql by list_reflexivity.
   assert (H0 := IHpi _ _ _ _ Heql).
   rewrite <- ? app_comm_cons in H0.
   destruct H0 as [[pi1' Hs1] [pi1'' Hs2]].
@@ -801,7 +801,7 @@ revert l1 l2 Heql; induction pi; intros l1' l2' Heql; subst.
 - destruct l1'; destr_eq Heql; subst; auto.
   cbn; apply bot_Fr, IHpi; reflexivity.
 - exfalso.
-  decomp_elt_eq_app Heql; subst.
+  decomp_list_eq Heql; subst.
   + apply ForallT_app_r in f.
     inversion f.
     destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
@@ -824,7 +824,7 @@ revert l1 l2 Heql; induction pi; intros l1' l2' Heql; subst.
   cbn. apply with_Fr.
   + rewrite app_comm_cons. apply IHpi1. reflexivity.
   + rewrite app_comm_cons. apply IHpi2. reflexivity.
-- exfalso. decomp_map Heql eqn:Hx. discriminate Hx.
+- exfalso. decomp_map_eq Heql eqn:Hx. discriminate Hx.
 - exfalso. destruct l1'; destr_eq Heql; subst.
   apply ForallT_app_r in f; inversion f.
   destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
@@ -853,7 +853,7 @@ revert A1 A2 l1 l2 Heql; induction pi; intros A1 A2 l1' l2' Heql; subst.
 - destruct l1'; destr_eq Heql; subst.
   cbn. apply bot_Fr, IHpi. reflexivity.
 - exfalso.
-  decomp_elt_eq_app Heql; subst.
+  decomp_list_eq Heql; subst.
   + apply ForallT_app_r in f.
     inversion f.
     destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
@@ -875,7 +875,7 @@ revert A1 A2 l1 l2 Heql; induction pi; intros A1 A2 l1' l2' Heql; subst.
   cbn. apply with_Fr.
   + rewrite app_comm_cons. apply IHpi1. reflexivity.
   + rewrite app_comm_cons. apply IHpi2. reflexivity.
-- exfalso. decomp_map Heql eqn:Hx. discriminate Hx.
+- exfalso. decomp_map_eq Heql eqn:Hx. discriminate Hx.
 - exfalso. destruct l1'; destr_eq Heql; subst.
   apply ForallT_app_r in f; inversion f.
   destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
@@ -908,7 +908,7 @@ revert A1 A2 l1 l2 Heql; induction pi; intros A1 A2 l1' l2' Heql; subst.
 - destruct l1'; destr_eq Heql; subst.
   cbn. split; apply bot_Fr, (IHpi A1 A2); reflexivity.
 - exfalso.
-  decomp_elt_eq_app Heql; subst.
+  decomp_list_eq Heql; subst.
   + apply ForallT_app_r in f.
     inversion f.
     destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
@@ -931,7 +931,7 @@ revert A1 A2 l1 l2 Heql; induction pi; intros A1 A2 l1' l2' Heql; subst.
   + rewrite app_comm_cons. apply (IHpi2 A1 A2). reflexivity.
   + rewrite app_comm_cons. apply (IHpi1 A1 A2). reflexivity.
   + rewrite app_comm_cons. apply (IHpi2 A1 A2). reflexivity.
-- exfalso. decomp_map Heql eqn:Hx. discriminate Hx.
+- exfalso. decomp_map_eq Heql eqn:Hx. discriminate Hx.
 - exfalso. destruct l1'; destr_eq Heql; subst.
   apply ForallT_app_r in f; inversion f.
   destruct X as [[Hf | Hf] | Hf]; inversion Hf; inversion H.
@@ -1230,20 +1230,19 @@ revert l Pi pi. induction s using lt_wf_rect; intros l Pi pi; split; [ split | ]
   eapply (snd (fst H)) in HF' as [(((l', l0), lw), lw') [[HP1 HP2] Hi] pi']; [ | reflexivity ].
   symmetry in HP1. assert (HP' := HP1).
   apply PermutationT_vs_cons_inv in HP' as [(l1', l2') Heq].
-  decomp_elt_eq_app Heq; subst.
-  + decomp_map Heq0 eqn:Hx. subst.
+  decomp_list_eq Heq; subst.
+  + decomp_map_eq Heq eqn:Hx. subst.
     injection Hx as [= ->].
     assert (HP' := HP1). list_simpl in HP'. symmetry in HP'.
     apply PermutationT_cons_app_inv in HP'. symmetry in HP'.
     apply PermutationT_vs_cons_inv in HP' as [(l1'', l2'') Heq].
-    rewrite app_assoc in Heq. decomp_elt_eq_app Heq; subst.
-    * rewrite <- map_app in Heq0.
-      decomp_map Heq0 eqn:Heq. injection Heq as [= ->].
+    rewrite app_assoc in Heq. decomp_list_eq Heq; subst.
+    * rewrite <- map_app in Heq. decomp_map_eq Heq eqn:Heq'. injection Heq' as [= ->].
       exists (l', l0, l1' ++ l1, lw'); repeat split.
       -- symmetry in HP1. list_simpl in HP1. apply PermutationT_cons_app_inv in HP1.
          list_simpl. assumption.
       -- assumption.
-      -- revert Hi Heq0; clear; induction lw'; intros Hi Heq.
+      -- revert Hi Heq; clear; induction lw'; intros Hi Heq.
          ++ apply inclT_nil_l.
          ++ destruct (inclT_cons_inv Hi) as [Hin Hi'].
             assert (HP := PermutationT_middle l1' l1 A).
@@ -1266,7 +1265,7 @@ revert l Pi pi. induction s using lt_wf_rect; intros l Pi pi; split; [ split | ]
     list_simpl in HP'. symmetry in HP'. rewrite app_assoc in HP'. apply PermutationT_cons_app_inv in HP'.
     symmetry in HP'. apply PermutationT_vs_cons_inv in HP' as [(l1'', l2'') Heq].
     rewrite <- app_assoc in Heq. decomp_elt_eq_app Heq; subst.
-    * decomp_map Heq0 eqn:Hx. subst. injection Hx as [= ->].
+    * decomp_map_eq Heq eqn:Hx. subst. injection Hx as [= ->].
       exists (l', l1 ++ l2', l1'' ++ A :: l0, A :: lw'); repeat split.
       -- symmetry in HP1. list_simpl in HP1. apply PermutationT_cons_app_inv in HP1.
          list_simpl. etransitivity; [ apply HP1 | ].
@@ -1278,12 +1277,11 @@ revert l Pi pi. induction s using lt_wf_rect; intros l Pi pi; split; [ split | ]
     * exists (l', l0 ++ l2'', A :: lw, A :: A :: lw'); repeat split.
       -- symmetry in HP1. rewrite app_assoc in HP1. apply PermutationT_cons_app_inv in HP1.
          list_simpl. etransitivity; [ apply HP1 | ].
-         list_simpl. rewrite <- Heq1. symmetry. rewrite ? app_assoc.
+         list_simpl. rewrite <- Heq. symmetry. rewrite ? app_assoc.
          apply PermutationT_cons_app. reflexivity.
       -- cbn. etransitivity; [ exact HP2 | ].
          symmetry. rewrite ? app_assoc. apply PermutationT_cons_app.
-         rewrite <- ? app_assoc, <- Heq1.
-         rewrite ? app_assoc. apply PermutationT_middle.
+         rewrite <- ? app_assoc, <- Heq, ? app_assoc. apply PermutationT_middle.
       -- apply inclT_cons, inclT_cons.
          ++ constructor. reflexivity.
          ++ constructor. reflexivity.
@@ -1588,7 +1586,7 @@ induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
 - exfalso; destruct l1'; destr_eq Heql.
 - destruct l1'; destr_eq Heql; subst; [ exfalso; inversion Hs | ].
   cbn; apply bot_Fr, (IHpi A0); auto.
-- decomp_elt_eq_app Heql; subst.
+- decomp_list_eq Heql; subst.
   + rewrite app_comm_cons, 2 app_assoc, <- (app_assoc _ _ l); apply tens_Fr; auto.
     * unfold polcont; destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi1 A0);
         auto; unfold polcont; destruct (polarity A); auto;
@@ -1627,7 +1625,7 @@ induction pi; intros A0 B0 l0 l1' l2' Hs HF Hf Heql; subst.
       now apply ForallT_app_r in f; inversion f.
 - destruct l1'; destr_eq Heql; subst; [ exfalso; inversion Hs | ].
   cbn. now apply with_Fr; rewrite app_comm_cons; [apply (IHpi1 A0) | apply (IHpi2 A0)].
-- exfalso. decomp_map Heql. inversion Hs.
+- exfalso. decomp_map_eq Heql. inversion Hs.
 - destruct l1'; destr_eq Heql; subst; [ exfalso; inversion Hs | ].
   cbn. apply de_Fr.
   + unfold polcont. destruct (polarity A); [ | rewrite app_comm_cons ]; apply (IHpi A0);

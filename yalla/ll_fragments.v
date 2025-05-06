@@ -6,6 +6,7 @@ From OLlibs Require Import infinite funtheory List_more Dependent_ForallT
 From Yalla Require Export ll_prop.
 From Yalla Require Import subs.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -23,7 +24,8 @@ Proof.
 intro FL. induction FL as [|l0 [|l L] pi FL IHFL]; cbn; repeat constructor; rewrite ? app_nil_r; assumption.
 Qed.
 
-(** Provability in [P + mix_n] by adding [wn (tens_n n bot)], and provability in [P + cut + ax : parr_n n bot] are equivalent *)
+(** Provability in [P + mix_n] by adding [wn (tens_n n bot)],
+  and provability in [P + cut + ax : parr_n n bot] are equivalent *)
 
 Lemma ll_to_mix_cut P n l : ll P (wn (tens_n n bot) :: l) ->
   ll (cutupd_pfrag (pmixupd_point_pfrag P n true) pcut_all) l.
@@ -861,7 +863,8 @@ Lemma ll_one_eq_bot_to_mix02 P l :
                                      else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) l.
 Proof.
 remember (mk_pfrag P.(pcut) P.(pgax) (fun k => if (k =? 0) then true
-                                         else (if (k =? 2) then true else P.(pmix) k)) P.(pperm)) as P' eqn:HeqP'.
+                                         else (if (k =? 2) then true
+                                         else P.(pmix) k)) P.(pperm)) as P' eqn:HeqP'.
 intros pi%(stronger_pfrag _ (axext_pfrag P' (fun b : bool => if b then one :: one :: nil
                                                                   else bot :: bot :: nil))).
 - eapply ax_gen; try eassumption; try reflexivity.
@@ -873,8 +876,7 @@ intros pi%(stronger_pfrag _ (axext_pfrag P' (fun b : bool => if b then one :: on
     repeat (constructor; try apply one_r).
   + apply bot_r, bot_r.
     change nil with (concat (@nil (list formula))).
-    rewrite HeqP'.
-    apply mix_r; [ reflexivity | apply ForallT_nil ].
+    rewrite HeqP'. apply mix_r, ForallT_nil. reflexivity.
 - rewrite HeqP'. repeat split; cbn; try reflexivity.
   + intro a. exists a. reflexivity.
   + intro n. repeat (destruct n; try apply BoolOrder.le_refl; try apply BoolOrder.le_true).
@@ -928,7 +930,7 @@ Proof.
 intro pi.
 apply (stronger_pfrag (cutrm_pfrag (cutupd_pfrag (pmixupd_point_pfrag
                                                  (pmixupd_point_pfrag P 0 true) 2 true) pcut_all)));
-  [ repeat split; try (intros a; exists a); reflexivity | ].
+  [ repeat split; [ intro a; exists a | .. ]; reflexivity | ].
 eapply cut_admissible; try eassumption.
 eapply stronger_pfrag in pi.
 - rewrite <- (app_nil_r l).
@@ -1018,12 +1020,9 @@ Qed.
 
 Lemma subs_llR R C x l : llR R l -> llR (subs C x R) (map (subs C x) l).
 Proof.
-intros pi%(subs_ll C x).
+intros pi%(subs_ll C x); [ | reflexivity ].
 eapply stronger_pfrag in pi; [ eassumption | ].
-repeat split. intros [|]; cbn.
-- rewrite subs_dual. exists true. reflexivity.
-- exists false. reflexivity.
-- reflexivity.
+repeat split. intros [|]; cbn; [ exists true; rewrite subs_dual | exists false ]; reflexivity.
 Qed.
 
 Lemma llR_to_ll R l : llR R l-> ll_ll (l ++ wn R :: wn (tens (dual R) bot) :: nil).
