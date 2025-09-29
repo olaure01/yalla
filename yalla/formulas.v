@@ -1,8 +1,12 @@
-From Stdlib Require Import List EqNat RelationClasses Lia.
-From OLlibs Require Import Logic_Datatypes_more Bool_more funtheory dectype.
+From Stdlib Require Import Relation_Definitions RelationClasses Lia.
+(* TODO Relations_Definitions not needed anymore from Stdlib#162 ? used for [relation] only? *)
+From OLlibs Require Import Logic_Datatypes_more Bool_more List_more funtheory dectype.
 From Yalla Require Export atoms.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
 Set Implicit Arguments.
+
 
 (** * Linear Logic formulas *)
 
@@ -22,36 +26,36 @@ Inductive formula :=
 | aplus (_ _ : formula) | awith (_ _ : formula)
 | oc (_ : formula) | wn (_ : formula).
 
-Variant var_formula : formula -> Type := | isvar : forall X, var_formula (var X).
-Variant covar_formula : formula -> Type := | iscovar X : covar_formula (covar X).
-Variant wn_formula : formula -> Type := | iswn A : wn_formula (wn A).
+Variant var_formula : formula -> Type := isvar X : var_formula (var X).
+Variant covar_formula : formula -> Type := iscovar X : covar_formula (covar X).
+Variant wn_formula : formula -> Type := iswn A : wn_formula (wn A).
 
-Definition is_var (A : formula) :=
+Definition is_var A :=
   match A with
   | var _ => true
   | _ => false
   end.
 
 Lemma var_spec A : reflectT (var_formula A) (is_var A).
-Proof. destruct A; cbn; constructor; try (intro H; inversion H); constructor. Qed.
+Proof. destruct A; cbn; constructor; try (intro H; inversion H; fail); constructor. Qed.
 
-Definition is_covar (A : formula) :=
+Definition is_covar A :=
   match A with
   | covar _ => true
   | _ => false
   end.
 
 Lemma covar_spec A : reflectT (covar_formula A) (is_covar A).
-Proof. destruct A; cbn; constructor; try (intro H; inversion H); constructor. Qed.
+Proof. destruct A; cbn; constructor; try (intro H; inversion H; fail); constructor. Qed.
 
-Definition is_wn (A : formula) :=
+Definition is_wn A :=
   match A with
   | wn _ => true
   | _ => false
   end.
 
 Lemma wn_spec A : reflectT (wn_formula A) (is_wn A).
-Proof. destruct A; cbn; constructor; try (intro H; inversion H); constructor. Qed.
+Proof. destruct A; cbn; constructor; try (intro H; inversion H; fail); constructor. Qed.
 
 (** Atomic [formula] *)
 Variant atomic : formula -> Type := | atomic_var x : atomic (var x) | atomic_covar x : atomic (covar x).
@@ -90,12 +94,13 @@ end.
 Lemma oc_n_oc n A : oc_n n (oc A) = oc_n (S n) A.
 Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
-(** Exponential modalities *)
+(** Exponential modalities
 
 (* lists of Booleans with false = oc and true = wn *)
 Definition exp_mod := list bool.
 
 Definition exp (m : exp_mod) A := fold_right (fun b : bool => if b then wn else oc) A m.
+*)
 
 
 (** Orthogonal / dual of a [formula] *)
@@ -143,16 +148,18 @@ Proof. induction n as [|n IHn]; [ | cbn; rewrite <- IHn ]; reflexivity. Qed.
 
 
 (** Size of a [formula] as its number of symbols *)
-Fixpoint fsize A :=
+Fixpoint fsize A := S
 match A with
-| var _ | covar _ => 1
-| one | bot | zero | top => 1
-| tens A B | parr A B | aplus A B | awith A B => S (fsize A + fsize B)
-| oc A | wn A => S (fsize A)
+| var _ | covar _ => 0
+| one | bot | zero | top => 0
+| tens A B | parr A B | aplus A B | awith A B => fsize A + fsize B
+| oc A | wn A => fsize A
 end.
 
+(*
 Lemma fsize_pos A : 0 < fsize A.
-Proof. induction A; cbn; lia. Qed.
+Proof. destruct A; cbn; lia. Qed.
+*)
 
 Lemma fsize_dual A : fsize (dual A) = fsize A.
 Proof. induction A; cbn; rewrite ? IHA1, ? IHA2; lia. Qed.
@@ -165,7 +172,7 @@ Proof. induction n as [|n IHn]; [ | cbn; rewrite IHn ]; reflexivity. Qed.
 
 
 (** Atoms in a formula *)
-Fixpoint atom_list A : list atom :=
+Fixpoint atom_list A :=
 match A with
 | var x | covar x => x :: nil
 | one | bot | zero | top => nil
@@ -181,7 +188,7 @@ Proof. now induction A; cbn; rewrite ? IHA1, ? IHA2. Qed.
 (** ** Sub-formulas *)
 
 (** First argument is a sub-formula of the second: *)
-Inductive subform : formula -> formula -> Prop :=
+Inductive subform : relation formula :=
 | sub_id A : subform A A
 | sub_tens_l A B C : subform A B -> subform A (tens B C)
 | sub_tens_r A B C : subform A B -> subform A (tens C B)
@@ -201,14 +208,12 @@ Proof. intros Hl Hr. induction Hr in A, Hl |- *; try (constructor; apply IHHr); 
 Proof. split; intro; [ apply sub_id | eapply sub_trans; eassumption ]. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
-Definition subform_list l1 l2 := Forall (fun A => Exists (subform A) l2) l1.
+Definition subform_list : relation _ := fun l1 l2 => Forall (fun A => Exists (subform A) l2) l1.
 
 Lemma sub_id_list l l0 : subform_list l (l0 ++ l).
 Proof.
 induction l as [|a l IHl] in l0 |- *; constructor.
-- induction l0.
-  + constructor. apply sub_id.
-  + apply Exists_cons_tl. assumption.
+- apply Exists_elt. constructor.
 - replace (l0 ++ a :: l) with ((l0 ++ a :: nil) ++ l) by (rewrite <- app_assoc; reflexivity). apply IHl.
 Qed.
 
@@ -216,13 +221,13 @@ Lemma sub_trans_list l1 l2 l3 : subform_list l1 l2 -> subform_list l2 l3 -> subf
 Proof.
 induction l1 in l2, l3 |- *; intros Hl Hr; constructor.
 - inversion Hl. subst.
-  revert Hr H1; clear; induction l2; intros Hr Hl; inversion Hl; subst.
+  revert Hr H1. clear. induction l2; intros Hr Hl; inversion Hl; subst.
   + inversion Hr. subst.
     inversion H2; subst.
     * apply Exists_cons_hd.
       transitivity a0; assumption.
     * apply Exists_cons_tl.
-      revert H; clear - H0; induction l; intro H; inversion H; subst.
+      revert H. clear - H0. induction l; intro H; inversion H; subst.
       -- apply Exists_cons_hd.
          transitivity a0; assumption.
       -- apply Exists_cons_tl, IHl. assumption.
@@ -241,8 +246,8 @@ From OLlibs Require Import GPermutationT.
 Lemma sub_perm_list b l l1 l2 : subform_list l l1 -> PCPermutationT b l1 l2 -> subform_list l l2.
 Proof.
 intros HF HP. apply Forall_forall.
-setoid_rewrite <- (PCPermutationT_Exists _ _ HP).
-apply Forall_forall; assumption.
+intro x. rewrite <- (PCPermutationT_Exists _ _ HP). revert x.
+apply Forall_forall. assumption.
 Qed.
 *)
 

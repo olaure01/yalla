@@ -461,24 +461,26 @@ Qed.
 
 (** Size of proofs *)
 
-Fixpoint psize P l (pi : ll P l) :=
+Fixpoint psize P l (pi : ll P l) := S
 match pi with
-| ax_r _ | gax_r _ => 1
-| ex_r _ _ pi0 _ | ex_wn_r _ _ _ _ pi0 _ => S (psize pi0)
-| mix_r _ PL => S ((fix psize_Forall P L (PL : ForallT (ll P) L) {struct PL} :=
+| ax_r _ | gax_r _ => 0
+| ex_r _ _ pi0 _ | ex_wn_r _ _ _ _ pi0 _ => psize pi0
+| mix_r _ PL => (fix psize_Forall P L (PL : ForallT (ll P) L) {struct PL} :=
        match PL with
        | ForallT_nil _ => 0
        | ForallT_cons _ Pl PL => (psize Pl) + (psize_Forall _ _ PL)
-       end) _ _ PL)
-| one_r | top_r _ => 1
-| bot_r pi0 | parr_r pi0 | plus_r1 _ pi0 | plus_r2 _ pi0 => S (psize pi0)
-| tens_r pi1 pi2 | cut_r _ _ pi1 pi2 => S (psize pi1 + psize pi2)
-| with_r pi1 pi2 => S (max (psize pi1) (psize pi2))
-| oc_r pi0 | de_r pi0 | wk_r _ pi0 | co_r pi0 => S (psize pi0)
+       end) _ _ PL
+| one_r | top_r _ => 0
+| bot_r pi0 | parr_r pi0 | plus_r1 _ pi0 | plus_r2 _ pi0 => psize pi0
+| tens_r pi1 pi2 | cut_r _ _ pi1 pi2 => psize pi1 + psize pi2
+| with_r pi1 pi2 => max (psize pi1) (psize pi2)
+| oc_r pi0 | de_r pi0 | wk_r _ pi0 | co_r pi0 => psize pi0
 end.
 
+(*
 Lemma psize_pos P l (pi : @ll P l) : 0 < psize pi.
 Proof. destruct pi; cbn; lia. Qed.
+*)
 
 Lemma psize_mix P L eq (FL : ForallT (ll P) L) :
   psize (mix_r eq FL) = S (ForallT_sum (fun _ pi => psize pi) FL).

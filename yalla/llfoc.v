@@ -231,13 +231,13 @@ Notation llfoc_pol l A := (llfoc (polcont l A) (polfoc A)).
 Instance llfoc_perm : Proper ((@PermutationT _) ==> eq ==> iffT) llfoc.
 Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_fr pi HP). Qed.
 
-Fixpoint fpsize l Pi (pi : llfoc l Pi) :=
+Fixpoint fpsize l Pi (pi : llfoc l Pi) := S
 match pi with
-| ax_fr _ | one_fr | top_fr _ _ _ => 1
+| ax_fr _ | one_fr | top_fr _ _ _ => 0
 | ex_fr pi0 _ | foc_fr pi0 | bot_fr pi0 | parr_fr pi0 | plus_fr1 _ _ _ pi0 | plus_fr2 _ _ _ pi0
-| oc_fr _ pi0 | de_fr _ _ pi0 | wk_fr _ pi0 | co_fr pi0 => S (fpsize pi0)
-| tens_fr _ _ _ _ pi1 pi2 => S (fpsize pi1 + fpsize pi2)
-| with_fr pi1 pi2 => S (max (fpsize pi1) (fpsize pi2))
+| oc_fr _ pi0 | de_fr _ _ pi0 | wk_fr _ pi0 | co_fr pi0 => fpsize pi0
+| tens_fr _ _ _ _ pi1 pi2 => fpsize pi1 + fpsize pi2
+| with_fr pi1 pi2 => max (fpsize pi1) (fpsize pi2)
 end.
 
 Lemma foc_gen_fr l A : llfoc_pol l A -> llfoc (A :: l) None.
@@ -959,7 +959,7 @@ revert l0 lf l Heqn; induction n using lt_wf_rect; intros [|A l0] lf l -> HFoc H
 - destruct (wFoc_dec A).
   + replace (l2 ++ lf ++ A :: l0) with (l2 ++ (lf ++ A :: nil) ++ l0) by now rewrite <- app_assoc.
     apply X with (list_sum (map fsize l0)) l; rewrite <- ? app_assoc; auto.
-    * assert (Hs := fsize_pos A); simpl; lia.
+    * destruct A; simpl; lia.
     * apply ForallT_app; auto.
   + apply not_wFoc in n as [[[ -> | [(A1, A2) ->]] | ->] | [(A1, A2) ->]]; cbn.
     * apply ex_Fr with (bot :: l2 ++ lf ++ l0);

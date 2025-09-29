@@ -6,6 +6,8 @@ From Stdlib Require BoolOrder.
 From OLlibs Require Import dectype funtheory List_more PermutationT_more GPermutationT.
 From Yalla Require Export iformulas.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -161,17 +163,17 @@ Inductive ill P : list iformula -> iformula -> Type :=
 Instance ill_perm P : Proper ((@PEPermutationT _ (ipperm P)) ==> eq ==> iffT) (ill P).
 Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_ir _ _ _ pi HP). Qed.
 
-Fixpoint ipsize P l A (pi : ill P l A) :=
+Fixpoint ipsize P l A (pi : ill P l A) := S
 match pi with
-| ax_ir _ | one_irr | top_irr _ | zero_ilr _ _ _ | gax_ir _ => 1
-| ex_ir _ _ _ pi0 _ | ex_oc_ir _ _ _ _ _ pi0 _ => S (ipsize pi0)
+| ax_ir _ | one_irr | top_irr _ | zero_ilr _ _ _ | gax_ir _ => 0
+| ex_ir _ _ _ pi0 _ | ex_oc_ir _ _ _ _ _ pi0 _ => ipsize pi0
 | one_ilr _ _ _ pi0 | tens_ilr _ _ _ _ _ pi0 | lpam_irr _ _ _ pi0 | gen_irr _ _ pi0 | gen_ilr _ _ pi0
-| lmap_irr _ _ _ pi0 | neg_irr _ _ pi0 | neg_ilr _ _ pi0 => S (ipsize pi0)
+| lmap_irr _ _ _ pi0 | neg_irr _ _ pi0 | neg_ilr _ _ pi0 => ipsize pi0
 | tens_irr _ _ _ _ pi1 pi2 | lpam_ilr _ _ _ _ _ _ pi1 pi2
-| lmap_ilr _ _ _ _ _ _ pi1 pi2 | cut_ir _ _ pi1 pi2 => S (ipsize pi1 + ipsize pi2)
-| with_ilr1 _ _ _ _ _ pi0 | with_ilr2 _ _ _ _ _ pi0 | plus_irr1 _ _ _ pi0 | plus_irr2 _ _ _ pi0 => S (ipsize pi0)
-| with_irr _ _ _ pi1 pi2 | plus_ilr _ _ _ _ _ pi1 pi2 => S (max (ipsize pi1) (ipsize pi2))
-| oc_irr pi0 | de_ilr _ _ _ _ pi0 | wk_ilr _ _ _ _ pi0 | co_ilr _ _ _ _ pi0 => S (ipsize pi0)
+| lmap_ilr _ _ _ _ _ _ pi1 pi2 | cut_ir _ _ pi1 pi2 => ipsize pi1 + ipsize pi2
+| with_ilr1 _ _ _ _ _ pi0 | with_ilr2 _ _ _ _ _ pi0 | plus_irr1 _ _ _ pi0 | plus_irr2 _ _ _ pi0 => ipsize pi0
+| with_irr _ _ _ pi1 pi2 | plus_ilr _ _ _ _ _ pi1 pi2 => max (ipsize pi1) (ipsize pi2)
+| oc_irr pi0 | de_ilr _ _ _ _ pi0 | wk_ilr _ _ _ _ pi0 | co_ilr _ _ _ _ pi0 => ipsize pi0
 end.
 
 Lemma stronger_ipfrag P Q (Hfrag : le_ipfrag P Q) l A : ill P l A -> ill Q l A.

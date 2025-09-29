@@ -1,9 +1,12 @@
 (** * Intuitionistic Linear Logic formulas *)
 
-From Stdlib Require Import Bool RelationClasses Lia.
-From OLlibs Require Import dectype List_more.
+From Stdlib Require Import Bool Relation_Definitions RelationClasses Lia.
+(* TODO Relations_Definitions not needed anymore from Stdlib#162 ? used for [relation] only? *)
+From OLlibs Require Import List_more dectype.
 From Yalla Require Export atoms.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
 Set Implicit Arguments.
 
 
@@ -31,19 +34,19 @@ Inductive iformula :=
 #[global] Definition N := ivar atN.
 
 (** Size of a [iformula] as its number of symbols *)
-Fixpoint ifsize A :=
+Fixpoint ifsize A := S
 match A with
-| ivar X => 1
-| ione | itop | izero => 1
-| itens A B | ilpam A B | ilmap A B | iwith A B | iplus A B => S (ifsize A + ifsize B)
-| igen A | ineg A | ioc A => S (ifsize A)
+| ivar X => 0
+| ione | itop | izero => 0
+| itens A B | ilpam A B | ilmap A B | iwith A B | iplus A B => ifsize A + ifsize B
+| igen A | ineg A | ioc A => ifsize A
 end.
 
 (** Atomic [iformula] *)
-Variant iatomic : iformula -> Type := | iatomic_var x : iatomic (ivar x).
+Variant iatomic : iformula -> Type := iatomic_var x : iatomic (ivar x).
 
 (** Atoms in a formula *)
-Fixpoint iatom_list A : list iatom :=
+Fixpoint iatom_list A :=
 match A with
 | ivar x => x :: nil
 | ione | izero | itop => nil
@@ -56,7 +59,7 @@ end.
 (** ** Sub-formulas *)
 
 (** First argument is a sub-formula of the second: *)
-Inductive isubform : iformula -> iformula -> Prop :=
+Inductive isubform : relation iformula :=
 | isub_id A : isubform A A
 | isub_tens_l A B C : isubform A B -> isubform A (itens B C)
 | isub_tens_r A B C : isubform A B -> isubform A (itens C B)
@@ -85,14 +88,12 @@ Qed.
 Proof. split; intro; [ apply isub_id | apply isub_trans ]. Qed.
 
 (** Each element of the first list is a sub-formula of some element of the second. *)
-Definition isubform_list l1 l2 := Forall (fun A => Exists (isubform A) l2) l1.
+Definition isubform_list : relation _ := fun l1 l2 => Forall (fun A => Exists (isubform A) l2) l1.
 
 Lemma isub_id_list l l0 : isubform_list l (l0 ++ l).
 Proof.
 induction l as [|a l IHl] in l0 |- *; constructor.
-- induction l0.
-  + constructor. apply isub_id.
-  + apply Exists_cons_tl. assumption.
+- apply Exists_elt. constructor.
 - replace (l0 ++ a :: l) with ((l0 ++ a :: nil) ++ l) by (rewrite <- app_assoc; reflexivity). apply IHl.
 Qed.
 
@@ -123,13 +124,11 @@ Qed.
 (* Unused
 From OLlibs Require Import GPermutationT.
 
-Lemma isub_perm_list b l l1 l2 :
-  isubform_list l l1 -> PCPermutationT b l1 l2 ->
-  isubform_list l l2.
+Lemma isub_perm_list b l l1 l2 : isubform_list l l1 -> PCPermutationT b l1 l2 -> isubform_list l l2.
 Proof.
-intros HF HP; apply Forall_forall.
-setoid_rewrite <- (PCPermutationT_Exists _ _ HP).
-apply Forall_forall; assumption.
+intros HF HP. apply Forall_forall.
+intro x. rewrite <- (PCPermutationT_Exists _ _ HP). revert x.
+apply Forall_forall. assumption.
 Qed.
 *)
 

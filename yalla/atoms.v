@@ -4,6 +4,10 @@
 From OLlibs Require Import Logic_Datatypes_more funtheory ListT.
 From OLlibs Require Export infinite.
 
+Set Default Goal Selector "!".
+Set Default Proof Using "Type".
+Set Implicit Arguments.
+
 
 (** ** Classes containing constraints on atom sets *)
 
@@ -67,7 +71,7 @@ Qed.
 #[export] Instance IAtom2AtomType_retract_fin A I :
   IAtom2AtomType_retract A I -> IAtom2AtomType_fin A I | 50 := fun C => {|
   IAtom2Atom_fin_base := IAtom2Atom_retract_base;
-  IAtom2Atom_fin := section_coimage_fin _ _ _ _ (@IAtom2Atom_retract A I C) |}.
+  IAtom2Atom_fin := section_coimage_fin _ (@IAtom2Atom_retract A I C) |}.
 
 
 (** ** Consistency checks *)
@@ -100,7 +104,7 @@ Class FullAtoms := {
   IAtom2Atom_retract_base_inv := g;
   IAtom2Atom_retract := Hr |}.
 #[local] Instance FIAtom2AtomType_fin (C : FullAtoms) : IAtom2AtomType_fin FAtom FPreIAtom | 50 := 
-  IAtom2AtomType_retract_fin _ _ (FIAtom2AtomType_retract C).
+  IAtom2AtomType_retract_fin (FIAtom2AtomType_retract C).
 #[local] Instance FAtom2IAtomType_self (C : FullAtoms) : Atom2IAtomType_self FAtom FPreIAtom | 50 := {|
   Atom2IAtom_Atom_self := FAtomType_self C;
   Atom2PreIAtom := FAtom2PreIAtom;

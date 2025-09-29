@@ -5,6 +5,7 @@ From OLlibs Require Import Logic_Datatypes_more funtheory infinite List_more Dep
 From Yalla Require Import subs isubs.
 From Yalla Require Export ill_vs_ll.
 
+Set Default Goal Selector "!".
 Set Default Proof Using "Type".
 Set Implicit Arguments.
 
@@ -19,7 +20,7 @@ Notation Na := (proj1_sig (projT3 Atom_self_inj)).
 Notation atom2atom := (projT1 (sigT_of_sigT2 Atom_self_inj)).
 Notation atom2atom_inj := (projT2 (sigT_of_sigT2 Atom_self_inj)).
 
-Definition atom_inf := AtomType_self_InfDecType atom (@Atom2IAtom_Atom_self atom preiatom _).
+Definition atom_inf := AtomType_self_InfDecType (Atoms.(Atom2IAtom_Atom_self)).
 
 Notation formula := (@formula atom_inf).
 Notation iformula := (@iformula preiatom).
