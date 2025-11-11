@@ -3,6 +3,7 @@
 From Stdlib Require Import Wf_nat Lia.
 From OLlibs Require Import Logic_Datatypes_more Bool_more infinite List_more PermutationT_more.
 From Yalla Require Import ll_fragments llfoc.
+Import LogicNotations.
 
 Set Default Goal Selector "!".
 Set Default Proof Using "Type".
@@ -904,7 +905,7 @@ apply trifoc_rect.
 Qed.
 
 Lemma mon_tri_equiv l lw lsa ls la : partition is_wn l = (map wn lw, lsa) -> partition is_Foc lsa = (ls, la) ->
-  iffT (llFoc l None) (atrifoc lw ls la).
+  llFoc l None <=> atrifoc lw ls la.
 Proof.
 intros Hp1 Hp2. split; intro pi.
 - eapply mon_to_tri; [ | reflexivity | | ]; eassumption.

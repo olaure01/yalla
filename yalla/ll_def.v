@@ -6,7 +6,7 @@ From Stdlib Require Permutation.
 From OLlibs Require Import dectype funtheory List_more Dependent_ForallT
                            PermutationT_more GPermutationT.
 From Yalla Require Export formulas.
-Import EqNotations.
+Import Logic_Datatypes_more.LogicNotations EqNotations.
 
 Set Default Goal Selector "!".
 Set Default Proof Using "Type".
@@ -411,7 +411,7 @@ Fixpoint Forall_sequent P PS l (pi : ll P l) : Type :=
 match pi with
 | ax_r _ | gax_r _ => PS l
 | ex_r _ _ pi1 _ | ex_wn_r _ _ _ _ pi1 _ => Forall_sequent PS pi1 * PS l
-| mix_r _ PL => ((fix Forall_sequent_Forall P L (PL : ForallT (ll P) L) {struct PL} : Type :=
+| mix_r _ PL => ((fix Forall_sequent_Forall P L (PL : ForallT (ll P) L) : Type :=
        match PL with
        | ForallT_nil _ => unit
        | ForallT_cons _ Pl PL => (Forall_sequent PS Pl * Forall_sequent_Forall _ _ PL)%type
@@ -465,7 +465,7 @@ Fixpoint psize P l (pi : ll P l) := S
 match pi with
 | ax_r _ | gax_r _ => 0
 | ex_r _ _ pi0 _ | ex_wn_r _ _ _ _ pi0 _ => psize pi0
-| mix_r _ PL => (fix psize_Forall P L (PL : ForallT (ll P) L) {struct PL} :=
+| mix_r _ PL => (fix psize_Forall P L (PL : ForallT (ll P) L) :=
        match PL with
        | ForallT_nil _ => 0
        | ForallT_cons _ Pl PL => (psize Pl) + (psize_Forall _ _ PL)
@@ -1281,7 +1281,7 @@ Fixpoint gax_elts P l (pi : ll P l) :=
 match pi with
 | ax_r _ => nil
 | ex_r _ _ pi0 _ | ex_wn_r _ _ _ _ pi0 _ => gax_elts pi0
-| mix_r _ PL => (fix gax_elts_Forall P L (PL : ForallT (ll P) L) {struct PL} :=
+| mix_r _ PL => (fix gax_elts_Forall P L (PL : ForallT (ll P) L) :=
        match PL with
        | ForallT_nil _ => nil
        | ForallT_cons _ Pl PL => (gax_elts Pl) ++ (gax_elts_Forall _ _ PL)
@@ -1429,7 +1429,7 @@ Qed.
 (** ** Consistency properties *)
 
 Lemma weak_consistency_no_dual_proofs_ll P (Hcut : full_cut P) :
-  iffT (ll P nil) { A & ll P (A :: nil) & ll P (dual A :: nil) }.
+  ll P nil <=> { A & ll P (A :: nil) & ll P (dual A :: nil) }.
 Proof.
 split.
 - intro pi. exists one; constructor. exact pi.

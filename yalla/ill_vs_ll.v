@@ -3,6 +3,7 @@
 From OLlibs Require Import Logic_Datatypes_more funtheory infinite List_more PermutationT_more GPermutationT.
 From Yalla Require Import ll_fragments.
 From Yalla Require Export ill_prop.
+Import LogicNotations.
 
 Set Default Goal Selector "!".
 Set Default Proof Using "Type".
@@ -52,8 +53,8 @@ induction l2 as [|a l2 IHl2] in l1 |- *; intros Heq; destruct l1; inversion Heq 
   exists (a :: l0); reflexivity.
 Qed.
 
-Lemma ill2ll_inv A : {'(l,lop) & forall B, iffT (A = ill2ll B) (InT B l)
-                               & forall B, iffT (A = dual (ill2ll B)) (InT B lop) }.
+Lemma ill2ll_inv A : {'(l,lop) & forall B, A = ill2ll B <=> InT B l
+                               & forall B, A = dual (ill2ll B) <=> InT B lop }.
 Proof.
 destruct (i2a_inv (i2a atN)) as [lN HlN].
 induction A.

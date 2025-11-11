@@ -4,6 +4,7 @@ From OLlibs Require Import Logic_Datatypes_more funtheory infinite List_more Dep
                            PermutationT GPermutationT.
 From Yalla Require Import subs isubs.
 From Yalla Require Export ill_vs_ll.
+Import LogicNotations.
 
 Set Default Goal Selector "!".
 Set Default Proof Using "Type".
@@ -50,7 +51,7 @@ intros Heq. destruct i; [ right | left; reflexivity ].
 enough (a2i (i2a (Some c)) = Some c) as Heqc by (rewrite <- Heqc; f_equal; assumption).
 apply i2i_not_atN. intros [=].
 Qed.
-Lemma i2a_fin a : { l & forall i, iffT (a = i2a i) (InT i l) }.
+Lemma i2a_fin a : { l & forall i, a = i2a i <=> InT i l }.
 Proof.
 destruct (eq_dt_dec a Na) as [ -> | Hneq ].
 - exists (atN :: a2i (i2a atN) :: nil). intros i. split.

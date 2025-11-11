@@ -3,6 +3,7 @@
 
 From OLlibs Require Import Logic_Datatypes_more funtheory ListT.
 From OLlibs Require Export infinite.
+Import LogicNotations.
 
 Set Default Goal Selector "!".
 Set Default Proof Using "Type".
@@ -26,7 +27,7 @@ Class IAtom2AtomType (A : DecType) (I : DecType) := IAtom2Atom : option I -> A.
 
 Class IAtom2AtomType_fin A I := {
   IAtom2Atom_fin_base :: IAtom2AtomType A I;
-  IAtom2Atom_fin x : { l & forall i, iffT (x = IAtom2Atom i) (InT i l) } }.
+  IAtom2Atom_fin x : { l & forall i, x = IAtom2Atom i <=> InT i l } }.
 
 Class IAtom2AtomType_retract A I := {
   IAtom2Atom_retract_base :: IAtom2AtomType A I;
@@ -55,7 +56,7 @@ Class AtomIAtomTAtomType A I T := {
 (** *** Construction of derived classes *)
 
 Lemma section_coimage_fin A (B : DecType) (f : A -> B) g : retract g f ->
-  forall y, { l & forall x, iffT (y = f x) (InT x l) }.
+  forall y, { l & forall x, y = f x <=> InT x l }.
 Proof.
 intros Hr y.
 destruct (section_coimage_option _ Hr y) as [[x|] Hx].

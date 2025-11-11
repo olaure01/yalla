@@ -2,6 +2,7 @@ From Stdlib Require Import Relation_Definitions RelationClasses Lia.
 (* TODO Relations_Definitions not needed anymore from Stdlib#162 ? used for [relation] only? *)
 From OLlibs Require Import Logic_Datatypes_more Bool_more List_more funtheory dectype.
 From Yalla Require Export atoms.
+Import LogicNotations.
 
 Set Default Goal Selector "!".
 Set Default Proof Using "Type".
@@ -131,7 +132,7 @@ Proof. split; intro H; rewrite <- (bidual A), <- (bidual B), H, ? bidual; reflex
 Lemma dual_inj : injective dual.
 Proof. intros A B H. rewrite <- (bidual A), <- (bidual B), H. reflexivity. Qed.
 
-Lemma atomic_dual A : iffT (atomic A) (atomic (dual A)).
+Lemma atomic_dual A : atomic A <=> atomic (dual A).
 Proof. destruct A; split; intros Hat; inversion Hat; constructor. Qed.
 
 Lemma dual_tens_n n A : dual (tens_n n A) = parr_n n (dual A).
