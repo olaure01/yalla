@@ -143,12 +143,12 @@ intros Hgax IHcut l' L pi;
     as [(((((lw1', lw2'), l1'), l2'), l''), L') (H1 & H2 & H3 & <-)].
   apply (ex_wn_r _ lw1'); [ | assumption ].
   rewrite H3. apply IHpi. assumption.
-- assert ({L0 & ((concat L0 = l' ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L')
+- assert ({L0 & (concat L0 = l' ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L')
               * ((length L0 = length L)
               *  (ForallT (fun l =>
                    {'(l0, L0) & (l = l0 ++ flat_map (fun '(p1,p2) => app (map wn lw) p2) L0)
                           * (InT (l0 ++ flat_map (fun '(p1,p2) => wn_n p1 (wn A) :: p2) L0) L)})
-                   L0)))%type})
+                   L0))})
     as (L0 & (<- & (Heql & FL))).
   { clear - Heq.
     induction L in lw, L', l', Heq |- *.

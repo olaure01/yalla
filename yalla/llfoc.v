@@ -92,8 +92,8 @@ Qed.
 
 Lemma not_wFocl l : notT (ForallT wFoc l) ->
   {'(A, l1, l2) & l = l1 ++ A :: l2
-                & ((A = bot) + {'(A1, A2) | A = parr A1 A2 }
-                 + (A = top) + {'(A1, A2) | A = awith A1 A2 })%type }.
+                & (A = bot) + {'(A1, A2) | A = parr A1 A2 }
+                + (A = top) + {'(A1, A2) | A = awith A1 A2 } }.
 Proof.
 intros HnF%ForallT_notT_ExistsT.
 - induction l as [|a l IHl]; inversion HnF; subst.
@@ -143,8 +143,8 @@ Qed.
 
 Lemma not_wtFocl l : notT (ForallT wtFoc l) ->
   {'(A, l1, l2) & l = l1 ++ A :: l2
-                & ((A = bot) + {'(A1, A2) | A = parr A1 A2 }
-                             + {'(A1, A2) | A = awith A1 A2 })%type }.
+                & (A = bot) + {'(A1, A2) | A = parr A1 A2 }
+                            + {'(A1, A2) | A = awith A1 A2 } }.
 Proof.
 intros HnF%ForallT_notT_ExistsT.
 - induction l as [|a l IHl]; inversion HnF; subst.
@@ -1057,13 +1057,14 @@ Qed.
 Lemma llfoc_to_llFoc s l Pi (pi : llfoc l Pi) : fpsize pi < s ->
    (Pi = None -> llFoc l None)
  * (forall C, Pi = Some C -> ForallT wFoc l ->
-      {'(l', l0, lw, lw') & (((PermutationT l (map wn lw ++ l0)) *
-                              (PermutationT l' (map wn lw' ++ l0))) * (inclT lw' lw))%type
+      {'(l', l0, lw, lw') & PermutationT l (map wn lw ++ l0) * PermutationT l' (map wn lw' ++ l0)
+                          * inclT lw' lw
                           & llFoc l' (Some C) })
  * (forall C, Pi = Some C -> notT (ForallT wFoc l) ->
       llFoc (C :: l) None * llFoc (wn C :: l) None).
 Proof.
-revert l Pi pi. induction s using lt_wf_rect; intros l Pi pi; split; [ split | ];
+induction s using (well_founded_induction_type lt_wf) in l, Pi, pi |- *.
+split; [ split | ];
   [ intro Heq; destruct pi; inversion Heq; subst; cbn in H
   | intros PPi Heq HF; destruct pi; inversion Heq; subst; cbn in H;
       try (exfalso; inversion HF; subst; destruct X0 as [[H'|H']|H']; inversion H'; fail)

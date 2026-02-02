@@ -789,9 +789,9 @@ Qed.
 Lemma tri_to_mon:
   (forall lw ls l, atrifoc lw ls l -> llFoc (map wn lw ++ ls ++ l) None)
 * (forall lw ls A, strifoc lw ls A ->
-     {'(lw', lx, l') & (inclT lw' lw * inclT lx lw * ForallT covar_formula lx
-                      * PermutationT l' (map wn lw' ++ lx ++ ls))%type
-                      & llFoc (polcont l' A) (polfoc A) }).
+     {'(lw', lx, l') & inclT lw' lw * inclT lx lw * ForallT covar_formula lx
+                     * PermutationT l' (map wn lw' ++ lx ++ ls)
+                     & llFoc (polcont l' A) (polfoc A) }).
 Proof.
 apply trifoc_rect.
 - intros A lw ls1 ls2 Hs pi [((lw', lx), l') [[[Hincl Hinclx] Hcv] HP] IHpi]. list_simpl. pol_simpl.

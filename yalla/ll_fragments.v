@@ -961,7 +961,6 @@ eapply stronger_pfrag in pi.
   + reflexivity.
 Qed.
 
-
 (* Hcut is here only to allow the use of cut_admissible
    the more general result without Hcut should be provable by induction *)
 Lemma ll_to_mix02'''_axcut P (Hgax_at : atomic_ax P) (Hcut : cut_closed P) (Hperm : pperm P = true) l n :
@@ -981,7 +980,6 @@ induction n as [|n IHn ] in l, pi |- *; cons2app.
   apply PermutationT_cons, PermutationT_middle. reflexivity.
 Qed.
 
-(* llR *)
 
 (** ** Linear logic extended with [R] = [bot]: [llR] *)
 

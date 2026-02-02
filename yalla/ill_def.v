@@ -205,7 +205,7 @@ match pi with
 | cut_ir _ _ pi1 pi2 => Forall_isequent PS pi1 * Forall_isequent PS pi2 * PS l A
 end.
 
-Definition Forall_iformula P FS := @Forall_isequent P (fun l A => (ForallT FS (A :: l))%type).
+Definition Forall_iformula P FS := @Forall_isequent P (fun l A => ForallT FS (A :: l)).
 
 Lemma Forall_isequent_is P PS l A (pi : ill P l A) : Forall_isequent PS pi -> PS l A.
 Proof. destruct pi; cbn; tauto. Qed.

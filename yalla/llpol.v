@@ -472,9 +472,7 @@ rewrite <- (app_nil_l l), app_comm_cons. eapply cut_r.
 Qed.
 
 (** Polarized sequents are those with at most one positive formula. *)
-Definition polsequent l :=
-  ({ l0 | l = map neg l0 } +
-   {'(l0, P0) & PermutationT l (pos P0 :: map neg l0) })%type.
+Definition polsequent l := ({ l0 | l = map neg l0 } + {'(l0, P0) & PermutationT l (pos P0 :: map neg l0) })%type.
 
 Lemma uniq_polsequent l1 l2 P1 P2 : PermutationT (pos P1 :: l1) (pos P2 :: map neg l2) ->
   { l1' & l1 = map neg l1' /\ P1 = P2 & PermutationT l1' l2 }.
@@ -498,14 +496,14 @@ Qed.
 
 (*
 Lemma polsequent_app l1 l2 : polsequent (l1 ++ l2) ->
-  { l & (((l2 = map neg l) * (polsequent l1)) +
-         ((l1 = map neg l) * (polsequent l2)))%type }.
+  { l & ((l2 = map neg l) * (polsequent l1)) +
+        ((l1 = map neg l) * (polsequent l2)) }.
 Proof.
 intros Hi.
 assert (Hi' := Hi).
 destruct Hi' as [ (l0 & Hi') | ((l0 & P) & Hi') ].
-- symmetry in Hi'; decomp_map_inf Hi'; subst.
-  exists l4; left; repeat split.
+- symmetry in Hi'; decomp_map_eq Hi'; subst.
+  exists l2; left; repeat split.
   left; eexists; reflexivity.
 - assert (Hi'' := Hi').
   apply PermutationT_vs_cons_inv in Hi' as ((l3 & l4) & Heq).
@@ -515,9 +513,9 @@ destruct Hi' as [ (l0 & Hi') | ((l0 & P) & Hi') ].
     apply PermutationT_cons_app_inv in Hi''.
     symmetry in Hi''.
     apply PermutationT_map_inv in Hi'' as [l' Heq HP].
-    symmetry in Heq; decomp_map_inf Heq; subst.
+    symmetry in Heq; decomp_map_eq Heq; subst.
     eexists; left; repeat split.
-    right; exists (l4 ++ l6, P); cbn; rewrite map_app.
+    right; exists (l3 ++ l, P); cbn; rewrite map_app.
     symmetry; apply PermutationT_middle.
   + symmetry in Hi''.
     rewrite app_assoc in Hi''.
@@ -526,9 +524,9 @@ destruct Hi' as [ (l0 & Hi') | ((l0 & P) & Hi') ].
     symmetry in Hi''.
     apply PermutationT_map_inv in Hi''.
     destruct Hi'' as [l' Heq HP].
-    symmetry in Heq; decomp_map_inf Heq; subst.
+    symmetry in Heq; decomp_map_eq Heq; subst.
     eexists; right; repeat split.
-    right; exists (l6 ++ l7, P); cbn; rewrite map_app.
+    right; exists (l ++ l4, P); cbn; rewrite map_app.
     symmetry; apply PermutationT_middle.
 Qed.
 *)

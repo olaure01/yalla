@@ -51,7 +51,7 @@ end.
 
 
 (** Parameters for [ll] provability:
- - [pcut], [pmix0] and [pmix2] determine whether the corresponding rule is in the system or not;
+ - [pcut] and [pmix] determine whether the corresponding rule is in the system or not;
  - [pperm] is [false] for exchange rule modulo cyclic permutations\
            and [true] for exchange rule modulo arbitrary permutations;
  - [pgax] determines the sequents which are valid as axioms in proofs.
@@ -1447,7 +1447,7 @@ Arguments ll_nested_ind' : clear implicits.
 
 Notation Dependent_ForallT_forall_formula :=
   (Dependent_ForallT_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
-                                                                    (fun x y => proj2 (eqb_eq x y)))).
+                                                                 (fun x y => proj2 (eqb_eq x y)))).
 
 Ltac destruct_ll H f X l Hl Hr HP FL a :=
   match type of H with
