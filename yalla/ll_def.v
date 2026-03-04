@@ -537,10 +537,10 @@ Proof.
 induction L in l0, l |- *; intros pi.
 - apply ex_r with (map wn l0 ++ l ++ concat nil).
   + apply wk_list_r. assumption.
-  + rewrite P_perm. cbn. rewrite 2 app_nil_r. apply PermutationT_app_swap.
+  + rewrite P_perm. cbn. rewrite 2 app_nil_r. apply PermutationT_app_comm.
 - apply ex_r with (map wn l0 ++ l ++ concat (a :: L));
     [ | rewrite P_perm; cbn; rewrite 2 (app_assoc _ _ (a ++ _));
-        apply PermutationT_app_tail, PermutationT_app_swap ].
+        apply PermutationT_app_tail, PermutationT_app_comm ].
   apply co_list_r.
   apply ex_r with ((l ++ (map wn l0 ++ a)) ++ map wn l0 ++ concat L).
   + apply IHL.
