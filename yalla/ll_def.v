@@ -7,6 +7,7 @@ From OLlibs Require Import dectype funtheory List_more Dependent_ForallT
                            PermutationT_more GPermutationT.
 From Yalla Require Export formulas.
 Import Logic_Datatypes_more.LogicNotations EqNotations.
+Coercion is_true : bool >-> Sortclass.
 
 Set Default Goal Selector "!".
 Set Default Proof Using "Type".
@@ -185,7 +186,7 @@ Inductive ll P : list formula -> Type :=
 | ax_r X : ll P (covar X :: var X :: nil)
 | ex_r l1 l2 : ll P l1 -> PCPermutationT (pperm P) l1 l2 -> ll P l2
 | ex_wn_r l1 lw lw' l2 : ll P (l1 ++ map wn lw ++ l2) -> PermutationT lw lw' -> ll P (l1 ++ map wn lw' ++ l2)
-| mix_r L (f : is_true (pmix P (length L))) : ForallT (ll P) L -> ll P (concat L)
+| mix_r L (f : pmix P (length L)) : ForallT (ll P) L -> ll P (concat L)
 | one_r : ll P (one :: nil)
 | bot_r l : ll P l -> ll P (bot :: l)
 | tens_r A B l1 l2 : ll P (A :: l1) -> ll P (B :: l2) -> ll P (tens A B :: l2 ++ l1)
@@ -209,7 +210,7 @@ Inductive ll P : list formula -> Type :=
 #[global] Arguments cut_r [P] _ f [l1 l2] _ _.
 #[global] Arguments gax_r [P] _.
 
-Definition mix'_r P L : is_true (pmix P (length L)) -> ll P (flat_map (@projT1 _ (ll P)) L).
+Definition mix'_r P L : pmix P (length L) -> ll P (flat_map (@projT1 _ (ll P)) L).
 Proof.
 intro Hmix. rewrite flat_map_concat_map. apply mix_r.
 - rewrite length_map. assumption.
@@ -585,7 +586,7 @@ induction n in l |- *; intros pi.
 Qed.
 
 (** Permutation on mix *)
-Lemma ex_mix_r P L L' (eq : is_true (pmix P (length L))) (p : PermutationT L L') :
+Lemma ex_mix_r P L L' (eq : pmix P (length L)) (p : PermutationT L L') :
   ForallT (ll P) L -> ll P (concat L').
 Proof.
 intros FL.
