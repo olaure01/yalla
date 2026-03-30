@@ -17,18 +17,18 @@ Context {atom : DecType} {preiatom : InfDecType} {Atoms : Atom2IAtomType_self at
 
 (** ** Basic ingredients for links with [ill] *)
 
-Notation Na := (proj1_sig (projT3 Atom_self_inj)).
-Notation atom2atom := (projT1 (sigT_of_sigT2 Atom_self_inj)).
-Notation atom2atom_inj := (projT2 (sigT_of_sigT2 Atom_self_inj)).
+Abbreviation Na := (proj1_sig (projT3 Atom_self_inj)).
+Abbreviation atom2atom := (projT1 (sigT_of_sigT2 Atom_self_inj)).
+Abbreviation atom2atom_inj := (projT2 (sigT_of_sigT2 Atom_self_inj)).
 
 Definition atom_inf := AtomType_self_InfDecType (Atoms.(Atom2IAtom_Atom_self)).
 
-Notation formula := (@formula atom_inf).
-Notation iformula := (@iformula preiatom).
+Abbreviation formula := (@formula atom_inf).
+Abbreviation iformula := (@iformula preiatom).
 
 Lemma Atom2PreIAtom_inj : injective Atom2PreIAtom.
 Proof. apply bijective_injective, Atom2PreIAtom_bij. Qed.
-Notation p2a := (proj1_sig (sig_of_sig2 (bijective_inverse Atom2PreIAtom_bij))).
+Abbreviation p2a := (proj1_sig (sig_of_sig2 (bijective_inverse Atom2PreIAtom_bij))).
 Definition i2a a :=
   match a with
   | None => Na

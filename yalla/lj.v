@@ -273,9 +273,8 @@ End Atoms.
 Section Atoms_inj.
 
 Context {atom : InfDecType} {preiatom : DecType} {Atoms : IAtom2AtomType_retract atom preiatom}.
-
-Notation iformula := (@iformula preiatom).
-Notation ill2ll := ill_vs_ll.ill2ll.
+Abbreviation iformula := (@iformula preiatom).
+Abbreviation ill2ll := ill_vs_ll.ill2ll.
 
 Lemma lj2ill_cbv_oclpam (A : iformula) : ill_vs_ll.oclpam (lj2ill_cbv A).
 Proof. induction A; (try now constructor); cbn; repeat constructor; assumption. Qed.

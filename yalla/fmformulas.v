@@ -13,8 +13,8 @@ Context {atom : DecType} {Atoms : AtomType_into_nat atom}.
 (** ** Encoding of [formula] into [nat]-labelled trees for ordering *)
 
 (** Embedding of [Atom] into [nat] *)
-Notation a2n := (snd (proj1_sig Atom_into_nat)).
-Notation n2a := (fst (proj1_sig Atom_into_nat)).
+Abbreviation a2n := (snd (proj1_sig Atom_into_nat)).
+Abbreviation n2a := (fst (proj1_sig Atom_into_nat)).
 Definition a2a_n : retract n2a a2n :=
   eq_rect _ _ (proj2_sig Atom_into_nat) _ (surjective_pairing (proj1_sig Atom_into_nat)).
 

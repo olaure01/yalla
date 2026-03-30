@@ -12,8 +12,8 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : DecType}.
-Notation formula := (@formula atom).
-Notation ll := (@ll atom).
+Abbreviation formula := (@formula atom).
+Abbreviation ll := (@ll atom).
 
 (** Consistency statements *)
 

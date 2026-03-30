@@ -11,8 +11,8 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : InfDecType}.
-Notation formula := (@formula atom).
-Notation llR := (@llR atom).
+Abbreviation formula := (@formula atom).
+Abbreviation llR := (@llR atom).
 
 (** ** The system [ll_bbb] *)
 (** It contains [ll_mix2] but allows [mix0] as well above one side of each [mix2] rule. *)

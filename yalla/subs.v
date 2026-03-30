@@ -9,7 +9,7 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : DecType}.
-Notation formula := (@formula atom).
+Abbreviation formula := (@formula atom).
 
 (** ** Substitutions *)
 
@@ -174,7 +174,7 @@ End Atoms.
 Section InfAtoms.
 
 Context {atom : InfDecType}.
-Notation formula := (@formula atom).
+Abbreviation formula := (@formula atom).
 
 (** Provide an [Atom] which is fresh for [A] *)
 Definition fresh_of (A : formula) := fresh (atom_list A).

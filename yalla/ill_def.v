@@ -14,7 +14,7 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {preiatom : DecType}.
-Notation iformula := (@iformula preiatom).
+Abbreviation iformula := (@iformula preiatom).
 
 (** ** Intuitionistic fragments for proofs *)
 

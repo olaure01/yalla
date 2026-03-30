@@ -13,18 +13,18 @@ Section Atoms.
 
 Context {atom : DecType} {preiatom : InfDecType} {Atoms : Atom2IAtomType_self atom preiatom}.
 
-Notation atom_inf := (@atom_inf _ _ Atoms).
-Notation formula := (@formula atom_inf).
-Notation iformula := (@iformula preiatom).
-Notation ill2ll := (@ill2ll _ _ iatom2atom_fin).
-Notation unill := (@unill _ _ Atoms).
-Notation trans := (@trans _ _ Atoms).
-Notation i2a := (@i2a _ _ Atoms).
-Notation a2i := (@a2i _ _ Atoms).
+Abbreviation atom_inf := (@atom_inf _ _ Atoms).
+Abbreviation formula := (@formula atom_inf).
+Abbreviation iformula := (@iformula preiatom).
+Abbreviation ill2ll := (@ill2ll _ _ iatom2atom_fin).
+Abbreviation unill := (@unill _ _ Atoms).
+Abbreviation trans := (@trans _ _ Atoms).
+Abbreviation i2a := (@i2a _ _ Atoms).
+Abbreviation a2i := (@a2i _ _ Atoms).
 Arguments ll_to_ill_trans_gen {_ _ _} R {P} _ [l].
 Arguments ll_to_ill_trans {_ _ _} R {P} _ [l].
-Notation ll_to_ill_trans := (@ll_to_ill_trans _ _ Atoms).
-Notation p2ipfrag := (@p2ipfrag _ _ Atoms).
+Abbreviation ll_to_ill_trans := (@ll_to_ill_trans _ _ Atoms).
+Abbreviation p2ipfrag := (@p2ipfrag _ _ Atoms).
 
 Section RTranslation.
 

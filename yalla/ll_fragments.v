@@ -14,8 +14,8 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : InfDecType}.
-Notation formula := (@formula atom).
-Notation ll := (@ll atom).
+Abbreviation formula := (@formula atom).
+Abbreviation ll := (@ll atom).
 
 (** ** Property on mix_n *)
 

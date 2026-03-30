@@ -13,15 +13,15 @@ Section Atoms.
 
 Context {atom : DecType} {preiatom : InfDecType} {tatom : DecType}
         {Atoms : AtomIAtomTAtomType atom preiatom tatom}.
-Notation atom_inf := (@atom_inf _ _ AtomIAtomTAtom_Atom2IAtom).
-Notation formula := (@formula atom_inf).
-Notation iformula := (@iformula preiatom).
-Notation tformula := (@tformula tatom).
-Notation a2i := (@a2i _ _ AtomIAtomTAtom_Atom2IAtom).
-Notation t2i := (@t2i atom_inf _ _ AtomIAtomTAtom_TAtom).
-Notation ill_ll := (@ill_ll preiatom).
-Notation tl2ill := (@tl2ill atom_inf _ _ AtomIAtomTAtom_TAtom).
-Notation trans := (@trans _ _ AtomIAtomTAtom_Atom2IAtom).
+Abbreviation atom_inf := (@atom_inf _ _ AtomIAtomTAtom_Atom2IAtom).
+Abbreviation formula := (@formula atom_inf).
+Abbreviation iformula := (@iformula preiatom).
+Abbreviation tformula := (@tformula tatom).
+Abbreviation a2i := (@a2i _ _ AtomIAtomTAtom_Atom2IAtom).
+Abbreviation t2i := (@t2i atom_inf _ _ AtomIAtomTAtom_TAtom).
+Abbreviation ill_ll := (@ill_ll preiatom).
+Abbreviation tl2ill := (@tl2ill atom_inf _ _ AtomIAtomTAtom_TAtom).
+Abbreviation trans := (@trans _ _ AtomIAtomTAtom_Atom2IAtom).
 
 Definition a2t X := proj1_sig (sig_of_sig2 (bijective_inverse TAtom2PreIAtom_bij)) (Atom2PreIAtom X).
 Lemma a2t_inj : injective a2t.

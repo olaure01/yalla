@@ -9,7 +9,7 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {preiatom : InfDecType}.
-Notation atN := (@atN preiatom).
+Abbreviation atN := (@atN preiatom).
 
 (** ** Substitutions *)
 

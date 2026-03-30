@@ -13,11 +13,11 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : InfDecType} {preiatom : DecType} {Atoms : IAtom2AtomType_fin atom preiatom}.
-Notation iatom := (option preiatom).
-Notation formula := (@formula atom).
-Notation iformula := (@iformula preiatom).
-Notation i2a := IAtom2Atom_fin_base.
-Notation i2a_inv := IAtom2Atom_fin.
+Abbreviation iatom := (option preiatom).
+Abbreviation formula := (@formula atom).
+Abbreviation iformula := (@iformula preiatom).
+Abbreviation i2a := IAtom2Atom_fin_base.
+Abbreviation i2a_inv := IAtom2Atom_fin.
 
 
 (** ** Characterization of [ill] as a fragment of [ll] *)
@@ -559,7 +559,7 @@ Section Non_Conservativity_Atoms.
 Variable x y z : iatom.
 
 (** Counter example from Schellinx-Lafont *)
-Notation cons_counter_ex := (ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
+Abbreviation cons_counter_ex := (ilpam (ilpam (ilpam (ivar x) (ivar y)) izero)
                                    (itens (ivar x) (ilpam izero (ivar z)))).
 
 Lemma counter_ll_prove : ll_ll (ill2ll cons_counter_ex :: nil).
@@ -638,7 +638,7 @@ End Non_Conservativity_Atoms.
 
 
 (** Counter example from Jui-Hsuan Wu *)
-Notation cons_counter_ex_atfree := (ilpam (ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero) ione).
+Abbreviation cons_counter_ex_atfree := (ilpam (ilpam (ilpam (ilpam (ilpam izero ione) ione) izero) izero) ione).
 
 Lemma counter_atfree_ll_prove : ll_ll (ill2ll cons_counter_ex_atfree :: nil).
 Proof.
@@ -746,10 +746,10 @@ Section Conservativity_Atoms.
 (** Embedding of [IAtom] into [Atom] *)
 
 Context {atom : InfDecType} {preiatom : DecType} {Atoms : IAtom2AtomType_retract atom preiatom}.
-Notation formula := (@formula atom).
-Notation iformula := (@iformula preiatom).
-Notation i2a := IAtom2Atom_retract_base.
-Notation i2a_inj := (section_injective IAtom2Atom_retract).
+Abbreviation formula := (@formula atom).
+Abbreviation iformula := (@iformula preiatom).
+Abbreviation i2a := IAtom2Atom_retract_base.
+Abbreviation i2a_inj := (section_injective IAtom2Atom_retract).
 
 
 (** *** Comparisons between [ll] connectives and [ill] *)

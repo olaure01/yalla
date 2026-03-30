@@ -13,10 +13,10 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : InfDecType}.
-Notation formula := (@formula atom).
-Notation aformula := (@aformula atom).
-Notation sformula := (@sformula atom).
-Notation is_Foc := (@is_Foc atom).
+Abbreviation formula := (@formula atom).
+Abbreviation aformula := (@aformula atom).
+Abbreviation sformula := (@sformula atom).
+Abbreviation is_Foc := (@is_Foc atom).
 
 (** * Triadic system *)
 

@@ -17,9 +17,9 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : DecType}.
-Notation formula := (@formula atom).
+Abbreviation formula := (@formula atom).
 
-Notation Dependent_ForallT_forall_formula :=
+Abbreviation Dependent_ForallT_forall_formula :=
   (Dependent_ForallT_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
                                                                  (fun x y => proj2 (eqb_eq x y)))).
 
@@ -157,6 +157,9 @@ apply Nat.eqb_eq in Heq1 as <-. apply Nat.eqb_eq in Heq2 as <-. contradiction Hn
 Qed.
 
 (** ** Rules *)
+
+Scheme All for ForallT. (* TODO put elsewhere? use new mechanism (Rocq 9.2) for [ll] *)
+
 
 (** The main inductive: [ll] proofs.
 
@@ -1446,7 +1449,7 @@ End Atoms.
 Arguments ll_nested_ind : clear implicits.
 Arguments ll_nested_ind' : clear implicits.
 
-Notation Dependent_ForallT_forall_formula :=
+Abbreviation Dependent_ForallT_forall_formula :=
   (Dependent_ForallT_forall (list_eq_dec (@eqb formulas_dectype) (fun x y => proj1 (eqb_eq x y))
                                                                  (fun x y => proj2 (eqb_eq x y)))).
 

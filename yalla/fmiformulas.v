@@ -13,8 +13,8 @@ Context {preiatom : DecType} {IAtoms : IAtomType_into_nat preiatom}.
 (** ** Encoding of [iformula] into [nat]-labelled trees for ordering *)
 
 (** Embedding of [IAtom] into [nat] *)
-Notation i2n := (snd (proj1_sig IAtom_into_nat)).
-Notation n2i := (fst (proj1_sig IAtom_into_nat)).
+Abbreviation i2n := (snd (proj1_sig IAtom_into_nat)).
+Abbreviation n2i := (fst (proj1_sig IAtom_into_nat)).
 Definition i2i_n : retract n2i i2n :=
   eq_rect _ _ (proj2_sig IAtom_into_nat) _ (surjective_pairing (proj1_sig IAtom_into_nat)).
 

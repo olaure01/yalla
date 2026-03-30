@@ -13,8 +13,8 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {preiatom : DecType}.
-Notation iformula := (@iformula preiatom).
-Notation ill := (@ill preiatom).
+Abbreviation iformula := (@iformula preiatom).
+Abbreviation ill := (@ill preiatom).
 
 (** Consistency *)
 

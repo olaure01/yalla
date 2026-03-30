@@ -12,7 +12,7 @@ Set Implicit Arguments.
 Section Atoms.
 
 Context {atom : InfDecType}.
-Notation formula := (@formula atom).
+Abbreviation formula := (@formula atom).
 
 (** ** Synchronous and asynchronous formulas *)
 Variant sformula : formula -> Type :=
@@ -226,7 +226,7 @@ Inductive llfoc : list formula -> option formula -> Type :=
 | wk_fr A l Pi : llfoc l Pi -> llfoc (wn A :: l) Pi
 | co_fr A l Pi : llfoc (wn A :: wn A :: l) Pi -> llfoc (wn A :: l) Pi.
 
-Notation llfoc_pol l A := (llfoc (polcont l A) (polfoc A)).
+Abbreviation llfoc_pol l A := (llfoc (polcont l A) (polfoc A)).
 
 Instance llfoc_perm : Proper ((@PermutationT _) ==> eq ==> iffT) llfoc.
 Proof. intros l1 l2 HP C1 C2 ->. split; intro pi; [ | symmetry in HP ]; exact (ex_fr pi HP). Qed.
@@ -714,7 +714,7 @@ Inductive llFoc : list formula -> option formula -> Type :=
 | wk_Fr A l : llFoc l None -> ForallT wFoc l -> llFoc (wn A :: l) None
 | co_Fr A l : llFoc (wn A :: wn A :: l) None -> ForallT wFoc l -> llFoc (wn A :: l) None.
 
-Notation llFoc_pol l A := (llFoc (polcont l A) (polfoc A)).
+Abbreviation llFoc_pol l A := (llFoc (polcont l A) (polfoc A)).
 
 (* useless in practice: [llFoc _ None] not recognized, require constant relation as 2nd parameter?
 Instance llFoc_perm : Proper ((@PermutationT _) ==> iffT) (fun l => llFoc l None).
