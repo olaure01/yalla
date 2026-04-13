@@ -1,0 +1,6 @@
+-R microyalla Yalla.MicroYalla
+-R yalla Yalla
+# -arg "-mangle-names '__'"
+
+microyalla
+yalla

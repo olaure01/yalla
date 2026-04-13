@@ -1,24 +1,22 @@
-(* fmformulas library for yalla *)
-
-
-
-(* output in Type *)
-
-
 (** * Order structure and finite multiset structure on formulas *)
 
-Require Import Injective.
-Require Import nattree.
-Require Import fmsetlist_Type.
+From OLlibs Require Import funtheory infinite nattree fmsetlistT BOrders.
+From Yalla Require Export formulas.
 
-Require Export formulas.
+Set Implicit Arguments.
+
+
+Section Atoms.
+
+Context {atom : DecType} {Atoms : AtomType_into_nat atom}.
 
 (** ** Encoding of [formula] into [nat]-labelled trees for ordering *)
 
 (** Embedding of [Atom] into [nat] *)
-Definition a2n := yalla_ax.a2n.
-Definition n2a := yalla_ax.n2a.
-Definition a2a_n := yalla_ax.a2a_n.
+Notation a2n := (snd (proj1_sig Atom_into_nat)).
+Notation n2a := (fst (proj1_sig Atom_into_nat)).
+Definition a2a_n : retract n2a a2n :=
+  eq_rect _ _ (proj2_sig Atom_into_nat) _ (surjective_pairing (proj1_sig Atom_into_nat)).
 
 (** Embedding of [formula] into [nattree] *)
 Fixpoint form2nattree A :=
@@ -54,30 +52,23 @@ match t with
 | _ => one
 end.
 
-Lemma form_nattree_section : forall A, nattree2form (form2nattree A) = A.
-Proof.
-induction A ; simpl ;
-  try rewrite IHA1 ; try rewrite IHA2 ;
-  try rewrite IHA ;
-  try rewrite a2a_n ; try reflexivity.
-Qed.
+Lemma form_nattree_section : retract nattree2form form2nattree.
+Proof. intro A. induction A; cbn; rewrite ?IHA1, ?IHA2, ?IHA, ?a2a_n; reflexivity. Qed.
 
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
 
-Instance border_formula : BOrder.
+#[export] Instance border_formula : BOrder | 50.
 Proof.
-eapply border_inj.
-eapply comp_inj.
-- apply nattree2nat_inj.
-- eapply section_inj.
-  apply form_nattree_section.
+eapply border_inj, compose_injective.
+- eapply section_injective. exact form_nattree_section.
+- exact nattree2nat_inj.
 Defined.
 
 
 (** ** Finite multi-sets over [formula] *)
 
-Instance fmset_formula : FinMultiset (SortedList _) formula :=
-  FMConstr_slist border_formula.
+#[export] Instance fmset_formula : FinMultiset (SortedList border_formula) formula | 50
+  := FMConstr_slist border_formula.
 
-
+End Atoms.

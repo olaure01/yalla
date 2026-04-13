@@ -1,0 +1,2 @@
+#!/bin/sh
+rocq makefile -f _RocqProject -o Makefile

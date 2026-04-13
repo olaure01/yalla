@@ -1,23 +1,22 @@
-(* fmformulas library for yalla *)
-
-(* output in Type *)
-
-
 (** * Order structure and finite multiset structure on intuitionistic formulas *)
 
-Require Import Injective.
-Require Import nattree.
-Require Import fmsetlist_Type.
+From OLlibs Require Import funtheory dectype nattree fmsetlistT BOrders.
+From Yalla Require Export iformulas.
 
-Require Export iformulas.
+Set Implicit Arguments.
 
+
+Section Atoms.
+
+Context {preiatom : DecType} {IAtoms : IAtomType_into_nat preiatom}.
 
 (** ** Encoding of [iformula] into [nat]-labelled trees for ordering *)
 
 (** Embedding of [IAtom] into [nat] *)
-Definition i2n := yalla_ax.i2n.
-Definition n2i := yalla_ax.n2i.
-Definition i2i_n := yalla_ax.i2i_n.
+Notation i2n := (snd (proj1_sig IAtom_into_nat)).
+Notation n2i := (fst (proj1_sig IAtom_into_nat)).
+Definition i2i_n : retract n2i i2n :=
+  eq_rect _ _ (proj2_sig IAtom_into_nat) _ (surjective_pairing (proj1_sig IAtom_into_nat)).
 
 (** Embedding of [iformula] into [nattree] *)
 Fixpoint iform2nattree A :=
@@ -53,31 +52,23 @@ match t with
 | _ => ione
 end.
 
-Lemma iform_nattree_section : forall A, nattree2iform (iform2nattree A) = A.
-Proof.
-induction A ; simpl ;
-  try rewrite IHA1 ; try rewrite IHA2 ;
-  try rewrite IHA ;
-  try rewrite i2i_n ; try reflexivity.
-Qed.
+Lemma iform_nattree_section : retract nattree2iform iform2nattree.
+Proof. intros A. induction A; cbn; rewrite ? IHA, ? IHA1, ? IHA2, ? i2i_n; reflexivity. Qed.
 
 
 (** ** [BOrder] structure (total order with value into [bool]) *)
 
-Instance border_iformula : BOrder.
+#[export] Instance border_iformula : BOrder | 50.
 Proof.
-eapply border_inj.
-eapply comp_inj.
+eapply border_inj, compose_injective.
+- eapply section_injective. intro. apply iform_nattree_section.
 - apply nattree2nat_inj.
-- eapply section_inj.
-  apply iform_nattree_section.
 Defined.
 
 
 (** ** Finite multi-sets over [iformula] *)
 
-Instance fmset_iformula :
-  FinMultiset (SortedList border_iformula) iformula
+#[export] Instance fmset_iformula : FinMultiset (SortedList border_iformula) iformula | 50
   := FMConstr_slist border_iformula.
 
-
+End Atoms.

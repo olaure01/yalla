@@ -1,4 +1,5 @@
-(** * Example of a concrete use of the yalla library: Lambek calculus *)
+(** * Example of a concrete use of the yalla library: a variant of the Lambek calculus
+  tensor-free Lambek calculus with additive conjunction and its unit *)
 
 From OLlibs Require Import dectype funtheory List_more PermutationT.
 
@@ -17,8 +18,7 @@ Context {preiatom : DecType}.
 
 (** ** 1. define formulas *)
 
-Inductive lform :=
-| lvar (_ : @iformulas.iatom preiatom) | ltens (_ _: lform) | lpam (_ _ : lform) | lmap (_ _ : lform).
+Inductive lform := | lvar (_ : @iformulas.iatom preiatom) | ltop | lwith (_ _: lform) | lpam (_ _ : lform).
 
 
 (** ** 2. define embedding into [iformulas.iformula] *)
@@ -26,16 +26,16 @@ Inductive lform :=
 Fixpoint l2ill A :=
 match A with
 | lvar x => iformulas.ivar x
-| ltens A B => iformulas.itens (l2ill A) (l2ill B)
+| ltop => iformulas.itop
+| lwith A B => iformulas.iwith (l2ill A) (l2ill B)
 | lpam A B => iformulas.ilpam (l2ill A) (l2ill B)
-| lmap A B => iformulas.ilmap (l2ill A) (l2ill B)
 end.
 
 (*
 Lemma l2ill_inj : injective l2ill.
 Proof.
 intros A; induction A; intros B Heq; destruct B; destr_eq Heq;
-  try apply IHA1 in Heq; try apply IHA2 in H; subst; try reflexivity.
+  try apply IHA1 in Heq; try apply IHA2 in H; subst; reflexivity.
 Qed.
 *)
 
@@ -44,12 +44,12 @@ Qed.
 
 Inductive lprove : list lform -> lform -> Type :=
 | ax_lr X : lprove (lvar X :: nil) (lvar X)
-| tens_lrr A B l1 l2 : lprove l1 A -> lprove l2 B -> lprove (l1 ++ l2) (ltens A B)
-| tens_llr A B C l1 l2 : lprove (l1 ++ A :: B :: l2) C -> lprove (l1 ++ ltens A B :: l2) C
+| top_lrr l : lprove l ltop
+| with_lrr A B l : lprove l A -> lprove l B -> lprove l (lwith A B)
+| with_llr1 A B C l1 l2 : lprove (l1 ++ A :: l2) C -> lprove (l1 ++ lwith A B :: l2) C
+| with_llr2 A B C l1 l2 : lprove (l1 ++ A :: l2) C -> lprove (l1 ++ lwith B A :: l2) C
 | lpam_lrr A B l : lprove (l ++ A :: nil) B -> lprove l (lpam A B)
-| lpam_llr A B C l1 l2 l3 : lprove l2 A -> lprove (l1 ++ B :: l3) C -> lprove (l1 ++ lpam A B :: l2 ++ l3) C
-| lmap_lrr A B l : lprove (A :: l) B -> lprove l (lmap A B)
-| lmap_llr A B C l1 l2 l3 : lprove l2 A -> lprove (l1 ++ B :: l3) C -> lprove (l1 ++ l2 ++ lmap A B :: l3) C.
+| lpam_llr A B C l1 l2 l3 : lprove l2 A -> lprove (l1 ++ B :: l3) C -> lprove (l1 ++ lpam A B :: l2 ++ l3) C.
 
 
 (** ** 4. characterize corresponding [ill] fragment *)
@@ -89,24 +89,23 @@ induction pi in l, A, Heql, HeqA |- *;
     apply IHpi; [ list_simpl | ]; reflexivity.
   + destruct l; discriminate H1.
 - destruct A; destr_eq HeqA. subst.
-  decomp_map_eq Heql. subst.
-  apply tens_lrr; [ apply IHpi1 | apply IHpi2]; reflexivity.
-- decomp_map_eq Heql eqn:Hx. subst.
-  destruct x; destr_eq Hx. subst.
-  apply tens_llr.
-  apply IHpi; [ list_simpl | ]; reflexivity.
-- destruct A; destr_eq HeqA. subst.
   apply lpam_lrr.
   apply IHpi; [ rewrite map_last | ]; reflexivity.
 - decomp_map_eq Heql eqn:Hx. subst.
   destruct x; destr_eq Hx. subst.
   apply lpam_llr; [ apply IHpi1 | apply IHpi2]; list_reflexivity.
+- destruct A; destr_eq HeqA.
+  apply top_lrr.
 - destruct A; destr_eq HeqA. subst.
-  apply lmap_lrr.
-  apply IHpi; reflexivity.
+  apply with_lrr; [ apply IHpi1 | apply IHpi2]; reflexivity.
 - decomp_map_eq Heql eqn:Hx. subst.
   destruct x; destr_eq Hx. subst.
-  apply lmap_llr; [ apply IHpi1 | apply IHpi2]; list_reflexivity.
+  apply with_llr1.
+  apply IHpi; [ list_simpl | ]; reflexivity.
+- decomp_map_eq Heql eqn:Hx. subst.
+  destruct x; destr_eq Hx. subst.
+  apply with_llr2.
+  apply IHpi; [ list_simpl | ]; reflexivity.
 Qed.
 
 

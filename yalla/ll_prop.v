@@ -1,468 +1,239 @@
-(* ll_prop library for yalla *)
-
 (** * Properties relying on cut admissibility *)
 
-Require Import Bool_more.
-Require Import List_more.
-Require Import Permutation_Type_more.
-Require Import CyclicPerm_Type.
-Require Import genperm_Type.
+From Stdlib Require Import Bool.
+From OLlibs Require Import dectype List_more Dependent_ForallT flat_map_more
+                           PermutationT_more GPermutationT.
+From Yalla Require Export ll_cut.
 
-Require Export ll_cut.
+Set Default Proof Using "Type".
+Set Implicit Arguments.
 
 
-(** Some additional reversibility statements *)
-Lemma with_rev1_noax {P} : (projT1 (pgax P) -> False) ->
-forall A B l1 l2, ll P (l1 ++ awith A B :: l2) -> ll P (l1 ++ A :: l2).
-Proof with myeeasy.
-intros Hgax A B l1 l2 pi.
-assert (ll P (dual (awith A B) :: A :: nil)) as pi'.
-{ apply plus_r1.
-  eapply ex_r ; [ | apply PCperm_Type_swap ].
-  apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
-eapply cut_r_axfree ; try eassumption.
-eapply ex_r ; [ apply pi | PCperm_Type_solve ].
+Section Atoms.
+
+Context {atom : DecType}.
+Notation formula := (@formula atom).
+Notation ll := (@ll atom).
+
+(** Consistency statements *)
+
+Lemma strong_consistency_axfree P (Hgax : no_ax P) (Hmix0 : pmix P 0 = false) : notT (ll P nil).
+Proof.
+intros pi%(cut_admissible_axfree Hgax).
+remember nil as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; (discriminate Heql + subst).
+- symmetry in p. apply IHpi, (PCPermutationT_nil _ _ p).
+- symmetry in p. apply IHpi.
+  apply app_eq_nil in Heql as [-> [->%map_eq_nil ->]%app_eq_nil].
+  apply PermutationT_nil in p as ->. reflexivity.
+- destruct L; [ | inversion Heql as [HeqL] ].
+  + cbn in eqpmix. rewrite Hmix0 in eqpmix. discriminate eqpmix.
+  + apply app_eq_nil in HeqL as [-> _].
+    rename X into HPL. inversion_clear HPL as [ | ? ? ? ? Hnil ].
+    exact (Hnil eq_refl).
+- discriminate f.
+- exact (Hgax a).
 Qed.
 
-Lemma with_rev2_noax {P} : (projT1 (pgax P) -> False) ->
-forall A B l1 l2, ll P (l1 ++ awith B A :: l2) -> ll P (l1 ++ A :: l2).
-Proof with myeeasy.
-intros Hgax A B l1 l2 pi.
-assert (ll P (dual (awith B A) :: A :: nil)) as pi'.
-{ apply plus_r2.
-  eapply ex_r ; [ | apply PCperm_Type_swap ].
-  apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
-eapply cut_r_axfree ; try eassumption.
-eapply ex_r ; [ apply pi | PCperm_Type_solve ].
+Lemma weak_consistency_axfree P (Hgax : no_ax P) : notT (ll P (zero :: nil)).
+Proof.
+intros pi%(cut_admissible_axfree Hgax).
+remember (zero :: nil) as l eqn:Heql. induction pi using ll_nested_ind in Heql |- *; (discriminate Heql + subst).
+- symmetry in p. apply IHpi, (PCPermutationT_length_1_inv _ _ _ p).
+- enough (lw' = nil) as ->
+    by (symmetry in p; apply PermutationT_nil in p as ->; exact (IHpi Heql)).
+  destruct l1.
+  + destruct lw'; (discriminate Heql + reflexivity).
+  + injection Heql as [= _ [-> [->%map_eq_nil ->]%app_eq_nil]%app_eq_nil].
+    reflexivity.
+- rename X into HPL. clear - PL HPL Heql. induction L in PL, HPL, Heql |- *; [ discriminate Heql | ].
+  inversion HPL as [ | ? ? ? ? Heq ]. destruct a.
+  + apply IHL with Fl; assumption.
+  + injection Heql as [= -> [-> _]%app_eq_nil].
+    exact (Heq eq_refl).
+- discriminate f.
+- exact (Hgax a).
 Qed.
-
-Lemma oc_rev_noax {P} : (projT1 (pgax P) -> False) ->
-forall A l1 l2, ll P (l1 ++ oc A :: l2) -> ll P (l1 ++ A :: l2).
-Proof with myeeasy.
-intros Hgax A l1 l2 pi.
-assert (ll P (dual (oc A) :: A :: nil)) as pi'.
-{ apply de_r.
-  eapply ex_r ; [ | apply PCperm_Type_swap ].
-  apply ax_exp. }
-eapply (ex_r _ ((l2 ++ l1) ++ A :: nil)) ; [ | PCperm_Type_solve ].
-eapply cut_r_axfree ; try eassumption.
-eapply ex_r ; [ apply pi | PCperm_Type_solve ].
-Qed.
-
 
 
 (** ** Subformula Property *)
 
-(** version of ll with predicate parameter for constraining sequents *)
-Inductive ll_ps P PS : list formula -> Type :=
-| ax_ps_r : forall X, is_true (PS (covar X :: var X :: nil)) -> ll_ps P PS (covar X :: var X :: nil)
-| ex_ps_r : forall l1 l2, is_true (PS l2) -> ll_ps P PS l1 -> PCperm_Type (pperm P) l1 l2 -> ll_ps P PS l2
-| ex_wn_ps_r : forall l1 lw lw' l2, is_true (PS (l1 ++ map wn lw' ++ l2)) ->
-                 ll_ps P PS (l1 ++ map wn lw ++ l2) ->
-                 Permutation_Type lw lw' -> ll_ps P PS (l1 ++ map wn lw' ++ l2)
-| mix0_ps_r {f : pmix0 P = true} : is_true (PS nil) -> ll_ps P PS nil
-| mix2_ps_r {f : pmix2 P = true} : forall l1 l2, is_true (PS (l2 ++ l1)) -> 
-                                     ll_ps P PS l1 -> ll_ps P PS l2 -> ll_ps P PS (l2 ++ l1)
-| one_ps_r : is_true (PS (one :: nil)) -> ll_ps P PS (one :: nil)
-| bot_ps_r : forall l, is_true (PS (bot :: l)) -> ll_ps P PS l -> ll_ps P PS (bot :: l)
-| tens_ps_r : forall A B l1 l2, is_true (PS (tens A B :: l2 ++ l1)) ->
-                               ll_ps P PS (A :: l1) -> ll_ps P PS (B :: l2) ->
-                               ll_ps P PS (tens A B :: l2 ++ l1)
-| parr_ps_r : forall A B l, is_true (PS (parr A B :: l)) -> 
-                               ll_ps P PS (A :: B :: l) -> ll_ps P PS (parr A B :: l)
-| top_ps_r : forall l, is_true (PS (top :: l)) -> ll_ps P PS (top :: l)
-| plus_ps_r1 : forall A B l, is_true (PS (aplus A B :: l)) ->
-                               ll_ps P PS (A :: l)-> ll_ps P PS (aplus A B :: l)
-| plus_ps_r2 : forall A B l, is_true (PS (aplus B A :: l)) ->
-                               ll_ps P PS (A :: l) -> ll_ps P PS (aplus B A :: l)
-| with_ps_r : forall A B l, is_true (PS (awith A B :: l)) ->
-                               ll_ps P PS (A :: l) -> ll_ps P PS (B :: l) ->
-                               ll_ps P PS (awith A B :: l)
-| oc_ps_r : forall A l, is_true (PS (oc A :: map wn l)) ->
-                                ll_ps P PS (A :: map wn l) -> ll_ps P PS (oc A :: map wn l)
-| de_ps_r : forall A l, is_true (PS (wn A :: l)) -> ll_ps P PS (A :: l) -> ll_ps P PS (wn A :: l)
-| wk_ps_r : forall A l, is_true (PS (wn A :: l)) -> ll_ps P PS l -> ll_ps P PS (wn A :: l)
-| co_ps_r : forall A l, is_true (PS (wn A :: l)) ->
-                            ll_ps P PS (wn A :: wn A :: l) -> ll_ps P PS (wn A :: l)
-| cut_ps_r {f : pcut P = true} : forall A l1 l2, is_true (PS (l2 ++ l1)) ->
-                               ll_ps P PS (dual A :: l1) -> ll_ps P PS (A :: l2) ->
-                               ll_ps P PS (l2 ++ l1)
-| gax_ps_r : forall a, is_true (PS (projT2 (pgax P) a)) -> ll_ps P PS (projT2 (pgax P) a).
-
-Lemma stronger_ps_pfrag P Q : le_pfrag P Q -> forall PS l,
-  ll_ps P PS l -> ll_ps Q PS l.
-Proof with myeeasy.
-intros Hle PS l H.
-induction H ; try (econstructor ; myeeasy ; fail).
-- apply (ex_ps_r _ _ l1)...
-  destruct Hle as (_ & _ & _ & _ & Hp).
-  unfold PCperm_Type in p.
-  unfold PCperm_Type.
-  destruct (pperm P) ; destruct (pperm Q) ;
-    simpl in Hp ; try inversion Hp...
-  apply cperm_perm_Type...
-- unfold le_pfrag in Hle.
-  rewrite f in Hle.
-  destruct Hle as (_ & _ & Hmix0 & _).
-  simpl in Hmix0...
-  apply (@mix0_ps_r _ _ Hmix0)...
-- unfold le_pfrag in Hle.
-  rewrite f in Hle.
-  destruct Hle as (_ & _ & _ & Hmix2 & _).
-  simpl in Hmix2...
-  apply (@mix2_ps_r _ _ Hmix2)...
-- destruct Hle as [Hle _].
-  rewrite f in Hle.
-  simpl in Hle.
-  eapply (@cut_ps_r _ _ Hle)...
-- destruct Hle as (_ & Hgax & _).
-  destruct (Hgax a) as [b Heq].
-  rewrite Heq in i ; rewrite Heq.
-  apply gax_ps_r...
-Qed.
-
-Lemma ll_ps_stronger {P} : forall PS QS l,
-  ll_ps P PS l -> (forall x, is_true (PS x) -> is_true (QS x)) -> ll_ps P QS l.
-Proof with try eassumption.
-intros PS QS l pi Hs.
-induction pi ; try (econstructor ; try apply Hs ; eassumption ; fail).
-Qed.
-
-Lemma ll_ps_is_ps {P} : forall l PS, ll_ps P PS l -> is_true (PS l).
-Proof.
-intros l PS Hll.
-inversion Hll ; assumption.
-Qed.
-
-Lemma ll_ps_is_ll {P} : forall l PS, ll_ps P PS l -> ll P l.
-Proof with try eassumption.
-intros l PS pi.
-induction pi ; try (econstructor ; eassumption ; fail).
-Qed.
-
-Lemma ll_is_ll_ps {P} : forall l, ll P l -> ll_ps P (fun _ => true) l.
-Proof with myeeasy.
-intros l pi.
-induction pi ; try (econstructor ; myeeasy ; fail).
-Qed.
-
 (** A fragment is a subset of formulas closed under subformula. *)
-Definition fragment FS :=
-  forall A, is_true (FS A) -> forall B, subform B A -> is_true (FS B).
+Definition fragment FS := forall A : formula, FS A -> forall B, subform B A -> FS B.
 
 (** Linear logic is conservative over its fragments (in the absence of cut). *)
-Lemma conservativity {P} : pcut P = false -> forall FS, fragment FS ->
-  forall l, ll_ps P (fun _ => true) l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
-Proof with try eassumption ; try reflexivity.
-intros P_cutfree FS HFS l pi.
-induction pi ; intros HFrag.
-- apply ax_ps_r...
-- apply (ex_ps_r _ _ l1)...
-  apply IHpi.
-  apply PCperm_Type_sym in p.
-  apply Forallb_Forall in HFrag.
-  apply Forallb_Forall.
-  eapply PCperm_Type_Forall...
-- eapply ex_wn_ps_r...
-  apply IHpi.
-  apply Forallb_Forall in HFrag.
-  apply Forallb_Forall.
-  apply (Permutation_Type_map wn) in p.
-  eapply Permutation_Type_Forall...
-  PCperm_Type_solve.
-- apply (@mix0_ps_r _ _ f)...
-- apply Forallb_Forall in HFrag.
-  assert (HFrag2 := Forall_app_inv _ _ _ HFrag).
-  destruct HFrag2 as [HFragl HFragr].
-  apply Forallb_Forall in HFragl.
-  apply Forallb_Forall in HFragr.
-  apply (@mix2_ps_r _ _ f)...
-  + apply Forallb_Forall...
-  + apply IHpi1...
-  + apply IHpi2...
-- apply one_ps_r...
-- apply bot_ps_r...
-  inversion HFrag.
-  apply andb_true_iff in H0.
-  destruct H0.
-  apply IHpi...
-- assert (HFrag2 := HFrag).
-  simpl in HFrag.
-  apply andb_true_iff in HFrag.
-  destruct HFrag as [HFragt HFrag].
-  apply Forallb_Forall in HFrag.
-  apply Forall_app_inv in HFrag.
-  destruct HFrag as [HFragl HFragr].
-  apply Forallb_Forall in HFragl.
-  apply Forallb_Forall in HFragr.
-  apply tens_ps_r...
-  + apply IHpi1...
-    simpl ; apply andb_true_iff ; split...
-    eapply HFS...
-    apply sub_tens_l...
-  + apply IHpi2...
-    simpl ; apply andb_true_iff ; split...
-    eapply HFS...
-    apply sub_tens_r...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply parr_ps_r...
-  apply IHpi.
-  simpl ; apply andb_true_iff ; split ;
-    [ | simpl ; apply andb_true_iff ; split ]...
-  + eapply HFS...
-    apply sub_parr_l...
-  + eapply HFS...
-    apply sub_parr_r...
-- apply top_ps_r...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply plus_ps_r1...
-  apply IHpi.
-  simpl ; apply andb_true_iff ; split...
-  eapply HFS...
-  apply sub_plus_l...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply plus_ps_r2...
-  apply IHpi.
-  simpl ; apply andb_true_iff ; split...
-  eapply HFS...
-  apply sub_plus_r...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply with_ps_r...
-  + apply IHpi1...
-    simpl ; apply andb_true_iff ; split...
-    eapply HFS...
-    apply sub_with_l...
-  + apply IHpi2...
-    simpl ; apply andb_true_iff ; split...
-    eapply HFS...
-    apply sub_with_r...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply oc_ps_r...
-  apply IHpi.
-  simpl ; apply andb_true_iff ; split...
-  eapply HFS...
-  apply sub_oc...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply de_ps_r...
-  apply IHpi.
-  simpl ; apply andb_true_iff ; split...
-  eapply HFS...
-  apply sub_wn...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply wk_ps_r...
-  apply IHpi...
-- inversion HFrag ; subst.
-  apply andb_true_iff in H0 ; destruct H0.
-  apply co_ps_r...
-  apply IHpi.
-  simpl ; apply andb_true_iff ; split...
-- rewrite P_cutfree in f.
-  inversion f.
-- apply gax_ps_r...
+Lemma conservativity P (P_cutfree : no_cut P) FS (Hfrag : fragment FS) l (pi : ll P l) :
+  ForallT FS l -> Forall_formula FS pi.
+Proof.
+induction pi using ll_nested_ind; cbn; intros HFS; try split; try now (inversion HFS; auto);
+  try (inversion_clear HFS; try split; try apply IHpi; try apply IHpi1; try apply IHpi2;
+       repeat constructor; try assumption; (eapply Hfrag; [ eassumption | ]); repeat constructor).
+- symmetry in p.
+  eapply IHpi, PCPermutationT_ForallT; eassumption.
+- symmetry in p.
+  eapply IHpi, (PCPermutationT_ForallT true), HFS.
+  apply PermutationT_app_head, PermutationT_app_tail, PermutationT_map, p.
+- apply Forall_Proofs_to_ForallT in X. clear - X HFS.
+  induction PL in X, HFS |- *; [ constructor | split; inversion X; subst ].
+  + apply X0. cbn. exact (ForallT_app_l _ _ HFS).
+  + apply IHPL; [ apply X1 | exact (ForallT_app_r _ _ HFS) ].
+- inversion_clear HFS. split.
+  + apply IHpi1.
+    constructor; [ | exact (ForallT_app_r _ _ X0) ].
+    apply (Hfrag _ X).
+    constructor; constructor.
+  + apply IHpi2.
+    constructor; [ | exact (ForallT_app_l _ _ X0) ].
+    apply (Hfrag _ X).
+    constructor; constructor.
+- rewrite P_cutfree in f. discriminate f.
+Qed.
+
+(** Cut-free subformula property:
+cut-free proofs only use subformulas of the conclusion. *)
+Lemma subformula_cutfree P (P_cutfree : no_cut P) l (pi : ll P l) :
+  Forall_formula (fun x => Exists (subform x) l) pi.
+Proof.
+apply (conservativity P_cutfree).
+- intros A Hf B Hs. eapply Exists_impl, Hf.
+  intros C HAC. transitivity A; assumption.
+- clear. induction l as [|A l IHl]; repeat constructor.
+  eapply ForallT_arrow, IHl. intros B Hl. right. exact Hl.
+Qed.
+
+(** Linear logic (with no axioms) is conservative over its fragments. *)
+Lemma conservativity_axfree P (P_axfree : no_ax P) FS (Hfrag : fragment FS) l (pi : ll P l) :
+  ForallT FS l -> { pi' : ll P l & Forall_formula FS pi' }.
+Proof.
+intros HFS.
+apply cut_admissible_axfree in pi; [ | assumption ].
+exists (stronger_pfrag _ _ (cutrm_pfrag_le P) _ pi).
+apply Forall_sequent_stronger_pfrag.
+apply conservativity; [ apply nocut_cutrm | | ]; assumption.
+Qed.
+
+Variable P : @pfrag atom.
+Variable P_axfree : no_ax P.
+
+(** Cut is admissible in any fragment with no axioms. *)
+Lemma cut_admissible_fragment_axfree FS (Hfrag : fragment FS) l (pi : ll P l) : Forall_formula FS pi ->
+  { pi' : ll (cutrm_pfrag P) l & Forall_formula FS pi'}.
+Proof using P_axfree.
+intros HFS.
+apply conservativity_axfree; [ assumption | assumption | | ].
+- apply cut_admissible_axfree; assumption.
+- exact (Forall_sequent_is _ _ HFS).
 Qed.
 
 (** Subformula property:
 any provable sequent is provable by a proof containing only subformulas of this sequent. *)
-Proposition subformula {P} : pcut P = false -> forall l,
-  ll P l -> ll_ps P (fun x => subformb_list x l) l.
-Proof with try eassumption ; try reflexivity.
-intros P_cutfree l pi.
-apply ll_is_ll_ps in pi.
-apply conservativity...
-- intros A Hf B Hs.
-  revert Hf ; clear - Hs ; induction l ; intro Hf ; inversion Hf ; subst.
-  simpl ; apply orb_true_iff.
-  apply orb_true_iff in H0.
-  destruct H0.
-  + left.
-    eapply subb_trans...
-    apply subb_sub...
-  + right.
-    apply IHl...
-- apply (subb_id_list l nil).
-Qed.
-
-(* Cut is admissible in any fragment with no axioms. *)
-Lemma cut_admissible_fragment_axfree {P} : (projT1 (pgax P) -> False) ->
- forall FS, fragment FS -> forall l,
-   ll_ps P (Forallb FS) l -> ll_ps (cutrm_pfrag P) (Forallb FS) l.
-Proof with myeeasy.
-intros P_axfree FS HFS l pi.
-apply conservativity...
-- apply ll_is_ll_ps.
-  apply cut_admissible_axfree...
-  eapply ll_ps_is_ll...
-- destruct pi...
-Qed.
-
-(** Linear logic (with no axioms) is conservative over its fragments. *)
-Lemma conservativity_axfree {P} : (projT1 (pgax P) -> False) ->
-  forall FS, fragment FS -> forall l,
-    ll P l -> is_true (Forallb FS l) -> ll_ps P (Forallb FS) l.
-Proof with try eassumption ; try reflexivity.
-intros P_axfree FS Hf l pi HFS.
-apply cut_admissible_axfree in pi...
-apply ll_is_ll_ps in pi.
-eapply conservativity in pi...
-clear - pi ; induction pi ;
-  try (econstructor ; eassumption ; fail).
-- eapply @cut_ps_r...
-  destruct P.
-  inversion f.
-- revert a i.
-  assert (pgax (cutrm_pfrag P) = pgax P) as Hcut by reflexivity.
-  rewrite Hcut.
-  apply gax_ps_r.
+Lemma subformula l (pi : ll P l) : { pi': ll P l & Forall_formula (fun x => Exists (subform x) l) pi' }.
+Proof using P_axfree.
+refine (conservativity_axfree P_axfree _ pi _).
+- intros A Hf B Hs. eapply Exists_impl, Hf.
+  intros C HAC. transitivity A; assumption.
+- clear. induction l as [|a l IHl]; repeat constructor.
+  eapply ForallT_arrow, IHl. intros A Hl. right. exact Hl.
 Qed.
 
 
 (** ** Deduction Theorem *)
 
+Variable P_perm : pperm P = true.
+Variable P_cut : full_cut P.
+
 (** Deduction lemma for linear logic. *)
-Lemma deduction_list {P} : pperm P = true -> pcut P = true -> forall lax l, 
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) (sum _ { k | k < length lax })
-                                (fun a => match a with
-                                          | inl x => projT2 (pgax P) x
-                                          | inr x => nth (proj1_sig x) lax one :: nil
-                                          end))) l
-  -> ll P (l ++ map wn (map dual lax)).
-Proof with myeeasy.
-intros P_perm P_cut lax.
-induction lax ; intros l pi.
-- list_simpl.
-  eapply stronger_pfrag...
-  nsplit 5...
-  simpl ; intros a.
-  destruct a.
-  + exists p...
-  + exfalso ; destruct s as [k Hlt] ; inversion Hlt.
-- remember (axupd_pfrag P (existT (fun x => x -> list formula) (sum _ { k | k < length lax })
-                                (fun a => match a with
-                                          | inl x => projT2 (pgax P) x
-                                          | inr x => nth (proj1_sig x) lax one :: nil
-                                          end)))
-    as Q.
-  simpl.
-  cons2app.
-  rewrite app_assoc.
+Lemma deduction_list lax l :
+  ll (axext_pfrag P (fun x : { k | k < length lax } => nth (proj1_sig x) lax one :: nil)) l ->
+  ll P (l ++ map wn (map dual lax)).
+Proof using P_perm.
+induction lax as [ | A lax IHlax ] in l |- *; intros pi.
+- list_simpl. eapply stronger_pfrag, pi.
+  repeat split; try reflexivity.
+  cbn. intros [a | [k Hlt]].
+  + exists a. reflexivity.
+  + exfalso. exact (PeanoNat.Nat.nlt_0_r _ Hlt).
+- remember (axext_pfrag P (fun x : { k | k < length lax } => nth (proj1_sig x) lax one :: nil))
+    as Q eqn:HeqQ.
+  cbn. cons2app. rewrite app_assoc.
   apply IHlax.
-  eapply (@ext_wn _ _ _ (dual a :: nil)) in pi.
-  eapply ax_gen ; [ | | | | | apply pi ] ; try (now rewrite HeqQ).
-  simpl in pi ; simpl ; intros a0.
-  destruct a0.
-  + eapply ex_r ; [ | apply PCperm_Type_last ].
+  eapply ax_gen; [ | | | | refine (ext_wn _ (dual A :: nil) pi); assumption ]; try (now rewrite ! HeqQ).
+  cbn in pi. cbn. intros [p | [[|k] Hlen]]; cbn.
+  + eapply ex_r; [ | apply PCPermutationT_cons_append ].
     apply wk_r.
     assert ({ b | projT2 (pgax P) p = projT2 (pgax Q) b}) as [b Hgax]
-      by (subst ; simpl ; exists (inl p) ; reflexivity).
-    rewrite Hgax.
-    apply gax_r.
-  + destruct s as [k Hlen].
-    destruct k ; simpl.
-    * eapply ex_r ; [ | apply PCperm_Type_swap ].
-      apply de_r.
-      eapply ex_r ; [ | apply PCperm_Type_swap ].
-      apply ax_exp.
-    * eapply ex_r ; [ | apply PCperm_Type_swap ].
-      apply wk_r.
-      assert ({ b | nth k lax one :: nil = projT2 (pgax Q) b}) as [b Hgax].
-      { subst ; simpl ; clear - Hlen.
-        apply Lt.lt_S_n in Hlen.
-        exists (inr (exist _ k Hlen))... }
-      rewrite Hgax.
-      apply gax_r.
-Unshelve. assumption.
+      by (subst; cbn; exists (inl p); reflexivity).
+    rewrite Hgax. apply gax_r.
+  + eapply ex_r; [ | apply PCPermutationT_swap ].
+    apply de_r.
+    eapply ex_r; [ apply ax_exp | apply PCPermutationT_swap ].
+  + eapply ex_r; [ | apply PCPermutationT_swap ].
+    apply wk_r.
+    assert ({ b | nth k lax one :: nil = projT2 (pgax Q) b}) as [b Hgax].
+    { subst. clear - Hlen. cbn.
+      apply PeanoNat.Nat.succ_lt_mono in Hlen.
+      exists (inr (exist _ k Hlen)). reflexivity. }
+      rewrite Hgax. apply gax_r.
 Qed.
 
-Lemma deduction_list_inv {P} : pperm P = true -> pcut P = true -> forall lax l, 
+Lemma deduction_list_inv lax l :
   ll P (l ++ map wn (map dual lax)) ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) (sum _ { k | k < length lax })
-                                (fun a => match a with
-                                          | inl x => projT2 (pgax P) x
-                                          | inr x => nth (proj1_sig x) lax one :: nil
-                                          end))) l.
-Proof with myeeasy.
-intros P_perm P_cut lax.
-induction lax ; intros l pi.
+  ll (axext_pfrag P (fun x : { k | k < length lax } => nth (proj1_sig x) lax one :: nil)) l.
+Proof using P_perm P_cut.
+induction lax as [|A lax IHlax] in l |- *; intro pi.
 - list_simpl in pi.
-  eapply stronger_pfrag...
-  nsplit 5...
-  simpl ; intros a.
-  exists (inl a)...
-- list_simpl in pi.
-  cons2app in pi.
-  rewrite app_assoc in pi.
+  eapply stronger_pfrag, pi.
+  repeat split; [ reflexivity | cbn | reflexivity .. ].
+  intro a. exists (inl a). reflexivity.
+- list_simpl in pi. cons2app in pi. rewrite app_assoc in pi.
   apply IHlax in pi.
-  rewrite <- (app_nil_r l).
-  eapply (cut_r _ (wn (dual a)))...
-  + simpl ; rewrite bidual.
-    change nil with (map wn nil).
-    apply oc_r ; simpl.
-    assert ({ b | a :: nil = projT2 (pgax (axupd_pfrag P
-     (existT (fun x => x -> list formula) (sum _ {k | k < S (length lax)})
-        (fun a0 => match a0 with
-                   | inl x => projT2 (pgax P) x
-                   | inr x => match proj1_sig x with
-                              | 0 => a
-                              | S m => nth m lax one
-                              end :: nil
-                   end)))) b}) as [b Hgax]
-      by (clear ; simpl ; exists (inr (exist _ 0 (le_n_S _ _ (le_0_n _)))) ; reflexivity).
-    rewrite Hgax.
-    apply gax_r.
-  + eapply ex_r ; [ | apply PCperm_Type_sym ; apply PCperm_Type_last ].
-    eapply stronger_pfrag...
-    nsplit 5...
-    simpl ; intros a'.
-    destruct a'.
-    * exists (inl p)...
-    * destruct s as [k Hlen] ; simpl.
-      apply Lt.lt_n_S in Hlen.
-      exists (inr (exist _ (S k) Hlen))...
-Unshelve. assumption.
+  rewrite <- (app_nil_r l). refine (cut_r (wn (dual A)) _ _ _); [ cbn; apply P_cut | | ].
+  + cbn. rewrite bidual.
+    change nil with (map (@wn atom) nil).
+    apply oc_r. cbn.
+    assert ({ b | A :: nil
+                = projT2 (pgax (axext_pfrag P (fun x : { k | k < S (length lax) } => match proj1_sig x with
+                                                                                     | 0 => A
+                                                                                     | S m => nth m lax one
+                                                                                     end :: nil))) b})
+      as [b Hgax]
+      by (clear; cbn; exists (inr (exist _ 0 (le_n_S _ _ (le_0_n _)))); reflexivity).
+    rewrite Hgax. apply gax_r.
+  + eapply ex_r; [ | apply PCPermutationT_sym, PCPermutationT_cons_append ].
+    eapply stronger_pfrag, pi.
+    repeat split; [ reflexivity | cbn | reflexivity .. ].
+    intros [p | [k Hlen]].
+    * exists (inl p). reflexivity.
+    * cbn. apply -> PeanoNat.Nat.succ_lt_mono in Hlen.
+      exists (inr (exist _ (S k) Hlen)). reflexivity.
 Qed.
 
-Lemma deduction {P} : pperm P = true -> (projT1 (pgax P) -> False) -> pcut P = true -> forall lax l,
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) { k | k < length lax }
-                            (fun a => nth (proj1_sig a) lax one :: nil))) l
-    -> ll (cutrm_pfrag P) (l ++ (map wn (map dual lax))).
-Proof with myeeasy.
-intros P_perm P_axfree P_cut lax l ; intros pi.
-apply cut_admissible_axfree...
-apply deduction_list...
-eapply stronger_pfrag...
-nsplit 5...
-simpl ; intros a.
-exists (inr a)...
+Lemma deduction lax l :
+  ll (axupd_pfrag P (existT (fun x => x -> _) { k | k < length lax }
+                            (fun a => nth (proj1_sig a) lax one :: nil))) l ->
+  ll (cutrm_pfrag P) (l ++ map wn (map dual lax)).
+Proof using P_perm P_cut P_axfree.
+intro pi.
+apply (cut_admissible_axfree P_axfree), deduction_list.
+eapply stronger_pfrag, pi.
+repeat split; [ reflexivity | | reflexivity .. ].
+intro a. exists (inr a). reflexivity.
 Qed.
 
-Lemma deduction_inv {P} : pperm P = true -> (projT1 (pgax P) -> False) -> pcut P = true -> forall lax l,
-  ll (cutrm_pfrag P) (l ++ (map wn (map dual lax))) ->
-  ll (axupd_pfrag P (existT (fun x => x -> list formula) { k | k < length lax }
+Lemma deduction_inv lax l :
+  ll (cutrm_pfrag P) (l ++ map wn (map dual lax)) ->
+  ll (axupd_pfrag P (existT (fun x => x -> _) { k | k < length lax }
                             (fun a => nth (proj1_sig a) lax one :: nil))) l.
-Proof with myeeasy.
-intros P_perm P_axfree P_cut lax l ; intros pi.
-assert (ll P (l ++ (map wn (map dual lax)))) as pi'.
-{ eapply stronger_pfrag...
-  nsplit 5...
-  simpl ; intros a.
-  exists a... }
-apply deduction_list_inv in pi'...
-eapply stronger_pfrag...
-nsplit 5...
-simpl ; intros a.
-destruct a.
+Proof using P_perm P_cut P_axfree.
+intro pi.
+assert (ll P (l ++ map wn (map dual lax))) as pi'%deduction_list_inv.
+{ eapply stronger_pfrag, pi.
+  repeat split; try reflexivity.
+  intros a. exists a. reflexivity. }
+eapply stronger_pfrag, pi'.
+repeat split; [ reflexivity | cbn | reflexivity .. ].
+intros [? | s].
 - contradiction P_axfree.
-- exists s...
+- exists s. reflexivity.
 Qed.
 
-
-
+End Atoms.
