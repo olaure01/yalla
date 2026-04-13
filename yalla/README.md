@@ -1,6 +1,6 @@
-# YALLA: an LL library for Coq
+# YALLA: an LL library for Rocq
 
-## Yet Another deep embedding of Linear Logic in Coq
+## Yet Another deep embedding of Linear Logic in Rocq
 
 
 
@@ -59,6 +59,8 @@ Main files:
        ipperm P = false)
 * isubs.v:
     susbtitution for ILL
+* ill_cut_at.v:
+    cut admissibility for atomic cut formulas in ILL
 * ill_cut.v:
     cut admissibility properties for ILL
 * ill_prop.v:
@@ -71,8 +73,11 @@ Main files:
     properties of double-negation translations from LL to ILL
     related to expressiveness analysis
 * llfoc.v:
-    definitions of focused systems
+    definitions of (monadic) focused systems
     and proof of strong focusing from weak focusing
+* llfoc_triadic.v:
+    triadic focused system
+	and equivalence with monadic focused system
 * nn_foc.v:
     double-negation-based proof of weak focusing
 
@@ -83,7 +88,9 @@ Example files for interfaces:
 * mell_Prop.v:
     unit-free MELL with proofs in Prop (i.e. provability only)
 * lambek.v:
-    a variant of Lambek calculus
+    Lambek calculus
+* lambek_cart.v:
+    a variant of Lambek calculus with cartesian product
 * mell_mset.v:
     multiset-based MELL (no exchange rule)
 * mell_msetoid.v:
@@ -106,8 +113,6 @@ Other files:
 * atoms.v:
     classes describing constraints on atoms used in the library
     with a specific instance proving the consistency of all hypotheses
-* basic_misc.v:
-    basic definitions and tactics
 
 The precise file dependencies are pictured in the [dependency graph](dependencies.png).
 

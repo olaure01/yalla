@@ -1,13 +1,13 @@
-# YALLA: an LL library for Coq
+# YALLA: an LL library for Rocq
 
-## Version 2.x
+## Version 2.1.0
 
-Modifications in definitions leading to possible incompatibilities with version 2.0.*:
+This major revision introduces modifications in definitions leading to possible incompatibilities with versions 2.0.*:
 
 * generalized mix rules
     (no real impact if mix rules are not used except that the `mix0` and `mix2` rules are replaced by a single rule);
 * output of `atomic` is now in `Type` (only requires simple updates if `atomic` is used);
-* results are now parametrized over atom sets (this increases the number of implicit parameters of objects);
+* results are now parameterized over atom sets (this increases the number of implicit parameters of objects);
 * introduction of `Forall_sequent` to deal with properties of sequents inside proofs rather than `ll_ps` (and similarly for the other systems);
 * parameter `pcut` for cut-rules is now of type `formula -> bool`.
 
@@ -21,7 +21,27 @@ New results added, including:
 * Girard's translations of intuitionistic logic;
 * more on focusing (Andreoli's triadic system).
 
-*Tested with Coq v8.17.0.*
+[OLlibs](https://github.com/olaure01/ollibs) v2.1 is now required as an external dependency.
+
+*Tested with Rocq v9.2.*
+
+## Version 2.0.7 (2025/03/26)
+
+This is mostly an adaptation of v2.0 to Rocq v9.0 and OLlibs v2.0.7.
+
+*Tested with Rocq v9.0-9.2.*
+
+## Version 2.0.6 (2024/09/16)
+
+This is mostly an adaptation of v2.0 to Coq v8.20 and OLlibs v2.0.7.
+
+*Tested with Coq v8.20.*
+
+## Version 2.0.5 (2024/09/15)
+
+This is mostly an adaptation of v2.0 to Coq v8.19 and OLlibs v2.0.6.
+
+*Tested with Coq v8.19.*
 
 ## Version 2.0.4 (2023/04/09)
 

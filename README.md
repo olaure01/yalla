@@ -1,13 +1,13 @@
-# yalla
+# Yalla
 
-## Yet Another deep embedding of Linear Logic in Coq
+## Yet Another deep embedding of Linear Logic in Rocq
 
 
 ### Installation
 
-Requires [OLlibs v2.0.2](https://github.com/olaure01/ollibs) (add-ons for the standard library): [see installation instructions](https://github.com/olaure01/ollibs/blob/master/README.md).
+Requires [OLlibs v2.1.1](https://github.com/olaure01/ollibs) (add-ons for the standard library): [see installation instructions](https://github.com/olaure01/ollibs/blob/master/README.md).
 
-1. [install OLlibs v2.0.2](https://github.com/olaure01/ollibs/blob/master/README.md)
+1. [install OLlibs v2.1.1](https://github.com/olaure01/ollibs/blob/master/README.md)
 2. install Yalla
 
         $ ./configure
@@ -17,7 +17,7 @@ Requires [OLlibs v2.0.2](https://github.com/olaure01/ollibs) (add-ons for the st
 ### Description
 
 * microyalla: kernel version of yalla
-* yalla: a deep embedding of variants of linear logic in Coq
+* yalla: a deep embedding of variants of linear logic in Rocq
 
 See the [more detailed README](yalla/README.md) for more informations.
 
