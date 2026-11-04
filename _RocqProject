@@ -1,6 +1,9 @@
--R microyalla Yalla.MicroYalla
+--rocq-package rocq-yalla
+--package-version 2.1.0_dev
+-package rocq-stdlib
+-package rocq-ollibs
+-package rocq-nanoyalla
 -R yalla Yalla
 # -arg "-mangle-names '__'"
 
-microyalla
 yalla
