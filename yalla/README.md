@@ -99,10 +99,10 @@ Example files for interfaces:
     polarized fragment of LL
 * tl.v:
     tensor logic
-* ll_smp.v:
-    interface for the standard version of LL
-* ill_smp.v:
-    interface for the standard version of ILL
+* macrollcut.v:
+    interface for the standard version of LL from NanoYalla
+* macroillcut.v:
+    interface for the standard version of ILL from NanoYalla
 * lj.v:
     intuitionistic logic (with the 2 Girard's translations)
 

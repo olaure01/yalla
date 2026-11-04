@@ -13,7 +13,7 @@ Set Implicit Arguments.
 
 Section Atoms.
 
-Context {atom : DecType} {preiatom : DecType}.
+Context {preiatom : DecType}.
 
 (** ** 1. define formulas *)
 
